@@ -78,8 +78,8 @@ void PAC_info::reset_params()
 
     par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
 
-    par[ AUTO_OPERATION_WAIT_TIME ] = 60;
-    par[ AUTO_OPERATION_WARN_TIME ] = 20;
+    par[ AUTO_OPERATION_WAIT_TIME ] = 60000;
+    par[ AUTO_OPERATION_WARN_TIME ] = 20000;
 
     par.save_all();
     }

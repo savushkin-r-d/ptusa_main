@@ -271,12 +271,13 @@ int operation::process_auto_switch_on()
             unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
             start_warn = get_millisec();
             start_wait = get_millisec();
+            is_first_goto_next_state = false;
             }
         }
     else
         {
-        auto dt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ] * 1000;
-        auto wt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WAIT_TIME ] * 1000;
+        auto dt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ];
+        auto wt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WAIT_TIME ];
 
         if ( unit->check_operation_on( n, false ) == 0 )
             {
@@ -285,19 +286,19 @@ int operation::process_auto_switch_on()
             return 0;
             }
 
+        // Прошел заданный интервал для ожидания возможности включения операции.
+        else if ( get_delta_millisec( start_wait ) > wt )
+            {
+            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            was_fail = true;
+            }
+
         // Прошел заданный интервал для уведомления.
         else if ( get_delta_millisec( start_warn ) > dt )
             {
             unit->check_operation_on( n );
             unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
             start_warn = get_millisec();
-            }
-
-        // Прошел заданный интервал для ожидания возможности включения операции.
-        else if ( get_delta_millisec( start_wait ) > wt )
-            {
-            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
-            was_fail = true;
             }
         }
 
