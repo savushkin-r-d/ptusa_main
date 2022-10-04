@@ -928,6 +928,16 @@ TEST( wages_eth, direct_set_tcp_buff )
     EXPECT_EQ( 0, w1.get_state() );
 }
 
+TEST( wages_eth, set_string_property )
+{
+    wages_eth w1( "W1" );
+    w1.init(0, 0, 0, 1);
+
+    char* ip = "0.0.0.0";
+    char* field = "NOT_IP";
+    w1.set_string_property( field, ip );
+}
+
 TEST( threshold_regulator, set_value )
     {
     threshold_regulator TRC1( "TRC1" );
