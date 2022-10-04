@@ -541,36 +541,20 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
 
     //TODO. Устаревшее название функции. Оставлено для совместимости.
     //Проверка на наличии функции check_on_mode.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    if ( !lua_isnil( lua_manager::get_instance()->get_Lua(), -1 ) )
-        {
-        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
-        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-        }
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto old_function_name = "check_on_mode";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
-            "check_on_mode", mode, show_error ? 1 : 0,
+            old_function_name, mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
     //Проверка на наличии функции user_check_operation_on.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    if ( !lua_isnil( lua_manager::get_instance()->get_Lua(), -1 ) )
-        {
-        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
-        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-        }
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto new_function_name = "user_check_operation_on";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
-            "user_check_operation_on", mode, show_error ? 1 : 0,
+            new_function_name, mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
