@@ -233,7 +233,7 @@ void operation::evaluate()
                     break;
 
                 case state_idx::RUN:
-                    unit->set_mode( n, next_state );
+                    unit->set_mode( n, state_idx::IDLE );
                     unit->set_err_msg( "автоотключение по запросу",
                         n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
                     break;

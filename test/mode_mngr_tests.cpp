@@ -185,25 +185,28 @@ TEST( operation, evaluate )
 
 
 	//Корректное автовключение/автоотключение.	
-	auto operation_state = test_op[ 0 ][ 0 ];
-	auto step = operation_state[ 0 ][ -1 ];
+	auto operation_idle_state = test_op[ 0 ][ 0 ];
+	auto operation_run_state = test_op[ 0 ][ 1 ];
+	auto main_step_in_idle = operation_idle_state[ 0 ][ -1 ];
+	auto main_step_in_run = operation_run_state[ 0 ][ -1 ];
 
 	int next = 0;
-	auto is_goto_next_state = operation_state->is_goto_next_state( next );
-	EXPECT_EQ( false, is_goto_next_state );			//Empty action.
+	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty action_in_idle.
 	EXPECT_EQ( -1, next );
 
-	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
-		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
+	auto action_in_idle = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+		( ( *main_step_in_idle )[ step::ACTIONS::A_TO_STEP_IF ] );
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_one, 0, 0 );
+	action_in_idle->add_dev( &test_DI_one, 0, 0 );
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_two, 0, 1 );
-	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
-		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_three, 1, 0 );
+	action_in_idle->add_dev( &test_DI_two, 0, 1 );
+	
+	auto action_in_run = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_TO_STEP_IF ] );
+	action_in_run->add_dev( &test_DI_one, 0, 1 );
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
 	test_op->evaluate();
@@ -213,6 +216,11 @@ TEST( operation, evaluate )
 	test_DI_one.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
@@ -591,7 +599,7 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 
 	int next_step = 0;
 	auto is_goto_next_step = action->is_jump( next_step );
-	EXPECT_EQ( false, is_goto_next_step );			//Empty action.
+	EXPECT_EQ( false, is_goto_next_step );			//Empty action_in_idle.
 	EXPECT_EQ( -1, next_step );
 
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,

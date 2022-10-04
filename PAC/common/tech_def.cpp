@@ -188,7 +188,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     if ( newm == 0 ) // Off mode.
                         {
                         // Check if possible.
-                        if ( ( res = lua_check_off_mode( operation_n ) ) == 0 )
+                        if ( ( res = lua_check_off_mode( operation_n ) ) <= 0 )
                             {
                             int idx = operation_n - 1;
                             state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
