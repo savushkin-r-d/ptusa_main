@@ -404,7 +404,7 @@ class jump_if_action : public action
         void print( const char* prefix = "", bool new_line = true ) const override;
 
     private:
-        bool check( std::vector< device* > &checked_devices,
+        bool check( const std::vector< device* > &checked_devices,
             bool check_is_opened ) const;
 
         enum GROUPS

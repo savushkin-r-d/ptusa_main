@@ -1680,7 +1680,7 @@ bool jump_if_action::is_jump( int& next )
     }
 //-----------------------------------------------------------------------------
 bool jump_if_action::check(
-    std::vector< device* > &checked_devices, bool check_is_opened ) const
+    const std::vector< device* > &checked_devices, bool check_is_opened ) const
     {
     for ( auto dev : checked_devices )
         {
