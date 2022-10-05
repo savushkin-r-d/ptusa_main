@@ -1682,9 +1682,8 @@ bool jump_if_action::is_jump( int& next )
 bool jump_if_action::check(
     std::vector< device* > checked_devices, bool check_is_opened ) const
     {
-    for ( size_t i = 0; i < checked_devices.size(); i++ )
+    for ( auto dev : checked_devices )
         {
-        auto dev = checked_devices[ i ];
         auto type = dev->get_type();
         if ( type == device::DT_V )
             {
