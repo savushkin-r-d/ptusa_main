@@ -229,18 +229,20 @@ TEST( operation, evaluate )
 
 	//Сигнал активен, но операция не должна включиться, так как нет требуемого
 	//сигнала.
-	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ] = 2;
-	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ] = 1;	
+	const auto WARN_TIME = 1;
+	const auto WAIT_TIME = 2 * WARN_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ] = WAIT_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ] = WARN_TIME;
 	test_DI_one.on();
 	test_DI_two.off();
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( WARN_TIME );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
-	sleep_ms( 2 );
+	sleep_ms( WAIT_TIME );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
-	sleep_ms( 3 );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
@@ -276,7 +278,7 @@ TEST( operation, evaluate )
 
 	//Сигнал активен, а операция должна включиться, так как появился требуемый
 	//сигнал.
-	sleep_ms( 2 );
+	sleep_ms( WAIT_TIME );
 	test_DI_one.on();
 	test_DI_two.on();
 	test_op->evaluate();

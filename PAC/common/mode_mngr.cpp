@@ -291,19 +291,19 @@ int operation::process_auto_switch_on()
             return 0;
             }
 
-        // Прошел заданный интервал для ожидания возможности включения операции.
-        else if ( get_delta_millisec( start_wait ) > wt )
-            {
-            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
-            was_fail = true;
-            }
-
         // Прошел заданный интервал для уведомления.
-        else if ( get_delta_millisec( start_warn ) > dt )
+        if ( get_delta_millisec( start_warn ) > dt )
             {
             unit->check_operation_on( n );
             unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
             start_warn = get_millisec();
+            }
+
+        // Прошел заданный интервал для ожидания возможности включения операции.
+        if ( get_delta_millisec( start_wait ) > wt )
+            {
+            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            was_fail = true;
             }
         }
 
