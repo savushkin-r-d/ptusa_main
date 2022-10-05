@@ -27,7 +27,7 @@ class ParentRecipeManager
 protected:
     int recipechanged;
     unsigned long recipechangechecktime;
-    int lineNo;
+    int fortesting;
     int currentRecipe;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
@@ -61,6 +61,7 @@ public:
     virtual void PasteRecipe();
     virtual void NullifyRecipe();
     virtual void LoadRecipeName();
+    ParentRecipeManager(int fortesting);
     ParentRecipeManager();
     virtual ~ParentRecipeManager()
     {

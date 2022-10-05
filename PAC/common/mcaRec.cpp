@@ -20,13 +20,32 @@ int ParentRecipeManager::blocksPerRecipe = 4;
 
 int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
-int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
 
 ParentRecipeManager::ParentRecipeManager()
 {
 
+}
+
+ParentRecipeManager::ParentRecipeManager( int fortesting ) :
+fortesting(fortesting),
+currentRecipe(0),
+curRecipeStartBlock(0),
+recipeStartAddr(0L)
+{
+    defaultfilename = new char[20];
+    sprintf(defaultfilename, "fortesting%drec.bin", fortesting);
+    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
+    recipeMemory = new unsigned char[recipeMemorySize];
+    lastEvalTime = get_millisec();
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
+    recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
+    strcpy(recipeList, "");
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    recipechanged = 0;
+    recipechangechecktime = get_millisec();
 }
 
 int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
@@ -72,7 +91,7 @@ void ParentRecipeManager::LoadRecipeName()
 
 void ParentRecipeManager::CopyRecipe()
 {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
     {
         delete[] recipeCopyBuffer;
         recipeCopyBuffer = nullptr;
@@ -93,7 +112,7 @@ void ParentRecipeManager::NullifyRecipe()
 
 void ParentRecipeManager::PasteRecipe()
 {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
     {
         WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
         LoadRecipeName();
