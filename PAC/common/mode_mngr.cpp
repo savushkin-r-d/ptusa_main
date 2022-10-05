@@ -853,7 +853,7 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
     
-    actions.push_back( new jump_if_devices_in_specific_state_action() );
+    actions.push_back( new jump_if_action() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1653,12 +1653,12 @@ void wash_action::finalize()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-jump_if_devices_in_specific_state_action::jump_if_devices_in_specific_state_action() :
+jump_if_action::jump_if_action() : 
     action( "Перейти в шаг по условию", G_GROUPS_CNT )
     {
     }
 //-----------------------------------------------------------------------------
-bool jump_if_devices_in_specific_state_action::is_jump( int& next )
+bool jump_if_action::is_jump( int& next )
     {
     next = -1;
     if ( is_empty() )
@@ -1679,7 +1679,7 @@ bool jump_if_devices_in_specific_state_action::is_jump( int& next )
     return false;
     }
 //-----------------------------------------------------------------------------
-bool jump_if_devices_in_specific_state_action::check(
+bool jump_if_action::check(
     std::vector< device* > checked_devices, bool check_is_opened ) const
     {
     for ( size_t i = 0; i < checked_devices.size(); i++ )
@@ -1703,8 +1703,7 @@ bool jump_if_devices_in_specific_state_action::check(
     return true;
     };
 //-----------------------------------------------------------------------------
-int jump_if_devices_in_specific_state_action::set_int_property(
-    const char* name, size_t idx, int value )
+int jump_if_action::set_int_property( const char* name, size_t idx, int value )
     {
     action::set_int_property( name, idx, value );
     if ( strcmp( name, "next_step_n" ) == 0 )
@@ -1729,8 +1728,7 @@ int jump_if_devices_in_specific_state_action::set_int_property(
     return 1;
     };
 //-----------------------------------------------------------------------------
-int jump_if_devices_in_specific_state_action::get_int_property(
-    const char* name, size_t idx )
+int jump_if_action::get_int_property( const char* name, size_t idx )
     {
     if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
         {
@@ -1740,13 +1738,12 @@ int jump_if_devices_in_specific_state_action::get_int_property(
     return -1;
     }
 //-----------------------------------------------------------------------------
-void jump_if_devices_in_specific_state_action::finalize()
+void jump_if_action::finalize()
     {
     return;
     }
 //-----------------------------------------------------------------------------
-void jump_if_devices_in_specific_state_action::print(
-    const char* prefix, bool new_line ) const
+void jump_if_action::print( const char* prefix, bool new_line ) const
     {
     action::print( prefix, false );
     printf( " { " );
@@ -1992,10 +1989,10 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto if_action = dynamic_cast<jump_if_devices_in_specific_state_action*>(
-        ( *active_step )[ step::A_TO_STEP_IF ] );
+    auto action = ( *active_step )[ step::A_TO_STEP_IF ];
+    auto if_action = static_cast<jump_if_action*>( action );
     int next_step = -1;
-    if ( if_action && if_action->is_jump( next_step ) )
+    if ( if_action->is_jump( next_step ) )
         {
         if ( next_step >= 0 )
             {
@@ -2224,11 +2221,9 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 bool operation_state::is_goto_next_state( int& next_state ) const
     {
-    auto to_new_state = dynamic_cast<jump_if_devices_in_specific_state_action*>(
-        ( *mode_step )[ step::A_TO_STEP_IF ] );
-    if ( to_new_state ) return to_new_state->is_jump( next_state );
-
-    return false;
+    auto action = ( *mode_step )[ step::A_TO_STEP_IF ];
+    auto to_new_state = static_cast<jump_if_action*>( action );
+    return to_new_state->is_jump( next_state );
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()

@@ -195,13 +195,13 @@ TEST( operation, evaluate )
 	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next );
 
-	auto if_action_in_idle = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+	auto if_action_in_idle = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_idle )[ step::ACTIONS::A_TO_STEP_IF ] );
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	if_action_in_idle->add_dev( &test_DI_one, 0, 0 );
 	
-	auto if_action_in_run = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_TO_STEP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
 
@@ -221,7 +221,7 @@ TEST( operation, evaluate )
 
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	auto required_DI_action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+	auto required_DI_action = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_REQUIRED_FB ] );
 	required_DI_action->add_dev( &test_DI_two );
 
@@ -231,6 +231,8 @@ TEST( operation, evaluate )
 	G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ] = 1;	
 	test_DI_one.on();
 	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	sleep_ms( 2 );
@@ -622,7 +624,7 @@ TEST( enable_step_by_signal, should_turn_off )
 	test_params_manager::removeObject();
     }
 
-TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
+TEST( jump_if_action, is_goto_next_step )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -650,7 +652,7 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	operation->start();
 	operation->evaluate();
 
-	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+	auto action = reinterpret_cast<jump_if_action*>
 		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
 
 	int next_step = 0;

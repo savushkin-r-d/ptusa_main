@@ -387,10 +387,10 @@ class wash_action: public action
 /// Проверка устройств на нахождение в активном (включены) и в пассивном
 /// (отключены) состоянии.
 /// </summary>
-class jump_if_devices_in_specific_state_action : public action
+class jump_if_action : public action
     {
     public:
-        jump_if_devices_in_specific_state_action();
+        jump_if_action();
 
         bool is_jump( int &next );
 
