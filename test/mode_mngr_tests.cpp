@@ -185,10 +185,12 @@ TEST( operation, evaluate )
 
 
 	//Корректное автовключение/автоотключение.	
-	auto operation_idle_state = test_op[ 0 ][ 0 ];
-	auto operation_run_state = test_op[ 0 ][ 1 ];
+	auto operation_idle_state = test_op[ 0 ][ operation::IDLE ];
+	auto operation_run_state = test_op[ 0 ][ operation::RUN ];
+	auto operation_pause_state = test_op[ 0 ][ operation::PAUSE ];
 	auto main_step_in_idle = operation_idle_state[ 0 ][ -1 ];
 	auto main_step_in_run = operation_run_state[ 0 ][ -1 ];
+	auto main_step_in_pause = operation_pause_state[ 0 ][ -1 ];
 
 	int next = 0;
 	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
@@ -279,6 +281,19 @@ TEST( operation, evaluate )
 	test_DI_two.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//В паузе переходы к новым состояниям не осуществляются.
+	test_op->switch_off();
+	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto if_action_in_pause = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_pause )[ step::ACTIONS::A_TO_STEP_IF ] );
+	if_action_in_pause->add_dev( &test_DI_one, 0, 0 );
+	test_op->start();
+	test_op->pause();
+	test_DI_three.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
