@@ -150,11 +150,8 @@ TRecipeManager::~TRecipeManager()
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
     recipeMemory = nullptr;
-    if (recipeCopyBuffer != nullptr)
-        {
-        delete[] recipeCopyBuffer;
-        recipeCopyBuffer = nullptr;
-        }
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
     defaultfilename = nullptr;
     }
@@ -750,11 +747,8 @@ TMediumRecipeManager::~TMediumRecipeManager()
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
     recipeMemory = nullptr;
-    if (recipeCopyBuffer != nullptr)
-    {
-        delete[] recipeCopyBuffer;
-        recipeCopyBuffer = nullptr;
-    }
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
     defaultfilename = nullptr;
 }
