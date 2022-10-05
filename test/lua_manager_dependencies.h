@@ -27,7 +27,7 @@ void set_lua_pcall_success_calls_before_failure(int val);
 // general mocks of hooked functions
 void        mock_lua_pushcclosure(lua_State *L, lua_CFunction fn, int n);
 int         mock_lua_gettop(lua_State *L);
-int			mock_lua_type( lua_State* L, int idx );
+int         mock_lua_type( lua_State* L, int idx );
 void        mock_lua_getfield(lua_State *L, int idx, const char *k);
 void        mock_lua_remove(lua_State *L, int idx);
 int	        mock_lua_pcall(lua_State *L, int nargs, int nresults, int errfunc);

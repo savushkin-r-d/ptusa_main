@@ -44,11 +44,11 @@ class PAC_info: public i_Lua_save_device
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
 
             ///< Время для включения операции по сигналам, мсек.
-            AUTO_OPERATION_WAIT_TIME,
+            P_AUTO_OPERATION_WAIT_TIME,
 
             ///< Время ожидания для повторной попытки включения операции по
             ///< сигналам, мсек.
-            AUTO_OPERATION_WARN_TIME,
+            P_AUTO_OPERATION_WARN_TIME,
 
 
             ///< Количество параметров.

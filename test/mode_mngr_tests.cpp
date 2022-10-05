@@ -229,8 +229,8 @@ TEST( operation, evaluate )
 
 	//Сигнал активен, но операция не должна включиться, так как нет требуемого
 	//сигнала.
-	G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WAIT_TIME ] = 2;
-	G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ] = 1;	
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ] = 2;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ] = 1;	
 	test_DI_one.on();
 	test_DI_two.off();
 	test_op->evaluate();

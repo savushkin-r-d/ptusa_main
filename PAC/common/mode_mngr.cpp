@@ -229,16 +229,21 @@ void operation::evaluate()
             switch ( current_state )
                 {
                 case state_idx::IDLE:
+                    //Из простоя по сигналам операция может быть включена 
+                    //(перейти в состояние выполнения).
                     process_auto_switch_on();
                     break;
 
                 case state_idx::RUN:
+                    //Из выполнения по сигналам операция может быть отключена
+                    //(перейти в состояние простоя).
                     unit->set_mode( n, state_idx::IDLE );
                     unit->set_err_msg( "автоотключение по запросу",
                         n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
                     break;
 
                 default:
+                    //Для всех остальных состояний ничего не делаем.
                     break;
                 }
             }
@@ -276,8 +281,8 @@ int operation::process_auto_switch_on()
         }
     else
         {
-        auto dt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ];
-        auto wt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WAIT_TIME ];
+        auto dt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ];
+        auto wt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ];
 
         if ( unit->check_operation_on( n, false ) == 0 )
             {
