@@ -1,7 +1,8 @@
 #ifndef tcp_client_h__
 #define tcp_client_h__
-#include "PAC_err.h"
-#include "tcp_cmctr.h"
+
+#include <cstdio>
+#include "dtime.h"
 
 #define RECONNECT_MIN_MULTIPLIER 5
 #define RECONNECT_MAX_MULTIPLIER 30

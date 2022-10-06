@@ -1,5 +1,6 @@
 #include "iot_wages_eth.h"
-#include "tcp_client.h"
+#include <string.h>
+#include <cstdlib>
 
 iot_wages_eth::iot_wages_eth( unsigned int id, char* ip, unsigned int port ) :
     tc( std::unique_ptr<tcp_client>( tcp_client::Create( ip, port, id, 0,

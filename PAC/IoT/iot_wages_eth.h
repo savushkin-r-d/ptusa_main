@@ -1,9 +1,8 @@
 #pragma once
 
-#include "iot_base.h"
 #include <memory>
-
-class tcp_client;
+#include "iot_base.h"
+#include "tcp_client.h"
 
 class iot_wages_eth : public i_iot_node
     {

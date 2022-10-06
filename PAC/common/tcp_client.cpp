@@ -1,4 +1,6 @@
 #include "tcp_client.h"
+#include "PAC_err.h"
+#include "tcp_cmctr.h"
 
 #ifdef WIN_OS
 #include "w_tcp_client.h"
