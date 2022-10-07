@@ -5271,7 +5271,7 @@ void wages_eth::direct_set_value( float new_value )
     weth->set_wages_value( new_value );
     }
 
-void wages_eth::direct_set_tcp_buff( char* new_value, int new_status )
+void wages_eth::direct_set_tcp_buff( const char* new_value, int new_status )
     {
     weth->direct_set_tcp_buff( new_value, new_status );
     }
