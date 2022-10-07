@@ -1,5 +1,5 @@
 #include "iot_wages_eth.h"
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 
 iot_wages_eth::iot_wages_eth( unsigned int id, char* ip, unsigned int port ) :
@@ -45,8 +45,9 @@ void iot_wages_eth::convert_value()
 
 void iot_wages_eth::direct_set_tcp_buff( char* new_value, int new_status )
     {
-    strncpy( tc->buff, new_value,
-        static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ) );
+    size_t len = strlen( new_value ) + 1;
+    if ( static_cast<size_t> ( CONSTANTS::BUFF_SIZE ) > len )
+        memcpy( tc->buff, new_value, len );
     status = new_status;
     convert_value();
     }
