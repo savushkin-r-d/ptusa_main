@@ -45,9 +45,10 @@ void iot_wages_eth::convert_value()
 
 void iot_wages_eth::direct_set_tcp_buff( const char* new_value, int new_status )
     {
-    size_t len = strlen( new_value ) + 1;
-    if ( static_cast<size_t> ( CONSTANTS::BUFF_SIZE ) > len )
-        memcpy( tc->buff, new_value, len );
+    auto max_length = static_cast<size_t> ( CONSTANTS::BUFF_SIZE );
+    strncpy( tc->buff, new_value, max_length );
+    tc->buff[ max_length ] = 0;
+
     status = new_status;
     convert_value();
     }
