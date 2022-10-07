@@ -7,7 +7,7 @@
 class iot_wages_eth : public i_iot_node
     {
     public:
-        iot_wages_eth( unsigned int id, char* ip, unsigned int port );
+        iot_wages_eth( unsigned int id, const char* ip, unsigned int port );
 
         void evaluate();
 
@@ -19,7 +19,7 @@ class iot_wages_eth : public i_iot_node
 
         void convert_value();
 
-        void direct_set_tcp_buff( char* new_value, int new_status );
+        void direct_set_tcp_buff( const char* new_value, int new_status );
 
     private:
         enum class CONSTANTS

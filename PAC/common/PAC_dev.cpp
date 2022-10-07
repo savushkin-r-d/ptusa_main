@@ -5230,8 +5230,7 @@ void wages_RS232::tare()
 //-----------------------------------------------------------------------------
 wages_eth::wages_eth( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_WT, device::DST_WT_ETH,
-        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ),
-    weth( nullptr )
+        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     }
@@ -5263,7 +5262,7 @@ void wages_eth::set_string_property( const char* field, const char* value )
         {
         int port = 1001;
         int id = 0;
-        weth = new iot_wages_eth( id, (char*)value, port );
+        weth = new iot_wages_eth( id, value, port );
         }
     }
 

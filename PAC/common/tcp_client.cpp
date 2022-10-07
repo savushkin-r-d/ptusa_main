@@ -41,7 +41,7 @@ tcp_client::~tcp_client()
     buff = nullptr;
     }
 
-tcp_client* tcp_client::Create( char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
+tcp_client* tcp_client::Create( const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
     {
 #if defined WIN_OS
     return new win_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);

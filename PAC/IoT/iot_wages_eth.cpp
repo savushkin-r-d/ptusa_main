@@ -2,7 +2,7 @@
 #include <cstring>
 #include <cstdlib>
 
-iot_wages_eth::iot_wages_eth( unsigned int id, char* ip, unsigned int port ) :
+iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port ) :
     tc( std::unique_ptr<tcp_client>( tcp_client::Create( ip, port, id, 0,
     static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ), 300u ) ) )
     {
@@ -43,7 +43,7 @@ void iot_wages_eth::convert_value()
         }
     }
 
-void iot_wages_eth::direct_set_tcp_buff( char* new_value, int new_status )
+void iot_wages_eth::direct_set_tcp_buff( const char* new_value, int new_status )
     {
     size_t len = strlen( new_value ) + 1;
     if ( static_cast<size_t> ( CONSTANTS::BUFF_SIZE ) > len )
