@@ -2078,8 +2078,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::DST_WT_ETH:
-                    new_device = new wages_eth(dev_name);
-                    new_io_device = (wages_eth*)new_device;
+                    new_device = new wages_eth( dev_name );
                     break;
 
                 default:
@@ -5229,7 +5228,7 @@ void wages_RS232::tare()
     }
 //-----------------------------------------------------------------------------
 wages_eth::wages_eth( const char* dev_name ) :
-    analog_io_device( dev_name, device::DT_WT, device::DST_WT_ETH,
+    device( dev_name, device::DT_WT, device::DST_WT_ETH,
         static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
@@ -5269,6 +5268,21 @@ void wages_eth::set_string_property( const char* field, const char* value )
 void wages_eth::direct_set_value( float new_value )
     {
     weth->set_wages_value( new_value );
+    }
+
+void wages_eth::direct_set_state( int state )
+    {
+    weth->set_state( state );
+    }
+
+void wages_eth::direct_off()
+    {
+    weth->set_state( 0 );
+    }
+
+void wages_eth::direct_on()
+    {
+    weth->set_state( 1 );
     }
 
 void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,

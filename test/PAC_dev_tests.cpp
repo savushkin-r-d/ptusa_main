@@ -829,7 +829,6 @@ TEST( wages_RS232, evaluate_io )
 TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
-    w1.init( 0, 0, 0, 1 );
 
     char* ip = "0.0.0.0";
     char* field = "IP";
@@ -842,7 +841,6 @@ TEST( wages_eth, evaluate_io )
 TEST( wages_eth, get_value )
     {
     wages_eth w1( "W1" );
-    w1.init( 0, 0, 0, 1 );
 
     char* ip = "0.0.0.0";
     char* field = "IP";
@@ -863,7 +861,6 @@ TEST( wages_eth, tare )
 TEST( wages_eth, get_state )
     {
     wages_eth w1( "W1" );
-    w1.init( 0, 0, 0, 1 );
 
     char* ip = "0.0.0.0";
     char* field = "IP";
@@ -875,7 +872,6 @@ TEST( wages_eth, get_state )
 TEST( wages_eth, direct_set_value )
     {
     wages_eth w1( "W1" );
-    w1.init(0, 0, 0, 1);
 
     char* ip = "0.0.0.0";
     char* field = "IP";
@@ -887,9 +883,8 @@ TEST( wages_eth, direct_set_value )
     }
 
 TEST( wages_eth, direct_set_tcp_buff )
-{
+    {
     wages_eth w1( "W1" );
-    w1.init( 0, 0, 0, 1 );
 
     char* ip = "0.0.0.0";
     char* field = "IP";
@@ -897,7 +892,7 @@ TEST( wages_eth, direct_set_tcp_buff )
 
     char new_value[] = "+01234.5kg";
     const auto SIZE = sizeof( new_value );
-    w1.direct_set_tcp_buff( new_value, SIZE, 1);
+    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 1234.5f, w1.get_value() );
 
     strcpy( new_value, "+01234.5kg" );
@@ -927,17 +922,17 @@ TEST( wages_eth, direct_set_tcp_buff )
     strcpy( new_value, "+01234.5zg" );
     w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
-}
+    }
 
 TEST( wages_eth, set_string_property )
-{
+    {
     wages_eth w1( "W1" );
-    w1.init(0, 0, 0, 1);
 
     char* ip = "0.0.0.0";
     char* field = "NOT_IP";
     w1.set_string_property( field, ip );
-}
+    }
+
 
 TEST( threshold_regulator, set_value )
     {

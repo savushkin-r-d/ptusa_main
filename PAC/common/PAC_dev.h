@@ -3216,7 +3216,7 @@ class wages_RS232 : public analog_io_device, public i_wages
         float value;
     };
 //-----------------------------------------------------------------------------
-class wages_eth : public analog_io_device, public i_wages
+class wages_eth : public device, public i_wages
     {
     public:
         explicit wages_eth( const char* dev_name );
@@ -3228,6 +3228,12 @@ class wages_eth : public analog_io_device, public i_wages
         void evaluate_io() override;
 
         void direct_set_value( float new_value ) override;
+        
+        void direct_set_state( int state ) override;
+
+        void direct_off() override;
+        
+        void direct_on() override;
 
         void tare() override;
 
