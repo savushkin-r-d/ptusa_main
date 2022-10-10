@@ -43,12 +43,10 @@ void iot_wages_eth::convert_value()
         }
     }
 
-void iot_wages_eth::direct_set_tcp_buff( const char* new_value, int new_status )
+void iot_wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
+    int new_status )
     {
-    auto max_length = static_cast<size_t> ( CONSTANTS::BUFF_SIZE );
-    strncpy( tc->buff, new_value, max_length );
-    tc->buff[ max_length ] = 0;
-
+    memcpy( tc->buff, new_value, size );
     status = new_status;
     convert_value();
     }

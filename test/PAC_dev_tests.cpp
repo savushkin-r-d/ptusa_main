@@ -896,35 +896,36 @@ TEST( wages_eth, direct_set_tcp_buff )
     w1.set_string_property( field, ip );
 
     char new_value[] = "+01234.5kg";
-    w1.direct_set_tcp_buff( new_value, 1);
+    const auto SIZE = sizeof( new_value );
+    w1.direct_set_tcp_buff( new_value, SIZE, 1);
     EXPECT_EQ( 1234.5f, w1.get_value() );
 
     strcpy( new_value, "+01234.5kg" );
-    w1.direct_set_tcp_buff( new_value, 0 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5kt" );
-    w1.direct_set_tcp_buff( new_value, 1 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5zg" );
-    w1.direct_set_tcp_buff( new_value, 1 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5zt" );
-    w1.direct_set_tcp_buff( new_value, 1 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5zg" );
-    w1.direct_set_tcp_buff( new_value, 0 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5kt" );
-    w1.direct_set_tcp_buff( new_value, 0 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
 
     strcpy( new_value, "+01234.5zg" );
-    w1.direct_set_tcp_buff( new_value, 0 );
+    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
 }
 
