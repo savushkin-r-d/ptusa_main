@@ -234,6 +234,14 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
     auto C3 = C( name.c_str() );
     EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( C3 ) );
+
+    //device::DT_WT, DST_WT_ETH
+    name = std::string( "W1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WT, device::DST_WT_ETH, name.c_str(), "Test wages", "W" );
+    EXPECT_EQ( nullptr, res );
+    auto W1 = WT( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
     }
 
 TEST( device_manager, clear_io_devices )
@@ -709,10 +717,10 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
-TEST( wages_RS232, get_value_from_wages )            
+TEST( wages_RS232, get_value_from_wages )
     {
-    wages_RS232 w1( "W1" );                          
-    w1.init( 0, 0, 1, 1 );                           
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
 
     //1 - Тест на пустой указатель
     //2, 3 - Данные корректные
@@ -736,8 +744,8 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 1, w1.get_state() );
 
     strcpy( tmp_str, "   +0012.34k" );                                     //3   
-    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );                                       
-    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );                                        
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
     std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
