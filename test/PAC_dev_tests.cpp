@@ -898,38 +898,47 @@ TEST( wages_eth, direct_set_tcp_buff )
     char* field = "IP";
     w1.set_string_property( field, ip );
 
+    //корректные данные 
     char new_value[] = "+01234.5kg";
     const auto SIZE = sizeof( new_value );
     w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 1234.5f, w1.get_value() );
 
-    strcpy( new_value, "+01234.5kg" );
+    //некорректные данные. Сохраняется предыдущее значение веса
+    strcpy( new_value, "+00000.5kg" );
     w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5kt" );
+    strcpy( new_value, "+00000.5kt" );
     w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5zg" );
+    strcpy( new_value, "+00000.5zg" );
     w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5zt" );
+    strcpy( new_value, "+00000.5zt" );
     w1.direct_set_tcp_buff( new_value, SIZE, 1 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5zg" );
+    strcpy( new_value, "+00000.5zg" );
     w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5kt" );
+    strcpy( new_value, "+00000.5kt" );
     w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
 
-    strcpy( new_value, "+01234.5zg" );
+    strcpy( new_value, "+00000.5zt" );
     w1.direct_set_tcp_buff( new_value, SIZE, 0 );
     EXPECT_EQ( 0, w1.get_state() );
+    EXPECT_EQ(1234.5f, w1.get_value());
     }
 
 TEST( wages_eth, set_string_property )
