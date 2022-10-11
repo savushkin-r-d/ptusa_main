@@ -31,6 +31,26 @@ TEST(TMediumRecipeManager, NullifyRecipe)
     mngr.NullifyRecipe();
 }
 
+TEST(ParentRecipeManager, CopyRecipe) //С‚РµСЃС‚ РїСЂРѕС€РµР»
+{
+    auto fortesting = 1;
+    ParentRecipeManager mngr(fortesting);
+    mngr.CopyRecipe();
+}
+
+TEST(ParentRecipeManager, PasteRecipe)//С‚РµСЃС‚ РїСЂРѕР№РґРµРЅ
+{
+    auto fortesting = 1;
+    ParentRecipeManager mngr(fortesting);
+    mngr.PasteRecipe();
+}
+
+TEST(ParentRecipeManager, NullifyRecipe)//С‚РµСЃС‚ РїСЂРѕС€РµР»
+{
+    auto fortesting = 1;
+    ParentRecipeManager mngr(fortesting);
+    mngr.NullifyRecipe();
+}
 
 TEST(TRecipeManager, LoadFromFile)
 {
@@ -44,24 +64,23 @@ TEST(TRecipeManager, LoadFromFile)
     EXPECT_EQ(0, mngr.LoadFromFile(fileName));
 }
 
-TEST(ParentRecipeManager, CopyRecipe) //тест прошел
+TEST(TRecipeManager, CopyRecipe)
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
     mngr.CopyRecipe();
 }
 
-TEST(ParentRecipeManager, PasteRecipe)//тест пройден
+TEST(TRecipeManager, PasteRecipe)
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
     mngr.PasteRecipe();
 }
 
-TEST(ParentRecipeManager, NullifyRecipe)//тест прошел
+TEST(TRecipeManager, NullifyRecipe)
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
     mngr.NullifyRecipe();
 }
-
