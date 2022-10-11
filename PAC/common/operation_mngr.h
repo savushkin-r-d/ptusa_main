@@ -598,6 +598,12 @@ class operation_state
 
         int check_steps_params( char* err_dev_name, int str_len );
 
+        /// @brief Проверка на отсутствие устройств.
+        ///
+        /// @return true  Есть устройства, над которыми что-то делается.
+        /// @return false Нет устройств, над которыми что-то делается.
+        bool is_empty() const;
+
         bool is_goto_next_state( int& next_state ) const;
 
     private:

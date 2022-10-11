@@ -81,25 +81,23 @@ int operation::pause()
     {
     switch ( current_state )
         {
-        case IDLE:
-            break;
-
-        case PAUSE:
-            break;
-
         case RUN:
-            current_state = PAUSE;
-
             run_time += states[ RUN ]->evaluation_time();
             run_step = states[ RUN ]->active_step();
 
             states[ RUN ]->save();
             states[ RUN ]->final();
-            states[ PAUSE ]->init();
-            states[ PAUSE ]->evaluate();
-            break;
 
-        case STOP:
+            if ( states[ PAUSING ]->is_empty() )
+                {
+                current_state = PAUSE;
+                }
+            else
+                {
+                current_state = PAUSING;
+                }
+            states[ current_state ]->init();
+            states[ current_state ]->evaluate();
             break;
 
         default:
@@ -113,27 +111,17 @@ int operation::stop()
     {
     switch ( current_state )
         {
-        case IDLE:
-            break;
-
-        case PAUSE:
-            current_state = STOP;
-            states[ PAUSE ]->final();
-            states[ STOP ]->init();
-            states[ STOP ]->evaluate();
-            break;
-
+        case PAUSING:
+        case PAUSE:  
+        case UNPAUSING:
+        case STARTING:
         case RUN:
-            current_state = STOP;
-            run_time += states[ RUN ]->evaluation_time();
-            run_step = states[ RUN ]->active_step();
+            states[ current_state ]->final();
+            if ( states[ STOPPING ]->is_empty() ) current_state = STOP;
+            else current_state = STOPPING;
 
-            states[ RUN ]->final();
-            states[ STOP ]->init();
-            states[ STOP ]->evaluate();
-            break;
-
-        case STOP:
+            states[ current_state ]->init();
+            states[ current_state ]->evaluate();
             break;
 
         default:
@@ -166,14 +154,17 @@ int operation::start( int new_run_step )
     switch ( current_state )
         {
         case IDLE:
-            current_state = RUN;
-            states[ RUN ]->init();
-
+            states[ IDLE ]->final();
+            if ( states[ STARTING ]->is_empty() ) current_state = RUN;
+            else current_state = STARTING;
+            
+            states[ current_state ]->init();
             run_time = 0;
             break;
 
         case PAUSE:
             states[ PAUSE ]->final();
+<<<<<<< HEAD
             states[ RUN ]->load();
 
             current_state = RUN;
@@ -201,6 +192,31 @@ int operation::start( int new_run_step )
 
         case STOP:
             break;
+=======
+            if ( states[ UNPAUSING ]->is_empty() )
+                {                
+                current_state = RUN;
+                states[ RUN ]->load();                
+                if ( new_run_step > 0 )
+                    {
+                    states[ RUN ]->init( new_run_step );
+                    }
+                else
+                    {
+                    states[ RUN ]->init();
+                    }
+                //Если возвращаемся в шаг, активный до паузы, то добавляем
+                //его время выполнения.
+                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                break;
+                }
+            else
+                {
+                current_state = UNPAUSING;
+                states[ UNPAUSING ]->init();
+                states[ UNPAUSING ]->evaluate();
+                }         
+>>>>>>> 10a50d30b (Implement logic)
 
         default:
             break;
@@ -2252,6 +2268,16 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation_state::is_empty() const
+    {
+    if ( !mode_step->is_empty() ) return false;
+    for ( auto st : steps )
+        {
+        if ( !st->is_empty() ) return false;
+        }
+    return true;
     }
 //-----------------------------------------------------------------------------
 bool operation_state::is_goto_next_state( int& next_state ) const
