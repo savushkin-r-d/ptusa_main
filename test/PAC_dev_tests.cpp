@@ -898,47 +898,23 @@ TEST( wages_eth, direct_set_tcp_buff )
     char* field = "IP";
     w1.set_string_property( field, ip );
 
-    //корректные данные 
-    char new_value[] = "+01234.5kg";
+    //Корректные данные.
+    char new_value[] = "+91234.5kg";
     const auto SIZE = sizeof( new_value );
     w1.direct_set_tcp_buff( new_value, SIZE, 1 );
-    EXPECT_EQ( 1234.5f, w1.get_value() );
+    const auto CORRECT_VALUE = 91234.5f;
+    EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
 
-    //некорректные данные. Сохраняется предыдущее значение веса
-    strcpy( new_value, "+00000.5kg" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5kt" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5zg" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5zt" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5zg" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5kt" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
-
-    strcpy( new_value, "+00000.5zt" );
-    w1.direct_set_tcp_buff( new_value, SIZE, 0 );
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ(1234.5f, w1.get_value());
+    //Некорректные данные. Сохраняется предыдущее значение веса.
+    const auto NOT_VALID_DATA = {
+        "          ", "+00000.5kt", "+00000.5zg", "+00000.5zt" };
+    for ( auto str : NOT_VALID_DATA )
+        {
+        strcpy( new_value, str );
+        w1.direct_set_tcp_buff( new_value, SIZE, 1 );
+        EXPECT_EQ( 0, w1.get_state() );
+        EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
+        }
     }
 
 TEST( wages_eth, set_string_property )

@@ -4,7 +4,8 @@
 
 iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port ) :
     tc( std::unique_ptr<tcp_client>( tcp_client::Create( ip, port, id, 0,
-    static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ), 300u ) ) )
+    static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ),
+    static_cast<unsigned long> ( CONSTANTS::SEND_RECEIVE_TIMEOUT ) ) ) )
     {
     }
 
