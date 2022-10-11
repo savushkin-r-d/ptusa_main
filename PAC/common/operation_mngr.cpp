@@ -1,18 +1,14 @@
-/// @file  mode_mngr.cpp
-/// @brief Содержит реализацию классов mode_mngr.h.
+/// @file  operation_mngr.cpp
+/// @brief Содержит реализацию классов operation_mngr.h.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
-///
-/// @par Описание директив препроцессора:
-/// @c USE_NO_COMB - компиляция без гребенки (объекта g_greb).@n
-/// в консоль.
 ///
 /// @par Текущая версия:
 /// @$Rev$.@n
 /// @$Author$.@n
 /// @$Date::                     $.
 
-#include "mode_mngr.h"
+#include "operation_mngr.h"
 #include "g_errors.h"
 //-----------------------------------------------------------------------------
 const char* operation::state_str [] =
