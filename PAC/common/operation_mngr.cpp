@@ -11,20 +11,42 @@
 #include "operation_mngr.h"
 #include "g_errors.h"
 //-----------------------------------------------------------------------------
-const char* operation::state_str [] =
+const char* operation::state_str [ operation::STATES_MAX ] =
     {
     "Отключен",
     "Выполнение",
     "Пауза",
-    "Остановлен"
+    "Остановлен",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "Запускается",
+    "Становится в паузу",
+    "Выходит из паузы",
+    "Останавливается",
+    "Завершается",
     };
 //-----------------------------------------------------------------------------
-const char* operation::en_state_str[] =
+const char* operation::en_state_str[ operation::STATES_MAX ] =
     {
     "OFF",
     "RUN",
     "PAUSE",
-    "STOP"
+    "STOP",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "STARTING",
+    "PAUSING",
+    "UNPAUSING",
+    "STOPPING",
+    "COMPLETING"
     };
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
@@ -35,10 +57,10 @@ operation::operation(const char* name, operation_manager *owner, int n) :
     run_step( -1 ),
     run_time( 0 )
     {
-    states.push_back( new operation_state( "off",  owner, n ) );
-    states.push_back( new operation_state( "run",  owner, n ) );
-    states.push_back( new operation_state( "pause",owner, n ) );
-    states.push_back( new operation_state( "stop", owner, n ) );
+    for ( auto state_name: en_state_str )
+        {
+        states.push_back( new operation_state( state_name, owner, n ) );
+        }
     }
 //-----------------------------------------------------------------------------
 operation::~operation()

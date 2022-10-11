@@ -732,11 +732,17 @@ class operation
             PAUSE,   // Пауза.
             STOP,    // Остановлен.
 
+            STARTING = 10,  //Запускается.
+            PAUSING,        //Становится в паузу.
+            UNPAUSING,      //Выходит в паузу.            
+            STOPPING,       //Останавливается.
+            COMPLETING,     //Завершается.
+
 			STATES_MAX,
             };
 
-        static const char* state_str [];
-        static const char* en_state_str[];
+        static const char* state_str [ STATES_MAX ];
+        static const char* en_state_str[ STATES_MAX ];
 
         state_idx get_state() const;
 
