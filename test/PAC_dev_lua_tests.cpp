@@ -36,8 +36,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );    
 
-    //int to_step_if_devices_in_specific_state_action::set_int_property(
-    //  const char* name, unsigned int idx, int value );
+    //int jump_if_action::set_int_property( const char* name, unsigned int idx, int value );
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_TO_STEP_IF ]:"
         "set_int_property( 'next_step_n', 0, 1 )" ) );

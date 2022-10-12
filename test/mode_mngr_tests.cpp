@@ -104,6 +104,10 @@ TEST( operation, evaluate )
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
 
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
@@ -177,7 +181,123 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( 3, test_op->active_step() );
 
+	test_op->switch_off();
 
+
+	//Корректное автовключение/автоотключение.	
+	auto operation_idle_state = test_op[ 0 ][ operation::IDLE ];
+	auto operation_run_state = test_op[ 0 ][ operation::RUN ];
+	auto operation_pause_state = test_op[ 0 ][ operation::PAUSE ];
+	auto main_step_in_idle = operation_idle_state[ 0 ][ -1 ];
+	auto main_step_in_run = operation_run_state[ 0 ][ -1 ];
+	auto main_step_in_pause = operation_pause_state[ 0 ][ -1 ];
+
+	int next = 0;
+	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+	EXPECT_EQ( -1, next );
+
+	auto if_action_in_idle = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_idle )[ step::ACTIONS::A_TO_STEP_IF ] );
+	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	if_action_in_idle->add_dev( &test_DI_one, 0, 0 );
+	
+	auto if_action_in_run = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_TO_STEP_IF ] );
+	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
+
+	//По умолчанию все сигналы неактивны, операция не должна включиться.
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+
+	//Сигнал активен, операция должна включиться.
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto required_DI_action = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_REQUIRED_FB ] );
+	required_DI_action->add_dev( &test_DI_two );
+
+	//Сигнал активен, но операция не должна включиться, так как нет требуемого
+	//сигнала.
+	const auto WARN_TIME = 1;
+	const auto WAIT_TIME = 2 * WARN_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ] = WAIT_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ] = WARN_TIME;
+	test_DI_one.on();
+	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( WARN_TIME );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( WAIT_TIME );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, но операция не должна включиться, так как автовключение 
+	//было отключено.
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, операция должна включиться, так как автовключение 
+	//было опять включено.
+	test_DI_one.off();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, но операция не должна включиться, так как нет требуемого
+	//сигнала.
+	test_DI_one.on();
+	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, а операция должна включиться, так как появился требуемый
+	//сигнал.
+	sleep_ms( WAIT_TIME );
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//В паузе переходы к новым состояниям не осуществляются.
+	test_op->switch_off();
+	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto if_action_in_pause = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_pause )[ step::ACTIONS::A_TO_STEP_IF ] );
+	if_action_in_pause->add_dev( &test_DI_one, 0, 0 );
+	test_op->start();
+	test_op->pause();
+	test_DI_three.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
 
@@ -521,7 +641,7 @@ TEST( enable_step_by_signal, should_turn_off )
 	test_params_manager::removeObject();
     }
 
-TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
+TEST( jump_if_action, is_goto_next_step )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -549,12 +669,12 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	operation->start();
 	operation->evaluate();
 
-	auto action = reinterpret_cast<to_step_if_devices_in_specific_state_action*>
+	auto action = reinterpret_cast<jump_if_action*>
 		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
 
 	int next_step = 0;
-	auto is_goto_next_step = action->is_goto_next_step( next_step );
-	EXPECT_EQ( false, is_goto_next_step );			//Empty action.
+	auto is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( false, is_goto_next_step );			//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next_step );
 
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
@@ -563,9 +683,8 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action->add_dev( &test_DI_two, 0, 1 );
-	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
-		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_three, 1, 0 );
+	valve_DO1 test_valve( "V3" );
+	action->add_dev( &test_valve, 1, 0 );
 	const int SET_NEXT_STEP = 2;
 	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
 	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
@@ -576,31 +695,32 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 
 	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
 	//перехода.
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем сигналы, к новому шагу не должно быть перехода.
 	test_DI_one.on();
 	test_DI_two.on();
-	test_DI_three.off();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	test_valve.off();
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем сигналы, к новому шагу должен быть переход.
 	test_DI_one.on();
 	test_DI_two.off();
-	test_DI_three.off();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	test_valve.off();
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем сигналы, к новому шагу должен быть переход.
 	test_DI_one.off();
 	test_DI_two.off();
-	test_DI_three.on();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	test_valve.on();
+	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
