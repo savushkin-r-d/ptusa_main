@@ -31,7 +31,7 @@ curRecipeStartBlock(0),
 recipeStartAddr(0L)
 {
     defaultfilename = new char[20];
-    sprintf(defaultfilename, "fortesting%drec.bin", lineNo );
+    sprintf(defaultfilename, "line%drec.bin", lineNo );
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
