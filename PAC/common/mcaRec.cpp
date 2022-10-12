@@ -24,19 +24,14 @@ int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
 
-ParentRecipeManager::ParentRecipeManager()
-{
-
-}
-
-ParentRecipeManager::ParentRecipeManager( int fortesting ) :
-fortesting(fortesting),
+ParentRecipeManager::ParentRecipeManager( int lineNo ) :
+lineNo( lineNo ),
 currentRecipe(0),
 curRecipeStartBlock(0),
 recipeStartAddr(0L)
 {
     defaultfilename = new char[20];
-    sprintf(defaultfilename, "fortesting%drec.bin", fortesting);
+    sprintf(defaultfilename, "line%drec.bin", lineNo );
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
@@ -120,10 +115,7 @@ void ParentRecipeManager::PasteRecipe()
 }
 
 
-TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
-    currentRecipe(0),
-    curRecipeStartBlock(0),
-    recipeStartAddr(0L)
+TRecipeManager::TRecipeManager( int lineNo ): ParentRecipeManager ( lineNo )
     {
     defaultfilename = new char[20];
     sprintf(defaultfilename, "line%drec.bin", lineNo);
@@ -138,22 +130,6 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
-    }
-
-TRecipeManager::~TRecipeManager()
-    {
-    SaveRecipeName();
-    delete[] currentRecipeName;
-    currentRecipeName = nullptr;
-    delete[] recipeList;
-    recipeList = nullptr;
-    SaveToFile(defaultfilename);
-    delete[] recipeMemory;
-    recipeMemory = nullptr;
-    delete[] recipeCopyBuffer;
-    recipeCopyBuffer = nullptr;
-    delete[] defaultfilename;
-    defaultfilename = nullptr;
     }
 
 int TRecipeManager::NextRecipe()
@@ -229,16 +205,6 @@ void TRecipeManager::EvalRecipe()
         }
     }
 
-unsigned long TRecipeManager::startAddr()
-    {
-    return ParentRecipeManager::startAddr();
-    }
-
-unsigned long TRecipeManager::startAddr( int recNo )
-    {
-    return ParentRecipeManager::startAddr(recNo);
-    }
-
 float TRecipeManager::getRecipeValue( int recNo, int valueNo )
     {
     unsigned long temp;
@@ -282,15 +248,6 @@ int TRecipeManager::setValue( int valueNo, float newValue )
 #endif // MSAPANEL
     return setRecipeValue(currentRecipe, valueNo, newValue);
     }
-
-void TRecipeManager::SaveRecipeName()
-    {
-#ifdef MSAPANEL
-    MsaPanel::UpdateRecipes();
-#endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
-    }
-
 
 int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, run_time_params_float* par )
     {
@@ -652,37 +609,6 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     return 0;
     }
 
-int TRecipeManager::SaveToFile(const char* filename)
-    {
-#ifdef DEBUG
-    printf("Saving recipes to file %s\n", filename);
-#endif // DEBUG
-    FILE* memFile = nullptr;
-    char fname[50];
-#ifdef PAC_PLCNEXT
-    sprintf(fname, "/opt/main/%s", filename);
-#else
-    sprintf(fname, "%s", filename);
-#endif // PAC_PLCNEXT
-    memFile = fopen(fname, "r+b");
-    if (nullptr == memFile)
-        {
-        memFile = fopen(fname, "w+b");
-        }
-    if (memFile)
-        {
-        fseek(memFile, 0, SEEK_SET);
-        fwrite(recipeMemory, 1, recipeMemorySize, memFile);
-        fclose(memFile);
-#ifdef PAC_PLCNEXT
-        char syscommand[] = "chmod 777 ";
-        strcat(syscommand, fname);
-        system(syscommand);
-#endif
-        }
-    return 0;
-    }
-
 int TRecipeManager::LoadFromFile( const char* filename )
     {
     FILE* memFile = nullptr;
@@ -703,24 +629,8 @@ int TRecipeManager::LoadFromFile( const char* filename )
     return 0;
     }
 
-
-int TMediumRecipeManager::startRecipeBlock = 0;
-
-int TMediumRecipeManager::recipePerLine = 10;
-
-int TMediumRecipeManager::blocksPerRecipe = 1;
-
-int TMediumRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 2;
-
-int TMediumRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
-
-unsigned char* TMediumRecipeManager::recipeCopyBuffer = nullptr;
-
-TMediumRecipeManager::TMediumRecipeManager(MediumTypes mType) :
-mediumType(mType),
-currentRecipe(0),
-curRecipeStartBlock(0),
-recipeStartAddr(0L)
+TMediumRecipeManager::TMediumRecipeManager(MediumTypes mType) : ParentRecipeManager( 0 ),
+mediumType(mType)
 {
     defaultfilename = new char[20];
     sprintf(defaultfilename, "medium%drec.bin", mType);
@@ -735,22 +645,6 @@ recipeStartAddr(0L)
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
-}
-
-TMediumRecipeManager::~TMediumRecipeManager()
-{
-    SaveRecipeName();
-    delete[] currentRecipeName;
-    currentRecipeName = nullptr;
-    delete[] recipeList;
-    recipeList = nullptr;
-    SaveToFile(defaultfilename);
-    delete[] recipeMemory;
-    recipeMemory = nullptr;
-    delete[] recipeCopyBuffer;
-    recipeCopyBuffer = nullptr;
-    delete[] defaultfilename;
-    defaultfilename = nullptr;
 }
 
 int TMediumRecipeManager::NextRecipe()
@@ -826,16 +720,6 @@ void TMediumRecipeManager::EvalRecipe()
     }
 }
 
-unsigned long TMediumRecipeManager::startAddr()
-{
-    return ParentRecipeManager::startAddr();
-}
-
-unsigned long TMediumRecipeManager::startAddr(int recNo)
-{
-    return ParentRecipeManager::startAddr(recNo);
-}
-
 float TMediumRecipeManager::getRecipeValue(int recNo, int valueNo)
 {
     unsigned long temp;
@@ -873,12 +757,6 @@ int TMediumRecipeManager::setValue(int valueNo, float newValue)
 {
     return setRecipeValue(currentRecipe, valueNo, newValue);
 }
-
-void TMediumRecipeManager::SaveRecipeName()
-{
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
-}
-
 
 int TMediumRecipeManager::LoadRecipeToParams(int recipeNo, saved_params<float, true> par)
 {
@@ -1023,37 +901,6 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
         memcpy(recipeMemory + startaddr, buf, length);
         }
 
-    return 0;
-}
-
-int TMediumRecipeManager::SaveToFile(const char* filename)
-{
-#ifdef DEBUG
-    printf("Saving recipes to file %s\n", filename);
-#endif // DEBUG
-    FILE* memFile = nullptr;
-    char fname[50];
-#ifdef PAC_PLCNEXT
-    sprintf(fname, "/opt/main/%s", filename);
-#else
-    sprintf(fname, "%s", filename);
-#endif // PAC_PLCNEXT
-    memFile = fopen(fname, "r+b");
-    if (nullptr == memFile)
-    {
-        memFile = fopen(fname, "w+b");
-    }
-    if (memFile)
-    {
-        fseek(memFile, 0, SEEK_SET);
-        fwrite(recipeMemory, 1, recipeMemorySize, memFile);
-        fclose(memFile);
-#ifdef PAC_PLCNEXT
-        char syscommand[] = "chmod 777 ";
-        strcat(syscommand, fname);
-        system(syscommand);
-#endif
-    }
     return 0;
 }
 

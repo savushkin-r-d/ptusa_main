@@ -27,11 +27,11 @@ class ParentRecipeManager
 protected:
     int recipechanged;
     unsigned long recipechangechecktime;
-    int fortesting;
-    int currentRecipe;
+    int lineNo;
+    int currentRecipe = 0;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
-    unsigned long recipeStartAddr;
+    unsigned long recipeStartAddr = 0;
 
     virtual unsigned long startAddr();
     virtual unsigned long startAddr(int recNo);
@@ -61,11 +61,59 @@ public:
     virtual void PasteRecipe();
     virtual void NullifyRecipe();
     virtual void LoadRecipeName();
-    ParentRecipeManager(int fortesting);
-    ParentRecipeManager();
+    ParentRecipeManager(int lineNo);
+
+    void SaveRecipeName()
+        {
+        WriteMem( startAddr(), recipeNameLength, (unsigned char*)currentRecipeName );
+        };
+
+    int SaveToFile( const char* filename )
+        {
+#ifdef DEBUG
+        printf( "Saving recipes to file %s\n", filename );
+#endif // DEBUG
+        FILE* memFile = nullptr;
+        char fname[ 50 ];
+#ifdef PAC_PLCNEXT
+        sprintf( fname, "/opt/main/%s", filename );
+#else
+        sprintf( fname, "%s", filename );
+#endif // PAC_PLCNEXT
+        memFile = fopen( fname, "r+b" );
+        if ( nullptr == memFile )
+            {
+            memFile = fopen( fname, "w+b" );
+            }
+        if ( memFile )
+            {
+            fseek( memFile, 0, SEEK_SET );
+            fwrite( recipeMemory, 1, recipeMemorySize, memFile );
+            fclose( memFile );
+#ifdef PAC_PLCNEXT
+            char syscommand[] = "chmod 777 ";
+            strcat( syscommand, fname );
+            system( syscommand );
+#endif
+            }
+        return 0;
+        };
+        
     virtual ~ParentRecipeManager()
-    {
-    }
+        {
+        SaveRecipeName();
+        delete[] currentRecipeName;
+        currentRecipeName = nullptr;
+        delete[] recipeList;
+        recipeList = nullptr;
+        SaveToFile( defaultfilename );
+        delete[] recipeMemory;
+        recipeMemory = nullptr;
+        delete[] recipeCopyBuffer;
+        recipeCopyBuffer = nullptr;
+        delete[] defaultfilename;
+        defaultfilename = nullptr;
+        }
 };
 
 ///@class TRecipeManager mcaRec.h
@@ -194,27 +242,11 @@ class TRecipeManager : public ParentRecipeManager
         RV_LASTVALVEOFF = 119,
         };
     protected:
-        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
-        int recipechanged;
-        unsigned long recipechangechecktime;
-        int lineNo;
-        int currentRecipe;
-        int curRecipeStartBlock;
-        unsigned long lastEvalTime;
-        unsigned long recipeStartAddr;
-        void SaveRecipeName();
-
         void FormRecipeList();
-        unsigned long startAddr();
-        unsigned long startAddr(int recNo);
-        unsigned char* recipeMemory;
-        unsigned long recipeMemorySize;
+
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) override;
     public:
-        ///@brief Имя файла с рецептами
-        char* defaultfilename;
-        char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -311,10 +343,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Переписывает текущий рецепт значениями из буффера
         /// @return   void
         void PasteRecipe();
-        /// @fn int TRecipeManager::SaveToFile()
-        /// @brief Сохранение рецептов модуля в файл
-        /// @return Возвращает 0 в случае успешного завершения
-        int SaveToFile(const char* filename);
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
@@ -328,7 +356,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
-        ~TRecipeManager();
     };
 
 
@@ -356,41 +383,13 @@ class TRecipeManager : public ParentRecipeManager
             MT_ACID,
         };
     protected:
-        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
-        int recipechanged;
         int mediumType;
-        unsigned long recipechangechecktime;
-        int currentRecipe;
-        int curRecipeStartBlock;
-        unsigned long lastEvalTime;
-        unsigned long recipeStartAddr;
-        void SaveRecipeName();
-
         void FormRecipeList();
-        unsigned long startAddr();
-        unsigned long startAddr(int recNo);
-        unsigned char* recipeMemory;
-        unsigned long recipeMemorySize;
+
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) override;
     public:
-        char* defaultfilename;
-        ///@brief Начальный блок для всех экземляров рецептов
-        static int startRecipeBlock;
-        ///@brief Количество рецептов на линию
-        static int recipePerLine;
-        ///@brief Длина рецепта в блоках
-        static int blocksPerRecipe;
-        ///@brief Длина имени рецепта
-        static int recipeNameLength;
-        ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
-        static int startRecipeParamsOffset;
-        ///@brief Буфер для копирования рецептов
-        static unsigned char* recipeCopyBuffer;
-        ///@brief Имя текущего рецепта
-        char* currentRecipeName;
         ///@brief Список рецептов для сервера
-        char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -487,10 +486,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Переписывает текущий рецепт значениями из буффера
         /// @return   void
         void PasteRecipe();
-        /// @fn int TRecipeManager::SaveToFile()
-        /// @brief Сохранение рецептов модуля в файл
-        /// @return Возвращает 0 в случае успешного завершения
-        int SaveToFile(const char* filename);
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
@@ -504,7 +499,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TMediumRecipeManager(MediumTypes mType);
-        ~TMediumRecipeManager();
     };
 
 
