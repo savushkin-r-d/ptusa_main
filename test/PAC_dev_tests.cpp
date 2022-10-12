@@ -234,6 +234,14 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
     auto C3 = C( name.c_str() );
     EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( C3 ) );
+
+    //device::DT_WT, DST_WT_ETH
+    name = std::string( "W1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WT, device::DST_WT_ETH, name.c_str(), "Test wages", "W" );
+    EXPECT_EQ( nullptr, res );
+    auto W1 = WT( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
     }
 
 TEST( device_manager, clear_io_devices )
@@ -714,8 +722,6 @@ TEST( wages_RS232, get_value_from_wages )
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
 
-    //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В
-    //таком формате приходят данные с весов. 
     //1 - Тест на пустой указатель
     //2, 3 - Данные корректные
     //4, 5 - Некорректные данные, возвращает 0
@@ -737,7 +743,7 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    strcpy( tmp_str, "   +0012.34k" );                                     //3
+    strcpy( tmp_str, "   +0012.34k" );                                     //3   
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -827,6 +833,99 @@ TEST( wages_RS232, evaluate_io )
     wages_RS232 w1( "W1" );
     w1.evaluate_io();
     }
+
+TEST( wages_eth, evaluate_io )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    w1.evaluate_io();
+    EXPECT_EQ( 0, w1.get_value() );
+    }
+
+TEST( wages_eth, get_value )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.set_par( 1, 0, 10 );
+    EXPECT_EQ( 20, w1.get_value() );
+    }
+
+TEST( wages_eth, tare )
+    {
+    wages_eth w1( "W1" );
+    w1.tare();
+    }
+
+TEST( wages_eth, get_state )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    EXPECT_EQ( 0, w1.get_state() );
+    }
+
+TEST( wages_eth, direct_set_value )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    }
+
+TEST( wages_eth, direct_set_tcp_buff )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    //Корректные данные.
+    char new_value[] = "+91234.5kg";
+    const auto SIZE = sizeof( new_value );
+    w1.direct_set_tcp_buff( new_value, SIZE, 1 );
+    const auto CORRECT_VALUE = 91234.5f;
+    EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
+
+    //Некорректные данные. Сохраняется предыдущее значение веса.
+    const auto NOT_VALID_DATA = {
+        "          ", "+00000.5kt", "+00000.5zg", "+00000.5zt" };
+    for ( auto str : NOT_VALID_DATA )
+        {
+        strcpy( new_value, str );
+        w1.direct_set_tcp_buff( new_value, SIZE, 1 );
+        EXPECT_EQ( 0, w1.get_state() );
+        EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
+        }
+    }
+
+TEST( wages_eth, set_string_property )
+    {
+    wages_eth w1( "W1" );
+
+    char* ip = "0.0.0.0";
+    char* field = "NOT_IP";
+    w1.set_string_property( field, ip );
+    }
+
 
 TEST( threshold_regulator, set_value )
     {
