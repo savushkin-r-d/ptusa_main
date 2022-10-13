@@ -54,7 +54,7 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device ( char *str )
+int par_device::save_device( char* str )
     {
     str[ 0 ] = 0;
 
@@ -68,28 +68,14 @@ int par_device::save_device ( char *str )
         {
         if ( par_name[ i ] )
             {
-            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}=", par_name[ i ] ).size;
-
-            float val =  par[ 0 ][ i + 1 ];
-            if ( 0. == val )
-                {
-                size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "0, " ).size;
-                }
-            else
-                {
-                double tmp;
-                if ( modf( val, &tmp ) == 0 )
-                    {
-                    size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}, ", (int)val ).size;                    
-                    }
-                else
-                    {
-                    size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{:.2}, ", val ).size;                    
-                    }
-                }
+            auto val = par[ 0 ][ i + 1 ];
+            double tmp;
+            int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
+                par_name[ i ], val, precision ).size;
             }
         }
-    *(str + size) = '\0';
+    *( str + size ) = '\0';
 
     return size;
     }
