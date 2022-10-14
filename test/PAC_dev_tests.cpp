@@ -578,7 +578,7 @@ TEST( counter_f, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, P_MIN_FLOW=0,"
+        "FQT1={M=0, ST=1, V=50, ABS_V=100, F=9.90, P_MIN_FLOW=0,"
         " P_MAX_FLOW=0, P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
     }
 
@@ -637,7 +637,7 @@ TEST( counter, set_cmd )
     EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
     fqt1.save_device( buff, "" );
-    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100},\n", buff );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50, ABS_V=100},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -741,7 +741,7 @@ TEST( counter_iolink, set_cmd )
     
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "FQT1={M=0, ST=1, V=50000.00, ABS_V=100000, F=9.90, T=1.1, "
+        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, F=9.90, T=1.1, "
         "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );

@@ -264,14 +264,11 @@ int device::save_device( char* buff, const char* prefix )
         type != DT_DI &&
         type != DT_DO )
         {
-        if ( get_value() == 0 )
-            {
-            res += sprintf( buff + res, "V=0, " );
-            }
-        else
-            {
-            res += sprintf( buff + res, "V=%.2f, ", get_value() );
-            }
+        auto val = get_value();
+        double tmp;
+        int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "V={:.{}f}, ",
+            val, precision ).size;
         }
 
     res += save_device_ex( buff + res );
