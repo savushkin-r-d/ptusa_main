@@ -86,7 +86,7 @@ long device_communicator::write_devices_states_service(
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );
                 }
-            answer_size++; // Учитываем завершающий \0.
+            outdata[ answer_size++ ] = '\0'; // Учитываем завершающий \0.
 
 #ifdef DEBUG_DEV_CMCTR
             if ( answer_size < 40000 ) //Вывод больших строк тормозит работу.
@@ -123,7 +123,7 @@ long device_communicator::write_devices_states_service(
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );
                 }
-            answer_size++; // Учитываем завершающий \0.
+            outdata[ answer_size++ ] = '\0'; // Учитываем завершающий \0.
 
 #ifdef DEBUG_DEV_CMCTR
             //printf( "%s", outdata + 2 );
@@ -213,7 +213,7 @@ long device_communicator::write_devices_states_service(
             printf( "Critical errors = \n%s", outdata );
 #endif // DEBUG_DEV_CMCTR
 
-            answer_size++; // Учитываем завершающий \0.
+            str[ answer_size++ ] = '\0'; // Учитываем завершающий \0.
             break;
             }
 

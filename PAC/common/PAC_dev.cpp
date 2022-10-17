@@ -75,8 +75,6 @@ int par_device::save_device( char* str )
                 par_name[ i ], val, precision ).size;
             }
         }
-    *( str + size ) = '\0';
-
     return size;
     }
 //-----------------------------------------------------------------------------
@@ -277,8 +275,6 @@ int device::save_device( char* buff, const char* prefix )
     const int extra_symbols_length = 2;                     //Remove last " ,".
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
-    *( buff + res ) = '\0';
-
     return res;
     }
 //-----------------------------------------------------------------------------
