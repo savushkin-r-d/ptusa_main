@@ -838,8 +838,8 @@ TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "IP";
+    auto ip = "0.0.0.0";
+    auto field = "IP";
     w1.set_string_property( field, ip );
 
     w1.evaluate_io();
@@ -850,8 +850,8 @@ TEST( wages_eth, get_value )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "IP";
+    auto ip = "0.0.0.0";
+    auto field = "IP";
     w1.set_string_property( field, ip );
 
     w1.direct_set_value( 10.0f );
@@ -870,8 +870,8 @@ TEST( wages_eth, get_state )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "IP";
+    auto ip = "0.0.0.0";
+    auto field = "IP";
     w1.set_string_property( field, ip );
 
     EXPECT_EQ( 0, w1.get_state() );
@@ -881,8 +881,8 @@ TEST( wages_eth, direct_set_value )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "IP";
+    auto ip = "0.0.0.0";
+    auto field = "IP";
     w1.set_string_property( field, ip );
     w1.direct_set_value( 10.0f );
     EXPECT_EQ( 10, w1.get_value() );
@@ -894,8 +894,8 @@ TEST( wages_eth, direct_set_tcp_buff )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "IP";
+    auto ip = "0.0.0.0";
+    auto field = "IP";
     w1.set_string_property( field, ip );
 
     //Корректные данные.
@@ -921,8 +921,8 @@ TEST( wages_eth, set_string_property )
     {
     wages_eth w1( "W1" );
 
-    char* ip = "0.0.0.0";
-    char* field = "NOT_IP";
+    auto ip = "0.0.0.0";
+    auto field = "NOT_IP";
     w1.set_string_property( field, ip );
     }
 
