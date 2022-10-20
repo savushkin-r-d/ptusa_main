@@ -483,11 +483,6 @@ void TRecipeManager::FormRecipeList()
         }
     }
 
-void TRecipeManager::LoadRecipeName()
-    {
-    ParentRecipeManager::LoadRecipeName();
-    }
-
 int TRecipeManager::ToRecipe( int recNo )
     {
     if (recNo >= 0 && recNo < recipePerLine)
@@ -619,21 +614,6 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
             }
         }
     return errflag;
-    }
-
-void TRecipeManager::CopyRecipe()
-    {
-    ParentRecipeManager::CopyRecipe();
-    }
-
-void TRecipeManager::PasteRecipe()
-    {
-    ParentRecipeManager::PasteRecipe();
-    }
-
-void TRecipeManager::NullifyRecipe()
-    {
-    ParentRecipeManager::NullifyRecipe();
     }
 
 int TRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
@@ -892,11 +872,6 @@ void TMediumRecipeManager::FormRecipeList()
     }
 }
 
-void TMediumRecipeManager::LoadRecipeName()
-{
-    ParentRecipeManager::LoadRecipeName();
-}
-
 int TMediumRecipeManager::ToRecipe(int recNo)
 {
     if (recNo >= 0 && recNo < recipePerLine)
@@ -916,21 +891,6 @@ int TMediumRecipeManager::ToRecipe(int recNo)
 int TMediumRecipeManager::getRecipeName(int recNO, char* recName)
 {
     return ReadMem(startAddr(recNO), recipeNameLength, (unsigned char*)recName);
-}
-
-void TMediumRecipeManager::CopyRecipe()
-{
-    ParentRecipeManager::CopyRecipe();
-}
-
-void TMediumRecipeManager::PasteRecipe()
-{
-    ParentRecipeManager::PasteRecipe();
-}
-
-void TMediumRecipeManager::NullifyRecipe()
-{
-    return ParentRecipeManager::NullifyRecipe();
 }
 
 int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)

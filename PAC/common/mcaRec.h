@@ -278,30 +278,14 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - ошибка !0 - ОК
         int ResetRecipeToDefaults(int recipeNo);
-        /// @fn  void TRecipeManager::LoadRecipeName()
-        /// @brief Обновляет имя рецепта из энергонезависимой памяти
-        /// @return   void
-        void LoadRecipeName();
         /// @fn  void TRecipeManager::EvalRecipe()
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
-        void EvalRecipe();
-        /// @fn  void TRecipeManager::CopyRecipe()
-        /// @brief Копирует текущий рецепт в буфер
-        /// @return   void
-        void CopyRecipe();
-        /// @fn  void TRecipeManager::PasteRecipe()
-        /// @brief Переписывает текущий рецепт значениями из буффера
-        /// @return   void
-        void PasteRecipe();
+        void EvalRecipe();    
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
-        int LoadFromFile(const char* filename);
-        /// @fn  void TRecipeManager::NullifyRecipe()
-        /// @brief Обнуляет текущий рецепт
-        /// @return   void
-        void NullifyRecipe();
+        int LoadFromFile(const char* filename); 
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
@@ -421,30 +405,14 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - ошибка !0 - ОК
         int ResetRecipeToDefaults(int recipeNo);
-        /// @fn  void TRecipeManager::LoadRecipeName()
-        /// @brief Обновляет имя рецепта из энергонезависимой памяти
-        /// @return   void
-        void LoadRecipeName();
         /// @fn  void TRecipeManager::EvalRecipe()
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
         void EvalRecipe();
-        /// @fn  void TRecipeManager::CopyRecipe()
-        /// @brief Копирует текущий рецепт в буфер
-        /// @return   void
-        void CopyRecipe();
-        /// @fn  void TRecipeManager::PasteRecipe()
-        /// @brief Переписывает текущий рецепт значениями из буффера
-        /// @return   void
-        void PasteRecipe();
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
         int LoadFromFile(const char* filename);
-        /// @fn  void TRecipeManager::NullifyRecipe()
-        /// @brief Обнуляет текущий рецепт
-        /// @return   void
-        void NullifyRecipe();
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
