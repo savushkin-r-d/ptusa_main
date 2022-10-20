@@ -1,6 +1,13 @@
 # ptusa #
 
-[![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/) [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml) [![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
+[![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/)
+[![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
+[![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
+
+
+[![Downloads](https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](https://github.com/savushkin-r-d/ptusa_main/releases/)
+
 
 Russian readme is [here](russian_readme/readme.md).
 
