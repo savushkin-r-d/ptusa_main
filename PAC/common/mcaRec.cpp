@@ -616,12 +616,6 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
     return errflag;
     }
 
-int TRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string)
-{
-    return ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
-}
-
 int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     unsigned char* buf, bool is_string ) 
     {
@@ -891,11 +885,6 @@ int TMediumRecipeManager::ToRecipe(int recNo)
 int TMediumRecipeManager::getRecipeName(int recNO, char* recName)
 {
     return ReadMem(startAddr(recNO), recipeNameLength, (unsigned char*)recName);
-}
-
-int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
-{
-    return ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
 }
 
 int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
