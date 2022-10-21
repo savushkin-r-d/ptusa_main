@@ -64,7 +64,7 @@ void ParentRecipeManager::SaveRecipeName()
     WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
 }
 
-int ParentRecipeManager::SaveToFile(const char* filename)
+int ParentRecipeManager::SaveToFile(const char* filename) const
 {
 #ifdef DEBUG
     printf("Saving recipes to file %s\n", filename);

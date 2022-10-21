@@ -63,7 +63,7 @@ public:
     virtual void LoadRecipeName();
     ParentRecipeManager(int lineNo);
     void SaveRecipeName();
-    int SaveToFile(const char* filename);
+    int SaveToFile(const char* filename) const;
     virtual ~ParentRecipeManager();
 };
 
