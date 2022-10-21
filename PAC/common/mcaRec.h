@@ -34,7 +34,7 @@ protected:
     unsigned long recipeStartAddr = 0;
 
     unsigned long startAddr();
-    unsigned long startAddr(int recNo);
+    unsigned long startAddr(int recNo) const;
     unsigned char* recipeMemory;
     unsigned long recipeMemorySize;
     int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
@@ -64,7 +64,6 @@ public:
     ParentRecipeManager(int lineNo);
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
-    virtual ~ParentRecipeManager();
 };
 
 ///@class TRecipeManager mcaRec.h

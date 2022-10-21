@@ -43,22 +43,6 @@ recipeStartAddr(0L)
     recipechangechecktime = get_millisec();
 }
 
-ParentRecipeManager::~ParentRecipeManager()
-{
-    SaveRecipeName();
-    delete[] currentRecipeName;
-    currentRecipeName = nullptr;
-    delete[] recipeList;
-    recipeList = nullptr;
-    SaveToFile(defaultfilename);
-    delete[] recipeMemory;
-    recipeMemory = nullptr;
-    delete[] recipeCopyBuffer;
-    recipeCopyBuffer = nullptr;
-    delete[] defaultfilename;
-    defaultfilename = nullptr;
-}
-
 void ParentRecipeManager::SaveRecipeName()
 {
     WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
@@ -126,7 +110,7 @@ unsigned long ParentRecipeManager::startAddr()
     return startAddr(currentRecipe);
 }
 
-unsigned long ParentRecipeManager::startAddr(int recNo)
+unsigned long ParentRecipeManager::startAddr(int recNo) const
 {
     return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
 }
