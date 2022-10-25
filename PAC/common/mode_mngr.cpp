@@ -857,8 +857,15 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new enable_step_by_signal() );
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
-    
-    actions.push_back( new jump_if_action() );
+          
+    if ( is_mode )
+        {
+        actions.push_back( new jump_if_action( "Переход в состояние по условию" ) );
+        }
+    else
+        {
+        actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
+        }
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1658,8 +1665,8 @@ void wash_action::finalize()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-jump_if_action::jump_if_action() : 
-    action( "Перейти в шаг по условию", G_GROUPS_CNT )
+jump_if_action::jump_if_action( const char* name ) :
+    action( name, G_GROUPS_CNT)
     {
     }
 //-----------------------------------------------------------------------------
