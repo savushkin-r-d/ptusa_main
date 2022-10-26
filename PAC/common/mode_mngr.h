@@ -390,7 +390,7 @@ class wash_action: public action
 class jump_if_action : public action
     {
     public:
-        jump_if_action( const char* name );
+        explicit jump_if_action( const char* name );
 
         bool is_jump( int &next );
 
