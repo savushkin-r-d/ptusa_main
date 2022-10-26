@@ -2000,7 +2000,7 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto action = ( *active_step )[ step::A_TO_STEP_IF ];
+    auto action = ( *active_step )[ step::A_JUMP_IF ];
     auto if_action = static_cast<jump_if_action*>( action );
     int next_step = -1;
     if ( if_action->is_jump( next_step ) )
@@ -2232,7 +2232,7 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 bool operation_state::is_goto_next_state( int& next_state ) const
     {
-    auto action = ( *mode_step )[ step::A_TO_STEP_IF ];
+    auto action = ( *mode_step )[ step::A_JUMP_IF ];
     auto to_new_state = static_cast<jump_if_action*>( action );
     return to_new_state->is_jump( next_state );
     }
