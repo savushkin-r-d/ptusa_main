@@ -37,7 +37,7 @@ recipeStartAddr(0L)
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
-    strncpy(recipeList, "", len);
+    strcpy(recipeList, "");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
     recipechanged = 0;
     recipechangechecktime = get_millisec();
@@ -177,7 +177,7 @@ TRecipeManager::TRecipeManager( int lineNo ): ParentRecipeManager ( lineNo )
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
-    strncpy(recipeList,"", len);
+    strcpy(recipeList,"");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     FormRecipeList();
     recipechanged = 0;
@@ -666,7 +666,7 @@ mediumType(mType)
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength];
     recipeList = new char[(recipeNameLength + 6) * recipePerLine];
-    strncpy(recipeList, "", len);
+    strcpy(recipeList, "");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
     FormRecipeList();
     recipechanged = 0;
