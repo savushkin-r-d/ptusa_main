@@ -57,14 +57,14 @@ public:
     char* recipeList;
     ///@brief Имя текущего рецепта
     char* currentRecipeName;
-    virtual void CopyRecipe();
-    virtual void PasteRecipe();
-    virtual void NullifyRecipe();
-    virtual void LoadRecipeName();
+    void CopyRecipe();
+    void PasteRecipe();
+    void NullifyRecipe();
+    void LoadRecipeName();
     ParentRecipeManager(int lineNo);
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
-    virtual ~ParentRecipeManager();
+    ~ParentRecipeManager();
 };
 
 ///@class TRecipeManager mcaRec.h
