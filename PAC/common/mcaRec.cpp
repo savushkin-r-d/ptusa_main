@@ -116,12 +116,12 @@ int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
 }
 
 int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string)
+    unsigned char* buf, bool is_string) const
 {
     return 0;
 }
 
-unsigned long ParentRecipeManager::startAddr()
+unsigned long ParentRecipeManager::startAddr() const
 {
     return startAddr(currentRecipe);
 }
