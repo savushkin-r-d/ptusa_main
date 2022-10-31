@@ -115,9 +115,21 @@ int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
     return 0;
 }
 
-int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string) const
+int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string) 
 {
+    if (is_string)
+    {
+        char* tmp = new char[length + 1];
+        convert_utf8_to_windows1251((char*)buf, tmp, strlen((char*)buf));
+        memcpy(recipeMemory + startaddr, tmp, length);
+        delete[] tmp;
+        tmp = nullptr;
+    }
+    else
+    {
+        memcpy(recipeMemory + startaddr, buf, length);
+    }
+
     return 0;
 }
 
@@ -616,24 +628,6 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
     return errflag;
     }
 
-int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string ) 
-    {
-    if ( is_string )
-        {
-        char* tmp = new char[ length + 1 ];
-        convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf));
-        memcpy( recipeMemory + startaddr, tmp, length );
-        delete[] tmp;
-        tmp = nullptr;
-        }
-    else
-        {
-        memcpy( recipeMemory + startaddr, buf, length );
-        }
-
-    return 0;
-    }
 
 int TRecipeManager::LoadFromFile( const char* filename )
     {

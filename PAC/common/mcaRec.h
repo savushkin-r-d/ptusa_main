@@ -24,7 +24,9 @@
 
 class ParentRecipeManager
 {
-protected:
+    friend class TRecipeManager;
+    friend class TMediumRecipeManager;
+private:
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
@@ -38,7 +40,8 @@ protected:
     unsigned char* recipeMemory;
     unsigned long recipeMemorySize;
     int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-    int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) const;
+    int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+
 public:
     char* defaultfilename;
     ///@brief Начальный блок для всех экземляров рецептов
@@ -192,10 +195,8 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
-    protected:
+    private:
         void FormRecipeList();
-
-        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
@@ -316,10 +317,9 @@ class TRecipeManager : public ParentRecipeManager
             MT_CAUSTIC = 0,
             MT_ACID,
         };
-    protected:
+    private:
         int mediumType;
         void FormRecipeList();
-
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         ///@brief Список рецептов для сервера
