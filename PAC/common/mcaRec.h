@@ -26,7 +26,6 @@ class ParentRecipeManager
 {
     friend class TRecipeManager;
     friend class TMediumRecipeManager;
-private:
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
