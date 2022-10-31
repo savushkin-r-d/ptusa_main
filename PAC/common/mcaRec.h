@@ -67,7 +67,6 @@ public:
     explicit ParentRecipeManager(int lineNo);
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
-    ~ParentRecipeManager();
 };
 
 ///@class TRecipeManager mcaRec.h
