@@ -61,3 +61,56 @@ TEST( lua_get_run_step_after_pause, tech_object )
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
+
+TEST( evaluate, tech_object )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	ASSERT_EQ( 0,
+		luaL_dostring( L, "o1=tech_object( \'O1\', 1, 1, \'o1\', 1, 1, 10, 10, 10, 10 )" ) );
+	ASSERT_EQ( 0,
+		luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
+
+	lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
+	auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
+	ASSERT_NE( nullptr, tank );
+
+	ASSERT_EQ( 0,
+		luaL_dostring( L,
+		"function o1:evaluate()\n"
+		"end" ) );
+
+	tank->evaluate();
+	const unsigned int OPER_N1 = 1;	
+	auto operation_1 = ( *tank->get_modes_manager() )[ OPER_N1 ];
+	//Операция должна быть в состоянии бездействия.
+	ASSERT_EQ( operation::IDLE, operation_1->get_state() );
+
+	tank->set_mode( OPER_N1, operation::RUN );
+	tank->evaluate();
+	//Операция должна быть в состоянии выполнения.
+	ASSERT_EQ( operation::RUN, operation_1->get_state() );
+
+	tank->set_mode( OPER_N1, operation::IDLE );
+	tank->evaluate();
+	//Операция должна быть в состоянии бездействия.
+	ASSERT_EQ( operation::IDLE, operation_1->get_state() );
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
