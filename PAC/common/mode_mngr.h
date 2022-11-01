@@ -390,7 +390,7 @@ class wash_action: public action
 class jump_if_action : public action
     {
     public:
-        jump_if_action();
+        explicit jump_if_action( const char* name );
 
         bool is_jump( int &next );
 
@@ -464,7 +464,7 @@ class step
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
             A_DELAY_OFF,
-            A_TO_STEP_IF,
+            A_JUMP_IF,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );

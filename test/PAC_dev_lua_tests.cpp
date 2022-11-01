@@ -38,13 +38,13 @@ TEST( toLuapp, tolua_PAC_dev_open )
 
     //int jump_if_action::set_int_property( const char* name, unsigned int idx, int value );
     EXPECT_EQ( 0,
-        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_TO_STEP_IF ]:"
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_JUMP_IF ]:"
         "set_int_property( 'next_step_n', 0, 1 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
     EXPECT_EQ( 0,
-        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_TO_STEP_IF ]:"
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_JUMP_IF ]:"
         "set_int_property( 'no_such_property', 0, 1 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );

@@ -198,13 +198,13 @@ TEST( operation, evaluate )
 	EXPECT_EQ( -1, next );
 
 	auto if_action_in_idle = reinterpret_cast<jump_if_action*>
-		( ( *main_step_in_idle )[ step::ACTIONS::A_TO_STEP_IF ] );
+		( ( *main_step_in_idle )[ step::ACTIONS::A_JUMP_IF ] );
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	if_action_in_idle->add_dev( &test_DI_one, 0, 0 );
 	
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
-		( ( *main_step_in_run )[ step::ACTIONS::A_TO_STEP_IF ] );
+		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
@@ -289,7 +289,7 @@ TEST( operation, evaluate )
 	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	auto if_action_in_pause = reinterpret_cast<jump_if_action*>
-		( ( *main_step_in_pause )[ step::ACTIONS::A_TO_STEP_IF ] );
+		( ( *main_step_in_pause )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_pause->add_dev( &test_DI_one, 0, 0 );
 	test_op->start();
 	test_op->pause();
@@ -670,7 +670,7 @@ TEST( jump_if_action, is_goto_next_step )
 	operation->evaluate();
 
 	auto action = reinterpret_cast<jump_if_action*>
-		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
+		( ( *step )[ step::ACTIONS::A_JUMP_IF ] );
 
 	int next_step = 0;
 	auto is_goto_next_step = action->is_jump( next_step );

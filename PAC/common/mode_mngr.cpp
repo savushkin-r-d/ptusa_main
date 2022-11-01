@@ -857,8 +857,15 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new enable_step_by_signal() );
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
-    
-    actions.push_back( new jump_if_action() );
+          
+    if ( is_mode )
+        {
+        actions.push_back( new jump_if_action( "Переход в состояние по условию" ) );
+        }
+    else
+        {
+        actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
+        }
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1658,8 +1665,8 @@ void wash_action::finalize()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-jump_if_action::jump_if_action() : 
-    action( "Перейти в шаг по условию", G_GROUPS_CNT )
+jump_if_action::jump_if_action( const char* name ) :
+    action( name, G_GROUPS_CNT)
     {
     }
 //-----------------------------------------------------------------------------
@@ -1993,7 +2000,7 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto action = ( *active_step )[ step::A_TO_STEP_IF ];
+    auto action = ( *active_step )[ step::A_JUMP_IF ];
     auto if_action = static_cast<jump_if_action*>( action );
     int next_step = -1;
     if ( if_action->is_jump( next_step ) )
@@ -2225,7 +2232,7 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 bool operation_state::is_goto_next_state( int& next_state ) const
     {
-    auto action = ( *mode_step )[ step::A_TO_STEP_IF ];
+    auto action = ( *mode_step )[ step::A_JUMP_IF ];
     auto to_new_state = static_cast<jump_if_action*>( action );
     return to_new_state->is_jump( next_state );
     }

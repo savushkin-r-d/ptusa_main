@@ -327,11 +327,7 @@ int tech_object::evaluate()
         operation* op = ( *operations_manager )[ idx ];
 
         modes_time[ idx ] = op->evaluation_time() / 1000;
-
-        if ( get_mode( idx ) == 1 )
-            {
-            op->evaluate();
-            }
+        op->evaluate();
 
         const int ERR_STR_SIZE = 80;
 
