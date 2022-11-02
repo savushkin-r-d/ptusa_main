@@ -193,9 +193,6 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
-    private:
-        void FormRecipeList();
-    public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -289,6 +286,8 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
+         private:
+             void FormRecipeList();
     };
 
 
@@ -315,11 +314,6 @@ class TRecipeManager : public ParentRecipeManager
             MT_CAUSTIC = 0,
             MT_ACID,
         };
-    private:
-        int mediumType;
-        void FormRecipeList();
-        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-    public:
         ///@brief Список рецептов для сервера
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
@@ -414,6 +408,10 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TMediumRecipeManager(MediumTypes mType);
+        private:
+            int mediumType;
+            void FormRecipeList();
+            int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     };
 
 
