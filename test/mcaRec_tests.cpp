@@ -31,21 +31,21 @@ TEST(TMediumRecipeManager, NullifyRecipe)
     mngr.NullifyRecipe();
 }
 
-TEST(ParentRecipeManager, CopyRecipe) //тест прошел
+TEST(ParentRecipeManager, CopyRecipe) 
 {
     auto fortesting = 1;
     ParentRecipeManager mngr(fortesting);
     mngr.CopyRecipe();
 }
 
-TEST(ParentRecipeManager, PasteRecipe)//тест пройден
+TEST(ParentRecipeManager, PasteRecipe)
 {
     auto fortesting = 1;
     ParentRecipeManager mngr(fortesting);
     mngr.PasteRecipe();
 }
 
-TEST(ParentRecipeManager, NullifyRecipe)//тест прошел
+TEST(ParentRecipeManager, NullifyRecipe)
 {
     auto fortesting = 1;
     ParentRecipeManager mngr(fortesting);
