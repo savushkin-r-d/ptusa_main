@@ -27,6 +27,10 @@ std::unordered_set<int> cipline_tech_object::steps_additional_rinse = { 8, 37, 5
 
 std::unordered_set<int> cipline_tech_object::steps_circulation = { 28, 48, 66, 76, 77 };
 
+std::unordered_set<int> cipline_tech_object::steps_caustic = { 22, 23, 24, 26, 28, 29, 31, 33, 34, 35 };
+
+std::unordered_set<int> cipline_tech_object::steps_acid = { 42, 43, 44 , 46, 48, 49, 53, 54, 55 };
+
 int isMsa = 0;
 
 int getNexpPrg(int cur, unsigned long prg)
@@ -3367,6 +3371,36 @@ int cipline_tech_object::_CheckErr( void )
         if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
             {
             return ERR_LEVEL_TANK_W;
+            }
+        }
+
+    //проверка датчика температуры на подаче
+    if ( TP->get_state( ) <= -1 )
+        {
+        if ( !(block_flags & (1 << BE_ERR_SUPPLY_TEMP_SENSOR)))
+            {
+            return ERR_SUPPLY_TEMP_SENSOR;
+            }
+        }
+
+    //проверка датчика температуры на возврате
+    if ( TR->get_state( ) <= -1 )
+        {
+        if ( !(block_flags & (1 << BE_ERR_RETURN_TEMP_SENSOR)))
+            {
+            return ERR_RETURN_TEMP_SENSOR;
+            }
+        }
+
+    //проверка датчика концентрации
+    if (steps_caustic.count(curstep) || steps_acid.count(curstep))
+        {
+        if (Q->get_state() <= -1)
+            {
+            if ( !(block_flags & (1 << BE_ERR_CONCENTRATION_SENSOR)))
+                {
+                return ERR_CONCENTRATION_SENSOR;
+                }
             }
         }
 

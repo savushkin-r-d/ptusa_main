@@ -224,16 +224,22 @@ enum MODULE_CONSTANTS
 #define ERR_LEVEL_TANK_S -36
 #define ERR_LEVEL_TANK_K -37
 #define ERR_LEVEL_TANK_W -38
+#define ERR_SUPPLY_TEMP_SENSOR -39
+#define ERR_RETURN_TEMP_SENSOR -40
+#define ERR_CONCENTRATION_SENSOR -41
 #define ERR_RET            -100
 
 
 //блокирование ошибок
 enum BLOCK_ERRORS
     {
-    BE_ERR_LEVEL_BACHOK = 0,
-    BE_ERR_LEVEL_TANK_S,
-    BE_ERR_LEVEL_TANK_K,
-    BE_ERR_LEVEL_TANK_W,
+        BE_ERR_LEVEL_BACHOK = 0,
+        BE_ERR_LEVEL_TANK_S,
+        BE_ERR_LEVEL_TANK_K,
+        BE_ERR_LEVEL_TANK_W,
+        BE_ERR_SUPPLY_TEMP_SENSOR,
+        BE_ERR_RETURN_TEMP_SENSOR,
+        BE_ERR_CONCENTRATION_SENSOR,
     };
 
 
@@ -637,6 +643,8 @@ class cipline_tech_object: public tech_object
         static std::unordered_set<int> steps_v2_supply;
         static std::unordered_set<int> steps_additional_rinse;
         static std::unordered_set<int> steps_circulation;
+        static std::unordered_set<int> cipline_tech_object::steps_caustic;
+        static std::unordered_set<int> cipline_tech_object::steps_acid;
 
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
