@@ -35,8 +35,21 @@ TEST( cipline_tech_object, _CheckErr )
             EXPECT_EQ( 0, cip1._CheckErr( ));
             }
         }
+    temp_sensor_supply.set_state( 0 );
+    temp_sensor_return.set_state( 0 );
+    conductivity_sensor.set_state( 0 );
+    cip1.curstep = 0;
+    temp_sensor_supply.set_value( -1 );
+    EXPECT_EQ( ERR_SUPPLY_TEMP_SENSOR, cip1._CheckErr( ));
+    temp_sensor_supply.set_value( 0 );
+    temp_sensor_return.set_value( -1 );
+    EXPECT_EQ( ERR_RETURN_TEMP_SENSOR, cip1._CheckErr( ));
+
+    temp_sensor_supply.set_value( 0 );
+    temp_sensor_return.set_value( 0 );
     temp_sensor_return.set_state( -1 );
     temp_sensor_supply.set_state( -1 );
+    conductivity_sensor.set_state( -1 );
     cip1.curstep = *(cipline_tech_object::steps_caustic.begin( ));
     cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_SUPPLY_TEMP_SENSOR | 1 << BE_ERR_RETURN_TEMP_SENSOR;
     EXPECT_EQ( ERR_CONCENTRATION_SENSOR, cip1._CheckErr( ));

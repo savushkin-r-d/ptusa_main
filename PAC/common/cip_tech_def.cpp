@@ -3375,7 +3375,7 @@ int cipline_tech_object::_CheckErr( void )
         }
 
     //проверка датчика температуры на подаче
-    if ( TP->get_state( ) <= -1 )
+    if ( TP->get_state( ) <= -1 || TP->get_value() <= -1.0f )
         {
         if ( !(block_flags & (1 << BE_ERR_SUPPLY_TEMP_SENSOR)))
             {
@@ -3384,7 +3384,7 @@ int cipline_tech_object::_CheckErr( void )
         }
 
     //проверка датчика температуры на возврате
-    if ( TR->get_state( ) <= -1 )
+    if ( TR->get_state( ) <= -1 || TR->get_value() <= -1.0f )
         {
         if ( !(block_flags & (1 << BE_ERR_RETURN_TEMP_SENSOR)))
             {
