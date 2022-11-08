@@ -643,8 +643,8 @@ class cipline_tech_object: public tech_object
         static std::unordered_set<int> steps_v2_supply;
         static std::unordered_set<int> steps_additional_rinse;
         static std::unordered_set<int> steps_circulation;
-        static std::unordered_set<int> cipline_tech_object::steps_caustic;
-        static std::unordered_set<int> cipline_tech_object::steps_acid;
+        static std::unordered_set<int> steps_caustic;
+        static std::unordered_set<int> steps_acid;
 
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
