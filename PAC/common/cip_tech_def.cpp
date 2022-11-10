@@ -3328,12 +3328,9 @@ int cipline_tech_object::_CheckErr( void )
     //проверка уровней в бачке
     if ((!LL->is_active() && (LM->is_active() || LH->is_active())) || (!LM->is_active() && LH->is_active()))
         {
-        if (get_delta_millisec(bachok_lvl_err_delay) > 5000L) //если ошибка уровня больше 5 секунд
+        if ( get_delta_millisec( bachok_lvl_err_delay ) > 5000L && !(block_flags & (1 << BE_ERR_LEVEL_BACHOK))) //если ошибка уровня больше 5 секунд
             {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_BACHOK)))
-                {
-                return ERR_LEVEL_BACHOK;
-                }
+            return ERR_LEVEL_BACHOK;
             }
         }
     else
@@ -3344,64 +3341,44 @@ int cipline_tech_object::_CheckErr( void )
     //проверка уровней в танке щелочи
     if (((curstep >= 22) && (curstep <=40)) || ((curstep >= 105) && (curstep <= 111)))
         {
-        if (!LSL->is_active() && LSH->is_active())
+        if ( !LSL->is_active( ) && LSH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_S)))
             {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_S)))
-                {
-                return ERR_LEVEL_TANK_S;
-                }
+            return ERR_LEVEL_TANK_S;
             }
         }
 
     //проверка уровней в танке кислоты
     if (((curstep >= 42) && (curstep <=60)) || ((curstep >= 115) && (curstep <= 121)))
         {
-        if (!LKL->is_active() && LKH->is_active())
+        if ( !LKL->is_active( ) && LKH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_K)))
             {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_K)))
-                {
-                return ERR_LEVEL_TANK_K;
-                }
+            return ERR_LEVEL_TANK_K;
             }
         }
 
     //проверка уровней в танке вторичной воды
-    if (!LWL->is_active() && LWH->is_active())
+    if ( !LWL->is_active( ) && LWH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
         {
-        if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
-            {
-            return ERR_LEVEL_TANK_W;
-            }
+        return ERR_LEVEL_TANK_W;
         }
 
     //проверка датчика температуры на подаче
-    if ( TP->get_state( ) <= -1 || TP->get_value() <= -1.0f )
+    if ((TP->get_state( ) <= -1 || TP->get_value( ) <= -1.0f) && !(block_flags & (1 << BE_ERR_SUPPLY_TEMP_SENSOR)))
         {
-        if ( !(block_flags & (1 << BE_ERR_SUPPLY_TEMP_SENSOR)))
-            {
-            return ERR_SUPPLY_TEMP_SENSOR;
-            }
+        return ERR_SUPPLY_TEMP_SENSOR;
         }
 
     //проверка датчика температуры на возврате
-    if ( TR->get_state( ) <= -1 || TR->get_value() <= -1.0f )
+    if ((TR->get_state( ) <= -1 || TR->get_value( ) <= -1.0f) && !(block_flags & (1 << BE_ERR_RETURN_TEMP_SENSOR)))
         {
-        if ( !(block_flags & (1 << BE_ERR_RETURN_TEMP_SENSOR)))
-            {
-            return ERR_RETURN_TEMP_SENSOR;
-            }
+        return ERR_RETURN_TEMP_SENSOR;
         }
 
     //проверка датчика концентрации
-    if (steps_caustic.count(curstep) || steps_acid.count(curstep))
+    if ((steps_caustic.count( curstep ) || steps_acid.count( curstep )) && Q->get_state( ) <= -1 &&
+        !(block_flags & (1 << BE_ERR_CONCENTRATION_SENSOR)))
         {
-        if (Q->get_state() <= -1)
-            {
-            if ( !(block_flags & (1 << BE_ERR_CONCENTRATION_SENSOR)))
-                {
-                return ERR_CONCENTRATION_SENSOR;
-                }
-            }
+        return ERR_CONCENTRATION_SENSOR;
         }
 
     // Нет расхода на подаче

@@ -203,31 +203,35 @@ enum MODULE_CONSTANTS
     };
 
 
-//errors
-#define SERR_UNKNOWN_STEP  -2
-#define ERR_POSSIBLE_NO_MEDIUM -9
-#define NO_ACID            -10
-#define NO_ALKALINE        -11
-#define NO_RETURN          -12
-#define ERR_NO_CONC        -13
-#define ERR_IS_CONC        -14
-#define ERR_WRONG_RET      -15
-#define ERR_PUMP           -16
-#define ERR_NO_FLOW        -17
-#define ERR_AIR            -18
-#define ERR_OS             -19
-#define ERR_CIP_OBJECT	   -20
-#define ERR_WRONG_OS_OR_RECIPE_ERROR	-30
-#define ERR_VALVES_ARE_IN_CONFLICT	-31
-#define ERR_ACID_WASH_REQUIRED	-32
-#define ERR_LEVEL_BACHOK -35
-#define ERR_LEVEL_TANK_S -36
-#define ERR_LEVEL_TANK_K -37
-#define ERR_LEVEL_TANK_W -38
-#define ERR_SUPPLY_TEMP_SENSOR -39
-#define ERR_RETURN_TEMP_SENSOR -40
-#define ERR_CONCENTRATION_SENSOR -41
-#define ERR_RET            -100
+enum CIP_ERRORS
+    {
+        SERR_UNKNOWN_STEP = -2,
+        ERR_POSSIBLE_NO_MEDIUM = -9,
+        NO_ACID = -10,
+        NO_ALKALINE = -11,
+        NO_RETURN = -12,
+        ERR_NO_CONC = -13,
+        ERR_IS_CONC = -14,
+        ERR_WRONG_RET = -15,
+        ERR_PUMP = -16,
+        ERR_NO_FLOW = -17,
+        ERR_AIR = -18,
+        ERR_OS = -19,
+        ERR_CIP_OBJECT = -20,
+        ERR_WRONG_OS_OR_RECIPE_ERROR = -30,
+        ERR_VALVES_ARE_IN_CONFLICT = -31,
+        ERR_ACID_WASH_REQUIRED = -32,
+        ERR_LEVEL_BACHOK = -35,
+        ERR_LEVEL_TANK_S = -36,
+        ERR_LEVEL_TANK_K = -37,
+        ERR_LEVEL_TANK_W = -38,
+        ERR_SUPPLY_TEMP_SENSOR = -39,
+        ERR_RETURN_TEMP_SENSOR = -40,
+        ERR_CONCENTRATION_SENSOR = -41,
+        ERR_RET = -100,
+    };
+
+
 
 
 //блокирование ошибок
