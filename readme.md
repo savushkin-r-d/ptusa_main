@@ -1,4 +1,4 @@
-# ptusa #
+# ptusa_main #
 
 [![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/)
 [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
@@ -8,6 +8,12 @@
 [![Downloads](https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](https://github.com/savushkin-r-d/ptusa_main/releases/)
 
 Russian readme is [here](russian_readme/readme.md).
+
+## System architecture ##
+
+General system architecture is shown below:
+
+![System architecture ](readme_images/system_architecture_en.png)
 
 ## Common description ##
 
