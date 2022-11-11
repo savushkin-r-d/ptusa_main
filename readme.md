@@ -9,7 +9,7 @@
 
 Russian readme is [here](russian_readme/readme.md).
 
-## System architecture ##
+## General system architecture ##
 
 General system architecture is shown below:
 
