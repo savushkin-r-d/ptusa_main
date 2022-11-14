@@ -314,6 +314,18 @@ class TRecipeManager : public ParentRecipeManager
             MT_CAUSTIC = 0,
             MT_ACID,
         };
+        ///@brief Начальный блок для всех экземляров рецептов
+        static int startRecipeBlock;
+        ///@brief Количество рецептов на линию
+        static int recipePerLine;
+        ///@brief Длина рецепта в блоках
+        static int blocksPerRecipe;
+        ///@brief Длина имени рецепта
+        static int recipeNameLength;
+        ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
+        static int startRecipeParamsOffset;
+        ///@brief Буфер для копирования рецептов
+        static unsigned char* recipeCopyBuffer;
         ///@brief Список рецептов для сервера
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры

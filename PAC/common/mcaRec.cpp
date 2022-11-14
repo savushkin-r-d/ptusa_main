@@ -633,6 +633,16 @@ int TRecipeManager::LoadFromFile( const char* filename )
     return 0;
     }
 
+int TMediumRecipeManager::startRecipeBlock = 0;
+
+int TMediumRecipeManager::recipePerLine = 10;
+
+int TMediumRecipeManager::blocksPerRecipe = 1;
+
+int TMediumRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 2;
+
+int TMediumRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+
 TMediumRecipeManager::TMediumRecipeManager(MediumTypes mType) : ParentRecipeManager( 0 ),
 mediumType(mType)
 {
