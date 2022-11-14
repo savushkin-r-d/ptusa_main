@@ -793,12 +793,14 @@ void cipline_tech_object::initline()
     is_old_definition = 1;
     char devname[20] = {0};
     char devname2[20] = {0};
+    G_DEVICE_MANAGER()->disable_error_logging = true;
     sprintf(devname, "LINE%dV%d", number, number * 100);
     sprintf(devname2, "LINE%dV%d", number, number * 100 + 11);
     if (((device*)V(devname))->get_type() == device::DT_NONE || ((device*)V(devname2))->get_type() == device::DT_NONE)
         {
         is_old_definition = 0;
         }
+        G_DEVICE_MANAGER()->disable_error_logging = false;
     if (is_old_definition)
         {
         sprintf(devname, "LINE%dV%d", number, number * 100);
@@ -901,6 +903,7 @@ void cipline_tech_object::initline()
 
         sprintf(devname, "LINE%dM%d", number, 1);
         NP = M(devname);
+        G_DEVICE_MANAGER()->disable_error_logging = true;
         if (((device*)M("M1"))->get_type() == device::DT_NONE)
             {
             NS = (i_DO_AO_device*)V(101);
@@ -908,6 +911,10 @@ void cipline_tech_object::initline()
         else
             {
             NS = M("M1");
+            if (dynamic_cast<device*>(NS)->get_type() == device::DT_NONE)
+                {
+                G_LOG->error("NS not found");
+                }
             }
         if (((device*)M("M2"))->get_type() == device::DT_NONE)
             {
@@ -916,7 +923,12 @@ void cipline_tech_object::initline()
         else
             {
             NK = M("M2");
+            if (dynamic_cast<device*>(NK)->get_type() == device::DT_NONE)
+                {
+                G_LOG->error("NK not found");
+                }
             }
+        G_DEVICE_MANAGER()->disable_error_logging = false;
         sprintf(devname, "LINE%dLS%d", number, 3);
         LL = LS(devname);
         sprintf(devname, "LINE%dLS%d", number, 2);
@@ -950,17 +962,23 @@ void cipline_tech_object::initline()
         ao = VC(devname);
 
         sprintf(devname, "LINE%dPT%d", number, 1);
+        G_DEVICE_MANAGER()->disable_error_logging = true;
         PRESSURE = PT(devname);
         if (((device*)PRESSURE)->get_type() == device::DT_NONE)
             {
             PRESSURE = 0;
+            if (dynamic_cast<device*>(PRESSURE)->get_type() == device::DT_NONE)
+                {
+                G_LOG->info("PRESSURE not used");
+                }
             }
+        G_DEVICE_MANAGER()->disable_error_logging = false;
         }
 
     PIDF = new MSAPID(&rt_par_float, PIDF_Z, P_ZAD_FLOW, PUMPFREQ, nullptr, cnt, P_PIDF_MAX_OUT);
     PIDP = new MSAPID(&rt_par_float, PIDP_Z, P_ZAD_PODOGR, ao, TP, nullptr, P_PIDP_MAX_OUT);
 
-    if ( G_DEBUG )
+    if ( G_PAC_INFO()->is_emulator() )
         {
         LSL->set_cmd("ST", 0, 1);
         LSH->set_cmd("ST", 0, 1);
@@ -971,7 +989,7 @@ void cipline_tech_object::initline()
         LL->set_cmd("ST", 0, 1);
         LM->set_cmd("ST", 0, 1);
         LH->set_cmd("ST", 0, 1);
-        printf("Init Line %d\n\r", number);
+        G_LOG->info("Init Line %d", number);
         }
 
     Mdls[nmr - 1] = this;
@@ -1078,7 +1096,6 @@ void cipline_tech_object::initline()
             acidLoadedRecipe = -1;
             }
         }
-
     }
 
 void cipline_tech_object::resetProgramName()
@@ -1365,19 +1382,14 @@ void cipline_tech_object::closeLineValves()
     unsigned int vstart = 1001;
     unsigned int vend = 1099;
     char devname[25];
-    if ( G_DEBUG )
-        {
-        printf("\n\rClosing line valves from %d to %d...", vstart, vend);
-        }
+    G_LOG->debug("Closing line valves from %d to %d...", vstart, vend);
+    G_DEVICE_MANAGER()->disable_error_logging = true;
     for (i = vstart; i <= vend; i++)
         {
         sprintf(devname, "LINE%dV%d", nmr, i);
         V(devname)->off();
         }
-    if ( G_DEBUG )
-        {
-        printf("\n\rDone closing valves\n\r");
-        }
+    G_DEVICE_MANAGER()->disable_error_logging = false;
     }
 
 int cipline_tech_object::isTank()
@@ -3341,7 +3353,7 @@ int cipline_tech_object::_CheckErr( void )
     if (((curstep >= 22) && (curstep <=40)) || ((curstep >= 105) && (curstep <= 111)))
         {
         if (!LSL->is_active() && LSH->is_active())
-            {
+        {
             if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_S)))
                 {
                 return ERR_LEVEL_TANK_S;
@@ -3353,10 +3365,10 @@ int cipline_tech_object::_CheckErr( void )
     if (((curstep >= 42) && (curstep <=60)) || ((curstep >= 115) && (curstep <= 121)))
         {
         if (!LKL->is_active() && LKH->is_active())
-            {
+        {
             if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_K)))
                 {
-                return ERR_LEVEL_TANK_K;
+        return ERR_LEVEL_TANK_K;
                 }
             }
         }
