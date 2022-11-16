@@ -968,13 +968,10 @@ void cipline_tech_object::initline()
         sprintf(devname, "LINE%dPT%d", number, 1);
         G_DEVICE_MANAGER()->disable_error_logging = true;
         PRESSURE = PT(devname);
-        if (((device*)PRESSURE)->get_type() == device::DT_NONE)
+        if (dynamic_cast<device*>(PRESSURE)->get_type() == device::DT_NONE)
             {
-            PRESSURE = 0;
-            if (dynamic_cast<device*>(PRESSURE)->get_type() == device::DT_NONE)
-                {
-                G_LOG->info("PRESSURE not used");
-                }
+            PRESSURE = nullptr;
+            G_LOG->info("PRESSURE not used");
             }
         G_DEVICE_MANAGER()->disable_error_logging = false;
         }
