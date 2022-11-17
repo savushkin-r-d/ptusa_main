@@ -10,13 +10,23 @@
 
 Управляющая логика реализуется в виде скрипта Lua. В ходе выполнения программы управление передается в отдельные специальные функции Lua, которые отвечают за отдельные этапы.
 
-1. Общая схема работы управляющей программы:
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
 
-![Clone repository](../readme_images/main.png)
+<p align="center"><img src="../docs/drakon_diagram/images/control_program.svg"></p>
 
-2. Управляющий цикл выглядит так:
+2.  Execution of the technological process:
 
-![Clone repository](../readme_images/control_cycle.png)
+<p align="center"><img src="../docs/drakon_diagram/images/execution_technological_process.svg" width="400"></p>
+
+<p align="center"><img src="../docs/drakon_diagram/images/unit_procedure.svg" width="400"></p>
+
+<p align="center"><img src="../docs/drakon_diagram/images/operation.svg"></p>
+
+<p align="center"><img src="../docs/drakon_diagram/images/steps.svg" width="500"></p>
+
+<p align="center"><img src="../docs/drakon_diagram/images/step.svg" width="300"></p>
+
+<p align="center"><img src="../docs/drakon_diagram/images/action.svg" width="500"></p>
 
 3. При включении/выключении операции происходит следующее:
 
@@ -46,7 +56,7 @@
 Или клонировать репозиторий используя Qt:
     Добавить -> Импортировать проект -> Клонирование Git
     указать ссылку на репозиторий и поставить галочку для рекурсивного клонирования.
-	
+
 2. Microsoft Visual Studio Community 2022
 
 Перед запуском проекта необходимо убедиться в том, что у вас установлен C++ CMake tools for Windows.
@@ -56,12 +66,11 @@
 
 Подробную информацию по установке можно получить [здесь](https://docs.microsoft.com/ru-ru/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). Версия CMake, необходимая для сборки: 3.13 и выше.
 
-После этого вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake. 	
-Если после запуска возникла ошибка, то следует очистить кэш CMake: `Проект -> Удалить кэш и выполнить перенастройку`.
-	
+После этого вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake.Если после запуска возникла ошибка, то следует очистить кэш CMake: `Проект -> Удалить кэш и выполнить перенастройку`.
+
 3. Microsoft Visual Studio Community 2019
 
-Вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake. 	
+Вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake.
 
 ## Как запустить проект ##
 
