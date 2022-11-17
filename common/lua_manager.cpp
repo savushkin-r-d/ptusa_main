@@ -469,7 +469,9 @@ int lua_manager::exec_lua_method_var( const char* object_name,
     if ( object_name && strcmp( object_name, "" ) != 0 )
         {
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
         lua_getfield( L, -1, function_name );
+        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
         lua_remove( L, -2 );
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
 

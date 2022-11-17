@@ -1034,7 +1034,7 @@ class step
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
             A_DELAY_OFF,
-            A_TO_STEP_IF,
+            A_JUMP_IF,
             };
 
         bool is_active() const;
