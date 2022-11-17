@@ -1,4 +1,4 @@
-# ptusa #
+# ptusa_main #
 
 [![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/) [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml) [![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
 
@@ -10,21 +10,21 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
 
-<p align="center"><img src="docs/drakon_diagram/images/control_program.svg"></p>
+<p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
 2.  Execution of the technological process:
 
-<p align="center"><img src="docs/drakon_diagram/images/execution_technological_process.svg" width="400"></p>
+<p align="center"><img src="docs/drakon_diagram/images/execution_technological_process_en.svg" width="400"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/unit_procedure.svg" width="400"></p>
+<p align="center"><img src="docs/drakon_diagram/images/unit_procedure_en.svg" width="400"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/operation.svg"></p>
+<p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/steps.svg" width="500"></p>
+<p align="center"><img src="docs/drakon_diagram/images/steps_en.svg" width="500"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/step.svg" width="300"></p>
+<p align="center"><img src="docs/drakon_diagram/images/step_en.svg" width="300"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/action.svg" width="500"></p>
+<p align="center"><img src="docs/drakon_diagram/images/action_en.svg" width="500"></p>
 
 3.  When operation is turned on (off) happens next:
 
