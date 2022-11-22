@@ -41,7 +41,6 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 <p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
 
-
 1.  During the execution of command happens next:
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
