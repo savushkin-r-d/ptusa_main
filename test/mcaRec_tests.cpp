@@ -33,22 +33,22 @@ TEST(TMediumRecipeManager, NullifyRecipe)
 
 TEST(ParentRecipeManager, CopyRecipe) 
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    ParentRecipeManager mngr(lineNo);
     mngr.CopyRecipe();
 }
 
 TEST(ParentRecipeManager, PasteRecipe)
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    ParentRecipeManager mngr(lineNo);
     mngr.PasteRecipe();
 }
 
 TEST(ParentRecipeManager, NullifyRecipe)
 {
-    auto fortesting = 1;
-    ParentRecipeManager mngr(fortesting);
+    auto lineNo = 1;
+    ParentRecipeManager mngr(lineNo);
     mngr.NullifyRecipe();
 }
 
