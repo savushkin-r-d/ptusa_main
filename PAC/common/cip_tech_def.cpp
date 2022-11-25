@@ -4010,31 +4010,10 @@ int cipline_tech_object::CheckConc( int where )
                 break;
             }
 
-        if (c>= z * (1 - parpar[0][P_NAV_TOLERANCE] / 100))
-            {
-            float divider;
-            switch (where)
-                {
-                case TANK_K:
-                    divider = ( 100 - c ) * parpar[0][P_RO_K] * parpar[0][P_K_K] / 100;
-                    if (0 == divider)
-                        {
-                        divider = 1;
-                        }
-                    rt_par_float[STP_QAVK] = (c - rt_par_float[STP_QAVK]) * parpar[0][P_VTANKK] / divider;
-                    break;
-                case TANK_S:
-                    divider =  ( 100 - c ) * parpar[0][P_RO_S] * parpar[0][P_K_S ] / 100;
-                    if (0 == divider)
-                        {
-                        divider = 1;
-                        }
-                    rt_par_float[STP_QAVS] = (c - rt_par_float[STP_QAVS]) * parpar[0][P_VTANKS] / divider ;
-                    break;
-                }
+        if ( c >= z * (1 - parpar[ 0 ][ P_NAV_TOLERANCE ] / 100))
             return 1;
-            }
-        else return 2;
+        else
+            return 2;
         }
     return 0;
     }
