@@ -10,11 +10,11 @@
 
 Управляющая логика реализуется в виде скрипта Lua. В ходе выполнения программы управление передается в отдельные специальные функции Lua, которые отвечают за отдельные этапы.
 
-1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
+1.  Общая схема работы программы контроллера (в [Drakon](https://drakonhub.com) diagram language):
 
 <p align="center"><img src="../docs/drakon_diagram/images/control_program.svg"></p>
 
-2.  Execution of the technological process:
+2.  Выполнение технологического процесса:
 
 <p align="center"><img src="../docs/drakon_diagram/images/execution_technological_process.svg" width="400"></p>
 

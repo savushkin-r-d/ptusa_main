@@ -13,7 +13,7 @@ Russian readme is [here](russian_readme/readme.md).
 
 General system architecture is shown below:
 
-![System architecture ](readme_images/system_architecture_en.png)
+<p align="center"><img src="readme_images/system_architecture_en.png"></p>
 
 ## Common description ##
 
@@ -39,10 +39,10 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 3.  When operation is turned on (off) happens next:
 
-![operation](readme_images/tech_object__set_mode_en.png)
+<p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
 
-4.  During the execution of command happens next:
-![command](readme_images/tech_object__exec_cmd_en.png)
+1.  During the execution of command happens next:
+<p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
 ## How to build the project ##
 
