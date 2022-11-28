@@ -48,14 +48,16 @@ TRecipeManager::~TRecipeManager()
     {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
-    if (recipeCopyBuffer != nullptr)
-        {
-        delete[] recipeCopyBuffer;
-        }
+    recipeMemory = nullptr;
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
+    defaultfilename = nullptr;
     }
 
 int TRecipeManager::NextRecipe()
@@ -668,14 +670,16 @@ TMediumRecipeManager::~TMediumRecipeManager()
 {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
-    if (recipeCopyBuffer != nullptr)
-    {
-        delete[] recipeCopyBuffer;
-    }
+    recipeMemory = nullptr;
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
+    defaultfilename = nullptr;
 }
 
 int TMediumRecipeManager::NextRecipe()

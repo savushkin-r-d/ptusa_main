@@ -1,27 +1,48 @@
-# ptusa #
+# ptusa_main #
 
-[![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/) [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml) [![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
+[![Open Hub Project Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/)
+[![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
+[![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
+
+[![Downloads](https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](https://github.com/savushkin-r-d/ptusa_main/releases/)
 
 Russian readme is [here](russian_readme/readme.md).
+
+## General system architecture ##
+
+General system architecture is shown below:
+
+<p align="center"><img src="readme_images/system_architecture_en.png"></p>
 
 ## Common description ##
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1. The general schema of controller program work:
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
 
-![Clone repository](readme_images/main_en.png)
+<p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
-2. Controller program loop looks like:
+2.  Execution of the technological process:
 
-![Clone repository](readme_images/control_cycle_en.png)
+<p align="center"><img src="docs/drakon_diagram/images/execution_technological_process_en.svg" width="400"></p>
 
-3. When operation turn on/off happens next:
+<p align="center"><img src="docs/drakon_diagram/images/unit_procedure_en.svg" width="400"></p>
 
-![Clone repository](readme_images/tech_object__set_mode_en.png)
+<p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
-4. During the execution of command happens next:
-![Clone repository](readme_images/tech_object__exec_cmd_en.png)
+<p align="center"><img src="docs/drakon_diagram/images/steps_en.svg" width="500"></p>
+
+<p align="center"><img src="docs/drakon_diagram/images/step_en.svg" width="300"></p>
+
+<p align="center"><img src="docs/drakon_diagram/images/action_en.svg" width="500"></p>
+
+3.  When operation is turned on (off) happens next:
+
+<p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
+
+1.  During the execution of command happens next:
+<p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
 ## How to build the project ##
 
@@ -34,7 +55,7 @@ or, if you are clonned without initializing and updating submodules, try next:
 ### win ###
 
 Requirements:
-1. Microsoft Visual Studio Community 2019
+1.  Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
@@ -46,7 +67,7 @@ Or clone reposytory in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
 	
-3. Microsoft Visual Studio Community 2022
+3.  Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
 C++ CMake tools for Windows are installed using:
@@ -68,9 +89,9 @@ To run demo project you should use this command line:
 
 ### win ###
 
-1. After building and deploying *`windows-default`* cmake-configuration:
+1.  After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
-2. Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
+2.  Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.

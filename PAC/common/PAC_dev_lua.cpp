@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Sep 14 10:18:36 2022.
+** Generated automatically by tolua++-1.0.92 on Wed Oct 26 17:03:44 2022.
 */
 
 #ifndef __cplusplus
@@ -3119,8 +3119,8 @@ static int tolua_PAC_dev_C00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   PID* tolua_ret = (PID*)  C(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"PID");
+   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  C(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_AO_device");
   }
  }
  return 1;
@@ -14826,7 +14826,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_ENABLE_STEP_BY_SIGNAL",step::A_ENABLE_STEP_BY_SIGNAL);
    tolua_constant(tolua_S,"A_DELAY_ON",step::A_DELAY_ON);
    tolua_constant(tolua_S,"A_DELAY_OFF",step::A_DELAY_OFF);
-   tolua_constant(tolua_S,"A_TO_STEP_IF",step::A_TO_STEP_IF);
+   tolua_constant(tolua_S,"A_JUMP_IF",step::A_JUMP_IF);
    tolua_function(tolua_S,"is_active",tolua_PAC_dev_step_is_active00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);

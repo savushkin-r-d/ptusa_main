@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -39,6 +40,7 @@
 #include "PAC_info.h"
 
 #include "iot_altivar.h"
+#include "iot_wages_eth.h"
 #include "log.h"
 
 #ifdef WIN_OS
@@ -576,6 +578,7 @@ class device : public i_DO_AO_device, public par_device
             DST_WT = 1,  ///< Весы.
             DST_WT_VIRT, ///< Виртуальные весы.
             DST_WT_RS232,///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -589,6 +592,10 @@ class device : public i_DO_AO_device, public par_device
             //TS
             DST_TS = 1,
             DST_TS_VIRT,
+
+            //DT_REGULATOR
+            DST_REGULATOR_PID = 1,
+            DST_REGULATOR_THLD,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -608,6 +615,11 @@ class device : public i_DO_AO_device, public par_device
         const char *get_description() const
             {
             return description;
+            }
+
+        virtual const char* get_error_description() const
+            {
+            return "обратная связь";
             }
 
         void set_descr( const char *new_description );
@@ -668,9 +680,7 @@ class device : public i_DO_AO_device, public par_device
         /// строки.
         ///
         /// Для использования в Lua.
-        virtual void set_string_property(const char* field, const char* value)
-            {
-            }
+        virtual void set_string_property( const char* field, const char* value );
 
     protected:
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
@@ -3206,6 +3216,44 @@ class wages_RS232 : public analog_io_device, public i_wages
         float value;
     };
 //-----------------------------------------------------------------------------
+class wages_eth : public device, public i_wages
+    {
+    public:
+        explicit wages_eth( const char* dev_name );
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+        void direct_set_value( float new_value ) override;
+        
+        void direct_set_state( int state ) override;
+
+        void direct_off() override;
+        
+        void direct_on() override;
+
+        void tare() override;
+
+        void set_string_property( const char* field, const char* value ) override;
+
+        void direct_set_tcp_buff( const char* new_value, size_t size,
+            int new_status );
+
+    private:
+        auto_smart_ptr < iot_wages_eth > weth;
+
+        enum class CONSTANTS
+        {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            P_CZ,           ///< Сдвиг нуля.
+            LAST_PARAM_IDX,
+        };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик веса
 class wages : public analog_io_device, public i_wages
     {
@@ -4025,6 +4073,8 @@ class base_counter: public i_counter, public device, public io_device
 
         int save_device_ex( char* buff );
 
+        const char* get_error_description() const override;
+
     protected:
         float get_abs_value() const
             {
@@ -4565,6 +4615,53 @@ class dev_stub : public i_counter, public valve, public i_wages,
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+class threshold_regulator :public device, public i_Lua_save_device
+    {
+    public:
+        enum class PARAM
+            {
+            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
+            P_DELTA,
+
+            PARAMS_COUNT
+            };
+
+        explicit threshold_regulator( const char* name );
+
+        int get_state() override;
+
+        void direct_off() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        const char* get_name_in_Lua() const override;
+
+        float get_value() override;
+
+        void direct_set_value( float val ) override;
+
+        int save_device( char* buff ) override;
+
+        void set_string_property( const char* field, const char* value ) override;
+
+    private:
+        enum class STATE
+            {
+            OFF,
+            ON,
+            };
+
+        STATE state = STATE::OFF;
+        int out_state = 0;
+        float set_value = 0;
+
+        device* sensor = nullptr;
+        device* actuator = nullptr;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.
@@ -4651,7 +4748,7 @@ class device_manager: public i_Lua_save_device
         wages* get_WT( const char *dev_name );
 
         /// @brief Получение регулятора по имени.
-        PID* get_C( const char* dev_name );
+        i_DO_AO_device* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
         signal_column* get_HLA( const char* dev_name );
@@ -4687,7 +4784,7 @@ class device_manager: public i_Lua_save_device
 
         device* get_stub_device()
             {
-            return static_cast<device*>( static_cast<valve*>( &stub ) );
+            return dynamic_cast<device*>( dynamic_cast<valve*>( &stub ) );
             }
 
         int init_params();
@@ -5026,7 +5123,7 @@ i_DO_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* C( const char* dev_name );
+i_DO_AO_device* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнальной колонны по имени.
 ///
