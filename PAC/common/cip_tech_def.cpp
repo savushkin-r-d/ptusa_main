@@ -298,25 +298,30 @@ cipline_tech_object::~cipline_tech_object()
     if (parpar != 0)
         {
         delete(parpar);
-        parpar = 0;
+        parpar = nullptr;
         }
     if (PIDF != 0)
         {
         delete(PIDF);
+        PIDF = nullptr;
         }
     if (PIDP != 0)
         {
         delete(PIDP);
+        PIDP = nullptr;
         }
     for (i = 0; i < SAV_CNT; i++) {
         delete SAV[i];
+        SAV[i] = nullptr;
         }
     for (i = 0; i < TMR_CNT; i++) {
         delete T[i];
+        T[i] = nullptr;
         }
     if (lineRecipes)
         {
         delete lineRecipes;
+        lineRecipes = nullptr;
         }
     if (causticRecipes)
         {
@@ -346,9 +351,13 @@ cipline_tech_object::~cipline_tech_object()
     }
     objectstats = nullptr;
     delete emptystats;
+    emptystats = nullptr;
     delete[] loadedRecName;
+    loadedRecName= nullptr;
     delete[] programList;
+    programList = nullptr;
     delete[] currentProgramName;
+    currentProgramName = nullptr;
     }
 
 int cipline_tech_object::save_device( char *buff )
