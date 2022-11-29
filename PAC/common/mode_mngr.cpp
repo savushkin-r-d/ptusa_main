@@ -125,6 +125,19 @@ int operation::stop()
     return 0;
     }
 //-----------------------------------------------------------------------------
+int operation::switch_off()
+    {
+    if ( current_state != IDLE )
+        {        
+        states[ current_state ]->final();
+        current_state = IDLE;
+        states[ IDLE ]->init();
+        states[ IDLE ]->evaluate();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int operation::start()
     {
     return start( run_step );   
@@ -207,7 +220,94 @@ void operation::evaluate()
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->evaluate();
+
+        int next_state = 0;
+        auto res = states[ current_state ]->is_goto_next_state( next_state );
+        if ( res )
+            {
+            auto unit = owner->owner;
+            switch ( current_state )
+                {
+                case state_idx::IDLE:
+                    //Из простоя по сигналам операция может быть включена 
+                    //(перейти в состояние выполнения).
+                    process_auto_switch_on();
+                    break;
+
+                case state_idx::RUN:
+                    //Из выполнения по сигналам операция может быть отключена
+                    //(перейти в состояние простоя).
+                    unit->set_mode( n, state_idx::IDLE );
+                    unit->set_err_msg( "автоотключение по запросу",
+                        n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                    break;
+
+                default:
+                    //Для всех остальных состояний ничего не делаем.
+                    break;
+                }
+            }
+        else
+            {
+            is_first_goto_next_state = true;
+            was_fail = false;
+            }
         }
+    }
+//-----------------------------------------------------------------------------
+int operation::process_auto_switch_on()
+    {
+    auto unit = owner->owner;
+    const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
+    const auto ERR = tech_object::ERR_MSG_TYPES::ERR_CANT_ON;
+
+    if ( was_fail ) return 1;
+
+    if ( is_first_goto_next_state )
+        {
+        auto result = unit->set_mode( n, operation::RUN );
+        if ( result == 0 )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            return 0;
+            }
+        else
+            {
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            start_wait = get_millisec();
+            is_first_goto_next_state = false;
+            }
+        }
+    else
+        {
+        auto dt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ];
+        auto wt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ];
+
+        if ( unit->check_operation_on( n, false ) == 0 )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            unit->set_mode( n, operation::RUN );
+            return 0;
+            }
+
+        // Прошел заданный интервал для уведомления.
+        if ( get_delta_millisec( start_warn ) > dt )
+            {
+            unit->check_operation_on( n );
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            }
+
+        // Прошел заданный интервал для ожидания возможности включения операции.
+        if ( get_delta_millisec( start_wait ) > wt )
+            {
+            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            was_fail = true;
+            }
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 void operation::final()
@@ -757,10 +857,14 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new enable_step_by_signal() );
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
-    
-    if ( !is_mode )
+          
+    if ( is_mode )
         {
-        actions.push_back( new to_step_if_devices_in_specific_state_action() );
+        actions.push_back( new jump_if_action( "Переход в состояние по условию" ) );
+        }
+    else
+        {
+        actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1561,79 +1665,66 @@ void wash_action::finalize()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-to_step_if_devices_in_specific_state_action::to_step_if_devices_in_specific_state_action() :
-    action( "Перейти в шаг по условию", G_GROUPS_CNT )
+jump_if_action::jump_if_action( const char* name ) :
+    action( name, G_GROUPS_CNT)
     {
     }
 //-----------------------------------------------------------------------------
-bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_step )
+bool jump_if_action::is_jump( int& next )
     {
-    next_step = -1;
+    next = -1;
     if ( is_empty() )
         {
         return false;
         }
 
-    bool res = false;
     for ( size_t idx = 0; idx < devices.size(); idx++ )
         {
-        if ( idx < next_steps.size() ) next_step = next_steps[ idx ];
-        res = true;
-        auto& devs = devices[ idx ];
-        auto& on_devices = devs[ G_ON_DEVICES ];
-        for ( u_int i = 0; i < on_devices.size(); i++ )
-            {
-            auto dev = on_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
-                {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_opened() ) res = false;
-                }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( !d->is_active() ) res = false;
-                }
-            }
-
-        auto& off_devices = devs[ G_OFF_DEVICES ];
-        for ( u_int i = 0; i < off_devices.size(); i++ )
-            {
-            auto dev = off_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
-                {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_closed() ) res = false;
-                }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( d->is_active() ) res = false;
-                }
-            }
+        if ( idx < next_n.size() ) next = next_n[ idx ];
+   
+        auto res = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
+            check( devices[ idx ][ G_OFF_DEVICES ], false );
 
         if ( res ) return true;
         }
 
-    return res;
+    return false;
     }
 //-----------------------------------------------------------------------------
-int to_step_if_devices_in_specific_state_action::set_int_property(
-    const char* name, size_t idx, int value )
+bool jump_if_action::check(
+    const std::vector< device* > &checked_devices, bool check_is_opened ) const
+    {
+    for ( auto dev : checked_devices )
+        {
+        auto type = dev->get_type();
+        if ( type == device::DT_V )
+            {
+            auto v = dynamic_cast<valve*>( dev );
+            if ( check_is_opened && !v->is_opened() ||
+                !check_is_opened && !v->is_closed() ) return false;
+            }
+        else if ( type == device::DT_DI || type == device::DT_GS ||
+            type == device::DT_DO )
+            {
+            auto d = dynamic_cast<i_DI_device*>( dev );
+            if ( check_is_opened && !d->is_active() ||
+                !check_is_opened && d->is_active() ) return false;
+            }
+        }
+    return true;
+    };
+//-----------------------------------------------------------------------------
+int jump_if_action::set_int_property( const char* name, size_t idx, int value )
     {
     action::set_int_property( name, idx, value );
     if ( strcmp( name, "next_step_n" ) == 0 )
         {
-        while ( idx >= next_steps.size() )
+        while ( idx >= next_n.size() )
             {
-            next_steps.push_back( -1 );
+            next_n.push_back( -1 );
             }
 
-        next_steps[ idx ] = value;
+        next_n[ idx ] = value;
         return 0;
         }
     else
@@ -1648,34 +1739,29 @@ int to_step_if_devices_in_specific_state_action::set_int_property(
     return 1;
     };
 //-----------------------------------------------------------------------------
-int to_step_if_devices_in_specific_state_action::get_int_property(
-    const char* name, size_t idx )
+int jump_if_action::get_int_property( const char* name, size_t idx )
     {
-    if ( strcmp( name, "next_step_n" ) == 0 )
+    if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
         {
-        if ( idx < next_steps.size() )
-            {
-            return next_steps[ idx ];
-            }
+        return next_n[ idx ];
         }
 
     return -1;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::finalize()
+void jump_if_action::finalize()
     {
     return;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::print(
-    const char* prefix, bool new_line ) const
+void jump_if_action::print( const char* prefix, bool new_line ) const
     {
     action::print( prefix, false );
     printf( " { " );
-    for ( u_int i = 0; i < next_steps.size(); i++ )
+    std::for_each( next_n.begin(), next_n.end(), [&]( int const& n )
         {
-        printf( "%d ", next_steps[ i ] );
-        }
+        printf( "%d ", n );
+        } );
     printf( "}" );
     if ( new_line )
         {
@@ -1914,10 +2000,10 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
-        ( *active_step )[ step::A_TO_STEP_IF ] );
+    auto action = ( *active_step )[ step::A_JUMP_IF ];
+    auto if_action = static_cast<jump_if_action*>( action );
     int next_step = -1;
-    if ( if_action && if_action->is_goto_next_step( next_step ) )
+    if ( if_action->is_jump( next_step ) )
         {
         if ( next_step >= 0 )
             {
@@ -2142,6 +2228,13 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation_state::is_goto_next_state( int& next_state ) const
+    {
+    auto action = ( *mode_step )[ step::A_JUMP_IF ];
+    auto to_new_state = static_cast<jump_if_action*>( action );
+    return to_new_state->is_jump( next_state );
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()

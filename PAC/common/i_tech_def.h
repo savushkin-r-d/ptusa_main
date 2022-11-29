@@ -74,6 +74,9 @@ class i_tech_object
 
     virtual int set_err_msg( const char* err_msg, int mode, int new_mode = 0,
         ERR_MSG_TYPES type = ERR_CANT_ON ) = 0;
+
+    virtual int check_operation_on( u_int operation_n,
+        bool show_error = true ) = 0;
     };
 
 #endif // I_TECH_H

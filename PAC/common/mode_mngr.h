@@ -387,12 +387,12 @@ class wash_action: public action
 /// Проверка устройств на нахождение в активном (включены) и в пассивном
 /// (отключены) состоянии.
 /// </summary>
-class to_step_if_devices_in_specific_state_action : public action
+class jump_if_action : public action
     {
     public:
-        to_step_if_devices_in_specific_state_action();
+        explicit jump_if_action( const char* name );
 
-        bool is_goto_next_step( int &next_step );
+        bool is_jump( int &next );
 
         int set_int_property( const char* name, size_t idx, int value ) override;
 
@@ -404,6 +404,9 @@ class to_step_if_devices_in_specific_state_action : public action
         void print( const char* prefix = "", bool new_line = true ) const override;
 
     private:
+        bool check( const std::vector< device* > &checked_devices,
+            bool check_is_opened ) const;
+
         enum GROUPS
             {
             G_ON_DEVICES = 0,   //Устройства, которые должны быть включены.
@@ -413,7 +416,7 @@ class to_step_if_devices_in_specific_state_action : public action
             };
 
         // Устройства.
-        std::vector < int > next_steps;
+        std::vector < int > next_n;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -461,7 +464,7 @@ class step
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
             A_DELAY_OFF,
-            A_TO_STEP_IF,
+            A_JUMP_IF,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
@@ -594,6 +597,8 @@ class operation_state
         int check_devices( char* err_dev_name, int str_len );
 
         int check_steps_params( char* err_dev_name, int str_len );
+
+        bool is_goto_next_state( int& next_state ) const;
 
     private:
         std::string name;
@@ -741,6 +746,8 @@ class operation
 
         int start();
 
+        int switch_off();
+
         int start( int new_run_step );
 #ifndef __GNUC__
 #pragma endregion
@@ -809,6 +816,8 @@ class operation
 #endif
 
     private:
+        int process_auto_switch_on();
+
         state_idx current_state;
 
         std::vector< operation_state* > states;
@@ -824,6 +833,11 @@ class operation
         u_int run_step;
 
         u_int run_time;  /// Время выполнения операции (состояние run).
+
+        u_long start_warn = 0;
+        u_long start_wait = 0;
+        bool is_first_goto_next_state = true;
+        bool was_fail = false;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операциях какого-либо объекта (танк,

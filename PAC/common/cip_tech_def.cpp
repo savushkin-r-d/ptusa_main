@@ -27,6 +27,10 @@ std::unordered_set<int> cipline_tech_object::steps_additional_rinse = { 8, 37, 5
 
 std::unordered_set<int> cipline_tech_object::steps_circulation = { 28, 48, 66, 76, 77 };
 
+std::unordered_set<int> cipline_tech_object::steps_caustic = { 22, 23, 24, 26, 28, 29, 31, 33, 34, 35 };
+
+std::unordered_set<int> cipline_tech_object::steps_acid = { 42, 43, 44 , 46, 48, 49, 53, 54, 55 };
+
 int isMsa = 0;
 
 int getNexpPrg(int cur, unsigned long prg)
@@ -294,25 +298,30 @@ cipline_tech_object::~cipline_tech_object()
     if (parpar != 0)
         {
         delete(parpar);
-        parpar = 0;
+        parpar = nullptr;
         }
     if (PIDF != 0)
         {
         delete(PIDF);
+        PIDF = nullptr;
         }
     if (PIDP != 0)
         {
         delete(PIDP);
+        PIDP = nullptr;
         }
     for (i = 0; i < SAV_CNT; i++) {
         delete SAV[i];
+        SAV[i] = nullptr;
         }
     for (i = 0; i < TMR_CNT; i++) {
         delete T[i];
+        T[i] = nullptr;
         }
     if (lineRecipes)
         {
         delete lineRecipes;
+        lineRecipes = nullptr;
         }
     if (causticRecipes)
         {
@@ -342,9 +351,13 @@ cipline_tech_object::~cipline_tech_object()
     }
     objectstats = nullptr;
     delete emptystats;
+    emptystats = nullptr;
     delete[] loadedRecName;
+    loadedRecName= nullptr;
     delete[] programList;
+    programList = nullptr;
     delete[] currentProgramName;
+    currentProgramName = nullptr;
     }
 
 int cipline_tech_object::save_device( char *buff )
@@ -2218,7 +2231,7 @@ int cipline_tech_object::_GoToStep( int cur, int param )
             return LoadProgram();
 
         }
-    return SERR_UNKNOWN_STEP;
+    return ERR_UNKNOWN_STEP;
     }
 
 int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
@@ -2455,7 +2468,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             enddelayTimer = get_millisec();
             return 0;
         }
-    return SERR_UNKNOWN_STEP;
+    return ERR_UNKNOWN_STEP;
     }
 
 int cipline_tech_object::EvalPIDS()
@@ -2896,7 +2909,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                 return 0;
                 }
         }
-    return SERR_UNKNOWN_STEP;
+    return ERR_UNKNOWN_STEP;
     }
 
     int cipline_tech_object::EvalCipInError()
@@ -3324,12 +3337,9 @@ int cipline_tech_object::_CheckErr( void )
     //проверка уровней в бачке
     if ((!LL->is_active() && (LM->is_active() || LH->is_active())) || (!LM->is_active() && LH->is_active()))
         {
-        if (get_delta_millisec(bachok_lvl_err_delay) > 5000L) //если ошибка уровня больше 5 секунд
+        if ( get_delta_millisec( bachok_lvl_err_delay ) > 5000L && !(block_flags & (1 << BE_ERR_LEVEL_BACHOK))) //если ошибка уровня больше 5 секунд
             {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_BACHOK)))
-                {
-                return ERR_LEVEL_BACHOK;
-                }
+            return ERR_LEVEL_BACHOK;
             }
         }
     else
@@ -3338,36 +3348,42 @@ int cipline_tech_object::_CheckErr( void )
         }
 
     //проверка уровней в танке щелочи
-    if (((curstep >= 22) && (curstep <=40)) || ((curstep >= 105) && (curstep <= 111)))
+    if ((((curstep >= 22) && (curstep <= 40)) || ((curstep >= 105) && (curstep <= 111))) &&
+        !LSL->is_active( ) && LSH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_S)))
         {
-        if (!LSL->is_active() && LSH->is_active())
-            {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_S)))
-                {
-                return ERR_LEVEL_TANK_S;
-                }
-            }
+        return ERR_LEVEL_TANK_S;
         }
 
     //проверка уровней в танке кислоты
-    if (((curstep >= 42) && (curstep <=60)) || ((curstep >= 115) && (curstep <= 121)))
+    if ((((curstep >= 42) && (curstep <= 60)) || ((curstep >= 115) && (curstep <= 121))) &&
+        !LKL->is_active( ) && LKH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_K)))
         {
-        if (!LKL->is_active() && LKH->is_active())
-            {
-            if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_K)))
-                {
-                return ERR_LEVEL_TANK_K;
-                }
-            }
+        return ERR_LEVEL_TANK_K;
         }
 
     //проверка уровней в танке вторичной воды
-    if (!LWL->is_active() && LWH->is_active())
+    if ( !LWL->is_active( ) && LWH->is_active( ) && !(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
         {
-        if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
-            {
-            return ERR_LEVEL_TANK_W;
-            }
+        return ERR_LEVEL_TANK_W;
+        }
+
+    //проверка датчика температуры на подаче
+    if ((TP->get_state( ) <= -1 || TP->get_value( ) <= -1.0f) && !(block_flags & (1 << BE_ERR_SUPPLY_TEMP_SENSOR)))
+        {
+        return ERR_SUPPLY_TEMP_SENSOR;
+        }
+
+    //проверка датчика температуры на возврате
+    if ((TR->get_state( ) <= -1 || TR->get_value( ) <= -1.0f) && !(block_flags & (1 << BE_ERR_RETURN_TEMP_SENSOR)))
+        {
+        return ERR_RETURN_TEMP_SENSOR;
+        }
+
+    //проверка датчика концентрации
+    if ((steps_caustic.count( curstep ) || steps_acid.count( curstep )) && Q->get_state( ) <= -1 &&
+        !(block_flags & (1 << BE_ERR_CONCENTRATION_SENSOR)))
+        {
+        return ERR_CONCENTRATION_SENSOR;
         }
 
     // Нет расхода на подаче
@@ -4894,7 +4910,7 @@ int cipline_tech_object::_ToObject( int from, int where )
             rt_par_float[STP_LV] = tmp;
             if (!LKL->is_active())
                 {
-                return NO_ACID;
+                return ERR_NO_ACID;
                 }
             break;
         case TANK_S:
@@ -4904,7 +4920,7 @@ int cipline_tech_object::_ToObject( int from, int where )
             rt_par_float[STP_LV] = tmp;
             if (!LSL->is_active())
                 {
-                return NO_ALKALINE;
+                return ERR_NO_ALKALINE;
                 }
             break;
         }
@@ -5011,7 +5027,7 @@ int cipline_tech_object::_FromObject( int what, int where )
                 T[TMR_RETURN]->start();
                 if (T[TMR_RETURN]->is_time_up()==1)
                     {
-                    return NO_RETURN;
+                    return ERR_NO_RETURN;
                     }
                 }
             }
@@ -5140,7 +5156,7 @@ int cipline_tech_object::_FromObject( int what, int where )
             rt_par_float[STP_LV] = tmp;
             if (!LKL->is_active())
                 {
-                return NO_ACID;
+                return ERR_NO_ACID;
                 }
             SortRR(TANK_K);
             break;
@@ -5151,7 +5167,7 @@ int cipline_tech_object::_FromObject( int what, int where )
             rt_par_float[STP_LV] = tmp;
             if (!LSL->is_active())
                 {
-                return NO_ALKALINE;
+                return ERR_NO_ALKALINE;
                 }
             SortRR(TANK_S);
             break;

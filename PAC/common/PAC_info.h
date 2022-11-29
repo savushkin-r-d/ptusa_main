@@ -16,8 +16,6 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 10,   ///< Количество параметров.
-
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
 			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
@@ -44,6 +42,17 @@ class PAC_info: public i_Lua_save_device
             ///< Переход на паузу операции при ошибке устройств,
             /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
+
+            ///< Время для включения операции по сигналам, мсек.
+            P_AUTO_OPERATION_WAIT_TIME,
+
+            ///< Время ожидания для повторной попытки включения операции по
+            ///< сигналам, мсек.
+            P_AUTO_OPERATION_WARN_TIME,
+
+
+            ///< Количество параметров.
+            P_PARAMS_COUNT
             };
 
         saved_params_u_int_4 par;

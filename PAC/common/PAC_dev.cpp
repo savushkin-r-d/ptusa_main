@@ -2077,6 +2077,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (wages_RS232*)new_device;
                     break;
 
+                case device::DST_WT_ETH:
+                    new_device = new wages_eth( dev_name );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -5223,6 +5227,70 @@ void wages_RS232::tare()
     //в качестве нулевого).
     }
 //-----------------------------------------------------------------------------
+wages_eth::wages_eth( const char* dev_name ) :
+    device( dev_name, device::DT_WT, device::DST_WT_ETH,
+        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    }
+
+float wages_eth::get_value()
+    {
+    return weth->get_wages_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    }
+
+int wages_eth::get_state()
+    {
+    return weth->get_wages_state();
+    }
+
+void wages_eth::evaluate_io()
+    {
+    weth->evaluate();
+    }
+
+void wages_eth::tare()
+    {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
+    }
+
+void wages_eth::set_string_property( const char* field, const char* value )
+    {
+    if ( !weth && strcmp( field, "IP" ) == 0 )
+        {
+        int port = 1001;
+        int id = 0;
+        weth = new iot_wages_eth( id, value, port );
+        }
+    }
+
+void wages_eth::direct_set_value( float new_value )
+    {
+    weth->set_wages_value( new_value );
+    }
+
+void wages_eth::direct_set_state( int state )
+    {
+    weth->set_state( state );
+    }
+
+void wages_eth::direct_off()
+    {
+    weth->set_state( 0 );
+    }
+
+void wages_eth::direct_on()
+    {
+    weth->set_state( 1 );
+    }
+
+void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
+    int new_status )
+    {
+    weth->direct_set_tcp_buff( new_value, size, new_status );
+    }
+
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
