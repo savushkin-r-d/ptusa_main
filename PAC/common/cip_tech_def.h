@@ -123,6 +123,7 @@
 
 enum selectablePrograms
     {
+    SPROG_NO_PROGRAM = 0,
     SPROG_RINSING_CLEAN = 1,
     SPROG_SANITIZER = 3,
     SPROG_HOTWATER = 5,
@@ -143,6 +144,7 @@ enum selectablePrograms
     SPROG_SELF_CLEAN = 2048,
     SPROG_AP_RC_KANAL = 9000,
     SPROG_AP_RC_SW = 9001,
+    SPROG_OPTION_DISABLE_RINSE = 9010,
     };
 
 #define KS_MASK             56
@@ -736,6 +738,7 @@ class cipline_tech_object: public tech_object
         unsigned long default_programlist; //список доступных программ мойки по-умолчанию
         int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
         int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
+        bool disable_final_rinsing; //Не ополаскивать после дезинфекции
 
         unsigned long ret_pums_ls_timer;
 

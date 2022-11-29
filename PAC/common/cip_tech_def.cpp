@@ -269,6 +269,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     no_liquid_last_time = 0;
 
     clean_water_rinsing_return = TANK_W; //по-умолчанию возвращаем в танк со вторичной водой.
+    disable_final_rinsing = false;
 
     if (tech_type == TECH_TYPE_SELF_CLEAN || tech_type == TECH_TYPE_CAR_WASH_SELF_CLEAN)
         {
@@ -1101,7 +1102,7 @@ void cipline_tech_object::initline()
 
 void cipline_tech_object::resetProgramName()
     {
-    sprintf(currentProgramName, "Не выбран");
+    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Не выбран");
     }
 
 void cipline_tech_object::resetRecipeName()
@@ -1114,41 +1115,47 @@ void cipline_tech_object::resetRecipeName()
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
-    char tmp_str[ PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
+    int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
+    int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
+    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
+    char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     strcpy(programList,"");
     if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
         {
-        sprintf(tmp_str, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
-        sprintf(prgArray[prgListLen], "Наведение кислоты");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Наведение кислоты");
         prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
         prgListLen++;
-        strcat(programList,tmp_str);
+        strcat_s(programList, programList_size, tmp_str);
         }
     if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
         {
-        sprintf(tmp_str, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
-        sprintf(prgArray[prgListLen], "Наведение щелочи");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Наведение щелочи");
         prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
         prgListLen++;
-        strcat(programList,tmp_str);
+        strcat_s(programList, programList_size, tmp_str);
         }
     if (scenabled && scline == 0)
         {
         if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
             {
-            sprintf(tmp_str, "%d##Очистка танков||", SPROG_SELF_CLEAN);
-            sprintf(prgArray[prgListLen], "Очистка танков");
+            sprintf_s(tmp_str, tmp_str_size, "%d##Очистка танков||", SPROG_SELF_CLEAN);
+            sprintf_s(prgArray[prgListLen], panel_program_size, "Очистка танков");
             prgNumber[prgListLen] = SPROG_SELF_CLEAN;
             prgListLen++;
-            strcat(programList,tmp_str);
+            strcat_s(programList, programList_size, tmp_str);
             }
         }
     }
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
+    int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
+    int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
+    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
     char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
@@ -1159,131 +1166,142 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
     strcpy(programList,"");
     if ((programmask >> 0) & 1)
         {
-        sprintf(tmp_str, "%d##Дезинф||", SPROG_HOTWATER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Дезинфeкция");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Дезинфeкция");
         prgNumber[prgListLen] = SPROG_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 1) & 1)
         {
-        sprintf(tmp_str, "%d##Ополаск||", SPROG_RINSING);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Ополаскивание");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Ополаскивание");
         prgNumber[prgListLen] = SPROG_RINSING;
         prgListLen++;
         }
     if ((programmask >> 2) & 1)
         {
-        sprintf(tmp_str, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Опол+Дезинф");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол+Дезинф");
         prgNumber[prgListLen] = SPROG_RINSING_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 3) & 1)
         {
-        sprintf(tmp_str, "%d##Кислота||", SPROG_ACID);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Кислота");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Кислота");
         prgNumber[prgListLen] = SPROG_ACID;
         prgListLen++;
         }
     if ((programmask >> 4) & 1)
         {
-        sprintf(tmp_str, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Кисл+Дезинф");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Кисл+Дезинф");
         prgNumber[prgListLen] = SPROG_ACID_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 5) & 1)
         {
-        sprintf(tmp_str, "%d##Щелочь||", SPROG_CAUSTIC);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щелочь");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щелочь");
         prgNumber[prgListLen] = SPROG_CAUSTIC;
         prgListLen++;
         }
     if ((programmask >> 6) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щелочь+Дезинф");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щелочь+Дезинф");
         prgNumber[prgListLen] = SPROG_CAUSTIC_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 7) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кисл+Дезинф");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кисл+Дезинф");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 8) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кислота");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID);
+        strcat_s(programList, programList_size,tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кислота");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID;
         prgListLen++;
         }
     if ((programmask >> 9) & 1)
         {
-        sprintf(tmp_str, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
-        strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Опол.ч.водой в канал.");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол.ч.водой в канал.");
         prgNumber[prgListLen] = SPROG_AP_RC_KANAL;
         prgListLen++;
         }
     if ((programmask >> 12) & 1)
         {
-        sprintf(tmp_str, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW);
-        strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Опол.ч.водой в танк");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол.ч.водой в танк");
         prgNumber[prgListLen] = SPROG_AP_RC_SW;
         prgListLen++;
         }
     if ((programmask >> 13) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER);
-        strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+ДезСР");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+ДезСР");
         prgNumber[prgListLen] = SPROG_CAUSTIC_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 14) & 1)
         {
-        sprintf(tmp_str, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER);
-        strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Кисл+ДезСР");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Кисл+ДезСР");
         prgNumber[prgListLen] = SPROG_ACID_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 15) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER);
-        strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кисл+ДезСР");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кисл+ДезСР");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 10) & 1)
         {
-        sprintf(tmp_str, "%d##ДезСР||", SPROG_SANITIZER);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Дезраствор");
+        sprintf_s(tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Дезраствор");
         prgNumber[prgListLen] = SPROG_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 11) & 1)
         {
-        sprintf(tmp_str, "%d##Управляемая||", SPROG_REMOTE);
-        strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Управляемая");
+        sprintf_s(tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE);
+        strcat_s(programList, programList_size, tmp_str);
+        sprintf_s(prgArray[prgListLen], panel_program_size, "Управляемая");
         prgNumber[prgListLen] = SPROG_REMOTE;
         prgListLen++;
+        }
+    if (((programmask >> 16) & 1) && (static_cast<int>(rt_par_float[P_PROGRAM]) & (1 << PRG_D)))
+        {
+        sprintf_s(tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE);
+        strcat_s(programList, programList_size, tmp_str);
+        if (prgListLen < PANEL_MAX_PROGRAMS)
+            {
+            sprintf_s( prgArray[ prgListLen ], PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER, "Без ополаск.(опция)" );
+            prgNumber[ prgListLen ] = SPROG_OPTION_DISABLE_RINSE;
+            prgListLen++;
+            }
         }
     }
 
@@ -1293,88 +1311,142 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
     switch (selectedPrg)
         {
         case SPROG_RINSING_CLEAN:
-            sprintf(currentProgramName, "Опол.чист.водой");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой");
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
+            disable_final_rinsing = false;
             break;
         case SPROG_SANITIZER:
-            sprintf(currentProgramName, "ДезРаствор");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезРаствор");
             rt_par_float[P_PROGRAM] =  SPROG_SANITIZER;
+            disable_final_rinsing = false;
             break;
         case SPROG_HOTWATER:
-            sprintf(currentProgramName, "Дезинфекция");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Дезинфекция");
             rt_par_float[P_PROGRAM] =  SPROG_HOTWATER;
+            disable_final_rinsing = false;
             break;
         case SPROG_RINSING:
-            sprintf(currentProgramName, "Ополаскивание");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Ополаскивание");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING;
+            disable_final_rinsing = false;
             break;
         case SPROG_RINSING_HOTWATER:
-            sprintf(currentProgramName, "Опол+Дезинф");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол+Дезинф");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING_HOTWATER;
+            disable_final_rinsing = false;
             break;
         case SPROG_ACID:
-            sprintf(currentProgramName, "Кислота");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота");
             rt_par_float[P_PROGRAM] =  SPROG_ACID;
+            disable_final_rinsing = false;
             break;
         case SPROG_ACID_HOTWATER:
-            sprintf(currentProgramName, "Кислота+Дез");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота+Дез");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_HOTWATER;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC:
-            sprintf(currentProgramName, "Щелочь");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щелочь");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_HOTWATER:
-            sprintf(currentProgramName, "Щел+Дезинф");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Дезинф");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_HOTWATER;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID:
-            sprintf(currentProgramName, "Щел+Кислота");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кислота");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID_HOTWATER:
-            sprintf(currentProgramName, "Щел+Кисл+Дез");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+Дез");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID_HOTWATER;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID_SANITIZER:
-            sprintf(currentProgramName, "Щел+Кисл+ДезСР");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_ACID_SANITIZER;
+            disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_SANITIZER:
-            sprintf(currentProgramName, "Щел+ДезСР");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_SANITIZER;
+            disable_final_rinsing = false;
             break;
         case SPROG_ACID_SANITIZER:
-            sprintf(currentProgramName, "Кисл+ДезСР");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_ACID_SANITIZER;
+            disable_final_rinsing = false;
             break;
         case SPROG_ACID_PREPARATION:
-            sprintf(currentProgramName, "Нав. кислоты");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. кислоты");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_PREPARATION;
             break;
         case SPROG_CAUSTIC_PREPARATION:
-            sprintf(currentProgramName, "Нав. щелочи");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. щелочи");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_PREPARATION;
             break;
         case SPROG_SELF_CLEAN:
-            sprintf(currentProgramName, "Очистка танков");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Очистка танков");
             rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
             break;
         case SPROG_REMOTE:
-            sprintf(currentProgramName, "Управляемая мойка");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Управляемая мойка");
             rt_par_float[P_PROGRAM] = SPROG_REMOTE;
+            disable_final_rinsing = false;
             break;
         case SPROG_AP_RC_KANAL:
-            sprintf(currentProgramName, "Опол.чист.водой в канал.");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в канал.");
             clean_water_rinsing_return = KANAL;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
+            disable_final_rinsing = false;
             break;
         case SPROG_AP_RC_SW:
-            sprintf(currentProgramName, "Опол.чист.водой в танк");
+            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в танк");
             clean_water_rinsing_return = TANK_W;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
+            disable_final_rinsing = false;
             break;
+        case SPROG_OPTION_DISABLE_RINSE:
+            switch ( static_cast<int>(rt_par_float[ P_PROGRAM ]))
+                {
+                case SPROG_HOTWATER:
+                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезБО" );
+                    disable_final_rinsing = true;
+                    loadedProgram = SPROG_HOTWATER;
+                    break;
+                case SPROG_CAUSTIC_HOTWATER:
+                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезБО" );
+                    disable_final_rinsing = true;
+                    loadedProgram = SPROG_CAUSTIC_HOTWATER;
+                    break;
+                case SPROG_ACID_HOTWATER:
+                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезБО" );
+                    disable_final_rinsing = true;
+                    loadedProgram = SPROG_ACID_HOTWATER;
+                    break;
+                case SPROG_CAUSTIC_ACID_HOTWATER:
+                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезБО" );
+                    disable_final_rinsing = true;
+                    loadedProgram = SPROG_CAUSTIC_ACID_HOTWATER;
+                    break;
+                default:
+                    resetProgramName( );
+                    loadedProgram = -1;
+                    disable_final_rinsing = false;
+                    rt_par_float[ P_PROGRAM ] = SPROG_NO_PROGRAM;
+                    break;
+                }
+            break;
+        default:
+            resetProgramName( );
+            loadedProgram = -1;
+            disable_final_rinsing = false;
+            rt_par_float[ P_PROGRAM ] = SPROG_NO_PROGRAM;
         }
+    formProgramList(rt_par_float[P_PROGRAM_MASK]);
     }
 
 void cipline_tech_object::closeLineValves()
@@ -3103,6 +3175,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     circ_water_no_pump_stop = 0;
     circ_medium_no_pump_stop = 0;
     clean_water_rinsing_return = TANK_W;
+    disable_final_rinsing = false;
     if (scenabled && scline == nmr)
         {
         scline = 0;
@@ -3186,6 +3259,7 @@ int cipline_tech_object::_LoadProgram( void )
         case PRG_SANITIZER:
             return 71;
         case PRG_OKO:
+            if (disable_final_rinsing) return 91;
             if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
                 {
                 return 83;

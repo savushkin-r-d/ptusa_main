@@ -1581,6 +1581,7 @@ class cipline_tech_object: public tech_object
         int scoldvalves; ///Старая логика управления клапанами сортировки растворов при самоочистке.
         int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
         bool use_internal_medium_recipes; //Вкл./выкл. использование рецептов для моющих средств.
+        bool disable_final_rinsing; //Не ополаскивать после дезинфекции
 
         i_DO_device* V00;
         i_DO_device* V01;
