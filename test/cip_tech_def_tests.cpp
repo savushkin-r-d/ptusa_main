@@ -63,6 +63,7 @@ TEST( cipline_tech_object, _CheckErr )
     }
 
 TEST( cipline_tech_object, evaluate )
+
     {
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
     lua_manager::get_instance( )->set_Lua( lua_open( ));
