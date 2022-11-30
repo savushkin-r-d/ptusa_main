@@ -1156,147 +1156,195 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
     int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
     int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
     int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
-    char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
+    char tmp_str[2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     prgListLen = 0;
-    ModbusServ::UpdateLinePrograms(nmr);
-    if (programmask == 0)
+    ModbusServ::UpdateLinePrograms( nmr );
+    if ( programmask == 0 )
         {
         programmask = default_programlist;
         }
-    strcpy(programList,"");
-    if ((programmask >> 0) & 1)
+    strcpy( programList, "" );
+    if ((programmask >> 0) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Дезинфeкция");
-        prgNumber[prgListLen] = SPROG_HOTWATER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Дезинфeкция" );
+            prgNumber[ prgListLen ] = SPROG_HOTWATER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 1) & 1)
+    if ((programmask >> 1) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Ополаскивание");
-        prgNumber[prgListLen] = SPROG_RINSING;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Ополаскивание" );
+            prgNumber[ prgListLen ] = SPROG_RINSING;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 2) & 1)
+    if ((programmask >> 2) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол+Дезинф");
-        prgNumber[prgListLen] = SPROG_RINSING_HOTWATER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол+Дезинф" );
+            prgNumber[ prgListLen ] = SPROG_RINSING_HOTWATER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 3) & 1)
+    if ((programmask >> 3) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Кислота");
-        prgNumber[prgListLen] = SPROG_ACID;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кислота" );
+            prgNumber[ prgListLen ] = SPROG_ACID;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 4) & 1)
+    if ((programmask >> 4) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Кисл+Дезинф");
-        prgNumber[prgListLen] = SPROG_ACID_HOTWATER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кисл+Дезинф" );
+            prgNumber[ prgListLen ] = SPROG_ACID_HOTWATER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 5) & 1)
+    if ((programmask >> 5) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щелочь");
-        prgNumber[prgListLen] = SPROG_CAUSTIC;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щелочь" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 6) & 1)
+    if ((programmask >> 6) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щелочь+Дезинф");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_HOTWATER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щелочь+Дезинф" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC_HOTWATER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 7) & 1)
+    if ((programmask >> 7) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кисл+Дезинф");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_HOTWATER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+Дезинф" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_HOTWATER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 8) & 1)
+    if ((programmask >> 8) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID);
-        strcat_s(programList, programList_size,tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кислота");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_ACID;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кислота" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 9) & 1)
+    if ((programmask >> 9) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол.ч.водой в канал.");
-        prgNumber[prgListLen] = SPROG_AP_RC_KANAL;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в канал." );
+            prgNumber[ prgListLen ] = SPROG_AP_RC_KANAL;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 12) & 1)
+    if ((programmask >> 12) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Опол.ч.водой в танк");
-        prgNumber[prgListLen] = SPROG_AP_RC_SW;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в танк" );
+            prgNumber[ prgListLen ] = SPROG_AP_RC_SW;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 13) & 1)
+    if ((programmask >> 13) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+ДезСР");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_SANITIZER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+ДезСР" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC_SANITIZER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 14) & 1)
+    if ((programmask >> 14) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Кисл+ДезСР");
-        prgNumber[prgListLen] = SPROG_ACID_SANITIZER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кисл+ДезСР" );
+            prgNumber[ prgListLen ] = SPROG_ACID_SANITIZER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 15) & 1)
+    if ((programmask >> 15) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Щел+Кисл+ДезСР");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_SANITIZER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+ДезСР" );
+            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_SANITIZER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 10) & 1)
+    if ((programmask >> 10) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Дезраствор");
-        prgNumber[prgListLen] = SPROG_SANITIZER;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Дезраствор" );
+            prgNumber[ prgListLen ] = SPROG_SANITIZER;
+            prgListLen++;
+            }
         }
-    if ((programmask >> 11) & 1)
+    if ((programmask >> 11) & 1 )
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE);
-        strcat_s(programList, programList_size, tmp_str);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Управляемая");
-        prgNumber[prgListLen] = SPROG_REMOTE;
-        prgListLen++;
+        sprintf_s( tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
+            {
+            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Управляемая" );
+            prgNumber[ prgListLen ] = SPROG_REMOTE;
+            prgListLen++;
+            }
         }
-    if (((programmask >> 16) & 1) && (static_cast<int>(rt_par_float[P_PROGRAM]) & (1 << PRG_D)))
+    if (((programmask >> 16) & 1) && (static_cast<int>(rt_par_float[ P_PROGRAM ]) & (1 << PRG_D)))
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE);
-        strcat_s(programList, programList_size, tmp_str);
-        if (prgListLen < PANEL_MAX_PROGRAMS)
+        sprintf_s( tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE );
+        strcat_s( programList, programList_size, tmp_str );
+        if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
             sprintf_s( prgArray[ prgListLen ], PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER, "Без ополаск.(опция)" );
             prgNumber[ prgListLen ] = SPROG_OPTION_DISABLE_RINSE;
