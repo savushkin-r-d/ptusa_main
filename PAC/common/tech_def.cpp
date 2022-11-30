@@ -395,6 +395,11 @@ int tech_object::lua_check_function( const char* function_name,
     //Проверка на наличии функции function_name
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
+    if ( lua_isnoneornil( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+        return 0;
+        }
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, function_name );
     lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
 

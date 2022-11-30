@@ -3,7 +3,7 @@
 
 using namespace ::testing;
 
-TEST( lua_get_run_step_after_pause, tech_object )
+TEST( tech_object, lua_get_run_step_after_pause )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -62,7 +62,7 @@ TEST( lua_get_run_step_after_pause, tech_object )
 	test_params_manager::removeObject();
 	}
 
-TEST( evaluate, tech_object )
+TEST( tech_object, evaluate )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -110,6 +110,29 @@ TEST( evaluate, tech_object )
 	tank->evaluate();
 	//Операция должна быть в состоянии бездействия.
 	ASSERT_EQ( operation::IDLE, operation_1->get_state() );
+
+
+	//Корректный переход от выполнения к паузе и опять к выполнению.
+	const unsigned int STEP_N1 = 1;
+	const unsigned int STEP_N2 = 2;
+	operation_1->add_step( "Init", 2, -1 );
+	operation_1->add_step( "Process #1", 3, -1 );
+	operation_1->add_step( "Process #2", 2, -1 );
+
+	tank->set_mode( OPER_N1, operation::RUN );
+	EXPECT_EQ( operation::RUN, tank->get_mode( OPER_N1 ) );
+	EXPECT_EQ( STEP_N1, operation_1->active_step() );
+	operation_1->to_next_step();					//Переход к следующему шагу.
+	EXPECT_EQ( STEP_N2, operation_1->active_step() );
+	tank->set_mode( OPER_N1, operation::PAUSE );	//Пауза.
+	tank->set_mode( OPER_N1, operation::RUN );		//Возобновление.
+	//После возобновления после паузы должен быть активен шаг, который был
+	//до паузы.
+	EXPECT_EQ( STEP_N2, operation_1->active_step() );
+
+	tank->set_mode( OPER_N1, operation::IDLE );
+	EXPECT_EQ( operation::IDLE, tank->get_mode( OPER_N1 ) );
+
 
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
