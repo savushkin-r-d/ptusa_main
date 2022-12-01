@@ -413,15 +413,15 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
 								case RC_SELECTED_REC:
 									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->loadedRecName, &outdata[3+i*2]);
-									i+=TRecipeManager::recipeNameLength - 1;
+									i+=TRecipeManager::get_recipe_name_length() - 1;
 									break;
 								case RC_SELECTED_PRG:
 									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->currentProgramName, &outdata[3+i*2]);
 									i+= PROGRAM_MAX_LEN - 1;
 									break;
 								case RC_EDITED_REC:
-									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->currentRecipeName, &outdata[3+i*2]);
-									i+=TRecipeManager::recipeNameLength - 1;
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->get_current_recipe_name(), &outdata[3 + i * 2]);
+									i+=TRecipeManager::get_recipe_name_length() - 1;
 									break;
 								case RC_SELECT_REC:
 									PackInt16(-1,&outdata[3+i*2]);
@@ -431,7 +431,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
 								case RC_LIST_LENGTH:
 									k = 0;
-									for (j = 0; j < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
+									for (j = 0; j < u_int(TRecipeManager::get_recipe_per_line()); j++)
 										{
 										if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
 											{
@@ -452,10 +452,10 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								default:
 									if (objnumber >= RC_LIST_START && objnumber < RC_PRG_SELECT)
 										{
-										int recipeno = (objnumber - RC_LIST_START) / TRecipeManager::recipeNameLength;
+										int recipeno = (objnumber - RC_LIST_START) / TRecipeManager::get_recipe_name_length();
 										//								printf("\n\rRecipeNo = %d", recipeno);
 										k = -1;
-										for (j = 0; j < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
+										for (j = 0; j < u_int(TRecipeManager::get_recipe_per_line()); j++)
 											{
 											if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
 												{
@@ -469,7 +469,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 												break;
 												}
 											}
-										i+= TRecipeManager::recipeNameLength - 1;
+										i+= TRecipeManager::get_recipe_name_length() - 1;
 										}
 									else
 										{
@@ -885,7 +885,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								case RC_SELECT_REC:
 									recipe_to_load = UnpackInt16(&data[7+i*2]);
 									k = -1;
-									for (j = 0; j < (unsigned int)(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
+									for (j = 0; j < (unsigned int)(TRecipeManager::get_recipe_per_line()); j++)
 										{
 										if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
 											{
@@ -900,8 +900,8 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
 								case RC_EDITED_REC:
 									//printf("\n\rEdit recipe. Words - %d", numberofElements);
-									UnicodetoUtf8(cipline_tech_object::Mdls[line-1]->lineRecipes->currentRecipeName, &data[7+i*2], 24);
-									i+= cipline_tech_object::Mdls[line-1]->lineRecipes->recipeNameLength - 1;
+									UnicodetoUtf8(cipline_tech_object::Mdls[line-1]->lineRecipes->get_current_recipe_name(), &data[7 + i * 2], 24);
+									i+= TRecipeManager::get_recipe_name_length() - 1;
 									break;
 								case RC_LIST_UPDATE:
 									k = UnpackInt16(&data[7+i*2]);

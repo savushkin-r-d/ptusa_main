@@ -139,7 +139,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     use_internal_medium_recipes = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
-    loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
+    loadedRecName = new char[TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER];
     programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(programList, "");
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
@@ -380,7 +380,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
 
     //Имя рецепта для редактирования
-    answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
+    answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->get_current_recipe_name());
 
     //Выбранная программа мойки
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
@@ -389,7 +389,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
 
     //Список доступных объектов мойки
-    answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
+    answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->get_recipe_list());
 
     //Номер машины
     answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar1);
@@ -451,10 +451,10 @@ int cipline_tech_object::save_device( char *buff )
     if (nmr == 1)
     {
         //Список доступных щелочных растворов
-        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->get_recipe_list() );
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_NMR='%d',\n", causticRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tCAUSTICNAME='%s',\n", causticName);
-        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR_NAME='%s',\n", causticRecipes->currentRecipeName);
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR_NAME='%s',\n", causticRecipes->get_current_recipe_name());
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR = \n\t{\n\t\t");
         for (i = 1; i <= causticRecipes->GetParamsCount(); i++)
             {
@@ -463,10 +463,10 @@ int cipline_tech_object::save_device( char *buff )
         answer_size += sprintf(buff + answer_size, "\n\t},\n");
 
         //Список доступных кислотных растворов
-        answer_size += sprintf(buff + answer_size, "\tACID_REC_LIST='%s',\n", acidRecipes->recipeList);
+        answer_size += sprintf(buff + answer_size, "\tACID_REC_LIST='%s',\n", acidRecipes->get_recipe_list());
         answer_size += sprintf(buff + answer_size, "\tACID_REC_NMR='%d',\n", acidRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tACIDNAME='%s',\n", acidName);
-        answer_size += sprintf(buff + answer_size, "\tACID_PAR_NAME='%s',\n", acidRecipes->currentRecipeName);
+        answer_size += sprintf(buff + answer_size, "\tACID_PAR_NAME='%s',\n", acidRecipes->get_current_recipe_name());
         answer_size += sprintf(buff + answer_size, "\tACID_PAR = \n\t{\n\t\t");
         for (i = 1; i <= acidRecipes->GetParamsCount(); i++)
             {
@@ -602,12 +602,12 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     if (0 == strcmp(prop, "CUR_REC"))
         {
         u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)lineRecipes->recipeNameLength)
+        if (slen < (unsigned int)TRecipeManager::get_recipe_name_length() )
             {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
+            strncpy_s(lineRecipes->get_current_recipe_name(), TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
-            strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy( lineRecipes->get_current_recipe_name(), val, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
@@ -619,10 +619,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)causticRecipes->recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(causticRecipes->currentRecipeName, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(causticRecipes->get_current_recipe_name(), causticRecipes->recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(causticRecipes->currentRecipeName, val, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(causticRecipes->get_current_recipe_name(), val, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
@@ -634,10 +634,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)acidRecipes->recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(acidRecipes->currentRecipeName, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(acidRecipes->get_current_recipe_name(), acidRecipes->recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(acidRecipes->currentRecipeName, val, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(acidRecipes->get_current_recipe_name(), val, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
@@ -1992,15 +1992,15 @@ int cipline_tech_object::EvalCommands()
                 }
             break;
         case MCMD_RELOAD_RECIPES:
-            lineRecipes->LoadFromFile(lineRecipes->defaultfilename);
+            lineRecipes->LoadFromFile(lineRecipes->get_default_file_name());
             lineRecipes->LoadRecipeName();
             break;
         case MCMD_RELOAD_CAUSTIC_RECIPES:
-            causticRecipes->LoadFromFile(causticRecipes->defaultfilename);
+            causticRecipes->LoadFromFile(causticRecipes->get_default_file_name());
             causticRecipes->LoadRecipeName();
             break;
         case MCMD_RELOAD_ACID_RECIPES:
-            acidRecipes->LoadFromFile(acidRecipes->defaultfilename);
+            acidRecipes->LoadFromFile(acidRecipes->get_default_file_name());
             acidRecipes->LoadRecipeName();
             break;
         case MCMD_RELOAD_WASH_STATS:

@@ -28,11 +28,9 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
 lineNo( lineNo ),
 currentRecipe(0),
 curRecipeStartBlock(0),
-recipeStartAddr(0L)
+recipeStartAddr(0L),
+defaultfilename( "line" + std::to_string( lineNo ) + "rec.bin" )
 {
-    const int DEF_NAME_LENGTH = 20;
-    defaultfilename = new char[ DEF_NAME_LENGTH ];
-    snprintf(defaultfilename, DEF_NAME_LENGTH, "line%drec.bin", lineNo);
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
@@ -166,11 +164,9 @@ void ParentRecipeManager::PasteRecipe()
 
 TRecipeManager::TRecipeManager( int lineNo ): ParentRecipeManager ( lineNo )
     {
-    defaultfilename = new char[20];
-    sprintf(defaultfilename, "line%drec.bin", lineNo);
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
-    LoadFromFile(defaultfilename);
+    LoadFromFile(defaultfilename.c_str());
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
@@ -226,7 +222,7 @@ void TRecipeManager::EvalRecipe()
         if (recipechanged)
             {
             recipechanged = 0;
-            SaveToFile(defaultfilename);
+            SaveToFile(defaultfilename.c_str());
             }
         recipechangechecktime = get_millisec();
         }
@@ -647,11 +643,9 @@ int TMediumRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 TMediumRecipeManager::TMediumRecipeManager(MediumTypes mType) : ParentRecipeManager( 0 ),
 mediumType(mType)
 {
-    defaultfilename = new char[20];
-    sprintf(defaultfilename, "medium%drec.bin", mType);
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
-    LoadFromFile(defaultfilename);
+    LoadFromFile(defaultfilename.c_str());
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength];
     recipeList = new char[(recipeNameLength + 6) * recipePerLine];
@@ -707,7 +701,7 @@ void TMediumRecipeManager::EvalRecipe()
         if (recipechanged)
         {
             recipechanged = 0;
-            SaveToFile(defaultfilename);
+            SaveToFile(defaultfilename.c_str());
         }
         recipechangechecktime = get_millisec();
     }

@@ -13,6 +13,8 @@
 #include "param_ex.h"
 #include "dtime.h"
 
+#include <string>
+
 ///@brief Множитель размера строки для кодировки UTF-8
 #define UNICODE_MULTIPLIER 3
 ///@brief Максимальная длина имени для рецепта
@@ -41,8 +43,7 @@ class ParentRecipeManager
     int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
 
-public:
-    char* defaultfilename;
+    std::string defaultfilename;
     ///@brief Начальный блок для всех экземляров рецептов
     static int startRecipeBlock;
     ///@brief Количество рецептов на линию
@@ -59,6 +60,8 @@ public:
     char* recipeList;
     ///@brief Имя текущего рецепта
     char* currentRecipeName;
+
+public:
     void CopyRecipe();
     void PasteRecipe();
     void NullifyRecipe();
@@ -66,6 +69,32 @@ public:
     explicit ParentRecipeManager(int lineNo);
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
+
+    static int get_recipe_name_length()
+        {
+        return recipeNameLength;
+        };
+
+    static int get_recipe_per_line()
+        {
+        return recipePerLine;
+        };
+
+
+    char* get_current_recipe_name() const
+        {
+        return currentRecipeName;
+        };
+
+    char* get_recipe_list() const
+        {
+        return recipeList;
+        };
+
+    const char* get_default_file_name() const
+        {
+        return defaultfilename.c_str();
+        }
 };
 
 ///@class TRecipeManager mcaRec.h
