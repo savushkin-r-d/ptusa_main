@@ -486,7 +486,7 @@ class MSAPID
     public:
         enum PARAM
             {
-            P_Z = 0,			   ///< Требуемооfое значение.
+            P_Z = 0,			   ///< Требуемое значение.
             P_k,		           ///< Параметр k.
             P_Ti,                  ///< Параметр Ti.
             P_Td,                  ///< Параметр Td.
@@ -518,7 +518,7 @@ class MSAPID
         float get_assignment();
 
         /// @brief Состояние регулятора
-        u_int_4 get_state();
+        u_int_4 get_state() const;
     };
 
 class TSav
@@ -528,11 +528,11 @@ class TSav
         unsigned long n;
         unsigned long integrator;
     public:
-        TSav(void);
-        ~TSav(void);
+        TSav();
+        ~TSav();
         void Add(float val, unsigned long inegr);
-        void R(void);
-        float Q(void);
+        void R();
+        float Q() const;
     };
 
 class cipline_tech_object: public tech_object
@@ -540,7 +540,7 @@ class cipline_tech_object: public tech_object
     protected:
         int ncmd;
         bool is_reset; //Идет сброс программы мойки.
-        bool is_ready_to_end; //Операция должна закончиться но ожидает сигнала готовности от объекта
+        bool is_ready_to_end{}; //Операция должна закончиться но ожидает сигнала готовности от объекта
 
         unsigned int tech_type; //подтип объекта
         int ret_circ_flag; //флаг управления возвратным насосом при циркуляции
@@ -562,18 +562,18 @@ class cipline_tech_object: public tech_object
         int forcesortrr; //флаг принудительной сортировки растворов без учета таймаута переключений
 
         unsigned long enddelayTimer;
-        int valvesAreInConflict;
-        virtual void resetProgramName();
-        virtual void resetRecipeName();
-        virtual void resetProgramList(unsigned long programmask = 0xB00);
-        virtual void formProgramList(unsigned long programmask);
-        virtual void loadProgramFromList(int selectedPrg);
-        virtual void closeLineValves();
+        int valvesAreInConflict{};
+        void resetProgramName();
+        void resetRecipeName();
+        void resetProgramList(unsigned long programmask = 0xB00);
+        void formProgramList(unsigned long programmask);
+        void loadProgramFromList(int selectedPrg);
+        void closeLineValves() const;
         int isTank();
         int isLine();
-        int getValvesConflict();
+        int getValvesConflict() const;
 
-        virtual void resetCarNumber();
+        void resetCarNumber();
 
         //для ошибки "возможно отсутствует концентрированный раствор"
         int no_liquid_is_warning;
@@ -621,10 +621,10 @@ class cipline_tech_object: public tech_object
             u_int par_uint_count, u_int runtime_par_uint_count );
 
 
-        ~cipline_tech_object();
+        ~cipline_tech_object() override;
 
         //Флаг формата описания устройств
-        char is_old_definition;
+        char is_old_definition{};
         //В программе мойки есть мойка кислотой
         bool program_has_acid;
         //В программе мойки есть мойка щелочью
@@ -638,8 +638,8 @@ class cipline_tech_object: public tech_object
 
         //работа с параметрами
         static saved_params<float, true>* parpar;
-        float get_station_par(int parno);
-        void set_station_par(int parno, float newval);
+        static float get_station_par(int parno);
+        static void set_station_par(int parno, float newval);
 
         //Статистика по объектам мойки
         static cip_stats* statsbase;
@@ -670,7 +670,7 @@ class cipline_tech_object: public tech_object
         bool use_internal_medium_recipes;
 
         ///Флаг завершения флипования на операциях циркуляции/промывки.
-        bool wasflip;
+        bool wasflip{};
 
         //Переменные для циркуляции
         char circ_tank_s; //Циркулировать ли через танк со щелочью
@@ -682,9 +682,9 @@ class cipline_tech_object: public tech_object
         char circ_podp_max_count;	//максимальное количество подпиток на операции
         char circ_water_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке
         char circ_medium_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке на щелочи и кислоте
-        char circ_was_feed; //флаг факта подпитки
+        char circ_was_feed{}; //флаг факта подпитки
         unsigned long circ_max_timer; //таймер подпитки
-        char circ_temp_reached; //флаг достижения заданной температуры на возврате
+        char circ_temp_reached{}; //флаг достижения заданной температуры на возврате
         unsigned long circ_return_timer;
 
         //Рецепты
@@ -713,16 +713,16 @@ class cipline_tech_object: public tech_object
         int switch2;
         int switch3;
         int switch4;
-        int getSwitch(int switchNO);
+        int getSwitch(int switchNO) const;
         void setSwitch(int switchNO, int value);
 
 
         //Список программ для панели
 #define PANEL_MAX_PROGRAMS 16
 #define PANEL_PROGRAM_LENGTH 24
-        char prgArray[PANEL_MAX_PROGRAMS][PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER];
-        int prgNumber[PANEL_MAX_PROGRAMS];
-        int prgListLen;
+        char prgArray[PANEL_MAX_PROGRAMS][PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER]{};
+        int prgNumber[PANEL_MAX_PROGRAMS]{};
+        int prgListLen{};
 
 
         int blocked;
@@ -740,7 +740,7 @@ class cipline_tech_object: public tech_object
         int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
         bool disable_final_rinsing; //Не ополаскивать после дезинфекции
 
-        unsigned long ret_pums_ls_timer;
+        unsigned long ret_pums_ls_timer{};
 
         static int blockAlarm;
         static cipline_tech_object* Mdls[10];
@@ -757,58 +757,58 @@ class cipline_tech_object: public tech_object
         static int scenabled;
         static int scoldvalves;
         static saved_params<float, true>* scparams;
-        float get_selfclean_par(int parno);
-        void set_selfclean_par(int parno, float newval);
-        virtual int SCInitPumping(int what, int from, int where, int whatdrainage, int step, int f);
-        virtual int SCPumping(int what, int from, int where, int whatdrainage);
+        static float get_selfclean_par(int parno);
+        static void set_selfclean_par(int parno, float newval);
+        int SCInitPumping(int what, int from, int where, int whatdrainage, int step, int f);
+        int SCPumping(int what, int from, int where, int whatdrainage);
         int timeIsOut();
         int volumePassed();
         //---функции самоочистки---
-        i_DO_device* V00;
-        i_DO_device* V01;
-        i_DO_device* V02;
-        i_DO_device* V03;
-        i_DO_device* V04;
-        i_DO_device* V05;
-        i_DO_device* V06;
-        i_DO_device* V07;
-        i_DO_device* V08;
-        i_DO_device* V09;
-        i_DO_device* V10;
-        i_DO_device* V11;
-        i_DO_device* V12;
-        i_DO_device* V13;
+        i_DO_device* V00{};
+        i_DO_device* V01{};
+        i_DO_device* V02{};
+        i_DO_device* V03{};
+        i_DO_device* V04{};
+        i_DO_device* V05{};
+        i_DO_device* V06{};
+        i_DO_device* V07{};
+        i_DO_device* V08{};
+        i_DO_device* V09{};
+        i_DO_device* V10{};
+        i_DO_device* V11{};
+        i_DO_device* V12{};
+        i_DO_device* V13{};
 
-        i_AI_device* LTK;
-        i_AI_device* LTS;
-        i_AI_device* LTW;
+        i_AI_device* LTK{};
+        i_AI_device* LTS{};
+        i_AI_device* LTW{};
 
-        i_DO_AO_device* NP;
-        i_DO_AO_device* NK;
-        i_DO_AO_device* NS;
-        i_DI_device* LL;
-        i_DI_device* LM;
-        i_DI_device* LH;
-        i_DI_device* LWL;
-        i_DI_device* LWH;
-        i_DI_device* LSL;
-        i_DI_device* LSH;
-        i_DI_device* LKL;
-        i_DI_device* LKH;
-        i_AI_device* TP;
-        i_AI_device* TR;
-        i_AI_device* Q;
-        i_AO_device* ao;
-        i_AO_device* PUMPFREQ;
-        i_AI_device* PRESSURE;
-        i_DI_device*FL;
-        timer* T[TMR_CNT];
-        TSav *SAV[SAV_CNT];
-        i_counter *cnt;
+        i_DO_AO_device* NP{};
+        i_DO_AO_device* NK{};
+        i_DO_AO_device* NS{};
+        i_DI_device* LL{};
+        i_DI_device* LM{};
+        i_DI_device* LH{};
+        i_DI_device* LWL{};
+        i_DI_device* LWH{};
+        i_DI_device* LSL{};
+        i_DI_device* LSH{};
+        i_DI_device* LKL{};
+        i_DI_device* LKH{};
+        i_AI_device* TP{};
+        i_AI_device* TR{};
+        i_AI_device* Q{};
+        i_AO_device* ao{};
+        i_AO_device* PUMPFREQ{};
+        i_AI_device* PRESSURE{};
+        i_DI_device*FL{};
+        timer* T[TMR_CNT]{};
+        TSav *SAV[SAV_CNT]{};
+        i_counter *cnt{};
         //-------------------
 
-        MSAPID* PIDF;
-        MSAPID* PIDP;
+        MSAPID* PIDF{};
+        MSAPID* PIDP{};
         void initline();
 
 
@@ -857,101 +857,101 @@ class cipline_tech_object: public tech_object
         static int msa_number;
 
         //overriden members
-        int save_device( char *buff );
-        int set_cmd( const char *prop, u_int idx, double val );
+        int save_device( char *buff ) override;
+        int set_cmd( const char *prop, u_int idx, double val ) override;
         int set_cmd( const char *prop, u_int idx, const char* val );
-        int evaluate();
+        int evaluate() override;
         int init_params();
 
         ////-------------------
-        virtual void RHI(void);
-        virtual void PauseTimers(void);
-        virtual int SetCommand(int command);
-        virtual void ResetWP(void);
-        virtual int SetRet(int val);
-        virtual int GetRetState();
-        virtual int HasRet();
-        virtual int ForceRet(int val);
-        virtual void ResetStat(void);
+        void RHI();
+        void PauseTimers();
+        int SetCommand(int command);
+        void ResetWP();
+        int SetRet(int val);
+        int GetRetState() const;
+        int HasRet() const;
+        int ForceRet(int val);
+        void ResetStat();
         ///Базовые функции. При необходимости могут вызываться из Lua. Могут быть переопределены.
-        virtual int _DoStep(int step_to_do);  //Выполнение шага, заданного параметром.
-        virtual int _GoToStep(int cur, int param); //Переход к следующему шагу.
-        virtual int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
-        virtual int _LoadProgram(void);
-        virtual void _StopDev(void);
-        virtual void _ResetLinesDevicesBeforeReset(void);
-        virtual int _OporCIP(int where);
-        virtual int _InitOporCIP(int where, int step_to_init, int not_first_call);
-        virtual int _CheckErr(void);
-        virtual int _Circ(int what);
-        virtual int _InitCirc(int what, int step_to_init, int not_first_call);
-        virtual int _InitToObject(int from, int where, int step_to_init, int f);
-        virtual int _InitFromObject(int what, int where, int step_to_init, int f);
-        virtual int _InitFilCirc(int with_what, int step_to_init, int f);
-        virtual int _InitOporCirc(int where, int step_to_init, int not_first_call);
-        virtual int _ToObject(int from, int where);
-        virtual int _FromObject(int what, int where);
-        virtual int _FillCirc(int with_what);
-        virtual int _OporCirc(int where);
-        virtual void _RT(void);
-        virtual void _Stop(int step_to_stop);
-        virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
-        virtual int _DoseRR(int what);
+        int _DoStep(int step_to_do);  //Выполнение шага, заданного параметром.
+        int _GoToStep(int cur, int param); //Переход к следующему шагу.
+        int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
+        int _LoadProgram();
+        void _StopDev();
+        void _ResetLinesDevicesBeforeReset();
+        int _OporCIP(int where);
+        int _InitOporCIP(int where, int step_to_init, int not_first_call);
+        int _CheckErr();
+        int _Circ(int what);
+        int _InitCirc(int what, int step_to_init, int not_first_call);
+        int _InitToObject(int from, int where, int step_to_init, int f);
+        int _InitFromObject(int what, int where, int step_to_init, int f);
+        int _InitFilCirc(int with_what, int step_to_init, int f);
+        int _InitOporCirc(int where, int step_to_init, int not_first_call);
+        int _ToObject(int from, int where);
+        int _FromObject(int what, int where);
+        int _FillCirc(int with_what);
+        int _OporCirc(int where);
+        void _RT();
+        void _Stop(int step_to_stop);
+        int _InitDoseRR(int what, int step_to_init, int not_first_call);
+        int _DoseRR(int what);
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
-        virtual int DoStep(int step_to_do);                                     //cip_DoStep(step)
-        virtual int GoToStep(int cur, int param);                               //cip_GoToStep(currentstep,param)
-        virtual int InitStep(int step_to_init, int not_first_call);             //cip_InitStep(steptoinit, param)
-        virtual int LoadProgram(void);                                          //cip_LoadProgram()
-        virtual void StopDev(void);                                             //cip_StopDev()
-        virtual void ResetLinesDevicesBeforeReset(void);
-        virtual int OporCIP(int where);
-        virtual int InitOporCIP(int where, int step_to_init, int not_first_call);
-        virtual int CheckErr(void);
-        virtual int Circ(int what);
-        virtual int InitCirc(int what, int step_to_init, int not_first_call);
-        virtual int InitToObject(int from, int where, int step_to_init, int not_first_call);
-        virtual int InitFromObject(int what, int where, int step_to_init, int not_first_call);
-        virtual int InitFilCirc(int with_what, int step_to_init, int not_first_call);
-        virtual int InitOporCirc(int where, int step_to_init, int not_first_call);
-        virtual int ToObject(int from, int where);
-        virtual int FromObject(int what, int where);
-        virtual int FillCirc(int with_what);
-        virtual int OporCirc(int where);
-        virtual void RT(void);
-        virtual void Stop(int step_to_stop);
-        virtual int InitDoseRR(int what, int step_to_init, int not_first_call);
-        virtual int DoseRR(int what);
+        int DoStep(int step_to_do);                                     //cip_DoStep(step)
+        int GoToStep(int cur, int param);                               //cip_GoToStep(currentstep,param)
+        int InitStep(int step_to_init, int not_first_call);             //cip_InitStep(steptoinit, param)
+        int LoadProgram();                                          //cip_LoadProgram()
+        void StopDev();                                             //cip_StopDev()
+        void ResetLinesDevicesBeforeReset();
+        int OporCIP(int where);
+        int InitOporCIP(int where, int step_to_init, int not_first_call);
+        int CheckErr();
+        int Circ(int what);
+        int InitCirc(int what, int step_to_init, int not_first_call);
+        int InitToObject(int from, int where, int step_to_init, int not_first_call);
+        int InitFromObject(int what, int where, int step_to_init, int not_first_call);
+        int InitFilCirc(int with_what, int step_to_init, int not_first_call);
+        int InitOporCirc(int where, int step_to_init, int not_first_call);
+        int ToObject(int from, int where);
+        int FromObject(int what, int where);
+        int FillCirc(int with_what);
+        int OporCirc(int where);
+        void RT();
+        void Stop(int step_to_stop);
+        int InitDoseRR(int what, int step_to_init, int not_first_call);
+        int DoseRR(int what);
         ////--------------------------------------------
         ////-----error service-------
-        virtual void ResetErr(void);
+        void ResetErr();
         ////-----for main station----
-        virtual void SortRR(int where, int forcetotank = 0);
-        virtual float GetConc(int what);
-        virtual int InitFilRR(int where);
-        virtual int InitCircRR(int where);
-        virtual int InitCheckConc(int where);
-        virtual int InitAddRR(int where, int step, int first_init_flag);
-        virtual int InitOpolRR(int where);
-        virtual int FilRR(int where);
-        virtual int CircRR(int where);
-        virtual int CheckConc(int where);
-        virtual int AddRR(int where);
-        virtual int OpolRR(int where);
+        void SortRR(int where, int forcetotank = 0);
+        float GetConc(int what) const;
+        int InitFilRR(int where);
+        int InitCircRR(int where);
+        int InitCheckConc(int where);
+        int InitAddRR(int where, int step, int first_init_flag);
+        int InitOpolRR(int where);
+        int FilRR(int where);
+        int CircRR(int where);
+        int CheckConc(int where);
+        int AddRR(int where);
+        int OpolRR(int where);
         ////-------------------
-        virtual int EvalBlock();
+        int EvalBlock();
         ////-------------------
-        virtual int EvalPIDS();
-        virtual int EvalCommands();
-        virtual int EvalRecipes();
-        virtual int EvalCipInProgress();
-        virtual int EvalCipInError();
-        virtual int EvalCipReadySignal();
+        int EvalPIDS();
+        int EvalCommands();
+        int EvalRecipes();
+        int EvalCipInProgress();
+        int EvalCipInError();
+        int EvalCipReadySignal();
         ////------------------------------
-        virtual int InitCustomStep(int what, int from, int where, int how, int step, int f);
-        virtual int EvalCustomStep(int what, int from, int where, int how);
+        int InitCustomStep(int what, int from, int where, int how, int step, int f);
+        int EvalCustomStep(int what, int from, int where, int how);
        ////Вспомогательные функции
-        void DateToChar(char* buff);
+        static void DateToChar(char* buff);
     };
 
 

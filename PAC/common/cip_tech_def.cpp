@@ -7,19 +7,19 @@
 #include "lua_manager.h"
 #include "utf2cp1251.h"
 
-TMediumRecipeManager* cipline_tech_object::causticRecipes = 0;
+TMediumRecipeManager* cipline_tech_object::causticRecipes = nullptr;
 
-char* cipline_tech_object::causticName = 0;
+char* cipline_tech_object::causticName = nullptr;
 
 int cipline_tech_object::causticLoadedRecipe = -1;
 
-TMediumRecipeManager* cipline_tech_object::acidRecipes = 0;
+TMediumRecipeManager* cipline_tech_object::acidRecipes = nullptr;
 
-char* cipline_tech_object::acidName = 0;
+char* cipline_tech_object::acidName = nullptr;
 
 int cipline_tech_object::acidLoadedRecipe = -1;
 
-cip_stats* cipline_tech_object::statsbase = 0;
+cip_stats* cipline_tech_object::statsbase = nullptr;
 
 std::unordered_set<int> cipline_tech_object::steps_v2_supply = { 7, 35, 55, 64, 85 };
 
@@ -77,29 +77,29 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     int i;
     nmr = number;
     tech_type = type;
-    if (0 == parpar)
+    if (nullptr == parpar)
         {
         parpar = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_MAIN");
         }
-    if (0 == causticRecipes)
+    if (nullptr == causticRecipes)
         {
         causticRecipes = new TMediumRecipeManager(TMediumRecipeManager::MT_CAUSTIC);
         }
-    if (0 == acidRecipes)
+    if (nullptr == acidRecipes)
         {
         acidRecipes = new TMediumRecipeManager(TMediumRecipeManager::MT_ACID);
         }
-    if (0 == causticName)
+    if (nullptr == causticName)
         {
         causticName = new char[TMediumRecipeManager::recipeNameLength];
         strcpy(causticName, "");
         }
-    if (0 == acidName)
+    if (nullptr == acidName)
         {
         acidName = new char[TMediumRecipeManager::recipeNameLength];
         strcpy(acidName, "");
         }
-    if (0 == statsbase)
+    if (nullptr == statsbase)
         {
         statsbase = new cip_stats();
         statsbase->loadFromFile(statsbase->filename);
@@ -176,37 +176,37 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     rt_par_float[P_SELECT_REC] = 0;
     rt_par_float[P_SELECT_PRG] = 0;
 
-    dev_upr_ret = 0;
-    dev_m_ret = 0;
-    dev_os_object = 0;
-    dev_os_object_ready = 0;
-    dev_os_cip_ready = 0;
-    dev_os_object_empty = 0;
-    dev_upr_medium_change = 0;
-    dev_upr_caustic = 0;
-    dev_upr_acid = 0;
-    dev_upr_water = 0;
-    dev_upr_desinfection = 0;
-    dev_upr_cip_ready = 0;
-    dev_upr_cip_finished = 0;
-    dev_upr_cip_finished2 = 0;
-    dev_upr_cip_in_progress = 0;
-    dev_ai_pump_frequency = 0;
-    dev_ai_pump_feedback = 0;
-    dev_upr_sanitizer_pump = 0;
-    dev_os_object_pause = 0;
-    dev_upr_circulation = 0;
-    dev_os_pump_can_run = 0;
-    dev_os_can_continue = 0;
-    dev_ls_ret_pump = 0;
+    dev_upr_ret = nullptr;
+    dev_m_ret = nullptr;
+    dev_os_object = nullptr;
+    dev_os_object_ready = nullptr;
+    dev_os_cip_ready = nullptr;
+    dev_os_object_empty = nullptr;
+    dev_upr_medium_change = nullptr;
+    dev_upr_caustic = nullptr;
+    dev_upr_acid = nullptr;
+    dev_upr_water = nullptr;
+    dev_upr_desinfection = nullptr;
+    dev_upr_cip_ready = nullptr;
+    dev_upr_cip_finished = nullptr;
+    dev_upr_cip_finished2 = nullptr;
+    dev_upr_cip_in_progress = nullptr;
+    dev_ai_pump_frequency = nullptr;
+    dev_ai_pump_feedback = nullptr;
+    dev_upr_sanitizer_pump = nullptr;
+    dev_os_object_pause = nullptr;
+    dev_upr_circulation = nullptr;
+    dev_os_pump_can_run = nullptr;
+    dev_os_can_continue = nullptr;
+    dev_ls_ret_pump = nullptr;
 
-    dev_upr_prerinse = 0;
-    dev_upr_intermediate_rinse = 0;
-    dev_upr_postrinse = 0;
-    dev_upr_pump_stopped = 0;
-    dev_ao_flow_task = 0;
-    dev_ao_temp_task = 0;
-    dev_upr_wash_aborted = 0;
+    dev_upr_prerinse = nullptr;
+    dev_upr_intermediate_rinse = nullptr;
+    dev_upr_postrinse = nullptr;
+    dev_upr_pump_stopped = nullptr;
+    dev_ao_flow_task = nullptr;
+    dev_ao_temp_task = nullptr;
+    dev_upr_wash_aborted = nullptr;
 
     pumpflag = 0;
     pumptimer = get_millisec();
@@ -282,7 +282,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         VSMG = V(11);
         VKMG = V(12);
         VWMG = V(13);
-        if (0 == scparams)
+        if (nullptr == scparams)
             {
             scparams = new saved_params<float, true>(SELFCLEAN_PAR_COUNT, "PAR_SELFCLEAN");
             }
@@ -296,17 +296,17 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
 cipline_tech_object::~cipline_tech_object()
     {
     int i;
-    if (parpar != 0)
+    if (parpar != nullptr)
         {
         delete(parpar);
         parpar = nullptr;
         }
-    if (PIDF != 0)
+    if (PIDF != nullptr)
         {
         delete(PIDF);
         PIDF = nullptr;
         }
-    if (PIDP != 0)
+    if (PIDP != nullptr)
         {
         delete(PIDP);
         PIDP = nullptr;
@@ -603,10 +603,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     if (0 == strcmp(prop, "CUR_REC"))
         {
         u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)lineRecipes->recipeNameLength)
+        if (slen < (unsigned int)TRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
+            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
             strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
 #endif
@@ -617,10 +617,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
         {
         u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)causticRecipes->recipeNameLength)
+        if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(causticRecipes->currentRecipeName, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(causticRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
             strncpy(causticRecipes->currentRecipeName, val, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
@@ -632,10 +632,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     if (0 == strcmp(prop, "ACID_PAR_NAME"))
         {
         u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)acidRecipes->recipeNameLength)
+        if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(acidRecipes->currentRecipeName, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(acidRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
             strncpy(acidRecipes->currentRecipeName, val, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
@@ -1086,7 +1086,7 @@ void cipline_tech_object::initline()
     if (nmr == 1)
         {
         causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
-        if (causticLoadedRecipe >= 0 && causticLoadedRecipe < causticRecipes->recipePerLine)
+        if (causticLoadedRecipe >= 0 && causticLoadedRecipe < TMediumRecipeManager::recipePerLine)
             {
             causticRecipes->getRecipeName(causticLoadedRecipe, causticName);
             }
@@ -1097,7 +1097,7 @@ void cipline_tech_object::initline()
             }
 
         acidLoadedRecipe = (int)(parpar[0][P_ACID_SELECTED]);
-        if (acidLoadedRecipe >= 0 && acidLoadedRecipe < acidRecipes->recipePerLine)
+        if (acidLoadedRecipe >= 0 && acidLoadedRecipe < TMediumRecipeManager::recipePerLine)
             {
             acidRecipes->getRecipeName(acidLoadedRecipe, acidName);
             }
@@ -1111,7 +1111,7 @@ void cipline_tech_object::initline()
 
 void cipline_tech_object::resetProgramName()
     {
-    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Не выбран");
+    snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Не выбран");
     }
 
 void cipline_tech_object::resetRecipeName()
@@ -1124,7 +1124,9 @@ void cipline_tech_object::resetRecipeName()
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
+#ifdef WIN32
     int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
+#endif
     int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
     int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
     char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
@@ -1133,29 +1135,41 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
     strcpy(programList,"");
     if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Наведение кислоты");
+        snprintf(tmp_str, tmp_str_size, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
+        snprintf(prgArray[prgListLen], panel_program_size, "Наведение кислоты");
         prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
         prgListLen++;
+#ifdef WIN32
         strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         }
     if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
         {
-        sprintf_s(tmp_str, tmp_str_size, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
-        sprintf_s(prgArray[prgListLen], panel_program_size, "Наведение щелочи");
+        snprintf(tmp_str, tmp_str_size, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
+        snprintf(prgArray[prgListLen], panel_program_size, "Наведение щелочи");
         prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
         prgListLen++;
+#ifdef WIN32
         strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         }
     if (scenabled && scline == 0)
         {
         if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
             {
-            sprintf_s(tmp_str, tmp_str_size, "%d##Очистка танков||", SPROG_SELF_CLEAN);
-            sprintf_s(prgArray[prgListLen], panel_program_size, "Очистка танков");
+            snprintf(tmp_str, tmp_str_size, "%d##Очистка танков||", SPROG_SELF_CLEAN);
+            snprintf(prgArray[prgListLen], panel_program_size, "Очистка танков");
             prgNumber[prgListLen] = SPROG_SELF_CLEAN;
             prgListLen++;
+#ifdef WIN32
             strcat_s(programList, programList_size, tmp_str);
+#else
+            strcat(programList, tmp_str);
+#endif
             }
         }
     }
@@ -1163,7 +1177,9 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
     int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
+#ifdef WIN32
     int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
+#endif
     int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
     char tmp_str[2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     prgListLen = 0;
@@ -1175,187 +1191,255 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
     strcpy( programList, "" );
     if ((programmask >> 0) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Дезинфeкция" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Дезинфeкция" );
             prgNumber[ prgListLen ] = SPROG_HOTWATER;
             prgListLen++;
             }
         }
     if ((programmask >> 1) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Ополаскивание" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Ополаскивание" );
             prgNumber[ prgListLen ] = SPROG_RINSING;
             prgListLen++;
             }
         }
     if ((programmask >> 2) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол+Дезинф" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол+Дезинф" );
             prgNumber[ prgListLen ] = SPROG_RINSING_HOTWATER;
             prgListLen++;
             }
         }
     if ((programmask >> 3) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кислота" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Кислота" );
             prgNumber[ prgListLen ] = SPROG_ACID;
             prgListLen++;
             }
         }
     if ((programmask >> 4) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кисл+Дезинф" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Кисл+Дезинф" );
             prgNumber[ prgListLen ] = SPROG_ACID_HOTWATER;
             prgListLen++;
             }
         }
     if ((programmask >> 5) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щелочь" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щелочь" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC;
             prgListLen++;
             }
         }
     if ((programmask >> 6) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щелочь+Дезинф" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щелочь+Дезинф" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC_HOTWATER;
             prgListLen++;
             }
         }
     if ((programmask >> 7) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+Дезинф" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+Дезинф" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_HOTWATER;
             prgListLen++;
             }
         }
     if ((programmask >> 8) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кислота" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кислота" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID;
             prgListLen++;
             }
         }
     if ((programmask >> 9) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в канал." );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в канал." );
             prgNumber[ prgListLen ] = SPROG_AP_RC_KANAL;
             prgListLen++;
             }
         }
     if ((programmask >> 12) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в танк" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в танк" );
             prgNumber[ prgListLen ] = SPROG_AP_RC_SW;
             prgListLen++;
             }
         }
     if ((programmask >> 13) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+ДезСР" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+ДезСР" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC_SANITIZER;
             prgListLen++;
             }
         }
     if ((programmask >> 14) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Кисл+ДезСР" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Кисл+ДезСР" );
             prgNumber[ prgListLen ] = SPROG_ACID_SANITIZER;
             prgListLen++;
             }
         }
     if ((programmask >> 15) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+ДезСР" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+ДезСР" );
             prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_SANITIZER;
             prgListLen++;
             }
         }
     if ((programmask >> 10) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Дезраствор" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Дезраствор" );
             prgNumber[ prgListLen ] = SPROG_SANITIZER;
             prgListLen++;
             }
         }
     if ((programmask >> 11) & 1 )
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], panel_program_size, "Управляемая" );
+            snprintf( prgArray[ prgListLen ], panel_program_size, "Управляемая" );
             prgNumber[ prgListLen ] = SPROG_REMOTE;
             prgListLen++;
             }
         }
     if (((programmask >> 16) & 1) && (static_cast<int>(rt_par_float[ P_PROGRAM ]) & (1 << PRG_D)))
         {
-        sprintf_s( tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE );
-        strcat_s( programList, programList_size, tmp_str );
+        snprintf( tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE );
+#ifdef WIN32
+        strcat_s(programList, programList_size, tmp_str);
+#else
+        strcat(programList, tmp_str);
+#endif
         if ( prgListLen < PANEL_MAX_PROGRAMS )
             {
-            sprintf_s( prgArray[ prgListLen ], PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER, "Без ополаск.(опция)" );
+            snprintf( prgArray[ prgListLen ], PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER, "Без ополаск.(опция)" );
             prgNumber[ prgListLen ] = SPROG_OPTION_DISABLE_RINSE;
             prgListLen++;
             }
@@ -1368,100 +1452,100 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
     switch (selectedPrg)
         {
         case SPROG_RINSING_CLEAN:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой");
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             disable_final_rinsing = false;
             break;
         case SPROG_SANITIZER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезРаствор");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезРаствор");
             rt_par_float[P_PROGRAM] =  SPROG_SANITIZER;
             disable_final_rinsing = false;
             break;
         case SPROG_HOTWATER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Дезинфекция");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Дезинфекция");
             rt_par_float[P_PROGRAM] =  SPROG_HOTWATER;
             disable_final_rinsing = false;
             break;
         case SPROG_RINSING:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Ополаскивание");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Ополаскивание");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING;
             disable_final_rinsing = false;
             break;
         case SPROG_RINSING_HOTWATER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол+Дезинф");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол+Дезинф");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING_HOTWATER;
             disable_final_rinsing = false;
             break;
         case SPROG_ACID:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота");
             rt_par_float[P_PROGRAM] =  SPROG_ACID;
             disable_final_rinsing = false;
             break;
         case SPROG_ACID_HOTWATER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота+Дез");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кислота+Дез");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_HOTWATER;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щелочь");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щелочь");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_HOTWATER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Дезинф");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Дезинф");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_HOTWATER;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кислота");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кислота");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID_HOTWATER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+Дез");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+Дез");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID_HOTWATER;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_ACID_SANITIZER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезСР");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_ACID_SANITIZER;
             disable_final_rinsing = false;
             break;
         case SPROG_CAUSTIC_SANITIZER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезСР");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_SANITIZER;
             disable_final_rinsing = false;
             break;
         case SPROG_ACID_SANITIZER:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезСР");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезСР");
             rt_par_float[P_PROGRAM] = SPROG_ACID_SANITIZER;
             disable_final_rinsing = false;
             break;
         case SPROG_ACID_PREPARATION:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. кислоты");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. кислоты");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_PREPARATION;
             break;
         case SPROG_CAUSTIC_PREPARATION:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. щелочи");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Нав. щелочи");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_PREPARATION;
             break;
         case SPROG_SELF_CLEAN:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Очистка танков");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Очистка танков");
             rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
             break;
         case SPROG_REMOTE:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Управляемая мойка");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Управляемая мойка");
             rt_par_float[P_PROGRAM] = SPROG_REMOTE;
             disable_final_rinsing = false;
             break;
         case SPROG_AP_RC_KANAL:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в канал.");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в канал.");
             clean_water_rinsing_return = KANAL;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             disable_final_rinsing = false;
             break;
         case SPROG_AP_RC_SW:
-            sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в танк");
+            snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Опол.чист.водой в танк");
             clean_water_rinsing_return = TANK_W;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             disable_final_rinsing = false;
@@ -1470,22 +1554,22 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
             switch ( static_cast<int>(rt_par_float[ P_PROGRAM ]))
                 {
                 case SPROG_HOTWATER:
-                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезБО" );
+                    snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "ДезБО" );
                     disable_final_rinsing = true;
                     loadedProgram = SPROG_HOTWATER;
                     break;
                 case SPROG_CAUSTIC_HOTWATER:
-                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезБО" );
+                    snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+ДезБО" );
                     disable_final_rinsing = true;
                     loadedProgram = SPROG_CAUSTIC_HOTWATER;
                     break;
                 case SPROG_ACID_HOTWATER:
-                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезБО" );
+                    snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Кисл+ДезБО" );
                     disable_final_rinsing = true;
                     loadedProgram = SPROG_ACID_HOTWATER;
                     break;
                 case SPROG_CAUSTIC_ACID_HOTWATER:
-                    sprintf_s(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезБО" );
+                    snprintf(currentProgramName, PROGRAM_MAX_LEN * UNICODE_MULTIPLIER, "Щел+Кисл+ДезБО" );
                     disable_final_rinsing = true;
                     loadedProgram = SPROG_CAUSTIC_ACID_HOTWATER;
                     break;
@@ -1506,7 +1590,7 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
     formProgramList(rt_par_float[P_PROGRAM_MASK]);
     }
 
-void cipline_tech_object::closeLineValves()
+void cipline_tech_object::closeLineValves() const
     {
     unsigned int i;
     unsigned int vstart = 1001;
@@ -1546,7 +1630,7 @@ int cipline_tech_object::isLine()
         }
     }
 
-int cipline_tech_object::getValvesConflict()
+int cipline_tech_object::getValvesConflict() const
     {
     int i,j,k;
     for (i = TRecipeManager::RV_FIRSTVALVEON; i<=TRecipeManager::RV_LASTVALVEOFF; i++)
@@ -1602,7 +1686,7 @@ float cipline_tech_object::get_station_par( int parno )
     return parpar[0][parno];
     }
 
-void cipline_tech_object::ResetStat( void )
+void cipline_tech_object::ResetStat( )
     {
     for ( int i = STP_QAVS; i <= STP_PODP_WATER; i++ )
         {
@@ -1644,7 +1728,7 @@ int cipline_tech_object::EvalBlock()
     return 1;
     }
 
-void cipline_tech_object::_StopDev( void )
+void cipline_tech_object::_StopDev( )
     {
     V01->off();
     V03->off();
@@ -1750,19 +1834,19 @@ void cipline_tech_object::_Stop( int step_to_stop )
     state=0;
     }
 
-void cipline_tech_object::RHI( void )
+void cipline_tech_object::RHI( )
     {
     PIDP->HI=0;
     PIDF->HI=0;
     }
 
-void cipline_tech_object::PauseTimers( void )
+void cipline_tech_object::PauseTimers( )
     {
     int i;
     for (i=0; i<TMR_CNT; i++) T[i]->pause();
     }
 
-void cipline_tech_object::_RT( void )
+void cipline_tech_object::_RT( )
     {
     int i;
     for (i=0; i<TMR_CNT; i++) T[i]->reset();
@@ -3093,7 +3177,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
         return 0;
         }
 
-void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
+void cipline_tech_object::_ResetLinesDevicesBeforeReset( )
     {
     curprg = -1;
     if (valvesAreInConflict)
@@ -3178,39 +3262,39 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_ao_temp_task->set_value(0);
         }
-    dev_upr_circulation = 0;
-    dev_upr_cip_in_progress = 0;
-    dev_upr_ret = 0;
-    dev_m_ret = 0;
+    dev_upr_circulation = nullptr;
+    dev_upr_cip_in_progress = nullptr;
+    dev_upr_ret = nullptr;
+    dev_m_ret = nullptr;
     nplaststate = false;
     flagnplaststate = false;
-    dev_os_object = 0;
-    dev_os_object_pause = 0;
-    dev_os_object_ready = 0;
-    dev_os_cip_ready = 0;
-    dev_os_object_empty = 0;
-    dev_upr_medium_change = 0;
-    dev_upr_caustic = 0;
-    dev_upr_acid = 0;
-    dev_upr_water = 0;
-    dev_upr_desinfection = 0;
-    dev_upr_cip_ready = 0;
-    dev_upr_cip_finished = 0;
-    dev_upr_cip_finished2 = 0;
-    dev_upr_sanitizer_pump = 0;
-    dev_os_pump_can_run = 0;
-    dev_ai_pump_feedback = 0;
-    dev_ai_pump_frequency = 0;
-    dev_ls_ret_pump = 0;
-    dev_os_can_continue = 0;
+    dev_os_object = nullptr;
+    dev_os_object_pause = nullptr;
+    dev_os_object_ready = nullptr;
+    dev_os_cip_ready = nullptr;
+    dev_os_object_empty = nullptr;
+    dev_upr_medium_change = nullptr;
+    dev_upr_caustic = nullptr;
+    dev_upr_acid = nullptr;
+    dev_upr_water = nullptr;
+    dev_upr_desinfection = nullptr;
+    dev_upr_cip_ready = nullptr;
+    dev_upr_cip_finished = nullptr;
+    dev_upr_cip_finished2 = nullptr;
+    dev_upr_sanitizer_pump = nullptr;
+    dev_os_pump_can_run = nullptr;
+    dev_ai_pump_feedback = nullptr;
+    dev_ai_pump_frequency = nullptr;
+    dev_ls_ret_pump = nullptr;
+    dev_os_can_continue = nullptr;
 
-    dev_upr_prerinse = 0;
-    dev_upr_intermediate_rinse = 0;
-    dev_upr_postrinse = 0;
-    dev_upr_pump_stopped = 0;
-    dev_ao_flow_task = 0;
-    dev_ao_temp_task = 0;
-    dev_upr_wash_aborted = 0;
+    dev_upr_prerinse = nullptr;
+    dev_upr_intermediate_rinse = nullptr;
+    dev_upr_postrinse = nullptr;
+    dev_upr_pump_stopped = nullptr;
+    dev_ao_flow_task = nullptr;
+    dev_ao_temp_task = nullptr;
+    dev_upr_wash_aborted = nullptr;
 
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
@@ -3258,7 +3342,7 @@ int cipline_tech_object::SetCommand( int command )
     return l;
     }
 
-int cipline_tech_object::_LoadProgram( void )
+int cipline_tech_object::_LoadProgram( )
     {
     int selectedprogram = (int)rt_par_float[P_PROGRAM];
     if (selectedprogram & (1 << PRG_K))
@@ -3337,10 +3421,10 @@ int cipline_tech_object::_LoadProgram( void )
             return 555;
         default:
             return 555;
-        };
+        }
     }
 
-void cipline_tech_object::ResetWP( void )
+void cipline_tech_object::ResetWP( )
     {
     int i;
     for (i = 1; i < P_RESERV_START; i++)
@@ -3364,7 +3448,7 @@ void cipline_tech_object::ResetWP( void )
     switch4 = 0;
     }
 
-int cipline_tech_object::GetRetState()
+int cipline_tech_object::GetRetState() const
     {
     if (0 == state)
         {
@@ -3381,7 +3465,7 @@ int cipline_tech_object::GetRetState()
     return 0;
     }
 
-int cipline_tech_object::HasRet()
+int cipline_tech_object::HasRet() const
     {
     if (0 == state)
         {
@@ -3405,15 +3489,15 @@ int cipline_tech_object::ForceRet( int val )
     return 0;
     }
 
-void cipline_tech_object::ResetErr( void )
+void cipline_tech_object::ResetErr( )
     {
     T[TMR_NO_FLOW]->reset();
     }
 
-int cipline_tech_object::_CheckErr( void )
+int cipline_tech_object::_CheckErr( )
     {
     float delta=0;
-    unsigned long block_flags = (unsigned long)parpar[0][P_BLOCK_ERRORS];
+    auto block_flags = (unsigned long)parpar[0][P_BLOCK_ERRORS];
 
     if (555 == curstep)
         {
@@ -3673,7 +3757,7 @@ void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
         }
     }
 
-float cipline_tech_object::GetConc( int what )
+float cipline_tech_object::GetConc( int what ) const
     {
     float x25, a, ms25, c25, c, divider;
     c=0;
@@ -5783,13 +5867,13 @@ int cipline_tech_object::_DoseRR( int what )
     if (T[TMR_OP_TIME]->is_time_up())
         {
         return 1;
-        };
+        }
     return 0;
     }
 
 int cipline_tech_object::init_object_devices()
     {
-    unsigned long circflag = (unsigned long)(rt_par_float[P_PODP_CIRC]);
+    auto circflag = (unsigned long)(rt_par_float[P_PODP_CIRC]);
     circ_tank_s = circflag & CIRC_TANK_S ? 1:0;
     circ_tank_k = circflag & CIRC_TANK_K ? 1:0;
     circ_podp_water = circflag & CIRC_PODP_HOTWATER ? 1:0;
@@ -5882,7 +5966,7 @@ int cipline_tech_object::init_object_devices()
 
     int cipline_tech_object::check_DI(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = {0};
         device* dev;
         if (dev_no > 0)
@@ -5909,7 +5993,7 @@ int cipline_tech_object::init_object_devices()
                         }
                     else
                         {
-                        outdev = 0;
+                        outdev = nullptr;
                         return -1;
                         }
                     }
@@ -5917,14 +6001,14 @@ int cipline_tech_object::init_object_devices()
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
     int cipline_tech_object::check_DO(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
         device* dev;
         if (dev_no > 0)
@@ -5951,7 +6035,7 @@ int cipline_tech_object::init_object_devices()
                         }
                     else
                         {
-                        outdev = 0;
+                        outdev = nullptr;
                         return -1;
                         }
                     }
@@ -5959,14 +6043,14 @@ int cipline_tech_object::init_object_devices()
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
     int cipline_tech_object::check_AI(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
         device* dev;
         if (dev_no > 0)
@@ -5986,21 +6070,21 @@ int cipline_tech_object::init_object_devices()
                     }
                 else
                     {
-                    outdev = 0;
+                    outdev = nullptr;
                     return -1;
                     }
                 }
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
     int cipline_tech_object::check_AO(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
         device* dev;
         if (dev_no > 0)
@@ -6027,7 +6111,7 @@ int cipline_tech_object::init_object_devices()
                         }
                     else
                         {
-                        outdev = 0;
+                        outdev = nullptr;
                         return -1;
                         }
                     }
@@ -6035,14 +6119,14 @@ int cipline_tech_object::init_object_devices()
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
     int cipline_tech_object::check_LS(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
         device* dev;
         if (dev_no > 0)
@@ -6063,21 +6147,21 @@ int cipline_tech_object::init_object_devices()
                     }
                 else
                     {
-                    outdev = 0;
+                    outdev = nullptr;
                     return -1;
                     }
                 }
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
     int cipline_tech_object::check_M(device*& outdev, int parno)
         {
-        u_int dev_no = (u_int)rt_par_float[parno];
+        auto dev_no = (u_int)rt_par_float[parno];
         char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
         device* dev;
         if (dev_no > 0)
@@ -6104,7 +6188,7 @@ int cipline_tech_object::init_object_devices()
                         }
                     else
                         {
-                        outdev = 0;
+                        outdev = nullptr;
                         return -1;
                         }
                     }
@@ -6112,12 +6196,12 @@ int cipline_tech_object::init_object_devices()
             }
         else
             {
-            outdev = 0;
+            outdev = nullptr;
             }
         return 0;
         }
 
-cipline_tech_object* cipline_tech_object::Mdls[10] = {0,0,0,0,0,0,0,0,0,0};
+cipline_tech_object* cipline_tech_object::Mdls[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
 
 int cipline_tech_object::EvalCipReadySignal()
     {
@@ -6126,7 +6210,7 @@ int cipline_tech_object::EvalCipReadySignal()
         if (dev_upr_cip_ready)
             {
             dev_upr_cip_ready->off();
-            dev_upr_cip_ready = 0;
+            dev_upr_cip_ready = nullptr;
             }
         lastloadedRecipe = loadedRecipe;
         if (loadedRecipe >= 0)
@@ -6159,7 +6243,7 @@ int cipline_tech_object::EvalCipReadySignal()
                             }
                         else
                             {
-                            dev_upr_cip_ready = 0;
+                            dev_upr_cip_ready = nullptr;
                             return -1;
                             }
                         }
@@ -6167,7 +6251,7 @@ int cipline_tech_object::EvalCipReadySignal()
                 }
             else
                 {
-                dev_upr_cip_ready = 0;
+                dev_upr_cip_ready = nullptr;
                 }
             if (dev_upr_cip_ready)
                 {
@@ -6854,7 +6938,7 @@ void cipline_tech_object::resetCarNumber()
     ncar4[ 0 ] = 0;
     }
 
-int cipline_tech_object::getSwitch( int switchNO )
+int cipline_tech_object::getSwitch( int switchNO ) const
     {
     switch (switchNO)
         {
@@ -6987,7 +7071,7 @@ int cipline_tech_object::InitStep( int step_to_init, int not_first_call )
     return luares;
     }
 
-int cipline_tech_object::LoadProgram( void )
+int cipline_tech_object::LoadProgram( )
     {
     int luares = 0;
 
@@ -7017,7 +7101,7 @@ int cipline_tech_object::LoadProgram( void )
     return luares;
     }
 
-void cipline_tech_object::StopDev( void )
+void cipline_tech_object::StopDev( )
     {
     if (2 == is_StopDev_func)
         {
@@ -7037,10 +7121,9 @@ void cipline_tech_object::StopDev( void )
         _StopDev();
         }
 
-    return;
     }
 
-void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
+void cipline_tech_object::ResetLinesDevicesBeforeReset( )
     {
     if (2 == is_ResetLinesDevicesBeforeReset_func)
         {
@@ -7124,7 +7207,7 @@ int cipline_tech_object::InitOporCIP( int where, int step_to_init, int not_first
     return luares;
     }
 
-int cipline_tech_object::CheckErr( void )
+int cipline_tech_object::CheckErr( )
     {
     int luares = 0;
 
@@ -7478,7 +7561,7 @@ int cipline_tech_object::OporCirc( int where )
     return luares;
     }
 
-void cipline_tech_object::RT( void )
+void cipline_tech_object::RT( )
     {
     if (2 == is_RT_func)
         {
@@ -7585,23 +7668,23 @@ int cipline_tech_object::DoseRR( int what )
     return luares;
     }
 
-i_DO_device* cipline_tech_object::VWDREN = 0;
+i_DO_device* cipline_tech_object::VWDREN = nullptr;
 
-i_DO_device* cipline_tech_object::VWMG = 0;
+i_DO_device* cipline_tech_object::VWMG = nullptr;
 
-i_DO_device* cipline_tech_object::VKDREN = 0;
+i_DO_device* cipline_tech_object::VKDREN = nullptr;
 
-i_DO_device* cipline_tech_object::VKMG = 0;
+i_DO_device* cipline_tech_object::VKMG = nullptr;
 
-i_DO_device* cipline_tech_object::VSDREN = 0;
+i_DO_device* cipline_tech_object::VSDREN = nullptr;
 
-i_DO_device* cipline_tech_object::VSMG = 0;
+i_DO_device* cipline_tech_object::VSMG = nullptr;
 
 int cipline_tech_object::scenabled = 0;
 
 int cipline_tech_object::scoldvalves = 0;
 
-saved_params<float, true>* cipline_tech_object::scparams = 0;
+saved_params<float, true>* cipline_tech_object::scparams = nullptr;
 
 int cipline_tech_object::scline = 0;
 
@@ -7611,7 +7694,7 @@ int cipline_tech_object::msa_number = 0;
 
 int cipline_tech_object::blockAlarm = 0;
 
-saved_params<float, true>* cipline_tech_object::parpar = 0;
+saved_params<float, true>* cipline_tech_object::parpar = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -7863,42 +7946,48 @@ void MSAPID::set( float new_z )
     par[ 0 ][ pid_par_offset + P_Z ] = new_z;
     }
 
-u_int_4 MSAPID::get_state()
+u_int_4 MSAPID::get_state() const
     {
     return state;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TSav::TSav(void) {
-    n=0;
-    cn=0;
-    integrator=0;
-    };
+TSav::TSav( )
+    {
+    n = 0;
+    cn = 0;
+    integrator = 0;
+    }
 
-TSav::~TSav(void) { };
+TSav::~TSav( ) = default;
 
-void TSav::Add(float val, unsigned long inegr) {
+void TSav::Add( float val, unsigned long inegr )
+    {
     unsigned long delta, i;
-    if (inegr>integrator) {
-        delta=inegr-integrator;
-        integrator=inegr;
-        for (i=0; i<delta; i++) {
+    if ( inegr > integrator )
+        {
+        delta = inegr - integrator;
+        integrator = inegr;
+        for ( i = 0; i < delta; i++ )
+            {
             n++;
-            cn=(cn*(n-1)+val)/n;
-            };
-        };
-    };
+            cn = (cn * (n - 1) + val) / n;
+            }
+        }
+    }
 
-void TSav::R(void) {
-    n=0;
-    cn=0;
-    integrator=0;
-    };
+void TSav::R( )
+    {
+    n = 0;
+    cn = 0;
+    integrator = 0;
+    }
 
-float TSav::Q(void) {
+float TSav::Q( ) const
+    {
     return cn;
-    };
+    }
 
 
 #ifdef WIN_OS

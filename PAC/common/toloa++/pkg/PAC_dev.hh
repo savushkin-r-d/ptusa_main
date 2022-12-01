@@ -1653,29 +1653,29 @@ class cipline_tech_object: public tech_object
         int timeIsOut();
 
         //Базовые методы для вызова из модифицированных на LUA
-        virtual int _DoStep(int step_to_do);
-        virtual int _GoToStep(int cur, int param);
-        virtual int _InitStep(int step_to_init, int not_first_call);
-        virtual int _LoadProgram(void);
-        virtual void _StopDev(void);
-        virtual void _ResetLinesDevicesBeforeReset(void);
-        virtual int _OporCIP(int where);
-        virtual int _InitOporCIP(int where, int step_to_init, int not_first_call);
-        virtual int _CheckErr(void);
-        virtual int _Circ(int what);
-        virtual int _InitCirc(int what, int step_to_init, int not_first_call);
-        virtual int _InitToObject(int from, int where, int step_to_init, int f);
-        virtual int _InitFromObject(int what, int where, int step_to_init, int f);
-        virtual int _InitFilCirc(int with_what, int step_to_init, int f);
-        virtual int _InitOporCirc(int where, int step_to_init, int not_first_call);
-        virtual int _ToObject(int from, int where);
-        virtual int _FromObject(int what, int where);
-        virtual int _FillCirc(int with_what);
-        virtual int _OporCirc(int where);
-        virtual void _RT(void);
-        virtual void _Stop(int step_to_stop);
-        virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
-        virtual int _DoseRR(int what);
+       int _DoStep(int step_to_do);
+       int _GoToStep(int cur, int param);
+       int _InitStep(int step_to_init, int not_first_call);
+       int _LoadProgram();
+       void _StopDev();
+       void _ResetLinesDevicesBeforeReset();
+       int _OporCIP(int where);
+       int _InitOporCIP(int where, int step_to_init, int not_first_call);
+       int _CheckErr();
+       int _Circ(int what);
+       int _InitCirc(int what, int step_to_init, int not_first_call);
+       int _InitToObject(int from, int where, int step_to_init, int f);
+       int _InitFromObject(int what, int where, int step_to_init, int f);
+       int _InitFilCirc(int with_what, int step_to_init, int f);
+       int _InitOporCirc(int where, int step_to_init, int not_first_call);
+       int _ToObject(int from, int where);
+       int _FromObject(int what, int where);
+       int _FillCirc(int with_what);
+       int _OporCirc(int where);
+       void _RT();
+       void _Stop(int step_to_stop);
+       int _InitDoseRR(int what, int step_to_init, int not_first_call);
+       int _DoseRR(int what);
     };
 //--------------------------------------------------------------------------
 class modbus_client
