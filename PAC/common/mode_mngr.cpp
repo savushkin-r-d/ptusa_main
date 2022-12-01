@@ -162,14 +162,20 @@ int operation::start( int new_run_step )
             if ( new_run_step > 0 )
                 {
                 states[ RUN ]->init( new_run_step );
+                //Если возвращаемся в шаг, активный до паузы, то добавляем
+                //его время выполнения.
+                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                }
+            else if ( run_step > 0 )
+                {
+                states[ RUN ]->init( run_step );
+                states[ RUN ]->add_dx_step_time();
                 }
             else
                 {
                 states[ RUN ]->init();
                 }
-            //Если возвращаемся в шаг, активный до паузы, то добавляем
-            //его время выполнения.
-            if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+
             break;
 
         case RUN:
