@@ -159,7 +159,8 @@ TEST( operation, evaluate )
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 
-	//Корректный переход от выполнения к паузе и опять к выполнению.
+	//Корректный переход от выполнения к паузе и опять к выполнению для методов
+	//операции.
 	test_op->start();
 	test_op->evaluate();
 	test_op->to_next_step();
@@ -182,7 +183,6 @@ TEST( operation, evaluate )
 	EXPECT_EQ( 3, test_op->active_step() );
 
 	test_op->switch_off();
-
 
 	//Корректное автовключение/автоотключение.	
 	auto operation_idle_state = test_op[ 0 ][ operation::IDLE ];
