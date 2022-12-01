@@ -30,8 +30,9 @@ currentRecipe(0),
 curRecipeStartBlock(0),
 recipeStartAddr(0L)
 {
-    defaultfilename = new char[20];
-    sprintf(defaultfilename, "line%drec.bin", lineNo );
+    const int DEF_NAME_LENGTH = 20;
+    defaultfilename = new char[ DEF_NAME_LENGTH ];
+    snprintf(defaultfilename, DEF_NAME_LENGTH, "line%drec.bin", lineNo);
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
@@ -173,7 +174,7 @@ TRecipeManager::TRecipeManager( int lineNo ): ParentRecipeManager ( lineNo )
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
-    strcpy(recipeList,"");
+    *recipeList = 0;
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     FormRecipeList();
     recipechanged = 0;
