@@ -24,6 +24,23 @@ int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
+int ParentRecipeManager::startRecipeBlock = 0;
+
+int ParentRecipeManager::recipePerLine = 25;
+
+int ParentRecipeManager::blocksPerRecipe = 4;
+
+int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
+
+int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+
+unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
+
+ParentRecipeManager::ParentRecipeManager()
+{
+
+}
+
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipe(0),
     curRecipeStartBlock(0),

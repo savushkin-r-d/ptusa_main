@@ -22,9 +22,30 @@
 ///@brief Интервал проверки изменений в рецепте
 #define RECIPE_SAVE_INTERVAL 30000L
 
+class ParentRecipeManager
+{
+    ///@brief Начальный блок для всех экземляров рецептов
+    static int startRecipeBlock;
+    ///@brief Количество рецептов на линию
+    static int recipePerLine;
+    ///@brief Длина рецепта в блоках
+    static int blocksPerRecipe;
+    ///@brief Длина имени рецепта
+    static int recipeNameLength;
+    ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
+    static int startRecipeParamsOffset;
+    ///@brief Буфер для копирования рецептов
+    static unsigned char* recipeCopyBuffer;
+    ///@brief Список рецептов для сервера
+    char* recipeList;
+    ///@brief Имя текущего рецепта
+    char* currentRecipeName;
+    ParentRecipeManager();
+};
+
 ///@class TRecipeManager mcaRec.h
 ///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
-class TRecipeManager
+class TRecipeManager 
     {
     public:
     enum RecipeValues
