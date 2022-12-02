@@ -141,7 +141,6 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
     programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
-    strcpy(programList, "");
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(currentProgramName, "");
     ncar1 = new char[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER];
@@ -355,8 +354,6 @@ cipline_tech_object::~cipline_tech_object()
     emptystats = nullptr;
     delete[] loadedRecName;
     loadedRecName= nullptr;
-    delete[] programList;
-    programList = nullptr;
     delete[] currentProgramName;
     currentProgramName = nullptr;
     }
@@ -387,7 +384,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
     //Список доступных программ мойки
-    answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
+    answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList.data());
 
     //Список доступных объектов мойки
     answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
@@ -1124,63 +1121,44 @@ void cipline_tech_object::resetRecipeName()
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
-#ifdef WIN32
-    int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
-#endif
     int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
     int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
     char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
-    strcpy(programList,"");
+    programList.clear();
     if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
         {
-        snprintf(tmp_str, tmp_str_size, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
-        snprintf(prgArray[prgListLen], panel_program_size, "Наведение кислоты");
-        prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
-        prgListLen++;
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
+        addProgramToList("Наведение кислоты", SPROG_ACID_PREPARATION);
         }
     if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
         {
-        snprintf(tmp_str, tmp_str_size, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
-        snprintf(prgArray[prgListLen], panel_program_size, "Наведение щелочи");
-        prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
-        prgListLen++;
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
+        addProgramToList("Наведение щелочи", SPROG_CAUSTIC_PREPARATION);
         }
-    if (scenabled && scline == 0)
+    if ( scenabled && scline == 0 && (SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN )
         {
-        if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
-            {
-            snprintf(tmp_str, tmp_str_size, "%d##Очистка танков||", SPROG_SELF_CLEAN);
-            snprintf(prgArray[prgListLen], panel_program_size, "Очистка танков");
-            prgNumber[prgListLen] = SPROG_SELF_CLEAN;
-            prgListLen++;
-#ifdef WIN32
-            strcat_s(programList, programList_size, tmp_str);
-#else
-            strcat(programList, tmp_str);
-#endif
-            }
+        addProgramToList("Очистка танков", SPROG_SELF_CLEAN);
+        }
+    }
+
+void cipline_tech_object::addProgramToList( const char *programName, int programNmr )
+    {
+    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
+    std::stringstream programStr;
+    programStr << programNmr << "##" << programName << "||";
+    programList.append(programStr.str());
+    if ( prgListLen < PANEL_MAX_PROGRAMS )
+        {
+        snprintf( prgArray[ prgListLen ], panel_program_size, programName );
+        prgNumber[ prgListLen ] = programNmr;
+        prgListLen++;
         }
     }
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
     int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
-#ifdef WIN32
-    int programList_size = PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER;
-#endif
-    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
+
     char tmp_str[2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms( nmr );
@@ -1188,261 +1166,74 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
         {
         programmask = default_programlist;
         }
-    strcpy( programList, "" );
+    programList.clear();
     if ((programmask >> 0) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Дезинф||", SPROG_HOTWATER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Дезинфeкция" );
-            prgNumber[ prgListLen ] = SPROG_HOTWATER;
-            prgListLen++;
-            }
+        addProgramToList("Дезинфекция", SPROG_HOTWATER);
         }
     if ((programmask >> 1) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Ополаск||", SPROG_RINSING );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Ополаскивание" );
-            prgNumber[ prgListLen ] = SPROG_RINSING;
-            prgListLen++;
-            }
+        addProgramToList("Ополаск", SPROG_RINSING);
         }
     if ((programmask >> 2) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол+Дезинф" );
-            prgNumber[ prgListLen ] = SPROG_RINSING_HOTWATER;
-            prgListLen++;
-            }
+        addProgramToList("Опол+Дез", SPROG_RINSING_HOTWATER);
         }
     if ((programmask >> 3) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Кислота||", SPROG_ACID );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Кислота" );
-            prgNumber[ prgListLen ] = SPROG_ACID;
-            prgListLen++;
-            }
+        addProgramToList("Кислота", SPROG_ACID);
         }
     if ((programmask >> 4) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Кисл+Дезинф" );
-            prgNumber[ prgListLen ] = SPROG_ACID_HOTWATER;
-            prgListLen++;
-            }
+        addProgramToList("Кисл+Дез", SPROG_ACID_HOTWATER);
         }
     if ((programmask >> 5) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щелочь||", SPROG_CAUSTIC );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щелочь" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC;
-            prgListLen++;
-            }
+        addProgramToList("Щелочь", SPROG_CAUSTIC);
         }
     if ((programmask >> 6) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щелочь+Дезинф" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC_HOTWATER;
-            prgListLen++;
-            }
+        addProgramToList("Щел+Дез", SPROG_CAUSTIC_HOTWATER);
         }
     if ((programmask >> 7) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+Дезинф" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_HOTWATER;
-            prgListLen++;
-            }
+        addProgramToList("Щел+Кисл+Дез", SPROG_CAUSTIC_ACID_HOTWATER);
         }
     if ((programmask >> 8) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кислота" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID;
-            prgListLen++;
-            }
+        addProgramToList("Щел+Кисл", SPROG_CAUSTIC_ACID);
         }
     if ((programmask >> 9) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в канал." );
-            prgNumber[ prgListLen ] = SPROG_AP_RC_KANAL;
-            prgListLen++;
-            }
+        addProgramToList("Опол.ч.водой в канал.", SPROG_AP_RC_KANAL);
         }
     if ((programmask >> 12) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Опол.ч.водой в танк" );
-            prgNumber[ prgListLen ] = SPROG_AP_RC_SW;
-            prgListLen++;
-            }
+        addProgramToList("Опол.ч.водой в танк", SPROG_AP_RC_SW);
         }
     if ((programmask >> 13) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+ДезСР" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC_SANITIZER;
-            prgListLen++;
-            }
+        addProgramToList("Щел+ДезСР", SPROG_CAUSTIC_SANITIZER);
         }
     if ((programmask >> 14) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Кисл+ДезСР" );
-            prgNumber[ prgListLen ] = SPROG_ACID_SANITIZER;
-            prgListLen++;
-            }
+        addProgramToList("Кисл+ДезСР", SPROG_ACID_SANITIZER);
         }
     if ((programmask >> 15) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Щел+Кисл+ДезСР" );
-            prgNumber[ prgListLen ] = SPROG_CAUSTIC_ACID_SANITIZER;
-            prgListLen++;
-            }
+        addProgramToList("Щел+Кисл+ДезСР", SPROG_CAUSTIC_ACID_SANITIZER);
         }
     if ((programmask >> 10) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##ДезСР||", SPROG_SANITIZER );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Дезраствор" );
-            prgNumber[ prgListLen ] = SPROG_SANITIZER;
-            prgListLen++;
-            }
+        addProgramToList("ДезСР", SPROG_SANITIZER);
         }
     if ((programmask >> 11) & 1 )
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Управляемая||", SPROG_REMOTE );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], panel_program_size, "Управляемая" );
-            prgNumber[ prgListLen ] = SPROG_REMOTE;
-            prgListLen++;
-            }
+        addProgramToList("Управляемая", SPROG_REMOTE);
         }
     if (((programmask >> 16) & 1) && (static_cast<int>(rt_par_float[ P_PROGRAM ]) & (1 << PRG_D)))
         {
-        snprintf( tmp_str, tmp_str_size, "%d##Без ополаск.(опция)||", SPROG_OPTION_DISABLE_RINSE );
-#ifdef WIN32
-        strcat_s(programList, programList_size, tmp_str);
-#else
-        strcat(programList, tmp_str);
-#endif
-        if ( prgListLen < PANEL_MAX_PROGRAMS )
-            {
-            snprintf( prgArray[ prgListLen ], PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER, "Без ополаск.(опция)" );
-            prgNumber[ prgListLen ] = SPROG_OPTION_DISABLE_RINSE;
-            prgListLen++;
-            }
+        addProgramToList("Без ополаск.(опция)", SPROG_OPTION_DISABLE_RINSE);
         }
     }
 

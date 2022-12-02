@@ -8,6 +8,8 @@
 #include "PAC_dev.h"
 #include "cip_stats.h"
 #include <unordered_set>
+#include <string>
+#include <sstream>
 
 
 #define NOCONC       0.1
@@ -567,6 +569,7 @@ class cipline_tech_object: public tech_object
         void resetRecipeName();
         void resetProgramList(unsigned long programmask = 0xB00);
         void formProgramList(unsigned long programmask);
+        void addProgramToList(const char* programName, int programNmr);
         void loadProgramFromList(int selectedPrg);
         void closeLineValves() const;
         int isTank();
@@ -693,7 +696,7 @@ class cipline_tech_object: public tech_object
         int lastloadedRecipe;
         int loadedProgram;
         char* loadedRecName;
-        char* programList;
+        std::string programList{};
         char* currentProgramName;
 
         //Выбор моющего средства
