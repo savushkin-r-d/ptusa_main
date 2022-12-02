@@ -140,7 +140,6 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
-    programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(currentProgramName, "");
     ncar1 = new char[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER];
@@ -1121,9 +1120,6 @@ void cipline_tech_object::resetRecipeName()
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
-    int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
-    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
-    char tmp_str[ 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     programList.clear();
@@ -1157,9 +1153,6 @@ void cipline_tech_object::addProgramToList( const char *programName, int program
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
-    int tmp_str_size = 2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER;
-
-    char tmp_str[2 * PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms( nmr );
     if ( programmask == 0 )
