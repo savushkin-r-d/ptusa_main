@@ -64,3 +64,10 @@ TEST( TRecipeManager, NullifyRecipe )
     TRecipeManager mngr( lineNo );
     mngr.NullifyRecipe();
     }
+
+TEST(ParentRecipeManager, CopyRecipe)
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    mngr.CopyRecipe();
+    }

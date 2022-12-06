@@ -12,18 +12,6 @@
 
 #include "utf2cp1251.h"
 
-int TRecipeManager::startRecipeBlock = 0;
-
-int TRecipeManager::recipePerLine = 25;
-
-int TRecipeManager::blocksPerRecipe = 4;
-
-int TRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
-
-int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
-
-unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
-
 int ParentRecipeManager::startRecipeBlock = 0;
 
 int ParentRecipeManager::recipePerLine = 25;
@@ -36,10 +24,75 @@ int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
 
-ParentRecipeManager::ParentRecipeManager()
+ParentRecipeManager::ParentRecipeManager(int lineNo) :
+    lineNo(lineNo),
+    currentRecipe(0),
+    curRecipeStartBlock(0),
+    recipeStartAddr(0L),
+    defaultfilename("line" + std::to_string(lineNo) + "rec.bin")
 {
-
+    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
+    recipeMemory = new unsigned char[recipeMemorySize];
+    lastEvalTime = get_millisec();
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
+    recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
+    strcpy(recipeList, "");
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    recipechanged = 0;
+    recipechangechecktime = get_millisec();
 }
+
+unsigned long ParentRecipeManager::startAddr() const
+{
+    return startAddr(currentRecipe);
+}
+
+unsigned long ParentRecipeManager::startAddr(int recNo) const
+{
+    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
+}
+
+void ParentRecipeManager::CopyRecipe()
+{
+    if (recipeCopyBuffer != nullptr)
+    {
+        delete[] recipeCopyBuffer;
+    }
+    recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+}
+
+int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string)
+{
+    if (is_string)
+    {
+        char* tmp = new char[length * UNICODE_MULTIPLIER];
+        memcpy(tmp, recipeMemory + startaddr, length);
+        convert_windows1251_to_utf8((char*)buf, tmp);
+        delete[] tmp;
+        tmp = nullptr;
+    }
+    else
+    {
+        memcpy(buf, recipeMemory + startaddr, length);
+    }
+
+    return 0;
+}
+
+int TRecipeManager::startRecipeBlock = 0;
+
+int TRecipeManager::recipePerLine = 25;
+
+int TRecipeManager::blocksPerRecipe = 4;
+
+int TRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
+
+int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+
+unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
+
 
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipe(0),
