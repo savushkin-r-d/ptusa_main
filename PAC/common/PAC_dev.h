@@ -2386,13 +2386,13 @@ class valve_iolink_shut_off_sorio : public valve
         struct in_data
             {
             int16_t  pos;
-            bool de_en       : 1; //De-Energized
-            bool main        : 1; //Main energized position
-            uint16_t unused1 : 2;
-            uint16_t status  : 5;
-            bool sv1         : 1; //Current state of solenoid 1
-            uint16_t unused2 : 2;
-            uint16_t err     : 5;
+            bool de_en          : 1; //De-Energized
+            bool main           : 1; //Main energized position
+            uint16_t unused1    : 2;
+            uint16_t status     : 4;
+            bool sv1            : 1; //Current state of solenoid 1
+            uint16_t unused2    : 2;
+            uint16_t led_state  : 5;
             };
 
         struct out_data_swapped   //Swapped low and high byte for easer processing

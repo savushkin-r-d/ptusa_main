@@ -4224,26 +4224,46 @@ void valve_iolink_shut_off_sorio::evaluate_io()
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-//#define DEBUG_IOLINK_
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
 
-    sprintf( G_LOG->msg, "%x %x %x %x\n",
-        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
-    G_LOG->write_log( i_log::P_WARNING );
+    static bool de_en;
+    static bool main;
+    static uint16_t status;
+    static bool sv1;
+    static uint16_t led_state;
+    static uint16_t pos;
 
-    sprintf( G_LOG->msg,
-        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-        in_info->de_en, in_info->main, in_info->usl,
-        in_info->lsp, 0.1 * in_info->pos );
-    G_LOG->write_log( i_log::P_NOTICE );
+    if ( de_en != in_info->de_en || main != in_info->main ||
+        status != in_info->status || sv1 != in_info->sv1 || led_state != in_info->led_state ||
+        pos != in_info->pos )
+        {
+        print_binary( *(int*)tmp );
+        printf( "\n" );
+
+        sprintf( G_LOG->msg,
+            "de_en %u, main %u, status %u, sv1 %u, led_state %u, pos %u\n",
+            in_info->de_en, in_info->main, in_info->status,
+            in_info->sv1, in_info->led_state, in_info->pos );
+        G_LOG->write_log( i_log::P_NOTICE );
+
+        print_binary( *(int*)out_info );
+        printf( "\n\n" );
+
+        de_en = in_info->de_en;
+        main = in_info->main;
+        status = in_info->status;
+        sv1 = in_info->sv1;
+        led_state = in_info->led_state;
+        pos = in_info->pos;
+        }
 #endif
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
-    int err = in_info->err;
+    int err = in_info->led_state;
 
     int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
@@ -4254,14 +4274,21 @@ int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_shut_off_sorio::get_fb_state()
     {
+    if ( get_AI_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return false;
+        }
+
+    if ( in_info->status ) return false;
+
     u_long dt = get_delta_millisec( start_switch_time );
     if ( dt < get_par( valve::P_ON_TIME, 0 ) )
         {
         return true;
         }
 
-    if ( out_info->sv1 == false && in_info->de_en && in_info->sv1 ) return true;
-    if ( out_info->sv1 == true && in_info->main && in_info->sv1 ) return true;
+    if ( !out_info->sv1 && in_info->de_en ) return true;
+    if ( out_info->sv1 && in_info->main ) return true;
 
     return false;
     }
