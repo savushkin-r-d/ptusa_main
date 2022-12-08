@@ -3974,7 +3974,6 @@ void valve_iolink_mix_proof::evaluate_io()
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-//#define DEBUG_IOLINK_MIXPROOF
 #ifdef DEBUG_IOLINK_MIXPROOF
     char* tmp = (char*)in_info;
 
@@ -4412,7 +4411,6 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-    //#define DEBUG_IOLINK_
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
 
@@ -6298,10 +6296,6 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             break;
         }
     v = alfa * v;
-
-    //Debug print.
-    //G_LOG->debug("%s v=%f, st=%d, %d %d %d %d", name, v, st,
-    //    data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
