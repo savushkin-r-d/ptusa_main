@@ -687,7 +687,6 @@ class device : public i_DO_AO_device, public par_device
         /// Для использования в Lua.
         virtual void set_string_property( const char* field, const char* value );
 
-    protected:
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
         ///
         /// @param buff [out] - буфер записи строки.
@@ -697,19 +696,24 @@ class device : public i_DO_AO_device, public par_device
             return 0;
             }
 
-        u_int_4 s_number;            ///< Последовательный номер устройства.
-
-        DEVICE_TYPE     type;        ///< Тип устройства.
-        DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
-
         bool get_manual_mode() const
             {
             return is_manual_mode;
             }
 
-        char * article;           ///< Артикул изделия.
+        char* get_article() const
+            {
+            return article;
+            }
 
     private:
+        u_int_4 s_number;            ///< Последовательный номер устройства.
+
+        DEVICE_TYPE     type;        ///< Тип устройства.
+        DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
+
+        char * article;           ///< Артикул изделия.
+
         bool is_manual_mode;      ///< Признак ручного режима.
 
         char name[ C_MAX_NAME ];
@@ -4141,7 +4145,7 @@ class counter : public base_counter
 class counter_f : public counter
     {
     public:
-        counter_f( const char *dev_name );
+        counter_f( const char *dev_name, DEVICE_SUB_TYPE sub_type = DST_FQT_F );
 
         int get_state();
 

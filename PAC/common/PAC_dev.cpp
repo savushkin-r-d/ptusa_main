@@ -2965,8 +2965,8 @@ float counter::get_min_flow() const
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-counter_f::counter_f( const char *dev_name ) :
-    counter( dev_name, DST_FQT_F, LAST_PARAM_IDX - 1 )
+counter_f::counter_f( const char *dev_name, DEVICE_SUB_TYPE sub_type ) :
+    counter( dev_name, sub_type, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
@@ -3034,9 +3034,8 @@ int counter_f::set_cmd( const char* prop, u_int idx, double val )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
+counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name, DST_FQT_F_OK )
     {
-    sub_type = DST_FQT_F_OK;
     }
 //-----------------------------------------------------------------------------
 int counter_f_ok::save_device_ex( char *buff )
@@ -5627,6 +5626,7 @@ void motor::direct_set_state( int new_state )
         }
 #endif // DEBUG_NO_IO_MODULES
 
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
         if ( new_state == 2 )
@@ -5878,7 +5878,7 @@ int motor::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 bool level_s::is_active()
     {
-    switch ( sub_type )
+    switch ( get_sub_type() )
         {
         case DST_LS_MIN:
             return get_state() == 0 ? 0 : 1;
@@ -5947,6 +5947,7 @@ void level_s_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
 
+    auto article = get_article();
     if ( strcmp( article, "IFM.LMT100" ) == 0 )
         {
         n_article = ARTICLE::IFM_LMT100;
@@ -7489,7 +7490,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
             if (!atv)
                 {
-                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, article);
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, get_article() );
                 atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
                 }
             }
