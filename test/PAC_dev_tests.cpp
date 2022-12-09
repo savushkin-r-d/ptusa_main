@@ -112,8 +112,19 @@ TEST( device_manager, add_io_device )
             "\t}\n",
         buff );
 
+    //device::DT_V, device::V_IOLINK_DO1_DI2
+    auto name = std::string( "V1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto V1 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V1 ) );
+
     //device::DT_FQT, device::DST_FQT_IOLINK
-    auto name = std::string( "FQT1" );
+    name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_IOLINK, name.c_str(), "Test counter", "IFM");
     EXPECT_NE( nullptr, res );
@@ -269,6 +280,7 @@ TEST( dev_stub, get_min_flow )
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
     }
 
+
 TEST( device, save_device )
     {
     temperature_e_analog t1( "T1" );
@@ -278,6 +290,36 @@ TEST( device, save_device )
     EXPECT_STREQ( 
         "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
+
+
+TEST( valve_iolink_shut_off_sorio, save_device )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );    
+    }
+
+TEST( valve_iolink_shut_off_sorio, evaluate_io )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 0, 1 );
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( V1.AI_channels.int_read_values[ 0 ] );
+
+    
+    EXPECT_EQ( 0, V1.get_value() ); //Default value.
+
+
+    const int POS = 341;
+    *reinterpret_cast<int*>( &V1.AI_channels.int_read_values[ 0 ][ 1 ] ) = POS;
+    std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct int.
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    V1.evaluate_io();    
+    }
+
 
 TEST( motor_altivar, set_cmd )
     {
