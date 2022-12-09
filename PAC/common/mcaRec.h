@@ -27,49 +27,32 @@
 class ParentRecipeManager
 {
     friend class TRecipeManager;
-    friend class TMediumRecipeManager;
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
-    int currentRecipe;
+    int currentRecipe = 0;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
-    unsigned long recipeStartAddr = 0L;
-    unsigned char* recipeMemory;
+    unsigned long recipeStartAddr = 0;
+
     unsigned long recipeMemorySize;
-    std::string defaultfilename;
-    ///@brief Имя текущего рецепта
-    ///@brief Количество рецептов на линию
-    static int recipePerLine;
-    ///@brief Длина имени рецепта
-    static int recipeNameLength;
+
     ///@brief Начальный блок для всех экземляров рецептов
     static int startRecipeBlock;
+    ///@brief Количество рецептов на линию
+    static int recipePerLine;
     ///@brief Длина рецепта в блоках
     static int blocksPerRecipe;
+    ///@brief Длина имени рецепта
+    static int recipeNameLength;
     ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
     static int startRecipeParamsOffset;
     ///@brief Буфер для копирования рецептов
     static unsigned char* recipeCopyBuffer;
-    char* currentRecipeName;
-    ///@brief Список рецептов для сервера
-    char* recipeList;
-
-    unsigned long startAddr() const;
-    unsigned long startAddr(int recNo) const;
-    int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-    int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+    ///@brief Имя текущего рецепта
 
 public:
-    void CopyRecipe();
-    void PasteRecipe();
-    void LoadRecipeName();
-    void NullifyRecipe();
-    void SaveRecipeName();
-    int SaveToFile(const char* filename) const;
-    explicit ParentRecipeManager( int lineNo );
-    virtual ~ParentRecipeManager();
-
+    ParentRecipeManager(int lineNo);
     static int get_recipe_name_length()
     {
         return recipeNameLength;
@@ -78,18 +61,6 @@ public:
     static int get_recipe_per_line()
     {
         return recipePerLine;
-    }
-    char* get_current_recipe_name() const
-    {
-        return currentRecipeName;
-    }
-    char* get_recipe_list() const
-    {
-        return recipeList;
-    }
-    const char* get_default_file_name() const
-    {
-        return defaultfilename.c_str();
     }
 };
 
@@ -218,6 +189,23 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
+    private:
+        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
+        void SaveRecipeName();
+
+        void FormRecipeList();
+        unsigned long startAddr();
+        unsigned long startAddr(int recNo);
+        unsigned char* recipeMemory;
+        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
+        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+    public:
+        ///@brief Имя файла с рецептами
+        char* defaultfilename;
+        ///@brief Имя текущего рецепта
+        char* currentRecipeName;
+        ///@brief Список рецептов для сервера
+        char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта

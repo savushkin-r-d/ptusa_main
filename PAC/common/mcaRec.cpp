@@ -12,31 +12,42 @@
 
 #include "utf2cp1251.h"
 
-int ParentRecipeManager::recipePerLine = 25;
-
-int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
-
 int ParentRecipeManager::startRecipeBlock = 0;
+
+int ParentRecipeManager::recipePerLine = 25;
 
 int ParentRecipeManager::blocksPerRecipe = 4;
 
+int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
+
 int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
-unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
-
-
-ParentRecipeManager::ParentRecipeManager( int lineNo ) :
+ParentRecipeManager::ParentRecipeManager( int lineNo) :
     lineNo(lineNo),
     currentRecipe(0),
     curRecipeStartBlock(0),
-    defaultfilename("line" + std::to_string(lineNo) + "rec.bin")
+    recipeStartAddr(0L)
 {
+    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
+    lastEvalTime = get_millisec();
+    recipechanged = 0;
+    recipechangechecktime = get_millisec();
+}
+
+unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
+
+TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
+{
+    defaultfilename = new char[20];
+    sprintf(defaultfilename, "line%drec.bin", lineNo);
     recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
     strcpy(recipeList, "");
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
 }
