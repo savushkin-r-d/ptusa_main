@@ -22,6 +22,8 @@ int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
 int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
+unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
+
 ParentRecipeManager::ParentRecipeManager( int lineNo) :
     lineNo(lineNo),
     currentRecipe(0),
@@ -34,7 +36,6 @@ ParentRecipeManager::ParentRecipeManager( int lineNo) :
     recipechangechecktime = get_millisec();
 }
 
-unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
 {
