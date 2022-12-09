@@ -140,7 +140,9 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     use_internal_medium_recipes = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
-    loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
+    loadedRecName = new char[TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER];
+    programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
+    strcpy(programList, "");
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(currentProgramName, "");
     ncar1 = new char[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER];
@@ -600,10 +602,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     if (0 == strcmp(prop, "CUR_REC"))
         {
         u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)TRecipeManager::recipeNameLength)
+        if (slen < (unsigned int)TRecipeManager::get_recipe_name_length())
             {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
+            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
             strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
 #endif
