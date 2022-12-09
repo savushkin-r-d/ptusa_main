@@ -4262,7 +4262,7 @@ void valve_iolink_shut_off_sorio::evaluate_io()
 int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
-    int err = in_info->led_state;
+    int err = in_info->status;
 
     int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
