@@ -125,7 +125,12 @@ class par_device
             this->err_par = err_par;
             }
 
-    protected:
+        float get_par( int idx ) const
+            {
+            return par[ 0 ][ idx ];
+            }
+
+    private:
         /// @brief Ошибки устройства.
         saved_params_u_int_4 *err_par;
 
@@ -2355,6 +2360,8 @@ class valve_iolink_shut_off_thinktop : public valve
 class valve_iolink_shut_off_sorio : public valve
     {
     public:
+        static const std::string SORIO_ARTICLE;
+
         valve_iolink_shut_off_sorio( const char* dev_name );
 
         VALVE_STATE get_valve_state();
@@ -2406,8 +2413,9 @@ class valve_iolink_shut_off_sorio : public valve
             uint16_t unused2 : 1;
             };
 
-        in_data* in_info = new in_data;
-        out_data_swapped* out_info = 0;
+        in_data* in_info = new in_data{ 0 };
+        static out_data_swapped stub_out_info;
+        out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
     };

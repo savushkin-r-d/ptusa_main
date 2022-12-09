@@ -1550,9 +1550,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_DO1_DI2:
-                    {
-                    const char* SORIO_ARTICLE = "DEF.SORIO-1SV";
-                    if ( strcmp( article, SORIO_ARTICLE ) == 0 )
+                    {                    
+                    if ( strcmp( article,
+                        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() ) == 0 )
                         {
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
                         new_io_device = (valve_iolink_shut_off_sorio*)new_device;
@@ -2616,7 +2616,7 @@ void threshold_regulator::direct_set_value( float val )
             }
 
         auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
-        auto is_reverse = ( *par )[ idx ] > 0;
+        auto is_reverse = get_par( idx ) > 0;
         if ( STATE::OFF == state )
             {
             out_state = 0;
@@ -2624,7 +2624,7 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            auto delta = ( *par )[ static_cast<int>( PARAM::P_DELTA ) ];
+            auto delta = get_par( static_cast<int>( PARAM::P_DELTA ) );
             if ( in_value > set_value + delta )
                 {
                 out_state = is_reverse ? 1 : 0;
@@ -4192,6 +4192,11 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
     }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
+
+valve_iolink_shut_off_sorio::out_data_swapped
+    valve_iolink_shut_off_sorio::stub_out_info;
 //-----------------------------------------------------------------------------
 valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
