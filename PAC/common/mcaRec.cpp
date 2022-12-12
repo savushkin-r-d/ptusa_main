@@ -12,17 +12,9 @@
 
 #include "utf2cp1251.h"
 
-int ParentRecipeManager::startRecipeBlock = 0;
-
 int ParentRecipeManager::recipePerLine = 25;
 
-int ParentRecipeManager::blocksPerRecipe = 4;
-
 int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
-
-int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
-
-unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
 ParentRecipeManager::ParentRecipeManager( int lineNo) :
     lineNo(lineNo),
@@ -30,12 +22,18 @@ ParentRecipeManager::ParentRecipeManager( int lineNo) :
     curRecipeStartBlock(0),
     recipeStartAddr(0L)
 {
-    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
     lastEvalTime = get_millisec();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
 }
 
+int TRecipeManager::startRecipeBlock = 0;
+
+int TRecipeManager::blocksPerRecipe = 4;
+
+int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+
+unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
 {
