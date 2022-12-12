@@ -721,10 +721,10 @@ class cipline_tech_object: public tech_object
 
 
         //Список программ для панели
-#define PANEL_MAX_PROGRAMS 16
-#define PANEL_PROGRAM_LENGTH 24
-        char prgArray[PANEL_MAX_PROGRAMS][PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER]{};
-        int prgNumber[PANEL_MAX_PROGRAMS]{};
+        static const int panelMaxPrograms = 16;
+        static const int panelProgramLength = 24;
+        std::vector<std::string> prgArray{};
+        int prgNumber[panelMaxPrograms]{};
         int prgListLen{};
 
 

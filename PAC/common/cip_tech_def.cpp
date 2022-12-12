@@ -77,6 +77,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     int i;
     nmr = number;
     tech_type = type;
+    for ( i = 0; i < panelMaxPrograms; i++ ) prgArray.emplace_back( "" );
     if (nullptr == parpar)
         {
         parpar = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_MAIN");
@@ -1139,13 +1140,12 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 
 void cipline_tech_object::addProgramToList( const char *programName, int programNmr )
     {
-    int panel_program_size = PANEL_PROGRAM_LENGTH * UNICODE_MULTIPLIER;
     std::stringstream programStr;
     programStr << programNmr << "##" << programName << "||";
     programList.append(programStr.str());
-    if ( prgListLen < PANEL_MAX_PROGRAMS )
+    if ( prgListLen < panelMaxPrograms )
         {
-        snprintf( prgArray[ prgListLen ], panel_program_size, programName );
+        prgArray[ prgListLen ] = programName;
         prgNumber[ prgListLen ] = programNmr;
         prgListLen++;
         }
