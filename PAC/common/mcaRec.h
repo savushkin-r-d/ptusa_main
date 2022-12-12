@@ -30,28 +30,17 @@ class ParentRecipeManager
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
-    int currentRecipe = 0;
+    int currentRecipe;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
-    unsigned long recipeStartAddr = 0;
-
-    unsigned long recipeMemorySize;
-
-    ///@brief Начальный блок для всех экземляров рецептов
-    static int startRecipeBlock;
-    ///@brief Количество рецептов на линию
-    static int recipePerLine;
-    ///@brief Длина рецепта в блоках
-    static int blocksPerRecipe;
-    ///@brief Длина имени рецепта
-    static int recipeNameLength;
-    ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
-    static int startRecipeParamsOffset;
-    ///@brief Буфер для копирования рецептов
-    static unsigned char* recipeCopyBuffer;
-    ///@brief Имя текущего рецепта
+    unsigned long recipeStartAddr;
 
 public:
+    ///@brief Количество рецептов на линию
+    static int recipePerLine;
+    ///@brief Длина имени рецепта
+    static int recipeNameLength;
+
     ParentRecipeManager(int lineNo);
     static int get_recipe_name_length()
     {
@@ -190,18 +179,26 @@ class TRecipeManager : public ParentRecipeManager
         RV_LASTVALVEOFF = 119,
         };
     private:
-        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
         void SaveRecipeName();
 
         void FormRecipeList();
         unsigned long startAddr();
         unsigned long startAddr(int recNo);
         unsigned char* recipeMemory;
-        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
+        unsigned long recipeMemorySize;
+        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         ///@brief Имя файла с рецептами
         char* defaultfilename;
+        ///@brief Начальный блок для всех экземляров рецептов
+        static int startRecipeBlock;
+        ///@brief Длина рецепта в блоках
+        static int blocksPerRecipe;
+        ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
+        static int startRecipeParamsOffset;
+        ///@brief Буфер для копирования рецептов
+        static unsigned char* recipeCopyBuffer;
         ///@brief Имя текущего рецепта
         char* currentRecipeName;
         ///@brief Список рецептов для сервера
