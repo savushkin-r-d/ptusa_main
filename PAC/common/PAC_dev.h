@@ -2367,9 +2367,13 @@ class valve_iolink_shut_off_sorio : public valve
 
         void evaluate_io();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() final;
 
+#ifdef DEBUG_NO_IO_MODULES
+        void direct_set_value( float new_value ) final;
+#endif
+
+#ifndef DEBUG_NO_IO_MODULES
         bool get_fb_state();
 
         int get_off_fb_value();
@@ -3784,9 +3788,9 @@ public:
 #ifdef DEBUG_NO_IO_MODULES
     int set_cmd( const char* prop, u_int idx, double val ) override;
 
-    int get_rpm() const
+    float get_rpm() const
         {
-        return rpm;
+        return (float)rpm;
         }
 #endif // DEBUG_NO_IO_MODULES
 

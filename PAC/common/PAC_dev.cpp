@@ -4174,8 +4174,8 @@ void valve_iolink_shut_off_sorio::evaluate_io()
     {
     out_info = (out_data_swapped*)get_AO_write_data( 0 );
 
-    char* data = (char*)get_AI_data( 0 );
-    char* buff = (char*)&in_info;
+    auto data = (char*)get_AI_data( 0 );
+    auto buff = (char*)&in_info;
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
@@ -4222,13 +4222,24 @@ int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
     int err = in_info.status;
-    float pos = 0.1f * in_info.pos;
 
     int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
-    res += sprintf( buff + res, "V=%.1f, ", pos );
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
 
     return res;
     }
+//-----------------------------------------------------------------------------
+float valve_iolink_shut_off_sorio::get_value()
+    {
+    return 0.1f * in_info.pos;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+void valve_iolink_shut_off_sorio::direct_set_value( float new_value )
+    {
+    in_info.pos = (int16_t)( new_value * 10 );
+    }
+#endif
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_shut_off_sorio::get_fb_state()
@@ -4250,11 +4261,6 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
     if ( out_info->sv1 && in_info.main ) return true;
 
     return false;
-    }
-//-----------------------------------------------------------------------------
-float valve_iolink_shut_off_sorio::get_value()
-    {
-    return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_off_fb_value()

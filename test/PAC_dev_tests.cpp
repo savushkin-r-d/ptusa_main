@@ -325,6 +325,12 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
+
+    V1.direct_set_value( 12.1 );
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
     }
 
 
