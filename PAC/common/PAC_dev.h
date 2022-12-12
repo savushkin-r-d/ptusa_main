@@ -506,11 +506,11 @@ class device : public i_DO_AO_device, public par_device
             M_ATV_LINEAR,
 
             //FQT
-            DST_FQT = 1,   ///< Счетчик.
-            DST_FQT_F,     ///< Счетчик + расход.
-            DST_FQT_F_OK,  ///< Счетчик + расход c диагностикой.
-            DST_FQT_VIRT,  ///Виртуальный cчетчик (без привязки к модулям).
-            DST_FQT_IOLINK,/// Счетчик IO-Link.
+            DST_FQT = 1,        ///< Счетчик.
+            DST_FQT_F,          ///< Счетчик + расход.
+                                ///< Резерв.
+            DST_FQT_VIRT = 4,   ///Виртуальный cчетчик (без привязки к модулям).
+            DST_FQT_IOLINK,     /// Счетчик IO-Link.
 
             //QT
             DST_QT = 1,   ///< Концентратомер.
@@ -4172,25 +4172,6 @@ class counter_f : public counter
             };
 
         float flow_value = 0.f;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Счетчик c диагностикой.
-class counter_f_ok : public counter_f
-    {
-    public:
-        counter_f_ok( const char *dev_name );
-
-        //Lua.
-        int save_device_ex( char *buff );
-
-        int get_state();
-
-    private:
-
-        enum CONSTANTS
-            {
-            DI_INDEX = 0,  ///< Индекс канала дискретного входа (диагностики).
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.

@@ -1330,9 +1330,6 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             case device::DST_FQT_F:
                 return ( counter_f* )res_ctr;
 
-            case device::DST_FQT_F_OK:
-                return ( counter_f_ok* )res_ctr;
-
             case device::DST_FQT:
                 return ( counter* )res_ctr;
 
@@ -1741,11 +1738,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_FQT_F:
                     new_device      = new counter_f( dev_name );
                     new_io_device = ( counter_f* ) new_device;
-                    break;
-
-                case device::DST_FQT_F_OK:
-                    new_device = new counter_f_ok( dev_name );
-                    new_io_device = (counter_f_ok*)new_device;
                     break;
 
                 case device::DST_FQT_VIRT:
@@ -3032,35 +3024,6 @@ int counter_f::set_cmd( const char* prop, u_int idx, double val )
 
     return 0;
     };
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name, DST_FQT_F_OK )
-    {
-    }
-//-----------------------------------------------------------------------------
-int counter_f_ok::save_device_ex( char *buff )
-    {
-    int res = counter_f::save_device_ex( buff );
-
-#ifdef DEBUG_NO_IO_MODULES
-    res += sprintf( buff + res, "OK=1, " );
-#else
-    res += sprintf( buff + res, "OK=%d, ", get_DI( DI_INDEX ) );
-#endif //DEBUG_NO_IO_MODULES
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int counter_f_ok::get_state()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    int i = get_DI( DI_INDEX );
-
-    return i == 1 ? counter_f::get_state() : static_cast<int>( STATES::S_ERROR );
-#else
-    return counter_f::get_state();
-#endif
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
