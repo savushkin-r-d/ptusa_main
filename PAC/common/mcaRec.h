@@ -41,7 +41,7 @@ public:
     ///@brief Длина имени рецепта
     static int recipeNameLength;
 
-    ParentRecipeManager(int lineNo);
+    explicit ParentRecipeManager(int lineNo);
     static int get_recipe_name_length()
     {
         return recipeNameLength;
@@ -296,8 +296,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
-          private:
-              void FormRecipeList();
     };
 
 
