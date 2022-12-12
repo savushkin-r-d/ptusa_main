@@ -305,7 +305,8 @@ TEST( valve_iolink_shut_off_sorio, save_device )
 TEST( valve_iolink_shut_off_sorio, evaluate_io )
     {
     valve_iolink_shut_off_sorio V1( "V1" );
-    V1.init( 0, 0, 0, 1 );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ] { 0 };
     V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
     auto buff = reinterpret_cast<char*>( V1.AI_channels.int_read_values[ 0 ] );
 
@@ -318,6 +319,12 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct int.
     std::swap( buff[ 2 ], buff[ 1 ] );
     V1.evaluate_io();    
+    const int BUFF_SIZE = 100;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
     }
 
 
