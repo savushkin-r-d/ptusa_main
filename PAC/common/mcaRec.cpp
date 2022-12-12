@@ -52,22 +52,6 @@ TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo )
     recipechangechecktime = get_millisec();
 }
 
-TRecipeManager::~TRecipeManager()
-    {
-    SaveRecipeName();
-    delete[] currentRecipeName;
-    currentRecipeName = nullptr;
-    delete[] recipeList;
-    recipeList = nullptr;
-    SaveToFile(defaultfilename);
-    delete[] recipeMemory;
-    recipeMemory = nullptr;
-    delete[] recipeCopyBuffer;
-    recipeCopyBuffer = nullptr;
-    delete[] defaultfilename;
-    defaultfilename = nullptr;
-    }
-
 int TRecipeManager::NextRecipe()
     {
     if (currentRecipe < recipePerLine - 1)
@@ -313,8 +297,6 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_PIDP_IsManualMode, 0);
         setRecipeValue(recipeNo, RV_PIDP_UManual, 30);
         setRecipeValue(recipeNo, RV_PIDP_Uk, 0);
-        //-PID1-!>
-        //-PID2
         setRecipeValue(recipeNo, RV_PIDF_Z, 15);
         setRecipeValue(recipeNo, RV_PIDF_k, 0.5);
         setRecipeValue(recipeNo, RV_PIDF_Ti, 10);

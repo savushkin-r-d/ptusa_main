@@ -4287,7 +4287,7 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
             break;
         }
     rt_par_float[P_ZAD_PODOGR] = v;
-    if (/*disable_tank_heating && */isTank() && (22 == step_to_init || 42 == step_to_init || 62 == step_to_init))
+    if (isTank() && (22 == step_to_init || 42 == step_to_init || 62 == step_to_init))
         {
         rt_par_float[P_ZAD_PODOGR] = 0;
         PIDP->off();
