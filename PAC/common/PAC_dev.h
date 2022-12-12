@@ -749,7 +749,7 @@ class digital_io_device : public device,
         virtual void print() const;
 
 #ifdef DEBUG_NO_IO_MODULES
-    protected:
+    private:
         int state;  ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
     };
@@ -1589,9 +1589,9 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state );
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
 #endif // DEBUG_NO_IO_MODULES
@@ -1875,13 +1875,9 @@ class valve_AS : public valve
             //                printf( "*write_state = %d\n", ( int ) *write_state );
             //                }
             }
-#endif // DEBUG_NO_IO_MODULES
 
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = ( char ) new_state;
-#else
             int offset = 0;
             //Для первого 31-го устройства четный номер - старшие четыре
             //бита (1), для остальных устройств нечетный номер - старшие четыре
@@ -1942,8 +1938,9 @@ class valve_AS : public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_IO_MODULES
             }
+
+#endif //DEBUG_NO_IO_MODULES
 
     protected:
         u_int AS_number;    ///< AS-номер устройства.
@@ -2080,11 +2077,9 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = ( char ) new_state;
-#else
             switch ( new_state )
                 {
                 case V_OFF:
@@ -2121,10 +2116,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
 #endif // DEBUG_NO_IO_MODULES

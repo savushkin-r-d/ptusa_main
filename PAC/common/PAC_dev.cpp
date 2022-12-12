@@ -3714,11 +3714,10 @@ void valve_mix_proof::open_lower_seat()
     direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
 void valve_mix_proof::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = ( char ) new_state;
-#else
     switch ( new_state )
         {
         case V_OFF:
@@ -3760,11 +3759,8 @@ void valve_mix_proof::direct_set_state( int new_state )
             direct_on();
             break;
         }
-#endif //DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
 void valve_mix_proof::direct_on()
     {
     set_DO( DO_INDEX_U, 0 );
