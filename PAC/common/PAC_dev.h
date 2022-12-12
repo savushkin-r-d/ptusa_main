@@ -1052,11 +1052,6 @@ class virtual_valve: public valve
     public:
         virtual_valve( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
         VALVE_STATE get_valve_state();
 
         virtual void direct_off();
@@ -1070,6 +1065,10 @@ class virtual_valve: public valve
         virtual void direct_on();
 
         virtual int get_state();
+
+    private:
+        float value;
+        int state;
     };
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
@@ -1942,9 +1941,6 @@ class valve_AS : public valve
 
 #endif //DEBUG_NO_IO_MODULES
 
-    protected:
-        u_int AS_number;    ///< AS-номер устройства.
-
         enum CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
@@ -1959,6 +1955,9 @@ class valve_AS : public valve
 
             MAILBOX_OFFSET = 8
             };
+
+    private:
+        u_int AS_number;    ///< AS-номер устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -2182,6 +2181,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #ifdef _MSC_VER
 #pragma region Выключение мини клапана с задержкой.
 #endif
+    private:
         /// @brief Вектор клапанов, ожидающих выключение.
         static std::vector< valve_bottom_mix_proof* > to_switch_off;
 
@@ -2410,7 +2410,7 @@ class valve_iolink_shut_off_sorio : public valve
             uint16_t unused2 : 1;
             };
 
-        in_data* in_info = new in_data{ 0 };
+        in_data in_info{ 0 };
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 
@@ -2448,13 +2448,14 @@ class valve_iolink_vtug : public valve
         /// @brief Получение состояния обратной связи.
         bool get_fb_state();
 
-        u_int vtug_number;        ///< Номер устройства.
-        u_int vtug_io_size = 1;   ///< Размер области, в словах.
-
         enum CONSTANTS
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
+
+    private:
+        u_int vtug_number;        ///< Номер устройства.
+        u_int vtug_io_size = 1;   ///< Размер области, в словах.
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
@@ -2592,9 +2593,9 @@ class AI1 : public analog_io_device
             return 0;
             }
 
-    protected:
 #ifdef DEBUG_NO_IO_MODULES
-        int st;
+    private:
+        int st = 0;
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2727,7 +2728,6 @@ class level: public AI1
             return start_param_idx + LAST_PARAM_IDX - 1;
             }
 
-    protected:
         enum CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
@@ -3013,9 +3013,6 @@ class concentration_e : public AI1
         concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
             AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            st = 1;
-#endif
             start_param_idx = AI1::get_params_count();
             set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
@@ -3159,12 +3156,6 @@ class virtual_wages : public device, public i_wages
     public:
         virtual_wages( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
-
         virtual void direct_off();
 
         virtual void direct_set_value( float new_value );
@@ -3178,6 +3169,10 @@ class virtual_wages : public device, public i_wages
         virtual int get_state();
 
         virtual void tare();
+
+    private:
+        float value;
+        int state;
     };
 //-----------------------------------------------------------------------------
 class wages_RS232 : public analog_io_device, public i_wages
@@ -3268,7 +3263,33 @@ class wages : public analog_io_device, public i_wages
         void tare();
         float get_weight();
 
-    protected:
+#ifdef DEBUG_NO_IO_MODULES
+        float get_value();
+        void  direct_set_value( float new_value );
+#endif // DEBUG_NO_IO_MODULES
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+        void direct_set_state( int new_state );
+        void  direct_set_value( float new_value )
+            {
+            return;
+            }
+#endif // DEBUG_NO_IO_MODULES
+
+        int get_state()
+            {
+            return 0;
+            }
+
+        int save_device_ex( char *buff )
+            {
+            return sprintf( buff, "W=%.3f, ", get_value() );
+            }
+
+    private:
+        float weight;
+        unsigned long filter_time;
 
         enum CONSTANTS
             {
@@ -3288,35 +3309,6 @@ class wages : public analog_io_device, public i_wages
             S_NONE = 0,
             S_TARE = 1,
             };
-
-        float weight;
-        unsigned long filter_time;
-
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
-        void  direct_set_value( float new_value );
-#endif // DEBUG_NO_IO_MODULES
-
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        float get_value();
-        void direct_set_state( int new_state );
-        void  direct_set_value( float new_value )
-            {
-            return;
-            }
-
-#endif // DEBUG_NO_IO_MODULES
-    public:
-        int get_state()
-            {
-            return 0;
-            }
-
-        int save_device_ex( char *buff )
-            {
-            return sprintf( buff, "W=%.3f, ", get_value() );
-            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
@@ -3325,14 +3317,6 @@ class virtual_device : public device
     public:
         virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type,
             device::DEVICE_SUB_TYPE dev_sub_type);
-
-    protected:
-
-        float value;
-        int state;
-        bool level_logic_invert;
-
-    public:
 
         virtual void direct_off();
 
@@ -3349,6 +3333,11 @@ class virtual_device : public device
         virtual bool is_active();
 
         virtual void set_rt_par(unsigned int idx, float value);
+
+    private:
+        float value;
+        int state;
+        bool level_logic_invert;
      };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
@@ -3398,10 +3387,9 @@ class virtual_counter : public device, public i_counter
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
 
-    protected:
-        STATES state;        
-
     private:
+        STATES state;
+
         float flow_value;
 
         u_int value;
@@ -3679,12 +3667,6 @@ class virtual_motor : public i_motor
     public:
         virtual_motor( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
-
         virtual void direct_off();
 
         virtual void direct_set_value( float new_value );
@@ -3696,6 +3678,10 @@ class virtual_motor : public i_motor
         virtual void direct_on();
 
         virtual int get_state();
+
+    private:
+        float value;
+        int state;
 
     };
 //-----------------------------------------------------------------------------
@@ -3797,9 +3783,19 @@ public:
 
 #ifdef DEBUG_NO_IO_MODULES
     int set_cmd( const char* prop, u_int idx, double val ) override;
+
+    int get_rpm() const
+        {
+        return rpm;
+        }
 #endif // DEBUG_NO_IO_MODULES
 
-protected:
+    altivar_node* get_atv() const
+        {
+        return atv;
+        }
+
+private:
     altivar_node* atv;
 
 #ifdef DEBUG_NO_IO_MODULES
@@ -3811,7 +3807,6 @@ protected:
     float amperage = .0f;
 #endif // DEBUG_NO_IO_MODULES
 
-private:
     enum CONSTANTS
     {
         ADDITIONAL_PARAM_COUNT = 1,
@@ -4470,7 +4465,7 @@ class camera : public i_camera, public device, public io_device
     {
     public:
         camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
-            int params_count = 0 );
+            int params_count = 0, bool is_ready = true );
 
         void direct_set_state( int new_state );
 
@@ -4520,8 +4515,6 @@ class camera_DI2 : public camera
     {
     public:
         camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type );
-
-        int get_state();
 
         void evaluate_io() override;
 
