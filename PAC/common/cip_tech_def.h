@@ -98,6 +98,7 @@
 #define  P_DEZINFECTION_TYPE    35	//Тип дезинфицирующего раствора
 #define  P_CAUSTIC_SELECTED     36	//Выбранный рецепт щелочного раствора
 #define  P_ACID_SELECTED        37	//Выбранный рецепт кислотного раствора
+#define  P_END_WASH_DELAY       38  //Длительность 555 операции(завершение мойки)
 
 
 //programms of moika

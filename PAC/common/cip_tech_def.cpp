@@ -2886,7 +2886,10 @@ int cipline_tech_object::_DoStep( int step_to_do )
 
             if (is_reset) can_end = true;
 
-            if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY && can_end)
+            unsigned long wash_end_delay = WASH_END_DELAY;
+            if (parpar[0][P_END_WASH_DELAY] > 0) wash_end_delay = parpar[0][P_END_WASH_DELAY];
+
+            if (get_delta_millisec(enddelayTimer) > wash_end_delay && can_end)
                 {
                 strcpy(objectstats->objlastwashprogram, currentProgramName);
                 DateToChar(objectstats->objlastwash);
