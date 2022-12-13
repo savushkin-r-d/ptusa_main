@@ -33,7 +33,7 @@ class ParentRecipeManager
     int currentRecipe;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
-    unsigned long recipeStartAddr;
+    unsigned long recipeStartAddr = 0L;
     std::string defaultfilename;
     ///@brief Имя текущего рецепта
     ///@brief Количество рецептов на линию
