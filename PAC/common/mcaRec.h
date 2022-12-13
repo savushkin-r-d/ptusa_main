@@ -63,7 +63,10 @@ public:
     void CopyRecipe();
     void PasteRecipe();
     void LoadRecipeName();
+    void NullifyRecipe();
     explicit ParentRecipeManager( int lineNo );
+    virtual ~ParentRecipeManager();
+
     static int get_recipe_name_length()
     {
         return recipeNameLength;
