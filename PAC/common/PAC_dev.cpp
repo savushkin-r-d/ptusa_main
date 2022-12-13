@@ -5569,9 +5569,10 @@ void motor::direct_set_value( float value )
 #ifdef DEBUG_NO_IO_MODULES
     freq = value;
 #else
-    if ( get_sub_type() == device::DST_M_FREQ || get_sub_type() == device::DST_M_REV_FREQ ||
-        get_sub_type() == device::DST_M_REV_FREQ_2 ||
-        get_sub_type() == device::DST_M_REV_FREQ_2_ERROR )
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
         }
