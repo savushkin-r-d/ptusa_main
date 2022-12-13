@@ -31,6 +31,8 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     curRecipeStartBlock(0),
     defaultfilename("line" + std::to_string(lineNo) + "rec.bin")
 {
+    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
+    recipeMemory = new unsigned char[recipeMemorySize];
     lastEvalTime = get_millisec();
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
@@ -39,7 +41,7 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     recipechangechecktime = get_millisec();
 }
 
-unsigned long ParentRecipeManager::startAddr()
+unsigned long ParentRecipeManager::startAddr() const
 {
     return startAddr(currentRecipe);
 }
@@ -47,6 +49,41 @@ unsigned long ParentRecipeManager::startAddr()
 unsigned long ParentRecipeManager::startAddr(int recNo) const
 {
     return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
+}
+int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string)
+{
+    if (is_string)
+    {
+        char* tmp = new char[length * UNICODE_MULTIPLIER];
+        memcpy(tmp, recipeMemory + startaddr, length);
+        convert_windows1251_to_utf8((char*)buf, tmp);
+        delete[] tmp;
+    }
+    else
+    {
+        memcpy(buf, recipeMemory + startaddr, length);
+    }
+
+    return 0;
+}
+
+int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string)
+{
+    if (is_string)
+    {
+        char* tmp = new char[length + 1];
+        convert_utf8_to_windows1251((char*)buf, tmp, strlen((char*)buf));
+        memcpy(recipeMemory + startaddr, tmp, length);
+        delete[] tmp;
+    }
+    else
+    {
+        memcpy(recipeMemory + startaddr, buf, length);
+    }
+
+    return 0;
 }
 
 
@@ -495,8 +532,40 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
     return errflag;
     }
 
-int TRecipeManager::LoadFromFile(const char* filename)
-{
+void TRecipeManager::CopyRecipe()
+    {
+    if (recipeCopyBuffer != nullptr)
+        {
+        delete[] recipeCopyBuffer;
+        }
+    recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+    }
+
+void TRecipeManager::PasteRecipe()
+    {
+    if (recipeCopyBuffer != nullptr)
+        {
+        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+        LoadRecipeName();
+        }
+    }
+
+void TRecipeManager::NullifyRecipe()
+    {
+    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
+    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
+    delete [] tempbuff;
+    tempbuff = nullptr;
+    LoadRecipeName();
+    }
+
+int TRecipeManager::SaveToFile(const char* filename)
+    {
+#ifdef DEBUG
+    printf("Saving recipes to file %s\n", filename);
+#endif // DEBUG
     FILE* memFile = nullptr;
     char fname[50];
 #ifdef PAC_PLCNEXT
