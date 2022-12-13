@@ -20,7 +20,6 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     lineNo(lineNo),
     currentRecipe(0),
     curRecipeStartBlock(0),
-    recipeStartAddr(0L),
     defaultfilename("line" + std::to_string(lineNo) + "rec.bin")
 {
     lastEvalTime = get_millisec();
