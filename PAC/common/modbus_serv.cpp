@@ -420,7 +420,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									i+= PROGRAM_MAX_LEN - 1;
 									break;
 								case RC_EDITED_REC:
-									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->currentRecipeName, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->get_current_recipe_name(), &outdata[3 + i * 2]);
 									i += TRecipeManager::get_recipe_name_length() - 1;
 									break;
 								case RC_SELECT_REC:
@@ -901,7 +901,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
 								case RC_EDITED_REC:
 									//printf("\n\rEdit recipe. Words - %d", numberofElements);
-									UnicodetoUtf8(cipline_tech_object::Mdls[line-1]->lineRecipes->currentRecipeName, &data[7+i*2], 24);
+									UnicodetoUtf8(cipline_tech_object::Mdls[line - 1]->lineRecipes->get_current_recipe_name(), &data[7 + i * 2], 24);
 									i += TRecipeManager::get_recipe_name_length() - 1;
 									break;
 								case RC_LIST_UPDATE:

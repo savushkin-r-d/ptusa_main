@@ -380,7 +380,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
 
     //Имя рецепта для редактирования
-    answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
+    answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->get_current_recipe_name());
 
     //Выбранная программа мойки
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
@@ -389,7 +389,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList.data());
 
     //Список доступных объектов мойки
-    answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
+    answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->get_recipe_list());
 
     //Номер машины
     answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar1);
@@ -605,9 +605,9 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)TRecipeManager::get_recipe_name_length())
             {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
+            strncpy_s(lineRecipes->get_current_recipe_name(), TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
-            strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(lineRecipes->get_current_recipe_name(), val, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
@@ -1993,7 +1993,7 @@ int cipline_tech_object::EvalCommands()
                 }
             break;
         case MCMD_RELOAD_RECIPES:
-            lineRecipes->LoadFromFile(lineRecipes->defaultfilename);
+            lineRecipes->LoadFromFile(lineRecipes->get_default_file_name());
             lineRecipes->LoadRecipeName();
             break;
         case MCMD_RELOAD_CAUSTIC_RECIPES:

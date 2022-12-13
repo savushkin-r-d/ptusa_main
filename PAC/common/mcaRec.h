@@ -13,6 +13,8 @@
 #include "param_ex.h"
 #include "dtime.h"
 
+#include <string>
+
 ///@brief Множитель размера строки для кодировки UTF-8
 #define UNICODE_MULTIPLIER 3
 ///@brief Максимальная длина имени для рецепта
@@ -32,14 +34,19 @@ class ParentRecipeManager
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
     unsigned long recipeStartAddr;
-
-public:
+    std::string defaultfilename;
+    ///@brief Имя текущего рецепта
     ///@brief Количество рецептов на линию
     static int recipePerLine;
     ///@brief Длина имени рецепта
     static int recipeNameLength;
+    char* currentRecipeName;
+    ///@brief Список рецептов для сервера
+    char* recipeList;
 
-    explicit ParentRecipeManager(int lineNo);
+public:
+
+    explicit ParentRecipeManager( int lineNo );
     static int get_recipe_name_length()
     {
         return recipeNameLength;
@@ -48,6 +55,18 @@ public:
     static int get_recipe_per_line()
     {
         return recipePerLine;
+    }
+    char* get_current_recipe_name() const
+    {
+        return currentRecipeName;
+    }
+    char* get_recipe_list() const
+    {
+        return recipeList;
+    }
+    const char* get_default_file_name() const
+    {
+        return defaultfilename.c_str();
     }
 };
 
@@ -187,8 +206,6 @@ class TRecipeManager : public ParentRecipeManager
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
-        ///@brief Имя файла с рецептами
-        char* defaultfilename;
         ///@brief Начальный блок для всех экземляров рецептов
         static int startRecipeBlock;
         ///@brief Длина рецепта в блоках
@@ -197,10 +214,6 @@ class TRecipeManager : public ParentRecipeManager
         static int startRecipeParamsOffset;
         ///@brief Буфер для копирования рецептов
         static unsigned char* recipeCopyBuffer;
-        ///@brief Имя текущего рецепта
-        char* currentRecipeName;
-        ///@brief Список рецептов для сервера
-        char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
