@@ -398,6 +398,14 @@ TEST( motor_altivar, get_amperage )
     EXPECT_EQ( 25.7f, m1.get_amperage( ) );
     }
 
+TEST( motor_altivar, set_string_property )
+    {
+    motor_altivar_linear M1( "M1" );
+    EXPECT_EQ( nullptr, M1.get_atv() );
+    M1.set_string_property( "IP", "127.0.0.1" );
+    EXPECT_NE( nullptr, M1.get_atv() );
+    }
+
 TEST( motor_altivar_linear, get_linear_speed )
     {
     motor_altivar_linear m1( "M1" );
