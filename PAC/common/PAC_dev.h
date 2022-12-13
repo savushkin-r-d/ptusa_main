@@ -3884,6 +3884,8 @@ class level_s_iolink : public analog_io_device
 
         void evaluate_io();
 
+        void set_article( const char* new_article ) override;
+
     private:
         int current_state;
         u_int_4 time;
@@ -3899,8 +3901,6 @@ class level_s_iolink : public analog_io_device
             EH_FTL33,
             };
         ARTICLE n_article;
-
-        void set_article( const char* new_article );
 
         struct LS_data
             {

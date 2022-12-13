@@ -1543,7 +1543,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_DO1_DI2:
-                    {                    
+                    {
                     if ( strcmp( article,
                         valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() ) == 0 )
                         {

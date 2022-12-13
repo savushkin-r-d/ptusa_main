@@ -352,6 +352,14 @@ TEST( level_s, is_active )
     }
 
 
+TEST( level_s_iolink, set_article )
+    {
+    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+    LS1.set_article( "IFM.LMT100" );
+    EXPECT_EQ( false, LS1.is_active() );
+    }
+
+
 TEST( motor, direct_set_state )
     {
     motor M1( "M1", device::DST_M_FREQ );
