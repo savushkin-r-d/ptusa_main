@@ -605,7 +605,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)TRecipeManager::get_recipe_name_length())
             {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
+            strncpy_s(lineRecipes->get_current_recipe_name(), TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
             strncpy(lineRecipes->get_current_recipe_name(), val, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER);
 #endif
