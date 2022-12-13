@@ -71,3 +71,10 @@ TEST(ParentRecipeManager, CopyRecipe)
     ParentRecipeManager mngr(lineNo);
     mngr.CopyRecipe();
     }
+
+TEST(ParentRecipeManager, PasteRecipe) 
+    {
+    auto lineNo = 0;
+    ParentRecipeManager mngr(lineNo);
+    mngr.PasteRecipe();
+    }
