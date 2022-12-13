@@ -41,6 +41,18 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     recipechangechecktime = get_millisec();
 }
 
+ParentRecipeManager::~ParentRecipeManager()
+{
+    delete[] currentRecipeName;
+    currentRecipeName = nullptr;
+    delete[] recipeList;
+    recipeList = nullptr;
+    delete[] recipeMemory;
+    recipeMemory = nullptr;
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
+}
+
 unsigned long ParentRecipeManager::startAddr() const
 {
     return startAddr(currentRecipe);
@@ -109,6 +121,17 @@ void ParentRecipeManager::PasteRecipe()
         LoadRecipeName();
     }
 }
+
+void ParentRecipeManager::NullifyRecipe()
+{
+    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
+    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
+    delete[] tempbuff;
+    tempbuff = nullptr;
+    LoadRecipeName();
+}
+
 
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
@@ -563,16 +586,6 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
             }
         }
     return errflag;
-    }
-
-void TRecipeManager::NullifyRecipe()
-    {
-    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
-    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
-    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
-    delete [] tempbuff;
-    tempbuff = nullptr;
-    LoadRecipeName();
     }
 
 int TRecipeManager::SaveToFile(const char* filename)

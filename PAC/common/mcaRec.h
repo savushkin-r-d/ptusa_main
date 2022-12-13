@@ -63,7 +63,10 @@ public:
     void CopyRecipe();
     void PasteRecipe();
     void LoadRecipeName();
+    void NullifyRecipe();
     explicit ParentRecipeManager( int lineNo );
+    virtual ~ParentRecipeManager();
+
     static int get_recipe_name_length()
     {
         return recipeNameLength;
@@ -309,10 +312,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
         int LoadFromFile(const char* filename);
-        /// @fn  void TRecipeManager::NullifyRecipe()
-        /// @brief Обнуляет текущий рецепт
-        /// @return   void
-        void NullifyRecipe();
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
