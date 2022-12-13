@@ -96,6 +96,19 @@ void ParentRecipeManager::CopyRecipe()
     ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
 }
 
+void ParentRecipeManager::LoadRecipeName()
+{
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+}
+
+void ParentRecipeManager::PasteRecipe()
+{
+    if (recipeCopyBuffer != nullptr)
+    {
+        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+        LoadRecipeName();
+    }
+}
 
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
@@ -541,15 +554,6 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
             }
         }
     return errflag;
-    }
-
-void TRecipeManager::PasteRecipe()
-    {
-    if (recipeCopyBuffer != nullptr)
-        {
-        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
-        LoadRecipeName();
-        }
     }
 
 void TRecipeManager::NullifyRecipe()
