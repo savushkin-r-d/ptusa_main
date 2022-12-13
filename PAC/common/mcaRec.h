@@ -60,7 +60,10 @@ class ParentRecipeManager
     int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
 
 public:
-
+    /// @fn  void TRecipeManager::CopyRecipe()
+    /// @brief Копирует текущий рецепт в буфер
+    /// @return   void
+    void CopyRecipe();
     explicit ParentRecipeManager( int lineNo );
     static int get_recipe_name_length()
     {
@@ -303,10 +306,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
         void EvalRecipe();
-        /// @fn  void TRecipeManager::CopyRecipe()
-        /// @brief Копирует текущий рецепт в буфер
-        /// @return   void
-        void CopyRecipe();
         /// @fn  void TRecipeManager::PasteRecipe()
         /// @brief Переписывает текущий рецепт значениями из буффера
         /// @return   void
