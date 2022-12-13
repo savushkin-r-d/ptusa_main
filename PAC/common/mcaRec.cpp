@@ -16,6 +16,15 @@ int ParentRecipeManager::recipePerLine = 25;
 
 int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
+int ParentRecipeManager::startRecipeBlock = 0;
+
+int ParentRecipeManager::blocksPerRecipe = 4;
+
+int ParentRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
+
+unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
+
+
 ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     lineNo(lineNo),
     currentRecipe(0),
@@ -30,13 +39,16 @@ ParentRecipeManager::ParentRecipeManager( int lineNo ) :
     recipechangechecktime = get_millisec();
 }
 
-int TRecipeManager::startRecipeBlock = 0;
+unsigned long ParentRecipeManager::startAddr()
+{
+    return startAddr(currentRecipe);
+}
 
-int TRecipeManager::blocksPerRecipe = 4;
+unsigned long ParentRecipeManager::startAddr(int recNo) const
+{
+    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
+}
 
-int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
-
-unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
 {
@@ -124,16 +136,6 @@ void TRecipeManager::EvalRecipe()
             }
         setValue(RV_TO_DEFAULTS, 0);
         }
-    }
-
-unsigned long TRecipeManager::startAddr()
-    {
-    return startAddr(currentRecipe);
-    }
-
-unsigned long TRecipeManager::startAddr( int recNo )
-    {
-    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
     }
 
 float TRecipeManager::getRecipeValue( int recNo, int valueNo )
