@@ -132,6 +132,13 @@ void ParentRecipeManager::NullifyRecipe()
     LoadRecipeName();
 }
 
+void ParentRecipeManager::SaveRecipeName()
+{
+#ifdef MSAPANEL
+    MsaPanel::UpdateRecipes();
+#endif // MSAPANEL
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+}
 
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 

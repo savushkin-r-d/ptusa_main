@@ -64,6 +64,7 @@ public:
     void PasteRecipe();
     void LoadRecipeName();
     void NullifyRecipe();
+    void SaveRecipeName();
     explicit ParentRecipeManager( int lineNo );
     virtual ~ParentRecipeManager();
 
@@ -216,8 +217,6 @@ class TRecipeManager : public ParentRecipeManager
         RV_LASTVALVEOFF = 119,
         };
     private:
-        void SaveRecipeName();
-
         void FormRecipeList();
     public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
