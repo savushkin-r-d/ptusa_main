@@ -65,6 +65,7 @@ public:
     void LoadRecipeName();
     void NullifyRecipe();
     void SaveRecipeName();
+    int SaveToFile(const char* filename) const;
     explicit ParentRecipeManager( int lineNo );
     virtual ~ParentRecipeManager();
 
@@ -303,10 +304,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
         void EvalRecipe();
-        /// @fn int TRecipeManager::SaveToFile()
-        /// @brief Сохранение рецептов модуля в файл
-        /// @return Возвращает 0 в случае успешного завершения
-        int SaveToFile(const char* filename);
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения

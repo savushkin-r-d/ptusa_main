@@ -53,6 +53,45 @@ ParentRecipeManager::~ParentRecipeManager()
     recipeCopyBuffer = nullptr;
 }
 
+void ParentRecipeManager::SaveRecipeName()
+{
+#ifdef MSAPANEL
+    MsaPanel::UpdateRecipes();
+#endif // MSAPANEL
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+}
+
+int ParentRecipeManager::SaveToFile(const char* filename) const
+{
+#ifdef DEBUG
+    printf("Saving recipes to file %s\n", filename);
+#endif //DEBUG
+    FILE* memFile = nullptr;
+    char fname[50];
+#ifdef PAC_PLCNEXT
+    sprintf(fname, "/opt/main/%s", filename);
+#else
+    sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+    memFile = fopen(fname, "r+b");
+    if (nullptr == memFile)
+    {
+        memFile = fopen(fname, "w+b");
+    }
+    if (memFile)
+    {
+        fseek(memFile, 0, SEEK_SET);
+        fwrite(recipeMemory, 1, recipeMemorySize, memFile);
+        fclose(memFile);
+#ifdef PAC_PLCNEXT
+        char syscommand[] = "chmod 777 ";
+        strcat(syscommand, fname);
+        system(syscommand);
+#endif
+    }
+    return 0;
+}
+
 unsigned long ParentRecipeManager::startAddr() const
 {
     return startAddr(currentRecipe);
@@ -130,14 +169,6 @@ void ParentRecipeManager::NullifyRecipe()
     delete[] tempbuff;
     tempbuff = nullptr;
     LoadRecipeName();
-}
-
-void ParentRecipeManager::SaveRecipeName()
-{
-#ifdef MSAPANEL
-    MsaPanel::UpdateRecipes();
-#endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
 }
 
 
@@ -586,11 +617,8 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
     return errflag;
     }
 
-int TRecipeManager::SaveToFile(const char* filename)
-    {
-#ifdef DEBUG
-    printf("Saving recipes to file %s\n", filename);
-#endif // DEBUG
+int TRecipeManager::LoadFromFile(const char* filename)
+{
     FILE* memFile = nullptr;
     char fname[50];
 #ifdef PAC_PLCNEXT
