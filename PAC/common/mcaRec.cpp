@@ -132,6 +132,13 @@ void ParentRecipeManager::NullifyRecipe()
     LoadRecipeName();
 }
 
+void ParentRecipeManager::SaveRecipeName()
+{
+#ifdef MSAPANEL
+    MsaPanel::UpdateRecipes();
+#endif // MSAPANEL
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+}
 
 
 TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
@@ -265,15 +272,6 @@ int TRecipeManager::setValue( int valueNo, float newValue )
 #endif // MSAPANEL
     return setRecipeValue(currentRecipe, valueNo, newValue);
     }
-
-void TRecipeManager::SaveRecipeName()
-    {
-#ifdef MSAPANEL
-    MsaPanel::UpdateRecipes();
-#endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
-    }
-
 
 int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, run_time_params_float* par )
     {
