@@ -1120,7 +1120,6 @@ camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     start_switch_time( get_millisec() )
     {
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
-    set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
     }
 
 void camera_DI2::evaluate_io()

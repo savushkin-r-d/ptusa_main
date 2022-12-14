@@ -112,7 +112,7 @@ TEST( device_manager, add_io_device )
             "\t}\n",
         buff );
 
-    //device::DT_V, device::V_IOLINK_DO1_DI2
+    //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
     auto name = std::string( "V1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
@@ -122,6 +122,18 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto V1 = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V1 ) );
+
+    //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
+    name = std::string( "V2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        "AlfaLaval" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto V2 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V2 ) );
+
 
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
@@ -349,6 +361,9 @@ TEST( level_s, is_active )
 
     level_s LS2( "LS2", device::DST_LS_MIN );
     EXPECT_EQ( false, LS2.is_active() );
+
+    level_s LS3( "LS3", device::DST_NONE );     //Unknown sub type.
+    EXPECT_EQ( false, LS3.is_active() );
     }
 
 
