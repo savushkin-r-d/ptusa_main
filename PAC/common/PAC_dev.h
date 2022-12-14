@@ -4137,7 +4137,7 @@ class counter : public base_counter
 class counter_f : public counter
     {
     public:
-        counter_f( const char *dev_name, DEVICE_SUB_TYPE sub_type = DST_FQT_F );
+        counter_f( const char *dev_name );
 
         int get_state();
 

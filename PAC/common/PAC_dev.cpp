@@ -2953,8 +2953,8 @@ float counter::get_min_flow() const
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-counter_f::counter_f( const char *dev_name, DEVICE_SUB_TYPE sub_type ) :
-    counter( dev_name, sub_type, LAST_PARAM_IDX - 1 )
+counter_f::counter_f( const char *dev_name ) :
+    counter( dev_name, DST_FQT_F, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
@@ -5553,9 +5553,10 @@ float motor::get_value()
 #ifdef DEBUG_NO_IO_MODULES
     return freq;
 #else
-    if ( get_sub_type() == device::DST_M_FREQ || get_sub_type() == device::DST_M_REV_FREQ ||
-        get_sub_type() == device::DST_M_REV_FREQ_2 ||
-        get_sub_type() == device::DST_M_REV_FREQ_2_ERROR )
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
         }
