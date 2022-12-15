@@ -27,6 +27,7 @@
 class ParentRecipeManager
 {
     friend class TRecipeManager;
+    friend class TMediumRecipeManager;
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
@@ -217,9 +218,6 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
-    private:
-        void FormRecipeList();
-    public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -313,11 +311,16 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
+          private:
+              void FormRecipeList();
     };
 
 
-    class TMediumRecipeManager
+    class TMediumRecipeManager : public ParentRecipeManager
     {
+        int mediumType;
+        void FormRecipeList();
+        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         enum RecipeValues
         {
@@ -339,26 +342,6 @@ class TRecipeManager : public ParentRecipeManager
             MT_CAUSTIC = 0,
             MT_ACID,
         };
-    private:
-        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
-        int recipechanged;
-        int mediumType;
-        unsigned long recipechangechecktime;
-        int currentRecipe;
-        int curRecipeStartBlock;
-        unsigned long lastEvalTime;
-        unsigned long recipeStartAddr;
-        void SaveRecipeName();
-
-        void FormRecipeList();
-        unsigned long startAddr();
-        unsigned long startAddr(int recNo);
-        unsigned char* recipeMemory;
-        unsigned long recipeMemorySize;
-        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-    public:
-        char* defaultfilename;
         ///@brief Начальный блок для всех экземляров рецептов
         static int startRecipeBlock;
         ///@brief Количество рецептов на линию
@@ -371,10 +354,6 @@ class TRecipeManager : public ParentRecipeManager
         static int startRecipeParamsOffset;
         ///@brief Буфер для копирования рецептов
         static unsigned char* recipeCopyBuffer;
-        ///@brief Имя текущего рецепта
-        char* currentRecipeName;
-        ///@brief Список рецептов для сервера
-        char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -455,40 +434,19 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - ошибка !0 - ОК
         int ResetRecipeToDefaults(int recipeNo);
-        /// @fn  void TRecipeManager::LoadRecipeName()
-        /// @brief Обновляет имя рецепта из энергонезависимой памяти
-        /// @return   void
-        void LoadRecipeName();
         /// @fn  void TRecipeManager::EvalRecipe()
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
         void EvalRecipe();
-        /// @fn  void TRecipeManager::CopyRecipe()
-        /// @brief Копирует текущий рецепт в буфер
-        /// @return   void
-        void CopyRecipe();
-        /// @fn  void TRecipeManager::PasteRecipe()
-        /// @brief Переписывает текущий рецепт значениями из буффера
-        /// @return   void
-        void PasteRecipe();
-        /// @fn int TRecipeManager::SaveToFile()
-        /// @brief Сохранение рецептов модуля в файл
-        /// @return Возвращает 0 в случае успешного завершения
-        int SaveToFile(const char* filename);
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
         int LoadFromFile(const char* filename);
-        /// @fn  void TRecipeManager::NullifyRecipe()
-        /// @brief Обнуляет текущий рецепт
-        /// @return   void
-        void NullifyRecipe();
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TMediumRecipeManager(MediumTypes mType);
-        ~TMediumRecipeManager();
     };
 
 
