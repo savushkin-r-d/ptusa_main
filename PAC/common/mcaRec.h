@@ -27,6 +27,7 @@
 class ParentRecipeManager
 {
     friend class TRecipeManager;
+    friend class TMediumRecipeManager;
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
@@ -217,9 +218,6 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
-    private:
-        void FormRecipeList();
-    public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -313,6 +311,8 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
+          private:
+              void FormRecipeList();
     };
 
 
