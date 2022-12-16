@@ -1021,10 +1021,11 @@ void signal_column_iolink::evaluate_io()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type, int params_count ) :
+camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int params_count, bool is_ready ) :
     device( dev_name, DT_CAM, sub_type, params_count ),
     io_device( dev_name ),
-    is_cam_ready( true ),
+    is_cam_ready( is_ready ),
     result( 0 ),
     state( 0 )
     {
@@ -1115,16 +1116,10 @@ bool camera::is_ready() const
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1 ),
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1, false ),
     start_switch_time( get_millisec() )
     {
-    is_cam_ready = false;
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
-    }
-
-int camera_DI2::get_state()
-    {
-    return state;
     }
 
 void camera_DI2::evaluate_io()
@@ -1329,9 +1324,6 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             {
             case device::DST_FQT_F:
                 return ( counter_f* )res_ctr;
-
-            case device::DST_FQT_F_OK:
-                return ( counter_f_ok* )res_ctr;
 
             case device::DST_FQT:
                 return ( counter* )res_ctr;
@@ -1551,8 +1543,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::V_IOLINK_DO1_DI2:
                     {
-                    const char* SORIO_ARTICLE = "DEF.SORIO-1SV";
-                    if ( strcmp( article, SORIO_ARTICLE ) == 0 )
+                    if ( strcmp( article,
+                        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() ) == 0 )
                         {
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
                         new_io_device = (valve_iolink_shut_off_sorio*)new_device;
@@ -1741,11 +1733,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_FQT_F:
                     new_device      = new counter_f( dev_name );
                     new_io_device = ( counter_f* ) new_device;
-                    break;
-
-                case device::DST_FQT_F_OK:
-                    new_device = new counter_f_ok( dev_name );
-                    new_io_device = (counter_f_ok*)new_device;
                     break;
 
                 case device::DST_FQT_VIRT:
@@ -2616,7 +2603,7 @@ void threshold_regulator::direct_set_value( float val )
             }
 
         auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
-        auto is_reverse = ( *par )[ idx ] > 0;
+        auto is_reverse = get_par( idx ) > 0;
         if ( STATE::OFF == state )
             {
             out_state = 0;
@@ -2624,7 +2611,7 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            auto delta = ( *par )[ static_cast<int>( PARAM::P_DELTA ) ];
+            auto delta = get_par( static_cast<int>( PARAM::P_DELTA ) );
             if ( in_value > set_value + delta )
                 {
                 out_state = is_reverse ? 1 : 0;
@@ -3032,36 +3019,6 @@ int counter_f::set_cmd( const char* prop, u_int idx, double val )
 
     return 0;
     };
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
-    {
-    sub_type = DST_FQT_F_OK;
-    }
-//-----------------------------------------------------------------------------
-int counter_f_ok::save_device_ex( char *buff )
-    {
-    int res = counter_f::save_device_ex( buff );
-
-#ifdef DEBUG_NO_IO_MODULES
-    res += sprintf( buff + res, "OK=1, " );
-#else
-    res += sprintf( buff + res, "OK=%d, ", get_DI( DI_INDEX ) );
-#endif //DEBUG_NO_IO_MODULES
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int counter_f_ok::get_state()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    int i = get_DI( DI_INDEX );
-
-    return i == 1 ? counter_f::get_state() : static_cast<int>( STATES::S_ERROR );
-#else
-    return counter_f::get_state();
-#endif
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
@@ -3752,11 +3709,10 @@ void valve_mix_proof::open_lower_seat()
     direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
 void valve_mix_proof::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = ( char ) new_state;
-#else
     switch ( new_state )
         {
         case V_OFF:
@@ -3798,11 +3754,8 @@ void valve_mix_proof::direct_set_state( int new_state )
             direct_on();
             break;
         }
-#endif //DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
 void valve_mix_proof::direct_on()
     {
     set_DO( DO_INDEX_U, 0 );
@@ -3974,7 +3927,6 @@ void valve_iolink_mix_proof::evaluate_io()
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-//#define DEBUG_IOLINK_MIXPROOF
 #ifdef DEBUG_IOLINK_MIXPROOF
     char* tmp = (char*)in_info;
 
@@ -4194,6 +4146,11 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
+
+valve_iolink_shut_off_sorio::out_data_swapped
+    valve_iolink_shut_off_sorio::stub_out_info;
+//-----------------------------------------------------------------------------
 valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
@@ -4205,8 +4162,8 @@ valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state()
     return (VALVE_STATE)digital_io_device::get_state();
 #else
 
-    if ( in_info->de_en ) return V_OFF;
-    if ( in_info->main ) return V_ON;
+    if ( in_info.de_en ) return V_OFF;
+    if ( in_info.main ) return V_ON;
 
     return V_OFF;
 #endif // DEBUG_NO_IO_MODULES
@@ -4216,34 +4173,54 @@ void valve_iolink_shut_off_sorio::evaluate_io()
     {
     out_info = (out_data_swapped*)get_AO_write_data( 0 );
 
-    char* data = (char*)get_AI_data( 0 );
-    char* buff = (char*)in_info;
+    auto data = (char*)get_AI_data( 0 );
+    auto buff = (char*)&in_info;
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-//#define DEBUG_IOLINK_
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
 
-    sprintf( G_LOG->msg, "%x %x %x %x\n",
-        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
-    G_LOG->write_log( i_log::P_WARNING );
+    static bool de_en;
+    static bool main;
+    static uint16_t status;
+    static bool sv1;
+    static uint16_t led_state;
+    static uint16_t pos;
 
-    sprintf( G_LOG->msg,
-        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-        in_info->de_en, in_info->main, in_info->usl,
-        in_info->lsp, 0.1 * in_info->pos );
-    G_LOG->write_log( i_log::P_NOTICE );
+    if ( de_en != in_info->de_en || main != in_info->main ||
+        status != in_info->status || sv1 != in_info->sv1 || led_state != in_info->led_state ||
+        pos != in_info->pos )
+        {
+        print_binary( *(int*)tmp );
+        printf( "\n" );
+
+        sprintf( G_LOG->msg,
+            "de_en %u, main %u, status %u, sv1 %u, led_state %u, pos %u\n",
+            in_info->de_en, in_info->main, in_info->status,
+            in_info->sv1, in_info->led_state, in_info->pos );
+        G_LOG->write_log( i_log::P_NOTICE );
+
+        print_binary( *(int*)out_info );
+        printf( "\n\n" );
+
+        de_en = in_info->de_en;
+        main = in_info->main;
+        status = in_info->status;
+        sv1 = in_info->sv1;
+        led_state = in_info->led_state;
+        pos = in_info->pos;
+        }
 #endif
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
-    int err = in_info->err;
+    int err = in_info.status;
 
     int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
@@ -4251,39 +4228,53 @@ int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
+float valve_iolink_shut_off_sorio::get_value()
+    {
+    return 0.1f * in_info.pos;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+void valve_iolink_shut_off_sorio::direct_set_value( float new_value )
+    {
+    in_info.pos = (int16_t)( new_value * 10 );
+    }
+#endif
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_shut_off_sorio::get_fb_state()
     {
+    if ( get_AI_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return false;
+        }
+
+    if ( in_info.status ) return false;
+
     u_long dt = get_delta_millisec( start_switch_time );
     if ( dt < get_par( valve::P_ON_TIME, 0 ) )
         {
         return true;
         }
 
-    if ( out_info->sv1 == false && in_info->de_en && in_info->sv1 ) return true;
-    if ( out_info->sv1 == true && in_info->main && in_info->sv1 ) return true;
+    if ( !out_info->sv1 && in_info.de_en ) return true;
+    if ( out_info->sv1 && in_info.main ) return true;
 
     return false;
     }
 //-----------------------------------------------------------------------------
-float valve_iolink_shut_off_sorio::get_value()
-    {
-    return 0.1f * in_info->pos;
-    }
-//-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_off_fb_value()
     {
-    return !in_info->sv1;
+    return !in_info.sv1;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_on_fb_value()
     {
-    return in_info->sv1;
+    return in_info.sv1;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_sorio::direct_on()
     {
-    if ( false == in_info->main )
+    if ( false == in_info.main )
         {
         start_switch_time = get_millisec();
         }
@@ -4385,7 +4376,6 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
     std::swap( buff[ 0 ], buff[ 1 ] );
     std::swap( buff[ 2 ], buff[ 3 ] );
 
-    //#define DEBUG_IOLINK_
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
 
@@ -5562,6 +5552,7 @@ float motor::get_value()
 #ifdef DEBUG_NO_IO_MODULES
     return freq;
 #else
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
@@ -5578,6 +5569,7 @@ void motor::direct_set_value( float value )
 #ifdef DEBUG_NO_IO_MODULES
     freq = value;
 #else
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
@@ -5597,6 +5589,7 @@ void motor::direct_set_state( int new_state )
         }
 #endif // DEBUG_NO_IO_MODULES
 
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
         if ( new_state == 2 )
@@ -5672,6 +5665,7 @@ int motor::get_state()
     return state;
 #else
     int o = get_DO( DO_INDEX );
+    auto sub_type = get_sub_type();
 
     if ( sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
@@ -5766,6 +5760,7 @@ void motor::direct_on()
 #ifdef DEBUG_NO_IO_MODULES
     state = 1;
 #else
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -5800,7 +5795,7 @@ void motor::direct_off()
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
-
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -5825,6 +5820,7 @@ int motor::save_device_ex( char *buff )
 #ifdef DEBUG_NO_IO_MODULES
     res = sprintf( buff, "R=0, " );
 #else
+    auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -5848,7 +5844,7 @@ int motor::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 bool level_s::is_active()
     {
-    switch ( sub_type )
+    switch ( get_sub_type() )
         {
         case DST_LS_MIN:
             return get_state() == 0 ? 0 : 1;
@@ -5917,6 +5913,7 @@ void level_s_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
 
+    auto article = get_article();
     if ( strcmp( article, "IFM.LMT100" ) == 0 )
         {
         n_article = ARTICLE::IFM_LMT100;
@@ -5968,7 +5965,7 @@ int level_s_iolink::get_state()
 	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
 	if (devstate != io_device::IOLINKSTATE::OK)
 		{
-		return sub_type == device::LS_IOLINK_MAX ? 1 : 0;
+		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
 		}
 
     u_int_4 dt = (u_int_4)get_par( P_DT, 0 );
@@ -6271,10 +6268,6 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             break;
         }
     v = alfa * v;
-
-    //Debug print.
-    //G_LOG->debug("%s v=%f, st=%d, %d %d %d %d", name, v, st,
-    //    data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
@@ -7463,7 +7456,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
             if (!atv)
                 {
-                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, article);
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, get_article() );
                 atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
                 }
             }
@@ -7534,9 +7527,9 @@ float motor_altivar_linear::get_linear_speed() const
     if ( 0 != d && 0 != n )
         {
 #ifdef DEBUG_NO_IO_MODULES
-        v = ( rpm * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+        v = ( get_rpm() * (float)M_PI * d ) / ( n * SEC_IN_MIN );
 #else
-        v = ( atv->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+        v = ( get_atv()->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
 #endif
         }
 

@@ -112,8 +112,31 @@ TEST( device_manager, add_io_device )
             "\t}\n",
         buff );
 
+    //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
+    auto name = std::string( "V1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto V1 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V1 ) );
+
+    //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
+    name = std::string( "V2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        "AlfaLaval" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto V2 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V2 ) );
+
+
     //device::DT_FQT, device::DST_FQT_IOLINK
-    auto name = std::string( "FQT1" );
+    name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_IOLINK, name.c_str(), "Test counter", "IFM");
     EXPECT_NE( nullptr, res );
@@ -269,6 +292,7 @@ TEST( dev_stub, get_min_flow )
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
     }
 
+
 TEST( device, save_device )
     {
     temperature_e_analog t1( "T1" );
@@ -278,6 +302,86 @@ TEST( device, save_device )
     EXPECT_STREQ( 
         "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
+
+TEST( device, set_article )
+    {
+    temperature_e_analog T1( "T1" );
+    auto IFM_TE = "IFM.TE11";
+    T1.set_article( IFM_TE );
+    EXPECT_STREQ( IFM_TE, T1.get_article() );
+    }
+
+
+TEST( valve_iolink_shut_off_sorio, save_device )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );    
+    }
+
+TEST( valve_iolink_shut_off_sorio, evaluate_io )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ] { 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( V1.AI_channels.int_read_values[ 0 ] );
+
+    
+    EXPECT_EQ( 0, V1.get_value() ); //Default value.
+
+
+    const int POS = 341;
+    *reinterpret_cast<int*>( &V1.AI_channels.int_read_values[ 0 ][ 1 ] ) = POS;
+    std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct int.
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    V1.evaluate_io();    
+    const int BUFF_SIZE = 100;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.direct_set_value( 12.1f );
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+    }
+
+
+TEST( level_s, is_active )
+    {
+    level_s LS1( "LS1", device::DST_LS_MAX );    
+    EXPECT_EQ( true, LS1.is_active() );
+
+    level_s LS2( "LS2", device::DST_LS_MIN );
+    EXPECT_EQ( false, LS2.is_active() );
+
+    level_s LS3( "LS3", device::DST_NONE );     //Unknown sub type.
+    EXPECT_EQ( false, LS3.is_active() );
+    }
+
+
+TEST( level_s_iolink, set_article )
+    {
+    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+    LS1.set_article( "IFM.LMT100" );
+    EXPECT_EQ( false, LS1.is_active() );
+    }
+
+
+TEST( motor, direct_set_state )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.set_state( 1 );
+    EXPECT_EQ( 1, M1.get_state() );
+    }
+
 
 TEST( motor_altivar, set_cmd )
     {
@@ -307,6 +411,14 @@ TEST( motor_altivar, get_amperage )
 
     m1.set_cmd( "AMP", 0, 25.7 );
     EXPECT_EQ( 25.7f, m1.get_amperage( ) );
+    }
+
+TEST( motor_altivar, set_string_property )
+    {
+    motor_altivar_linear M1( "M1" );
+    EXPECT_EQ( nullptr, M1.get_atv() );
+    M1.set_string_property( "IP", "127.0.0.1" );
+    EXPECT_NE( nullptr, M1.get_atv() );
     }
 
 TEST( motor_altivar_linear, get_linear_speed )
