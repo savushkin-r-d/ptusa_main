@@ -29,7 +29,7 @@
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
 #define STEAM_VALVE_MIN_DELAY 1200L
 ///@brief Количество параметров станции
-#define STATION_PAR_COUNT 40
+#define STATION_PAR_COUNT 50
 ///@brief Количество параметров для программы самоочистки
 #define SELFCLEAN_PAR_COUNT 20
 ///@brief Максимальная длина номера машины
@@ -99,6 +99,8 @@
 #define  P_CAUSTIC_SELECTED     36	//Выбранный рецепт щелочного раствора
 #define  P_ACID_SELECTED        37	//Выбранный рецепт кислотного раствора
 #define  P_END_WASH_DELAY       38  //Длительность 555 операции(завершение мойки)
+#define  P_MIN_BULK_FOR_WATER   39  //Минимальный аналоговый уровень в танке воды, при котором считать, что его нет
+#define  P_MIN_BULK_DELTA       40  //Отклонение уровня в танке вторичной воды
 
 
 //programms of moika
@@ -564,6 +566,8 @@ class cipline_tech_object: public tech_object
 
         int forcesortrr; //флаг принудительной сортировки растворов без учета таймаута переключений
 
+        bool waterTankLastEmptyState{}; //последнее состояние танка вторичной воды
+
         unsigned long enddelayTimer;
         int valvesAreInConflict{};
         void resetProgramName();
@@ -877,6 +881,7 @@ class cipline_tech_object: public tech_object
         int HasRet() const;
         int ForceRet(int val);
         void ResetStat();
+        bool waterTankIsEmpty();
         ///Базовые функции. При необходимости могут вызываться из Lua. Могут быть переопределены.
         int _DoStep(int step_to_do);  //Выполнение шага, заданного параметром.
         int _GoToStep(int cur, int param); //Переход к следующему шагу.

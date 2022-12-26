@@ -85,4 +85,82 @@ TEST( cipline_tech_object, evaluate )
     EXPECT_NE( 0, cip1.state );
     }
 
+TEST( cipline_tech_object, waterTankIsEmpty )
+    {
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    virtual_device waterTankLowLevel( "LWL", device::DT_LS, device::DST_LS_VIRT);
+    virtual_device waterTankCurrentLevel( "LTW", device::DT_LT, device::DST_LT_VIRT);
+    cip1.LWL = reinterpret_cast<i_DI_device *>(&waterTankLowLevel);
+    cip1.LTW = reinterpret_cast<i_AI_device *>(&waterTankCurrentLevel);
+
+    waterTankLowLevel.direct_set_state(0);
+    waterTankCurrentLevel.set_value(0);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 0;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 0;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(0);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 0;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 0;
+    EXPECT_EQ(false, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(9);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(11);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(12);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(false, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(11);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(false, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(10);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(false, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(9.99);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(10);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(11.99);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(true, cip1.waterTankIsEmpty());
+
+    waterTankLowLevel.direct_set_state(1);
+    waterTankCurrentLevel.set_value(12);
+    cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
+    cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
+    EXPECT_EQ(false, cip1.waterTankIsEmpty());
+    }
+
 
