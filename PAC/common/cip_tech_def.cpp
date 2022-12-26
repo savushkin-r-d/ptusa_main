@@ -4301,7 +4301,7 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
         {
         divider = 1;
         }
-    rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
+    rt_par_float[P_MAX_OPER_TM] = 3.6f * MAX_OP_TIME * p / divider;
     T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
     T[TMR_OP_TIME]->start();
 
@@ -4460,7 +4460,7 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
         {
         divider = 1;
         }
-    rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
+    rt_par_float[P_MAX_OPER_TM] = 3.6f * MAX_OP_TIME * p / divider;
     T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
     T[TMR_OP_TIME]->start();
     T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_FLOW_R] * 1000);
@@ -6289,7 +6289,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             break;
         case 157:
             operV = scparams[0][SCP_LITERS_AFTER_LL_TS];
-            operT = operV / operFlow * 3.6 * 1.2;
+            operT = operV / operFlow * 3.6f * 1.2f;
             break;
         case 160:
             operV = scparams[0][SCP_V_PROM_TS];
@@ -6305,7 +6305,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             break;
         case 164:
             operV = scparams[0][SCP_LITERS_AFTER_LL_TK];
-            operT = operV / operFlow * 3.6 * 1.2;
+            operT = operV / operFlow * 3.6f * 1.2f;
             break;
         case 167:
             operV = scparams[0][SCP_V_PROM_TK];
@@ -6318,7 +6318,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             break;
         case 170:
             operV = scparams[0][SCP_LITERS_AFTER_LL_TW];
-            operT = operV / operFlow * 3.6 * 1.2;
+            operT = operV / operFlow * 3.6f * 1.2f;
             break;
         case 173:
             operV = scparams[0][SCP_V_PROM_TW];
@@ -6331,7 +6331,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             break;
         case 176:
             operV = scparams[0][SCP_LITERS_AFTER_LL_TK];
-            operT = operV / operFlow * 3.6 * 1.2;
+            operT = operV / operFlow * 3.6f * 1.2f;
             break;
         case 179:
             operV = scparams[0][SCP_V_PROM_TS];
@@ -7482,6 +7482,40 @@ int cipline_tech_object::msa_number = 0;
 int cipline_tech_object::blockAlarm = 0;
 
 saved_params<float, true>* cipline_tech_object::parpar = nullptr;
+
+bool cipline_tech_object::waterTankIsEmpty( )
+    {
+    auto ret = !LWL->is_active( );
+    if ( ret ) return ret;
+    auto lowLevelExtreme = parpar[ 0 ][ P_MIN_BULK_FOR_WATER ];
+    if ( lowLevelExtreme > 0 )
+        {
+        auto currentWaterLevel = LTW->get_value( );
+        if ( waterTankLastEmptyState )
+            {
+            if ( currentWaterLevel >= lowLevelExtreme + parpar[ 0 ][ P_MIN_BULK_DELTA ] )
+                {
+                ret = false;
+                waterTankLastEmptyState = false;
+                } else
+                {
+                ret = true;
+                }
+            } else
+            {
+            if ( currentWaterLevel < lowLevelExtreme )
+                {
+                ret = true;
+                waterTankLastEmptyState = true;
+                } else
+                {
+                ret = false;
+                }
+            }
+
+        }
+    return ret;
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
