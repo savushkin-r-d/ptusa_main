@@ -51,7 +51,7 @@ class data_file : public file
 
         virtual ~data_file()
             {
-            file_close();
+            data_file::file_close();
             }
 
         int file_open( const char* file_name );

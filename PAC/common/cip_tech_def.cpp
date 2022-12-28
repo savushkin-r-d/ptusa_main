@@ -7766,8 +7766,6 @@ TSav::TSav(void) {
     integrator=0;
     };
 
-TSav::~TSav(void) { };
-
 void TSav::Add(float val, unsigned long inegr) {
     unsigned long delta, i;
     if (inegr>integrator) {

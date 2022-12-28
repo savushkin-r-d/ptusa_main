@@ -89,7 +89,7 @@ cip_object_stats* cip_stats::get_obj_stats(char* objid)
         char* keychar = new char[MAX_ID_LENGTH * UNICODE_MULTIPLIER];
         strcpy(keychar, objid);
         cip_object_stats* newos = new cip_object_stats(keychar);
-        obj_stats.insert(std::pair<char*, cip_object_stats*>(keychar, newos));
+        obj_stats.emplace(keychar, newos);
         return newos;
         }
     else
@@ -147,7 +147,7 @@ void cip_stats::deserialize(std::istream& stream)
         cip_object_stats* cos = new cip_object_stats("tmp");
         cos->deserialize(stream);
         strcpy(obj_name, cos->objid);
-        obj_stats.insert(std::pair<char*, cip_object_stats*>(obj_name, cos));
+        obj_stats.emplace( obj_name, cos );
         }
     }
 

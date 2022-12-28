@@ -527,7 +527,6 @@ class TSav
         unsigned long integrator;
     public:
         TSav(void);
-        ~TSav(void);
         void Add(float val, unsigned long inegr);
         void R(void);
         float Q(void);
