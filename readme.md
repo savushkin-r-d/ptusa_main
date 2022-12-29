@@ -62,7 +62,7 @@ You should open (in Visual Studio) root directory. This you get a CMake based pr
 
 You could open file CMakeList.txt cloned repository in Qt.
 
-Or clone reposytory in Qt:
+Or clone repository in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
 	
