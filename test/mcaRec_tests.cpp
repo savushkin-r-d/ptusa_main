@@ -65,6 +65,13 @@ TEST( TRecipeManager, NullifyRecipe )
     mngr.NullifyRecipe();
     }
 
+TEST(TRecipeManager, EvalRecipe)
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    mngr.EvalRecipe();
+    }
+
 TEST(ParentRecipeManager, CopyRecipe)
     {
     auto lineNo = 0;
