@@ -80,8 +80,23 @@ TEST(ParentRecipeManager, PasteRecipe)
     }
 
 TEST(ParentRecipeManager, NullifyRecipe)
-{
+    {
     auto lineNo = 0;
     ParentRecipeManager mngr(lineNo);
     mngr.NullifyRecipe();
-}
+    }
+
+TEST(ParentRecipeManager, SaveRecipeName)
+    {
+    auto lineNo = 0;
+    ParentRecipeManager mngr(lineNo);
+    mngr.SaveRecipeName();
+    }
+
+TEST(ParentRecipeManager, SaveToFile)
+    {
+    auto lineNo = 0;
+    ParentRecipeManager mngr(lineNo);
+    auto fileName = "tmp3.txt";
+    EXPECT_EQ(0, mngr.SaveToFile(fileName));
+    }
