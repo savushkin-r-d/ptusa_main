@@ -65,44 +65,45 @@ TEST( TRecipeManager, NullifyRecipe )
     mngr.NullifyRecipe();
     }
 
-TEST(TRecipeManager, EvalRecipe)
+TEST( TRecipeManager, EvalRecipe )
     {
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     mngr.EvalRecipe();
     }
 
-TEST(ParentRecipeManager, CopyRecipe)
+
+TEST( ParentRecipeManager, CopyRecipe )
     {
-    auto lineNo = 0;
+    auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     mngr.CopyRecipe();
     }
 
-TEST(ParentRecipeManager, PasteRecipe) 
+TEST( ParentRecipeManager, PasteRecipe ) 
     {
-    auto lineNo = 0;
+    auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     mngr.PasteRecipe();
     }
 
-TEST(ParentRecipeManager, NullifyRecipe)
+TEST( ParentRecipeManager, NullifyRecipe )
     {
-    auto lineNo = 0;
+    auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     mngr.NullifyRecipe();
     }
 
-TEST(ParentRecipeManager, SaveRecipeName)
+TEST( ParentRecipeManager, SaveRecipeName )
     {
-    auto lineNo = 0;
+    auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     mngr.SaveRecipeName();
     }
 
-TEST(ParentRecipeManager, SaveToFile)
+TEST( ParentRecipeManager, SaveToFile )
     {
-    auto lineNo = 0;
+    auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     auto fileName = "tmp3.txt";
     EXPECT_EQ(0, mngr.SaveToFile(fileName));
