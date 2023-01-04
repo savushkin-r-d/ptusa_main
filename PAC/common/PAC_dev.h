@@ -453,6 +453,8 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
+            
+            DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
 
             DST_V_VIRT,               ///< Виртуальный клапан.
 
@@ -1028,9 +1030,9 @@ class valve: public digital_io_device
 
     private:
         /// @brief Определение завершения отключения клапана с задержкой.
-        static bool is_switching_off_finished( valve *v )
+        virtual bool is_switching_off_finished()
             {
-            return !v->is_switching_off;
+            return !is_switching_off;
             };
 
         bool is_switching_off; ///Выключается ли клапан с задержкой.
@@ -2182,23 +2184,61 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #pragma region Выключение мини клапана с задержкой.
 #endif
     private:
-        /// @brief Вектор клапанов, ожидающих выключение.
-        static std::vector< valve_bottom_mix_proof* > to_switch_off;
-
         u_long start_off_time; //Время начала открытия клапана.
 
         int is_closing_mini; //Мини клапан в режиме закрытия
 
     public:
         /// @brief Определение завершения отключения клапана с задержкой.
-        static bool is_switching_off_finished( valve_bottom_mix_proof *v );
-
-        /// @brief Выключение мини клапанов с задержкой.
-        static void evaluate();
+        bool is_switching_off_finished() override;
 
 #ifdef _MSC_VER
 #pragma endregion Выключение мини клапана с задержкой.
 #endif
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан донный.
+class valve_mini_flushing : public i_mix_proof, public valve
+    {
+    public:
+        valve_mini_flushing( const char* dev_name );
+
+        /// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
+        /// седла нет.
+        void open_upper_seat();
+
+        /// @brief Открыть нижнее седло.
+        void open_lower_seat();
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
+            DO_INDEX_MINI_V,///< Индекс канала дискретного выхода мини клапана.
+
+            DI_INDEX_OPEN = 0,  ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
+            };
+
+        void direct_set_state( int new_state );
+
+#ifndef DEBUG_NO_IO_MODULES
+        void direct_on();
+        void direct_off();
+#endif // DEBUG_NO_IO_MODULES
+
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        //всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state();
+
+        bool get_fb_state();
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_off_fb_value();
+
+        int get_on_fb_value();
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.

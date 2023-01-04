@@ -16,8 +16,6 @@ auto_smart_ptr < device_manager > device_manager::instance;
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
-std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
-
 valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
 valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
 circuit_breaker::F_data_out circuit_breaker::stub_out_info;
@@ -1556,6 +1554,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         }
                     break;
                     }
+
+                case device::DST_V_MINI_FLUSHING:
+                    new_device = new valve_mini_flushing( dev_name );
+                    new_io_device = (valve_mini_flushing*)new_device;
+                    break;
 
                 case device::DST_V_VIRT:
                     new_device = new virtual_valve( dev_name );
@@ -3561,7 +3564,7 @@ void valve::evaluate()
 
     to_switch_off.erase(
         std::remove_if( to_switch_off.begin(), to_switch_off.end(),
-        is_switching_off_finished ), to_switch_off.end() );
+        []( valve* v ) { return v->is_switching_off_finished(); } ), to_switch_off.end() );
     }
 //-----------------------------------------------------------------------------
 void valve::off()
@@ -3788,18 +3791,17 @@ void valve_mix_proof::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Определение завершения отключения клапана с задержкой.
-bool valve_bottom_mix_proof::is_switching_off_finished(
-    valve_bottom_mix_proof *v )
+bool valve_bottom_mix_proof::is_switching_off_finished()
     {
     //Если открыли клапан раньше завершения закрытия, то его можно удалять из
     //вектора.
-    if ( v->get_valve_state() == VALVE_STATE::V_ON )
+    if ( get_valve_state() == VALVE_STATE::V_ON )
         {
         return true;
         }
 
     //Если сняли флаг закрытия, то удаляем из вектора
-    if (!v->is_closing_mini)
+    if (!is_closing_mini)
         {
         return true;
         }
@@ -3808,27 +3810,15 @@ bool valve_bottom_mix_proof::is_switching_off_finished(
 
     //Если завершилось время задержки, выключаем мини клапан перед удалением
     //клапана из вектора.
-    if ( get_delta_millisec( v->start_off_time ) > delay )
+    if ( get_delta_millisec( start_off_time ) > delay )
         {
-        v->set_DO( DO_INDEX_MINI_V, 0 );
-        v->is_closing_mini = 0;
+        set_DO( DO_INDEX_MINI_V, 0 );
+        is_closing_mini = 0;
         return true;
         }
 
     return false;
     };
-//-----------------------------------------------------------------------------
-void valve_bottom_mix_proof::evaluate()
-    {
-    if ( to_switch_off.empty() )
-        {
-        return;
-        }
-
-    to_switch_off.erase(
-        std::remove_if( to_switch_off.begin(), to_switch_off.end(),
-        is_switching_off_finished ), to_switch_off.end() );
-    }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 void valve_bottom_mix_proof::direct_on()
@@ -7086,6 +7076,137 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
             break;
         }
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_mini_flushing::valve_mini_flushing( const char* dev_name ) : valve(
+    true, true, dev_name, DT_V, DST_V_MINI_FLUSHING )
+    {
+    }
+
+/// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
+/// седла нет.
+void valve_mini_flushing::open_upper_seat()
+    {
+    }
+
+/// @brief Открыть нижнее седло.
+void valve_mini_flushing::open_lower_seat()
+    {
+    direct_set_state( V_LOWER_SEAT );
+    }
+
+void valve_mini_flushing::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT: //Открываем микроклапан
+            direct_off();
+
+            if ( 0 == get_DO( DO_INDEX_MINI_V ) )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_MINI_V, 1 );
+                }
+            break;
+
+        case V_LOWER_SEAT:
+            direct_off();
+            break;
+
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+void valve_mini_flushing::direct_on()
+    {
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        set_DO( DO_INDEX_MINI_V, 0 );
+        }
+    }
+
+void valve_mini_flushing::direct_off()
+    {
+    VALVE_STATE st = get_valve_state();
+    bool was_seat = st == V_LOWER_SEAT || st == V_UPPER_SEAT;
+
+    set_DO( DO_INDEX_MINI_V, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( o != 0 || was_seat )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+valve::VALVE_STATE valve_mini_flushing::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+    int o = get_DO( DO_INDEX );
+
+    if ( o == 0 && get_DO( DO_INDEX_MINI_V ) == 1 ) return V_UPPER_SEAT;
+
+    return (VALVE_STATE)o;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+bool valve_mini_flushing::get_fb_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return true;
+#else
+    int o = get_DO( DO_INDEX );
+    int i0 = get_DI( DI_INDEX_CLOSE );
+    int i1 = get_DI( DI_INDEX_OPEN );
+
+    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+        ( o == 1 && i1 == 1 && i0 == 0 ) )
+        {
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+#endif // DEBUG_NO_WAGO_MODULE
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_mini_flushing::get_off_fb_value()
+    {
+    return get_DI( DI_INDEX_CLOSE );
+    }
+
+int valve_mini_flushing::get_on_fb_value()
+    {
+    return get_DI( DI_INDEX_OPEN );
+    }
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_device::direct_off()
