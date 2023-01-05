@@ -7083,13 +7083,11 @@ valve_mini_flushing::valve_mini_flushing( const char* dev_name ) : valve(
     {
     }
 
-/// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
-/// седла нет.
 void valve_mini_flushing::open_upper_seat()
     {
+    //Не делаем ничего, так как верхнего седла нет.
     }
 
-/// @brief Открыть нижнее седло.
 void valve_mini_flushing::open_lower_seat()
     {
     direct_set_state( V_LOWER_SEAT );

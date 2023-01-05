@@ -2201,43 +2201,45 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 class valve_mini_flushing : public i_mix_proof, public valve
     {
     public:
-        valve_mini_flushing( const char* dev_name );
+        explicit valve_mini_flushing( const char* dev_name );
 
-        /// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
-        /// седла нет.
-        void open_upper_seat();
+        /// @brief Открыть верхнее седло.
+        void open_upper_seat() final;
 
         /// @brief Открыть нижнее седло.
-        void open_lower_seat();
+        void open_lower_seat() final;
 
     private:
-        enum CONSTANTS
+        enum CONSTANTS_DO
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
-            DO_INDEX_MINI_V,///< Индекс канала дискретного выхода мини клапана.
-
-            DI_INDEX_OPEN = 0,  ///< Индекс канала дискретного входа Открыт.
-            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
+            DO_INDEX_MINI_V ///< Индекс канала дискретного выхода мини клапана.
             };
 
-        void direct_set_state( int new_state );
+        enum CONSTANTS_DI
+            {
+            DI_INDEX_OPEN = 0,  ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE      ///< Индекс канала дискретного входа Закрыт.
+            };
+
+        void direct_set_state( int new_state ) final;
 
 #ifndef DEBUG_NO_IO_MODULES
-        void direct_on();
-        void direct_off();
+        void direct_on() final;
+        void direct_off() final;
 #endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() final;
 
-        bool get_fb_state();
+        bool get_fb_state() final;
 
 #ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value();
+        int get_off_fb_value() final;
 
-        int get_on_fb_value();
+        int get_on_fb_value() final;
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
