@@ -7121,7 +7121,6 @@ void valve_mini_flushing::direct_set_state( int new_state )
             direct_off();
             break;
 
-
         default:
             direct_on();
             break;
