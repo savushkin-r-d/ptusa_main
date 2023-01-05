@@ -2222,9 +2222,9 @@ class valve_mini_flushing : public i_mix_proof, public valve
             DI_INDEX_CLOSE      ///< Индекс канала дискретного входа Закрыт.
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state ) final;
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_on() final;
         void direct_off() final;
 #endif // DEBUG_NO_IO_MODULES

@@ -7093,6 +7093,7 @@ void valve_mini_flushing::open_lower_seat()
     direct_set_state( V_LOWER_SEAT );
     }
 
+#ifndef DEBUG_NO_IO_MODULES
 void valve_mini_flushing::direct_set_state( int new_state )
     {
     switch ( new_state )
@@ -7125,7 +7126,6 @@ void valve_mini_flushing::direct_set_state( int new_state )
         }
     }
 
-#ifndef DEBUG_NO_IO_MODULES
 void valve_mini_flushing::direct_on()
     {
     set_DO( DO_INDEX_L, 0 );
