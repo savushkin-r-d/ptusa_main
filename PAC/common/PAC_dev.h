@@ -2078,6 +2078,22 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             }
 #endif
 
+#ifdef _MSC_VER
+#pragma region Выключение мини клапана с задержкой.
+#endif
+    private:
+        u_long start_off_time;  //Время начала открытия клапана.
+
+        int is_closing_mini;    //Мини клапан в режиме закрытия
+
+    public:
+        /// @brief Определение завершения отключения клапана с задержкой.
+        bool is_switching_off_finished() override;
+
+#ifdef _MSC_VER
+#pragma endregion Выключение мини клапана с задержкой.
+#endif
+
     private:
         enum CONSTANTS
             {
@@ -2181,22 +2197,6 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             return get_DI( DI_INDEX_OPEN );
             }
 #endif // DEBUG_NO_IO_MODULES
-
-#ifdef _MSC_VER
-#pragma region Выключение мини клапана с задержкой.
-#endif
-    private:
-        u_long start_off_time;  //Время начала открытия клапана.
-
-        int is_closing_mini;    //Мини клапан в режиме закрытия
-
-    public:
-        /// @brief Определение завершения отключения клапана с задержкой.
-        bool is_switching_off_finished() override;
-
-#ifdef _MSC_VER
-#pragma endregion Выключение мини клапана с задержкой.
-#endif
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
