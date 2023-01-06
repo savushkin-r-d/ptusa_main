@@ -2132,13 +2132,11 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
 
-#ifndef DEBUG_NO_IO_MODULES
         VALVE_STATE get_valve_state()
             {
             int o = get_DO( DO_INDEX );

@@ -342,6 +342,39 @@ TEST( valve, evaluate )
     }
 
 
+TEST( valve_bottom_mix_proof, is_switching_off_finished )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+    const auto DELAY_TIME = 1;
+    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    V1.on();
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    V1.off();
+    V1.set_mini_closing_state( true );
+    EXPECT_EQ( false, V1.is_switching_off_finished() );
+    sleep_ms( DELAY_TIME + DELAY_TIME );
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+    }
+
+
+TEST( valve_mini_flushing, get_state )
+    {
+    valve_mini_flushing V1( "V1" );
+    const auto DELAY_TIME = 1;
+    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //No upper seat.          
+
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::V_LOWER_SEAT, V1.get_state() );
+    }
+
+
 TEST( valve_iolink_shut_off_sorio, save_device )
     {
     valve_iolink_shut_off_sorio V1( "V1" );
