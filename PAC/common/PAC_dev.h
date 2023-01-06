@@ -987,7 +987,10 @@ class valve: public digital_io_device
     protected:
 
         /// @brief Получение состояния клапана без учета обратной связи.
-        virtual VALVE_STATE get_valve_state() = 0;
+        virtual VALVE_STATE get_valve_state()
+            {
+            return (VALVE_STATE)digital_io_device::get_state();
+            }
 
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state()
@@ -2067,6 +2070,14 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             direct_set_state( V_LOWER_SEAT );
             }
 
+#ifdef PTUSA_TEST
+        void set_mini_closing_state( bool state )
+            {
+            is_closing_mini = state;
+            start_off_time = get_millisec();
+            }
+#endif
+
     private:
         enum CONSTANTS
             {
@@ -2126,11 +2137,10 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
+
+#ifndef DEBUG_NO_IO_MODULES
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
             int o = get_DO( DO_INDEX );
 
             if (o == 0 && get_DO(DO_INDEX_MINI_V) == 1) return V_UPPER_SEAT;
@@ -2138,14 +2148,10 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
             int o = get_DO( DO_INDEX );
             int i0 = get_DI( DI_INDEX_CLOSE );
             int i1 = get_DI( DI_INDEX_OPEN );
@@ -2165,10 +2171,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULE
             }
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_CLOSE );
@@ -2184,9 +2188,9 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #pragma region Выключение мини клапана с задержкой.
 #endif
     private:
-        u_long start_off_time; //Время начала открытия клапана.
+        u_long start_off_time;  //Время начала открытия клапана.
 
-        int is_closing_mini; //Мини клапан в режиме закрытия
+        int is_closing_mini;    //Мини клапан в режиме закрытия
 
     public:
         /// @brief Определение завершения отключения клапана с задержкой.
@@ -2227,18 +2231,15 @@ class valve_mini_flushing : public i_mix_proof, public valve
 
         void direct_on() final;
         void direct_off() final;
-#endif // DEBUG_NO_IO_MODULES
 
+    protected:
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
-    protected:
         VALVE_STATE get_valve_state() final;
 
         bool get_fb_state() final;
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value() final;
-
         int get_on_fb_value() final;
 #endif // DEBUG_NO_IO_MODULES
     };

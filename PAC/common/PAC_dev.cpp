@@ -3793,13 +3793,6 @@ void valve_mix_proof::direct_off()
 /// @brief Определение завершения отключения клапана с задержкой.
 bool valve_bottom_mix_proof::is_switching_off_finished()
     {
-    //Если открыли клапан раньше завершения закрытия, то его можно удалять из
-    //вектора.
-    if ( get_valve_state() == VALVE_STATE::V_ON )
-        {
-        return true;
-        }
-
     //Если сняли флаг закрытия, то удаляем из вектора
     if (!is_closing_mini)
         {
@@ -7153,26 +7146,18 @@ void valve_mini_flushing::direct_off()
         set_DO( DO_INDEX, 0 );
         }
     }
-#endif // DEBUG_NO_IO_MODULES
 
 valve::VALVE_STATE valve_mini_flushing::get_valve_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
     int o = get_DO( DO_INDEX );
 
     if ( o == 0 && get_DO( DO_INDEX_MINI_V ) == 1 ) return V_UPPER_SEAT;
 
     return (VALVE_STATE)o;
-#endif // DEBUG_NO_IO_MODULES
     }
 
 bool valve_mini_flushing::get_fb_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return true;
-#else
     int o = get_DO( DO_INDEX );
     int i0 = get_DI( DI_INDEX_CLOSE );
     int i1 = get_DI( DI_INDEX_OPEN );
@@ -7190,10 +7175,8 @@ bool valve_mini_flushing::get_fb_state()
         }
 
     return false;
-#endif // DEBUG_NO_WAGO_MODULE
     }
 
-#ifndef DEBUG_NO_IO_MODULES
 int valve_mini_flushing::get_off_fb_value()
     {
     return get_DI( DI_INDEX_CLOSE );
