@@ -9,7 +9,7 @@ using namespace ::testing;
 
 TEST(lua_manager_test, no_print_stack_traceback)
 {
-	G_LUA_MANAGER->no_print_stack_traceback();
+    lua_manager::no_print_stack_traceback();
 }
 
 /*
@@ -741,7 +741,7 @@ TEST( lua_manager, error_trace )
     {
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
-    G_LUA_MANAGER->print_stack_traceback();
+    lua_manager::use_print_stack_traceback();
     
     EXPECT_EQ( 0, luaL_dostring( L, "t = {}" ) );
     EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist1 = 1" ) );

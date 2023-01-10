@@ -157,7 +157,7 @@ int eval( lua_State* L )
 
 int no_print_stack_traceback( lua_State* L )
     {
-    G_LUA_MANAGER->no_print_stack_traceback();
+    lua_manager::no_print_stack_traceback();
     return 0;
     }
 
