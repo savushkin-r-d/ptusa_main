@@ -60,6 +60,8 @@ TEST( cipline_tech_object, _CheckErr )
     cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] =
         1 << BE_ERR_RETURN_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR | 1 << BE_ERR_SUPPLY_TEMP_SENSOR;
     EXPECT_EQ( 0, cip1._CheckErr( ));
+
+    G_LUA_MANAGER->free_Lua();
     }
 
 TEST( cipline_tech_object, evaluate )
@@ -70,4 +72,6 @@ TEST( cipline_tech_object, evaluate )
 
     cip1.initline();
     EXPECT_EQ( 0, cip1.evaluate() );
+
+    G_LUA_MANAGER->free_Lua();
     }

@@ -737,3 +737,19 @@ TEST_F(LuaManagerTest, reload_script_luaL_dofile_failure)
     subhook_free(hook_lua_pcall);
 }
 
+TEST( lua_manager, error_trace )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+    G_LUA_MANAGER->print_stack_traceback();
+    
+    EXPECT_EQ( 0, luaL_dostring( L, "t = {}" ) );
+    EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist1 = 1" ) );
+    EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist2 = {}" ) );
+    EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist3 = function(a, b) return a + b end" ) );
+
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "no_exist1", "error_trace") );
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "no_exist2", "error_trace" ) );
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "no_exist3", "error_trace" ) );
+    G_LUA_MANAGER->free_Lua();
+    }

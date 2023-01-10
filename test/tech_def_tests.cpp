@@ -152,6 +152,5 @@ TEST( tech_object, lua_check_function )
     auto res = tank1.lua_check_function( "no_function", "test call", 1, true );
     ASSERT_EQ( 0, res );
 
-
     G_LUA_MANAGER->free_Lua();
     }

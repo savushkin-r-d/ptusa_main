@@ -52,6 +52,11 @@ class lua_manager
             is_print_stack_traceback = false;
             }
 
+        void print_stack_traceback()
+            {
+            is_print_stack_traceback = true;
+            }
+
         static lua_manager* get_instance();
 
         int init( lua_State* L, const char* script_name, const char* dir = "",
