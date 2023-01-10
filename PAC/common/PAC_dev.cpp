@@ -3564,8 +3564,9 @@ void valve::evaluate()
 
     to_switch_off.erase(
         std::remove_if( to_switch_off.begin(), to_switch_off.end(),
-        []( valve* v ) { return v->is_switching_off_finished(); } ), to_switch_off.end() );
-    }
+        []( valve* v ) { return v->is_switching_off_finished(); } ),
+        to_switch_off.end() );
+        }
 //-----------------------------------------------------------------------------
 void valve::off()
     {
@@ -3805,8 +3806,8 @@ bool valve_bottom_mix_proof::is_switching_off_finished()
     //клапана из вектора.
     if ( get_delta_millisec( start_off_time ) > delay )
         {
-        set_DO( DO_INDEX_MINI_V, 0 );
         is_closing_mini = 0;
+        direct_off();
         return true;
         }
 
@@ -3823,7 +3824,6 @@ void valve_bottom_mix_proof::direct_on()
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
-
         set_DO( DO_INDEX_MINI_V, 1 );
         }
     }
@@ -3831,30 +3831,25 @@ void valve_bottom_mix_proof::direct_on()
 void valve_bottom_mix_proof::direct_off()
     {
     VALVE_STATE st = get_valve_state();
-    bool was_seat = st == V_LOWER_SEAT;
-    bool was_mini = st == V_UPPER_SEAT;
-    int o = get_DO( DO_INDEX );
 
-    if ( was_seat )
+    if ( st == V_LOWER_SEAT )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX_L, 0 );
         }
 
-    if ( was_mini && !is_closing_mini )
-        {
-        start_switch_time = get_millisec();
-        set_DO( DO_INDEX_MINI_V, 0 );
-        }
-
-    if ( o != 0 )
+    if ( 1 == get_DO( DO_INDEX ) )
         {
         start_switch_time = get_millisec();
         start_off_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         is_closing_mini = 1;
+        }
 
-        to_switch_off.push_back( this );
+    if ( 1 == get_DO( DO_INDEX_MINI_V ) && !is_closing_mini )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_MINI_V, 0 );
         }
     }
 #endif // DEBUG_NO_IO_MODULES
