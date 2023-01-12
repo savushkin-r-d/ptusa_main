@@ -7,6 +7,14 @@ using namespace ::testing;
 	void evaluate()
 */
 
+TEST( action, is_empty )
+	{
+	action a1( "empty_action", 0 );	
+
+	EXPECT_EQ( true, a1.is_empty() );
+	}
+
+
 TEST( open_seat_action, evaluate )
 	{
 	char* res = 0;
