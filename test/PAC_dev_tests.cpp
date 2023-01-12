@@ -134,6 +134,17 @@ TEST( device_manager, add_io_device )
     auto V2 = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V2 ) );
 
+    //device::DT_V, device::DST_V_MINI_FLUSHING, Test
+    name = std::string( "V3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_MINI_FLUSHING, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto V3 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V3 ) );
+
 
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
@@ -309,6 +320,61 @@ TEST( device, set_article )
     auto IFM_TE = "IFM.TE11";
     T1.set_article( IFM_TE );
     EXPECT_STREQ( IFM_TE, T1.get_article() );
+    }
+
+
+TEST( valve, evaluate )
+    {
+    valve::evaluate();
+
+    valve_mini_flushing V1( "V1" );
+    const auto DELAY_TIME = 1;
+    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //Should be closed.
+    V1.on();
+    V1.off();
+    EXPECT_EQ( valve::V_ON, V1.get_state() );   //Should be opened.
+    valve::evaluate();
+    sleep_ms( DELAY_TIME + DELAY_TIME );
+    valve::evaluate();
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //Should be closed.
+    }
+
+
+TEST( valve_bottom_mix_proof, is_switching_off_finished )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+    const auto DELAY_TIME = 1;
+    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    V1.on();
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    V1.off();
+    V1.set_mini_closing_state( true );
+    EXPECT_EQ( false, V1.is_switching_off_finished() );
+    sleep_ms( DELAY_TIME + DELAY_TIME );
+    EXPECT_EQ( true, V1.is_switching_off_finished() );
+    }
+
+
+TEST( valve_mini_flushing, get_state )
+    {
+    valve_mini_flushing V1( "V1" );
+    const auto DELAY_TIME = 1;
+    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //No upper seat.
+
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::V_LOWER_SEAT, V1.get_state() );
+
+    V1.off();
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );
     }
 
 
