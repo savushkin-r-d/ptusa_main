@@ -368,10 +368,13 @@ TEST( valve_mini_flushing, get_state )
     G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
 
     V1.open_upper_seat();
-    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //No upper seat.          
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );  //No upper seat.
 
     V1.open_lower_seat();
     EXPECT_EQ( valve::V_LOWER_SEAT, V1.get_state() );
+
+    V1.off();
+    EXPECT_EQ( valve::V_OFF, V1.get_state() );
     }
 
 

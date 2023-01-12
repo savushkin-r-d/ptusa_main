@@ -7094,7 +7094,11 @@ void valve_mini_flushing::direct_set_state( int new_state )
             direct_on();
             break;
 
-        case V_UPPER_SEAT: //Открываем микроклапан
+        case V_UPPER_SEAT: 
+            direct_off();
+            break;
+
+        case V_LOWER_SEAT:      //Открываем миниклапан.
             direct_off();
 
             if ( 0 == get_DO( DO_INDEX_MINI_V ) )
@@ -7102,10 +7106,6 @@ void valve_mini_flushing::direct_set_state( int new_state )
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_MINI_V, 1 );
                 }
-            break;
-
-        case V_LOWER_SEAT:
-            direct_off();
             break;
 
         default:
@@ -7129,13 +7129,14 @@ void valve_mini_flushing::direct_on()
 
 void valve_mini_flushing::direct_off()
     {
-    VALVE_STATE st = get_valve_state();
-    bool was_seat = st == V_LOWER_SEAT || st == V_UPPER_SEAT;
-
-    set_DO( DO_INDEX_MINI_V, 0 );
+    if ( get_DO( DO_INDEX_MINI_V ) == 1 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_MINI_V, 0 );
+        }
+   
     int o = get_DO( DO_INDEX );
-
-    if ( o != 0 || was_seat )
+    if ( o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -7146,7 +7147,7 @@ valve::VALVE_STATE valve_mini_flushing::get_valve_state()
     {
     int o = get_DO( DO_INDEX );
 
-    if ( o == 0 && get_DO( DO_INDEX_MINI_V ) == 1 ) return V_UPPER_SEAT;
+    if ( o == 0 && get_DO( DO_INDEX_MINI_V ) == 1 ) return V_LOWER_SEAT;
 
     return (VALVE_STATE)o;
     }
