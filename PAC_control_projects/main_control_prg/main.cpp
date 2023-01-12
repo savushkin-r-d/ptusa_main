@@ -183,7 +183,6 @@ int main( int argc, const char *argv[] )
         G_DEVICE_MANAGER()->evaluate_io();
 
         valve::evaluate();
-        valve_bottom_mix_proof::evaluate();
 
         G_TECH_OBJECT_MNGR()->evaluate();
         sleep_ms( sleep_time_ms );
