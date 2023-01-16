@@ -512,7 +512,7 @@ int tcp_communicator_win::evaluate()
         }
 
         int total_size = 0;
-        unsigned char* p = buf;
+        char* p = (char*) buf;
 
         // Настраиваем  file descriptor set.
         fd_set fds;

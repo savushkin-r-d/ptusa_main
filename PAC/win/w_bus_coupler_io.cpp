@@ -10,9 +10,9 @@ extern int errno;
 int io_manager_windows::net_init(io_node* node)
 {
     int type = SOCK_STREAM;
-    int protocol = 0; /* всегда 0 */
+    int protocol = 0; /* РІСЃРµРіРґР° 0 */
     int err;
-    int sock = err = socket(AF_INET, type, protocol); // Cоздание сокета.
+    int sock = err = socket(AF_INET, type, protocol); // CРѕР·РґР°РЅРёРµ СЃРѕРєРµС‚Р°.
 
     if (sock < 0)
     {
@@ -24,7 +24,7 @@ int io_manager_windows::net_init(io_node* node)
         return -4;
     }
 
-    // Адресация мастер-сокета.
+    // РђРґСЂРµСЃР°С†РёСЏ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     struct sockaddr_in socket_remote_server;
     const int PORT = 502;
     memset(&socket_remote_server, 0, sizeof(socket_remote_server));
@@ -45,7 +45,7 @@ int io_manager_windows::net_init(io_node* node)
         return -5;
     }
 
-    // Переводим в неблокирующий режим.
+    // РџРµСЂРµРІРѕРґРёРј РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     u_long mode = 1;
     err = ioctlsocket(sock, FIONBIO, &mode);
     if (err != 0)
@@ -59,7 +59,7 @@ int io_manager_windows::net_init(io_node* node)
         return -5;
     }
 
-    // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
+    // РџСЂРёРІСЏР·РєР° СЃРѕРєРµС‚Р°. РЎСЂР°Р·Сѓ РІРѕР·РІСЂР°С‰Р°РµС‚ СѓРїСЂР°РІР»РµРЅРёРµ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РµРј СЂРµР¶РёРјРµ.
     err = connect(sock, (struct sockaddr*)&socket_remote_server,
         sizeof(socket_remote_server));
 
@@ -403,7 +403,7 @@ int io_manager_windows::write_outputs()
 //-----------------------------------------------------------------------------
 int io_manager_windows::e_communicate(io_node* node, int bytes_to_send, int bytes_to_receive)
 {
-    // Проверка связи с узлом I/O.
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СѓР·Р»РѕРј I/O.
     if (get_delta_millisec(node->last_poll_time) > io_node::C_MAX_WAIT_TIME)
     {
         if (false == node->is_set_err)
@@ -424,9 +424,9 @@ int io_manager_windows::e_communicate(io_node* node, int bytes_to_send, int byte
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number);
         }
     }
-    // Проверка связи с узлом I/O.-!>
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СѓР·Р»РѕРј I/O.-!>
 
-    // Инициализация сетевого соединения, при необходимости.
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚РµРІРѕРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
     if (node->state != io_node::ST_OK)
     {
         if (get_delta_millisec(node->last_init_time) < node->delay_time)
@@ -445,11 +445,11 @@ int io_manager_windows::e_communicate(io_node* node, int bytes_to_send, int byte
             return -100;
         }
     }
-    // Инициализация сетевого соединения, при необходимости.-!>
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚РµРІРѕРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.-!>
 
     node->delay_time = io_node::C_INITIAL_RECONNECT_DELAY;
 
-    // Посылка данных.
+    // РџРѕСЃС‹Р»РєР° РґР°РЅРЅС‹С….
     int res = tcp_communicator_win::sendall(node->sock, buff,
         bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat);
@@ -460,7 +460,7 @@ int io_manager_windows::e_communicate(io_node* node, int bytes_to_send, int byte
         return -101;
     }
 
-    // Получение данных.
+    // РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С….
     res = tcp_communicator_win::recvtimeout(node->sock, buff,
         bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US);
 
