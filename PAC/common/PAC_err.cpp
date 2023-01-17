@@ -94,7 +94,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
         sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, true ) );
         G_LOG->write_log( i_log::P_ERR );
 
-        errors.push_back( critical_error( eclass, p1, p2 ) );
+        errors.emplace_back( eclass, p1, p2 );
         errors_id++;
         }
     }

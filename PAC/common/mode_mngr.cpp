@@ -477,10 +477,10 @@ int operation::switch_active_extra_step( int off_step, int on_step )
 action::action( std::string name, u_int subgropups_cnt ) : name( name ),
     par( 0 ), subgropups_cnt( subgropups_cnt )
     {
-    devices.push_back( std::vector < std::vector< device* > >() );
+    devices.emplace_back();
     for ( u_int i = 0; i < subgropups_cnt; i++ )
         {
-        devices[ MAIN_GROUP ].push_back( std::vector< device* >() );
+        devices[ MAIN_GROUP ].emplace_back();
         }
     }
 //-----------------------------------------------------------------------------
@@ -619,18 +619,18 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     {
     while ( group >= devices.size() )
         {
-        devices.push_back( std::vector < std::vector< device* > >() );
+        devices.emplace_back();
 
         size_t last_idx = devices.size() - 1;
         while ( subgropups_cnt > devices[ last_idx ].size() )
             {
-            devices[ last_idx ].push_back( std::vector< device* >() );
+            devices[ last_idx ].emplace_back();
             }
         }
 
     while ( subgroup >= devices[ group ].size() )
         {
-        devices[ group ].push_back( std::vector< device* >() );
+        devices[ group ].emplace_back();
         }
 
     devices[ group ][ subgroup ].push_back( dev );

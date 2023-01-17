@@ -559,7 +559,7 @@ int lua_manager::error_trace( lua_State * L )
             errors.erase( errors.begin(), errors.end() - MAX_ERRORS / 2 );
             }
 
-        std::sort( errors.begin(), errors.begin() );
+        std::sort( errors.begin(), errors.end() );
         }
 
     return 0;
