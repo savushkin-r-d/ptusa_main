@@ -3258,7 +3258,7 @@ class wages_RS232 : public analog_io_device, public i_wages
             };
 
         int state;
-        float value;
+        float value = .0f;
     };
 //-----------------------------------------------------------------------------
 class wages_eth : public device, public i_wages

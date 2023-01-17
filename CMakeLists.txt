@@ -67,7 +67,8 @@ file(GLOB common_src CONFIGURE_DEPENDS
 list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
 
 file(GLOB test_src CONFIGURE_DEPENDS
-    	test/*.cpp)
+    	    test/*.cpp
+            test/dll/*.cpp)
 
 if(LINUX)
     file(GLOB linux_src CONFIGURE_DEPENDS
@@ -91,6 +92,7 @@ if(LINUX)
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
+           PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
 
     if(ARP_DEVICE)
@@ -122,7 +124,8 @@ elseif(WIN32)
             PAC_control_projects/main_control_prg/version.rc)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
-           test/main_test.cpp
+           test/main_test.cpp           
+           PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})

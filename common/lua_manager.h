@@ -47,9 +47,14 @@ int check_file(const char* file_name, char* err_str);
 class lua_manager
     {
     public:
-        void no_print_stack_traceback()
+        static void no_print_stack_traceback()
             {
             is_print_stack_traceback = false;
+            }
+
+        static void use_print_stack_traceback()
+            {
+            is_print_stack_traceback = true;
             }
 
         static lua_manager* get_instance();
