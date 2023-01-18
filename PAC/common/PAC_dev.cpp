@@ -2873,7 +2873,8 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int base_counter::save_device_ex( char* buff )
     {
-    return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    return fmt::format_to_n(
+        buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description() const
@@ -2973,8 +2974,8 @@ float counter_f::get_flow()
 int counter_f::save_device_ex( char *buff )
     {
     int res = counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, ",
+        get_flow() ).size;
 
     return res;
     }
@@ -3094,9 +3095,8 @@ float counter_iolink::get_flow()
 int counter_iolink::save_device_ex( char* buff )
     {
     int res = base_counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
-    res += sprintf( buff + res, "T=%.1f, ", get_temperature() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
+        get_flow(), get_temperature() ).size;
 
     return res;
     }
@@ -7401,11 +7401,14 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=0.0, ",
-        reverse, freq, rpm, est, amperage );
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
+        reverse, freq, rpm, est, amperage ).size; 
 #else
-    res = sprintf(buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=%.1f, ",
-        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state, atv->amperage, atv->frq_max);
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
+        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
+        atv->amperage, atv->frq_max ).size;
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
