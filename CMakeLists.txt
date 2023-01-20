@@ -23,9 +23,6 @@ endif()
 ################# create targets ######################################################
 
 add_compile_definitions(PAC_PC)
-if(NOT ARP_DEVICE)
-    add_compile_definitions(DEBUG_NO_IO_MODULES)
-endif()
 
 if(LINUX)
     add_compile_definitions(LINUX_OS)
