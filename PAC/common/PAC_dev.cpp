@@ -7116,7 +7116,6 @@ void valve_mini_flushing::direct_set_state( int new_state )
 
 void valve_mini_flushing::direct_on()
     {
-    set_DO( DO_INDEX_L, 0 );
     int o = get_DO( DO_INDEX );
 
     if ( 0 == o )
