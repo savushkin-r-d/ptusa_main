@@ -172,22 +172,26 @@
         {
             "name": "build-windows-VS2022-release",
             "displayName": "Windows Release",
-            "configurePreset": "windows-VS2022-default"
+            "configurePreset": "windows-VS2022-default",
+            "configuration": "Release"
         },
         {
             "name": "build-windows-VS2022-debug",
             "displayName": "Windows Debug",
-            "configurePreset": "windows-VS2022-debug"
+            "configurePreset": "windows-VS2022-debug",
+            "configuration": "Debug"
         },
         {
             "name": "build-windows-VS2019-release",
             "displayName": "Windows Release",
-            "configurePreset": "windows-VS2019-default"
+            "configurePreset": "windows-VS2019-default",
+            "configuration": "Release"
         },
         {
             "name": "build-windows-VS2019-debug",
             "displayName": "Windows Debug",
-            "configurePreset": "windows-VS2019-debug"
+            "configurePreset": "windows-VS2019-debug",
+            "configuration": "Debug"
         },
         {
             "name": "build-windows-AXCF3152-2021-LTS-Release",
