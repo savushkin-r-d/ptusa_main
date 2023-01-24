@@ -60,12 +60,11 @@ file(GLOB common_src CONFIGURE_DEPENDS
         common/util/*.cpp
         common/*.cpp
 
-        PAC/common/OPCUA/*.c #########
         PAC/common/*.cpp
         PAC/common/sys/*.cpp
         PAC/IoT/*.cpp)
 
-list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
+list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
 
 file(GLOB test_src CONFIGURE_DEPENDS
     	    test/*.cpp
@@ -176,7 +175,6 @@ set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA> ############
 
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 

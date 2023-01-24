@@ -98,8 +98,12 @@ UA_NodeId techObjectTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1200 } };
 
 void OPCUAServer::Init(int port)
 {
-    server = UA_Server_new();
-    UA_ServerConfig_setDefault(UA_Server_getConfig(server));
+    config = UA_ServerConfig_new_default();
+    nl = UA_ServerNetworkLayerTCP(UA_ConnectionConfig_default, 4840, NULL);
+    config->networkLayers = &nl;
+    config->networkLayersSize = 1;
+    server = UA_Server_new(config);
+   
 }
 
 
@@ -127,6 +131,7 @@ void OPCUAServer::Shutdown()
 {
     UA_Server_run_shutdown(server);
     UA_Server_delete(server);
+    nl.deleteMembers(&nl);
 }
 
 void OPCUAServer::Evaluate()
