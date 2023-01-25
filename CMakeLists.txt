@@ -54,6 +54,8 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 set(SUBHOOK_TESTS OFF)
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook EXCLUDE_FROM_ALL)
 
+add_subdirectory(benchmark)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -94,6 +96,10 @@ if(LINUX)
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
+    
+    add_executable(main_perfomance_test ${common_src} ${linux_src}
+           test/perfomance/main_perfomance_test.cpp           
+           PAC_control_projects/main_control_prg/version.rc)
 
     if(ARP_DEVICE)
         execute_process(COMMAND plcncli
@@ -126,6 +132,10 @@ elseif(WIN32)
     add_executable(main_test ${common_src} ${win_src} ${test_src}
            test/main_test.cpp           
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
+           PAC_control_projects/main_control_prg/version.rc)
+
+    add_executable(main_perfomance_test ${common_src} ${win_src}
+           test/perfomance/main_perfomance_test.cpp           
            PAC_control_projects/main_control_prg/version.rc)
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -164,7 +174,8 @@ target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
 
-set_target_properties (subhook gtest gtest_main gmock gmock_main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set_target_properties (subhook gtest gtest_main gmock gmock_main benchmark
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 #######################################################################################
 
 ################# project include-paths ###############################################
@@ -218,6 +229,7 @@ set(TEST_INCLUDES
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
+target_include_directories(main_perfomance_test PUBLIC ${GENERAL_INCLUDES})
 #######################################################################################
 
 ################# set link options ####################################################
@@ -250,10 +262,13 @@ endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
 
+target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic benchmark::benchmark)
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
     target_link_libraries(libptusa_main wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
+    target_link_libraries(main_perfomance_test wsock32 ws2_32)
 
     if(DEFINED ENV{LUA_DEV})
         target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
