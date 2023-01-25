@@ -59,47 +59,11 @@ class ParentRecipeManager
     unsigned long startAddr(int recNo) const;
     int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+    void FormRecipeList();
 
 public:
-    void CopyRecipe();
-    void PasteRecipe();
-    void LoadRecipeName();
-    void NullifyRecipe();
-    void SaveRecipeName();
-    int SaveToFile(const char* filename) const;
-    explicit ParentRecipeManager( int lineNo );
-    virtual ~ParentRecipeManager();
-
-    static int get_recipe_name_length()
-    {
-        return recipeNameLength;
-    };
-
-    static int get_recipe_per_line()
-    {
-        return recipePerLine;
-    }
-    char* get_current_recipe_name() const
-    {
-        return currentRecipeName;
-    }
-    char* get_recipe_list() const
-    {
-        return recipeList;
-    }
-    const char* get_default_file_name() const
-    {
-        return defaultfilename.c_str();
-    }
-};
-
-///@class TRecipeManager mcaRec.h
-///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
-class TRecipeManager : public ParentRecipeManager
-    {
-    public:
     enum RecipeValues
-        {
+    {
         RV_IS_USED = 0,
         RV_TO_DEFAULTS,
         RV_V1,			//объем V1 (от модуля до объекта)
@@ -217,7 +181,50 @@ class TRecipeManager : public ParentRecipeManager
         RV_LASTVALVEON = 114,
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
-        };
+    };
+    void CopyRecipe();
+    void PasteRecipe();
+    void LoadRecipeName();
+    void NullifyRecipe();
+    void SaveRecipeName();
+    int SaveToFile(const char* filename) const;
+    float getRecipeValue(int recNo, int valueNo);
+    int setRecipeValue(int recNo, int valueNo, float newValue);
+    float getValue(int valueNo);
+    int setValue(int valueNo, float newValue);
+    int ResetRecipeToDefaults(int recipeNo);
+    void EvalRecipe();
+    explicit ParentRecipeManager( int lineNo );
+    virtual ~ParentRecipeManager();
+
+    static int get_recipe_name_length()
+    {
+        return recipeNameLength;
+    };
+
+    static int get_recipe_per_line()
+    {
+        return recipePerLine;
+    }
+    char* get_current_recipe_name() const
+    {
+        return currentRecipeName;
+    }
+    char* get_recipe_list() const
+    {
+        return recipeList;
+    }
+    const char* get_default_file_name() const
+    {
+        return defaultfilename.c_str();
+    }
+};
+
+///@class TRecipeManager mcaRec.h
+///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
+class TRecipeManager : public ParentRecipeManager
+    {
+    public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
         /// @param recipeNo - номер рецепта
@@ -236,36 +243,12 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - заданный номер рецепта > максимального количества рецептов
         int setCurrentRecipe(int recipeNo);
-        /// @fn  float TRecipeManager::getRecipeValue(int recNo, int valueNo)
-        /// @brief Возвращает значение параметра указанного рецепта
-        /// @param recNo Номер рецепта
-        /// @param valueNo Номер параметра
-        /// @return   float Значение параметра
-        float getRecipeValue(int recNo, int valueNo);
-        /// @fn  float TRecipeManager::getValue(int valueNo)
-        /// @brief Возвращает значение параметра текущего рецепта
-        /// @param valueNo Номер параметра
-        /// @return   float Значение параметра
-        float getValue(int valueNo);
         /// @fn  int TRecipeManager::getRecipeName(int recNO, char* recName)
         /// @brief Получает строку с именем рецепта
         /// @param recNO Номер рецепта
         /// @param recName Указатель на строку, в которую будет записан рецепт
         /// @return   int 0 - ошибка !0 - ОК
         int getRecipeName(int recNO, char* recName);
-        /// @fn  int TRecipeManager::setRecipeValue(int recNo, int valueNo, float newValue)
-        /// @brief Устанавливает значение заданного параметра заданного рецепта
-        /// @param recNo Номер рецепта
-        /// @param valueNo Номер параметра
-        /// @param newValue Новое значение
-        /// @return   int 0 - ошибка !0 - ОК
-        int setRecipeValue(int recNo, int valueNo, float newValue);
-        /// @fn  int TRecipeManager::setValue(int valueNo, float newValue)
-        /// @brief Устанавливает значение заданного параметра текущего рецепта
-        /// @param valueNo Номер параметра
-        /// @param newValue Новое значение
-        /// @return   int 0 - ошибка !0 - ОК
-        int setValue(int valueNo, float newValue);
         /// @fn  int TRecipeManager::NextRecipe()
         /// @brief Переход к следующему рецепту
         /// @return   int 0 - ошибка !0 - ОК
@@ -293,15 +276,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Возвращает количество параметров для рецепта
         /// @return   int Количество параметров рецепта
         int GetParamsCount();
-        /// @fn  int TRecipeManager::ResetRecipeToDefaults(int recipeNo)
-        /// @brief Сбрасывает значения параметров указанного рецепта на значения по-умолчанию
-        /// @param recipeNo Номер рецепта
-        /// @return   int 0 - ошибка !0 - ОК
-        int ResetRecipeToDefaults(int recipeNo);
-        /// @fn  void TRecipeManager::EvalRecipe()
-        /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
-        /// @return   void
-        void EvalRecipe();
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
@@ -311,8 +285,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
         /// @return
         TRecipeManager(int lineNo);
-          private:
-              void FormRecipeList();
     };
 
 
@@ -434,10 +406,6 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - ошибка !0 - ОК
         int ResetRecipeToDefaults(int recipeNo);
-        /// @fn  void TRecipeManager::EvalRecipe()
-        /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
-        /// @return   void
-        void EvalRecipe();
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения

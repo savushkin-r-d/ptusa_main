@@ -171,185 +171,64 @@ void ParentRecipeManager::NullifyRecipe()
     LoadRecipeName();
 }
 
-
-TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
+float ParentRecipeManager::getRecipeValue(int recNo, int valueNo)
 {
-    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
-    recipeMemory = new unsigned char[recipeMemorySize];
-    LoadFromFile(defaultfilename.c_str());
-    lastEvalTime = get_millisec();
-    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
-    recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
-    *recipeList = 0;
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
-    FormRecipeList();
-    recipechanged = 0;
-    recipechangechecktime = get_millisec();
-}
-
-int TRecipeManager::NextRecipe()
-    {
-    if (currentRecipe < recipePerLine - 1)
-        {
-        SaveRecipeName();
-        currentRecipe++;
-        curRecipeStartBlock += blocksPerRecipe;
-        LoadRecipeName();
-        return 1;
-        }
-    else
-        {
-        return 0;
-        }
-    }
-
-int TRecipeManager::PrevRecipe()
-    {
-    if (currentRecipe > 0)
-        {
-        SaveRecipeName();
-        currentRecipe--;
-        curRecipeStartBlock -= blocksPerRecipe;
-        LoadRecipeName();
-        return 1;
-        }
-    else
-        {
-        return 0;
-        }
-    }
-
-void TRecipeManager::EvalRecipe()
-    {
-    if (get_delta_millisec(lastEvalTime) > 10000L)
-        {
-        lastEvalTime = get_millisec();
-        SaveRecipeName();
-        FormRecipeList();
-        }
-    if (get_delta_millisec(recipechangechecktime) > RECIPE_SAVE_INTERVAL)
-        {
-        if (recipechanged)
-            {
-            recipechanged = 0;
-            SaveToFile(defaultfilename.c_str());
-            }
-        recipechangechecktime = get_millisec();
-        }
-    if (getValue(RV_TO_DEFAULTS != 0))
-        {
-        switch((int)getValue(RV_TO_DEFAULTS))
-            {
-        case 1:
-            ResetRecipeToDefaults(currentRecipe);
-#ifdef DEBUG
-            printf("Reset recipe %d to defaults",currentRecipe);
-#endif
-            break;
-        case 2:
-            CopyRecipe();
-            break;
-        case 3:
-            PasteRecipe();
-            break;
-        case 4:
-            NullifyRecipe();
-            break;
-            }
-        setValue(RV_TO_DEFAULTS, 0);
-        }
-    }
-
-float TRecipeManager::getRecipeValue( int recNo, int valueNo )
-    {
     unsigned long temp;
     ReadMem(startAddr(recNo) + startRecipeParamsOffset + 4 * valueNo, 4, (unsigned char*)&temp);
     if (temp != 0xFFFFFFFF)
-        {
-        return *((float*)&temp);
-        }
-    else
-        {
-        return -1000;
-        }
-    }
-
-int TRecipeManager::setRecipeValue( int recNo, int valueNo, float newValue )
     {
+        return *((float*)&temp);
+    }
+    else
+    {
+        return -1000;
+    }
+}
+
+int ParentRecipeManager::setRecipeValue(int recNo, int valueNo, float newValue)
+{
     recipechanged = 1;
     recipechangechecktime = get_millisec();
     WriteMem(startAddr(recNo) + startRecipeParamsOffset + 4 * valueNo, 4, (unsigned char*)&newValue);
     return 0;
-    }
+}
 
-int TRecipeManager::GetParamsCount()
-    {
-    return (blocksPerRecipe * BLOCK_SIZE - startRecipeParamsOffset) / 4;
 
-    }
-
-float TRecipeManager::getValue( int valueNo )
-    {
-    return getRecipeValue(currentRecipe, valueNo);
-    }
-
-int TRecipeManager::setValue( int valueNo, float newValue )
-    {
+int ParentRecipeManager::setValue(int valueNo, float newValue)
+{
 #ifdef MSAPANEL
     if (valueNo == RV_IS_USED)
-        {
+    {
         MsaPanel::UpdateRecipes();
-        }
+    }
 #endif // MSAPANEL
     return setRecipeValue(currentRecipe, valueNo, newValue);
-    }
+}
 
-int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, run_time_params_float* par )
+void ParentRecipeManager::FormRecipeList()
+{
+    strcpy(recipeList, "");
+    char tmprecipename[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER];
+    for (int i = 0; i < recipePerLine; i++)
     {
-    if (recipeNo < recipePerLine && recipeStartPos + parQuantity < GetParamsCount() && (unsigned int)paramsStartPos + (unsigned int)parQuantity < par->get_count())
+        if (getRecipeValue(i, RV_IS_USED) != 0)
         {
-        for (int i = 0; i < parQuantity; i++)
-            {
-            par[0][paramsStartPos + i] = getRecipeValue(recipeNo, recipeStartPos + i);
-            #ifdef DEBUG
-            printf("\n\rsetparamm %d %f\n\r", paramsStartPos + i, par[0][paramsStartPos + i]);
- #endif
-            }
-        #ifdef DEBUG
-        printf("\n\rLoaded recipe %d\n\r",recipeNo);
- #endif
-        return 1;
+            ReadMem(startAddr(i), recipeNameLength, (unsigned char*)tmprecipename, true);
+            sprintf(recipeList + strlen(recipeList), "%d##%s||", i + 1, tmprecipename);
         }
-    else
-        {
-        return 0;
-        }
-    }
 
-int TRecipeManager::getCurrentRecipe()
-    {
-    return currentRecipe;
     }
+}
 
-int TRecipeManager::setCurrentRecipe( int recipeNo )
-    {
-    if (recipeNo >=0 && recipeNo < recipePerLine)
-        {
-        SaveRecipeName();
-        curRecipeStartBlock += blocksPerRecipe * (recipeNo - currentRecipe);
-        currentRecipe = recipeNo;
-        return 1;
-        }
-    else
-        {
-        return 0;
-        }
-    }
+float ParentRecipeManager::getValue(int valueNo)
+{
+    return getRecipeValue(currentRecipe, valueNo);
+}
 
-int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
-    {
+int ParentRecipeManager::ResetRecipeToDefaults(int recipeNo)
+{
     if (recipeNo >= 0 && recipeNo < recipePerLine)
-        {
+    {
         setRecipeValue(recipeNo, RV_IS_USED, 0);
         setRecipeValue(recipeNo, RV_TO_DEFAULTS, 0);
         setRecipeValue(recipeNo, RV_V1, 200);
@@ -447,20 +326,93 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_SIGNAL_CAN_CONTINUE, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_WATER, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_PRERINSE, 0);
-        setRecipeValue(recipeNo, RV_SIGNAL_INTERMEDIATE_RINSE, 0); 
-        setRecipeValue(recipeNo, RV_SIGNAL_POSTRINSE, 0); 
-        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_STOPPED, 0); 
-        setRecipeValue(recipeNo, RV_SIGNAL_FLOW_TASK, 0); 
-        setRecipeValue(recipeNo, RV_SIGNAL_TEMP_TASK, 0); 
-        setRecipeValue(recipeNo, RV_SIGNAL_WASH_ABORTED, 0); 
-        setRecipeValue(recipeNo, RV_PRESSURE_CONTROL, 0); 
-        setRecipeValue(recipeNo, RV_DONT_USE_WATER_TANK, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_INTERMEDIATE_RINSE, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_POSTRINSE, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_STOPPED, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_FLOW_TASK, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_TEMP_TASK, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_WASH_ABORTED, 0);
+        setRecipeValue(recipeNo, RV_PRESSURE_CONTROL, 0);
+        setRecipeValue(recipeNo, RV_DONT_USE_WATER_TANK, 0);
         setRecipeValue(recipeNo, RV_PIDP_MAX_OUT, 0);
         setRecipeValue(recipeNo, RV_PIDF_MAX_OUT, 0);
         for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
-            {
+        {
             setRecipeValue(recipeNo, i, 0);
+        }
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void ParentRecipeManager::EvalRecipe()
+    {
+    if (get_delta_millisec(lastEvalTime) > 10000L)
+        {
+        lastEvalTime = get_millisec();
+        SaveRecipeName();
+        FormRecipeList();
+        }
+    if (get_delta_millisec(recipechangechecktime) > RECIPE_SAVE_INTERVAL)
+        {
+        if (recipechanged)
+            {
+            recipechanged = 0;
+            SaveToFile(defaultfilename.c_str());
             }
+        recipechangechecktime = get_millisec();
+        }
+    if (getValue(RV_TO_DEFAULTS != 0))
+        {
+        switch((int)getValue(RV_TO_DEFAULTS))
+            {
+        case 1:
+            ResetRecipeToDefaults(currentRecipe);
+#ifdef DEBUG
+            printf("Reset recipe %d to defaults",currentRecipe);
+#endif
+            break;
+        case 2:
+            CopyRecipe();
+            break;
+        case 3:
+            PasteRecipe();
+            break;
+        case 4:
+            NullifyRecipe();
+            break;
+            }
+        setValue(RV_TO_DEFAULTS, 0);
+        }
+    }
+
+
+TRecipeManager::TRecipeManager(int lineNo) : ParentRecipeManager( lineNo ) 
+{
+    recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
+    recipeMemory = new unsigned char[recipeMemorySize];
+    LoadFromFile(defaultfilename.c_str());
+    lastEvalTime = get_millisec();
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
+    recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
+    *recipeList = 0;
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    FormRecipeList();
+    recipechanged = 0;
+    recipechangechecktime = get_millisec();
+}
+
+int TRecipeManager::NextRecipe()
+    {
+    if (currentRecipe < recipePerLine - 1)
+        {
+        SaveRecipeName();
+        currentRecipe++;
+        curRecipeStartBlock += blocksPerRecipe;
+        LoadRecipeName();
         return 1;
         }
     else
@@ -469,18 +421,67 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         }
     }
 
-void TRecipeManager::FormRecipeList()
+int TRecipeManager::PrevRecipe()
     {
-    strcpy(recipeList, "");
-    char tmprecipename[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER];
-    for (int i = 0; i < recipePerLine; i++)
+    if (currentRecipe > 0)
         {
-        if (getRecipeValue(i, RV_IS_USED) != 0)
-            {
-            ReadMem(startAddr( i ), recipeNameLength, (unsigned char*)tmprecipename, true );
-            sprintf(recipeList + strlen(recipeList), "%d##%s||", i + 1, tmprecipename);
-            }
+        SaveRecipeName();
+        currentRecipe--;
+        curRecipeStartBlock -= blocksPerRecipe;
+        LoadRecipeName();
+        return 1;
+        }
+    else
+        {
+        return 0;
+        }
+    }
 
+int TRecipeManager::GetParamsCount()
+    {
+    return (blocksPerRecipe * BLOCK_SIZE - startRecipeParamsOffset) / 4;
+
+    }
+
+int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, run_time_params_float* par )
+    {
+    if (recipeNo < recipePerLine && recipeStartPos + parQuantity < GetParamsCount() && (unsigned int)paramsStartPos + (unsigned int)parQuantity < par->get_count())
+        {
+        for (int i = 0; i < parQuantity; i++)
+            {
+            par[0][paramsStartPos + i] = getRecipeValue(recipeNo, recipeStartPos + i);
+            #ifdef DEBUG
+            printf("\n\rsetparamm %d %f\n\r", paramsStartPos + i, par[0][paramsStartPos + i]);
+ #endif
+            }
+        #ifdef DEBUG
+        printf("\n\rLoaded recipe %d\n\r",recipeNo);
+ #endif
+        return 1;
+        }
+    else
+        {
+        return 0;
+        }
+    }
+
+int TRecipeManager::getCurrentRecipe()
+    {
+    return currentRecipe;
+    }
+
+int TRecipeManager::setCurrentRecipe( int recipeNo )
+    {
+    if (recipeNo >=0 && recipeNo < recipePerLine)
+        {
+        SaveRecipeName();
+        curRecipeStartBlock += blocksPerRecipe * (recipeNo - currentRecipe);
+        currentRecipe = recipeNo;
+        return 1;
+        }
+    else
+        {
+        return 0;
         }
     }
 
@@ -692,47 +693,6 @@ int TMediumRecipeManager::PrevRecipe()
     else
     {
         return 0;
-    }
-}
-
-void TMediumRecipeManager::EvalRecipe()
-{
-    if (get_delta_millisec(lastEvalTime) > 10000L)
-    {
-        lastEvalTime = get_millisec();
-        SaveRecipeName();
-        FormRecipeList();
-    }
-    if (get_delta_millisec(recipechangechecktime) > RECIPE_SAVE_INTERVAL)
-    {
-        if (recipechanged)
-        {
-            recipechanged = 0;
-            SaveToFile(defaultfilename.c_str());
-        }
-        recipechangechecktime = get_millisec();
-    }
-    if (getValue(RV_TO_DEFAULTS != 0))
-    {
-        switch ((int)getValue(RV_TO_DEFAULTS))
-        {
-        case 1:
-            ResetRecipeToDefaults(currentRecipe);
-#ifdef DEBUG
-            printf("Reset recipe %d to defaults", currentRecipe);
-#endif
-            break;
-        case 2:
-            CopyRecipe();
-            break;
-        case 3:
-            PasteRecipe();
-            break;
-        case 4:
-            NullifyRecipe();
-            break;
-        }
-        setValue(RV_TO_DEFAULTS, 0);
     }
 }
 
