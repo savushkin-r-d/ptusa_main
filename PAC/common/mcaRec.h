@@ -349,12 +349,12 @@ class TRecipeManager : public ParentRecipeManager
         /// @param recNo Номер рецепта
         /// @param valueNo Номер параметра
         /// @return   float Значение параметра
-        float getRecipeValue(int recNo, int valueNo);
+        float getRecipeValue(int recNo, int valueNo) override;
         /// @fn  float TRecipeManager::getValue(int valueNo)
         /// @brief Возвращает значение параметра текущего рецепта
         /// @param valueNo Номер параметра
         /// @return   float Значение параметра
-        float getValue(int valueNo);
+        float getValue(int valueNo) override;
         /// @fn  int TRecipeManager::getRecipeName(int recNO, char* recName)
         /// @brief Получает строку с именем рецепта
         /// @param recNO Номер рецепта
@@ -367,13 +367,13 @@ class TRecipeManager : public ParentRecipeManager
         /// @param valueNo Номер параметра
         /// @param newValue Новое значение
         /// @return   int 0 - ошибка !0 - ОК
-        int setRecipeValue(int recNo, int valueNo, float newValue);
+        int setRecipeValue(int recNo, int valueNo, float newValue) override;
         /// @fn  int TRecipeManager::setValue(int valueNo, float newValue)
         /// @brief Устанавливает значение заданного параметра текущего рецепта
         /// @param valueNo Номер параметра
         /// @param newValue Новое значение
         /// @return   int 0 - ошибка !0 - ОК
-        int setValue(int valueNo, float newValue);
+        int setValue(int valueNo, float newValue) override;
         /// @fn  int TRecipeManager::NextRecipe()
         /// @brief Переход к следующему рецепту
         /// @return   int 0 - ошибка !0 - ОК
@@ -405,7 +405,7 @@ class TRecipeManager : public ParentRecipeManager
         /// @brief Сбрасывает значения параметров указанного рецепта на значения по-умолчанию
         /// @param recipeNo Номер рецепта
         /// @return   int 0 - ошибка !0 - ОК
-        int ResetRecipeToDefaults(int recipeNo);
+        int ResetRecipeToDefaults(int recipeNo) override;
         /// @fn int TRecipeManager::LoadFromFile()
         /// @brief Загрузка рецептов из сохраненного файла
         /// @return Возвращает 0 в случае успешного завершения
