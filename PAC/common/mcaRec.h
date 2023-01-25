@@ -188,11 +188,11 @@ public:
     void NullifyRecipe();
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
-    float getRecipeValue(int recNo, int valueNo);
-    int setRecipeValue(int recNo, int valueNo, float newValue);
-    float getValue(int valueNo);
-    int setValue(int valueNo, float newValue);
-    int ResetRecipeToDefaults(int recipeNo);
+    virtual float getRecipeValue(int recNo, int valueNo);
+    virtual int setRecipeValue(int recNo, int valueNo, float newValue);
+    virtual float getValue(int valueNo);
+    virtual int setValue(int valueNo, float newValue);
+    virtual int ResetRecipeToDefaults(int recipeNo);
     void EvalRecipe();
     explicit ParentRecipeManager( int lineNo );
     virtual ~ParentRecipeManager();
