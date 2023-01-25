@@ -153,6 +153,7 @@ if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
 
     set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    set_target_properties(main_perfomance_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
