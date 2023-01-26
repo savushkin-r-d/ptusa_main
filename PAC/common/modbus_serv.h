@@ -106,7 +106,8 @@ enum RecipeControl
 class ModbusServ
 	{
 	public:
-		static long ModbusService(long len, unsigned char *data, unsigned  char *outdata);
+		static long ModbusService(long len, unsigned char *data, unsigned  char *outdata,
+			bool use_compression = true);
 		static int ForceBit(int bit, unsigned char* Buf, int toset = 1);
 		static int PackString(char* String, unsigned char* Buf);
 		static int PackTime(unsigned long timevar, unsigned char* Buf, int units = 0); /*units: 0 - ms 1 -s*/

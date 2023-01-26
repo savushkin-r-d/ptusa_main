@@ -32,7 +32,7 @@ class tcp_communicator
 #endif
     public:
         /// @brief Определение функции сервиса.
-        typedef long int srv_proc( long int, u_char *, u_char * );
+        typedef long int srv_proc( long int, u_char *, u_char *, bool );
         typedef srv_proc *srv_ptr;
 
         /// @brief Получение единственного экземпляра класса для работы с

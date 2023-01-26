@@ -34,7 +34,7 @@ void print_str( const char *err_str, char is_need_CR )
     }
 //-----------------------------------------------------------------------------
 long device_communicator::write_devices_states_service(
-    long len, u_char *data, u_char *outdata )
+    long len, u_char *data, u_char *outdata, bool use_compression )
     {
     if ( len < 1 )
         {
@@ -284,20 +284,23 @@ long device_communicator::write_devices_states_service(
 
     if ( answer_size > 0 )
         {
-        unsigned long r = sizeof( buff );
-        int res = compress( ( u_char* ) buff, &r, outdata, answer_size );
-
-        if ( res == Z_OK && r > 0 )
+        if ( use_compression )
             {
-            memcpy( outdata, buff, r );
-            answer_size = r;
-            }
-        else
-            {
-            outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
+            unsigned long r = sizeof( buff );
+            int res = compress( (u_char*)buff, &r, outdata, answer_size );
 
-            answer_size = 2;
+            if ( res == Z_OK && r > 0 )
+                {
+                memcpy( outdata, buff, r );
+                answer_size = r;
+                }
+            else
+                {
+                outdata[ 0 ] = 0;
+                outdata[ 1 ] = 0; //Возвращаем 0.
+
+                answer_size = 2;
+                }
             }
         }
 
