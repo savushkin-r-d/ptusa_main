@@ -108,3 +108,15 @@ TEST( ParentRecipeManager, SaveToFile )
     auto fileName = "tmp3.txt";
     EXPECT_EQ(0, mngr.SaveToFile(fileName));
     }
+
+TEST(ParentRecipeManager, getRecipeValue)
+{
+    auto lineNo = 1;
+    ParentRecipeManager mngr(lineNo);
+    auto recNo = 0;
+    auto valueNo = 0;
+    auto newValue = 0;
+    mngr.getRecipeValue(recNo, valueNo);
+    mngr.setRecipeValue(recNo, valueNo, newValue);
+}
+
