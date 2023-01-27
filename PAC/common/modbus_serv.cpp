@@ -143,8 +143,7 @@ unsigned char ModbusServ::UTable[128][2] =
 		{0x4,0x4F}
 	};
 
-long ModbusServ::ModbusService( long len, unsigned char *data,
-	unsigned char *outdata, bool use_compression )
+long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *outdata )
 	{
 	lua_State* L = lua_manager::get_instance()->get_Lua();
 

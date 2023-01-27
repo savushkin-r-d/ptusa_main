@@ -848,7 +848,7 @@ int tcp_communicator_linux::do_echo ( int idx )
             case FRAME_SINGLE:
 
                 res = services[ buf[ 1 ] ] (
-                    ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5, true );
+                    ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
 
                 if ( ( unsigned int ) res > max_buffer_use )
                     {
@@ -886,7 +886,7 @@ int tcp_communicator_linux::do_echo ( int idx )
             {
             res = services[ 15 ] ( ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ),
                 buf + 6,
-                buf + 6, buf );
+                buf + 6 );
             if ( res > 0 )
                 {
                 buf[ 4 ] = ( res >> 8 ) & 0xFF;

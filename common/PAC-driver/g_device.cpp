@@ -19,6 +19,7 @@ const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
+bool device_communicator::use_compression = false;
 //-----------------------------------------------------------------------------
 void print_str( const char *err_str, char is_need_CR )
     {
@@ -34,7 +35,7 @@ void print_str( const char *err_str, char is_need_CR )
     }
 //-----------------------------------------------------------------------------
 long device_communicator::write_devices_states_service(
-    long len, u_char *data, u_char *outdata, bool use_compression )
+    long len, u_char *data, u_char *outdata )
     {
     if ( len < 1 )
         {
@@ -282,25 +283,22 @@ long device_communicator::write_devices_states_service(
         }
 
 
-    if ( answer_size > 0 )
+    if ( answer_size > 0 && use_compression )
         {
-        if ( use_compression )
+        unsigned long r = sizeof( buff );
+        int res = compress( (u_char*)buff, &r, outdata, answer_size );
+
+        if ( res == Z_OK && r > 0 )
             {
-            unsigned long r = sizeof( buff );
-            int res = compress( (u_char*)buff, &r, outdata, answer_size );
+            memcpy( outdata, buff, r );
+            answer_size = r;
+            }
+        else
+            {
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
 
-            if ( res == Z_OK && r > 0 )
-                {
-                memcpy( outdata, buff, r );
-                answer_size = r;
-                }
-            else
-                {
-                outdata[ 0 ] = 0;
-                outdata[ 1 ] = 0; //Возвращаем 0.
-
-                answer_size = 2;
-                }
+            answer_size = 2;
             }
         }
 

@@ -30,13 +30,15 @@ static void DoSetup( const benchmark::State& state )
             "../../../../demo_projects/T1-PLCnext-Demo/",
             "../../../../demo_projects/T1-PLCnext-Demo/sys/" );
 
+        device_communicator::switch_off_compression();
         auto res = G_DEVICE_CMMCTR->write_devices_states_service(
-            1, in_data_devices, out_data, false );
+            1, in_data_devices, out_data );
         printf( "\n");
-        printf( "Saved devices uncompressed buffer size: %d\n", res );
+        printf( "Saved devices uncompressed buffer size:\t%ld\n", res );
+        device_communicator::switch_on_compression();
         res = G_DEVICE_CMMCTR->write_devices_states_service(
-            1, in_data_devices, out_data, true );
-        printf( "Saved devices compressed buffer size: %d\n", res );
+            1, in_data_devices, out_data );
+        printf( "Saved devices compressed buffer size:\t%ld\n", res );
 
         is_init = true;
         }
@@ -44,6 +46,7 @@ static void DoSetup( const benchmark::State& state )
 
 static void write_devices_service_with_compression( benchmark::State& state )
     {
+    device_communicator::switch_on_compression();
     for ( auto _ : state )
         G_DEVICE_CMMCTR->write_devices_states_service( 1,
             in_data_devices, out_data );
@@ -51,9 +54,10 @@ static void write_devices_service_with_compression( benchmark::State& state )
 
 static void write_devices_service_no_compression( benchmark::State& state )
     {
+    device_communicator::switch_off_compression();
     for ( auto _ : state )
-        G_DEVICE_CMMCTR->write_devices_states_service( 1,
-            in_data_devices, out_data, false );
+        G_DEVICE_CMMCTR->write_devices_states_service( 1, 
+            in_data_devices, out_data );
     }
 
 // Register the function as a benchmark
