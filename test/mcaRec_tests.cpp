@@ -114,6 +114,15 @@ TEST( TRecipeManager, setCurrentRecipe )
     mngr.setCurrentRecipe(recipeNo);
     }
 
+TEST( TRecipeManager, OnRecipeDevices ) 
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto recipeNo = 0;
+    auto msaline = 1;
+    mngr.OnRecipeDevices( recipeNo, msaline );
+    }
+
 TEST( ParentRecipeManager, CopyRecipe )
     {
     auto lineNo = 1;
