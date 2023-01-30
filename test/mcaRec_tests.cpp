@@ -90,17 +90,29 @@ TEST( TRecipeManager, NextRecipe )
     TRecipeManager mngr(lineNo);
     auto currentRecipe = 0;
     mngr.NextRecipe();
+    currentRecipe = 24;
+    mngr.NextRecipe();
     }
 
-TEST(TRecipeManager, PrevRecipe)
-{
+TEST( TRecipeManager, PrevRecipe )
+    {
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     auto currentRecipe = 1;
     mngr.PrevRecipe();
     currentRecipe = 0;
     mngr.PrevRecipe();
-}
+    }
+
+TEST( TRecipeManager, setCurrentRecipe )
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto recipeNo = 0;
+    mngr.setCurrentRecipe(recipeNo);
+    recipeNo = -1;
+    mngr.setCurrentRecipe(recipeNo);
+    }
 
 TEST( ParentRecipeManager, CopyRecipe )
     {
