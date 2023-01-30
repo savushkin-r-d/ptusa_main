@@ -73,6 +73,15 @@ TEST( TRecipeManager, EvalRecipe )
     }
 
 
+TEST(TRecipeManager, OffRecipeDevices)
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto recipeNo = 0;
+    auto msaline = 1;
+    mngr.OffRecipeDevices(recipeNo, msaline);
+    }
+
 TEST( ParentRecipeManager, CopyRecipe )
     {
     auto lineNo = 1;
@@ -110,7 +119,7 @@ TEST( ParentRecipeManager, SaveToFile )
     }
 
 TEST(ParentRecipeManager, getRecipeValue)
-{
+    {
     auto lineNo = 1;
     ParentRecipeManager mngr(lineNo);
     auto recNo = 0;
@@ -118,5 +127,6 @@ TEST(ParentRecipeManager, getRecipeValue)
     auto newValue = 0;
     mngr.getRecipeValue(recNo, valueNo);
     mngr.setRecipeValue(recNo, valueNo, newValue);
-}
+    mngr.setValue(valueNo, newValue);
+    }
 
