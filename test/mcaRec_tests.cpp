@@ -84,15 +84,23 @@ TEST( TRecipeManager, OffRecipeDevices )
     mngr.OffRecipeDevices(recipeNo, msaline);
     }
 
-TEST(TRecipeManager, NextRecipe)
+TEST( TRecipeManager, NextRecipe )
     {
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     auto currentRecipe = 0;
     mngr.NextRecipe();
-    currentRecipe = 26;
-    mngr.NextRecipe();
     }
+
+TEST(TRecipeManager, PrevRecipe)
+{
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto currentRecipe = 1;
+    mngr.PrevRecipe();
+    currentRecipe = 0;
+    mngr.PrevRecipe();
+}
 
 TEST( ParentRecipeManager, CopyRecipe )
     {
