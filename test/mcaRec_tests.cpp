@@ -39,6 +39,8 @@ TEST( TRecipeManager, LoadFromFile )
 
     auto recipeNo = 0;
     mngr.ResetRecipeToDefaults( recipeNo );
+    recipeNo = -1;
+    mngr.ResetRecipeToDefaults(recipeNo);
     auto fileName = "tmp2.txt";
     EXPECT_EQ( 0, mngr.SaveToFile( fileName ) );
     EXPECT_EQ( 0, mngr.LoadFromFile( fileName ) );
@@ -73,13 +75,23 @@ TEST( TRecipeManager, EvalRecipe )
     }
 
 
-TEST(TRecipeManager, OffRecipeDevices)
+TEST( TRecipeManager, OffRecipeDevices )
     {
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     auto recipeNo = 0;
     auto msaline = 1;
     mngr.OffRecipeDevices(recipeNo, msaline);
+    }
+
+TEST(TRecipeManager, NextRecipe)
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto currentRecipe = 0;
+    mngr.NextRecipe();
+    currentRecipe = 26;
+    mngr.NextRecipe();
     }
 
 TEST( ParentRecipeManager, CopyRecipe )
