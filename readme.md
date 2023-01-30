@@ -95,7 +95,9 @@ To run demo project you should use this command line:
 ```
 2.  Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
 
-## lua ##
+## Libraries used ##
+
+### lua ###
 
 Lua is a scripting programming language. A characteristic feature of Lua is implementation of a large number of program entities with a minimum of syntactic means.  
 Thus, all composite user data types (arrays, structures, sets, queues, lists) are implemented through the mechanism of tables, and the mechanisms of object-oriented programming,
@@ -112,7 +114,9 @@ Functions in Lua are objects of the first class, can be assigned and passed in p
 Closures are supported, it is possible to create higher-order functions.  
 The object system is prototypical, there is no explicit support for inheritance, but it is easily implemented using metatables.
 
-## tolua++ ##
+Detailed  information can be obtained [here](https://www.lua.org).
+
+### tolua++ ###
 
 tolua is a tool that greatly simplifies the integration of C/C++ code with Lua. Based on a cleaned header file, 
 tolua automatically generates the binding code to access C/C++ features from Lua. Using Lua API and tag method facilities, 
@@ -123,15 +127,19 @@ classes, and methods to want to export to the Lua environment. Then tolua parses
 that automatically binds the C/C++ code to Lua. If link the created file with our application, 
 the specified C/C++ code can be accessed from Lua.
 
-## zlib ## 
+Detailed information can be obtained [here](https://web.tecgraf.puc-rio.br/~celes/tolua).
+
+### zlib ###
 
 zlib is a software library used for data compression and is an abstraction of the DEFLATE compression algorithm used in their gzip file compression program.
 
-## subhook ## 
+Detailed information can be obtained https://zlib.net/apps.html.
+
+### subhook ###
 
 SubHook is a simple hooking library for C and C++ that works on Windows, Linux and macOS. It supports x86 only (32-bit and 64-bit).
 
-### installation ###
+#### installation ####
 
 Easy method:
 
@@ -141,3 +149,13 @@ Easy method:
 With CMake:
 
 Copy the subhook repo to your project tree.
+
+Detailed information can be obtained [here](https://github.com/Zeex/subhook).
+
+### googletest ###
+
+Google Test is a C++ unit testing library built on the xUnit testing methodology, that is, when individual parts of the program (classes, functions, modules) are tested separately from each other, in isolation. The library itself is developed with the active use of testing, when adding any parts to the official version, in addition to the code of the changes themselves, it is necessary to write a set of tests to confirm their correctness.
+
+Detailed information can be obtained [here](https://github.com/google/googletest).
+
+
