@@ -133,7 +133,7 @@ Detailed information can be obtained [here](https://web.tecgraf.puc-rio.br/~cele
 
 zlib is a software library used for data compression and is an abstraction of the DEFLATE compression algorithm used in their gzip file compression program.
 
-Detailed information can be obtained https://zlib.net/apps.html.
+Detailed information can be obtained [здесь](https://zlib.net/apps.html).
 
 ### subhook ###
 
