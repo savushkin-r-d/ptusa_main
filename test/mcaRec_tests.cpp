@@ -123,6 +123,16 @@ TEST( TRecipeManager, OnRecipeDevices )
     mngr.OnRecipeDevices( recipeNo, msaline );
     }
 
+TEST( TRecipeManager, ToRecipe )
+{
+    auto lineNo = 1;
+    TRecipeManager mngr(lineNo);
+    auto recNo = 1;
+    mngr.ToRecipe(recNo);
+    recNo = 25;
+    mngr.ToRecipe(recNo);
+}
+
 TEST( ParentRecipeManager, CopyRecipe )
     {
     auto lineNo = 1;
