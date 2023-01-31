@@ -22,7 +22,7 @@ jobs:
             cc: "cl",
             cxx: "cl",
             environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat",
-            targets: "ptusa_main libptusa_main main_test",
+            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
         - {
@@ -40,7 +40,7 @@ jobs:
             os: ubuntu-latest,
             cc: "gcc",
             cxx: "g++",
-            targets: "ptusa_main libptusa_main main_test",
+            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
     steps:
