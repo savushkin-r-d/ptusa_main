@@ -5,7 +5,7 @@
 #include "lua_manager.h"
 #include "log.h"
 
-int G_DEBUG = 1;    //Вывод дополнительной отладочной информации.
+int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
 lua_State* L = nullptr;
@@ -25,43 +25,47 @@ static void DoSetup( const benchmark::State& state )
         lua_gc( L, LUA_GCSTOP, 0 );
         luaL_openlibs( L );         // Open standard libraries.
 
-        G_LUA_MANAGER->init( L,
-            "../../../../demo_projects/T1-PLCnext-Demo/main.plua",
-            "../../../../demo_projects/T1-PLCnext-Demo/",
-            "../../../../demo_projects/T1-PLCnext-Demo/sys/" );
+        G_LUA_MANAGER->init( L, "main.plua", "", "./sys/" );
 
         device_communicator::switch_off_compression();
         auto res = G_DEVICE_CMMCTR->write_devices_states_service(
             1, in_data_devices, out_data );
-        printf( "\n");
-        printf( "Saved devices uncompressed buffer size:\t%ld\n", res );
+        if ( G_DEBUG )
+            {
+            printf( "\n" );
+            printf( "Saved devices uncompressed buffer size:\t%ld\n", res );
+            }
         device_communicator::switch_on_compression();
         res = G_DEVICE_CMMCTR->write_devices_states_service(
             1, in_data_devices, out_data );
-        printf( "Saved devices compressed buffer size:\t%ld\n", res );
+        if ( G_DEBUG )
+            {
+            printf( "Saved devices compressed buffer size:\t%ld\n", res );
+            }
 
         is_init = true;
         }
     }
 
-static void write_devices_service_with_compression( benchmark::State& state )
+static void write_devices_service( benchmark::State& state, bool use_compression )
     {
-    device_communicator::switch_on_compression();
+    if ( use_compression ) device_communicator::switch_on_compression();
+    else device_communicator::switch_off_compression();
+
+    auto size = G_DEVICE_CMMCTR->write_devices_states_service( 1,
+        in_data_devices, out_data );
+
     for ( auto _ : state )
         G_DEVICE_CMMCTR->write_devices_states_service( 1,
             in_data_devices, out_data );
-    }
 
-static void write_devices_service_no_compression( benchmark::State& state )
-    {
-    device_communicator::switch_off_compression();
-    for ( auto _ : state )
-        G_DEVICE_CMMCTR->write_devices_states_service( 1, 
-            in_data_devices, out_data );
+    state.counters.insert( { {"Size", size} } );
     }
 
 // Register the function as a benchmark
-BENCHMARK( write_devices_service_no_compression )->Setup( DoSetup )->Unit( benchmark::kMicrosecond );
-BENCHMARK( write_devices_service_with_compression )->Setup( DoSetup )->Unit( benchmark::kMicrosecond );
+BENCHMARK_CAPTURE( write_devices_service, "no compression", false )->
+    Setup( DoSetup )->Unit( benchmark::kMicrosecond );
+BENCHMARK_CAPTURE( write_devices_service, "with compression", true )->
+    Setup( DoSetup )->Unit( benchmark::kMicrosecond );
 
 BENCHMARK_MAIN();
