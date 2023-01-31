@@ -31,6 +31,41 @@ TEST( TMediumRecipeManager, NullifyRecipe )
     mngr.NullifyRecipe();
     }
 
+TEST( TMediumRecipeManager, GetParamsCount )
+{
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    mngr.GetParamsCount();
+}
+
+TEST( TMediumRecipeManager, getValue )
+{
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    auto valueNo = 0;
+    mngr.getValue(valueNo);
+}
+
+TEST( TMediumRecipeManager, setValue)
+{
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    auto valueNo = 0;
+    auto newValue = 0;
+    mngr.setValue(valueNo, newValue);
+}
+
+TEST( TMediumRecipeManager, getCurrentRecipe )
+{
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    mngr.getCurrentRecipe();
+}
+
+TEST( TMediumRecipeManager, setCurrentRecipe )
+{
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    auto recipeNo = 0;
+    mngr.setCurrentRecipe(recipeNo);
+    recipeNo = 25;
+    mngr.setCurrentRecipe(recipeNo);
+}
 
 TEST( TRecipeManager, LoadFromFile )
     {
