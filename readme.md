@@ -129,13 +129,13 @@ the specified C/C++ code can be accessed from Lua.
 
 Detailed information can be obtained [here](https://web.tecgraf.puc-rio.br/~celes/tolua/tolua-3.2.html).
 
-### zlib ### 
+### zlib ###
 
 zlib is a software library used for data compression and is an abstraction of the DEFLATE compression algorithm used in their gzip file compression program.
 
 Detailed information can be obtained [here](https://www.zlib.net).
 
-### subhook ### 
+### subhook ###
 
 SubHook is a simple hooking library for C and C++ that works on Windows, Linux and macOS. It supports x86 only (32-bit and 64-bit).
 
