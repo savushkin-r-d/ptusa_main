@@ -1,6 +1,14 @@
 name: CMake Build Matrix
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  pull_request_target:
+    branches: [ master ]
+    types: [ labeled ]
 
 env:
   NINJA_VERSION: 1.10.1
@@ -11,6 +19,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
@@ -117,13 +126,13 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
           set(yasm_install_path "C:/Program Files/yasm")
-          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)  
+          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)
           # Add to PATH environment variable
           file(APPEND "$ENV{GITHUB_PATH}" ";${yasm_install_path}")
-          
+
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt-get install -y yasm)
-        endif()    
+        endif()
 
 
     - name: Configure
@@ -148,7 +157,7 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
-        
+
         if ("${{ runner.os }}" STREQUAL "Linux")
             set(ENV{CODE_COVERAGE} "ON")
         endif()
