@@ -118,7 +118,7 @@ Detailed information can be obtained [here](https://www.lua.org).
 
 ### tolua++ ###
 
-tolua is a tool that greatly simplifies the integration of C/C++ code with Lua. Based on a cleaned header file, 
+Tolua is a tool that greatly simplifies the integration of C/C++ code with Lua. Based on a cleaned header file, 
 tolua automatically generates the binding code to access C/C++ features from Lua. Using Lua API and tag method facilities, 
 tolua maps C/C++ constants, external variables, functions, classes, and methods to Lua.
 
@@ -131,7 +131,7 @@ Detailed information can be obtained [here](https://web.tecgraf.puc-rio.br/~cele
 
 ### zlib ###
 
-zlib is a software library used for data compression and is an abstraction of the DEFLATE compression algorithm used in their gzip file compression program.
+Zlib is a software library used for data compression and is an abstraction of the DEFLATE compression algorithm used in their gzip file compression program.
 
 Detailed information can be obtained [here](https://www.zlib.net).
 
