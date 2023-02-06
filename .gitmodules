@@ -17,3 +17,6 @@
 [submodule "demo_projects/T1-PLCnext-Demo"]
 	path = demo_projects/T1-PLCnext-Demo
 	url = https://github.com/savushkin-r-d/T1-PLCnext-Demo.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/google/benchmark.git
