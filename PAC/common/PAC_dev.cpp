@@ -242,11 +242,13 @@ void device::set_string_property( const char* field, const char* value )
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
-    int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
+    int res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "{}{}={{M={:d}, ", prefix, name, is_manual_mode ).size;
 
     if ( type != DT_AO )
         {
-        res += sprintf( buff + res, "ST=%d, ", get_state() );
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "ST={}, ",
+            get_state() ).size;
         }
 
     if ( type != DT_V &&
