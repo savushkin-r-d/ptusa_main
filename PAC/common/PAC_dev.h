@@ -991,9 +991,13 @@ class valve: public digital_io_device
 
         /// @brief Получение состояния клапана без учета обратной связи.
         virtual VALVE_STATE get_valve_state()
+#ifdef DEBUG_NO_IO_MODULES
             {
             return (VALVE_STATE)digital_io_device::get_state();
             }
+#else
+            = 0;
+#endif // DEBUG_NO_IO_MODULES
 
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state()

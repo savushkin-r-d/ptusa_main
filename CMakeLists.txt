@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2022.12.16.0 )
+project(ptusa_main VERSION 2023.01.18.0 )
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -43,21 +43,26 @@ endif(MSVC)
 configure_file( version_info.in version_info.h @ONLY)
 
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt EXCLUDE_FROM_ALL)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 set(BUILD_SHARED_LIBS ON)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua EXCLUDE_FROM_ALL)
+add_subdirectory(lua EXCLUDE_FROM_ALL)
+
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ EXCLUDE_FROM_ALL)
+add_subdirectory(tolua++ EXCLUDE_FROM_ALL)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib EXCLUDE_FROM_ALL)
+add_subdirectory(zlib EXCLUDE_FROM_ALL)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
+add_subdirectory(googletest EXCLUDE_FROM_ALL)
 
 set(SUBHOOK_TESTS OFF)
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook EXCLUDE_FROM_ALL)
+add_subdirectory(subhook EXCLUDE_FROM_ALL)
+
+if(NOT MINGW)
+    add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+endif()
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -99,6 +104,10 @@ if(LINUX)
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
+    
+    add_executable(main_perfomance_test ${common_src} ${linux_src}
+           test/perfomance/main_perfomance_test.cpp           
+           PAC_control_projects/main_control_prg/version.rc)
 
     if(ARP_DEVICE)
         execute_process(COMMAND plcncli
@@ -133,7 +142,12 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-    set_target_properties (toluapp toluapp_lib liblua fmt PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+if(NOT MINGW)
+    add_executable(main_perfomance_test ${common_src} ${win_src}
+           test/perfomance/main_perfomance_test.cpp           
+           PAC_control_projects/main_control_prg/version.rc)
+endif()
+
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
@@ -169,7 +183,11 @@ target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
 
-set_target_properties (subhook gtest gtest_main gmock gmock_main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set_target_properties (subhook gtest gtest_main gmock gmock_main
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+if(NOT MINGW)
+    set_target_properties (benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+endif()
 #######################################################################################
 
 ################# project include-paths ###############################################
@@ -224,6 +242,10 @@ set(TEST_INCLUDES
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
+if(NOT MINGW)
+    target_include_directories(main_perfomance_test PUBLIC ${GENERAL_INCLUDES})
+endif()
+
 #######################################################################################
 
 ################# set link options ####################################################
@@ -256,10 +278,18 @@ endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)
 
+if(NOT MINGW)
+    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic benchmark::benchmark)
+endif()
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
     target_link_libraries(libptusa_main wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
+    if(NOT MINGW)
+        target_link_libraries(main_perfomance_test wsock32 ws2_32)
+    endif()
+    
 
     if(DEFINED ENV{LUA_DEV})
         target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
@@ -311,6 +341,12 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+
+    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
+            --benchmark_out=benchmark_result.json --benchmark_out_format=json 
+            --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
+            --benchmark_counters_tabular=true
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 endif()
 
 include(GoogleTest)

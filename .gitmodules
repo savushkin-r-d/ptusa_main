@@ -20,3 +20,6 @@
 [submodule "fmt"]
 	path = fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/google/benchmark.git
