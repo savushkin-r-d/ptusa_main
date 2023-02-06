@@ -19,7 +19,7 @@ const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
-bool device_communicator::use_compression = false;
+bool device_communicator::use_compression = true;
 //-----------------------------------------------------------------------------
 void print_str( const char *err_str, char is_need_CR )
     {

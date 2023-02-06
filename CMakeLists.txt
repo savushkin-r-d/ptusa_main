@@ -279,7 +279,7 @@ endif()
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)
 
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic benchmark::benchmark)
+    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
 endif()
 
 if(WIN32)
