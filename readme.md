@@ -131,3 +131,9 @@ Detailed information can be obtained [here](https://github.com/Zeex/subhook).
 Google Test is a library for unit testing in C++. Google Test is built on the xUnit testing methodology, that is, when individual parts of the program (classes, functions, modules) are tested separately from each other, in isolation. The library itself is developed with the active use of testing, when adding any parts to the official version, in addition to the code of the changes themselves, it is necessary to write a set of tests to confirm their correctness.
 
 Detailed information can be obtained [here](https://github.com/google/googletest).
+
+### google benchmark ###
+
+Google benchmark is a microbenchmark support library. The library can be used with C++03. However, it requires C++11 to build, including compiler and standard library support.
+
+Detailed information can be obtained [here](https://github.com/google/benchmark).
