@@ -106,7 +106,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     {
     if ( G_DEBUG )
         {
-        printf( "Init Lua...\n" );
+        G_LOG->debug( "Init Lua..." );
         }
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
