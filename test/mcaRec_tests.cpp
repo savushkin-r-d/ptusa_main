@@ -164,9 +164,9 @@ TEST( TRecipeManager, ToRecipe )
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     auto recNo = 1;
-    mngr.ToRecipe(recNo);
+    EXPECT_EQ(1, mngr.ToRecipe(recNo));
     recNo = 25;
-    mngr.ToRecipe(recNo);
+    EXPECT_EQ(0, mngr.ToRecipe(recNo));
 }
 
 TEST( ParentRecipeManager, CopyRecipe )
