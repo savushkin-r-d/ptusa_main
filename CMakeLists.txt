@@ -51,7 +51,7 @@ add_subdirectory(lua EXCLUDE_FROM_ALL)
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
 
-add_subdirectory(tolua++ EXCLUDE_FROM_ALL)
+add_subdirectory(toluapp EXCLUDE_FROM_ALL)
 
 add_subdirectory(zlib EXCLUDE_FROM_ALL)
 
@@ -221,7 +221,7 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tolua++/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/toluapp/include>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/lua>
