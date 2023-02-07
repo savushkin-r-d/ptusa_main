@@ -1,5 +1,5 @@
-[submodule "tolua++"]
-	path = tolua++
+[submodule "toluapp"]
+	path = toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
 [submodule "lua"]
