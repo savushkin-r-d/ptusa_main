@@ -49,7 +49,7 @@ TEST( TMediumRecipeManager, setValue)
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     auto valueNo = 0;
     auto newValue = 0;
-    mngr.setValue(valueNo, newValue);
+    EXPECT_EQ(0, mngr.setValue(valueNo, newValue));
 }
 
 TEST( TMediumRecipeManager, getCurrentRecipe )
@@ -213,7 +213,7 @@ TEST(ParentRecipeManager, getRecipeValue)
     auto valueNo = 0;
     auto newValue = 0;
     mngr.getRecipeValue(recNo, valueNo);
-    mngr.setRecipeValue(recNo, valueNo, newValue);
+    EXPECT_EQ(0, mngr.setRecipeValue(recNo, valueNo, newValue));
     mngr.setValue(valueNo, newValue);
     }
 
