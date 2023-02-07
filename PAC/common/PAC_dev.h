@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <fmt/core.h>
 
 #include <vector>
 #include <string>
@@ -49,6 +50,8 @@
 #endif // WIN_OS
 
 class PID;
+
+const size_t MAX_COPY_SIZE = 1000;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///

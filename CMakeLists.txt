@@ -14,6 +14,7 @@ endif()
 
 if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -41,7 +42,12 @@ endif(MSVC)
 
 configure_file( version_info.in version_info.h @ONLY)
 
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
+set(BUILD_SHARED_LIBS ON)
+
 add_subdirectory(lua EXCLUDE_FROM_ALL)
+
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
 
@@ -142,7 +148,6 @@ if(NOT MINGW)
            PAC_control_projects/main_control_prg/version.rc)
 endif()
 
-    set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
@@ -220,7 +225,8 @@ endif ()
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/lua>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>)
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
@@ -264,16 +270,16 @@ endif()
 
 ################# add link targets ####################################################
 
-target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic)
-target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
+target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
+target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
 if(ARP_DEVICE)
-    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic)
+    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 endif()
 
-target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
+target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)
 
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic benchmark::benchmark)
+    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
 endif()
 
 if(WIN32)

@@ -54,7 +54,7 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device ( char *str )
+int par_device::save_device( char* str )
     {
     str[ 0 ] = 0;
 
@@ -63,34 +63,19 @@ int par_device::save_device ( char *str )
         return 0;
         }
 
-    int res = 0;
+    int size = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
             {
-            res += sprintf( str + res, "%s=", par_name[ i ] );
-
-            float val =  par[ 0 ][ i + 1 ];
-            if ( 0. == val )
-                {
-                res += sprintf( str + res, "0, " );
-                }
-            else
-                {
-                double tmp;
-                if ( modf( val, &tmp ) == 0 )
-                    {
-                    res += sprintf( str + res, "%d, ", ( int ) val );
-                    }
-                else
-                    {
-                    res += sprintf( str + res, "%.2f, ", val );
-                    }
-                }
+            auto val = par[ 0 ][ i + 1 ];
+            double tmp;
+            int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
+                par_name[ i ], val, precision ).size;
             }
         }
-
-    return res;
+    return size;
     }
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
@@ -257,11 +242,13 @@ void device::set_string_property( const char* field, const char* value )
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
-    int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
+    int res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "{}{}={{M={:d}, ", prefix, name, is_manual_mode ).size;
 
     if ( type != DT_AO )
         {
-        res += sprintf( buff + res, "ST=%d, ", get_state() );
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "ST={}, ",
+            get_state() ).size;
         }
 
     if ( type != DT_V &&
@@ -277,14 +264,11 @@ int device::save_device( char* buff, const char* prefix )
         type != DT_DI &&
         type != DT_DO )
         {
-        if ( get_value() == 0 )
-            {
-            res += sprintf( buff + res, "V=0, " );
-            }
-        else
-            {
-            res += sprintf( buff + res, "V=%.2f, ", get_value() );
-            }
+        auto val = get_value();
+        double tmp;
+        int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "V={:.{}f}, ",
+            val, precision ).size;
         }
 
     res += save_device_ex( buff + res );
@@ -292,8 +276,7 @@ int device::save_device( char* buff, const char* prefix )
 
     const int extra_symbols_length = 2;                     //Remove last " ,".
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
-    res += sprintf( buff + res, "},\n" );
-
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -2892,7 +2875,8 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int base_counter::save_device_ex( char* buff )
     {
-    return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    return fmt::format_to_n(
+        buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description() const
@@ -2992,8 +2976,8 @@ float counter_f::get_flow()
 int counter_f::save_device_ex( char *buff )
     {
     int res = counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, ",
+        get_flow() ).size;
 
     return res;
     }
@@ -3113,9 +3097,8 @@ float counter_iolink::get_flow()
 int counter_iolink::save_device_ex( char* buff )
     {
     int res = base_counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
-    res += sprintf( buff + res, "T=%.1f, ", get_temperature() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
+        get_flow(), get_temperature() ).size;
 
     return res;
     }
@@ -7419,11 +7402,14 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=0.0, ",
-        reverse, freq, rpm, est, amperage );
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
+        reverse, freq, rpm, est, amperage ).size; 
 #else
-    res = sprintf(buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=%.1f, ",
-        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state, atv->amperage, atv->frq_max);
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
+        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
+        atv->amperage, atv->frq_max ).size;
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
