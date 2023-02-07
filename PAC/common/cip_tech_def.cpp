@@ -953,9 +953,11 @@ void cipline_tech_object::initline()
         LKH = LS(6);
         LKL = LS(7);
 
+        G_DEVICE_MANAGER()->disable_error_logging = true;
         LTS = LT("LT1");
         LTK = LT("LT2");
         LTW = LT("LT3");
+        G_DEVICE_MANAGER()->disable_error_logging = false;
 
         sprintf(devname, "LINE%dTE%d", number, 1);
         TP = TE(devname);
