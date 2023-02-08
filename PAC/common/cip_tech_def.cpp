@@ -4852,14 +4852,13 @@ int cipline_tech_object::_ToObject( int from, int where )
             rt_par_float[STP_LV] = tmp;
             break;
         case TANK_W:
-            if (!LWL->is_active())
+            if ( waterTankIsEmpty( ))
                 {
                 tankempty = 1;
-                tankemptytimer = get_millisec();
-                }
-            if (tankempty)
+                tankemptytimer = get_millisec( );
+                } else
                 {
-                if (get_delta_millisec(tankemptytimer) > 60000L)
+                if ( tankempty && get_delta_millisec( tankemptytimer ) > toTankSwitchTimeMs )
                     {
                     tankempty = 0;
                     }
@@ -4919,7 +4918,7 @@ int cipline_tech_object::_ToObject( int from, int where )
 
             if (tankfull)
                 {
-                if (get_delta_millisec(tankfulltimer) > 60000L && (!LWH->is_active()))
+                if ( get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
                     {
                     tankfull = 0;
                     }
@@ -5098,14 +5097,13 @@ int cipline_tech_object::_FromObject( int what, int where )
             rt_par_float[STP_LV] = tmp ;
             break;
         case TANK_W:
-            if (!LWL->is_active())
+            if ( waterTankIsEmpty( ))
                 {
                 tankempty = 1;
-                tankemptytimer = get_millisec();
-                }
-            if (tankempty)
+                tankemptytimer = get_millisec( );
+                } else
                 {
-                if (get_delta_millisec(tankemptytimer) > 60000L)
+                if ( tankempty && get_delta_millisec( tankemptytimer ) > toTankSwitchTimeMs )
                     {
                     tankempty = 0;
                     }
@@ -5167,7 +5165,7 @@ int cipline_tech_object::_FromObject( int what, int where )
 
             if (tankfull)
                 {
-                if (get_delta_millisec(tankfulltimer) > 60000L && (!LWH->is_active()))
+                if ( get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
                     {
                     tankfull = 0;
                     }
@@ -5386,7 +5384,7 @@ int cipline_tech_object::_Circ( int what )
                         }
                     circ_was_feed = 1;
                     }
-                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
+                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > circMaxFeedTimeMs))
                     {
                     V02->off();
                     if (1 == circ_was_feed)
@@ -5440,7 +5438,7 @@ int cipline_tech_object::_Circ( int what )
                         }
                     circ_was_feed = 1;
                     }
-                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
+                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > circMaxFeedTimeMs))
                     {
                     V03->off();
                     if (1 == circ_was_feed)
@@ -5495,7 +5493,7 @@ int cipline_tech_object::_Circ( int what )
                         }
                     circ_was_feed = 1;
                     }
-                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
+                if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > circMaxFeedTimeMs))
                     {
                     V00->instant_off();
                     if (1 == circ_was_feed)

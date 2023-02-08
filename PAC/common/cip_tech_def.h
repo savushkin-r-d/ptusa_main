@@ -657,6 +657,10 @@ class cipline_tech_object: public tech_object
         static std::unordered_set<int> steps_caustic;
         static std::unordered_set<int> steps_acid;
 
+        //Константы
+        static const unsigned long toTankSwitchTimeMs{ 60000L };
+        static const unsigned long circMaxFeedTimeMs{ 60000L };
+
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
 
