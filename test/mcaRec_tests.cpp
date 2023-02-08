@@ -212,7 +212,7 @@ TEST(ParentRecipeManager, getRecipeValue)
     auto recNo = 0;
     auto valueNo = 0;
     auto newValue = 0;
-    EXPECT_EQ(0, 0, mngr.getRecipeValue(recNo, valueNo));
+    mngr.getRecipeValue(recNo, valueNo);
     EXPECT_EQ(0, mngr.setRecipeValue(recNo, valueNo, newValue));
     EXPECT_EQ(0, mngr.setValue(valueNo, newValue));
     }
