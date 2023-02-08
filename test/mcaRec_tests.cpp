@@ -41,7 +41,7 @@ TEST( TMediumRecipeManager, getValue )
 {
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     auto valueNo = 0;
-    mngr.getValue(valueNo);
+    EXPECT_EQ(0, mngr.getValue(valueNo));
 }
 
 TEST( TMediumRecipeManager, setValue)
@@ -156,7 +156,7 @@ TEST( TRecipeManager, OnRecipeDevices )
     TRecipeManager mngr(lineNo);
     auto recipeNo = 0;
     auto msaline = 1;
-    mngr.OnRecipeDevices( recipeNo, msaline );
+    EXPECT_EQ(0, mngr.OnRecipeDevices(recipeNo, msaline));
     }
 
 TEST( TRecipeManager, ToRecipe )
@@ -212,8 +212,8 @@ TEST(ParentRecipeManager, getRecipeValue)
     auto recNo = 0;
     auto valueNo = 0;
     auto newValue = 0;
-    mngr.getRecipeValue(recNo, valueNo);
+    EXPECT_EQ(0, 0, mngr.getRecipeValue(recNo, valueNo));
     EXPECT_EQ(0, mngr.setRecipeValue(recNo, valueNo, newValue));
-    mngr.setValue(valueNo, newValue);
+    EXPECT_EQ(0, mngr.setValue(valueNo, newValue));
     }
 
