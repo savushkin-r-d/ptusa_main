@@ -128,7 +128,6 @@ TEST( TRecipeManager, OffRecipeDevices )
     TRecipeManager mngr(lineNo);
     auto recipeNo = 0;
     auto msaline = 1;
-    mngr.OffRecipeDevices(recipeNo, msaline);
     EXPECT_EQ(0, mngr.OffRecipeDevices(recipeNo, msaline));
     }
 
