@@ -32,31 +32,31 @@ TEST( TMediumRecipeManager, NullifyRecipe )
     }
 
 TEST( TMediumRecipeManager, GetParamsCount )
-{
+    {
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     mngr.GetParamsCount();
-}
+    }
 
 TEST( TMediumRecipeManager, getValue )
-{
+    {
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     auto valueNo = 0;
     EXPECT_EQ(0, mngr.getValue(valueNo));
-}
+    }
 
 TEST( TMediumRecipeManager, setValue)
-{
+    {
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     auto valueNo = 0;
     auto newValue = 0;
     EXPECT_EQ(0, mngr.setValue(valueNo, newValue));
-}
+    }
 
 TEST( TMediumRecipeManager, getCurrentRecipe )
-{
+    {
     TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
     mngr.getCurrentRecipe();
-}
+    }
 
 TEST( TMediumRecipeManager, setCurrentRecipe )
 {
@@ -66,6 +66,18 @@ TEST( TMediumRecipeManager, setCurrentRecipe )
     recipeNo = 25;
     mngr.setCurrentRecipe(recipeNo);
 }
+
+TEST( TMediumRecipeManager, NextRecipe )
+    {
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    mngr.NextRecipe();
+    }
+
+TEST( TMediumRecipeManager, PrevRecipe )
+    {
+    TMediumRecipeManager mngr(TMediumRecipeManager::MT_CAUSTIC);
+    mngr.PrevRecipe();
+    }
 
 TEST( TRecipeManager, LoadFromFile )
     {
@@ -154,14 +166,14 @@ TEST( TRecipeManager, OnRecipeDevices )
     }
 
 TEST( TRecipeManager, ToRecipe )
-{
+    {
     auto lineNo = 1;
     TRecipeManager mngr(lineNo);
     auto recNo = 1;
     EXPECT_EQ(1, mngr.ToRecipe(recNo));
     recNo = 25;
     EXPECT_EQ(0, mngr.ToRecipe(recNo));
-}
+    }
 
 TEST( ParentRecipeManager, CopyRecipe )
     {
