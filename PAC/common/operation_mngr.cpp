@@ -164,7 +164,6 @@ int operation::start( int new_run_step )
 
         case PAUSE:
             states[ PAUSE ]->final();
-<<<<<<< HEAD
             states[ RUN ]->load();
 
             current_state = RUN;
@@ -192,7 +191,6 @@ int operation::start( int new_run_step )
 
         case STOP:
             break;
-=======
             if ( states[ UNPAUSING ]->is_empty() )
                 {                
                 current_state = RUN;
@@ -216,7 +214,6 @@ int operation::start( int new_run_step )
                 states[ UNPAUSING ]->init();
                 states[ UNPAUSING ]->evaluate();
                 }         
->>>>>>> 10a50d30b (Implement logic)
 
         default:
             break;
