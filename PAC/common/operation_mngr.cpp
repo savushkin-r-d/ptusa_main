@@ -847,8 +847,9 @@ int required_DI_action::check( char* reason ) const
         {
         if ( !devs[ i ]->is_active() )
             {
-            sprintf( reason, "нет сигнала \'%.25s (%.50s)\'",
+            auto out = fmt::format_to( reason, "нет сигнала \'{:.25} ({:.50})\'",
                 devs[ i ]->get_name(), devs[ i ]->get_description() );
+            *out = 0;
             return 1;
             }
         }
@@ -1055,9 +1056,11 @@ int DI_DO_action::check( char* reason ) const
             d_i_device->get_type() != device::DT_LS &&
             d_i_device->get_type() != device::DT_FS )
             {
-            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+            auto out = fmt::format_to( reason,
+                "в поле \'{}\' устройство \'{:.25} ({:.50})\'"
                 " не является входным сигналом (DI, SB, GS, LS, FS)", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
+            *out = 0;
             return 1;
             }
         }
@@ -1173,10 +1176,12 @@ int AI_AO_action::check( char* reason ) const
             d_o_device->get_type() != device::DT_QT &&
             d_o_device->get_type() != device::DT_TE )
             {
-            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+            auto out = fmt::format_to( reason,
+                "в поле \'{}\' устройство \'{:.25} ({:.50})\'"
                 " не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
                 name.c_str(),
                 d_o_device->get_name(), d_o_device->get_description() );
+            *out = 0;
             return 1;
             }
         }
