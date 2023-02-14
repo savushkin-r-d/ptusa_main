@@ -168,7 +168,7 @@ TEST( operation, evaluate )
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->stop();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
-	test_op->final();
+	test_op->finalize();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 		
 	test_op->start();
@@ -183,7 +183,7 @@ TEST( operation, evaluate )
 	test_op->stop();
 	EXPECT_EQ( operation::STOP, test_op->get_state() );
 	test_op->evaluate();
-	test_op->final();
+	test_op->finalize();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 	test_op->start();
@@ -195,7 +195,7 @@ TEST( operation, evaluate )
 	test_op->stop();
 	EXPECT_EQ( operation::STOP, test_op->get_state() );
 	test_op->evaluate();
-	test_op->final();
+	test_op->finalize();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 

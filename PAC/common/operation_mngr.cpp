@@ -86,7 +86,7 @@ int operation::pause()
             run_step = states[ RUN ]->active_step();
 
             states[ RUN ]->save();
-            states[ RUN ]->final();
+            states[ RUN ]->finalize();
 
             if ( states[ PAUSING ]->is_empty() )
                 {
@@ -116,7 +116,7 @@ int operation::stop()
         case UNPAUSING:
         case STARTING:
         case RUN:
-            states[ current_state ]->final();
+            states[ current_state ]->finalize();
             if ( states[ STOPPING ]->is_empty() ) current_state = STOP;
             else current_state = STOPPING;
 
@@ -135,7 +135,7 @@ int operation::switch_off()
     {
     if ( current_state != IDLE )
         {        
-        states[ current_state ]->final();
+        states[ current_state ]->finalize();
         current_state = IDLE;
         states[ IDLE ]->init();
         states[ IDLE ]->evaluate();
@@ -154,7 +154,7 @@ int operation::start( int new_run_step )
     switch ( current_state )
         {
         case IDLE:
-            states[ IDLE ]->final();
+            states[ IDLE ]->finalize();
             if ( states[ STARTING ]->is_empty() ) current_state = RUN;
             else current_state = STARTING;
             
@@ -163,7 +163,7 @@ int operation::start( int new_run_step )
             break;
 
         case PAUSE:
-            states[ PAUSE ]->final();
+            states[ PAUSE ]->finalize();
             states[ RUN ]->load();
 
             current_state = RUN;
@@ -347,12 +347,12 @@ int operation::process_auto_switch_on()
     return 1;
     }
 //-----------------------------------------------------------------------------
-void operation::final()
+void operation::finalize()
     {
     //Для состояния OFF ничего не делаем, поэтому current_state > 0.
     if ( current_state > 0 && current_state < STATES_MAX )
         {
-        states[ current_state ]->final();
+        states[ current_state ]->finalize();
         for ( int idx = IDLE; idx < STATES_MAX; idx++ )
             {
             states[ idx ]->reset_eval_time();
@@ -954,7 +954,7 @@ void step::evaluate() const
         }
     }
 //-----------------------------------------------------------------------------
-void step::final()
+void step::finalize()
     {
     for ( u_int i = 0; i < actions.size(); i++  )
         {
@@ -2034,7 +2034,7 @@ void operation_state::evaluate()
                     }
                 else
                     {
-                    final(); //Для операции-заглушки.
+                    finalize(); //Для операции-заглушки.
                     }
                 }
             else
@@ -2067,9 +2067,9 @@ void operation_state::evaluate()
     steps[ active_step_n ]->evaluate();
     }
 //-----------------------------------------------------------------------------
-void operation_state::final()
+void operation_state::finalize()
     {
-    mode_step->final();
+    mode_step->finalize();
     start_time = get_millisec();
 
     //Если активный шаг не завершился, сохраняем время его выполнения для
@@ -2081,7 +2081,7 @@ void operation_state::final()
 
     if ( active_step_n >= 0 )
         {
-        steps[ active_step_n ]->final();
+        steps[ active_step_n ]->finalize();
         if ( G_DEBUG )
             {
             printf( "%sFINAL ACTIVE STEP №%d\n",
@@ -2095,7 +2095,7 @@ void operation_state::final()
         size_t step_n = active_steps[ idx ] - 1;
         if ( step_n < steps.size() )
             {
-            steps[ step_n ]->final();
+            steps[ step_n ]->finalize();
             if ( G_DEBUG )
                 {
                 SetColor( YELLOW );
@@ -2146,7 +2146,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     if ( active_step_n >= 0 )
         {
-        steps[ active_step_n ]->final();
+        steps[ active_step_n ]->finalize();
         }
     active_step_n = new_step - 1;
     active_step_next_step_n = next_step_ns[ active_step_n ];
@@ -2188,7 +2188,7 @@ void operation_state::turn_off_active_step()
     {
     if ( active_step_n >= 0 )
         {
-        steps[ active_step_n ]->final();
+        steps[ active_step_n ]->finalize();
         if ( G_DEBUG )
             {
             printf( "%sFINAL ACTIVE STEP №%d\n",
@@ -2416,7 +2416,7 @@ int operation_state::off_extra_step( int step_idx )
     auto res = std::find( active_steps.begin(), active_steps.end(), step_idx );
     if ( res != active_steps.end() )
         {
-        steps[ step_idx - 1 ]->final();
+        steps[ step_idx - 1 ]->finalize();
         active_steps.erase( res );
 
         if ( G_DEBUG )
@@ -2460,7 +2460,7 @@ int operation_state::switch_active_extra_step( int off_step, int on_step )
     auto res = std::find( active_steps.begin(), active_steps.end(), off_step );
     if ( res != active_steps.end() )
         {
-        steps[ off_step - 1 ]->final();
+        steps[ off_step - 1 ]->finalize();
         steps[ on_step - 1 ]->init();
         steps[ on_step - 1 ]->evaluate();
 

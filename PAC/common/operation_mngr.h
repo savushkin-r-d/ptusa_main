@@ -489,7 +489,7 @@ class step
 
         void evaluate() const;
 
-        void final();
+        void finalize();
 
         /// Получение времени выполнения шага.
         u_int_4 get_eval_time() const;
@@ -562,7 +562,7 @@ class operation_state
 
         void evaluate();
 
-        void final();
+        void finalize();
 
         void reset_eval_time()
             {
@@ -691,7 +691,7 @@ class operation
 
         void evaluate();
 
-        void final();
+        void finalize();
 
         int check_steps_params( char* err_dev_name, int str_len );
 
