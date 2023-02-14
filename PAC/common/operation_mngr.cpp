@@ -596,25 +596,30 @@ bool action::is_empty() const
     return true;
     }
 //-----------------------------------------------------------------------------
-int action::check_devices( char* err_dev_name, int max_to_write ) const
+int action::check_devices( char* err_description, int size ) const
     {
-    for ( u_int i = 0; i < devices.size(); i++ )
+    char *out = err_description;
+    auto written_size = 0;
+    auto free_size = size - 1;
+
+    for ( auto &group : devices )
         {
-        for ( u_int j = 0; j < devices[ i ].size(); j++ )
+        for ( auto &subgroup : group )
             {
-            for ( u_int k = 0; k < devices[ i ][ j ].size(); k++ )
+            for ( auto dev : subgroup )
                 {
-                auto dev = devices[ i ][ j ][ k ];
                 if ( dev->get_state() < 0 )
                     {
                     int par = int( ( *dev->get_err_par() )[ 1 ] );
 
-                    if ( ( par & base_error::P_IS_SUPPRESS ) == 0 )
+                    if ( !( par & base_error::P_IS_SUPPRESS ) )
                         {
-                        max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ),
-                            max_to_write, "'%s', ", dev->get_name() );
-
-                        if ( max_to_write < 0 )
+                        auto res = fmt::format_to_n(
+                            out, free_size, "'{}', ", dev->get_name() );
+                        free_size -= res.size;
+                        written_size += res.size;
+                        out = res.out;
+                        if ( free_size < 0 )
                             {
                             break;
                             }
@@ -624,23 +629,25 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
             }
         }
 
-    if ( err_dev_name[ 0 ] ) //Есть ошибки.
+    if ( written_size ) //Есть ошибки.
         {
-        size_t length = strlen( err_dev_name );
-        if ( max_to_write < 0 )
-            {
-            err_dev_name[ length - 1 ] = '.';
-            err_dev_name[ length - 2 ] = '.';
-            err_dev_name[ length - 3 ] = '.';
+        //Описание не вместилось в заданное количество символов.
+        if ( free_size < 0 )
+            {     
+            *out = '\0';
+            *( out - 1 ) = '.';
+            *( out - 2 ) = '.';
+            *( out - 3 ) = '.';
+            return size;
             }
         else
             {
             //Убираем последние символы - ", ".
-            err_dev_name[ length - 1 ] = 0;
-            err_dev_name[ length - 2 ] = 0;
+            *( out - 1 ) = '\0';
+            *( out - 2 ) = '\0';
+            //Выше перезаписали два символа и учитываем завершающий \0.
+            return written_size - 2 + 1;
             }
-
-        return 1;
         }
 
     return 0;
@@ -1011,8 +1018,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < actions.size(); i++ )
         {
-        int len = (int) strlen( err_dev_name );
-        int res = actions[ i ]->check_devices( err_dev_name + len, str_len - len );
+        int res = actions[ i ]->check_devices( err_dev_name, str_len );
 
         if ( res )
             {
@@ -2219,8 +2225,7 @@ void operation_state::print( const char* prefix /*= "" */ ) const
 //----------------------------------------------------------------------------
 int operation_state::check_devices( char* err_dev_name, int str_len )
     {
-    int res = mode_step->check_devices( err_dev_name +
-        strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+    int res = mode_step->check_devices( err_dev_name, str_len );
 
     if ( res )
         {
@@ -2234,8 +2239,7 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
 
     if ( active_step_n >= 0 && ( unsigned int ) active_step_n < steps.size() )
         {
-        res = steps[ active_step_n ]->check_devices( err_dev_name +
-            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+        res = steps[ active_step_n ]->check_devices( err_dev_name, str_len );
 
         if ( res )
             {

@@ -84,10 +84,10 @@ class action
 
         /// @brief Поиск устройства с какой-либо ошибкой.
         ///
-        /// @param [out] err_dev_name Устройство.
-        /// @param [in] max_to_write Дополнительный параметр.
-        /// @return 0 - нет ошибок, 1 - есть ошибки.
-        int check_devices( char* err_dev_name, int max_to_write ) const;
+        /// @param [out] err_description Устройства, находящиеся в ошибке.
+        /// @param [in] size Дополнительный параметр.
+        /// @return 0 - нет ошибок, >0 - есть ошибки, длина строки описания.
+        int check_devices( char* err_description, int size ) const;
 
         /// @brief Установка параметров для действия.
         ///
