@@ -68,7 +68,7 @@ operation::~operation()
     for ( size_t i = 0; i < states.size(); i++ )
         {
         delete states[ i ];
-        states[ i ] = 0;
+        states[ i ] = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
@@ -506,7 +506,7 @@ int operation::switch_active_extra_step( int off_step, int on_step )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 action::action( std::string name, u_int subgropups_cnt ) : name( name ),
-    par( 0 ), subgropups_cnt( subgropups_cnt )
+    par( nullptr ), subgropups_cnt( subgropups_cnt )
     {
     devices.emplace_back();
     for ( u_int i = 0; i < subgropups_cnt; i++ )
@@ -918,7 +918,7 @@ step::~step()
     for ( u_int i = 0; i < actions.size(); i++  )
         {
         delete actions[ i ];
-        actions[ i ] = 0;
+        actions[ i ] = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1900,12 +1900,12 @@ operation_state::operation_state( const char* name,
 operation_state::~operation_state()
     {
     delete mode_step;
-    mode_step = 0;
+    mode_step = nullptr;
 
     for ( size_t idx = 0; idx < steps.size(); idx++ )
         {
         delete steps[ idx ];
-        steps[ idx ] = 0;
+        steps[ idx ] = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
