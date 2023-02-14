@@ -629,12 +629,12 @@ int action::check_devices( char* err_description, int size ) const
             }
         }
 
-    if ( written_size ) //Есть ошибки.
+    *out = '\0';
+    if ( written_size > 2 ) //Есть ошибки.
         {
         //Описание не вместилось в заданное количество символов.
         if ( free_size < 0 )
             {     
-            *out = '\0';
             *( out - 1 ) = '.';
             *( out - 2 ) = '.';
             *( out - 3 ) = '.';
