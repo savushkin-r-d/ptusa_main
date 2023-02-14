@@ -2,14 +2,46 @@
 
 using namespace ::testing;
 
-/*
-	TEST METHOD DEFENITION:
-	void evaluate()
-*/
+
+TEST( action, check_devices )
+	{
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	action a1( "test_action", 0 );
+	virtual_valve v1( "TEST1_V1" );
+	tech_dev_error err_v1( &v1 );
+	v1.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
+	virtual_valve v2( "TEST1_V2" );
+	tech_dev_error err_v2( &v2 );
+	v2.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
+	virtual_valve v3( "TEST1_V3" );
+	tech_dev_error err_v3( &v3 );
+	v3.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
+	
+	a1.add_dev( &v1 );
+
+	const auto MAX_SIZE = 20;
+	std::string buff ( MAX_SIZE, '\0' );
+
+	auto res = a1.check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_NE( 0, res );
+	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
+
+	a1.add_dev( &v2 );
+	a1.add_dev( &v3 );
+	res = a1.check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_EQ( MAX_SIZE, res );
+	EXPECT_STREQ( "'TEST1_V1', 'TES...", buff.c_str() );
+
+	test_params_manager::removeObject();
+	}
 
 TEST( action, is_empty )
 	{
-	action a1( "empty_action", 0 );	
+	action a1( "empty_action", 0 );
 
 	EXPECT_EQ( true, a1.is_empty() );
 	}
