@@ -42,8 +42,11 @@ TEST( action, check_devices )
 TEST( action, is_empty )
 	{
 	action a1( "empty_action", 0 );
-
 	EXPECT_EQ( true, a1.is_empty() );
+
+	virtual_valve v1( "TEST1_V1" );
+	a1.add_dev( &v1 );
+	EXPECT_EQ( false, a1.is_empty() );
 	}
 
 
@@ -123,6 +126,39 @@ TEST( open_seat_action, evaluate )
 
 	test_params_manager::removeObject();
 	}
+
+
+TEST( operation_state, is_empty )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	operation->add_step( "Тестовый шаг", -1, -1 );
+	auto operation_state = ( *operation )[ 1 ];	
+	EXPECT_EQ( true, operation_state->is_empty() );
+
+	auto step = ( *operation_state )[ -1 ];
+	auto action = ( *step )[ step::ACTIONS::A_ON ];
+	DO1 test_DO( "test_DO", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	action->add_dev( &test_DO );
+	EXPECT_EQ( false, operation_state->is_empty() );
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
 
 /*
 	TEST METHOD DEFENITION:
