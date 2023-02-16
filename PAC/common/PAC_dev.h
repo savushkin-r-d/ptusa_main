@@ -29,7 +29,7 @@
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
-
+#include "imitation_TE.h"
 #include "smart_ptr.h"
 
 #include "dtime.h"
@@ -791,6 +791,7 @@ class analog_io_device : public device, public io_device
         void  direct_off();
 
 #ifdef DEBUG_NO_IO_MODULES
+        imitation_TE house_value;
         float get_value();
         void  direct_set_value( float new_value );
 

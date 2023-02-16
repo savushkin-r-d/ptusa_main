@@ -2821,7 +2821,7 @@ void base_counter::pause()
     get_quantity(); // Пересчитываем значение счетчика.
 
     state = STATES::S_PAUSE;
-    }
+    }   
 //-----------------------------------------------------------------------------
 void base_counter::start()
     {
@@ -6782,14 +6782,14 @@ void analog_io_device::direct_on()
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_off()
     {
-    direct_set_value( 0 );
+    direct_set_value( 0);
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
 
 float analog_io_device::get_value()
     {
-    return value;
+    return house_value.get_TE();
     }
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_set_value( float new_value )
