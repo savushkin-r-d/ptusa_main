@@ -225,12 +225,12 @@ TEST( operation, evaluate )
 	test_op->switch_off();
 
 	//Корректное автовключение/автоотключение.	
-	auto operation_idle_state = test_op[ 0 ][ operation::IDLE ];
-	auto operation_run_state = test_op[ 0 ][ operation::RUN ];
-	auto operation_pause_state = test_op[ 0 ][ operation::PAUSE ];
-	auto main_step_in_idle = operation_idle_state[ 0 ][ -1 ];
-	auto main_step_in_run = operation_run_state[ 0 ][ -1 ];
-	auto main_step_in_pause = operation_pause_state[ 0 ][ -1 ];
+	auto operation_idle_state = ( *test_op )[ operation::IDLE ];
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	auto operation_pause_state = ( *test_op )[ operation::PAUSE ];
+	auto main_step_in_idle = ( *operation_idle_state )[ -1 ];
+	auto main_step_in_run = ( *operation_run_state )[ -1 ];
+	auto main_step_in_pause = ( *operation_pause_state )[ -1 ];
 
 	int next = 0;
 	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
@@ -241,7 +241,7 @@ TEST( operation, evaluate )
 		( ( *main_step_in_idle )[ step::ACTIONS::A_JUMP_IF ] );
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	if_action_in_idle->add_dev( &test_DI_one, 0, 0 );
+	if_action_in_idle->add_dev( &test_DI_one );
 	
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
@@ -263,9 +263,9 @@ TEST( operation, evaluate )
 
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	auto required_DI_action = reinterpret_cast<jump_if_action*>
+	auto main_jump_if_action = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_REQUIRED_FB ] );
-	required_DI_action->add_dev( &test_DI_two );
+	main_jump_if_action->add_dev( &test_DI_two );
 
 	//Сигнал активен, но операция не должна включиться, так как нет требуемого
 	//сигнала.
@@ -330,15 +330,38 @@ TEST( operation, evaluate )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	auto if_action_in_pause = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_pause )[ step::ACTIONS::A_JUMP_IF ] );
-	if_action_in_pause->add_dev( &test_DI_one, 0, 0 );
+	if_action_in_pause->add_dev( &test_DI_one );
 	test_op->start();
 	test_op->pause();
 	test_DI_three.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
-	G_LUA_MANAGER->free_Lua();
-	test_params_manager::removeObject();
+
+	DO1 test_DO_one( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+    //При наличии описания состояния "Pausing" переходим к нему.
+    auto operation_pausing_state = ( *test_op )[ operation::PAUSING ];
+    auto main_step_in_pausing = ( *operation_pausing_state )[ -1 ];
+	auto on_action_in_pausing = ( *main_step_in_pausing )[ step::ACTIONS::A_ON ];
+	on_action_in_pausing->add_dev( &test_DO_one );
+
+    test_op->start();
+    test_op->pause();
+    EXPECT_EQ( operation::PAUSING, test_op->get_state() );
+
+    //При наличии описания состояния "Stopping" переходим к нему.
+    auto operation_stopping_state = ( *test_op )[ operation::STOPPING ];
+    auto main_step_in_stopping = ( *operation_stopping_state )[ -1 ];
+	auto on_action_in_stopping = ( *main_step_in_stopping )[ step::ACTIONS::A_ON ];
+	on_action_in_stopping->add_dev( &test_DO_one );
+
+    test_op->stop();
+    EXPECT_EQ( operation::STOPPING, test_op->get_state() );
+
+    G_LUA_MANAGER->free_Lua();
+    test_params_manager::removeObject();
 	}
 
 /*
