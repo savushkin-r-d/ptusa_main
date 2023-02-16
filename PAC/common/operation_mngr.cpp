@@ -164,48 +164,28 @@ int operation::start( int new_run_step )
 
         case PAUSE:
             states[ PAUSE ]->finalize();
-            states[ RUN ]->load();
-
-            current_state = RUN;
-            if ( new_run_step > 0 )
-                {
-                states[ RUN ]->init( new_run_step );
-                //Если возвращаемся в шаг, активный до паузы, то добавляем
-                //его время выполнения.
-                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
-                }
-            else if ( run_step > 0 )
-                {
-                states[ RUN ]->init( run_step );
-                states[ RUN ]->add_dx_step_time();
-                }
-            else
-                {
-                states[ RUN ]->init();
-                }
-
-            break;
-
-        case RUN:
-            break;
-
-        case STOP:
-            break;
             if ( states[ UNPAUSING ]->is_empty() )
-                {                
+                {
                 current_state = RUN;
-                states[ RUN ]->load();                
+                states[ RUN ]->load();
+
                 if ( new_run_step > 0 )
                     {
                     states[ RUN ]->init( new_run_step );
+                    //Если возвращаемся в шаг, активный до паузы, то добавляем
+                    //его время выполнения.
+                    if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                    }
+                else if ( run_step > 0 )
+                    {
+                    states[ RUN ]->init( run_step );
+                    states[ RUN ]->add_dx_step_time();
                     }
                 else
                     {
                     states[ RUN ]->init();
                     }
-                //Если возвращаемся в шаг, активный до паузы, то добавляем
-                //его время выполнения.
-                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                states[ RUN ]->evaluate();
                 break;
                 }
             else
@@ -213,7 +193,14 @@ int operation::start( int new_run_step )
                 current_state = UNPAUSING;
                 states[ UNPAUSING ]->init();
                 states[ UNPAUSING ]->evaluate();
-                }         
+                }
+            break;
+
+        case RUN:
+            break;
+
+        case STOP:
+            break;
 
         default:
             break;
@@ -278,6 +265,22 @@ void operation::evaluate()
                     unit->set_err_msg( "автоотключение по запросу",
                         n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
                     break;
+
+                case state_idx::STARTING:
+                    unit->set_mode( n, state_idx::RUN );
+                    break;
+
+                case state_idx::PAUSING:
+                    unit->set_mode( n, state_idx::PAUSE );
+                    break;
+
+                case state_idx::UNPAUSING:
+                    unit->set_mode( n, state_idx::RUN );
+                    break;
+
+                case state_idx::STOPPING:
+                    unit->set_mode( n, state_idx::STOP );
+                    break;                    
 
                 default:
                     //Для всех остальных состояний ничего не делаем.
@@ -577,11 +580,6 @@ void action::finalize()
 //-----------------------------------------------------------------------------
 bool action::is_empty() const
     {
-    if ( devices.empty() )
-        {
-        return true;
-        }
-
     for ( u_int i = 0; i < devices.size(); i++ )
         {
         if ( !devices[ i ].empty() )

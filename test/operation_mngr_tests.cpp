@@ -130,7 +130,6 @@ TEST( open_seat_action, evaluate )
 
 TEST( operation_state, is_empty )
 	{
-	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
 
