@@ -117,10 +117,13 @@ TEST( TRecipeManager, NullifyRecipe )
 TEST( TRecipeManager, EvalRecipe )
     {
     auto lineNo = 1;
-    TRecipeManager mngr(lineNo);
+    ParentRecipeManager mngr(lineNo);
+    auto lastEvalTime = 11000L;
+    EXPECT_GT(get_delta_millisec(lastEvalTime), 10000L);
+    auto recipechangechecktime = 31000L;
+    EXPECT_GT(get_delta_millisec(recipechangechecktime), RECIPE_SAVE_INTERVAL);
     mngr.EvalRecipe();
     }
-
 
 TEST( TRecipeManager, OffRecipeDevices )
     {
