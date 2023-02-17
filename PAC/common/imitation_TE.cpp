@@ -1,25 +1,39 @@
-#include "imitation_TE.h"
+﻿#include "imitation_TE.h"
 
 bool imitation_TE::is_p()
-{
-	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5;
-}
+    {
+    // f(x)=1/(σ√2π)∙e^(-1/2∙((x-μ)/σ)^2) - функция Гаусса 
+    // σ - стандартное отклонение
+    // x - случайная величина
+    // μ - математическое ожидание
+	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5; // 0.5 вероятность того, что случайная велична находится на [25,30].
+    }
 
 std::default_random_engine imitation_TE::random_gen()
-{
-	  std::default_random_engine gen;
-	return gen;
-}
+    {
+	std::default_random_engine gen;
+    return gen;
+    }
 
 float imitation_TE::get_TE()
-{
+    {
+    x = x_dis(gen);
+    if (is_p())
+        {                                                                           
+        old_value = x;
+        return x;                             
+        }
+    else
+        {
+        return old_value;
+        }
     
-       x = x_dis(gen);
-       if (is_p()) {                                                                           
-           old_value = x;
-           return x;                             
-       }
-       else return old_value;
-        
-        
-}
+    }
+
+imitation_TE::imitation_TE()
+    {
+    }
+
+imitation_TE::imitation_TE(float D,float m_expec,float st_deviation):D(D),m_expec(m_expec),st_deviation(st_deviation)
+    {
+    }
