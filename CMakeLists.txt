@@ -130,17 +130,17 @@ if(LINUX)
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main.cpp
-            PAC_control_projects/main_control_prg/version.rc "PAC/common/imitation_TE.h" "PAC/common/imitation_TE.cpp")
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_library(libptusa_main ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
             PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp
-            PAC_control_projects/main_control_prg/version.rc "PAC/common/imitation_TE.h" "PAC/common/imitation_TE.cpp")
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
            test/main_test.cpp           
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
-           PAC_control_projects/main_control_prg/version.rc "PAC/common/imitation_TE.h" "PAC/common/imitation_TE.cpp")
+           PAC_control_projects/main_control_prg/version.rc)
 
 if(NOT MINGW)
     add_executable(main_perfomance_test ${common_src} ${win_src}
