@@ -141,8 +141,6 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER];
-    programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
-    strcpy(programList, "");
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(currentProgramName, "");
     ncar1 = new char[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER];
