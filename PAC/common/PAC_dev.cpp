@@ -1547,6 +1547,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_valve( dev_name );
                     break;
 
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3:
+                    new_device = new valve_iol_terminal_mixproof_DO3( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -4679,6 +4684,128 @@ inline int valve_iolink_vtug_off::get_off_fb_value()
     return get_DI(DI_INDEX);
     }
 #endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name ) :
+    valve( dev_name, DT_V, V_IOL_TERMINAL_MIXPROOF_DO3 )
+    {
+    };
+
+void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            terminal_on_id = (u_int)value;
+            break;
+
+        case 2:
+            terminal_upper_seat_id = (u_int)value;
+            break;
+
+        case 3:
+            terminal_lower_seat_id = (u_int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    };
+
+/// @brief Получение данных состояния устройства.
+char valve_iol_terminal_mixproof_DO3::get_state_data( char* data, int n )
+    {
+    if ( !data || !n )
+        {
+        return 0;
+        }
+
+    u_int offset = ( n - 1 ) / 8;
+    char state = data[ offset ];
+    state >>= ( n - 1 ) % 8;
+    state &= 1;
+
+    return state;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_on()
+    {
+    char* data = (char*)get_AO_write_data( AO_INDEX );
+    if ( !data || !terminal_on_id )
+        {
+        return;
+        }
+
+    char state = get_state_data( data, terminal_on_id );
+    if ( 0 == state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    u_int on_offset = ( terminal_on_id - 1 ) / 8;
+    data[ on_offset ] |= 1 << ( ( terminal_on_id - 1 ) % 8 );
+    u_int upper_offset = ( terminal_upper_seat_id - 1 ) / 8;
+    data[ upper_offset ] &= ~( 1 << ( ( upper_offset - 1 ) % 8 ) );
+    u_int lower_offset = ( terminal_lower_seat_id - 1 ) / 8;
+    data[ lower_offset ] &= ~( 1 << ( ( lower_offset - 1 ) % 8 ) );
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_off()
+    {
+    char* data = (char*)get_AO_write_data( AO_INDEX );
+    if ( !data || !terminal_on_id )
+        {
+        return;
+        }
+
+    char on_state = get_state_data( data, terminal_on_id );
+    char upper_state = get_state_data( data, terminal_on_id );
+    char lower_state = get_state_data( data, terminal_on_id );
+    if ( on_state || upper_state || lower_state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    u_int on_offset = ( terminal_on_id - 1 ) / 8;
+    data[ on_offset ] &= ~( 1 << ( ( on_offset - 1 ) % 8 ) );
+    u_int upper_offset = ( terminal_upper_seat_id - 1 ) / 8;
+    data[ upper_offset ] &= ~( 1 << ( ( upper_offset - 1 ) % 8 ) );
+    u_int lower_offset = ( terminal_lower_seat_id - 1 ) / 8;
+    data[ lower_offset ] &= ~( 1 << ( ( lower_offset - 1 ) % 8 ) );
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_mixproof_DO3::get_state()
+    {
+    if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return -1;
+        }
+    else
+        {
+        return valve::get_state();
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+valve::VALVE_STATE valve_iol_terminal_mixproof_DO3::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+    char* data = (char*)get_AO_read_data( AO_INDEX );
+    char state = get_state_data( data, terminal_on_id );
+
+    return (VALVE_STATE)state;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+/// @brief Получение состояния обратной связи.
+bool valve_iol_terminal_mixproof_DO3::get_fb_state()
+    {
+    return true;
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(

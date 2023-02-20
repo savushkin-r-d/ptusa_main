@@ -456,10 +456,13 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
-            
+          
             DST_V_VIRT,               ///< Виртуальный клапан.
 
             DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
+
+            V_IOL_TERMINAL_MIXPROOF_DO3,     ///< IO-Link клапан (от пневмооострова) с тремя каналом управления.
+
 
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
@@ -2554,6 +2557,43 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
 
         int get_off_fb_value();
 #endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
+class valve_iol_terminal_mixproof_DO3 : public valve
+    {
+    public:
+        valve_iol_terminal_mixproof_DO3( const char* dev_name );
+
+        void set_rt_par( u_int idx, float value );
+
+        void direct_on();
+
+        void direct_off();
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_state() override;
+#endif // DEBUG_NO_IO_MODULES
+
+
+    protected:
+        /// @brief Получение данных состояния устройства.
+        char get_state_data( char* data, int n );
+
+        VALVE_STATE get_valve_state();
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state();
+
+        enum CONSTANTS
+            {
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+
+    private:
+        u_int terminal_on_id = 0;          ///< Номер соленоида открытия.
+        u_int terminal_upper_seat_id = 0;  ///< Номер соленоида верхнего седла.
+        u_int terminal_lower_seat_id = 0;  ///< Номер соленоида нижнего седла.
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
