@@ -461,8 +461,7 @@ class device : public i_DO_AO_device, public par_device
 
             DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
 
-            V_IOL_TERMINAL_MIXPROOF_DO3,     ///< IO-Link клапан (от пневмооострова) с тремя каналом управления.
-
+            V_IOL_TERMINAL_MIXPROOF_DO3,    ///< Противосмешивающий клапан (включение от IO-Link пневмооострова) с тремя каналами управления.
 
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
@@ -2563,13 +2562,13 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
 class valve_iol_terminal_mixproof_DO3 : public valve
     {
     public:
-        valve_iol_terminal_mixproof_DO3( const char* dev_name );
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
 
-        void set_rt_par( u_int idx, float value );
+        void set_rt_par( u_int idx, float value ) override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
 #ifndef DEBUG_NO_IO_MODULES
         int get_state() override;
@@ -2578,14 +2577,14 @@ class valve_iol_terminal_mixproof_DO3 : public valve
 
     protected:
         /// @brief Получение данных состояния устройства.
-        char get_state_data( char* data, int n );
+        char get_state_data( const char* data, int n ) const;
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() override;
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        enum CONSTANTS
+        enum class CONSTANTS : u_int
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };

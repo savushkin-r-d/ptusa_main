@@ -4714,7 +4714,8 @@ void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
     };
 
 /// @brief Получение данных состояния устройства.
-char valve_iol_terminal_mixproof_DO3::get_state_data( char* data, int n )
+char valve_iol_terminal_mixproof_DO3::get_state_data( const char* data,
+    int n ) const
     {
     if ( !data || !n )
         {
@@ -4731,7 +4732,8 @@ char valve_iol_terminal_mixproof_DO3::get_state_data( char* data, int n )
 
 void valve_iol_terminal_mixproof_DO3::direct_on()
     {
-    char* data = (char*)get_AO_write_data( AO_INDEX );
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
     if ( !data || !terminal_on_id )
         {
         return;
@@ -4753,7 +4755,8 @@ void valve_iol_terminal_mixproof_DO3::direct_on()
 
 void valve_iol_terminal_mixproof_DO3::direct_off()
     {
-    char* data = (char*)get_AO_write_data( AO_INDEX );
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
     if ( !data || !terminal_on_id )
         {
         return;
