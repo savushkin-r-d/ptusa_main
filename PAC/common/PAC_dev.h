@@ -791,7 +791,6 @@ class analog_io_device : public device, public io_device
         void  direct_off();
 
 #ifdef DEBUG_NO_IO_MODULES
-        imitation_TE house_value;
         float get_value();
         void  direct_set_value( float new_value );
 
@@ -2805,6 +2804,7 @@ class temperature_e_iolink : public AI1
 
         TE_data *info;
 		u_int start_param_idx;
+        imitation_TE house_value;
 		enum CONSTANTS
 			{
 			P_ERR_T = 1,                ///< Аварийное значение температуры.
