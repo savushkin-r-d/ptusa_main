@@ -1,4 +1,4 @@
-﻿#include "imitation_TE.h"
+#include "imitation_TE.h"
 
 bool imitation_TE::is_p()
     {

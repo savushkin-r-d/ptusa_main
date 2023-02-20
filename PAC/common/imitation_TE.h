@@ -8,18 +8,18 @@ class imitation_TE
     public:
         imitation_TE();
         imitation_TE(float D,float m_expec,float st_deviation);
-        float get_TE(); // возвращает значения температуры 
+        float get_TE(); // РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёСЏ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ 
 
     private:
-        float D = 0.234;   // дисперсия
-        float m_expec = 27; // мат. ожидание 
-        float st_deviation = 0.48; // стандартное отклонение 
+        float D = 0.234;   // РґРёСЃРїРµСЂСЃРёСЏ
+        float m_expec = 27; // РјР°С‚. РѕР¶РёРґР°РЅРёРµ 
+        float st_deviation = 0.48; // СЃС‚Р°РЅРґР°СЂС‚РЅРѕРµ РѕС‚РєР»РѕРЅРµРЅРёРµ 
         float old_value = 25.7;
         std::default_random_engine gen = random_gen();
-        std::uniform_real_distribution<float> x_dis = std::uniform_real_distribution<float>(20, 30);  // функция генерирует случайные вещественные числа из заданного диапазона  
-        std::default_random_engine random_gen(); // возврат случайной вещественной величины
-        float x = x_dis(gen);  // случайная величмина 
-        bool is_p();   // функция расчета вероятности 
+        std::uniform_real_distribution<float> x_dis = std::uniform_real_distribution<float>(20, 30);  // С„СѓРЅРєС†РёСЏ РіРµРЅРµСЂРёСЂСѓРµС‚ СЃР»СѓС‡Р°Р№РЅС‹Рµ РІРµС‰РµСЃС‚РІРµРЅРЅС‹Рµ С‡РёСЃР»Р° РёР· Р·Р°РґР°РЅРЅРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°  
+        std::default_random_engine random_gen(); // РІРѕР·РІСЂР°С‚ СЃР»СѓС‡Р°Р№РЅРѕР№ РІРµС‰РµСЃС‚РІРµРЅРЅРѕР№ РІРµР»РёС‡РёРЅС‹
+        float x = x_dis(gen);  // СЃР»СѓС‡Р°Р№РЅР°СЏ РІРµР»РёС‡РјРёРЅР° 
+        bool is_p();   // С„СѓРЅРєС†РёСЏ СЂР°СЃС‡РµС‚Р° РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё 
 
     };
 
