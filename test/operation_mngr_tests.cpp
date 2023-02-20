@@ -186,6 +186,18 @@ TEST( operation, evaluate )
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
+	//Корректный переход от выполнения к паузе и опять к выполнению для методов
+	//операции когда в паузе нет шагов.
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->evaluate();
+	test_op->pause();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->finalize();
+
 	test_op->print( "" );
 
 	test_op->add_step( "Init", 2, -1 );
@@ -372,9 +384,22 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
+	test_op->finalize();
 
 	DO1 test_DO_one( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+	//При наличии описания состояния "Starting" переходим к нему.
+	auto operation_starting_state = ( *test_op )[ operation::STARTING ];
+	auto main_step_in_starting = ( *operation_starting_state )[ -1 ];
+	auto on_action_in_starting = ( *main_step_in_starting )[ step::ACTIONS::A_ON ];
+	on_action_in_starting->add_dev( &test_DO_one );
+
+	test_op->start();
+	EXPECT_EQ( operation::STARTING, test_op->get_state() );
+
+	on_action_in_starting->clear_dev();
+	test_op->finalize();
 
     //При наличии описания состояния "Pausing" переходим к нему.
     auto operation_pausing_state = ( *test_op )[ operation::PAUSING ];
@@ -385,6 +410,19 @@ TEST( operation, evaluate )
     test_op->start();
     test_op->pause();
     EXPECT_EQ( operation::PAUSING, test_op->get_state() );
+	test_op->finalize();
+	on_action_in_pausing->clear_dev();
+
+	//При наличии описания состояния "Unpausing" переходим к нему.
+	auto operation_unpausing_state = ( *test_op )[ operation::UNPAUSING ];
+	auto main_step_in_unpausing = ( *operation_unpausing_state )[ -1 ];
+	auto on_action_in_unpausing = ( *main_step_in_unpausing )[ step::ACTIONS::A_ON ];
+	on_action_in_unpausing->add_dev( &test_DO_one );
+
+	test_op->start();
+	test_op->pause();
+	test_op->start();
+	EXPECT_EQ( operation::UNPAUSING, test_op->get_state() );
 
     //При наличии описания состояния "Stopping" переходим к нему.
     auto operation_stopping_state = ( *test_op )[ operation::STOPPING ];
