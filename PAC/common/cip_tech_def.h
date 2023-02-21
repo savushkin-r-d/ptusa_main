@@ -931,7 +931,7 @@ class cipline_tech_object: public tech_object
         int FromObject(int what, int where);
         int FillCirc(int with_what);
         int OporCirc(int where);
-        void RT();
+        void RT() const;
         void Stop(int step_to_stop);
         int InitDoseRR(int what, int step_to_init, int not_first_call);
         int DoseRR(int what);

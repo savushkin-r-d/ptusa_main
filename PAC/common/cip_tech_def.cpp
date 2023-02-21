@@ -3745,7 +3745,7 @@ int cipline_tech_object::InitCheckConc( int where )
     return 0;
     }
 
-int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
+int cipline_tech_object::InitAddRR( int where, [[maybe_unused]] int step, int first_init_flag )
 {
     float v, pd = 0, kk = 0, kz = 0, ro = 0, vt = 0, kt;
     V05->off();
@@ -4096,7 +4096,7 @@ int cipline_tech_object::OpolRR( int where )
     return 0;
     }
 
-int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, int f )
+int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, [[maybe_unused]] int f )
     {
     float v=1, p=1, z=0;
     //	int ot;
@@ -4485,7 +4485,7 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
     return 0;
     }
 
-int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_first_call )
+int cipline_tech_object::_InitOporCIP( int where, [[maybe_unused]] int step_to_init, [[maybe_unused]] int not_first_call )
 {
     float z=0;
     opcip=0;
@@ -4562,7 +4562,7 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
     return 0;
     }
 
-int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
+int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, [[maybe_unused]] int f )
     {
     V01->on();
     V11->off();
@@ -4622,7 +4622,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
     return 0;
     }
 
-int cipline_tech_object::_InitOporCirc( int where, int step_to_init, int not_first_call )
+int cipline_tech_object::_InitOporCirc( int where, int step_to_init, [[maybe_unused]] int not_first_call )
 {
     V11->off();
     V00->instant_off();
@@ -5591,7 +5591,7 @@ int cipline_tech_object::_OporCirc( int where )
     return 0;
     }
 
-int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_call )
+int cipline_tech_object::_InitDoseRR( int what, [[maybe_unused]] int step_to_init, [[maybe_unused]] int not_first_call )
 {
     switch (what)
         {
@@ -6049,7 +6049,7 @@ int cipline_tech_object::EvalCipReadySignal()
     return 0;
     }
 
-int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatdrainage, int step, int f )
+int cipline_tech_object::SCInitPumping([[maybe_unused]] int what, int from, int where, int whatdrainage, int step, [[maybe_unused]] int f )
     {
 
     V05->off();
@@ -6406,7 +6406,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     return 0;
     }
 
-int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrainage )
+int cipline_tech_object::SCPumping( int what, int from, int where, [[maybe_unused]] int whatdrainage )
     {
 
     switch (what)
@@ -6655,7 +6655,7 @@ void cipline_tech_object::set_selfclean_par( int parno, float newval )
         }
     }
 
-int cipline_tech_object::InitCustomStep( int what, int from, int where, int how, int step, int f ) const
+int cipline_tech_object::InitCustomStep([[maybe_unused]] int what, [[maybe_unused]] int from, [[maybe_unused]] int where, [[maybe_unused]] int how, int step, int f ) const
     {
     int luares = 0;
 
@@ -6684,7 +6684,7 @@ int cipline_tech_object::InitCustomStep( int what, int from, int where, int how,
     return luares;
     }
 
-int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how ) const
+int cipline_tech_object::EvalCustomStep([[maybe_unused]] int what, [[maybe_unused]] int from, [[maybe_unused]] int where, [[maybe_unused]] int how ) const
     {
     int luares = 0;
 
@@ -7348,7 +7348,7 @@ int cipline_tech_object::OporCirc( int where )
     return luares;
     }
 
-void cipline_tech_object::RT( )
+void cipline_tech_object::RT( ) const
     {
     if (2 == is_RT_func)
         {
