@@ -4736,20 +4736,22 @@ bool valve_iol_terminal_mixproof_DO3::get_state_bit( const char* data,
         }
 
     u_int offset = ( n - 1 ) / 8;
-    char state = data[ offset ];
-    state >>= ( n - 1 ) % 8;
-    state &= 1;
+    auto st = data[ offset ];
+    st >>= ( n - 1 ) % 8;
+    st &= 1;
 
-    return state > 0;
+    return st > 0;
     }
 
 /// @brief Установка данных состояния устройства.
-void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, int n )
+void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, 
+    unsigned int n ) const
     {
     data[ n ] |= 1 << ( ( n - 1 ) % 8 );
     }
 
-void valve_iol_terminal_mixproof_DO3::reset_state_bit( char* data, int n )
+void valve_iol_terminal_mixproof_DO3::reset_state_bit( char* data,
+    unsigned int n ) const
     {
     data[ n ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
     }

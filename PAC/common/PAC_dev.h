@@ -2587,9 +2587,9 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
         bool get_state_bit( const char* data, int n ) const;
 
         /// @brief Установка бита состояния устройства.
-        void set_state_bit( char* data, int n );
+        void set_state_bit( char* data, unsigned int n ) const;
         /// @brief Сброс бита состояния устройства.
-        void reset_state_bit( char* data, int n );
+        void reset_state_bit( char* data, unsigned int n ) const;
 
         VALVE_STATE get_valve_state() override;
 
