@@ -1,6 +1,6 @@
 #include "imitation_TE.h"
 
-const bool imitation_TE::is_p()
+ bool imitation_TE::is_p() const
     {
     // f(x)=1/(σ√2π)∙e^(-1/2∙((x-μ)/σ)^2) - функция Гаусса 
     // σ - стандартное отклонение
@@ -9,9 +9,9 @@ const bool imitation_TE::is_p()
 	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5; // 0.5 вероятность того, что случайная велична находится на [25,30].
     }
 
-const float imitation_TE::get_st_deviation()
+float imitation_TE::get_st_deviation() const
     {
-    return sqrt(D);
+    return float(sqrt(D));
     }
 
 float imitation_TE::get_TE()

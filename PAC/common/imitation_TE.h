@@ -18,8 +18,8 @@ class imitation_TE
         std::mt19937 gen{ rd() };
         std::uniform_real_distribution<float> x_dis = std::uniform_real_distribution<float>(20, 30);  // функция генерирует случайные вещественные числа из заданного диапазона  
         float x = x_dis(gen);  // случайная величмина 
-        const bool is_p();   // функция расчета вероятности 
-        const float get_st_deviation();
+        bool is_p() const;   // функция расчета вероятности 
+        float get_st_deviation() const;
        
     };
 
