@@ -2576,6 +2576,8 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+        VALVE_STATE get_valve_state() override;
+
 #ifndef DEBUG_NO_IO_MODULES
         int get_state() override;
 #endif // DEBUG_NO_IO_MODULES
@@ -2590,8 +2592,6 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
         void set_state_bit( char* data, unsigned int n ) const;
         /// @brief Сброс бита состояния устройства.
         void reset_state_bit( char* data, unsigned int n ) const;
-
-        VALVE_STATE get_valve_state() override;
 
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;

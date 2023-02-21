@@ -4693,18 +4693,18 @@ valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* de
 
 void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
     {
-    switch ( idx )
-        {
+    auto ui_val = static_cast<unsigned int>( value );
+    switch ( idx ) {
         case 1:
-            terminal_on_id = (u_int)value;
+            terminal_on_id = ui_val;
             break;
 
         case 2:
-            terminal_upper_seat_id = (u_int)value;
+            terminal_upper_seat_id = ui_val;
             break;
 
         case 3:
-            terminal_lower_seat_id = (u_int)value;
+            terminal_lower_seat_id = ui_val;
             break;
 
         default:

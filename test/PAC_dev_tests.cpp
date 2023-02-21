@@ -430,6 +430,63 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     }
 
 
+TEST( valve_iol_terminal_mixproof_DO3, on )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };    
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 1, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 2, 2 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 3, 3 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_mixproof_DO3, off )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par( 1, 1 );
+    V1.set_rt_par( 2, 2 );
+    V1.set_rt_par( 3, 3 );
+
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+
 TEST( level_s, is_active )
     {
     level_s LS1( "LS1", device::DST_LS_MAX );    
