@@ -4713,13 +4713,26 @@ void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
         }
     };
 
+bool valve_iol_terminal_mixproof_DO3::check_config()
+    {
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( !data || !terminal_on_id ||
+        !terminal_upper_seat_id || !terminal_lower_seat_id )
+        {
+        return false;
+        }
+
+    return true;
+    }
+
 /// @brief Получение данных состояния устройства.
-char valve_iol_terminal_mixproof_DO3::get_state_data( const char* data,
+bool valve_iol_terminal_mixproof_DO3::get_state_bit( const char* data,
     int n ) const
     {
     if ( !data || !n )
         {
-        return 0;
+        return false;
         }
 
     u_int offset = ( n - 1 ) / 8;
@@ -4727,55 +4740,110 @@ char valve_iol_terminal_mixproof_DO3::get_state_data( const char* data,
     state >>= ( n - 1 ) % 8;
     state &= 1;
 
-    return state;
+    return state > 0;
+    }
+
+/// @brief Установка данных состояния устройства.
+void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, int n )
+    {
+    data[ n ] |= 1 << ( ( n - 1 ) % 8 );
+    }
+
+void valve_iol_terminal_mixproof_DO3::reset_state_bit( char* data, int n )
+    {
+    data[ n ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
     }
 
 void valve_iol_terminal_mixproof_DO3::direct_on()
     {
+    if ( !check_config() ) return;
+
     auto data = (char*)get_AO_write_data(
         static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
-    if ( !data || !terminal_on_id )
-        {
-        return;
-        }
-
-    char state = get_state_data( data, terminal_on_id );
-    if ( 0 == state )
+    auto is_on = get_state_bit( data, terminal_on_id );
+    if ( !is_on )
         {
         start_switch_time = get_millisec();
         }
 
-    u_int on_offset = ( terminal_on_id - 1 ) / 8;
-    data[ on_offset ] |= 1 << ( ( terminal_on_id - 1 ) % 8 );
-    u_int upper_offset = ( terminal_upper_seat_id - 1 ) / 8;
-    data[ upper_offset ] &= ~( 1 << ( ( upper_offset - 1 ) % 8 ) );
-    u_int lower_offset = ( terminal_lower_seat_id - 1 ) / 8;
-    data[ lower_offset ] &= ~( 1 << ( ( lower_offset - 1 ) % 8 ) );
+    set_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_ON;
     }
 
 void valve_iol_terminal_mixproof_DO3::direct_off()
     {
+    if ( !check_config() ) return;
+
     auto data = (char*)get_AO_write_data(
         static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
-    if ( !data || !terminal_on_id )
-        {
-        return;
-        }
-
-    char on_state = get_state_data( data, terminal_on_id );
-    char upper_state = get_state_data( data, terminal_on_id );
-    char lower_state = get_state_data( data, terminal_on_id );
-    if ( on_state || upper_state || lower_state )
+    auto is_on = get_state_bit( data, terminal_on_id );
+    auto is_upper = get_state_bit( data, terminal_on_id );
+    auto is_lower = get_state_bit( data, terminal_on_id );
+    if ( is_on || is_upper || is_lower )
         {
         start_switch_time = get_millisec();
         }
 
-    u_int on_offset = ( terminal_on_id - 1 ) / 8;
-    data[ on_offset ] &= ~( 1 << ( ( on_offset - 1 ) % 8 ) );
-    u_int upper_offset = ( terminal_upper_seat_id - 1 ) / 8;
-    data[ upper_offset ] &= ~( 1 << ( ( upper_offset - 1 ) % 8 ) );
-    u_int lower_offset = ( terminal_lower_seat_id - 1 ) / 8;
-    data[ lower_offset ] &= ~( 1 << ( ( lower_offset - 1 ) % 8 ) );
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_OFF;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_upper_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    set_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_UPPER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_lower_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    set_state_bit( data, terminal_lower_seat_id );
+    state = V_LOWER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            open_upper_seat();
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            open_lower_seat();
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
     }
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -4794,14 +4862,7 @@ int valve_iol_terminal_mixproof_DO3::get_state()
 
 valve::VALVE_STATE valve_iol_terminal_mixproof_DO3::get_valve_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
-    char* data = (char*)get_AO_read_data( AO_INDEX );
-    char state = get_state_data( data, terminal_on_id );
-
-    return (VALVE_STATE)state;
-#endif // DEBUG_NO_IO_MODULES
+    return state;
     }
 
 /// @brief Получение состояния обратной связи.

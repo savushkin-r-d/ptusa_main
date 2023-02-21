@@ -2559,7 +2559,7 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
-class valve_iol_terminal_mixproof_DO3 : public valve
+class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
     {
     public:
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
@@ -2570,14 +2570,26 @@ class valve_iol_terminal_mixproof_DO3 : public valve
 
         void direct_off() override;
 
+        void open_upper_seat() override;
+
+        void open_lower_seat() override;
+
+        void direct_set_state( int new_state ) override;
+
 #ifndef DEBUG_NO_IO_MODULES
         int get_state() override;
 #endif // DEBUG_NO_IO_MODULES
 
+    private:
+        bool check_config();
 
-    protected:
-        /// @brief Получение данных состояния устройства.
-        char get_state_data( const char* data, int n ) const;
+        /// @brief Получение бита состояния устройства.
+        bool get_state_bit( const char* data, int n ) const;
+
+        /// @brief Установка бита состояния устройства.
+        void set_state_bit( char* data, int n );
+        /// @brief Сброс бита состояния устройства.
+        void reset_state_bit( char* data, int n );
 
         VALVE_STATE get_valve_state() override;
 
@@ -2589,10 +2601,11 @@ class valve_iol_terminal_mixproof_DO3 : public valve
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
 
-    private:
         u_int terminal_on_id = 0;          ///< Номер соленоида открытия.
         u_int terminal_upper_seat_id = 0;  ///< Номер соленоида верхнего седла.
         u_int terminal_lower_seat_id = 0;  ///< Номер соленоида нижнего седла.
+
+        valve::VALVE_STATE state = V_OFF;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
