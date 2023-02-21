@@ -617,10 +617,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(causticRecipes->get_current_recipe_name(), causticRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(causticRecipes->get_current_recipe_name(), causticRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(causticRecipes->get_current_recipe_name(), val, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(causticRecipes->get_current_recipe_name(), val, causticRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
@@ -632,10 +632,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(acidRecipes->get_current_recipe_name(), acidRecipes->recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(acidRecipes->get_current_recipe_name(), acidRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(acidRecipes->get_current_recipe_name(), val, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(acidRecipes->get_current_recipe_name(), val, acidRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
