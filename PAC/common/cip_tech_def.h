@@ -877,7 +877,7 @@ class cipline_tech_object: public tech_object
 
         ////-------------------
         void RHI();
-        void PauseTimers();
+        void PauseTimers() const;
         int SetCommand(int command);
         void ResetWP();
         int SetRet(int val);
@@ -906,7 +906,7 @@ class cipline_tech_object: public tech_object
         int _FromObject(int what, int where);
         int _FillCirc(int with_what);
         int _OporCirc(int where);
-        void _RT();
+        void _RT() const;
         void _Stop(int step_to_stop);
         int _InitDoseRR(int what, int step_to_init, int not_first_call);
         int _DoseRR(int what);
@@ -937,7 +937,7 @@ class cipline_tech_object: public tech_object
         int DoseRR(int what);
         ////--------------------------------------------
         ////-----error service-------
-        void ResetErr();
+        void ResetErr() const;
         ////-----for main station----
         void SortRR(int where, int forcetotank = 0);
         float GetConc(int what) const;
@@ -961,8 +961,8 @@ class cipline_tech_object: public tech_object
         int EvalCipInError();
         int EvalCipReadySignal();
         ////------------------------------
-        int InitCustomStep(int what, int from, int where, int how, int step, int f);
-        int EvalCustomStep(int what, int from, int where, int how);
+        int InitCustomStep(int what, int from, int where, int how, int step, int f) const;
+        int EvalCustomStep(int what, int from, int where, int how) const;
        ////Вспомогательные функции
         static void DateToChar(char* buff);
     };

@@ -208,7 +208,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								}
 							break;
 						case C_MSA_STATIONPARAMS:
-							ForceBit(i,&outdata[3],cipline_tech_object::Mdls[0]->get_station_par(objnumber) != 0 ? 1 : 0);
+							ForceBit(i,&outdata[3], cipline_tech_object::get_station_par(objnumber) != 0 ? 1 : 0);
 							break;
 						case C_MSA_CONTROL:
 							line = objnumber / 100;
@@ -387,7 +387,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
                                 case OTHER_PLC_TIME:
                                     char tempdatetime[17];
-                                    cipline_tech_object::Mdls[0]->DateToChar(tempdatetime);
+									cipline_tech_object::DateToChar(tempdatetime);
                                     tempdatetime[16] = 0;
                                     PackString(tempdatetime, &outdata[3 + i * 2]);
                                     i += 7;
@@ -505,7 +505,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							break;
 
 						case C_MSA_STATIONPARAMS:
-							PackFloat(cipline_tech_object::Mdls[0]->get_station_par(objnumber/2), &outdata[3+i*2]);
+							PackFloat(cipline_tech_object::get_station_par(objnumber/2), &outdata[3+i*2]);
 							i++;
 							break;
 
@@ -736,7 +736,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					case C_MSA_STATIONPARAMS:
 						if (objnumber < cipline_tech_object::Mdls[0]->parpar->get_count())
 							{
-							cipline_tech_object::Mdls[0]->set_station_par(objnumber, (float)(data[4] ? 1 : 0));
+							cipline_tech_object::set_station_par(objnumber, (float)(data[4] ? 1 : 0));
 							}
 						break;
 					case C_MSA_LINE1PARAMS:
@@ -965,7 +965,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                                     {
                                     printf("\n\rWrite Station param %d = %f", objnumber / 2, UnpackFloat(&data[7+i*2]));
                                     }
-								cipline_tech_object::Mdls[0]->set_station_par(objnumber / 2, UnpackFloat(&data[7+i*2]));
+								cipline_tech_object::set_station_par(objnumber / 2, UnpackFloat(&data[7+i*2]));
 								}
 							i++;
 							break;

@@ -1626,13 +1626,13 @@ void cipline_tech_object::RHI( )
     PIDF->HI=0;
     }
 
-void cipline_tech_object::PauseTimers( )
+void cipline_tech_object::PauseTimers( ) const
     {
     int i;
     for (i=0; i<TMR_CNT; i++) T[i]->pause();
     }
 
-void cipline_tech_object::_RT( )
+void cipline_tech_object::_RT( ) const
     {
     int i;
     for (i=0; i<TMR_CNT; i++) T[i]->reset();
@@ -3278,7 +3278,7 @@ int cipline_tech_object::ForceRet( int val )
     return 0;
     }
 
-void cipline_tech_object::ResetErr( )
+void cipline_tech_object::ResetErr( ) const
     {
     T[TMR_NO_FLOW]->reset();
     }
@@ -6655,7 +6655,7 @@ void cipline_tech_object::set_selfclean_par( int parno, float newval )
         }
     }
 
-int cipline_tech_object::InitCustomStep( int what, int from, int where, int how, int step, int f )
+int cipline_tech_object::InitCustomStep( int what, int from, int where, int how, int step, int f ) const
     {
     int luares = 0;
 
@@ -6684,7 +6684,7 @@ int cipline_tech_object::InitCustomStep( int what, int from, int where, int how,
     return luares;
     }
 
-int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how )
+int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how ) const
     {
     int luares = 0;
 
