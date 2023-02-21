@@ -2585,16 +2585,10 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
     private:
         bool check_config();
 
-        /// @brief Получение бита состояния устройства.
-        bool get_state_bit( const char* data, int n ) const;
-
         /// @brief Установка бита состояния устройства.
         void set_state_bit( char* data, unsigned int n ) const;
         /// @brief Сброс бита состояния устройства.
         void reset_state_bit( char* data, unsigned int n ) const;
-
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
 
         enum class CONSTANTS : u_int
             {

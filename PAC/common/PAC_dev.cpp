@@ -4726,23 +4726,6 @@ bool valve_iol_terminal_mixproof_DO3::check_config()
     return true;
     }
 
-/// @brief Получение данных состояния устройства.
-bool valve_iol_terminal_mixproof_DO3::get_state_bit( const char* data,
-    int n ) const
-    {
-    if ( !data || !n )
-        {
-        return false;
-        }
-
-    u_int offset = ( n - 1 ) / 8;
-    auto st = data[ offset ];
-    st >>= ( n - 1 ) % 8;
-    st &= 1;
-
-    return st > 0;
-    }
-
 /// @brief Установка данных состояния устройства.
 void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, 
     unsigned int n ) const
@@ -4762,8 +4745,7 @@ void valve_iol_terminal_mixproof_DO3::direct_on()
 
     auto data = (char*)get_AO_write_data(
         static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
-    auto is_on = get_state_bit( data, terminal_on_id );
-    if ( !is_on )
+    if ( state != VALVE_STATE::V_ON )
         {
         start_switch_time = get_millisec();
         }
@@ -4780,10 +4762,7 @@ void valve_iol_terminal_mixproof_DO3::direct_off()
 
     auto data = (char*)get_AO_write_data(
         static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
-    auto is_on = get_state_bit( data, terminal_on_id );
-    auto is_upper = get_state_bit( data, terminal_on_id );
-    auto is_lower = get_state_bit( data, terminal_on_id );
-    if ( is_on || is_upper || is_lower )
+    if ( state )
         {
         start_switch_time = get_millisec();
         }
@@ -4866,12 +4845,6 @@ valve::VALVE_STATE valve_iol_terminal_mixproof_DO3::get_valve_state()
     {
     return state;
     }
-
-/// @brief Получение состояния обратной связи.
-bool valve_iol_terminal_mixproof_DO3::get_fb_state()
-    {
-    return true;
-    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(

@@ -441,6 +441,10 @@ TEST( valve_iol_terminal_mixproof_DO3, on )
     V1.on();
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
+    V1.set_rt_par( 5, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
     V1.set_rt_par( 1, 1 );
     V1.on();
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
@@ -483,6 +487,31 @@ TEST( valve_iol_terminal_mixproof_DO3, off )
     V1.open_lower_seat();
     EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
     V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_mixproof_DO3, direct_set_state )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par( 1, 1 );
+    V1.set_rt_par( 2, 2 );
+    V1.set_rt_par( 3, 3 );
+
+    V1.direct_set_state( valve::V_ON );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_UPPER_SEAT );
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT );
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_OFF );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
     EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
     }
 
