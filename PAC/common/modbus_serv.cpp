@@ -808,7 +808,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 			unsigned int startingAddress  = data[2] * 256 + data[3];
 			unsigned int numberofElements = data[4] * 256 + data[5];
 			unsigned int coilgroup        = data[ 0 ];
-			unsigned int i,j;
+			unsigned int i;
                         int k;
 			int recipe_to_load;
 			int line;
@@ -886,7 +886,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								case RC_SELECT_REC:
 									recipe_to_load = UnpackInt16(&data[7+i*2]);
 									k = -1;
-									for (j = 0; j < (unsigned int)(TRecipeManager::get_recipe_per_line()); j++)
+									for (unsigned int j = 0; j < (unsigned int)(TRecipeManager::get_recipe_per_line()); j++)//
 										{
 										if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
 											{

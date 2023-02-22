@@ -98,9 +98,9 @@ constexpr size_t STATION_PAR_COUNT = 50;
 #define  P_DEZINFECTION_TYPE    35	//Тип дезинфицирующего раствора
 #define  P_CAUSTIC_SELECTED     36	//Выбранный рецепт щелочного раствора
 #define  P_ACID_SELECTED        37	//Выбранный рецепт кислотного раствора
-#define  P_END_WASH_DELAY       38  //Длительность 555 операции(завершение мойки)
-#define  P_MIN_BULK_FOR_WATER   39  //Минимальный аналоговый уровень в танке воды, при котором считать, что его нет
-#define  P_MIN_BULK_DELTA       40  //Отклонение уровня в танке вторичной воды
+constexpr size_t  P_END_WASH_DELAY = 38;  //Длительность 555 операции(завершение мойки)
+constexpr size_t  P_MIN_BULK_FOR_WATER = 39;  //Минимальный аналоговый уровень в танке воды, при котором считать, что его нет
+constexpr size_t  P_MIN_BULK_DELTA = 40;  //Отклонение уровня в танке вторичной воды
 
 
 //programms of moika
