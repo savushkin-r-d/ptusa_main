@@ -4689,21 +4689,22 @@ inline int valve_iolink_vtug_off::get_off_fb_value()
 valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name ) :
     valve( dev_name, DT_V, V_IOL_TERMINAL_MIXPROOF_DO3 )
     {
-    };
+    }
 
 void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
     {
     auto ui_val = static_cast<unsigned int>( value );
-    switch ( idx ) {
-        case 1:
+    switch ( static_cast<TERMINAL_OUTPUT>( idx ) )
+        {
+        case TERMINAL_OUTPUT::ON:
             terminal_on_id = ui_val;
             break;
 
-        case 2:
+        case TERMINAL_OUTPUT::UPPER_SEAT:
             terminal_upper_seat_id = ui_val;
             break;
 
-        case 3:
+        case TERMINAL_OUTPUT::LOWER_SEAT:
             terminal_lower_seat_id = ui_val;
             break;
 
@@ -4711,7 +4712,7 @@ void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
             valve::set_rt_par( idx, value );
             break;
         }
-    };
+    }
 
 bool valve_iol_terminal_mixproof_DO3::check_config()
     {

@@ -2587,12 +2587,20 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
 
         /// @brief Установка бита состояния устройства.
         void set_state_bit( char* data, unsigned int n ) const;
+
         /// @brief Сброс бита состояния устройства.
         void reset_state_bit( char* data, unsigned int n ) const;
 
         enum class CONSTANTS : u_int
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+
+        enum class TERMINAL_OUTPUT : u_int
+            {
+            ON = 1,   ///< Включение.
+            UPPER_SEAT,
+            LOWER_SEAT
             };
 
         u_int terminal_on_id = 0;          ///< Номер соленоида открытия.
