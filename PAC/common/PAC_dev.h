@@ -4698,6 +4698,8 @@ class threshold_regulator :public device, public i_Lua_save_device
 /// Содержит информацию обо всех устройствах проекта.
 class device_manager: public i_Lua_save_device
     {
+    protected:
+        std::vector< device* > project_devices; ///< Все устройства.
     public:
         device_manager();
 
@@ -4864,8 +4866,6 @@ class device_manager: public i_Lua_save_device
             const char *dev_name );
 
         int get_device_n( const char* dev_name );
-
-        std::vector< device* > project_devices; ///< Все устройства.
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
