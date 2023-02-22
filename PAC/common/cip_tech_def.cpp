@@ -617,10 +617,10 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
-            strncpy_s(causticRecipes->get_current_recipe_name(), causticRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
+            strncpy_s(causticRecipes->get_current_recipe_name(), TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(causticRecipes->get_current_recipe_name(), val, causticRecipes->TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
+            strncpy(causticRecipes->get_current_recipe_name(), val, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
 #endif
             }
         return 0;
