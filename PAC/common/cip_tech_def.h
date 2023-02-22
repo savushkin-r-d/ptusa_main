@@ -29,7 +29,7 @@
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
 #define STEAM_VALVE_MIN_DELAY 1200L
 ///@brief Количество параметров станции
-#define STATION_PAR_COUNT 50
+constexpr size_t STATION_PAR_COUNT = 50;
 ///@brief Количество параметров для программы самоочистки
 #define SELFCLEAN_PAR_COUNT 20
 ///@brief Максимальная длина номера машины

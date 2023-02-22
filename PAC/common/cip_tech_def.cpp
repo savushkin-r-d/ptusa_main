@@ -4916,12 +4916,9 @@ int cipline_tech_object::_ToObject( int from, int where )
                 tankfulltimer = get_millisec();
                 }
 
-            if (tankfull)
+            if (tankfull && get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
                 {
-                if ( get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
-                    {
                     tankfull = 0;
-                    }
                 }
 
 
@@ -5163,12 +5160,9 @@ int cipline_tech_object::_FromObject( int what, int where )
                 tankfulltimer = get_millisec();
                 }
 
-            if (tankfull)
-                {
-                if ( get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
-                    {
-                    tankfull = 0;
-                    }
+            if (tankfull && get_delta_millisec(tankfulltimer) > toTankSwitchTimeMs && (!LWH->is_active()))
+                { 
+                tankfull = 0;
                 }
 
 
@@ -7785,12 +7779,12 @@ TSav::~TSav( ) = default;
 
 void TSav::Add( float val, unsigned long inegr )
     {
-    unsigned long delta, i;
+    unsigned long delta;
     if ( inegr > integrator )
         {
         delta = inegr - integrator;
         integrator = inegr;
-        for ( i = 0; i < delta; i++ )
+        for (unsigned long i = 0; i < delta; i++ )
             {
             n++;
             cn = (cn * (n - 1) + val) / n;
