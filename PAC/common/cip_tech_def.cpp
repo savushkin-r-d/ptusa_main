@@ -378,16 +378,16 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
 
     //Имя рецепта для редактирования
-    answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->get_current_recipe_name());
+    answer_size += snprintf(buff + answer_size, sizeof(buff), lineRecipes->get_current_recipe_name());
 
     //Выбранная программа мойки
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
     //Список доступных программ мойки
-    answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList.data());
+    answer_size += snprintf(buff + answer_size, sizeof(buff), programList.data());
 
     //Список доступных объектов мойки
-    answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->get_recipe_list());
+    answer_size += snprintf(buff + answer_size, sizeof(buff), lineRecipes->get_recipe_list());
 
     //Номер машины
     answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar1);
@@ -452,7 +452,7 @@ int cipline_tech_object::save_device( char *buff )
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->get_recipe_list());
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_NMR='%d',\n", causticRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tCAUSTICNAME='%s',\n", causticName);
-        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR_NAME='%s',\n", causticRecipes->get_current_recipe_name());
+        answer_size += snprintf(buff + answer_size, sizeof(buff), causticRecipes->get_current_recipe_name());
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR = \n\t{\n\t\t");
         for (i = 1; i <= causticRecipes->GetParamsCount(); i++)
             {
@@ -461,10 +461,10 @@ int cipline_tech_object::save_device( char *buff )
         answer_size += sprintf(buff + answer_size, "\n\t},\n");
 
         //Список доступных кислотных растворов
-        answer_size += sprintf(buff + answer_size, "\tACID_REC_LIST='%s',\n", acidRecipes->get_recipe_list());
+        answer_size += snprintf(buff + answer_size, sizeof(buff), acidRecipes->get_recipe_list());
         answer_size += sprintf(buff + answer_size, "\tACID_REC_NMR='%d',\n", acidRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tACIDNAME='%s',\n", acidName);
-        answer_size += sprintf(buff + answer_size, "\tACID_PAR_NAME='%s',\n", acidRecipes->get_current_recipe_name());
+        answer_size += snprintf(buff + answer_size, sizeof(buff), acidRecipes->get_current_recipe_name());
         answer_size += sprintf(buff + answer_size, "\tACID_PAR = \n\t{\n\t\t");
         for (i = 1; i <= acidRecipes->GetParamsCount(); i++)
             {
