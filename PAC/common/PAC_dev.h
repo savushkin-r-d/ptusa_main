@@ -4706,7 +4706,7 @@ class device_manager: public i_Lua_save_device
         virtual ~device_manager();
 
         /// @brief Отключение сообщений о ненайденных устройствах.
-        bool disable_error_logging;
+        bool disable_error_logging = false;
 
         /// @brief Получение устройства.
         device* get_device( int dev_type, const char *dev_name );
