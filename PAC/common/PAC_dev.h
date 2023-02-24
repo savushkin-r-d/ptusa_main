@@ -2472,16 +2472,18 @@ class valve_iolink_shut_off_sorio : public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
-class valve_iolink_vtug : public valve
+class valve_iol_terminal : public valve
     {
     public:
-        valve_iolink_vtug( const char *dev_name,
-            device::DEVICE_SUB_TYPE sub_type );
+        valve_iol_terminal( const char *dev_name,
+            device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
 
-        valve_iolink_vtug( bool is_on_fb, bool is_off_fb, const char *dev_name,
-            device::DEVICE_SUB_TYPE sub_type);
+        valve_iol_terminal( bool is_on_fb, bool is_off_fb, const char *dev_name,
+            device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
 
         void set_rt_par( u_int idx, float value );
+
+        bool check_config();
 
 #ifndef DEBUG_NO_IO_MODULES
     public:
@@ -2493,27 +2495,21 @@ class valve_iolink_vtug : public valve
 #endif // DEBUG_NO_IO_MODULES
 
 
-    protected:
-        /// @brief Получение данных состояния устройства.
-        char get_state_data( char* data );
-
         VALVE_STATE get_valve_state();
 
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
-
+    private:
         enum CONSTANTS
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
 
-    private:
-        u_int vtug_number;        ///< Номер устройства.
-        u_int vtug_io_size = 1;   ///< Размер области, в словах.
+        std::vector< unsigned int > terminal_id;
+
+        VALVE_STATE state = VALVE_STATE::V_OFF;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_on : public valve_iolink_vtug
+class valve_iolink_vtug_on : public valve_iol_terminal
     {
     public:
         valve_iolink_vtug_on(const char* dev_name);
@@ -2536,7 +2532,7 @@ class valve_iolink_vtug_on : public valve_iolink_vtug
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_off : public valve_iolink_vtug
+class valve_iolink_vtug_off : public valve_iol_terminal
     {
     public:
         valve_iolink_vtug_off(const char* dev_name);
@@ -2611,7 +2607,7 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
-class valve_iolink_vtug_DO2 : public valve_iolink_vtug
+class valve_iolink_vtug_DO2 : public valve_iol_terminal
     {
     public:
         valve_iolink_vtug_DO2( const char* dev_name );

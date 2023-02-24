@@ -1497,9 +1497,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_VTUG_DO1:
-                    new_device = new valve_iolink_vtug( dev_name,
+                    new_device = new valve_iol_terminal( dev_name,
                         device::V_IOLINK_VTUG_DO1 );
-                    new_io_device = (valve_iolink_vtug*)new_device;
+                    new_io_device = (valve_iol_terminal*)new_device;
                     break;
 
                 case device::V_IOLINK_VTUG_DO1_DI2:
@@ -4493,39 +4493,53 @@ void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iolink_vtug::valve_iolink_vtug( const char* dev_name,
-    device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type ),
-    vtug_number( 0 )
+valve_iol_terminal::valve_iol_terminal( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int terminal_size ) :
+    valve_iol_terminal( false, false, dev_name, sub_type, terminal_size )
     {
     }
 //-----------------------------------------------------------------------------
-valve_iolink_vtug::valve_iolink_vtug( bool is_on_fb, bool is_off_fb,
-    const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-    valve( is_on_fb, is_off_fb, dev_name, DT_V, sub_type ),
-    vtug_number( 0 )
+valve_iol_terminal::valve_iol_terminal( bool is_on_fb, bool is_off_fb,
+    const char* dev_name, device::DEVICE_SUB_TYPE sub_type, u_int terminal_size ) :
+    valve( is_on_fb, is_off_fb, dev_name, DT_V, sub_type )
     {
+    terminal_id.resize( terminal_size );
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_vtug::set_rt_par( u_int idx, float value )
+void valve_iol_terminal::set_rt_par( u_int idx, float value )
     {
-    switch ( idx )
+    if ( idx < terminal_id.size() )
         {
-        case 1:
-            vtug_number = (u_int)value;
-            break;
-
-        case 2:
-            vtug_io_size = (u_int)value;
-            break;
-
-        default:
-            valve::set_rt_par( idx, value );
-            break;
+        terminal_id[ idx ] = static_cast<u_int>( value );
         }
+    else
+        {
+        valve::set_rt_par( idx, value );
+        }
+    }
+
+bool valve_iol_terminal::check_config()
+    {
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( !data )
+        {
+        return false;
+        }
+
+    for ( auto id : terminal_id )
+        {
+        if ( !id )
+            {
+            return false;
+            }
+        }
+
+    return true;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
-void valve_iolink_vtug::direct_on()
+void valve_iol_terminal::direct_on()
     {
     char* data = (char*)get_AO_write_data( AO_INDEX );
     char read_state = get_state_data( data );
@@ -4544,7 +4558,7 @@ void valve_iolink_vtug::direct_on()
     data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_vtug::direct_off()
+void valve_iol_terminal::direct_off()
     {
     char* data = (char*)get_AO_write_data( AO_INDEX );
     char read_state = get_state_data( data );
@@ -4563,7 +4577,7 @@ void valve_iolink_vtug::direct_off()
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_vtug::get_state()
+int valve_iol_terminal::get_state()
     {
     if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
         {
@@ -4576,42 +4590,14 @@ int valve_iolink_vtug::get_state()
     }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
-char valve_iolink_vtug::get_state_data( char* data )
+valve::VALVE_STATE valve_iol_terminal::get_valve_state()
     {
-    if ( !data || !vtug_number )
-        {
-        return 0;
-        }
-
-    u_int offset = ( vtug_number - 1 ) / 8;
-    char state = data[ offset ];
-    state >>= ( vtug_number - 1 ) % 8;
-    state &= 1;
-
-    return state;
-    }
-//-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_vtug::get_valve_state()
-    {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
-    char* data = (char*)get_AO_read_data( AO_INDEX );
-    char state = get_state_data( data );
-
     return (VALVE_STATE)state;
-#endif // DEBUG_NO_IO_MODULES
-    }
-//-----------------------------------------------------------------------------
-/// @brief Получение состояния обратной связи.
-bool valve_iolink_vtug::get_fb_state()
-    {
-    return true;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug_on::valve_iolink_vtug_on(const char* dev_name) :
-    valve_iolink_vtug( true, false, dev_name, V_IOLINK_VTUG_DO1_FB_ON)
+    valve_iol_terminal( true, false, dev_name, V_IOLINK_VTUG_DO1_FB_ON)
     {
     }
 //-----------------------------------------------------------------------------
@@ -4649,7 +4635,7 @@ inline int valve_iolink_vtug_on::get_off_fb_value()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug_off::valve_iolink_vtug_off(const char* dev_name) :
-    valve_iolink_vtug(false, true, dev_name, V_IOLINK_VTUG_DO1_FB_OFF)
+    valve_iol_terminal(false, true, dev_name, V_IOLINK_VTUG_DO1_FB_OFF)
     {
     }
 //-----------------------------------------------------------------------------
@@ -5041,7 +5027,7 @@ int DI1::get_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug_DO2::valve_iolink_vtug_DO2( const char* dev_name ) :
-    valve_iolink_vtug( true, false, dev_name, V_IOLINK_VTUG_DO1_DI2 )
+    valve_iol_terminal( true, false, dev_name, V_IOLINK_VTUG_DO1_DI2 )
     {
     }
 //-----------------------------------------------------------------------------
