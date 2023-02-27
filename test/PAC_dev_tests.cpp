@@ -36,19 +36,7 @@ TEST( signal_column, turn_off_blue )
 
 TEST( valve_iol_terminal, get_state_data )
     {
-    class valve_iolink_vtug_test : public valve_iol_terminal
-        {
-        public:
-            valve_iolink_vtug_test( bool is_on_fb, bool is_off_fb,
-                const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-                valve_iol_terminal( is_on_fb, is_off_fb, dev_name, sub_type ) {};
-
-            valve_iolink_vtug_test( const char* dev_name,
-                device::DEVICE_SUB_TYPE sub_type ) :valve_iol_terminal(
-                dev_name, sub_type ) {};
-        };
-
-    valve_iolink_vtug_test v1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
+    valve_iol_terminal_DO1_DI1_on v1( "V1" );
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 

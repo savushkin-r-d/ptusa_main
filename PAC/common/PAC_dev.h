@@ -2471,96 +2471,121 @@ class valve_iolink_shut_off_sorio : public valve
         bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан IO-link VTUG с одним каналом управления.
+/// @brief Клапан с управлением от пневмоострова IO-link.
+
 class valve_iol_terminal : public valve
     {
     public:
-        valve_iol_terminal( const char *dev_name,
-            device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
-
         valve_iol_terminal( bool is_on_fb, bool is_off_fb, const char *dev_name,
             device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
 
-        void set_rt_par( u_int idx, float value );
+        void set_rt_par( u_int idx, float value ) override;
 
         bool check_config();
 
+        /// @brief Установка данных состояния устройства.
+        void set_state_bit( char* data, unsigned int n ) const;
+
+        void reset_state_bit( char* data, unsigned int n ) const;
+
+        enum class TERMINAL_OUTPUT : u_int
+            {
+            ON = 1,   ///< Включение.
+            UPPER_SEAT,
+            LOWER_SEAT
+            };
+
+        unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n =
+            TERMINAL_OUTPUT::ON ) const;
+
 #ifndef DEBUG_NO_IO_MODULES
-    public:
+		int get_state() override;
+#endif // DEBUG_NO_IO_MODULES
+
+        VALVE_STATE get_valve_state() override;
+
         void direct_on();
 
         void direct_off();
 
-		int get_state() override;
-#endif // DEBUG_NO_IO_MODULES
+        unsigned int get_AO_index() const
+            {
+            return static_cast<unsigned int> ( CONSTANTS::AO_INDEX_1 );
+            }
 
+        unsigned int get_DI_index() const
+            {
+            return static_cast<unsigned int> ( CONSTANTS::DI_INDEX_1 );
+            }
 
-        VALVE_STATE get_valve_state();
+        void set_state( VALVE_STATE new_state )
+            {
+            state = new_state;
+            }
 
     private:
-        enum CONSTANTS
+        enum class CONSTANTS
             {
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            AO_INDEX_1 = 0,   ///< Индекс канала аналогового выхода.
+
+            DI_INDEX_1 = 0,   ///< Индекс канала дискретного входа.
             };
 
-        std::vector< unsigned int > terminal_id;
+        std::vector<unsigned int> terminal_id;
 
         VALVE_STATE state = VALVE_STATE::V_OFF;
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_on : public valve_iol_terminal
+/// @brief Клапан IO-link VTUG с одним каналом управления.
+class valve_iol_terminal_DO1 : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_on(const char* dev_name);
-
-    private:
-        enum CONSTANTS
+        valve_iol_terminal_DO1( const char* dev_name ) :
+            valve_iol_terminal( false, false, dev_name,
+            device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
             {
-            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
             };
-
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
-
-        int get_on_fb_value();
-
-        int get_off_fb_value();
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_off : public valve_iol_terminal
+class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_off(const char* dev_name);
+        valve_iol_terminal_DO1_DI1_on( const char* dev_name );
 
     private:
-        enum CONSTANTS
-            {
-            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
-            };
-
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_on_fb_value();
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
+#endif // DEBUG_NO_IO_MODULES
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
+class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
+    {
+    public:
+        valve_iol_terminal_DO1_DI1_off(const char* dev_name);
+
+    private:
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state() override;
+
+        int get_on_fb_value() override;
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_off_fb_value() override;
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
-class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
+class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_terminal
     {
     public:
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
-
-        void set_rt_par( u_int idx, float value ) override;
 
         void direct_on() override;
 
@@ -2571,39 +2596,6 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
         void open_lower_seat() override;
 
         void direct_set_state( int new_state ) override;
-
-        VALVE_STATE get_valve_state() override;
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_state() override;
-#endif // DEBUG_NO_IO_MODULES
-
-    private:
-        bool check_config();
-
-        /// @brief Установка бита состояния устройства.
-        void set_state_bit( char* data, unsigned int n ) const;
-
-        /// @brief Сброс бита состояния устройства.
-        void reset_state_bit( char* data, unsigned int n ) const;
-
-        enum class CONSTANTS : u_int
-            {
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
-            };
-
-        enum class TERMINAL_OUTPUT : u_int
-            {
-            ON = 1,   ///< Включение.
-            UPPER_SEAT,
-            LOWER_SEAT
-            };
-
-        u_int terminal_on_id = 0;          ///< Номер соленоида открытия.
-        u_int terminal_upper_seat_id = 0;  ///< Номер соленоида верхнего седла.
-        u_int terminal_lower_seat_id = 0;  ///< Номер соленоида нижнего седла.
-
-        valve::VALVE_STATE state = V_OFF;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
