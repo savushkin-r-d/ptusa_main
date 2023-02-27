@@ -54,7 +54,7 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device ( char *str )
+int par_device::save_device( char* str )
     {
     str[ 0 ] = 0;
 
@@ -63,34 +63,19 @@ int par_device::save_device ( char *str )
         return 0;
         }
 
-    int res = 0;
+    int size = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
             {
-            res += sprintf( str + res, "%s=", par_name[ i ] );
-
-            float val =  par[ 0 ][ i + 1 ];
-            if ( 0. == val )
-                {
-                res += sprintf( str + res, "0, " );
-                }
-            else
-                {
-                double tmp;
-                if ( modf( val, &tmp ) == 0 )
-                    {
-                    res += sprintf( str + res, "%d, ", ( int ) val );
-                    }
-                else
-                    {
-                    res += sprintf( str + res, "%.2f, ", val );
-                    }
-                }
+            auto val = par[ 0 ][ i + 1 ];
+            double tmp;
+            int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
+                par_name[ i ], val, precision ).size;
             }
         }
-
-    return res;
+    return size;
     }
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
@@ -257,11 +242,13 @@ void device::set_string_property( const char* field, const char* value )
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
-    int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
+    int res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "{}{}={{M={:d}, ", prefix, name, is_manual_mode ).size;
 
     if ( type != DT_AO )
         {
-        res += sprintf( buff + res, "ST=%d, ", get_state() );
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "ST={}, ",
+            get_state() ).size;
         }
 
     if ( type != DT_V &&
@@ -277,14 +264,11 @@ int device::save_device( char* buff, const char* prefix )
         type != DT_DI &&
         type != DT_DO )
         {
-        if ( get_value() == 0 )
-            {
-            res += sprintf( buff + res, "V=0, " );
-            }
-        else
-            {
-            res += sprintf( buff + res, "V=%.2f, ", get_value() );
-            }
+        auto val = get_value();
+        double tmp;
+        int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "V={:.{}f}, ",
+            val, precision ).size;
         }
 
     res += save_device_ex( buff + res );
@@ -292,8 +276,7 @@ int device::save_device( char* buff, const char* prefix )
 
     const int extra_symbols_length = 2;                     //Remove last " ,".
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
-    res += sprintf( buff + res, "},\n" );
-
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -1562,6 +1545,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::DST_V_VIRT:
                     new_device = new virtual_valve( dev_name );
+                    break;
+
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3:
+                    new_device = new valve_iol_terminal_mixproof_DO3( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3*)new_device;
                     break;
 
                 default:
@@ -2892,7 +2880,8 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int base_counter::save_device_ex( char* buff )
     {
-    return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    return fmt::format_to_n(
+        buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description() const
@@ -2992,8 +2981,8 @@ float counter_f::get_flow()
 int counter_f::save_device_ex( char *buff )
     {
     int res = counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, ",
+        get_flow() ).size;
 
     return res;
     }
@@ -3113,9 +3102,8 @@ float counter_iolink::get_flow()
 int counter_iolink::save_device_ex( char* buff )
     {
     int res = base_counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
-    res += sprintf( buff + res, "T=%.1f, ", get_temperature() );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
+        get_flow(), get_temperature() ).size;
 
     return res;
     }
@@ -4696,6 +4684,168 @@ inline int valve_iolink_vtug_off::get_off_fb_value()
     return get_DI(DI_INDEX);
     }
 #endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name ) :
+    valve( dev_name, DT_V, V_IOL_TERMINAL_MIXPROOF_DO3 )
+    {
+    }
+
+void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
+    {
+    auto ui_val = static_cast<unsigned int>( value );
+    switch ( static_cast<TERMINAL_OUTPUT>( idx ) )
+        {
+        case TERMINAL_OUTPUT::ON:
+            terminal_on_id = ui_val;
+            break;
+
+        case TERMINAL_OUTPUT::UPPER_SEAT:
+            terminal_upper_seat_id = ui_val;
+            break;
+
+        case TERMINAL_OUTPUT::LOWER_SEAT:
+            terminal_lower_seat_id = ui_val;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    }
+
+bool valve_iol_terminal_mixproof_DO3::check_config()
+    {
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( !data || !terminal_on_id ||
+        !terminal_upper_seat_id || !terminal_lower_seat_id )
+        {
+        return false;
+        }
+
+    return true;
+    }
+
+/// @brief Установка данных состояния устройства.
+void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, 
+    unsigned int n ) const
+    {
+    data[ n ] |= 1 << ( ( n - 1 ) % 8 );
+    }
+
+void valve_iol_terminal_mixproof_DO3::reset_state_bit( char* data,
+    unsigned int n ) const
+    {
+    data[ n ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_on()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( state != VALVE_STATE::V_ON )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    set_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_ON;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_off()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_OFF;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_upper_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    set_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_UPPER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_lower_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    set_state_bit( data, terminal_lower_seat_id );
+    state = V_LOWER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            open_upper_seat();
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            open_lower_seat();
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_mixproof_DO3::get_state()
+    {
+    if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return -1;
+        }
+    else
+        {
+        return valve::get_state();
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+valve::VALVE_STATE valve_iol_terminal_mixproof_DO3::get_valve_state()
+    {
+    return state;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
@@ -7419,11 +7569,14 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=0.0, ",
-        reverse, freq, rpm, est, amperage );
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
+        reverse, freq, rpm, est, amperage ).size; 
 #else
-    res = sprintf(buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=%.1f, ",
-        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state, atv->amperage, atv->frq_max);
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
+        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
+        atv->amperage, atv->frq_max ).size;
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
