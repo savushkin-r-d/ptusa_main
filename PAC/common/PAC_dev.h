@@ -2508,14 +2508,14 @@ class valve_iol_terminal : public valve
 
         void direct_off();
 
-        unsigned int get_AO_index() const
+        unsigned int get_AO_index( unsigned int offset = 0 ) const
             {
-            return static_cast<unsigned int> ( CONSTANTS::AO_INDEX_1 );
+            return static_cast<unsigned int> ( CONSTANTS::AO_INDEX_1 ) + offset;
             }
 
-        unsigned int get_DI_index() const
+        unsigned int get_DI_index( unsigned int offset = 0 ) const
             {
-            return static_cast<unsigned int> ( CONSTANTS::DI_INDEX_1 );
+            return static_cast<unsigned int> ( CONSTANTS::DI_INDEX_1 ) + offset;
             }
 
         void set_state( VALVE_STATE new_state )
@@ -2607,18 +2607,16 @@ class valve_iolink_vtug_DO2 : public valve_iol_terminal
     private:
         enum CONSTANTS
             {
-            DI_INDEX_ON = 0,     ///< Индекс канала дискретного входа.
-            DI_INDEX_OFF,
+            DI_INDEX_OFF = 1, //< Индекс канала дискретного входа.
             };
 
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_on_fb_value();
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
