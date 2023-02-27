@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <fmt/core.h>
 
 #include <vector>
 #include <string>
@@ -49,6 +50,8 @@
 #endif // WIN_OS
 
 class PID;
+
+const size_t MAX_COPY_SIZE = 1000;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
@@ -453,10 +456,12 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
-            
+          
             DST_V_VIRT,               ///< Виртуальный клапан.
 
             DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
+
+            V_IOL_TERMINAL_MIXPROOF_DO3,    ///< Противосмешивающий клапан (включение от IO-Link пневмооострова) с тремя каналами управления.
 
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
@@ -2551,6 +2556,58 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
 
         int get_off_fb_value();
 #endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
+class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve
+    {
+    public:
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
+
+        void set_rt_par( u_int idx, float value ) override;
+
+        void direct_on() override;
+
+        void direct_off() override;
+
+        void open_upper_seat() override;
+
+        void open_lower_seat() override;
+
+        void direct_set_state( int new_state ) override;
+
+        VALVE_STATE get_valve_state() override;
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_state() override;
+#endif // DEBUG_NO_IO_MODULES
+
+    private:
+        bool check_config();
+
+        /// @brief Установка бита состояния устройства.
+        void set_state_bit( char* data, unsigned int n ) const;
+
+        /// @brief Сброс бита состояния устройства.
+        void reset_state_bit( char* data, unsigned int n ) const;
+
+        enum class CONSTANTS : u_int
+            {
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+
+        enum class TERMINAL_OUTPUT : u_int
+            {
+            ON = 1,   ///< Включение.
+            UPPER_SEAT,
+            LOWER_SEAT
+            };
+
+        u_int terminal_on_id = 0;          ///< Номер соленоида открытия.
+        u_int terminal_upper_seat_id = 0;  ///< Номер соленоида верхнего седла.
+        u_int terminal_lower_seat_id = 0;  ///< Номер соленоида нижнего седла.
+
+        valve::VALVE_STATE state = V_OFF;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.

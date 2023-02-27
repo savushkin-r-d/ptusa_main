@@ -7,6 +7,8 @@
 /// @c WIN_OS           - компиляция для ОС Windows.
 ///
 
+#include <fmt/core.h>
+
 #include <stdlib.h>
 #include <signal.h>
 #include "fcntl.h"
@@ -86,7 +88,7 @@ int main( int argc, const char *argv[] )
 
     if ( argc < 2 )
         {
-        printf( "Usage: main script.plua\n" );
+        fmt::print( "Usage: main script.plua\n" );
         return EXIT_SUCCESS;
         }
 #ifdef PAC_WAGO_750_860
