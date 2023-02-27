@@ -2,10 +2,10 @@
 
 float imitation_TE::get_random()
     {
-    int max = get_max();
-    int min = get_min();
+    max = get_max();
+    min = get_min();
     float real = 0.1f;
-    return std::rand() % 10 * real + min + std::rand() % (max - min + 1);
+    return float(std::rand() % 10 * real + min + std::rand() % (max - min + 1));
     }
 
 void imitation_TE::set_max(int max)
@@ -13,7 +13,7 @@ void imitation_TE::set_max(int max)
     this->max = max;
     }
 
-int imitation_TE::get_max()
+int imitation_TE::get_max() const
     {
     return max;
     }
@@ -23,7 +23,7 @@ void imitation_TE::set_min(int min)
     this->min = min;
     }
 
-int imitation_TE::get_min()
+int imitation_TE::get_min() const
     {
     return min;
     }
