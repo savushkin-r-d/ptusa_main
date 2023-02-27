@@ -1547,6 +1547,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_valve( dev_name );
                     break;
 
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3:
+                    new_device = new valve_iol_terminal_mixproof_DO3( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -4679,6 +4684,168 @@ inline int valve_iolink_vtug_off::get_off_fb_value()
     return get_DI(DI_INDEX);
     }
 #endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name ) :
+    valve( dev_name, DT_V, V_IOL_TERMINAL_MIXPROOF_DO3 )
+    {
+    }
+
+void valve_iol_terminal_mixproof_DO3::set_rt_par( u_int idx, float value )
+    {
+    auto ui_val = static_cast<unsigned int>( value );
+    switch ( static_cast<TERMINAL_OUTPUT>( idx ) )
+        {
+        case TERMINAL_OUTPUT::ON:
+            terminal_on_id = ui_val;
+            break;
+
+        case TERMINAL_OUTPUT::UPPER_SEAT:
+            terminal_upper_seat_id = ui_val;
+            break;
+
+        case TERMINAL_OUTPUT::LOWER_SEAT:
+            terminal_lower_seat_id = ui_val;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    }
+
+bool valve_iol_terminal_mixproof_DO3::check_config()
+    {
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( !data || !terminal_on_id ||
+        !terminal_upper_seat_id || !terminal_lower_seat_id )
+        {
+        return false;
+        }
+
+    return true;
+    }
+
+/// @brief Установка данных состояния устройства.
+void valve_iol_terminal_mixproof_DO3::set_state_bit( char* data, 
+    unsigned int n ) const
+    {
+    data[ n ] |= 1 << ( ( n - 1 ) % 8 );
+    }
+
+void valve_iol_terminal_mixproof_DO3::reset_state_bit( char* data,
+    unsigned int n ) const
+    {
+    data[ n ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_on()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( state != VALVE_STATE::V_ON )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    set_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_ON;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_off()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    if ( state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_OFF;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_upper_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    set_state_bit( data, terminal_upper_seat_id );
+    reset_state_bit( data, terminal_lower_seat_id );
+    state = V_UPPER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_lower_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( CONSTANTS::AO_INDEX ) );
+    reset_state_bit( data, terminal_on_id );
+    reset_state_bit( data, terminal_upper_seat_id );
+    set_state_bit( data, terminal_lower_seat_id );
+    state = V_LOWER_SEAT;
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            open_upper_seat();
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            open_lower_seat();
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_mixproof_DO3::get_state()
+    {
+    if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return -1;
+        }
+    else
+        {
+        return valve::get_state();
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+valve::VALVE_STATE valve_iol_terminal_mixproof_DO3::get_valve_state()
+    {
+    return state;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
