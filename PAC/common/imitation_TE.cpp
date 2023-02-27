@@ -1,12 +1,40 @@
 #include "imitation_TE.h"
 
- bool imitation_TE::is_p() const
+float imitation_TE::get_random()
+    {
+    int max = get_max();
+    int min = get_min();
+    float real = 0.1f;
+    return std::rand() % 10 * real + min + std::rand() % (max - min + 1);
+    }
+
+void imitation_TE::set_max(int max)
+    {
+    this->max = max;
+    }
+
+int imitation_TE::get_max()
+    {
+    return max;
+    }
+
+void imitation_TE::set_min(int min)
+    {
+    this->min = min;
+    }
+
+int imitation_TE::get_min()
+    {
+    return min;
+    }
+
+bool imitation_TE::is_p() const
     {
     // f(x)=1/(σ√2π)∙e^(-1/2∙((x-μ)/σ)^2) - функция Гаусса 
     // σ - стандартное отклонение
     // x - случайная величина
     // μ - математическое ожидание
-	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5; // 0.5 вероятность того, что случайная велична находится на [25,30].
+	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5; // 0.5 вероятность того, что случайная величина находится на [25,30].
     }
 
 float imitation_TE::get_st_deviation() const
@@ -16,7 +44,7 @@ float imitation_TE::get_st_deviation() const
 
 float imitation_TE::get_TE()
     {
-    x = x_dis(gen);
+    x = get_random();
     if (is_p())
         {                                                                           
         old_value = x;

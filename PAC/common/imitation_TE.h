@@ -1,7 +1,8 @@
 #pragma once
 #define _USE_MATH_DEFINES
-#include <random>
 #include <cmath>
+#include <cstdlib>
+
 class imitation_TE 
     {
     public:
@@ -10,14 +11,19 @@ class imitation_TE
         float get_TE(); // возвращает значения температуры 
 
     private:
-        float D = float(0.234);   // дисперсия
-        float m_expec = 27; // мат. ожидание 
-        float st_deviation = float(0.48); // стандартное отклонение 
-        float old_value = float(25.7);
-        std::random_device rd{};
-        std::mt19937 gen{ rd() };
-        std::uniform_real_distribution<float> x_dis = std::uniform_real_distribution<float>(20, 30);  // функция генерирует случайные вещественные числа из заданного диапазона  
-        float x = x_dis(gen);  // случайная величмина 
+        float D = 0.234f;   // дисперсия
+        float m_expec = 27.f; // мат. ожидание 
+        float st_deviation = 0.48f; // стандартное отклонение 
+        float old_value = 25.7f;
+        float x = get_random(); // случайная величина
+        int max = 30;
+        int min = 20;
+       
+        float get_random();
+        void set_max(int max);
+        int get_max();
+        void set_min(int min);
+        int get_min();
         bool is_p() const;   // функция расчета вероятности 
         float get_st_deviation() const;
        
