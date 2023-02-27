@@ -1004,33 +1004,7 @@ void cipline_tech_object::initline()
 
     Mdls[nmr - 1] = this;
     MdlsCNT++;
-    rt_par_float[P_R_NO_FLOW] = 2;
-    rt_par_float[P_TM_R_NO_FLOW] = 20;
-    rt_par_float[P_TM_NO_FLOW_R] = 20;
-    rt_par_float[P_TM_NO_CONC] = 20;
-    rt_par_float[PIDP_Z] = 95;
-    rt_par_float[PIDP_k] = 2;
-    rt_par_float[PIDP_Ti] = 30;
-    rt_par_float[PIDP_Td] = (float)0.2;
-    rt_par_float[PIDP_dt] = 500;
-    rt_par_float[PIDP_dmax] = 130;
-    rt_par_float[PIDP_dmin] = 0;
-    rt_par_float[PIDP_AccelTime] = 30;
-    rt_par_float[PIDP_IsManualMode] = 0;
-    rt_par_float[PIDP_UManual] = 30;
-    rt_par_float[PIDP_Uk] = 0;
-    rt_par_float[PIDF_Z] = 15;
-    rt_par_float[PIDF_k] = (float)0.5;
-    rt_par_float[PIDF_Ti] = 10;
-    rt_par_float[PIDF_Td] = (float)0.1;
-    rt_par_float[PIDF_dt] = 1000;
-    rt_par_float[PIDF_dmax] = 40;
-    rt_par_float[PIDF_dmin] = 0;
-    rt_par_float[PIDF_AccelTime] = 2;
-    rt_par_float[PIDF_IsManualMode] = 0;
-    rt_par_float[PIDF_UManual] = 15;
-    rt_par_float[PIDF_Uk] = 0;
-
+    init_params();
     isMsa = 1;
 
     auto check_Lua_function = [=]( const char* function_name, int& is_function )
