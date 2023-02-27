@@ -605,7 +605,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 #ifdef WIN_OS
             strncpy_s(lineRecipes->get_current_recipe_name(), TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val, _TRUNCATE);
 #else
-            strncpy(lineRecipes->get_current_recipe_name(), val, TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER);
+            fmt::format_to_n(lineRecipes->get_current_recipe_name(), TRecipeManager::get_recipe_name_length() * UNICODE_MULTIPLIER, val);
 #endif
             }
         return 0;
@@ -620,7 +620,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
             strncpy_s(causticRecipes->get_current_recipe_name(), TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(causticRecipes->get_current_recipe_name(), val, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
+            fmt::format_to_n(causticRecipes->get_current_recipe_name(), TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val);
 #endif
             }
         return 0;
@@ -635,7 +635,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
             strncpy_s(acidRecipes->get_current_recipe_name(), TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
                 val, _TRUNCATE);
 #else
-            strncpy(acidRecipes->get_current_recipe_name(), val, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER);
+            fmt::format_to_n(acidRecipes->get_current_recipe_name(), TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val);
 #endif
             }
         return 0;
