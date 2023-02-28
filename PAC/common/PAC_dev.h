@@ -2498,11 +2498,11 @@ class valve_iol_terminal : public valve
         enum class IO_CONSTANT : unsigned int
             {
             AO_INDEX_1 = 0,///< Индекс канала аналогового выхода.
-            AO_INDEX_2,
-            AO_INDEX_3,
+            AO_INDEX_2 = 1,
+            AO_INDEX_3 = 2,
 
             DI_INDEX_1 = 0,///< Индекс канала дискретного входа обратной связи.
-            DI_INDEX_2,
+            DI_INDEX_2 = 1,
             };
 
         unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n =
