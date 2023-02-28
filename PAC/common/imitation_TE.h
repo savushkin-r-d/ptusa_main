@@ -2,6 +2,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include<random>
+#include <vector>
+#include<numeric>
 
 class imitation_TE
     {
