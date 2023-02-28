@@ -4,7 +4,6 @@ float imitation_TE::get_random()
     {
     max = get_max();
     min = get_min();
-    std::size_t size = max - min;
     std::vector<int> iv(10);
     std::vector<float> fv(10);
     std::iota(iv.begin(), iv.end(), min);

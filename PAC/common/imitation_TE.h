@@ -4,6 +4,7 @@
 #include<random>
 #include <vector>
 #include<numeric>
+#include <algorithm>
 
 class imitation_TE
     {
