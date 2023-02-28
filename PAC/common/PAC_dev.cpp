@@ -5364,7 +5364,11 @@ int wages_eth::get_state()
 
 void wages_eth::evaluate_io()
     {
+#ifdef DEBUG_NO_IO_MODULES
+    weth->set_wages_value(.0f);
+#else
     weth->evaluate();
+#endif
     }
 
 void wages_eth::tare()
