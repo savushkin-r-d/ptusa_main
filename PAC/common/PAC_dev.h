@@ -2504,9 +2504,9 @@ class valve_iol_terminal : public valve
 
         VALVE_STATE get_valve_state() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
         unsigned int get_AO_index( unsigned int offset = 0 ) const
             {
@@ -2518,7 +2518,7 @@ class valve_iol_terminal : public valve
             return static_cast<unsigned int> ( CONSTANTS::DI_INDEX_1 ) + offset;
             }
 
-        void set_state( VALVE_STATE new_state )
+        void set_st( VALVE_STATE new_state )
             {
             state = new_state;
             }
@@ -2540,7 +2540,7 @@ class valve_iol_terminal : public valve
 class valve_iol_terminal_DO1 : public valve_iol_terminal
     {
     public:
-        valve_iol_terminal_DO1( const char* dev_name ) :
+        explicit valve_iol_terminal_DO1( const char* dev_name ) :
             valve_iol_terminal( false, false, dev_name,
             device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
             {
@@ -2551,7 +2551,7 @@ class valve_iol_terminal_DO1 : public valve_iol_terminal
 class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
     {
     public:
-        valve_iol_terminal_DO1_DI1_on( const char* dev_name );
+        explicit valve_iol_terminal_DO1_DI1_on( const char* dev_name );
 
     private:
         /// @brief Получение состояния обратной связи.
@@ -2568,7 +2568,7 @@ class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
 class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
     {
     public:
-        valve_iol_terminal_DO1_DI1_off(const char* dev_name);
+        explicit valve_iol_terminal_DO1_DI1_off(const char* dev_name);
 
     private:
         /// @brief Получение состояния обратной связи.

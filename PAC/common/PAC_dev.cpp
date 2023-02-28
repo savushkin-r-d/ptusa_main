@@ -4521,15 +4521,8 @@ bool valve_iol_terminal::check_config()
         return false;
         }
 
-    for ( auto id : terminal_id )
-        {
-        if ( !id )
-            {
-            return false;
-            }
-        }
-
-    return true;
+    return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
+        []( const unsigned int & id ) { return id > 0; } );
     }
 
 /// @brief Установка данных состояния устройства.
@@ -4567,7 +4560,7 @@ int valve_iol_terminal::get_state()
 
 valve::VALVE_STATE valve_iol_terminal::get_valve_state()
     {
-    return (VALVE_STATE)state;
+    return state;
     }
 
 void valve_iol_terminal::direct_on()
@@ -4620,7 +4613,8 @@ bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
         return true;
         }
 
-    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
         {
         return true;
         }
@@ -4659,7 +4653,8 @@ bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
         return true;
         }
 
-    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
         {
         return true;
         }
@@ -4716,7 +4711,7 @@ void valve_iol_terminal_mixproof_DO3::open_upper_seat()
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
 
-    set_state( V_UPPER_SEAT );
+    set_st( V_UPPER_SEAT );
     }
 
 void valve_iol_terminal_mixproof_DO3::open_lower_seat()
@@ -4728,7 +4723,7 @@ void valve_iol_terminal_mixproof_DO3::open_lower_seat()
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
 
-    set_state( V_LOWER_SEAT );
+    set_st( V_LOWER_SEAT );
     }
 
 void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
@@ -4978,7 +4973,8 @@ bool valve_iolink_vtug_DO2::get_fb_state()
         return true;
         }
 
-    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
         {
         return true;
         }
