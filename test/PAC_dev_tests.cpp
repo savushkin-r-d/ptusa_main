@@ -156,6 +156,17 @@ TEST( device_manager, add_io_device )
     const auto V7 = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
 
+    //device::DT_V, device::V_IOLINK_VTUG_DO1_DI2
+    name = std::string( "V8" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    const auto V8 = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
+
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -451,6 +462,46 @@ TEST( valve_iol_terminal_DO1, on )
     }
 
 
+TEST( valve_iol_terminal_DO1_DI1_off, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI1_off V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    EXPECT_EQ( false, V1.get_fb_state() );
+    }
+
+TEST( valve_iol_terminal_DO1_DI1_off, get_on_fb_value )
+    {
+    valve_iol_terminal_DO1_DI1_off V1( "V1" );
+    EXPECT_EQ( false, V1.get_on_fb_value() );
+    }
+
+
+TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI1_on V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    EXPECT_EQ( true, V1.get_fb_state() );
+    }
+
+TEST( valve_iol_terminal_DO1_DI1_on, get_off_fb_value )
+    {
+    valve_iol_terminal_DO1_DI1_on V1( "V1" );
+    EXPECT_EQ( false, V1.get_off_fb_value() );
+    }
+
+
 TEST( valve_iol_terminal_mixproof_DO3, on )
     {
     valve_iol_terminal_mixproof_DO3 V1( "V1" );
@@ -534,6 +585,20 @@ TEST( valve_iol_terminal_mixproof_DO3, direct_set_state )
 
     V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
     EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+
+TEST( valve_iol_terminal_DO2, get_fb_state )
+    {
+    valve_iol_terminal_DO2 V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    EXPECT_EQ( false, V1.get_fb_state() );
     }
 
 

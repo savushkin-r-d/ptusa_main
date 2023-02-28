@@ -2546,7 +2546,6 @@ class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
     public:
         explicit valve_iol_terminal_DO1_DI1_on( const char* dev_name );
 
-    private:
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 
@@ -2563,7 +2562,6 @@ class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
     public:
         explicit valve_iol_terminal_DO1_DI1_off(const char* dev_name);
 
-    private:
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 
@@ -2592,12 +2590,11 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
-class valve_iolink_vtug_DO2 : public valve_iol_terminal
+class valve_iol_terminal_DO2 : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_DO2( const char* dev_name );
+        valve_iol_terminal_DO2( const char* dev_name );
 
-    private:
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 

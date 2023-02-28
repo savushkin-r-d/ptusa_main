@@ -1502,8 +1502,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_VTUG_DO1_DI2:
-                    new_device = new valve_iolink_vtug_DO2( dev_name );
-                    new_io_device = (valve_iolink_vtug_DO2*)new_device;
+                    new_device = new valve_iol_terminal_DO2( dev_name );
+                    new_io_device = (valve_iol_terminal_DO2*)new_device;
                     break;
 
                 case device::V_IOLINK_VTUG_DO1_FB_OFF:
@@ -4956,12 +4956,12 @@ int DI1::get_state()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iolink_vtug_DO2::valve_iolink_vtug_DO2( const char* dev_name ) :
+valve_iol_terminal_DO2::valve_iol_terminal_DO2( const char* dev_name ) :
     valve_iol_terminal( true, true, dev_name, V_IOLINK_VTUG_DO1_DI2 )
     {
     }
 
-bool valve_iolink_vtug_DO2::get_fb_state()
+bool valve_iol_terminal_DO2::get_fb_state()
     {
     int o = get_valve_state();
 
@@ -4989,12 +4989,12 @@ bool valve_iolink_vtug_DO2::get_fb_state()
     }
 
 #ifndef DEBUG_NO_IO_MODULES
-int valve_iolink_vtug_DO2::get_on_fb_value()
+int valve_iol_terminal_DO2::get_on_fb_value()
     {
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
-inline int valve_iolink_vtug_DO2::get_off_fb_value()
+inline int valve_iol_terminal_DO2::get_off_fb_value()
     {
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
     }
