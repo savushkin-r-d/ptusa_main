@@ -2488,11 +2488,21 @@ class valve_iol_terminal : public valve
 
         void reset_state_bit( char* data, unsigned int n ) const;
 
-        enum class TERMINAL_OUTPUT : u_int
+        enum class TERMINAL_OUTPUT : unsigned int
             {
-            ON = 1,   ///< Включение.
-            UPPER_SEAT,
-            LOWER_SEAT
+            ON = 1,         ///< Включение.
+            UPPER_SEAT,     ///< Включение верхнего седла.
+            LOWER_SEAT      ///< Включение нижнего седла.
+            };
+
+        enum class IO_CONSTANT : unsigned int
+            {
+            AO_INDEX_1 = 0,///< Индекс канала аналогового выхода.
+            AO_INDEX_2,
+            AO_INDEX_3,
+
+            DI_INDEX_1 = 0,///< Индекс канала дискретного входа обратной связи.
+            DI_INDEX_2,
             };
 
         unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n =
@@ -2508,29 +2518,12 @@ class valve_iol_terminal : public valve
 
         void direct_off() override;
 
-        unsigned int get_AO_index( unsigned int offset = 0 ) const
-            {
-            return static_cast<unsigned int> ( CONSTANTS::AO_INDEX_1 ) + offset;
-            }
-
-        unsigned int get_DI_index( unsigned int offset = 0 ) const
-            {
-            return static_cast<unsigned int> ( CONSTANTS::DI_INDEX_1 ) + offset;
-            }
-
         void set_st( VALVE_STATE new_state )
             {
             state = new_state;
             }
 
     private:
-        enum class CONSTANTS
-            {
-            AO_INDEX_1 = 0,   ///< Индекс канала аналогового выхода.
-
-            DI_INDEX_1 = 0,   ///< Индекс канала дискретного входа.
-            };
-
         std::vector<unsigned int> terminal_id;
 
         VALVE_STATE state = VALVE_STATE::V_OFF;
@@ -2605,11 +2598,6 @@ class valve_iolink_vtug_DO2 : public valve_iol_terminal
         valve_iolink_vtug_DO2( const char* dev_name );
 
     private:
-        enum CONSTANTS
-            {
-            DI_INDEX_OFF = 1, //< Индекс канала дискретного входа.
-            };
-
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 

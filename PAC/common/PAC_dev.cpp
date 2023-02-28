@@ -4515,7 +4515,7 @@ void valve_iol_terminal::set_rt_par( u_int idx, float value )
 bool valve_iol_terminal::check_config()
     {
     auto data = (char*)get_AO_write_data(
-        static_cast<u_int> ( CONSTANTS::AO_INDEX_1 ) );
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
     if ( !data )
         {
         return false;
@@ -4574,7 +4574,8 @@ void valve_iol_terminal::direct_on()
         direct_off();
         }
 
-    auto data = (char*)( get_AO_write_data( get_AO_index() ) );
+    auto data = (char*)( get_AO_write_data(
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
     set_state_bit( data, get_terminal_id() );
     state = valve::VALVE_STATE::V_ON;
     }
@@ -4589,7 +4590,8 @@ void valve_iol_terminal::direct_off()
         start_switch_time = get_millisec();
         }
 
-    auto data = (char*)( get_AO_write_data( get_AO_index() ) );
+    auto data = (char*)( get_AO_write_data( 
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
     reset_state_bit( data, get_terminal_id() );
     state = valve::VALVE_STATE::V_OFF;
     }
@@ -4605,7 +4607,7 @@ bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
     if ( !check_config() ) return false;
 
     auto o = get_valve_state();
-    int i = get_DI( get_DI_index() );
+    int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
 
     if ( o == i )
         {
@@ -4625,7 +4627,7 @@ bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
 #ifndef DEBUG_NO_IO_MODULES
 int valve_iol_terminal_DO1_DI1_on::get_on_fb_value()
     {
-    return get_DI( get_DI_index() );
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 #endif // DEBUG_NO_IO_MODULES
 
@@ -4645,7 +4647,8 @@ bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
     if ( !check_config() ) return false;
 
     auto o = get_valve_state();
-    int i = get_DI( get_DI_index() );
+    int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+
 
     if ( o != i )
         {
@@ -4670,7 +4673,7 @@ int valve_iol_terminal_DO1_DI1_off::get_on_fb_value()
 #ifndef DEBUG_NO_IO_MODULES
 inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
     {
-    return get_DI( get_DI_index() );
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
@@ -4686,7 +4689,8 @@ void valve_iol_terminal_mixproof_DO3::direct_on()
 
     valve_iol_terminal::direct_on();
 
-    auto data = (char*)get_AO_write_data( get_AO_index() );
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
     }
@@ -4697,7 +4701,8 @@ void valve_iol_terminal_mixproof_DO3::direct_off()
 
     valve_iol_terminal::direct_off();
 
-    auto data = (char*)get_AO_write_data( get_AO_index() );
+    auto data = (char*)get_AO_write_data( 
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
     }
@@ -4706,7 +4711,8 @@ void valve_iol_terminal_mixproof_DO3::open_upper_seat()
     {
     if ( !check_config() ) return;
 
-    auto data = (char*)get_AO_write_data( get_AO_index() );
+    auto data = (char*)get_AO_write_data( 
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
@@ -4718,7 +4724,8 @@ void valve_iol_terminal_mixproof_DO3::open_lower_seat()
     {
     if ( !check_config() ) return;
 
-    auto data = (char*)get_AO_write_data( get_AO_index() );
+    auto data = (char*)get_AO_write_data(
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
@@ -4953,14 +4960,13 @@ valve_iolink_vtug_DO2::valve_iolink_vtug_DO2( const char* dev_name ) :
     valve_iol_terminal( true, true, dev_name, V_IOLINK_VTUG_DO1_DI2 )
     {
     }
-//-----------------------------------------------------------------------------
 
 bool valve_iolink_vtug_DO2::get_fb_state()
     {
     int o = get_valve_state();
 
-    int i1 = get_DI( get_DI_index( DI_INDEX_OFF ) );
-    int i2 = get_DI( get_DI_index( DI_INDEX_OFF ) );
+    int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
     if ( o == 1 && i1 == 1 && i2 == 0 ) //Открыт.
         {
         start_switch_time = get_millisec();
@@ -4985,12 +4991,12 @@ bool valve_iolink_vtug_DO2::get_fb_state()
 #ifndef DEBUG_NO_IO_MODULES
 int valve_iolink_vtug_DO2::get_on_fb_value()
     {
-    return get_DI( get_DI_index() );
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
 inline int valve_iolink_vtug_DO2::get_off_fb_value()
     {
-    return get_DI( get_DI_index( DI_INDEX_OFF ) );
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
     }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
