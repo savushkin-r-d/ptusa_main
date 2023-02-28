@@ -2593,7 +2593,7 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
 class valve_iol_terminal_DO2 : public valve_iol_terminal
     {
     public:
-        valve_iol_terminal_DO2( const char* dev_name );
+        explicit valve_iol_terminal_DO2( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
