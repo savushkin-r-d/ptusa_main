@@ -4,7 +4,7 @@ float imitation_TE::get_random()
     {
     max = get_max();
     min = get_min();
-    std::vector<int> iv(11);
+    std::vector<float> iv(11);
     std::vector<float> fv(10);
     std::iota(iv.begin(), iv.end(), min);
     std::iota(fv.begin(), fv.end(), 1);
@@ -47,9 +47,9 @@ float imitation_TE::get_st_deviation() const
     return float(sqrt(D));
     }
 
-unsigned imitation_TE::get_index()
+unsigned imitation_TE::get_index() const
     {
-    unsigned value = unsigned(std::time(nullptr));
+    auto value = unsigned(std::time(nullptr));
     unsigned int rd = value % 10;
     return rd;
     }
