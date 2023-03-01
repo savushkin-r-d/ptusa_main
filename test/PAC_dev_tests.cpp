@@ -493,6 +493,13 @@ TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
 
     EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+    const auto WAIT_TIME = 10;
+    V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    EXPECT_EQ( true, V1.get_fb_state() );
+    sleep_ms( 2 * WAIT_TIME );
+    EXPECT_EQ( false, V1.get_fb_state() );
     }
 
 TEST( valve_iol_terminal_DO1_DI1_on, get_off_fb_value )
