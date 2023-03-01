@@ -4534,13 +4534,15 @@ bool valve_iol_terminal::check_config()
 void valve_iol_terminal::set_state_bit( char* data,
     unsigned int n ) const
     {
-    data[ n ] |= 1 << ( ( n - 1 ) % 8 );
+    auto offset = ( n - 1 ) / 8;
+    data[ offset ] |= 1 << ( ( n - 1 ) % 8 );
     }
 
 void valve_iol_terminal::reset_state_bit( char* data,
     unsigned int n ) const
     {
-    data[ n ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
+    auto offset = ( n - 1 ) / 8;
+    data[ offset ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
     }
 
 unsigned int valve_iol_terminal::get_terminal_id(
@@ -5017,17 +5019,17 @@ valve_iol_terminal_mixproof_DO3_DI2::
 /// @brief Получение состояния обратной связи.
 bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
     {
-    int o = get_valve_state();
+    auto o = get_valve_state();
 
     int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
-    if ( o == 1 && i1 == 1 && i2 == 0 ) //Открыт.
+    if ( o == VALVE_STATE::V_ON && i1 == 1 && i2 == 0 ) //Открыт.
         {
         start_switch_time = get_millisec();
         return true;
         }
 
-    if ( o == 0 && i1 == 0 && i2 == 1 ) //Закрыт.
+    if ( o == VALVE_STATE::V_OFF && i1 == 0 && i2 == 1 ) //Закрыт.
         {
         start_switch_time = get_millisec();
         return true;
