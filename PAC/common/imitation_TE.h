@@ -27,7 +27,7 @@ class imitation_TE
         int get_min() const;
         bool is_p() const;   // функция расчета вероятности
         float get_st_deviation() const;
-        unsigned get_index();
+        unsigned get_index() const;
     };
 
 
