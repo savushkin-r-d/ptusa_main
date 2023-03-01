@@ -10,6 +10,10 @@ class imitation_TE
         imitation_TE() = default;
         imitation_TE(float D,float m_expec);
         float get_TE(); // возвращает значения температуры
+        void set_max(int max);
+        int get_max() const;
+        void set_min(int min);
+        int get_min() const;
 
     private:
         float D = 0.234f;   // дисперсия
@@ -21,10 +25,6 @@ class imitation_TE
         int min = 20;
 
         float get_random();
-        void set_max(int max);
-        int get_max() const;
-        void set_min(int min);
-        int get_min() const;
         bool is_p() const;   // функция расчета вероятности
         float get_st_deviation() const;
         unsigned get_index() const;
