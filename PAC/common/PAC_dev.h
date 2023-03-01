@@ -461,7 +461,14 @@ class device : public i_DO_AO_device, public par_device
 
             DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
 
-            V_IOL_TERMINAL_MIXPROOF_DO3,    ///< Противосмешивающий клапан (включение от IO-Link пневмооострова) с тремя каналами управления.
+            ///< Противосмешивающий клапан (включение от IO-Link
+            ///< пневмооострова) с тремя каналами управления.
+            V_IOL_TERMINAL_MIXPROOF_DO3,    
+
+            ///< Противосмешивающий клапан (включение от IO-Link
+            ///< пневмооострова) с тремя каналами управления и двумя обратными
+            ///< связами.
+            V_IOL_TERMINAL_MIXPROOF_DO3_DI2,
 
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
@@ -2578,6 +2585,12 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
     public:
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
 
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
+            device::DEVICE_SUB_TYPE sub_type ):
+            valve_iol_terminal( true, true, dev_name, sub_type, 3 )
+            {
+            }
+
         void direct_on() override;
 
         void direct_off() override;
@@ -2594,6 +2607,23 @@ class valve_iol_terminal_DO2 : public valve_iol_terminal
     {
     public:
         explicit valve_iol_terminal_DO2( const char* dev_name );
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state() override;
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
+
+        int get_off_fb_value() override;
+#endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления и
+/// 2-я обратными связями.
+class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_DO3
+    {
+    public:
+        explicit valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;

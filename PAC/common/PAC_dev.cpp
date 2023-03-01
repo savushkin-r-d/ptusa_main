@@ -1551,6 +1551,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (valve_iol_terminal_mixproof_DO3*)new_device;
                     break;
 
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2:
+                    new_device = new valve_iol_terminal_mixproof_DO3_DI2( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3_DI2*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -4547,9 +4552,11 @@ unsigned int valve_iol_terminal::get_terminal_id(
 #ifndef DEBUG_NO_IO_MODULES
 int valve_iol_terminal::get_state()
     {
-    if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+    IOLINKSTATE res = get_AO_IOLINK_state(
+        static_cast<u_int>( IO_CONSTANT::AO_INDEX_1 ) );
+    if ( res != io_device::IOLINKSTATE::OK )
         {
-        return -1;
+        return -static_cast<int>( res );
         }
     else
         {
@@ -4995,6 +5002,56 @@ int valve_iol_terminal_DO2::get_on_fb_value()
     }
 
 inline int valve_iol_terminal_DO2::get_off_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3_DI2::
+    valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name ) :
+    valve_iol_terminal_mixproof_DO3( dev_name, V_IOL_TERMINAL_MIXPROOF_DO3_DI2 )
+    {
+    }
+
+/// @brief Получение состояния обратной связи.
+bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
+    {
+    int o = get_valve_state();
+
+    int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    if ( o == 1 && i1 == 1 && i2 == 0 ) //Открыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( o == 0 && i1 == 0 && i2 == 1 ) //Закрыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( o == VALVE_STATE::V_LOWER_SEAT ||
+        o == VALVE_STATE::V_UPPER_SEAT ) return true;
+
+    if ( get_delta_millisec( start_switch_time ) <
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_mixproof_DO3_DI2::get_on_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    }
+
+int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value()
     {
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
     }
