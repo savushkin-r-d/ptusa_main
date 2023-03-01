@@ -4,13 +4,13 @@ float imitation_TE::get_random()
     {
     max = get_max();
     min = get_min();
-    std::vector<int> iv(10);
+    std::vector<int> iv(11);
     std::vector<float> fv(10);
     std::iota(iv.begin(), iv.end(), min);
     std::iota(fv.begin(), fv.end(), 1);
-    std::random_shuffle(iv.begin(), iv.end());
-    std::random_shuffle(fv.begin(), fv.end());
-    return static_cast<float>(fv.front() * 0.1f + iv.front());
+    unsigned int index_fv = get_index();
+    unsigned int index_iv = get_index();
+    return  fv.at(index_fv) *0.1f + iv.at(index_iv);
     }
 
 void imitation_TE::set_max(int max_in_range)
@@ -39,12 +39,19 @@ bool imitation_TE::is_p() const
     // σ - стандартное отклонение
     // x - случайная величина
     // μ - математическое ожидание
-	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.5; // 0.5 вероятность того, что случайная величина находится на [25,30].
+	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.01; // 0.01 вероятность того, что случайная величина находится на [25,30].
     }
 
 float imitation_TE::get_st_deviation() const
     {
     return float(sqrt(D));
+    }
+
+unsigned imitation_TE::get_index()
+    {
+    unsigned value = unsigned(std::time(nullptr));
+    unsigned int rd = value % 10;
+    return rd;
     }
 
 float imitation_TE::get_TE()
