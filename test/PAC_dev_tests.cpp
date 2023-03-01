@@ -87,8 +87,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V1 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V1 ) );
+    auto Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
     name = std::string( "V2" );
@@ -98,8 +98,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V2 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V2 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::DST_V_MINI_FLUSHING, Test
     name = std::string( "V3" );
@@ -109,8 +109,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V3 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V3 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_VTUG_DO1
     name = std::string( "V4" );
@@ -120,8 +120,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    const auto V4 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF
     name = std::string( "V5" );
@@ -131,8 +131,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    const auto V5 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON
     name = std::string( "V6" );
@@ -142,30 +142,41 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    const auto V6 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
-
-    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
-    name = std::string( "V7" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    const auto V7 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_VTUG_DO1_DI2
-    name = std::string( "V8" );
+    name = std::string( "V7" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, name.c_str(), "Test valve",
         "Test" );
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    const auto V8 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V4 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
+    name = std::string( "V8" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
+    name = std::string( "V9" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
@@ -594,6 +605,24 @@ TEST( valve_iol_terminal_mixproof_DO3, direct_set_state )
     EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
     }
 
+TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
+    {
+    valve_iol_terminal_mixproof_DO3_DI2 V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+    const auto WAIT_TIME = 10;
+    V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    sleep_ms( 2 * WAIT_TIME );
+    EXPECT_EQ( false, V1.get_fb_state() );
+    }
 
 TEST( valve_iol_terminal_DO2, get_fb_state )
     {
