@@ -1,11 +1,9 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include<random>
 #include <vector>
 #include<numeric>
-#include <algorithm>
-
+#include <ctime>
 class imitation_TE
     {
     public:
@@ -29,6 +27,7 @@ class imitation_TE
         int get_min() const;
         bool is_p() const;   // функция расчета вероятности
         float get_st_deviation() const;
-
+        unsigned get_index();
     };
+
 
