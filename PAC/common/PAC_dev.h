@@ -2582,6 +2582,7 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
     {
     public:
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
+            bool is_on_fb = false, bool is_off_fb = false,
             device::DEVICE_SUB_TYPE sub_type = V_IOL_TERMINAL_MIXPROOF_DO3 );
 
         void open_upper_seat() override;
@@ -2592,10 +2593,10 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
-class valve_iol_terminal_DO2 : public valve_iol_terminal
+class valve_iol_terminal_DO1_DI2 : public valve_iol_terminal
     {
     public:
-        explicit valve_iol_terminal_DO2( const char* dev_name );
+        explicit valve_iol_terminal_DO1_DI2( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;

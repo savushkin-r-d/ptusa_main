@@ -677,17 +677,29 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
     }
 
-TEST( valve_iol_terminal_DO2, get_fb_state )
-    {
-    valve_iol_terminal_DO2 V1( "V1" );
 
-    V1.init( 0, 1, 1, 0 );
+TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI2 V1( "V1" );
+
+    V1.init( 0, 2, 1, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
     V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
 
     EXPECT_EQ( false, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 1;//ОС для отключенного состояния.
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;//ОС для включенного состояния.
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 0;//ОС для отключенного состояния.
+    V1.direct_on();
+    EXPECT_EQ( true, V1.get_fb_state() );
     }
 
 

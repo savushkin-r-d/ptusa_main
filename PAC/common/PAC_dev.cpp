@@ -1502,8 +1502,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_VTUG_DO1_DI2:
-                    new_device = new valve_iol_terminal_DO2( dev_name );
-                    new_io_device = (valve_iol_terminal_DO2*)new_device;
+                    new_device = new valve_iol_terminal_DO1_DI2( dev_name );
+                    new_io_device = (valve_iol_terminal_DO1_DI2*)new_device;
                     break;
 
                 case device::V_IOLINK_VTUG_DO1_FB_OFF:
@@ -4696,8 +4696,8 @@ inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
-    device::DEVICE_SUB_TYPE sub_type ) :
-    valve_iol_terminal( true, true, dev_name, sub_type, 3 )
+    bool is_on_fb, bool is_off_fb, device::DEVICE_SUB_TYPE sub_type ) :
+    valve_iol_terminal( is_on_fb, is_off_fb, dev_name, sub_type, 3 )
     {
     }
 
@@ -4950,24 +4950,24 @@ int DI1::get_state()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iol_terminal_DO2::valve_iol_terminal_DO2( const char* dev_name ) :
+valve_iol_terminal_DO1_DI2::valve_iol_terminal_DO1_DI2( const char* dev_name ) :
     valve_iol_terminal( true, true, dev_name, V_IOLINK_VTUG_DO1_DI2 )
     {
     }
 
-bool valve_iol_terminal_DO2::get_fb_state()
+bool valve_iol_terminal_DO1_DI2::get_fb_state()
     {
-    int o = get_valve_state();
+    auto o = get_valve_state();
 
     int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
-    if ( o == 1 && i1 == 1 && i2 == 0 ) //Открыт.
+    if ( VALVE_STATE::V_ON == o && i1 == 1 && i2 == 0 ) //Открыт.
         {
         start_switch_time = get_millisec();
         return true;
         }
 
-    if ( o == 0 && i1 == 0 && i2 == 1 ) //Закрыт.
+    if ( VALVE_STATE::V_OFF == o && i1 == 0 && i2 == 1 ) //Закрыт.
         {
         start_switch_time = get_millisec();
         return true;
@@ -4983,12 +4983,12 @@ bool valve_iol_terminal_DO2::get_fb_state()
     }
 
 #ifndef DEBUG_NO_IO_MODULES
-int valve_iol_terminal_DO2::get_on_fb_value()
+int valve_iol_terminal_DO1_DI2::get_on_fb_value()
     {
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
-inline int valve_iol_terminal_DO2::get_off_fb_value()
+inline int valve_iol_terminal_DO1_DI2::get_off_fb_value()
     {
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
     }
@@ -4997,7 +4997,7 @@ inline int valve_iol_terminal_DO2::get_off_fb_value()
 //-----------------------------------------------------------------------------
 valve_iol_terminal_mixproof_DO3_DI2::
     valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name ) :
-    valve_iol_terminal_mixproof_DO3( dev_name, V_IOL_TERMINAL_MIXPROOF_DO3_DI2 )
+    valve_iol_terminal_mixproof_DO3( dev_name, true, true, V_IOL_TERMINAL_MIXPROOF_DO3_DI2 )
     {
     }
 
@@ -5008,20 +5008,20 @@ bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
 
     int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
-    if ( o == VALVE_STATE::V_ON && i1 == 1 && i2 == 0 ) //Открыт.
+    if ( VALVE_STATE::V_ON == o && i1 == 1 && i2 == 0 ) //Открыт.
         {
         start_switch_time = get_millisec();
         return true;
         }
 
-    if ( o == VALVE_STATE::V_OFF && i1 == 0 && i2 == 1 ) //Закрыт.
+    if ( VALVE_STATE::V_OFF == o && i1 == 0 && i2 == 1 ) //Закрыт.
         {
         start_switch_time = get_millisec();
         return true;
         }
 
-    if ( o == VALVE_STATE::V_LOWER_SEAT ||
-        o == VALVE_STATE::V_UPPER_SEAT ) return true;
+    if ( VALVE_STATE::V_LOWER_SEAT == o ||
+        VALVE_STATE::V_UPPER_SEAT == o ) return true;
 
     if ( get_delta_millisec( start_switch_time ) <
         static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
