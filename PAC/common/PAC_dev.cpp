@@ -4605,7 +4605,7 @@ void valve_iol_terminal::direct_off()
 
     auto data = (char*)( get_AO_write_data( 
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
-    for ( size_t i = static_cast<size_t>( TERMINAL_OUTPUT::ON );
+    for ( auto i = static_cast<size_t>( TERMINAL_OUTPUT::ON );
         i < terminal_id.size() + 1; i++ )
         {
         reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>( i ) ) );
