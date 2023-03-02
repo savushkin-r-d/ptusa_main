@@ -22,8 +22,8 @@ class imitation_TE
         float st_deviation = 0.48f; // стандартное отклонение
         float old_value = 25.7f;
         float x = get_random(); // случайная величина
-        int max = 30;
-        int min = 20;
+        float max = 30.f;
+        float min = 20.f;
 
         float get_random();
         bool is_p() const;   // функция расчета вероятности
