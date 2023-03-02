@@ -18,7 +18,7 @@ void imitation_TE::set_max(int max_in_range)
     this->max = max_in_range;
     }
 
-int imitation_TE::get_max() const
+float imitation_TE::get_max() const
     {
     return max;
     }
@@ -28,7 +28,7 @@ void imitation_TE::set_min(int min_in_range)
     this->min = min_in_range;
     }
 
-int imitation_TE::get_min() const
+float imitation_TE::get_min() const
     {
     return min;
     }
