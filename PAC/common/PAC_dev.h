@@ -2512,8 +2512,7 @@ class valve_iol_terminal : public valve
             DI_INDEX_2 = 1,
             };
 
-        unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n =
-            TERMINAL_OUTPUT::ON ) const;
+        unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n ) const;
 
 #ifndef DEBUG_NO_IO_MODULES
 		int get_state() override;
@@ -2522,7 +2521,6 @@ class valve_iol_terminal : public valve
         VALVE_STATE get_valve_state() override;
 
         void direct_on() override;
-
         void direct_off() override;
 
         void set_st( VALVE_STATE new_state )
@@ -2583,17 +2581,8 @@ class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
 class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_terminal
     {
     public:
-        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name );
-
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
-            device::DEVICE_SUB_TYPE sub_type ):
-            valve_iol_terminal( true, true, dev_name, sub_type, 3 )
-            {
-            }
-
-        void direct_on() override;
-
-        void direct_off() override;
+            device::DEVICE_SUB_TYPE sub_type = V_IOL_TERMINAL_MIXPROOF_DO3 );
 
         void open_upper_seat() override;
 

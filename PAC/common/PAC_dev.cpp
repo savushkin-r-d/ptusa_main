@@ -4580,12 +4580,16 @@ void valve_iol_terminal::direct_on()
     if ( valve::VALVE_STATE::V_ON != st )
         {
         start_switch_time = get_millisec();
-        direct_off();
         }
 
     auto data = (char*)( get_AO_write_data(
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
-    set_state_bit( data, get_terminal_id() );
+    set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    for ( size_t i = static_cast<size_t>( TERMINAL_OUTPUT::ON ) + 1;
+        i < terminal_id.size() + 1; i++ )
+        {
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>( i ) ) );
+        }
     state = valve::VALVE_STATE::V_ON;
     }
 
@@ -4601,7 +4605,11 @@ void valve_iol_terminal::direct_off()
 
     auto data = (char*)( get_AO_write_data( 
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
-    reset_state_bit( data, get_terminal_id() );
+    for ( size_t i = static_cast<size_t>( TERMINAL_OUTPUT::ON );
+        i < terminal_id.size() + 1; i++ )
+        {
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>( i ) ) );
+        }
     state = valve::VALVE_STATE::V_OFF;
     }
 //-----------------------------------------------------------------------------
@@ -4687,33 +4695,10 @@ inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name ) :
-    valve_iol_terminal( false, false, dev_name, V_IOL_TERMINAL_MIXPROOF_DO3, 3 )
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type ) :
+    valve_iol_terminal( true, true, dev_name, sub_type, 3 )
     {
-    }
-
-void valve_iol_terminal_mixproof_DO3::direct_on()
-    {
-    if ( !check_config() ) return;
-
-    valve_iol_terminal::direct_on();
-
-    auto data = (char*)get_AO_write_data(
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
-    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
-    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
-    }
-
-void valve_iol_terminal_mixproof_DO3::direct_off()
-    {
-    if ( !check_config() ) return;
-
-    valve_iol_terminal::direct_off();
-
-    auto data = (char*)get_AO_write_data( 
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
-    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
-    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
     }
 
 void valve_iol_terminal_mixproof_DO3::open_upper_seat()
