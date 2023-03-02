@@ -483,6 +483,11 @@ TEST( valve_iol_terminal_DO1_DI1_off, get_fb_state )
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
 
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
     EXPECT_EQ( false, V1.get_fb_state() );
 
     const auto WAIT_TIME = 10;
@@ -512,6 +517,11 @@ TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
     V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( true, V1.get_fb_state() );
 
@@ -572,6 +582,11 @@ TEST( valve_iol_terminal_mixproof_DO3, off )
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 2 );
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 3 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0},\n", buff );
 
     V1.on();
     EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
@@ -636,7 +651,12 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 2 );
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 3 );
-       
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
     const auto WAIT_TIME = 10;
     V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
     //Не прошёл заданый интервал - должно вернуться "истина".
@@ -688,6 +708,11 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
     V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( false, V1.get_fb_state() );
 

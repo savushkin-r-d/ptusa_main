@@ -2483,7 +2483,12 @@ class valve_iolink_shut_off_sorio : public valve
 class valve_iol_terminal : public valve
     {
     public:
-        valve_iol_terminal( bool is_on_fb, bool is_off_fb, const char *dev_name,
+        explicit valve_iol_terminal( bool is_on_fb, bool is_off_fb,
+            const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
+            u_int terminal_size = 1 );
+
+        ///< Конструктор для клапана без обратных связей.
+        explicit valve_iol_terminal( const char* dev_name,
             device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
 
         void set_rt_par( u_int idx, float value ) override;
@@ -2538,11 +2543,7 @@ class valve_iol_terminal : public valve
 class valve_iol_terminal_DO1 : public valve_iol_terminal
     {
     public:
-        explicit valve_iol_terminal_DO1( const char* dev_name ) :
-            valve_iol_terminal( false, false, dev_name,
-            device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
-            {
-            };
+        explicit valve_iol_terminal_DO1( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
@@ -2582,7 +2583,9 @@ class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_ter
     {
     public:
         explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
-            bool is_on_fb = false, bool is_off_fb = false,
+            bool is_on_fb, bool is_off_fb, device::DEVICE_SUB_TYPE sub_type );
+
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
             device::DEVICE_SUB_TYPE sub_type = V_IOL_TERMINAL_MIXPROOF_DO3 );
 
         void open_upper_seat() override;

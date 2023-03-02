@@ -3313,7 +3313,7 @@ int valve::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( ( is_off_fb || is_on_fb ) && get_par( P_FB, 0 ) == FB_IS_AND_OFF )
                 {
                 return VX_LOWER_SEAT_FB_OFF;
                 }
@@ -3327,7 +3327,7 @@ int valve::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( ( is_off_fb || is_on_fb ) && get_par( P_FB, 0 ) == FB_IS_AND_OFF )
                 {
                 return VX_UPPER_SEAT_FB_OFF;
                 }
@@ -4504,6 +4504,13 @@ valve_iol_terminal::valve_iol_terminal( bool is_on_fb, bool is_off_fb,
     terminal_id.resize( terminal_size );
     }
 
+valve_iol_terminal::valve_iol_terminal( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int terminal_size ) :
+    valve( dev_name, DT_V, sub_type )
+    {
+    terminal_id.resize( terminal_size );
+    }
+
 void valve_iol_terminal::set_rt_par( u_int idx, float value )
     {
     idx -= 1;
@@ -4614,6 +4621,12 @@ void valve_iol_terminal::direct_off()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+valve_iol_terminal_DO1::valve_iol_terminal_DO1( const char* dev_name ) :
+    valve_iol_terminal( dev_name, device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
+    {
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_iol_terminal_DO1_DI1_on::valve_iol_terminal_DO1_DI1_on( const char* dev_name ) :
     valve_iol_terminal( true, false, dev_name, V_IOLINK_VTUG_DO1_FB_ON )
     {
@@ -4698,6 +4711,11 @@ inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
 valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
     bool is_on_fb, bool is_off_fb, device::DEVICE_SUB_TYPE sub_type ) :
     valve_iol_terminal( is_on_fb, is_off_fb, dev_name, sub_type, 3 )
+    {
+    }
+
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
+   device::DEVICE_SUB_TYPE sub_type ) : valve_iol_terminal( dev_name, sub_type, 3 )
     {
     }
 
