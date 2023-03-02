@@ -609,19 +609,45 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     {
     valve_iol_terminal_mixproof_DO3_DI2 V1( "V1" );
 
-    V1.init( 0, 1, 1, 0 );
+    V1.init( 0, 2, 1, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
     V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
     V1.set_rt_par(
-        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
-
-    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 1 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 2 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 3 );
+       
     const auto WAIT_TIME = 10;
     V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    //Не прошёл заданый интервал - должно вернуться "истина".
     EXPECT_EQ( true, V1.get_fb_state() );
 
     sleep_ms( 2 * WAIT_TIME );
+    //Прошёл заданый интервал - должно вернуться "ложь".
     EXPECT_EQ( false, V1.get_fb_state() );
+
+    V1.direct_on();
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+    //Есть обратная связь - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    V1.direct_off();
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 0;
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 1;
+    //Есть обратная связь - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 0;
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 0;
+    V1.open_upper_seat();
+    //Открыто верхнее седло - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+    V1.open_lower_seat();
+    //Открыто нижнее седло - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
     }
 
 TEST( valve_iol_terminal_DO2, get_fb_state )
