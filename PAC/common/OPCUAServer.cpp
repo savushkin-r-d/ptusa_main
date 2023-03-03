@@ -99,7 +99,9 @@ UA_NodeId techObjectTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1200 } };
 void OPCUAServer::Init(int port)
 {
     server = UA_Server_new();
-    UA_ServerConfig_setDefault(UA_Server_getConfig(server));
+    UA_Int16 portNumber = port;
+    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, 0);
+    //UA_ServerConfig_setDefault(UA_Server_getConfig(server));
 }
 
 
@@ -115,6 +117,26 @@ void OPCUAServer::UserInit()
     else
         {
         lua_remove(L, -1);
+        }
+    }
+
+void OPCUAServer::CreateDevObjects()
+    {
+    u_int deviceCount = G_DEVICE_MANAGER()->get_device_count();
+
+    for( u_int i = 0; i < deviceCount; i++)
+        {
+        UA_NodeId device;
+        char deviceName[ 20 ];
+        strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
+        UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
+        oAttr.displayName = UA_LOCALIZEDTEXT( "en-US", deviceName );
+        UA_Server_addObjectNode( server, UA_NODEID_NULL,
+            UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
+            UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
+            UA_QUALIFIEDNAME( 1, deviceName ),
+            UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
+            oAttr, NULL, &device );
         }
     }
 

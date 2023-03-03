@@ -14,6 +14,7 @@ public:
     }
     void Init(int port);
     void UserInit();
+    void CreateDevObjects();
     UA_StatusCode  Start();
     void Shutdown();
     void Evaluate();

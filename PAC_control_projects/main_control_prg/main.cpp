@@ -97,7 +97,7 @@ int main( int argc, const char *argv[] )
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 #ifdef OPCUA
-    OPCUAServer::getInstance().Init(4840);
+    OPCUAServer::getInstance().Init(4841);
 #endif
 
     G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
@@ -143,6 +143,7 @@ int main( int argc, const char *argv[] )
     OPCUAServer::getInstance().UserInit();
     //OPCUAServer::getInstance().BaseConfig();
 
+    OPCUAServer::getInstance().CreateDevObjects();
     UA_StatusCode retval = OPCUAServer::getInstance().Start();
     if(retval != UA_STATUSCODE_GOOD)
         {

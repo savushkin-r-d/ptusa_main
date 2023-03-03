@@ -23,6 +23,7 @@ endif()
 ################# create targets ######################################################
 
 add_compile_definitions(PAC_PC)
+add_compile_definitions(OPCUA)
 if(NOT ARP_DEVICE)
     add_compile_definitions(DEBUG_NO_IO_MODULES)
 endif()
