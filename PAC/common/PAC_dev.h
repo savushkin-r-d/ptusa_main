@@ -2804,7 +2804,7 @@ class temperature_e_iolink : public AI1
 
         TE_data *info;
 		u_int start_param_idx;
-        imitation_TE house_value;
+        imitation_TE house_value=imitation_TE(0.238f,26.f,20.f,30.f);
 		enum CONSTANTS
 			{
 			P_ERR_T = 1,                ///< Аварийное значение температуры.
