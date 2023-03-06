@@ -1,5 +1,16 @@
 #include "imitation_TE.h"
 
+imitation_TE::imitation_TE(float dispersion = 0.238f, float m_expec = 27.f, float min_TE = 30.f, float max_TE = 20.f)
+    : dispersion(dispersion), m_expec(m_expec), min_TE(min_TE), max_TE(max_TE) 
+    {
+        const size_t arr_size = max_TE - min_TE;
+        iarr = std::make_unique<float[]>(arr_size); // массив для генерации случайных вещественных чисел 
+        flarr = std::make_unique<float[]>(arr_size); // массив с заданным диапазоном значений температуры 
+        std::iota(iarr.get(), iarr.get() + arr_size, min_TE);
+        std::iota(flarr.get(), flarr.get() + arr_size, 1);
+        st_deviation = get_st_deviation();   
+    }
+
 float imitation_TE::get_random()
     {
     max = get_max();
@@ -73,3 +84,4 @@ imitation_TE::imitation_TE(float D,float m_expec):D(D),m_expec(m_expec)
     {
     st_deviation= get_st_deviation();
     }
+
