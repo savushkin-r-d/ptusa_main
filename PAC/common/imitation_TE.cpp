@@ -7,15 +7,10 @@ imitation_TE::imitation_TE(float dispersion = 0.238f, float m_expec = 27.f, floa
         st_deviation = get_st_deviation();   
     }
 
-imitation_TE::imitation_TE()
-    {
-       this->dispersion=0.238f;    // дисперсия
-       this->m_expec=28.f;            // мат. ожидание
-       this->st_deviation=get_st_deviation();      // стандартное отклонение
-       this->max_TE=20.f;
-       this->min_TE=30.f;
-       initial_arrays(min_TE, max_TE);
-       st_deviation = get_st_deviation();
+imitation_TE::~imitation_TE() 
+    { 
+      delete[] iarr;
+      delete[] flarr;
     }
 
 float imitation_TE::get_random()
@@ -75,10 +70,10 @@ unsigned imitation_TE::get_index() const
 void imitation_TE::initial_arrays(float min_TE, float max_TE) 
 {
       const size_t arr_size = max_TE - min_TE;
-      iarr = std::make_unique<float[]>(arr_size);  // массив для генерации случайных вещественных чисел
-      flarr = std::make_unique<float[]>(arr_size);  // массив с заданным диапазоном значений температуры
-      std::iota(iarr.get(), iarr.get() + arr_size, min_TE);
-      std::iota(flarr.get(), flarr.get() + arr_size, 1);
+      iarr = new float [arr_size];  // массив для генерации случайных вещественных чисел
+      flarr = new float[arr_size];  // массив с заданным диапазоном значений температуры
+      std::iota(iarr, iarr + arr_size, 1);
+      std::iota(flarr, flarr + arr_size, min_TE);
       st_deviation = get_st_deviation();
 }
 
