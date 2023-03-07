@@ -10,9 +10,9 @@ class imitation_TE
         imitation_TE() = default;
         imitation_TE(float D,float m_expec);
         float get_TE(); // возвращает значения температуры
-        void set_max(float max);
+        void set_max(float max_in_range);
         float get_max() const;
-        void set_min(float min);
+        void set_min(float min_in_range);
         float get_min() const;
         float get_st_deviation() const;
 
