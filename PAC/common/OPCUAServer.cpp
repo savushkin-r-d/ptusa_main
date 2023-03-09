@@ -207,8 +207,8 @@ void OPCUAServer::CreateIOModules()
         for (u_int j = 0; j < AICount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Boolean status = false;
-            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            UA_Float value = 0.0f;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_FLOAT]);
             std::string str = "AI " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
 
@@ -225,8 +225,8 @@ void OPCUAServer::CreateIOModules()
         for (u_int j = 0; j < AOCount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Boolean status = false;
-            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            UA_Float value = 0.0f;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_FLOAT]);
             std::string str = "AO " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
 
