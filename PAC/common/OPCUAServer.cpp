@@ -123,20 +123,119 @@ void OPCUAServer::UserInit()
 void OPCUAServer::CreateDevObjects()
     {
     u_int deviceCount = G_DEVICE_MANAGER()->get_device_count();
+    char deviceName[20];
+    char deviceDescription[50];
 
     for( u_int i = 0; i < deviceCount; i++)
         {
-        UA_NodeId device;
-        char deviceName[ 20 ];
+        UA_NodeId deviceId;
         strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
+        strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
+
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
         oAttr.displayName = UA_LOCALIZEDTEXT( "en-US", deviceName );
+        oAttr.description = UA_LOCALIZEDTEXT( "ru-ru", deviceDescription);
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
             UA_QUALIFIEDNAME( 1, deviceName ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
-            oAttr, NULL, &device );
+            oAttr, NULL, &deviceId );
+        }
+    }
+
+void OPCUAServer::CreateIOModules()
+    {
+    u_int ioModulsCount = G_IO_MANAGER()->get_nodes_count();
+    char ioModuleName[20];
+
+    for (u_int i = 1; i < ioModulsCount; i++)
+        {
+        //Create Module Object
+        UA_NodeId ioModuleId;
+        strcpy(ioModuleName, G_IO_MANAGER()->get_node(i)->name);
+
+        UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
+        oAttr.displayName = UA_LOCALIZEDTEXT("en-US", ioModuleName);
+        UA_Server_addObjectNode(server, UA_NODEID_NULL,
+            UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
+            UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
+            UA_QUALIFIEDNAME(1, ioModuleName),
+            UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE),
+            oAttr, NULL, &ioModuleId);
+
+        //Create Module DI
+        u_int DICount = G_IO_MANAGER()->get_node(i)->DI_cnt;
+
+        for (u_int j = 0; j < DICount / 8; j++)
+            {
+            UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
+            UA_Boolean status = false;
+            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            std::string str = "DI " + std::to_string(j);
+            statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+
+            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+                UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+                UA_QUALIFIEDNAME(1, "DI"),
+                UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+                statusAttr, NULL, NULL);
+
+            }
+
+        //Create Module DO
+        u_int DOCount = G_IO_MANAGER()->get_node(i)->DO_cnt;
+
+        for (u_int j = 0; j < DOCount / 8; j++)
+            {
+            UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
+            UA_Boolean status = false;
+            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            std::string str = "DO " + std::to_string(j);
+            statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+
+            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+                UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+                UA_QUALIFIEDNAME(1, "DO"),
+                UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+                statusAttr, NULL, NULL);
+            }
+
+        //Create Module AI
+        u_int AICount = G_IO_MANAGER()->get_node(i)->AI_cnt;
+
+        for (u_int j = 0; j < AICount; j++)
+            {
+            UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
+            UA_Boolean status = false;
+            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            std::string str = "AI " + std::to_string(j);
+            statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+
+            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+                UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+                UA_QUALIFIEDNAME(1, "AI"),
+                UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+                statusAttr, NULL, NULL);
+            }
+
+        //Create Module AO
+        u_int AOCount = G_IO_MANAGER()->get_node(i)->AO_cnt;
+
+        for (u_int j = 0; j < AOCount; j++)
+            {
+            UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
+            UA_Boolean status = false;
+            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            std::string str = "AO " + std::to_string(j);
+            statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+
+            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+                UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+                UA_QUALIFIEDNAME(1, "AO"),
+                UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+                statusAttr, NULL, NULL);
+            }
         }
     }
 

@@ -15,6 +15,7 @@ public:
     void Init(int port);
     void UserInit();
     void CreateDevObjects();
+    void CreateIOModules();
     UA_StatusCode  Start();
     void Shutdown();
     void Evaluate();

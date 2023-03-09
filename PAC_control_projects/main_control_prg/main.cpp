@@ -143,7 +143,8 @@ int main( int argc, const char *argv[] )
     OPCUAServer::getInstance().UserInit();
     //OPCUAServer::getInstance().BaseConfig();
 
-    OPCUAServer::getInstance().CreateDevObjects();
+    //OPCUAServer::getInstance().CreateDevObjects();
+    OPCUAServer::getInstance().CreateIOModules();
     UA_StatusCode retval = OPCUAServer::getInstance().Start();
     if(retval != UA_STATUSCODE_GOOD)
         {

@@ -135,7 +135,7 @@ int eval( lua_State* L )
 #endif // ifndef
 
 #ifdef OPCUA
-    OPCUAServer::getInstance().Evaluate();
+ //   OPCUAServer::getInstance().Evaluate();
 #endif
 
     sleep_ms( sleep_time_ms );
