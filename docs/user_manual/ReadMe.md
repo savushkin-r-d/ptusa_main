@@ -11,5 +11,5 @@ $$ f(x)= {1 \over (σ√2π)} e^{-{1\over 2}{\left(x-μ\over σ \right)}^2}$$
 где ${μ}$ $-$ математическое ожидание (среднее значение), $σ$ $-$ cреднеквадратичное отклонение, $σ^2$ $-$ дисперсия распределения.
 
 <p align="center">
-<img align="center" src="../../readme_images/plot_house.png"> </p>
+<img align="center" src="../../readme_images/house_plot.png"> </p>
 <p align="center"> График функции нормального распределения</p>
