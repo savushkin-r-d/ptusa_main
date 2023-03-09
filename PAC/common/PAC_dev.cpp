@@ -5203,7 +5203,7 @@ float temperature_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
    {
-    return house_value.get_TE();
+    return analog_io_device::get_value();
    }
 #endif
 //-----------------------------------------------------------------------------
@@ -6784,12 +6784,42 @@ void analog_io_device::direct_off()
     {
     direct_set_value( 0 );
     }
+
+int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        sprintf( G_LOG->msg,
+            "%s\t analog_io_device::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'E':
+            is_emulation = val != 0;
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+
+int analog_io_device::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "E=%d, ", is_emulation );
+    return res;
+    }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
 
 float analog_io_device::get_value()
     {
-    return value;
+    if ( is_emulation ) return emulator_analog.get_value();
+    else return value;
     }
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_set_value( float new_value )
