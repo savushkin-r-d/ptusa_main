@@ -64,7 +64,7 @@ unsigned imitation_TE::get_index() const
 
 void imitation_TE::initial_arrays(float min, float max) 
 {
-      const std::size_t ptr_size = static_cast<std::size_t>(max - min);
+      const auto ptr_size = static_cast<std::size_t>(max - min);
       iptr = std::unique_ptr<float[]>(new float[ptr_size]); // массив для генерации случайных вещественных чисел
       flptr= std::unique_ptr<float[]>(new float[ptr_size]);  // массив с заданным диапазоном значений температуры
       std::iota(iptr.get(), iptr.get() + ptr_size, 1);
