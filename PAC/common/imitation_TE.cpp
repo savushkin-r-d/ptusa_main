@@ -1,6 +1,6 @@
 #include "imitation_TE.h"
 
-imitation_TE::imitation_TE(float dispersion = 0.238f, float m_expec = 27.f, float min_TE = 20.f, float max_TE = 30.f)
+analog_emulator::analog_emulator(float dispersion, float m_expec, float min_TE, float max_TE)
     : dispersion(dispersion), m_expec(m_expec), min_TE(min_TE), max_TE(max_TE) 
     {
         initial_arrays(min_TE, max_TE);
@@ -26,17 +26,17 @@ void imitation_TE::set_max(float max_in_range)
     this->max = max_in_range;
     }
 
-float imitation_TE::get_max() const
+float analog_emulator::get_max() const
     {
     return max;
     }
 
-void imitation_TE::set_min(float min_in_range)
+void analog_emulator::set_min(float min_in_range)
     {
     this->min = min_in_range;
     }
 
-float imitation_TE::get_min() const
+float analog_emulator::get_min() const
     {
     return min;
     }
@@ -50,19 +50,19 @@ bool imitation_TE::is_p() const
 	return pow((st_deviation * sqrt(2 * M_PI)), -1) * exp(-(pow(x - m_expec, 2) / (2 * pow(st_deviation, 2)))) > 0.01; // 0.01 вероятность того, что случайная величина находится на [25,30].
     }
 
-float imitation_TE::get_st_deviation() const
+float analog_emulator::get_st_deviation() const
     {
     return float(sqrt(D));
     }
 
-unsigned imitation_TE::get_index() const
+unsigned analog_emulator::get_index() const
     {
     auto value = unsigned(std::time(nullptr));
     unsigned int rd = value % 10;
     return rd;
     }
 
-void imitation_TE::initial_arrays(float min, float max) 
+void analog_emulator::initial_arrays(float min, float max) 
 {
       const auto ptr_size = static_cast<std::size_t>(max - min);
       iptr = std::unique_ptr<float[]>(new float[ptr_size]); // массив для генерации случайных вещественных чисел
@@ -72,7 +72,7 @@ void imitation_TE::initial_arrays(float min, float max)
       st_deviation = get_st_deviation();
 }
 
-float imitation_TE::get_TE()
+float analog_emulator::get_value()
     {
     x = get_random();
     if (is_p())

@@ -790,6 +790,9 @@ class analog_io_device : public device, public io_device
         void  direct_on();
         void  direct_off();
 
+        int set_cmd( const char* prop, u_int idx, double val );
+        int save_device_ex( char* buff );
+
 #ifdef DEBUG_NO_IO_MODULES
         float get_value();
         void  direct_set_value( float new_value );
@@ -805,6 +808,9 @@ class analog_io_device : public device, public io_device
     private:
         float value = .0f;    ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
+
+        bool is_emulation = false;
+        analog_emulator emulator_analog = analog_emulator();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -2804,7 +2810,7 @@ class temperature_e_iolink : public AI1
 
         TE_data *info;
 		u_int start_param_idx;
-        imitation_TE house_value=imitation_TE(0.238f,26.f,20.f,30.f);
+        
 		enum CONSTANTS
 			{
 			P_ERR_T = 1,                ///< Аварийное значение температуры.
