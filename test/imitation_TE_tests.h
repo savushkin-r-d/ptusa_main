@@ -1,4 +1,4 @@
 #pragma once
-#include "imitation_TE.h"
+#include "analog_emulator.h"
 #include "includes.h"
 
