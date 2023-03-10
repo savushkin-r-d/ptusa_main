@@ -29,7 +29,7 @@
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
-#include "imitation_TE.h"
+#include "analog_emulator.h"
 #include "smart_ptr.h"
 
 #include "dtime.h"
