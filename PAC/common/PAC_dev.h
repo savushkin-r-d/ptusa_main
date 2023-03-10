@@ -790,8 +790,8 @@ class analog_io_device : public device, public io_device
         void  direct_on();
         void  direct_off();
 
-        int set_cmd( const char* prop, u_int idx, double val );
-        int save_device_ex( char* buff );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+        int save_device_ex( char* buff ) override;
 
 #ifdef DEBUG_NO_IO_MODULES
         float get_value();

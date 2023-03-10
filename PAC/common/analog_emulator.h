@@ -23,8 +23,8 @@ class analog_emulator
         float dispersion;   // дисперсия
         float m_expec;      // мат. ожидание
         float st_deviation; // стандартное отклонение
-        float max_TE;
         float min_TE;
+        float max_TE;
         float x;            // случайная величина
         std::unique_ptr<float[]> flptr;
         std::unique_ptr<float[]> iptr;
