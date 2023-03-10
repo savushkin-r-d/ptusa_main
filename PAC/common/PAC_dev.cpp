@@ -6789,29 +6789,27 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        sprintf( G_LOG->msg,
-            "%s\t analog_io_device::set_cmd() - prop = %s, idx = %d, val = %f",
+        fmt::format_to( G_LOG->msg,
+            "{}\t analog_io_device::set_cmd() - prop = {}, idx = {}, val = {}",
             get_name(), prop, idx, val );
         G_LOG->write_log( i_log::P_DEBUG );
         }
 
-    switch ( prop[ 0 ] )
+    if (prop[0] == 'E') 
         {
-        case 'E':
-            is_emulation = val != 0;
-            break;
-
-        default:
-            return device::set_cmd( prop, idx, val );
-        }
+        is_emulation = val != 0;
+        }    
+        else {
+             return device::set_cmd( prop, idx, val );
+             }
 
     return 0;
     }
 
 int analog_io_device::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "E=%d, ", is_emulation );
-    return res;
+    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "E={}, ", is_emulation ? 1 : 0 );
+    return res.size;
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
