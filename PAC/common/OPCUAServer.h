@@ -16,6 +16,7 @@ public:
     void UserInit();
     void CreateDevObjects();
     void CreateIOModules();
+    UA_Server* getServer();
     UA_StatusCode  Start();
     void Shutdown();
     void Evaluate();

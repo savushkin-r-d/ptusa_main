@@ -167,15 +167,18 @@ void OPCUAServer::CreateIOModules()
         //Create Module DI
         u_int DICount = G_IO_MANAGER()->get_node(i)->DI_cnt;
 
-        for (u_int j = 0; j < DICount / 8; j++)
+        for (u_int j = 0; j < DICount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Boolean status = false;
-            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            statusAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+            UA_Byte value = 0;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_BYTE]);
+
             std::string str = "DI " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+            UA_NodeId DInodeId = UA_NODEID_STRING(0, (char*)str.c_str());
 
-            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+            UA_Server_addVariableNode(server, DInodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                 UA_QUALIFIEDNAME(1, "DI"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
@@ -186,15 +189,18 @@ void OPCUAServer::CreateIOModules()
         //Create Module DO
         u_int DOCount = G_IO_MANAGER()->get_node(i)->DO_cnt;
 
-        for (u_int j = 0; j < DOCount / 8; j++)
+        for (u_int j = 0; j < DOCount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Boolean status = false;
-            UA_Variant_setScalar(&statusAttr.value, &status, &UA_TYPES[UA_TYPES_BOOLEAN]);
+            statusAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+            UA_Byte value = 0;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_BYTE]);
+
             std::string str = "DO " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+            UA_NodeId DOnodeId = UA_NODEID_STRING(0, (char*)str.c_str());
 
-            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+            UA_Server_addVariableNode(server, DOnodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                 UA_QUALIFIEDNAME(1, "DO"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
@@ -207,12 +213,15 @@ void OPCUAServer::CreateIOModules()
         for (u_int j = 0; j < AICount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Float value = 0.0f;
-            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+            statusAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+            UA_Int16 value = 0;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_INT16]);
+
             std::string str = "AI " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+            UA_NodeId AInodeId = UA_NODEID_STRING(0, (char*)str.c_str());
 
-            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+            UA_Server_addVariableNode(server, AInodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                 UA_QUALIFIEDNAME(1, "AI"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
@@ -225,18 +234,26 @@ void OPCUAServer::CreateIOModules()
         for (u_int j = 0; j < AOCount; j++)
             {
             UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
-            UA_Float value = 0.0f;
-            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_FLOAT]);
+            statusAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+            UA_Int16 value = 0;
+            UA_Variant_setScalar(&statusAttr.value, &value, &UA_TYPES[UA_TYPES_INT16]);
+
             std::string str = "AO " + std::to_string(j);
             statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", (char*)str.c_str());
+            UA_NodeId AOnodeId = UA_NODEID_STRING(0, (char*)str.c_str());
 
-            UA_Server_addVariableNode(server, UA_NODEID_NULL, ioModuleId,
+            UA_Server_addVariableNode(server, AOnodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                 UA_QUALIFIEDNAME(1, "AO"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
                 statusAttr, NULL, NULL);
             }
         }
+    }
+
+UA_Server* OPCUAServer::getServer()
+    {
+    return server;
     }
 
 UA_StatusCode OPCUAServer::Start()
