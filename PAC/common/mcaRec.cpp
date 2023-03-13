@@ -98,7 +98,7 @@ int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
     return 0;
 }
 
-void TRecipeManager::SaveRecipeName()
+void ParentRecipeManager::SaveRecipeName()
 {
 #ifdef MSAPANEL
     MsaPanel::UpdateRecipes();
@@ -302,14 +302,6 @@ int TRecipeManager::setValue( int valueNo, float newValue )
         }
 #endif // MSAPANEL
     return setRecipeValue(currentRecipe, valueNo, newValue);
-    }
-
-void TRecipeManager::SaveRecipeName()
-    {
-#ifdef MSAPANEL
-    MsaPanel::UpdateRecipes();
-#endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
     }
 
 
@@ -862,6 +854,24 @@ int TMediumRecipeManager::LoadRecipeToParams(int recipeNo, saved_params<float, t
 int TMediumRecipeManager::getCurrentRecipe()
 {
     return currentRecipe;
+}
+
+int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
+{
+    if (is_string)
+    {
+        char* tmp = new char[length + 1];
+        convert_utf8_to_windows1251((char*)buf, tmp, length * UNICODE_MULTIPLIER);
+        memcpy(recipeMemory + startaddr, tmp, length);
+        delete[] tmp;
+        tmp = nullptr;
+    }
+    else
+    {
+        memcpy(recipeMemory + startaddr, buf, length);
+    }
+
+    return 0;
 }
 
 int TMediumRecipeManager::setCurrentRecipe(int recipeNo)

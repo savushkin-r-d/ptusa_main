@@ -23,55 +23,51 @@
 ///@brief Интервал проверки изменений в рецепте
 #define RECIPE_SAVE_INTERVAL 30000L
 
-///@class TRecipeManager mcaRec.h
-///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
 class ParentRecipeManager
-    {
+{
     friend class TRecipeManager;
     friend class TMediumRecipeManager;
     int recipechanged;
     unsigned long recipechangechecktime;
     int lineNo;
-    int currentRecipe = 0;
+    int currentRecipe;
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
-    unsigned long recipeStartAddr = 0;
-
-    unsigned long startAddr() const;
-    unsigned long startAddr(int recNo) const;
+    unsigned long recipeStartAddr = 0L;
     unsigned char* recipeMemory;
     unsigned long recipeMemorySize;
-    int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-    int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
-
     std::string defaultfilename;
-    ///@brief Начальный блок для всех экземляров рецептов
-    static int startRecipeBlock;
+    ///@brief Имя текущего рецепта
     ///@brief Количество рецептов на линию
     static int recipePerLine;
-    ///@brief Длина рецепта в блоках
-    static int blocksPerRecipe;
     ///@brief Длина имени рецепта
     static int recipeNameLength;
+    ///@brief Начальный блок для всех экземляров рецептов
+    static int startRecipeBlock;
+    ///@brief Длина рецепта в блоках
+    static int blocksPerRecipe;
     ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
     static int startRecipeParamsOffset;
     ///@brief Буфер для копирования рецептов
     static unsigned char* recipeCopyBuffer;
+    char* currentRecipeName;
     ///@brief Список рецептов для сервера
     char* recipeList;
-    ///@brief Имя текущего рецепта
-    char* currentRecipeName;
 
-    public:
+    unsigned long startAddr() const;
+    unsigned long startAddr(int recNo) const;
+    int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+    int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+public:
     void CopyRecipe();
     void PasteRecipe();
-    void NullifyRecipe();
     void LoadRecipeName();
-    explicit ParentRecipeManager(int lineNo);
+    void NullifyRecipe();
     void SaveRecipeName();
     int SaveToFile(const char* filename) const;
     explicit ParentRecipeManager(int lineNo);
     virtual ~ParentRecipeManager();
+
     static int get_recipe_name_length()
     {
         return recipeNameLength;
@@ -93,9 +89,10 @@ class ParentRecipeManager
     {
         return defaultfilename.c_str();
     }
-    };
+};
 
-
+///@class TRecipeManager mcaRec.h
+///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
 class TRecipeManager : public ParentRecipeManager
     {
     public:
@@ -219,12 +216,8 @@ class TRecipeManager : public ParentRecipeManager
         RV_FIRSTVALVEOFF = 115,
         RV_LASTVALVEOFF = 119,
         };
-    private:
-        ///@brief Флаг, сигнализирующий об изменении параметров рецепта
-        int lineNo;
-        void SaveRecipeName();
-
-        void FormRecipeList();
+   private:
+       void FormRecipeList();
     public:
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
@@ -358,6 +351,7 @@ class TRecipeManager : public ParentRecipeManager
         void SaveRecipeName();
 
         void FormRecipeList();
+        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         ///@brief Начальный блок для всех экземляров рецептов
         static int startRecipeBlock;
