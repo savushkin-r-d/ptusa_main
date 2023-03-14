@@ -84,7 +84,7 @@ class par_device
         ///
         /// @return 0 - ок.
         /// @return 1 - ошибка, параметр с таким именем не найден.
-        int set_cmd( const char *name, double val );
+        int set_par_by_name( const char *name, double val );
 
         /// @brief Установка значения параметра.
         ///
