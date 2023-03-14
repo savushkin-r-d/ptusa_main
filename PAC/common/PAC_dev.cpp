@@ -78,7 +78,7 @@ int par_device::save_device( char* str )
     return size;
     }
 //-----------------------------------------------------------------------------
-int par_device::set_cmd( const char *name, double val )
+int par_device::set_par_by_name( const char *name, double val )
     {
     if ( par )
         {
@@ -316,7 +316,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             break;
 
         case 'P': //Параметры.
-            par_device::set_cmd( prop, val );
+            par_device::set_par_by_name( prop, val );
             break;
 
         default:
