@@ -6809,7 +6809,7 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
 int analog_io_device::save_device_ex( char* buff )
     {
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "E={}, ", is_emulation ? 1 : 0 );
-    return res.size;
+    return static_cast<int>(res.size);
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES

@@ -4,7 +4,7 @@
 #include <ctime>
 #include <numeric>
 #include <vector>
-#include <memory>
+#include <iostream>
 
 class analog_emulator
     {
@@ -26,11 +26,11 @@ class analog_emulator
         float min_TE;
         float max_TE;
         float x;            // случайная величина
-        std::unique_ptr<float[]> flptr;
-        std::unique_ptr<float[]> iptr;
+        std::vector<float> iv; // вектор для генерации случайных вещественных чисел.
+        std::vector<float> fv; // вектор с заданным диапазоном значений температуры.
 
         float get_random() const;
         bool is_p() const;  // функция расчета вероятности
         unsigned get_index() const;
-        void initial_arrays( float min, float max );
+        void init_vector( float min, float max );
     };
