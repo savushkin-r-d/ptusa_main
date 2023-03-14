@@ -202,7 +202,7 @@ void OPCUAServer::CreateIOModules()
 
             UA_Server_addVariableNode(server, DOnodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
-                UA_QUALIFIEDNAME(1, "DO"),
+                UA_QUALIFIEDNAME(0, "DO"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
                 statusAttr, NULL, NULL);
             }
@@ -244,7 +244,7 @@ void OPCUAServer::CreateIOModules()
 
             UA_Server_addVariableNode(server, AOnodeId, ioModuleId,
                 UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
-                UA_QUALIFIEDNAME(1, "AO"),
+                UA_QUALIFIEDNAME(0, "AO"),
                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
                 statusAttr, NULL, NULL);
             }
