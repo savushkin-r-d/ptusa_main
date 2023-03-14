@@ -15,17 +15,16 @@ analog_emulator::analog_emulator( float dispersion, float m_expec,
 
 void analog_emulator::init_vector(float min, float max) 
     {
-    std::size_t v_size;
+   
     if ( max == min )
     {
-        v_size = max;
         iv.emplace_back(0);
         fv.emplace_back(max);
         std::clog << "max = min\n";
     } 
     else
     {
-        v_size = static_cast<std::size_t>( max - min );
+        const auto v_size = static_cast<std::size_t>( max - min );
         iv.resize(v_size);
         fv.resize(v_size);
         std::iota(iv.begin(), iv.end(), 1);
