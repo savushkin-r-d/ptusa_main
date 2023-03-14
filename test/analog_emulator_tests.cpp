@@ -2,7 +2,7 @@
 
 using namespace ::testing;
 
-TEST(analog_emulator, get_TE) 
+TEST(analog_emulator, get_value) 
 	{
   analog_emulator obj = analog_emulator(0.444f, 0.25f, 20.f, 30.f);
 	float test_variable = obj.get_value();
