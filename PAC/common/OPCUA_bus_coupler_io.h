@@ -1,4 +1,4 @@
-﻿#include "bus_coupler_io.h"
+#include "bus_coupler_io.h"
 #include "OPCUAServer.h"
 #include "dtime.h"
 #include "PAC_err.h"
