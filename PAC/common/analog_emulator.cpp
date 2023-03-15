@@ -10,6 +10,7 @@ analog_emulator::analog_emulator( float dispersion, float m_expec,
     std::clog << "max > min\n";
     }
     init_vector(min_TE, max_TE);
+    prev_x = get_random();
     st_deviation = get_st_deviation();
     }
 
@@ -63,24 +64,24 @@ bool analog_emulator::is_p() const
     // σ - стандартное отклонение
     // x - случайная величина
     // μ - математическое ожидание
+    // 0.01 вероятность того, что случайная величина находится
+    // в заданном диапазоне температур
     constexpr double two_pi = 2 * M_PI;
     return ( 1 / ( st_deviation * sqrt( two_pi ) ) ) *
-        exp( -( pow( x - m_expec, 2 ) / ( 2 * st_deviation * st_deviation ) ) ) > 0.01; // 0.01 вероятность того, что случайная величина находится 
-                                                                                        // в заданном диапазоне температур
+        exp( -( pow( x - m_expec, 2 ) / ( 2 * st_deviation * st_deviation ) ) ) > 0.01; 
     } 
 
 float analog_emulator::get_value() 
     {
     x = get_random();
-    static float old_value;
     if ( is_p() ) 
     {
-      old_value = x;
+      prev_x = x;
       return x;
     } 
     else 
     {
-      return old_value;
+      return prev_x;
     }
     }
 
@@ -88,8 +89,9 @@ float analog_emulator::get_random() const
     {
     unsigned int index_fv = get_index();
     unsigned int index_iv = get_index();
+    unsigned int index_r = get_index();
     // Вспомогательная величина для генерации случайных вещественных чисел.
-    const float real = 0.2f;
+    float real = 0.1f * static_cast<float>(index_r);
     return iv.at(index_fv) * real + fv.at(index_iv);
     }
 
