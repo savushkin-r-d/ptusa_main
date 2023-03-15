@@ -33,4 +33,5 @@ class analog_emulator
         bool is_p() const;  // функция расчета вероятности
         unsigned get_index() const;
         void init_vector( float min, float max );
+        float prev_x;
     };
