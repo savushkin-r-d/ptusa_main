@@ -1,12 +1,12 @@
 #include "analog_emulator.h"
 
 analog_emulator::analog_emulator( float dispersion, float m_expec,
-    float min_TE, float max_TE, float x ) : dispersion( dispersion ),
-    m_expec( m_expec ), min_TE( min_TE ), max_TE( max_TE ), x( x )
+    float min_TE, float max_TE, float p, float x ) : dispersion( dispersion ),
+    m_expec( m_expec ), min( min ), max( max ), x( x ), p( p )
     {
-    if ( max_TE < min_TE )
+    if ( max < min )
         {
-        std::swap( max_TE, min_TE );
+        std::swap( max, min );
         std::clog << "max > min\n";
         }
     init_vector( min_TE, max_TE );
@@ -14,21 +14,21 @@ analog_emulator::analog_emulator( float dispersion, float m_expec,
     st_deviation = get_st_deviation();
     }
 
-void analog_emulator::init_vector( float min, float max )
+void analog_emulator::init_vector( float min_t, float max_t )
     {
-    if ( max == min )
+    if ( max_t == min_t )
         {
         iv.emplace_back( 0 );
-        fv.emplace_back( max );
+        fv.emplace_back( max_t );
         std::clog << "max = min\n";
         }
     else
         {
-        const auto v_size = static_cast<std::size_t>( max - min );
+        const auto v_size = static_cast<std::size_t>( max_t - min_t );
         iv.resize( v_size );
         fv.resize( v_size );
         std::iota( iv.begin(), iv.end(), 1 );
-        std::iota( fv.begin(), fv.end(), min_TE );
+        std::iota( fv.begin(), fv.end(), min_t );
         }
     }
 
@@ -39,22 +39,22 @@ float analog_emulator::get_st_deviation() const
 
 void analog_emulator::set_max( float max_in_range )
     {
-    this->max_TE = max_in_range;
+    this->max = max_in_range;
     }
 
 float analog_emulator::get_max() const
     {
-    return max_TE;
+    return max;
     }
 
 void analog_emulator::set_min( float min_in_range )
     {
-    this->min_TE = min_in_range;
+    this->min = min_in_range;
     }
 
 float analog_emulator::get_min() const
     {
-    return min_TE;
+    return min;
     }
 
 bool analog_emulator::is_p() const
@@ -67,32 +67,32 @@ bool analog_emulator::is_p() const
     // в заданном диапазоне температур.
     constexpr double two_pi = 2 * M_PI;
     return ( 1 / ( st_deviation * sqrt( two_pi ) ) ) *
-        exp( -( pow( x - m_expec, 2 ) / ( 2 * st_deviation * st_deviation ) ) ) > 0.01;
+        exp( -( pow( x - m_expec, 2 ) / ( 2 * st_deviation * st_deviation ) ) ) > p;
     }
 
-float analog_emulator::get_value()
+float analog_emulator::get_value() 
     {
     x = get_random();
-    if ( is_p() ) 
-    {
-      prev_x = x;
-      return x;
-    } 
+    if (is_p()) 
+        {
+        prev_x = x;
+        return x;
+        } 
     else 
-    {
-      return prev_x;
+        {
+        return prev_x;
+        }
     }
 
-float analog_emulator::get_random() const
+float analog_emulator::get_random() const 
     {
     unsigned int index_fv = get_index();
-    unsigned int index_iv = get_index();
     unsigned int index_r = get_index();
     // Вспомогательная величина для генерации случайных вещественных чисел.
-    float real = 0.1f * static_cast<float>(index_r);
-    return iv.at(index_fv) * real + fv.at(index_iv);
+    float real = 0.1f * static_cast<float>( index_r );
+    return real + fv.at( index_fv );
     }
-
+    
 unsigned analog_emulator::get_index() const
     {
     auto value = unsigned( std::time( nullptr ) );

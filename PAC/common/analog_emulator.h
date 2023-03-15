@@ -10,7 +10,7 @@ class analog_emulator
     {
     public:
         analog_emulator( float dispersion = 0.238f, float m_expec = 27.f,
-            float min_TE = 20.f, float max_TE = 30.f, float x = 1.f );
+            float min = 20.f, float max = 30.f, float p = 0.01f, float x = 1.f );
 
         /// @brief Получение значения аналоговой величины.
         ///
@@ -27,9 +27,10 @@ class analog_emulator
         float dispersion;   ///< Дисперсия.
         float m_expec;      ///< Математическое ожидание.
         float st_deviation; ///< Стандартное отклонение.
-        float min_TE;
-        float max_TE;
+        float min;
+        float max;
         float x;                ///< Случайная величина.
+        float p;                ///< Плотность вероятности.
         std::vector<float> iv;  ///< Вектор для генерации случайных вещественных чисел.
         std::vector<float> fv;  ///< Вектор с заданным диапазоном значений температуры.
 
