@@ -5350,7 +5350,7 @@ void wages_eth::evaluate_io()
 #ifdef DEBUG_NO_IO_MODULES
     weth->set_wages_value(.0f);
 #else
-  //  weth->evaluate();
+    weth->evaluate();
 #endif
     }
 

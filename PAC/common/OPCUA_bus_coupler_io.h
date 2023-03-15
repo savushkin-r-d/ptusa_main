@@ -1,10 +1,10 @@
-#include "bus_coupler_io.h"
+п»ї#include "bus_coupler_io.h"
 #include "OPCUAServer.h"
 #include "dtime.h"
 #include "PAC_err.h"
 
 //-----------------------------------------------------------------------------
-/// @brief Работа с модулями ввода/вывода c помощью OPCUA.
+/// @brief Р Р°Р±РѕС‚Р° СЃ РјРѕРґСѓР»СЏРјРё РІРІРѕРґР°/РІС‹РІРѕРґР° c РїРѕРјРѕС‰СЊСЋ OPCUA.
 ///
 ///
 class io_manager_OPCUA : public io_manager

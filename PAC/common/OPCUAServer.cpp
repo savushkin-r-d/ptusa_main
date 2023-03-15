@@ -146,10 +146,10 @@ void OPCUAServer::CreateDevObjects()
 
 void OPCUAServer::CreateIOModules()
     {
-    u_int ioModulsCount = G_IO_MANAGER()->get_nodes_count();
+    u_int ioModulesCount = G_IO_MANAGER()->get_nodes_count();
     char ioModuleName[20];
 
-    for (u_int i = 1; i < ioModulsCount; i++)
+    for (u_int i = 1; i < ioModulesCount; i++)
         {
         //Create Module Object
         UA_NodeId ioModuleId;
