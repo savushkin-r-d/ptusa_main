@@ -100,6 +100,12 @@ int operation::pause()
             states[ current_state ]->evaluate();
             break;
 
+        case PAUSING:
+            states[ PAUSING ]->finalize();
+            current_state = PAUSE;
+            states[ current_state ]->init();
+            break;
+
         default:
             break;
         }
@@ -114,11 +120,19 @@ int operation::stop()
         case PAUSING:
         case PAUSE:  
         case UNPAUSING:
-        case STARTING:
+        case STARTING:        
         case RUN:
             states[ current_state ]->finalize();
             if ( states[ STOPPING ]->is_empty() ) current_state = STOP;
             else current_state = STOPPING;
+
+            states[ current_state ]->init();
+            states[ current_state ]->evaluate();
+            break;
+
+        case STOPPING:
+            states[ current_state ]->finalize();
+            current_state = STOP;
 
             states[ current_state ]->init();
             states[ current_state ]->evaluate();
@@ -200,6 +214,36 @@ int operation::start( int new_run_step )
             break;
 
         case STOP:
+            break;
+
+        case STARTING:
+            states[ STARTING ]->finalize();
+            current_state = RUN;
+            states[ current_state ]->init();
+            run_time = 0;
+            break;
+
+        case UNPAUSING:
+            current_state = RUN;
+            states[ RUN ]->load();
+
+            if ( new_run_step > 0 )
+                {
+                states[ RUN ]->init( new_run_step );
+                //Если возвращаемся в шаг, активный до паузы, то добавляем
+                //его время выполнения.
+                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                }
+            else if ( run_step > 0 )
+                {
+                states[ RUN ]->init( run_step );
+                states[ RUN ]->add_dx_step_time();
+                }
+            else
+                {
+                states[ RUN ]->init();
+                }
+            states[ RUN ]->evaluate();
             break;
 
         default:
