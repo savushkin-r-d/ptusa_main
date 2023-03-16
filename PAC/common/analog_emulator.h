@@ -5,6 +5,7 @@
 #include <numeric>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 class analog_emulator
     {
@@ -22,7 +23,7 @@ class analog_emulator
         void set_min( float min_in_range );
         float get_min() const;
         float get_st_deviation() const;
-
+       
     private:
         float dispersion;   ///< Дисперсия.
         float m_expec;      ///< Математическое ожидание.
@@ -31,7 +32,6 @@ class analog_emulator
         float max;
         float x;                ///< Случайная величина.
         float p;                ///< Плотность вероятности.
-        std::vector<float> iv;  ///< Вектор для генерации случайных вещественных чисел.
         std::vector<float> fv;  ///< Вектор с заданным диапазоном значений температуры.
 
         float get_random() const;
@@ -39,7 +39,6 @@ class analog_emulator
         /// @brief Расчет вероятности.
         bool is_p() const;
 
-        unsigned get_index() const;
-        void init_vector( float min, float max );
+        void init_vector(float min, float max);
         float prev_x;
     };
