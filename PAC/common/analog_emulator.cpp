@@ -1,15 +1,17 @@
 #include "analog_emulator.h"
 
 analog_emulator::analog_emulator( float dispersion, float m_expec,
-    float min_TE, float max_TE, float p, float x ) : dispersion( dispersion ),
+    float min, float max, float p, float x ) : dispersion( dispersion ),
     m_expec( m_expec ), min( min ), max( max ), x( x ), p( p )
     {
     if ( max < min )
         {
-        std::swap( max, min );
+        std::swap( min, max );
+        this->max = max;
+        this->min = min;
         std::clog << "max > min\n";
         }
-    init_vector( min_TE, max_TE );
+    init_vector( min, max );
     prev_x = get_random();
     st_deviation = get_st_deviation();
     }
@@ -18,18 +20,15 @@ void analog_emulator::init_vector( float min_t, float max_t )
     {
     if ( max_t == min_t )
         {
-        iv.emplace_back( 0 );
-        fv.emplace_back( max_t );
+        fv.resize(1);
         std::clog << "max = min\n";
         }
     else
         {
         const auto v_size = static_cast<std::size_t>( max_t - min_t );
-        iv.resize( v_size );
         fv.resize( v_size );
-        std::iota( iv.begin(), iv.end(), 1 );
-        std::iota( fv.begin(), fv.end(), min_t );
         }
+        std::iota(fv.begin(), fv.end(), min_t);
     }
 
 float analog_emulator::get_st_deviation() const
@@ -86,16 +85,12 @@ float analog_emulator::get_value()
 
 float analog_emulator::get_random() const 
     {
-    unsigned int index_fv = get_index();
-    unsigned int index_r = get_index();
-    // Вспомогательная величина для генерации случайных вещественных чисел.
-    float real = 0.1f * static_cast<float>( index_r );
-    return real + fv.at( index_fv );
+     auto value = unsigned( std::time( nullptr ) );
+     std::size_t fv_size = fv.size();
+     unsigned int fv_index = value % fv_size;
+     // Вспомогательная величина для генерации случайных вещественных чисел.
+     float real = ( float )fv_index / max;
+     float round_real = ( ( float )( ( int ) ( real  *  10 ) ) ) / 10;
+     return fv.at(fv_index) + round_real;
     }
     
-unsigned analog_emulator::get_index() const
-    {
-    auto value = unsigned( std::time( nullptr ) );
-    unsigned int rd = value % 10;
-    return rd;
-    }
