@@ -275,6 +275,7 @@ TEST( operation, evaluate )
 	auto operation_idle_state = ( *test_op )[ operation::IDLE ];
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto operation_pause_state = ( *test_op )[ operation::PAUSE ];
+
 	auto main_step_in_idle = ( *operation_idle_state )[ -1 ];
 	auto main_step_in_run = ( *operation_run_state )[ -1 ];
 	auto main_step_in_pause = ( *operation_pause_state )[ -1 ];
@@ -389,6 +390,7 @@ TEST( operation, evaluate )
 	DO1 test_DO_one( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 
+
 	//При наличии описания состояния "Starting" переходим к нему.
 	auto operation_starting_state = ( *test_op )[ operation::STARTING ];
 	auto main_step_in_starting = ( *operation_starting_state )[ -1 ];
@@ -398,8 +400,18 @@ TEST( operation, evaluate )
 	test_op->start();
 	EXPECT_EQ( operation::STARTING, test_op->get_state() );
 
+	//При наличии перехода по условию, переходим к "Run".
+	auto if_action_in_starting = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_starting )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_starting->add_dev( &test_DI_one );
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
 	on_action_in_starting->clear_dev();
+	if_action_in_starting->clear_dev();
 	test_op->finalize();
+
 
     //При наличии описания состояния "Pausing" переходим к нему.
     auto operation_pausing_state = ( *test_op )[ operation::PAUSING ];
@@ -410,8 +422,19 @@ TEST( operation, evaluate )
     test_op->start();
     test_op->pause();
     EXPECT_EQ( operation::PAUSING, test_op->get_state() );
-	test_op->finalize();
+
+	//При наличии перехода по условию, переходим к "Pause".
+	auto if_action_in_pausing = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_pausing )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_pausing->add_dev( &test_DI_one );
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
 	on_action_in_pausing->clear_dev();
+	if_action_in_pausing->clear_dev();
+	test_op->finalize();
+
 
 	//При наличии описания состояния "Unpausing" переходим к нему.
 	auto operation_unpausing_state = ( *test_op )[ operation::UNPAUSING ];
@@ -424,6 +447,18 @@ TEST( operation, evaluate )
 	test_op->start();
 	EXPECT_EQ( operation::UNPAUSING, test_op->get_state() );
 
+	//При наличии перехода по условию, переходим к "Run".
+	auto if_action_in_unpausing = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_unpausing )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_unpausing->add_dev( &test_DI_one );
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	on_action_in_unpausing->clear_dev();
+	if_action_in_unpausing->clear_dev();
+
+
     //При наличии описания состояния "Stopping" переходим к нему.
     auto operation_stopping_state = ( *test_op )[ operation::STOPPING ];
     auto main_step_in_stopping = ( *operation_stopping_state )[ -1 ];
@@ -432,6 +467,20 @@ TEST( operation, evaluate )
 
     test_op->stop();
     EXPECT_EQ( operation::STOPPING, test_op->get_state() );
+
+	//При наличии перехода по условию, переходим к "Stop".
+	auto if_action_in_stopping = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_stopping )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_stopping->add_dev( &test_DI_one );
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+
+	on_action_in_unpausing->clear_dev();
+	if_action_in_unpausing->clear_dev();
+
+	test_op->finalize();
+
 
     G_LUA_MANAGER->free_Lua();
     test_params_manager::removeObject();
