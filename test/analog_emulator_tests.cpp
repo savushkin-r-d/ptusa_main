@@ -6,8 +6,10 @@ TEST( analog_emulator, get_value )
     {
     analog_emulator obj = analog_emulator( 0.444f, 0.25f, 20.f, 30.f );
     float test_variable = obj.get_value();
-    EXPECT_GE( test_variable, 20 );
-    EXPECT_LE( test_variable, 35 );
+    float min_t = obj.get_min();
+    float max_t = obj.get_max();
+    EXPECT_GE( test_variable, min_t );
+    EXPECT_LE( test_variable, max_t );
     }
 
 TEST( analog_emulator, analog_emulator )
@@ -38,7 +40,7 @@ TEST( analog_emulator, set_min )
     EXPECT_EQ( ex_min, 0 );
     }
 
-TEST(analog_emulator, init_vector) 
+TEST( analog_emulator, init_vector ) 
     {
     analog_emulator obj4 = analog_emulator( 0.444f, 0.25f, 20.f, 20.f );
     float value = obj4.get_value();
