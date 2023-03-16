@@ -159,6 +159,42 @@ TEST( operation_state, is_empty )
 	}
 
 
+TEST( operation, start )
+	{
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->pause();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->stop();
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+	test_op->start();
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+	test_op->finalize();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
+
 /*
 	TEST METHOD DEFENITION:
 	void evaluate()
