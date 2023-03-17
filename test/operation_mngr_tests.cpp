@@ -2,6 +2,7 @@
 
 using namespace ::testing;
 
+const int MAX_STR_SIZE = 500;
 
 TEST( action, check_devices )
 	{
@@ -569,53 +570,6 @@ TEST( AI_AO_action, check )
 	test_params_manager::removeObject();
 	}
 
-/*
-	TEST METHOD DEFENITION:
-	void check()
-*/
-
-TEST( DI_DO_action, check )
-	{
-	char* res = 0;
-	mock_params_manager* par_mock = new mock_params_manager();
-	test_params_manager::replaceEntity( par_mock );
-
-	EXPECT_CALL( *par_mock, init( _ ) );
-	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
-		.Times( AtLeast( 2 ) )
-		.WillRepeatedly( Return( res ) );
-
-	par_mock->init( 0 );
-	par_mock->final_init( 0, 0, 0 );
-
-	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
-	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
-	DI_signal test_DI( "test_DI1" );
-
-	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
-	auto operation_mngr = test_tank.get_modes_manager();
-	auto operation = ( *operation_mngr )[ 1 ];
-	auto operation_state = ( *operation )[ 1 ];
-	auto step = ( *operation_state )[ 1 ];
-
-	auto action = ( *step )[ step::ACTIONS::A_DI_DO ];
-	char msg[ 1024 ];
-
-	EXPECT_EQ( 0, action->check( msg ) );
-
-	action->add_dev( &test_DO );
-	action->add_dev( &test_DI );
-	EXPECT_NE( 0, action->check( msg ) );
-
-	action->clear_dev();
-	action->add_dev( &test_DI );
-	action->add_dev( &test_DO );
-	EXPECT_EQ( 0, action->check( msg ) );
-
-	test_params_manager::removeObject();
-	}
-
 
 TEST( checked_devices_action, finalize )
 	{
@@ -631,6 +585,7 @@ TEST( checked_devices_action, finalize )
 	action.finalize();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
+
 
 TEST( delay_on_action, evaluate )
 	{
@@ -724,11 +679,31 @@ TEST( delay_off_action, evaluate )
 	test_params_manager::removeObject();
 	}
 
+
+TEST( required_DI_action, check )
+	{
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	test_DI.set_descr( "Test DI" );
+	auto action = required_DI_action();
+	action.add_dev( &test_DI );
+
+	std::string msg( MAX_STR_SIZE, '\0');
+	auto res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 1, res );
+	EXPECT_STREQ( "нет сигнала 'test_DI1 (Test DI)'", msg.c_str() );
+
+	test_DI.on();
+	res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+	}
+
 TEST( required_DI_action, finalize )
 	{
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	auto action = checked_devices_action();
+	auto action = required_DI_action();
 	action.add_dev( &test_DI );
 
 	test_DI.on();
@@ -738,6 +713,32 @@ TEST( required_DI_action, finalize )
 
 	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
+	}
+
+
+TEST( DI_DO_action, check )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	test_DO.set_descr( "Test DO" );
+	auto action = DI_DO_action();
+	action.add_dev( &test_DO );
+
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 1, res );
+	EXPECT_STREQ( "в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
+		" не является входным сигналом (DI, SB, GS, LS, FS)", msg.c_str() );
+
+	action.clear_dev();
+	action.add_dev( &test_DI );
+	action.add_dev( &test_DO );
+	res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
 	}
 
 TEST( DI_DO_action, finalize )
@@ -760,6 +761,7 @@ TEST( DI_DO_action, finalize )
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
 	}
+
 
 TEST( AI_AO_action, finalize )
 	{

@@ -872,6 +872,7 @@ void delay_off_action::evaluate()
 //-----------------------------------------------------------------------------
 int required_DI_action::check( char* reason ) const
     {
+    *reason = 0;
     if ( is_empty() )
         {
         return 0;
