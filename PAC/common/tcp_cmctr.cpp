@@ -24,7 +24,7 @@ tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0
     {
     max_cycles          = 10;
     glob_cmctr_ok       = 1;
-    for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
+    for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = nullptr;
 
     clients = new std::map<int, tcp_client*>();
     }
@@ -32,10 +32,10 @@ tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0
 tcp_communicator::srv_ptr tcp_communicator::reg_service( u_char srv_id,
     srv_ptr fk )
     {
-    if ( services[ srv_id ] == NULL )
+    if ( services[ srv_id ] == nullptr)
         {
         services[ srv_id ] = fk;
-        return NULL;
+        return nullptr;
         }
     else
         {

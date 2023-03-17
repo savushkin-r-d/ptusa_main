@@ -554,7 +554,7 @@ i_DO_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* C( const char* dev_name );
+i_DO_AO_device* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение камеры по имени.
 ///
@@ -1027,13 +1027,14 @@ class step
 
             A_REQUIRED_FB,
             A_DI_DO,
+            A_INVERTED_DI_DO,
             A_AI_AO,
             A_WASH,
 
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
             A_DELAY_OFF,
-            A_TO_STEP_IF,
+            A_JUMP_IF,
             };
 
         bool is_active() const;
@@ -1063,6 +1064,14 @@ class action
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
         int set_bool_property( const char* name, bool value );
+
+        /// @brief Задание числового свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @idx [in] index Индекс свойства.
+        /// @param [in] value Значение свойства.
+        int set_int_property( const char* name, unsigned int idx, int value );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.

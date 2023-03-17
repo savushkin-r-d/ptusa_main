@@ -32,7 +32,7 @@ log_mngr::log_mngr(): lg( nullptr )
 log_mngr::~log_mngr()
     {
     delete lg;
-    lg = 0;
+    lg = nullptr;
     }
 //-----------------------------------------------------------------------------
 void i_log::write_log( PRIORITIES priority, const char* debug_message )

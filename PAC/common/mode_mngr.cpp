@@ -78,6 +78,7 @@ int operation::pause()
             states[ RUN ]->save();
             states[ RUN ]->final();
             states[ PAUSE ]->init();
+            states[ PAUSE ]->evaluate();
             break;
 
         case STOP:
@@ -101,6 +102,7 @@ int operation::stop()
             current_state = STOP;
             states[ PAUSE ]->final();
             states[ STOP ]->init();
+            states[ STOP ]->evaluate();
             break;
 
         case RUN:
@@ -110,6 +112,7 @@ int operation::stop()
 
             states[ RUN ]->final();
             states[ STOP ]->init();
+            states[ STOP ]->evaluate();
             break;
 
         case STOP:
@@ -122,7 +125,25 @@ int operation::stop()
     return 0;
     }
 //-----------------------------------------------------------------------------
+int operation::switch_off()
+    {
+    if ( current_state != IDLE )
+        {        
+        states[ current_state ]->final();
+        current_state = IDLE;
+        states[ IDLE ]->init();
+        states[ IDLE ]->evaluate();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int operation::start()
+    {
+    return start( run_step );   
+    }
+//-----------------------------------------------------------------------------
+int operation::start( int new_run_step )
     {
     switch ( current_state )
         {
@@ -138,16 +159,23 @@ int operation::start()
             states[ RUN ]->load();
 
             current_state = RUN;
-            if ( run_step > 0 )
+            if ( new_run_step > 0 )
+                {
+                states[ RUN ]->init( new_run_step );
+                //Если возвращаемся в шаг, активный до паузы, то добавляем
+                //его время выполнения.
+                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+                }
+            else if ( run_step > 0 )
                 {
                 states[ RUN ]->init( run_step );
+                states[ RUN ]->add_dx_step_time();
                 }
             else
                 {
                 states[ RUN ]->init();
                 }
 
-            states[ RUN ]->add_dx_step_time();
             break;
 
         case RUN:
@@ -198,7 +226,94 @@ void operation::evaluate()
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->evaluate();
+
+        int next_state = 0;
+        auto res = states[ current_state ]->is_goto_next_state( next_state );
+        if ( res )
+            {
+            auto unit = owner->owner;
+            switch ( current_state )
+                {
+                case state_idx::IDLE:
+                    //Из простоя по сигналам операция может быть включена 
+                    //(перейти в состояние выполнения).
+                    process_auto_switch_on();
+                    break;
+
+                case state_idx::RUN:
+                    //Из выполнения по сигналам операция может быть отключена
+                    //(перейти в состояние простоя).
+                    unit->set_mode( n, state_idx::IDLE );
+                    unit->set_err_msg( "автоотключение по запросу",
+                        n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                    break;
+
+                default:
+                    //Для всех остальных состояний ничего не делаем.
+                    break;
+                }
+            }
+        else
+            {
+            is_first_goto_next_state = true;
+            was_fail = false;
+            }
         }
+    }
+//-----------------------------------------------------------------------------
+int operation::process_auto_switch_on()
+    {
+    auto unit = owner->owner;
+    const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
+    const auto ERR = tech_object::ERR_MSG_TYPES::ERR_CANT_ON;
+
+    if ( was_fail ) return 1;
+
+    if ( is_first_goto_next_state )
+        {
+        auto result = unit->set_mode( n, operation::RUN );
+        if ( result == 0 )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            return 0;
+            }
+        else
+            {
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            start_wait = get_millisec();
+            is_first_goto_next_state = false;
+            }
+        }
+    else
+        {
+        auto dt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ];
+        auto wt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ];
+
+        if ( unit->check_operation_on( n, false ) == 0 )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            unit->set_mode( n, operation::RUN );
+            return 0;
+            }
+
+        // Прошел заданный интервал для уведомления.
+        if ( get_delta_millisec( start_warn ) > dt )
+            {
+            unit->check_operation_on( n );
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            }
+
+        // Прошел заданный интервал для ожидания возможности включения операции.
+        if ( get_delta_millisec( start_wait ) > wt )
+            {
+            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            was_fail = true;
+            }
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 void operation::final()
@@ -362,10 +477,10 @@ int operation::switch_active_extra_step( int off_step, int on_step )
 action::action( std::string name, u_int subgropups_cnt ) : name( name ),
     par( 0 ), subgropups_cnt( subgropups_cnt )
     {
-    devices.push_back( std::vector < std::vector< device* > >() );
+    devices.emplace_back();
     for ( u_int i = 0; i < subgropups_cnt; i++ )
         {
-        devices[ MAIN_GROUP ].push_back( std::vector< device* >() );
+        devices[ MAIN_GROUP ].emplace_back();
         }
     }
 //-----------------------------------------------------------------------------
@@ -401,7 +516,7 @@ void action::print( const char* prefix /*= "" */,
         }
     }
 //-----------------------------------------------------------------------------
-void action::final()
+void action::finalize()
     {
     if ( is_empty() )
         {
@@ -504,21 +619,31 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     {
     while ( group >= devices.size() )
         {
-        devices.push_back( std::vector < std::vector< device* > >() );
+        devices.emplace_back();
 
         size_t last_idx = devices.size() - 1;
         while ( subgropups_cnt > devices[ last_idx ].size() )
             {
-            devices[ last_idx ].push_back( std::vector< device* >() );
+            devices[ last_idx ].emplace_back();
             }
         }
 
     while ( subgroup >= devices[ group ].size() )
         {
-        devices[ group ].push_back( std::vector< device* >() );
+        devices[ group ].emplace_back();
         }
 
     devices[ group ][ subgroup ].push_back( dev );
+    }
+//-----------------------------------------------------------------------------
+int action::set_int_property( const char* name, size_t idx, int value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->info( "\"%s\" set int property \"%s\"[%zu] to \"%d\"",
+            this->name.c_str(), name, idx, value );
+        }
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void action::clear_dev()
@@ -700,7 +825,7 @@ int required_DI_action::check( char* reason ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-void required_DI_action::final()
+void required_DI_action::finalize()
     {
     // При завершении ничего не делаем.
     }
@@ -710,7 +835,7 @@ checked_devices_action::checked_devices_action() : action( "Проверяемы
     {
     }
 //-----------------------------------------------------------------------------
-void checked_devices_action::final() 
+void checked_devices_action::finalize()
     {
     // При завершении ничего не делаем.
     }
@@ -738,10 +863,14 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new enable_step_by_signal() );
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
-    
-    if ( !is_mode )
+          
+    if ( is_mode )
         {
-        actions.push_back( new to_step_if_devices_in_specific_state_action() );
+        actions.push_back( new jump_if_action( "Переход в состояние по условию" ) );
+        }
+    else
+        {
+        actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
         }
     }
 //-----------------------------------------------------------------------------
@@ -790,7 +919,7 @@ void step::final()
     {
     for ( u_int i = 0; i < actions.size(); i++  )
         {
-        actions[ i ]->final();
+        actions[ i ]->finalize();
         }
     dx_time = 0;
     active = false;
@@ -925,7 +1054,7 @@ void DI_DO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void DI_DO_action::final()
+void DI_DO_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1047,7 +1176,7 @@ void AI_AO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void AI_AO_action::final()
+void AI_AO_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1168,7 +1297,7 @@ void open_seat_action::evaluate()
             }
         else //Время промывки седел вышло.
             {
-            final();
+            finalize();
 
             phase = P_WAITING;
             start_cycle_time = get_millisec();
@@ -1199,7 +1328,7 @@ void open_seat_action::evaluate()
             }
         else //Время промывки седел вышло.
             {
-            final();
+            finalize();
 
             phase = P_WAITING;
             start_cycle_time = get_millisec();
@@ -1217,7 +1346,7 @@ void open_seat_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void open_seat_action::final()
+void open_seat_action::finalize()
     {
     if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() ) return;
 
@@ -1515,7 +1644,7 @@ void wash_action::print( const char* prefix /*= "" */,
     printf( "\n" );
     }
 //-----------------------------------------------------------------------------
-void wash_action::final()
+void wash_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1542,65 +1671,108 @@ void wash_action::final()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-to_step_if_devices_in_specific_state_action::to_step_if_devices_in_specific_state_action() :
-    action( "Перейти в шаг по условию", G_SUBGROUPS_CNT )
+jump_if_action::jump_if_action( const char* name ) :
+    action( name, G_GROUPS_CNT)
     {
     }
 //-----------------------------------------------------------------------------
-bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
+bool jump_if_action::is_jump( int& next )
     {
+    next = -1;
     if ( is_empty() )
         {
         return false;
         }
 
-    bool res = true;
-    auto& devs = devices[ MAIN_GROUP ];
-    if ( devs.size() >= G_SUBGROUPS_CNT )
+    for ( size_t idx = 0; idx < devices.size(); idx++ )
         {
-        auto& on_devices = devs[ G_ON_DEVICES ];
-        for ( u_int i = 0; i < on_devices.size(); i++ )
+        if ( idx < next_n.size() ) next = next_n[ idx ];
+   
+        auto res = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
+            check( devices[ idx ][ G_OFF_DEVICES ], false );
+
+        if ( res ) return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+bool jump_if_action::check(
+    const std::vector< device* > &checked_devices, bool check_is_opened ) const
+    {
+    for ( auto dev : checked_devices )
+        {
+        auto type = dev->get_type();
+        if ( type == device::DT_V )
             {
-            auto dev = on_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
-                {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_opened() ) res = false;
-                }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( !d->is_active() ) res = false;
-                }
+            auto v = dynamic_cast<valve*>( dev );
+            if ( check_is_opened && !v->is_opened() ||
+                !check_is_opened && !v->is_closed() ) return false;
+            }
+        else if ( type == device::DT_DI || type == device::DT_GS ||
+            type == device::DT_DO )
+            {
+            auto d = dynamic_cast<i_DI_device*>( dev );
+            if ( check_is_opened && !d->is_active() ||
+                !check_is_opened && d->is_active() ) return false;
+            }
+        }
+    return true;
+    };
+//-----------------------------------------------------------------------------
+int jump_if_action::set_int_property( const char* name, size_t idx, int value )
+    {
+    action::set_int_property( name, idx, value );
+    if ( strcmp( name, "next_step_n" ) == 0 )
+        {
+        while ( idx >= next_n.size() )
+            {
+            next_n.push_back( -1 );
             }
 
-        auto& off_devices = devs[ G_OFF_DEVICES ];
-        for ( u_int i = 0; i < off_devices.size(); i++ )
+        next_n[ idx ] = value;
+        return 0;
+        }
+    else
+        {
+        if ( G_DEBUG )
             {
-            auto dev = off_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
-                {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_closed() ) res = false;
-                }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( d->is_active() ) res = false;
-                }
+            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+                this->name.c_str(), name );
             }
         }
 
-    return res;
+    return 1;
+    };
+//-----------------------------------------------------------------------------
+int jump_if_action::get_int_property( const char* name, size_t idx )
+    {
+    if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
+        {
+        return next_n[ idx ];
+        }
+
+    return -1;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::final()
+void jump_if_action::finalize()
     {
     return;
+    }
+//-----------------------------------------------------------------------------
+void jump_if_action::print( const char* prefix, bool new_line ) const
+    {
+    action::print( prefix, false );
+    printf( " { " );
+    std::for_each( next_n.begin(), next_n.end(), [&]( int const& n )
+        {
+        printf( "%d ", n );
+        } );
+    printf( "}" );
+    if ( new_line )
+        {
+        printf( "\n" );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1834,31 +2006,19 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
-        ( *active_step )[ step::A_TO_STEP_IF ] );
-    if ( if_action && if_action->is_goto_next_step() )
+    auto action = ( *active_step )[ step::A_JUMP_IF ];
+    auto if_action = static_cast<jump_if_action*>( action );
+    int next_step = -1;
+    if ( if_action->is_jump( next_step ) )
         {
-        if ( -1 == active_step_next_step_n )
+        if ( next_step >= 0 )
             {
-            if ( n > 0 )
+            if ( G_DEBUG )
                 {
-                int time = (int)owner->get_step_param( par_n );
-                const int MAX_BUFF_SIZE = 200;
-                char buff[ MAX_BUFF_SIZE ] = { 0 };
-                std::snprintf( buff, MAX_BUFF_SIZE,
-                    "завершение по включению/отключению устройств последнего шага (\'%s\')",
-                    steps[ active_step_n ]->get_name() );
-                owner->owner->set_err_msg( buff, n, 0, i_tech_object::ERR_OFF );
-                owner->off_mode( n );
+                printf( "Переход к новому шагу. " );
+                if_action->print();
                 }
-            else
-                {
-                final(); //Для операции-заглушки.
-                }
-            }
-        else
-            {
-            to_step( active_step_next_step_n, 0 );
+            to_step( next_step );
             }
         }
 
@@ -2074,6 +2234,13 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation_state::is_goto_next_state( int& next_state ) const
+    {
+    auto action = ( *mode_step )[ step::A_JUMP_IF ];
+    auto to_new_state = static_cast<jump_if_action*>( action );
+    return to_new_state->is_jump( next_state );
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()
@@ -2328,11 +2495,11 @@ operation_manager::~operation_manager()
     for ( size_t i = 0; i < operations.size(); i++ )
         {
         delete operations[ i ];
-        operations[ i ] = 0;
+        operations[ i ] = nullptr;
         }
 
     delete oper_stub;
-    oper_stub = 0;
+    oper_stub = nullptr;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

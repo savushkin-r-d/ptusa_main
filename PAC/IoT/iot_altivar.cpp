@@ -39,8 +39,8 @@ void altivar_manager::add_node(const char* IP_address, unsigned int port, unsign
 	nodeip.append(" ");
 	nodeip.append(std::to_string(timeout));
 	altivar_node* new_node = new altivar_node(SOCKID_ALTIVAR + index, IP_address, port, timeout, type);
-	nodes.insert(altivar_node_pair(nodeip, new_node));
-	num_nodes.insert(altivar_node_num_pair(index, new_node));
+	nodes.emplace(nodeip, new_node);
+	num_nodes.emplace(index, new_node);
 	index++;
 	}
 

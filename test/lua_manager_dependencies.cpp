@@ -3,7 +3,8 @@
 void LuaManagerTest::SetUp()
 {
 	lua_hooks.push_back(subhook_new((void *) lua_pushcclosure,      (void *) mock_lua_pushcclosure,     SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));	
+	lua_hooks.push_back(subhook_new((void *) lua_type,				(void *) mock_lua_type,				SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_getfield,          (void *) mock_lua_getfield,         SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_remove,            (void *) mock_lua_remove,           SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_pcall,             (void *) mock_lua_pcall,            SUBHOOK_64BIT_OFFSET));
@@ -56,6 +57,11 @@ void mock_lua_pushcclosure(lua_State *L, lua_CFunction fn, int n)
 int mock_lua_gettop(lua_State *L)
 {
 	return 0;
+}
+
+int mock_lua_type(lua_State* L, int idx)
+{
+	return -1;
 }
 
 void mock_lua_getfield(lua_State *L, int idx, const char *k)

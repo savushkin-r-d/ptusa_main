@@ -7,6 +7,14 @@ using namespace ::testing;
 	void evaluate()
 */
 
+TEST( action, is_empty )
+	{
+	action a1( "empty_action", 0 );	
+
+	EXPECT_EQ( true, a1.is_empty() );
+	}
+
+
 TEST( open_seat_action, evaluate )
 	{
 	char* res = 0;
@@ -79,7 +87,7 @@ TEST( open_seat_action, evaluate )
 	EXPECT_EQ( false, test_DO1.is_active() );
 	EXPECT_EQ( false, test_DO2.is_active() );
 
-	action->final();
+	action->finalize();
 
 	test_params_manager::removeObject();
 	}
@@ -103,6 +111,10 @@ TEST( operation, evaluate )
 
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
@@ -142,8 +154,21 @@ TEST( operation, evaluate )
 	test_op->final();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->evaluate();
+	test_op->pause();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+	test_op->evaluate();
+	test_op->stop();
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+	test_op->evaluate();
+	test_op->final();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
-	//Корректный переход от выполнения к паузе и опять к выполнению.
+
+	//Корректный переход от выполнения к паузе и опять к выполнению для методов
+	//операции.
 	test_op->start();
 	test_op->evaluate();
 	test_op->to_next_step();
@@ -165,7 +190,122 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( 3, test_op->active_step() );
 
+	test_op->switch_off();
 
+	//Корректное автовключение/автоотключение.	
+	auto operation_idle_state = test_op[ 0 ][ operation::IDLE ];
+	auto operation_run_state = test_op[ 0 ][ operation::RUN ];
+	auto operation_pause_state = test_op[ 0 ][ operation::PAUSE ];
+	auto main_step_in_idle = operation_idle_state[ 0 ][ -1 ];
+	auto main_step_in_run = operation_run_state[ 0 ][ -1 ];
+	auto main_step_in_pause = operation_pause_state[ 0 ][ -1 ];
+
+	int next = 0;
+	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+	EXPECT_EQ( -1, next );
+
+	auto if_action_in_idle = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_idle )[ step::ACTIONS::A_JUMP_IF ] );
+	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	if_action_in_idle->add_dev( &test_DI_one, 0, 0 );
+	
+	auto if_action_in_run = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
+
+	//По умолчанию все сигналы неактивны, операция не должна включиться.
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+
+	//Сигнал активен, операция должна включиться.
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto required_DI_action = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_REQUIRED_FB ] );
+	required_DI_action->add_dev( &test_DI_two );
+
+	//Сигнал активен, но операция не должна включиться, так как нет требуемого
+	//сигнала.
+	const auto WARN_TIME = 1;
+	const auto WAIT_TIME = 2 * WARN_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ] = WAIT_TIME;
+	G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ] = WARN_TIME;
+	test_DI_one.on();
+	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( WARN_TIME );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( WAIT_TIME );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, но операция не должна включиться, так как автовключение 
+	//было отключено.
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, операция должна включиться, так как автовключение 
+	//было опять включено.
+	test_DI_one.off();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, но операция не должна включиться, так как нет требуемого
+	//сигнала.
+	test_DI_one.on();
+	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, а операция должна включиться, так как появился требуемый
+	//сигнал.
+	sleep_ms( WAIT_TIME );
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//В паузе переходы к новым состояниям не осуществляются.
+	test_op->switch_off();
+	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto if_action_in_pause = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_pause )[ step::ACTIONS::A_JUMP_IF ] );
+	if_action_in_pause->add_dev( &test_DI_one, 0, 0 );
+	test_op->start();
+	test_op->pause();
+	test_DI_three.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
 
@@ -264,7 +404,7 @@ TEST( DI_DO_action, check )
 	}
 
 
-TEST( checked_devices_action, final )
+TEST( checked_devices_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	auto action = checked_devices_action();
@@ -275,7 +415,7 @@ TEST( checked_devices_action, final )
 	action.evaluate();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
 
@@ -319,7 +459,7 @@ TEST( delay_on_action, evaluate )
 	action->evaluate();
 	EXPECT_EQ( 1, test_DO.get_state() );
 
-	action->final();
+	action->finalize();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
 	test_params_manager::removeObject();
@@ -365,13 +505,13 @@ TEST( delay_off_action, evaluate )
 	action->evaluate();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
-	action->final();
+	action->finalize();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
 	test_params_manager::removeObject();
 	}
 
-TEST( required_DI_action, final )
+TEST( required_DI_action, finalize )
 	{
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
@@ -383,11 +523,11 @@ TEST( required_DI_action, final )
 	action.evaluate();
 	EXPECT_EQ( 1, test_DI.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	}
 
-TEST( DI_DO_action, final )
+TEST( DI_DO_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -403,12 +543,12 @@ TEST( DI_DO_action, final )
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 1, test_DO.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
 	}
 
-TEST( AI_AO_action, final )
+TEST( AI_AO_action, finalize )
 	{
 	DO1 test_AO( "test_AO1", device::DEVICE_TYPE::DT_AO,
 		device::DEVICE_SUB_TYPE::DST_AO_VIRT );
@@ -425,12 +565,12 @@ TEST( AI_AO_action, final )
 	EXPECT_EQ( VALUE, test_AI.get_value() );
 	EXPECT_EQ( VALUE, test_AO.get_value() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( VALUE, test_AI.get_value() );
 	EXPECT_EQ( 0, test_AO.get_value() );
 	}
 
-TEST( wash_action, final )
+TEST( wash_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -454,7 +594,7 @@ TEST( wash_action, final )
 	EXPECT_EQ( 1, test_M1.get_state() );
 	EXPECT_EQ( 2, test_M2.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
 	EXPECT_EQ( 0, test_M1.get_state() );
@@ -508,3 +648,93 @@ TEST( enable_step_by_signal, should_turn_off )
 
 	test_params_manager::removeObject();
     }
+
+TEST( jump_if_action, is_goto_next_step )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	operation->add_step( "Тестовый шаг 1", -1, -1 );
+	operation->add_step( "Тестовый шаг 2", -1, -1 );
+	auto operation_state = operation[ 0 ][ 1 ];
+	auto step = operation_state[ 0 ][ 1 ];
+
+	operation->start();
+	operation->evaluate();
+
+	auto action = reinterpret_cast<jump_if_action*>
+		( ( *step )[ step::ACTIONS::A_JUMP_IF ] );
+
+	int next_step = 0;
+	auto is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( false, is_goto_next_step );			//Empty if_action_in_idle.
+	EXPECT_EQ( -1, next_step );
+
+	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI_one, 0, 0 );
+	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI_two, 0, 1 );
+	valve_DO1 test_valve( "V3" );
+	action->add_dev( &test_valve, 1, 0 );
+	const int SET_NEXT_STEP = 2;
+	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
+	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
+
+	EXPECT_EQ( -1, action->get_int_property( "no_exist", 0 ) );
+	next_step = action->get_int_property( "next_step_n", 0 );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
+	//перехода.
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( false, is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//Устанавливаем сигналы, к новому шагу не должно быть перехода.
+	test_DI_one.on();
+	test_DI_two.on();
+	test_valve.off();
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( false, is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//Устанавливаем сигналы, к новому шагу должен быть переход.
+	test_DI_one.on();
+	test_DI_two.off();
+	test_valve.off();
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( true, is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//Устанавливаем сигналы, к новому шагу должен быть переход.
+	test_DI_one.off();
+	test_DI_two.off();
+	test_valve.on();
+	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_EQ( true, is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//Выполняем операцию, должен осуществиться переход к новому шагу.
+	operation->evaluate();
+	EXPECT_EQ( SET_NEXT_STEP, operation->get_run_active_step() );	
+
+	test_params_manager::removeObject();
+	}

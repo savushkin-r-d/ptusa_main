@@ -202,38 +202,45 @@ enum MODULE_CONSTANTS
     //---для самоочистки---
     };
 
+///@brief CIP_ERROR_CODES
+const int ERR_UNKNOWN_STEP = -2;
+const int ERR_POSSIBLE_NO_MEDIUM = -9;
+const int ERR_NO_ACID = -10;
+const int ERR_NO_ALKALINE = -11;
+const int ERR_NO_RETURN = -12;
+const int ERR_NO_CONC = -13;
+const int ERR_IS_CONC = -14;
+const int ERR_WRONG_RET = -15;
+const int ERR_PUMP = -16;
+const int ERR_NO_FLOW = -17;
+const int ERR_AIR = -18;
+const int ERR_OS = -19;
+const int ERR_CIP_OBJECT = -20;
+const int ERR_WRONG_OS_OR_RECIPE_ERROR = -30;
+const int ERR_VALVES_ARE_IN_CONFLICT = -31;
+const int ERR_ACID_WASH_REQUIRED = -32;
+const int ERR_LEVEL_BACHOK = -35;
+const int ERR_LEVEL_TANK_S = -36;
+const int ERR_LEVEL_TANK_K = -37;
+const int ERR_LEVEL_TANK_W = -38;
+const int ERR_SUPPLY_TEMP_SENSOR = -39;
+const int ERR_RETURN_TEMP_SENSOR = -40;
+const int ERR_CONCENTRATION_SENSOR = -41;
+const int ERR_RET = -100;
+///---CIP_ERROR_CODES
 
-//errors
-#define SERR_UNKNOWN_STEP  -2
-#define ERR_POSSIBLE_NO_MEDIUM -9
-#define NO_ACID            -10
-#define NO_ALKALINE        -11
-#define NO_RETURN          -12
-#define ERR_NO_CONC        -13
-#define ERR_IS_CONC        -14
-#define ERR_WRONG_RET      -15
-#define ERR_PUMP           -16
-#define ERR_NO_FLOW        -17
-#define ERR_AIR            -18
-#define ERR_OS             -19
-#define ERR_CIP_OBJECT	   -20
-#define ERR_WRONG_OS_OR_RECIPE_ERROR	-30
-#define ERR_VALVES_ARE_IN_CONFLICT	-31
-#define ERR_ACID_WASH_REQUIRED	-32
-#define ERR_LEVEL_BACHOK -35
-#define ERR_LEVEL_TANK_S -36
-#define ERR_LEVEL_TANK_K -37
-#define ERR_LEVEL_TANK_W -38
-#define ERR_RET            -100
 
 
 //блокирование ошибок
 enum BLOCK_ERRORS
     {
-    BE_ERR_LEVEL_BACHOK = 0,
-    BE_ERR_LEVEL_TANK_S,
-    BE_ERR_LEVEL_TANK_K,
-    BE_ERR_LEVEL_TANK_W,
+        BE_ERR_LEVEL_BACHOK = 0,
+        BE_ERR_LEVEL_TANK_S,
+        BE_ERR_LEVEL_TANK_K,
+        BE_ERR_LEVEL_TANK_W,
+        BE_ERR_SUPPLY_TEMP_SENSOR,
+        BE_ERR_RETURN_TEMP_SENSOR,
+        BE_ERR_CONCENTRATION_SENSOR,
     };
 
 
@@ -432,7 +439,9 @@ class MSAPID
         int task_par_offset;
         int pid_par_offset;
         int out_max_recalc_offset;
-        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0, int outmaxrecalcpar = 0 );
+        MSAPID(run_time_params_float* par, int startpar, int taskpar,
+            i_AO_device* ao = nullptr, i_AI_device* ai = nullptr,
+            i_counter* ai2 = nullptr, int outmaxrecalcpar = 0 );
         void eval();
         void eval(float input, float task);
         void reset();
@@ -518,7 +527,6 @@ class TSav
         unsigned long integrator;
     public:
         TSav(void);
-        ~TSav(void);
         void Add(float val, unsigned long inegr);
         void R(void);
         float Q(void);
@@ -635,6 +643,8 @@ class cipline_tech_object: public tech_object
         static std::unordered_set<int> steps_v2_supply;
         static std::unordered_set<int> steps_additional_rinse;
         static std::unordered_set<int> steps_circulation;
+        static std::unordered_set<int> steps_caustic;
+        static std::unordered_set<int> steps_acid;
 
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
