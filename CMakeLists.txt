@@ -8,6 +8,8 @@ set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2022.08.26.0)
 
+option(USE_OPCUA "Use OPC UA" OFF)
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
@@ -145,7 +147,6 @@ elseif(WIN32)
     endif()
 endif()
 
-option(USE_OPCUA "Use OPC UA" ON)
 if(USE_OPCUA)
     target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
     target_link_libraries(libptusa_main open62541::open62541)
