@@ -761,6 +761,9 @@ class operation
         int switch_off();
 
         int start( int new_run_step );
+
+        void to_run_state( int new_run_step );
+
 #ifndef __GNUC__
 #pragma endregion
 #endif

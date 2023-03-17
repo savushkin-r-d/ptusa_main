@@ -180,26 +180,7 @@ int operation::start( int new_run_step )
             states[ PAUSE ]->finalize();
             if ( states[ UNPAUSING ]->is_empty() )
                 {
-                current_state = RUN;
-                states[ RUN ]->load();
-
-                if ( new_run_step > 0 )
-                    {
-                    states[ RUN ]->init( new_run_step );
-                    //Если возвращаемся в шаг, активный до паузы, то добавляем
-                    //его время выполнения.
-                    if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
-                    }
-                else if ( run_step > 0 )
-                    {
-                    states[ RUN ]->init( run_step );
-                    states[ RUN ]->add_dx_step_time();
-                    }
-                else
-                    {
-                    states[ RUN ]->init();
-                    }
-                states[ RUN ]->evaluate();
+                to_run_state( new_run_step );
                 break;
                 }
             else
@@ -224,26 +205,7 @@ int operation::start( int new_run_step )
             break;
 
         case UNPAUSING:
-            current_state = RUN;
-            states[ RUN ]->load();
-
-            if ( new_run_step > 0 )
-                {
-                states[ RUN ]->init( new_run_step );
-                //Если возвращаемся в шаг, активный до паузы, то добавляем
-                //его время выполнения.
-                if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
-                }
-            else if ( run_step > 0 )
-                {
-                states[ RUN ]->init( run_step );
-                states[ RUN ]->add_dx_step_time();
-                }
-            else
-                {
-                states[ RUN ]->init();
-                }
-            states[ RUN ]->evaluate();
+            to_run_state( new_run_step );
             break;
 
         default:
@@ -251,6 +213,30 @@ int operation::start( int new_run_step )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void operation::to_run_state( int new_run_step )
+    {
+    current_state = RUN;
+    states[ RUN ]->load();
+
+    if ( new_run_step > 0 )
+        {
+        states[ RUN ]->init( new_run_step );
+        //Если возвращаемся в шаг, активный до паузы, то добавляем
+        //его время выполнения.
+        if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
+        }
+    else if ( run_step > 0 )
+        {
+        states[ RUN ]->init( run_step );
+        states[ RUN ]->add_dx_step_time();
+        }
+    else
+        {
+        states[ RUN ]->init();
+        }
+    states[ RUN ]->evaluate();
     }
 //-----------------------------------------------------------------------------
 int operation::check_devices_on_run_state(char* err_dev_name, int str_len)
