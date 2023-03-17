@@ -270,7 +270,7 @@ target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
 if(ARP_DEVICE)
     target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic)
     if (USE_OPCUA)
-        target_link_libraries(PtusaPLCnextEngineer open62541)
+        target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
     endif()
 endif()
 
