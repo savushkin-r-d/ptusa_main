@@ -64,6 +64,8 @@ class PAC_critical_errors_manager
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
             {
+            AS_UNKNOWN,
+
             //AC_NO_CONNECTION,     ///< Ошибка связи.
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
             AS_PANEL,               ///< Ошибки панелей EasyView.

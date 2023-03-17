@@ -122,7 +122,7 @@ project_manager::~project_manager()
     if ( cfg_file )
         {
         delete cfg_file;
-        cfg_file = 0;
+        cfg_file = nullptr;
         }
     }
 //-----------------------------------------------------------------------------

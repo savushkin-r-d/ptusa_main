@@ -1,7 +1,8 @@
 #ifndef tcp_client_h__
 #define tcp_client_h__
-#include "PAC_err.h"
-#include "tcp_cmctr.h"
+
+#include <cstdio>
+#include "dtime.h"
 
 #define RECONNECT_MIN_MULTIPLIER 5
 #define RECONNECT_MAX_MULTIPLIER 30
@@ -41,7 +42,7 @@ class tcp_client
         unsigned char is_initialized;
         int async_result;
     public:
-        static tcp_client* Create(char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass,
+        static tcp_client* Create(const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass,
             unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
         virtual int Communicate(unsigned int bytestosend);
         virtual int AsyncSend(unsigned int bytestosend);

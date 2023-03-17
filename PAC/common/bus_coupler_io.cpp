@@ -795,23 +795,23 @@ void io_device::IO_channels::init( int ch_count )
         switch ( type )
             {
             case IO_channels::CT_DI:
-                char_read_values = new u_char*[ count ]{ 0 };
+                char_read_values = new u_char*[ count ]{ nullptr };
                 break;
 
             case IO_channels::CT_DO:
-                char_read_values  = new u_char*[ count ]{ 0 };
-                char_write_values = new u_char*[ count ]{ 0 };
+                char_read_values  = new u_char*[ count ]{ nullptr };
+                char_write_values = new u_char*[ count ]{ nullptr };
                 break;
 
             case IO_channels::CT_AI:
-                int_read_values = new int_2*[ count ]{ 0 };
-				int_module_read_values = new int_2*[count]{ 0 };
+                int_read_values = new int_2*[ count ]{ nullptr };
+				int_module_read_values = new int_2*[count]{ nullptr };
                 break;
 
             case IO_channels::CT_AO:
-                int_read_values  = new int_2*[ count ]{ 0 };
-				int_module_read_values = new int_2*[count]{ 0 };
-                int_write_values = new int_2*[ count ]{ 0 };
+                int_read_values  = new int_2*[ count ]{ nullptr };
+				int_module_read_values = new int_2*[count]{ nullptr };
+                int_write_values = new int_2*[ count ]{ nullptr };
                 break;
             }
         }
@@ -1081,7 +1081,7 @@ io_manager::~io_manager()
             }
 
         delete [] nodes;
-        nodes = 0;
+        nodes = nullptr;
         nodes_count = 0;
         }
     }

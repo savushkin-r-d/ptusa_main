@@ -20,10 +20,12 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <fmt/core.h>
 
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -39,6 +41,7 @@
 #include "PAC_info.h"
 
 #include "iot_altivar.h"
+#include "iot_wages_eth.h"
 #include "log.h"
 
 #ifdef WIN_OS
@@ -47,6 +50,8 @@
 #endif // WIN_OS
 
 class PID;
+
+const size_t MAX_COPY_SIZE = 1000;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
@@ -123,7 +128,12 @@ class par_device
             this->err_par = err_par;
             }
 
-    protected:
+        float get_par( int idx ) const
+            {
+            return par[ 0 ][ idx ];
+            }
+
+    private:
         /// @brief Ошибки устройства.
         saved_params_u_int_4 *err_par;
 
@@ -446,8 +456,19 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
-
+          
             DST_V_VIRT,               ///< Виртуальный клапан.
+
+            DST_V_MINI_FLUSHING,      ///< Клапан с мини-клапаном промывки.
+
+            ///< Противосмешивающий клапан (включение от IO-Link
+            ///< пневмооострова) с тремя каналами управления.
+            V_IOL_TERMINAL_MIXPROOF_DO3,    
+
+            ///< Противосмешивающий клапан (включение от IO-Link
+            ///< пневмооострова) с тремя каналами управления и двумя обратными
+            ///< связами.
+            V_IOL_TERMINAL_MIXPROOF_DO3_DI2,
 
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
@@ -499,11 +520,11 @@ class device : public i_DO_AO_device, public par_device
             M_ATV_LINEAR,
 
             //FQT
-            DST_FQT = 1,   ///< Счетчик.
-            DST_FQT_F,     ///< Счетчик + расход.
-            DST_FQT_F_OK,  ///< Счетчик + расход c диагностикой.
-            DST_FQT_VIRT,  ///Виртуальный cчетчик (без привязки к модулям).
-            DST_FQT_IOLINK,/// Счетчик IO-Link.
+            DST_FQT = 1,        ///< Счетчик.
+            DST_FQT_F,          ///< Счетчик + расход.
+                                ///< Резерв.
+            DST_FQT_VIRT = 4,   ///Виртуальный cчетчик (без привязки к модулям).
+            DST_FQT_IOLINK,     /// Счетчик IO-Link.
 
             //QT
             DST_QT = 1,   ///< Концентратомер.
@@ -576,6 +597,7 @@ class device : public i_DO_AO_device, public par_device
             DST_WT = 1,  ///< Весы.
             DST_WT_VIRT, ///< Виртуальные весы.
             DST_WT_RS232,///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -589,6 +611,10 @@ class device : public i_DO_AO_device, public par_device
             //TS
             DST_TS = 1,
             DST_TS_VIRT,
+
+            //DT_REGULATOR
+            DST_REGULATOR_PID = 1,
+            DST_REGULATOR_THLD,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -608,6 +634,11 @@ class device : public i_DO_AO_device, public par_device
         const char *get_description() const
             {
             return description;
+            }
+
+        virtual const char* get_error_description() const
+            {
+            return "обратная связь";
             }
 
         void set_descr( const char *new_description );
@@ -668,11 +699,8 @@ class device : public i_DO_AO_device, public par_device
         /// строки.
         ///
         /// Для использования в Lua.
-        virtual void set_string_property(const char* field, const char* value)
-            {
-            }
+        virtual void set_string_property( const char* field, const char* value );
 
-    protected:
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
         ///
         /// @param buff [out] - буфер записи строки.
@@ -682,19 +710,24 @@ class device : public i_DO_AO_device, public par_device
             return 0;
             }
 
-        u_int_4 s_number;            ///< Последовательный номер устройства.
-
-        DEVICE_TYPE     type;        ///< Тип устройства.
-        DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
-
         bool get_manual_mode() const
             {
             return is_manual_mode;
             }
 
-        char * article;           ///< Артикул изделия.
+        char* get_article() const
+            {
+            return article;
+            }
 
     private:
+        u_int_4 s_number;            ///< Последовательный номер устройства.
+
+        DEVICE_TYPE     type;        ///< Тип устройства.
+        DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
+
+        char * article;           ///< Артикул изделия.
+
         bool is_manual_mode;      ///< Признак ручного режима.
 
         char name[ C_MAX_NAME ];
@@ -730,7 +763,7 @@ class digital_io_device : public device,
         virtual void print() const;
 
 #ifdef DEBUG_NO_IO_MODULES
-    protected:
+    private:
         int state;  ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
     };
@@ -966,7 +999,14 @@ class valve: public digital_io_device
     protected:
 
         /// @brief Получение состояния клапана без учета обратной связи.
-        virtual VALVE_STATE get_valve_state() = 0;
+        virtual VALVE_STATE get_valve_state()
+#ifdef DEBUG_NO_IO_MODULES
+            {
+            return (VALVE_STATE)digital_io_device::get_state();
+            }
+#else
+            = 0;
+#endif // DEBUG_NO_IO_MODULES
 
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state()
@@ -1009,9 +1049,9 @@ class valve: public digital_io_device
 
     private:
         /// @brief Определение завершения отключения клапана с задержкой.
-        static bool is_switching_off_finished( valve *v )
+        virtual bool is_switching_off_finished()
             {
-            return !v->is_switching_off;
+            return !is_switching_off;
             };
 
         bool is_switching_off; ///Выключается ли клапан с задержкой.
@@ -1033,11 +1073,6 @@ class virtual_valve: public valve
     public:
         virtual_valve( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
         VALVE_STATE get_valve_state();
 
         virtual void direct_off();
@@ -1051,6 +1086,10 @@ class virtual_valve: public valve
         virtual void direct_on();
 
         virtual int get_state();
+
+    private:
+        float value;
+        int state;
     };
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
@@ -1570,9 +1609,9 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state );
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
 #endif // DEBUG_NO_IO_MODULES
@@ -1856,13 +1895,9 @@ class valve_AS : public valve
             //                printf( "*write_state = %d\n", ( int ) *write_state );
             //                }
             }
-#endif // DEBUG_NO_IO_MODULES
 
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = ( char ) new_state;
-#else
             int offset = 0;
             //Для первого 31-го устройства четный номер - старшие четыре
             //бита (1), для остальных устройств нечетный номер - старшие четыре
@@ -1923,11 +1958,9 @@ class valve_AS : public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_IO_MODULES
             }
 
-    protected:
-        u_int AS_number;    ///< AS-номер устройства.
+#endif //DEBUG_NO_IO_MODULES
 
         enum CONSTANTS
             {
@@ -1943,6 +1976,9 @@ class valve_AS : public valve
 
             MAILBOX_OFFSET = 8
             };
+
+    private:
+        u_int AS_number;    ///< AS-номер устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -2050,6 +2086,30 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             direct_set_state( V_LOWER_SEAT );
             }
 
+#ifdef PTUSA_TEST
+        void set_mini_closing_state( bool state )
+            {
+            is_closing_mini = state;
+            start_off_time = get_millisec();
+            }
+#endif
+
+#ifdef _MSC_VER
+#pragma region Выключение мини клапана с задержкой.
+#endif
+    private:
+        u_long start_off_time;  //Время начала открытия клапана.
+
+        int is_closing_mini;    //Мини клапан в режиме закрытия
+
+    public:
+        /// @brief Определение завершения отключения клапана с задержкой.
+        bool is_switching_off_finished() override;
+
+#ifdef _MSC_VER
+#pragma endregion Выключение мини клапана с задержкой.
+#endif
+
     private:
         enum CONSTANTS
             {
@@ -2061,11 +2121,9 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = ( char ) new_state;
-#else
             switch ( new_state )
                 {
                 case V_OFF:
@@ -2102,22 +2160,17 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
+
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
             int o = get_DO( DO_INDEX );
 
             if (o == 0 && get_DO(DO_INDEX_MINI_V) == 1) return V_UPPER_SEAT;
@@ -2125,14 +2178,10 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
             int o = get_DO( DO_INDEX );
             int i0 = get_DI( DI_INDEX_CLOSE );
             int i1 = get_DI( DI_INDEX_OPEN );
@@ -2152,10 +2201,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULE
             }
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_CLOSE );
@@ -2166,27 +2213,49 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             return get_DI( DI_INDEX_OPEN );
             }
 #endif // DEBUG_NO_IO_MODULES
-
-#ifdef _MSC_VER
-#pragma region Выключение мини клапана с задержкой.
-#endif
-        /// @brief Вектор клапанов, ожидающих выключение.
-        static std::vector< valve_bottom_mix_proof* > to_switch_off;
-
-        u_long start_off_time; //Время начала открытия клапана.
-
-        int is_closing_mini; //Мини клапан в режиме закрытия
-
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан донный.
+class valve_mini_flushing : public i_mix_proof, public valve
+    {
     public:
-        /// @brief Определение завершения отключения клапана с задержкой.
-        static bool is_switching_off_finished( valve_bottom_mix_proof *v );
+        explicit valve_mini_flushing( const char* dev_name );
 
-        /// @brief Выключение мини клапанов с задержкой.
-        static void evaluate();
+        /// @brief Открыть верхнее седло.
+        void open_upper_seat() final;
 
-#ifdef _MSC_VER
-#pragma endregion Выключение мини клапана с задержкой.
-#endif
+        /// @brief Открыть нижнее седло.
+        void open_lower_seat() final;
+
+    private:
+        enum CONSTANTS_DO
+            {
+            DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
+            DO_INDEX_MINI_V ///< Индекс канала дискретного выхода мини клапана.
+            };
+
+        enum CONSTANTS_DI
+            {
+            DI_INDEX_OPEN = 0,  ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE      ///< Индекс канала дискретного входа Закрыт.
+            };
+
+#ifndef DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) final;
+
+        void direct_on() final;
+        void direct_off() final;
+
+    protected:
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        //всех вариантов (ручной режим, обратная связь, ...).
+        VALVE_STATE get_valve_state() final;
+
+        bool get_fb_state() final;
+
+        int get_off_fb_value() final;
+        int get_on_fb_value() final;
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
@@ -2345,6 +2414,8 @@ class valve_iolink_shut_off_thinktop : public valve
 class valve_iolink_shut_off_sorio : public valve
     {
     public:
+        static const std::string SORIO_ARTICLE;
+
         valve_iolink_shut_off_sorio( const char* dev_name );
 
         VALVE_STATE get_valve_state();
@@ -2353,9 +2424,13 @@ class valve_iolink_shut_off_sorio : public valve
 
         void evaluate_io();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() final;
 
+#ifdef DEBUG_NO_IO_MODULES
+        void direct_set_value( float new_value ) final;
+#endif
+
+#ifndef DEBUG_NO_IO_MODULES
         bool get_fb_state();
 
         int get_off_fb_value();
@@ -2376,13 +2451,13 @@ class valve_iolink_shut_off_sorio : public valve
         struct in_data
             {
             int16_t  pos;
-            bool de_en       : 1; //De-Energized
-            bool main        : 1; //Main energized position
-            uint16_t unused1 : 2;
-            uint16_t status  : 5;
-            bool sv1         : 1; //Current state of solenoid 1
-            uint16_t unused2 : 2;
-            uint16_t err     : 5;
+            bool de_en          : 1; //De-Energized
+            bool main           : 1; //Main energized position
+            uint16_t unused1    : 2;
+            uint16_t status     : 4;
+            bool sv1            : 1; //Current state of solenoid 1
+            uint16_t unused2    : 2;
+            uint16_t led_state  : 5;
             };
 
         struct out_data_swapped   //Swapped low and high byte for easer processing
@@ -2396,119 +2471,160 @@ class valve_iolink_shut_off_sorio : public valve
             uint16_t unused2 : 1;
             };
 
-        in_data* in_info = new in_data;
-        out_data_swapped* out_info = 0;
+        in_data in_info{ 0 };
+        static out_data_swapped stub_out_info;
+        out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан IO-link VTUG с одним каналом управления.
-class valve_iolink_vtug : public valve
+/// @brief Клапан с управлением от пневмоострова IO-link.
+
+class valve_iol_terminal : public valve
     {
     public:
-        valve_iolink_vtug( const char *dev_name,
-            device::DEVICE_SUB_TYPE sub_type );
+        explicit valve_iol_terminal( bool is_on_fb, bool is_off_fb,
+            const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
+            u_int terminal_size = 1 );
 
-        valve_iolink_vtug( bool is_on_fb, bool is_off_fb, const char *dev_name,
-            device::DEVICE_SUB_TYPE sub_type);
+        ///< Конструктор для клапана без обратных связей.
+        explicit valve_iol_terminal( const char* dev_name,
+            device::DEVICE_SUB_TYPE sub_type, u_int terminal_size = 1 );
 
-        void set_rt_par( u_int idx, float value );
+        void set_rt_par( u_int idx, float value ) override;
+
+        bool check_config();
+
+        /// @brief Установка данных состояния устройства.
+        void set_state_bit( char* data, unsigned int n ) const;
+
+        void reset_state_bit( char* data, unsigned int n ) const;
+
+        enum class TERMINAL_OUTPUT : unsigned int
+            {
+            ON = 1,         ///< Включение.
+            UPPER_SEAT,     ///< Включение верхнего седла.
+            LOWER_SEAT      ///< Включение нижнего седла.
+            };
+
+        enum class IO_CONSTANT : unsigned int
+            {
+            AO_INDEX_1 = 0,///< Индекс канала аналогового выхода.
+            AO_INDEX_2 = 1,
+            AO_INDEX_3 = 2,
+
+            DI_INDEX_1 = 0,///< Индекс канала дискретного входа обратной связи.
+            DI_INDEX_2 = 1,
+            };
+
+        unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n ) const;
 
 #ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-
-        void direct_off();
-
 		int get_state() override;
 #endif // DEBUG_NO_IO_MODULES
 
+        VALVE_STATE get_valve_state() override;
 
-    protected:
-        /// @brief Получение данных состояния устройства.
-        char get_state_data( char* data );
+        void direct_on() override;
+        void direct_off() override;
 
-        VALVE_STATE get_valve_state();
-
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
-
-        u_int vtug_number;        ///< Номер устройства.
-        u_int vtug_io_size = 1;   ///< Размер области, в словах.
-
-        enum CONSTANTS
+        void set_st( VALVE_STATE new_state )
             {
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
-            };
+            state = new_state;
+            }
+
+    private:
+        std::vector<unsigned int> terminal_id;
+
+        VALVE_STATE state = VALVE_STATE::V_OFF;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления.
+class valve_iol_terminal_DO1 : public valve_iol_terminal
+    {
+    public:
+        explicit valve_iol_terminal_DO1( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_on : public valve_iolink_vtug
+class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_on(const char* dev_name);
+        explicit valve_iol_terminal_DO1_DI1_on( const char* dev_name );
 
-    private:
-        enum CONSTANTS
-            {
-            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
-            };
-
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_on_fb_value();
-
-        int get_off_fb_value();
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
 #endif // DEBUG_NO_IO_MODULES
+
+        int get_off_fb_value() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
-class valve_iolink_vtug_off : public valve_iolink_vtug
+class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_off(const char* dev_name);
+        explicit valve_iol_terminal_DO1_DI1_off(const char* dev_name);
 
-    private:
-        enum CONSTANTS
-            {
-            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
-            };
-
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_on_fb_value();
+        int get_on_fb_value() override;
 
-        int get_off_fb_value();
+#ifndef DEBUG_NO_IO_MODULES
+        int get_off_fb_value() override;
 #endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
+class valve_iol_terminal_mixproof_DO3 : public i_mix_proof, public valve_iol_terminal
+    {
+    public:
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
+            bool is_on_fb, bool is_off_fb, device::DEVICE_SUB_TYPE sub_type );
+
+        explicit valve_iol_terminal_mixproof_DO3( const char* dev_name,
+            device::DEVICE_SUB_TYPE sub_type = V_IOL_TERMINAL_MIXPROOF_DO3 );
+
+        void open_upper_seat() override;
+
+        void open_lower_seat() override;
+
+        void direct_set_state( int new_state ) override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
-class valve_iolink_vtug_DO2 : public valve_iolink_vtug
+class valve_iol_terminal_DO1_DI2 : public valve_iol_terminal
     {
     public:
-        valve_iolink_vtug_DO2( const char* dev_name );
+        explicit valve_iol_terminal_DO1_DI2( const char* dev_name );
 
-    private:
-        enum CONSTANTS
-            {
-            DI_INDEX_ON = 0,     ///< Индекс канала дискретного входа.
-            DI_INDEX_OFF,
-            };
-
-    protected:
-#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_on_fb_value();
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
+#endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления и
+/// 2-я обратными связями.
+class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_DO3
+    {
+    public:
+        explicit valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name );
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state() override;
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
+
+        int get_off_fb_value() override;
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
@@ -2577,9 +2693,9 @@ class AI1 : public analog_io_device
             return 0;
             }
 
-    protected:
 #ifdef DEBUG_NO_IO_MODULES
-        int st;
+    private:
+        int st = 0;
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2712,7 +2828,6 @@ class level: public AI1
             return start_param_idx + LAST_PARAM_IDX - 1;
             }
 
-    protected:
         enum CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
@@ -2998,9 +3113,6 @@ class concentration_e : public AI1
         concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
             AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            st = 1;
-#endif
             start_param_idx = AI1::get_params_count();
             set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
@@ -3144,12 +3256,6 @@ class virtual_wages : public device, public i_wages
     public:
         virtual_wages( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
-
         virtual void direct_off();
 
         virtual void direct_set_value( float new_value );
@@ -3163,6 +3269,10 @@ class virtual_wages : public device, public i_wages
         virtual int get_state();
 
         virtual void tare();
+
+    private:
+        float value;
+        int state;
     };
 //-----------------------------------------------------------------------------
 class wages_RS232 : public analog_io_device, public i_wages
@@ -3203,7 +3313,45 @@ class wages_RS232 : public analog_io_device, public i_wages
             };
 
         int state;
-        float value;
+        float value = .0f;
+    };
+//-----------------------------------------------------------------------------
+class wages_eth : public device, public i_wages
+    {
+    public:
+        explicit wages_eth( const char* dev_name );
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+        void direct_set_value( float new_value ) override;
+        
+        void direct_set_state( int state ) override;
+
+        void direct_off() override;
+        
+        void direct_on() override;
+
+        void tare() override;
+
+        void set_string_property( const char* field, const char* value ) override;
+
+        void direct_set_tcp_buff( const char* new_value, size_t size,
+            int new_status );
+
+    private:
+        auto_smart_ptr < iot_wages_eth > weth;
+
+        enum class CONSTANTS
+        {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            P_CZ,           ///< Сдвиг нуля.
+            LAST_PARAM_IDX,
+        };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
@@ -3215,7 +3363,33 @@ class wages : public analog_io_device, public i_wages
         void tare();
         float get_weight();
 
-    protected:
+#ifdef DEBUG_NO_IO_MODULES
+        float get_value();
+        void  direct_set_value( float new_value );
+#endif // DEBUG_NO_IO_MODULES
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+        void direct_set_state( int new_state );
+        void  direct_set_value( float new_value )
+            {
+            return;
+            }
+#endif // DEBUG_NO_IO_MODULES
+
+        int get_state()
+            {
+            return 0;
+            }
+
+        int save_device_ex( char *buff )
+            {
+            return sprintf( buff, "W=%.3f, ", get_value() );
+            }
+
+    private:
+        float weight;
+        unsigned long filter_time;
 
         enum CONSTANTS
             {
@@ -3235,35 +3409,6 @@ class wages : public analog_io_device, public i_wages
             S_NONE = 0,
             S_TARE = 1,
             };
-
-        float weight;
-        unsigned long filter_time;
-
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
-        void  direct_set_value( float new_value );
-#endif // DEBUG_NO_IO_MODULES
-
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        float get_value();
-        void direct_set_state( int new_state );
-        void  direct_set_value( float new_value )
-            {
-            return;
-            }
-
-#endif // DEBUG_NO_IO_MODULES
-    public:
-        int get_state()
-            {
-            return 0;
-            }
-
-        int save_device_ex( char *buff )
-            {
-            return sprintf( buff, "W=%.3f, ", get_value() );
-            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
@@ -3272,14 +3417,6 @@ class virtual_device : public device
     public:
         virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type,
             device::DEVICE_SUB_TYPE dev_sub_type);
-
-    protected:
-
-        float value;
-        int state;
-        bool level_logic_invert;
-
-    public:
 
         virtual void direct_off();
 
@@ -3296,6 +3433,11 @@ class virtual_device : public device
         virtual bool is_active();
 
         virtual void set_rt_par(unsigned int idx, float value);
+
+    private:
+        float value;
+        int state;
+        bool level_logic_invert;
      };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
@@ -3345,10 +3487,9 @@ class virtual_counter : public device, public i_counter
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
 
-    protected:
-        STATES state;        
-
     private:
+        STATES state;
+
         float flow_value;
 
         u_int value;
@@ -3626,12 +3767,6 @@ class virtual_motor : public i_motor
     public:
         virtual_motor( const char* dev_name );
 
-    protected:
-        float value;
-        int state;
-
-    public:
-
         virtual void direct_off();
 
         virtual void direct_set_value( float new_value );
@@ -3643,6 +3778,10 @@ class virtual_motor : public i_motor
         virtual void direct_on();
 
         virtual int get_state();
+
+    private:
+        float value;
+        int state;
 
     };
 //-----------------------------------------------------------------------------
@@ -3743,10 +3882,20 @@ public:
     float get_amperage() const override;
 
 #ifdef DEBUG_NO_IO_MODULES
-    int set_cmd( const char* prop, u_int idx, double val );
+    int set_cmd( const char* prop, u_int idx, double val ) override;
+
+    float get_rpm() const
+        {
+        return (float)rpm;
+        }
 #endif // DEBUG_NO_IO_MODULES
 
-protected:
+    altivar_node* get_atv() const
+        {
+        return atv;
+        }
+
+private:
     altivar_node* atv;
 
 #ifdef DEBUG_NO_IO_MODULES
@@ -3758,7 +3907,6 @@ protected:
     float amperage = .0f;
 #endif // DEBUG_NO_IO_MODULES
 
-private:
     enum CONSTANTS
     {
         ADDITIONAL_PARAM_COUNT = 1,
@@ -3832,6 +3980,8 @@ class level_s_iolink : public analog_io_device
 
         void evaluate_io();
 
+        void set_article( const char* new_article ) override;
+
     private:
         int current_state;
         u_int_4 time;
@@ -3847,8 +3997,6 @@ class level_s_iolink : public analog_io_device
             EH_FTL33,
             };
         ARTICLE n_article;
-
-        void set_article( const char* new_article );
 
         struct LS_data
             {
@@ -3970,8 +4118,6 @@ class base_counter: public i_counter, public device, public io_device
         base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
             int extra_par_cnt );
 
-        virtual ~base_counter();
-
         void evaluate_io();
 
         void print() const override;
@@ -4027,6 +4173,8 @@ class base_counter: public i_counter, public device, public io_device
 
         int save_device_ex( char* buff );
 
+        const char* get_error_description() const override;
+
     protected:
         float get_abs_value() const
             {
@@ -4062,8 +4210,6 @@ class counter : public base_counter
             DEVICE_SUB_TYPE sub_type = device::DST_FQT,
             int extra_par_cnt = ADDITIONAL_PARAMS_COUNT );
 
-        virtual ~counter();
-
         float get_raw_value() const override;
 
         float get_max_raw_value() const override;
@@ -4088,8 +4234,6 @@ class counter_f : public counter
     {
     public:
         counter_f( const char *dev_name );
-
-        virtual ~counter_f();
 
         int get_state();
 
@@ -4118,32 +4262,11 @@ class counter_f : public counter
         float flow_value = 0.f;
     };
 //-----------------------------------------------------------------------------
-/// @brief Счетчик c диагностикой.
-class counter_f_ok : public counter_f
-    {
-    public:
-        counter_f_ok( const char *dev_name );
-
-        //Lua.
-        int save_device_ex( char *buff );
-
-        int get_state();
-
-    private:
-
-        enum CONSTANTS
-            {
-            DI_INDEX = 0,  ///< Индекс канала дискретного входа (диагностики).
-            };
-    };
-//-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.
 class counter_iolink : public base_counter
     {
     public:
         counter_iolink( const char* dev_name );
-
-        ~counter_iolink();
 
         void evaluate_io();
 
@@ -4442,7 +4565,7 @@ class camera : public i_camera, public device, public io_device
     {
     public:
         camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
-            int params_count = 0 );
+            int params_count = 0, bool is_ready = true );
 
         void direct_set_state( int new_state );
 
@@ -4492,8 +4615,6 @@ class camera_DI2 : public camera
     {
     public:
         camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type );
-
-        int get_state();
 
         void evaluate_io() override;
 
@@ -4570,6 +4691,53 @@ class dev_stub : public i_counter, public valve, public i_wages,
         void tare();
 
         void process_DO( u_int n, DO_state state, const char* name ) override;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+class threshold_regulator :public device, public i_Lua_save_device
+    {
+    public:
+        enum class PARAM
+            {
+            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
+            P_DELTA,
+
+            PARAMS_COUNT
+            };
+
+        explicit threshold_regulator( const char* name );
+
+        int get_state() override;
+
+        void direct_off() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        const char* get_name_in_Lua() const override;
+
+        float get_value() override;
+
+        void direct_set_value( float val ) override;
+
+        int save_device( char* buff ) override;
+
+        void set_string_property( const char* field, const char* value ) override;
+
+    private:
+        enum class STATE
+            {
+            OFF,
+            ON,
+            };
+
+        STATE state = STATE::OFF;
+        int out_state = 0;
+        float set_value = 0;
+
+        device* sensor = nullptr;
+        device* actuator = nullptr;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4659,7 +4827,7 @@ class device_manager: public i_Lua_save_device
         wages* get_WT( const char *dev_name );
 
         /// @brief Получение регулятора по имени.
-        PID* get_C( const char* dev_name );
+        i_DO_AO_device* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
         signal_column* get_HLA( const char* dev_name );
@@ -4695,7 +4863,7 @@ class device_manager: public i_Lua_save_device
 
         device* get_stub_device()
             {
-            return static_cast<device*>( static_cast<valve*>( &stub ) );
+            return dynamic_cast<device*>( dynamic_cast<valve*>( &stub ) );
             }
 
         int init_params();
@@ -5034,7 +5202,7 @@ i_DO_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* C( const char* dev_name );
+i_DO_AO_device* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнальной колонны по имени.
 ///

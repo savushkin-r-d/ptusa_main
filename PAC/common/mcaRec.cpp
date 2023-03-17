@@ -22,7 +22,7 @@ int TRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
 int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
-unsigned char* TRecipeManager::recipeCopyBuffer = NULL;
+unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipe(0),
@@ -48,14 +48,16 @@ TRecipeManager::~TRecipeManager()
     {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
-    if (recipeCopyBuffer != NULL)
-        {
-        delete[] recipeCopyBuffer;
-        }
+    recipeMemory = nullptr;
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
+    defaultfilename = nullptr;
     }
 
 int TRecipeManager::NextRecipe()
@@ -516,7 +518,7 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 
 void TRecipeManager::CopyRecipe()
     {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
         {
         delete[] recipeCopyBuffer;
         }
@@ -526,7 +528,7 @@ void TRecipeManager::CopyRecipe()
 
 void TRecipeManager::PasteRecipe()
     {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
         {
         WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
         LoadRecipeName();
@@ -539,7 +541,7 @@ void TRecipeManager::NullifyRecipe()
     memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
     WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
     delete [] tempbuff;
-    tempbuff = 0;
+    tempbuff = nullptr;
     LoadRecipeName();
     }
 
@@ -584,7 +586,7 @@ int TRecipeManager::SaveToFile(const char* filename)
 #ifdef DEBUG
     printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
-    FILE* memFile = NULL;
+    FILE* memFile = nullptr;
     char fname[50];
 #ifdef PAC_PLCNEXT
     sprintf(fname, "/opt/main/%s", filename);
@@ -592,7 +594,7 @@ int TRecipeManager::SaveToFile(const char* filename)
     sprintf(fname, "%s", filename);
 #endif // PAC_PLCNEXT
     memFile = fopen(fname, "r+b");
-    if (NULL == memFile)
+    if (nullptr == memFile)
         {
         memFile = fopen(fname, "w+b");
         }
@@ -612,7 +614,7 @@ int TRecipeManager::SaveToFile(const char* filename)
 
 int TRecipeManager::LoadFromFile( const char* filename )
     {
-    FILE* memFile = NULL;
+    FILE* memFile = nullptr;
     char fname[50];
 #ifdef PAC_PLCNEXT
     sprintf(fname, "/opt/main/%s", filename);
@@ -641,7 +643,7 @@ int TMediumRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 2;
 
 int TMediumRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
-unsigned char* TMediumRecipeManager::recipeCopyBuffer = NULL;
+unsigned char* TMediumRecipeManager::recipeCopyBuffer = nullptr;
 
 TMediumRecipeManager::TMediumRecipeManager(MediumTypes mType) :
 mediumType(mType),
@@ -668,14 +670,16 @@ TMediumRecipeManager::~TMediumRecipeManager()
 {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
-    if (recipeCopyBuffer != NULL)
-    {
-        delete[] recipeCopyBuffer;
-    }
+    recipeMemory = nullptr;
+    delete[] recipeCopyBuffer;
+    recipeCopyBuffer = nullptr;
     delete[] defaultfilename;
+    defaultfilename = nullptr;
 }
 
 int TMediumRecipeManager::NextRecipe()
@@ -915,7 +919,7 @@ int TMediumRecipeManager::getRecipeName(int recNO, char* recName)
 
 void TMediumRecipeManager::CopyRecipe()
 {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
     {
         delete[] recipeCopyBuffer;
     }
@@ -925,7 +929,7 @@ void TMediumRecipeManager::CopyRecipe()
 
 void TMediumRecipeManager::PasteRecipe()
 {
-    if (recipeCopyBuffer != NULL)
+    if (recipeCopyBuffer != nullptr)
     {
         WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
         LoadRecipeName();
@@ -938,7 +942,7 @@ void TMediumRecipeManager::NullifyRecipe()
     memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
     WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
     delete[] tempbuff;
-    tempbuff = 0;
+    tempbuff = nullptr;
     LoadRecipeName();
 }
 
@@ -981,7 +985,7 @@ int TMediumRecipeManager::SaveToFile(const char* filename)
 #ifdef DEBUG
     printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
-    FILE* memFile = NULL;
+    FILE* memFile = nullptr;
     char fname[50];
 #ifdef PAC_PLCNEXT
     sprintf(fname, "/opt/main/%s", filename);
@@ -989,7 +993,7 @@ int TMediumRecipeManager::SaveToFile(const char* filename)
     sprintf(fname, "%s", filename);
 #endif // PAC_PLCNEXT
     memFile = fopen(fname, "r+b");
-    if (NULL == memFile)
+    if (nullptr == memFile)
     {
         memFile = fopen(fname, "w+b");
     }
@@ -1009,7 +1013,7 @@ int TMediumRecipeManager::SaveToFile(const char* filename)
 
 int TMediumRecipeManager::LoadFromFile(const char* filename)
 {
-    FILE* memFile = NULL;
+    FILE* memFile = nullptr;
     char fname[50];
     memset(recipeMemory, 0, recipeMemorySize);
 #ifdef PAC_PLCNEXT

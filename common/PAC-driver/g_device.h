@@ -118,7 +118,19 @@ class device_communicator
         static auto_smart_ptr < device_communicator > instance;
         static char buff[ tcp_communicator::BUFSIZE ];
 
+        static bool use_compression;
+
     public:
+        static void switch_on_compression()
+            {
+            use_compression = true;
+            }
+
+        static void switch_off_compression()
+            {
+            use_compression = false;
+            }
+
         /// @brief Получение единственного экземпляра класса.
         static device_communicator* get_instance()
             {

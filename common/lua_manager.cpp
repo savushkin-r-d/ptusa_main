@@ -106,7 +106,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     {
     if ( G_DEBUG )
         {
-        printf( "Init Lua...\n" );
+        G_LOG->debug( "Init Lua..." );
         }
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
@@ -374,6 +374,21 @@ lua_manager::~lua_manager()
         }
     }
 //-----------------------------------------------------------------------------
+bool lua_manager::is_exist_lua_function( const char* object_name,
+    const char* function_name ) const
+    {
+    auto res = false;
+    lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+    if ( !lua_isnil( L, -1 ) )
+        {
+        lua_getfield( L, -1, function_name );
+        res = lua_isfunction( L, -1 );
+        lua_pop( L, 1 );
+        }
+    lua_pop( L, 1 );
+    return res;
+    }
+//-----------------------------------------------------------------------------
 int lua_manager::void_exec_lua_method( const char *object_name,
                                       const char *function_name, const char *c_function_name ) const
     {
@@ -454,7 +469,9 @@ int lua_manager::exec_lua_method_var( const char* object_name,
     if ( object_name && strcmp( object_name, "" ) != 0 )
         {
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
         lua_getfield( L, -1, function_name );
+        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
         lua_remove( L, -2 );
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
 
@@ -542,7 +559,7 @@ int lua_manager::error_trace( lua_State * L )
             errors.erase( errors.begin(), errors.end() - MAX_ERRORS / 2 );
             }
 
-        std::sort( errors.begin(), errors.begin() );
+        std::sort( errors.begin(), errors.end() );
         }
 
     return 0;

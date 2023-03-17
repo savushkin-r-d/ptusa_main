@@ -72,7 +72,7 @@ class action
         virtual void evaluate() {}
 
         /// @brief Завершения действия.
-        virtual void final();
+        virtual void finalize();
 
         /// @brief Добавление устройства к действию.
         ///
@@ -120,6 +120,14 @@ class action
             {
             return 0;
             }
+
+        /// @brief Задание числового свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @idx [in] index Индекс свойства.
+        /// @param [in] value Значение свойства.
+        virtual int set_int_property( const char* name, size_t idx, int value );
 
         enum CONSTANTS
             {
@@ -222,7 +230,7 @@ class open_seat_action: public action
 
         void init();
         void evaluate();
-        void final();
+        void finalize();
 
 #ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
@@ -287,7 +295,7 @@ class DI_DO_action: public action
 
         void evaluate();
 
-        void final() override;
+        void finalize() override;
 
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
@@ -317,7 +325,7 @@ class AI_AO_action : public action
 
         void evaluate();
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -332,7 +340,7 @@ class required_DI_action: public action
 
         int check( char* reason ) const;
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -343,7 +351,7 @@ class checked_devices_action : public action
     public:
         checked_devices_action();
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -360,7 +368,7 @@ class wash_action: public action
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
-        void final() override;
+        void finalize() override;
 
     private:
         enum GROUPS
@@ -379,24 +387,36 @@ class wash_action: public action
 /// Проверка устройств на нахождение в активном (включены) и в пассивном
 /// (отключены) состоянии.
 /// </summary>
-class to_step_if_devices_in_specific_state_action : public action
+class jump_if_action : public action
     {
     public:
-        to_step_if_devices_in_specific_state_action();
+        explicit jump_if_action( const char* name );
 
-        bool is_goto_next_step() const;
+        bool is_jump( int &next );
+
+        int set_int_property( const char* name, size_t idx, int value ) override;
+
+        int get_int_property( const char* name, size_t idx );
 
         /// @brief Завершения действия.
-        void final();
+        void finalize();
+
+        void print( const char* prefix = "", bool new_line = true ) const override;
 
     private:
+        bool check( const std::vector< device* > &checked_devices,
+            bool check_is_opened ) const;
+
         enum GROUPS
             {
             G_ON_DEVICES = 0,   //Устройства, которые должны быть включены.
             G_OFF_DEVICES,      //Устройства, которые должны быть отключены.
 
-            G_SUBGROUPS_CNT,    //Количество групп.
+            G_GROUPS_CNT,       //Количество групп.
             };
+
+        // Устройства.
+        std::vector < int > next_n;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -444,7 +464,7 @@ class step
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
             A_DELAY_OFF,
-            A_TO_STEP_IF,
+            A_JUMP_IF,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
@@ -577,6 +597,8 @@ class operation_state
         int check_devices( char* err_dev_name, int str_len );
 
         int check_steps_params( char* err_dev_name, int str_len );
+
+        bool is_goto_next_state( int& next_state ) const;
 
     private:
         std::string name;
@@ -723,6 +745,10 @@ class operation
         int stop();
 
         int start();
+
+        int switch_off();
+
+        int start( int new_run_step );
 #ifndef __GNUC__
 #pragma endregion
 #endif
@@ -790,6 +816,8 @@ class operation
 #endif
 
     private:
+        int process_auto_switch_on();
+
         state_idx current_state;
 
         std::vector< operation_state* > states;
@@ -805,6 +833,11 @@ class operation
         u_int run_step;
 
         u_int run_time;  /// Время выполнения операции (состояние run).
+
+        u_long start_warn = 0;
+        u_long start_wait = 0;
+        bool is_first_goto_next_state = true;
+        bool was_fail = false;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операциях какого-либо объекта (танк,

@@ -63,18 +63,18 @@ tech_object::~tech_object()
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         delete errors[ i ];
-        errors[ i ] = 0;
+        errors[ i ] = nullptr;
         }
 
     delete[] name;
-    name = 0;
+    name = nullptr;
     delete[] name_Lua;
-    name_Lua = 0;
+    name_Lua = nullptr;
     delete[] full_name;
-    full_name = 0;
+    full_name = nullptr;
 
     delete operations_manager;
-    operations_manager = 0;
+    operations_manager = nullptr;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
@@ -168,7 +168,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         // Check if possible.
                         if ( ( res = lua_check_on_start( operation_n ) ) == 0 )
                             {
-                            op->start();
+                            auto run_step = 
+                                lua_get_run_step_after_pause( operation_n );
+                            op->start( run_step );
                             lua_on_start( operation_n );
                             }
                         else
@@ -186,7 +188,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     if ( newm == 0 ) // Off mode.
                         {
                         // Check if possible.
-                        if ( ( res = lua_check_off_mode( operation_n ) ) == 0 )
+                        if ( ( res = lua_check_off_mode( operation_n ) ) <= 0 )
                             {
                             int idx = operation_n - 1;
                             state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
@@ -203,7 +205,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         {
                         //Проверка режима на проверку ОС устройств.
                         const int ERR_STR_SIZE = 41;
-                        char res_str[ ERR_STR_SIZE ] = "обр. связь ";
+                        char res_str[ ERR_STR_SIZE ] = "авария ";
 
                         int len = strlen( res_str );
                         res = op->check_devices_on_run_state(
@@ -325,11 +327,7 @@ int tech_object::evaluate()
         operation* op = ( *operations_manager )[ idx ];
 
         modes_time[ idx ] = op->evaluation_time() / 1000;
-
-        if ( get_mode( idx ) == 1 )
-            {
-            op->evaluate();
-            }
+        op->evaluate();
 
         const int ERR_STR_SIZE = 80;
 
@@ -397,6 +395,11 @@ int tech_object::lua_check_function( const char* function_name,
     //Проверка на наличии функции function_name
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
+    if ( lua_isnoneornil( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+        return 0;
+        }
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, function_name );
     lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
 
@@ -404,6 +407,19 @@ int tech_object::lua_check_function( const char* function_name,
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
             function_name, mode, show_error ? 1 : 0, comment );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_get_run_step_after_pause( u_int mode ) const
+    {
+    auto function_name = "get_run_step_after_pause";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, function_name ) )
+        {
+        return G_LUA_MANAGER->int_exec_lua_method( name_Lua,
+            function_name, mode,
+            "int tech_object::lua_get_run_step_after_pause( u_int mode )" );
         }
 
     return 0;
@@ -526,28 +542,20 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
 
     //TODO. Устаревшее название функции. Оставлено для совместимости.
     //Проверка на наличии функции check_on_mode.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto old_function_name = "check_on_mode";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
-            "check_on_mode", mode, show_error ? 1 : 0,
+            old_function_name, mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
     //Проверка на наличии функции user_check_operation_on.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto new_function_name = "user_check_operation_on";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
-            "user_check_operation_on", mode, show_error ? 1 : 0,
+            new_function_name, mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
@@ -1296,7 +1304,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 E_MAX_ERRORS_SIZE );
             }
         delete new_err;
-        new_err = 0;
+        new_err = nullptr;
         }
 
     return 0;
@@ -1398,7 +1406,7 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
 
     //Проверка режима на проверку ОС устройств.
     const int S_SIZE = 41;
-    char res_str[ S_SIZE ] = "обр. связь ";
+    char res_str[ S_SIZE ] = "авария ";
 
     int l = strlen( res_str );
     int res = op->check_devices_on_run_state( res_str + l, S_SIZE - l );
@@ -1573,7 +1581,7 @@ int tech_object_manager::init_objects()
 tech_object_manager::~tech_object_manager()
     {
     delete stub;
-    stub = 0;
+    stub = nullptr;
 
 // Удаляются в Lua.
 //    for ( u_int i = 0; i < tech_objects.size(); i++ )

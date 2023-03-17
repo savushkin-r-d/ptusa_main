@@ -47,9 +47,14 @@ int check_file(const char* file_name, char* err_str);
 class lua_manager
     {
     public:
-        void no_print_stack_traceback()
+        static void no_print_stack_traceback()
             {
             is_print_stack_traceback = false;
+            }
+
+        static void use_print_stack_traceback()
+            {
+            is_print_stack_traceback = true;
             }
 
         static lua_manager* get_instance();
@@ -58,6 +63,9 @@ class lua_manager
             const char* sys_dir = "", const char* extra_dirs = "" );
 
         ~lua_manager();
+
+        bool is_exist_lua_function( const char* object_name,
+            const char* function_name ) const;
 
         int void_exec_lua_method( const char *object_name,
             const char *function_name, const char *c_function_name ) const;
@@ -95,6 +103,15 @@ class lua_manager
         void set_Lua( lua_State* l)
             {
             L = l;
+            }
+
+        void free_Lua()
+            {
+            if ( L )
+                {
+                lua_close( L );
+                L = nullptr;
+                };
             }
 #endif
 
