@@ -520,8 +520,7 @@ bool operation::is_active_extra_step( int step_idx ) const
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
-       return states[ current_state ]->is_active_extra_step( step_idx );
-
+        return states[ current_state ]->is_active_extra_step( step_idx );
         }
 
     return false;
@@ -1095,9 +1094,9 @@ int DI_DO_action::check( char* reason ) const
             d_i_device->get_type() != device::DT_LS &&
             d_i_device->get_type() != device::DT_FS )
             {
-            auto out = fmt::format_to( reason,
-                "в поле \'{}\' устройство \'{:.25} ({:.50})\'"
-                " не является входным сигналом (DI, SB, GS, LS, FS)", name.c_str(),
+            auto format_str = "в поле \'{}\' устройство \'{:.25} ({:.50})\' "
+                "не является входным сигналом (DI, SB, GS, LS, FS)";
+            auto out = fmt::format_to( reason, format_str, name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             *out = 0;
             return 1;
@@ -1215,10 +1214,9 @@ int AI_AO_action::check( char* reason ) const
             do_device->get_type() != device::DT_QT &&
             do_device->get_type() != device::DT_TE )
             {
-            auto out = fmt::format_to( reason,
-                "в поле \'{}\' устройство \'{:.25} ({:.50})\'"
-                " не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
-                name.c_str(),
+            auto format_str = "в поле \'{}\' устройство \'{:.25} ({:.50})\' "
+                "не является входным сигналом (АI, PT, LT, FQT, QT, TE)";
+            auto out = fmt::format_to( reason, format_str, name.c_str(),
                 do_device->get_name(), do_device->get_description() );
             *out = 0;
             return 1;
