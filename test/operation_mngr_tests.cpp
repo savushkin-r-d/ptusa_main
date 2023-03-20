@@ -195,11 +195,52 @@ TEST( operation, start )
 	test_params_manager::removeObject();
 	}
 
+TEST( operation, on_extra_step )
+	{
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
 
-/*
-	TEST METHOD DEFENITION:
-	void evaluate()
-*/
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	test_op->add_step( "Init", -1, -1 );
+	test_op->add_step( "Process #1", -1, -1 );
+	test_op->add_step( "Process #2", -1, -1 );
+
+	auto const MAIN_STEP = 1;
+	test_op->start( MAIN_STEP );
+	auto const EXTRA_STEP = 2;
+	auto const ANOTHER_EXTRA_STEP = 3;
+	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+	test_op->on_extra_step( EXTRA_STEP );
+	EXPECT_TRUE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+	test_op->switch_active_extra_step( EXTRA_STEP, ANOTHER_EXTRA_STEP );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_TRUE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+	test_op->off_extra_step( ANOTHER_EXTRA_STEP );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+
+	test_op->on_extra_step( EXTRA_STEP );
+	test_op->on_extra_step( ANOTHER_EXTRA_STEP );
+	EXPECT_TRUE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_TRUE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+	test_op->finalize();
+	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
 
 TEST( operation, evaluate )
 	{
