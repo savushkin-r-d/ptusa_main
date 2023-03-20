@@ -879,12 +879,12 @@ int required_DI_action::check( char* reason ) const
         }
 
     auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
+    for ( auto d : devs )
         {
-        if ( !devs[ i ]->is_active() )
+        if ( !d->is_active() )
             {
-            auto out = fmt::format_to( reason, "нет сигнала \'{:.25} ({:.50})\'",
-                devs[ i ]->get_name(), devs[ i ]->get_description() );
+            auto f_str = "нет сигнала \'{:.25} ({:.50})\'";
+            auto out = fmt::format_to( reason, f_str, d->get_name(), d->get_description() );
             *out = 0;
             return 1;
             }
@@ -953,7 +953,11 @@ step::~step()
 //-----------------------------------------------------------------------------
 int step::check( char* reason ) const
     {
-    int res = actions[ A_DI_DO ]->check( reason );
+    auto res = actions[ A_DI_DO ]->check( reason );
+    if ( res ) return res;
+    res = actions[ A_AI_AO ]->check( reason );
+    if ( res ) return res;
+    res = actions[ A_INVERTED_DI_DO ]->check( reason );
     if ( res ) return res;
 
     if ( is_mode )
@@ -1203,19 +1207,19 @@ int AI_AO_action::check( char* reason ) const
             continue;
             }
 
-        auto d_o_device = devs[ i ][ 0 ];
-        if ( d_o_device->get_type() != device::DT_AI &&
-            d_o_device->get_type() != device::DT_PT &&
-            d_o_device->get_type() != device::DT_LT &&
-            d_o_device->get_type() != device::DT_FQT &&
-            d_o_device->get_type() != device::DT_QT &&
-            d_o_device->get_type() != device::DT_TE )
+        auto do_device = devs[ i ][ 0 ];
+        if ( do_device->get_type() != device::DT_AI &&
+            do_device->get_type() != device::DT_PT &&
+            do_device->get_type() != device::DT_LT &&
+            do_device->get_type() != device::DT_FQT &&
+            do_device->get_type() != device::DT_QT &&
+            do_device->get_type() != device::DT_TE )
             {
             auto out = fmt::format_to( reason,
                 "в поле \'{}\' устройство \'{:.25} ({:.50})\'"
                 " не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
                 name.c_str(),
-                d_o_device->get_name(), d_o_device->get_description() );
+                do_device->get_name(), do_device->get_description() );
             *out = 0;
             return 1;
             }
