@@ -44,9 +44,7 @@ class action
     public:
         action( std::string name, u_int subgropups_cnt = 1 );
 
-        virtual ~action()
-            {
-            }
+        virtual ~action() = default;
 
         /// @brief Проверка на отсутствие устройств.
         ///
@@ -66,10 +64,16 @@ class action
             }
 
         /// @brief Инициализация действия.
-        virtual void init() {}
+        virtual void init() 
+            {
+            // По умолчанию ничего не делаем.
+            }
 
         /// @brief Выполнение действия.
-        virtual void evaluate() {}
+        virtual void evaluate() 
+            {
+            // По умолчанию ничего не делаем.
+            }
 
         /// @brief Завершения действия.
         virtual void finalize();
@@ -92,9 +96,9 @@ class action
         /// @brief Установка параметров для действия.
         ///
         /// @param [in] par Параметры.
-        virtual void set_params( const saved_params_float *par )
+        virtual void set_params( const saved_params_float *new_par )
             {
-            this->par = par;
+            par = new_par;
             }
 
         /// @brief Задание индексов используемых параметров к действию.
@@ -116,7 +120,7 @@ class action
         ///
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
-        virtual int set_bool_property( const char* name, bool value )
+        virtual int set_bool_property( const char* prop_name, bool value )
             {
             return 0;
             }
@@ -186,7 +190,7 @@ class on_reverse_action : public action
             {
             }
 
-        void evaluate();
+        void evaluate() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -199,9 +203,9 @@ class off_action: public action
             {
             }
 
-        void evaluate();
+        void evaluate() override;
 
-        void init();
+        void init() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -228,9 +232,9 @@ class open_seat_action: public action
     public:
         open_seat_action( bool is_mode, operation_state *owner );
 
-        void init();
-        void evaluate();
-        void finalize();
+        void init() override;
+        void evaluate() override;
+        void finalize() override;
 
 #ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
@@ -241,11 +245,11 @@ class open_seat_action: public action
         /// @param [in] dev Устройство.
         /// @param [in] group Дополнительный параметр.
         /// @param [in] seat_type Дополнительный параметр.
-        void add_dev( device *dev, u_int group, u_int seat_type );
+        void add_dev( device *dev, u_int group, u_int seat_type ) override;
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
-        bool is_empty() const;
+        bool is_empty() const override;
 
     private:
         enum PHASES
@@ -289,11 +293,11 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        DI_DO_action( std::string name = "Группы DI->DO's" );
+        explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
-        void evaluate();
+        void evaluate() override;
 
         void finalize() override;
 
@@ -321,9 +325,9 @@ class AI_AO_action : public action
     public:
         AI_AO_action();
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
-        void evaluate();
+        void evaluate() override;
 
         void finalize() override;
     };
@@ -338,7 +342,7 @@ class required_DI_action: public action
             {
             }
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
         void finalize() override;
     };
@@ -364,7 +368,7 @@ class wash_action: public action
             {
             }
 
-        void evaluate();
+        void evaluate() override;
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
@@ -396,10 +400,10 @@ class jump_if_action : public action
 
         int set_int_property( const char* name, size_t idx, int value ) override;
 
-        int get_int_property( const char* name, size_t idx );
+        int get_int_property( const char* name, size_t idx ) ;
 
         /// @brief Завершения действия.
-        void finalize();
+        void finalize() override;
 
         void print( const char* prefix = "", bool new_line = true ) const override;
 
