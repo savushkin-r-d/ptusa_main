@@ -67,19 +67,19 @@ if ( par != 0 &&
 ///
 /// Подробное описание.
 class step_path
- {
- };
+    {
+    };
 ```
 7. Комментирование определения функций осуществляется в следующем виде:
 ```C++
 //------------------------------------------------------------------------------
 void descriptive_name( type descriptive_name )
- {
- // Здесь помещается комментарий, описывающий, как
- // функция делает то, что она делает. Он может пропускаться
- // если программа сама по себе достаточно содержательна.
- code_goes_here();
- }
+    {
+    // Здесь помещается комментарий, описывающий, как
+    // функция делает то, что она делает. Он может пропускаться
+    // если программа сама по себе достаточно содержательна.
+    code_goes_here();
+    }
 ```
 8. Каждое определение функций нового класса отделяется специальным комментарием. Вид:
 ```C++
@@ -137,14 +137,14 @@ int set_dev_cnt( u_int_2 new_close_dev_cnt,
 //
 here_is_the_code();
 while( some_condition )
- {
- this_code_is_rather_obscure(); // 1
- }
+    {
+    this_code_is_rather_obscure(); // 1
+    }
 more_stuff_here();
 while( some_condition )
- {
- this_code_is_also_obscure(); // 2
- }
+    {
+    this_code_is_also_obscure(); // 2
+    }
  ```
 12. Должно использоваться табличное форматирование кода. Пример:
 ```C++
@@ -159,18 +159,18 @@ z = x; // A здесь третий.
 13. Длинный список инициализации элементов форматируется следующим образом:
 ```C++
 class derived : public base
- {
- string str;
- const int x;
- public:
- derived( char *init_str, int init_x );
- }
+    {
+    string str;
+    const int x;
+    public:
+    derived( char *init_str, int init_x );
+    }
 derived::derived( char *init_str, int init_x ): base( str, x
 ),
  str( init_str ),
  x( init_x )
- {
- }
+    {
+    }
 ```
 14. Так как директива препроцессора #ifdef почти всегда расположена на некотором расстоянии от #endif, то всегда комментируется #endif. Пример:
 ```C++
