@@ -159,6 +159,25 @@ TEST( open_seat_action, evaluate )
 	}
 
 
+TEST( step, get_name )
+	{
+	auto ST_NAME = "test_step";
+	step st1( ST_NAME, 0 );
+	EXPECT_STREQ( ST_NAME, st1.get_name() );
+	}
+
+TEST( step, is_active )
+	{
+	auto ST_NAME = "test_step";
+	step st1( ST_NAME, 0 );
+	EXPECT_FALSE( st1.is_active() );
+	st1.init();
+	EXPECT_TRUE( st1.is_active() );
+	st1.finalize();
+	EXPECT_FALSE( st1.is_active() );
+	}
+
+
 TEST( operation_state, is_empty )
 	{
 	char* res = 0;
@@ -239,6 +258,36 @@ TEST( operation_state, check_devices )
 	test_params_manager::removeObject();
 	}
 
+
+TEST( operation, operator_at )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );	
+	auto stub = ( *test_op )[ operation::STATES_MAX ];
+	ASSERT_STREQ( "заглушка", stub->get_name() );
+
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
 
 TEST( operation, start )
 	{
