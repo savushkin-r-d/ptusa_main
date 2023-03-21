@@ -116,6 +116,7 @@ TEST( open_seat_action, evaluate )
 	auto action = step[ 0 ][ step::ACTIONS::A_UPPER_SEATS_ON ];
 	action->add_dev( &test_DO1, 0, valve::V_UPPER_SEAT );
 	action->add_dev( &test_DO2, 0, valve::V_LOWER_SEAT );
+	action->print();
 
 	action->init();
 	reinterpret_cast<open_seat_action*>( action )->set_wait_time( FLIP_INTERVAL_MS );
