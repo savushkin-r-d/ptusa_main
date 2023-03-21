@@ -529,7 +529,6 @@ class step
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
 
-    private:
         bool active;
         u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
 
@@ -632,7 +631,6 @@ class operation_state
         operation_manager *owner;
         int n;              /// Номер.
 
-    private:
         /// Время выполнения активного шага, для возобновления после паузы.
         u_int_4 dx_step_time;
 
@@ -645,7 +643,6 @@ class operation_state
 #pragma region Поддержка более чем одного активного шага.
 #endif
 
-    public:
         void save();
         void load();
 
@@ -796,7 +793,6 @@ class operation
                 }
             }
 
-    public:
         step* add_step( const char* name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
 
@@ -808,7 +804,6 @@ class operation
 #pragma region Поддержка более чем одного активного шага.
 #endif
 
-    public:
         int on_extra_step( int step_idx );
 
         int off_extra_step( int step_idx );
@@ -918,25 +913,6 @@ class operation_manager
             {
             return owner->get_params();
             }
-
-        /////TODO. Будущая функциональность.
-        ///// @brief Обновление состояния доступности операций.
-        /////
-        ///// Для каждой операции:
-        ///// 1. Проверяем, если она включена, то можно ли ее отключить из
-        ///// соответствующего массива доступности. Если нет, то формируем
-        ///// также пояснение.
-        ///// 2. Если операция не включена, то проверяем, есть ли хотя бы одна
-        ///// активная операция (основная).
-        ///// 2.1 Если есть, то для каждой активной операции проверяем, можно ли
-        ///// с ней параллельно запустить данную операцию, если нет, то формируем
-        ///// пояснение.
-        ///// 3. Если нет активных (основных) операций, проверяем на возможность
-        ///// включения после последней выключенной операции (основной), если
-        ///// нет, то формируем пояснение.
-        ////int refresh_availability( int *modes_states, int last_mode )
-        ////    {
-        ////    }
 
         i_tech_object *owner;              ///Техобъект-владелец.
 
