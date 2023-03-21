@@ -4,6 +4,28 @@ using namespace ::testing;
 
 const int MAX_STR_SIZE = 500;
 
+
+TEST( action, check )
+	{
+	action* a1 = new action( "test_action", 0 );
+	const auto MAX_SIZE = 20;
+	std::string buff( MAX_SIZE, '\0' );
+	auto res = a1->check( &buff[ 0 ] );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", buff.c_str() );
+	delete a1;
+	}
+
+TEST( action, set_bool_property )
+	{
+	action a1( "test_action", 0 );
+	const auto MAX_SIZE = 20;
+	std::string buff( MAX_SIZE, '\0' );
+	auto res = a1.set_bool_property( &buff[ 0 ], false );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", buff.c_str() );
+	}
+
 TEST( action, check_devices )
 	{
 	char* res = 0;
