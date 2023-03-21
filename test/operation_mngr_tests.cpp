@@ -6,8 +6,16 @@ const int MAX_STR_SIZE = 500;
 
 TEST( action, check_devices )
 	{
+	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
 
@@ -27,14 +35,14 @@ TEST( action, check_devices )
 	const auto MAX_SIZE = 20;
 	std::string buff ( MAX_SIZE, '\0' );
 
-	auto res = a1.check_devices( &buff[ 0 ], MAX_SIZE );
-	EXPECT_NE( 0, res );
+	auto r = a1.check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_NE( 0, r );
 	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
 
 	a1.add_dev( &v2 );
 	a1.add_dev( &v3 );
-	res = a1.check_devices( &buff[ 0 ], MAX_SIZE );
-	EXPECT_EQ( MAX_SIZE, res );
+	r = a1.check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_EQ( MAX_SIZE, r );
 	EXPECT_STREQ( "'TEST1_V1', 'TES...", buff.c_str() );
 
 	test_params_manager::removeObject();
@@ -131,8 +139,15 @@ TEST( open_seat_action, evaluate )
 
 TEST( operation_state, is_empty )
 	{
+	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
 
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
@@ -159,11 +174,61 @@ TEST( operation_state, is_empty )
 	test_params_manager::removeObject();
 	}
 
+TEST( operation_state, check_devices )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto test_op = ( *operation_mngr )[ 1 ];
+	test_op->add_step( "Тестовый шаг", -1, -1 );
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	auto additional_step_in_run = operation_run_state->add_step( "Step_#2", -1, -1 );
+	auto a1 = reinterpret_cast<on_action*>(
+		( *additional_step_in_run )[ step::ACTIONS::A_ON ] );
+
+	virtual_valve v1( "TEST1_V1" );
+	tech_dev_error err_v1( &v1 );	
+	a1->add_dev( &v1 );
+	const auto MAX_SIZE = 20;
+	std::string buff( MAX_SIZE, '\0' );
+	auto ADDITIONAL_STEP = 2;
+	test_op->start();
+	test_op->to_step( ADDITIONAL_STEP );
+	v1.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
+	auto r = operation_run_state->check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_NE( 0, r );
+	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
+
+
+	test_params_manager::removeObject();
+	}
+
 
 TEST( operation, start )
 	{
+	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
 
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
@@ -195,10 +260,17 @@ TEST( operation, start )
 	test_params_manager::removeObject();
 	}
 
-TEST( operation, on_extra_step )
+TEST( operation, turn_off_active_step )
 	{
+	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
 
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
@@ -206,6 +278,43 @@ TEST( operation, on_extra_step )
 	lua_State* L = lua_open();
 	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	test_op->add_step( "Init", -1, -1 );
+
+
+	auto const MAIN_STEP = 1;
+	EXPECT_EQ( 0, test_op->active_step() );
+	test_op->start( MAIN_STEP );
+	EXPECT_EQ( MAIN_STEP, test_op->active_step() );
+	test_op->turn_off_active_step();
+	EXPECT_EQ( 0, test_op->active_step() );
+
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
+TEST( operation, on_extra_step )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
@@ -236,11 +345,13 @@ TEST( operation, on_extra_step )
 	test_op->finalize();
 	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
 	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_extra_step( EXTRA_STEP ) );
+	EXPECT_FALSE( test_op->is_active_extra_step( ANOTHER_EXTRA_STEP ) );
+	
 
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
-
 
 TEST( operation, evaluate )
 	{
