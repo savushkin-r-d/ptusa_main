@@ -17,6 +17,9 @@
 [submodule "demo_projects/T1-PLCnext-Demo"]
 	path = demo_projects/T1-PLCnext-Demo
 	url = https://github.com/savushkin-r-d/T1-PLCnext-Demo.git
+[submodule "open62541/open62541"]
+	path = open62541/open62541
+	url = https://github.com/open62541/open62541.git
 [submodule "fmt"]
 	path = fmt
 	url = https://github.com/fmtlib/fmt.git

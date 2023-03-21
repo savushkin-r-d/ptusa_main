@@ -4768,9 +4768,6 @@ class device_manager: public i_Lua_save_device
             return get_stub_device();
             }
 
-        ///@brief Получение количества всех устройств.
-        u_int get_device_count();
-
         /// @brief Получение клапана по его номеру.
         i_DO_device* get_V( const char *dev_name );
 

@@ -1231,11 +1231,6 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
-u_int device_manager::get_device_count()
-    {
-    return project_devices.size();
-    }
-//-----------------------------------------------------------------------------
 void device_manager::print() const
     {
     printf( "Device manager [%zu]:\n", project_devices.size() );
@@ -5238,7 +5233,7 @@ float wages_RS232::get_value_from_wages()
     //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
     //данных, вернуть старое значение (3). После переключения в режим
     //считывания данных получаем данные и обрабатываем (4)
-    //Если данные корректные, то в 4м байте символ "+" (ASCII - 43), иначе -
+    //Если данные корректные, в 4м бите символ "+" (ASCII - 43), иначе -
     //ошибка (5).
 
     char* data = (char*)get_AI_data(
