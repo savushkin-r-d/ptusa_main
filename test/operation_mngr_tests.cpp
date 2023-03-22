@@ -160,6 +160,48 @@ TEST( open_seat_action, evaluate )
 	}
 
 
+TEST( off_action, evaluate )
+	{
+	saved_params_u_int_4& par = PAC_info::get_instance()->par;
+	par[ PAC_info::P_V_OFF_DELAY_TIME ] = 0;
+
+	valve::clear_switching_off_queue();
+
+	virtual_valve V1( "V1" );
+	virtual_valve V2( "V2" );
+	virtual_valve V3( "V3" );
+	off_action action;
+	action.add_dev( &V1 );
+	action.add_dev( &V2 );
+
+	EXPECT_FALSE( V1.is_active() );
+	EXPECT_FALSE( V2.is_active() );
+	EXPECT_FALSE( V3.is_active() );
+
+	V1.on();
+	V2.on();
+	V3.on();
+	action.init();
+	sleep_ms( 1 );
+	valve::evaluate();
+	EXPECT_FALSE( V1.is_active() );
+	EXPECT_FALSE( V2.is_active() );
+	EXPECT_TRUE( V3.is_active() );
+
+	V1.on();
+	V2.on();
+	V3.on();
+	action.evaluate();
+	sleep_ms( 1 );
+	valve::evaluate();
+	EXPECT_FALSE( V1.is_active() );
+	EXPECT_FALSE( V2.is_active() );
+	EXPECT_TRUE( V3.is_active() );
+	
+	action.finalize();
+	}
+
+
 TEST( step, get_name )
 	{
 	auto ST_NAME = "test_step";
