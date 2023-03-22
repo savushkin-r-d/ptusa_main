@@ -19,11 +19,17 @@ TEST( action, print )
 	output = testing::internal::GetCapturedStdout();
 	EXPECT_EQ( output, "test: { {TEST1_V1} } \n" );
 
-	a1.add_dev( &v1, action::MAIN_GROUP, 1 );
+	a1.add_dev( &v1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
 	testing::internal::CaptureStdout();
 	a1.print();
 	output = testing::internal::GetCapturedStdout();
 	EXPECT_EQ( output, "test: { {TEST1_V1} {TEST1_V1} } \n" );
+
+	a1.add_dev( &v1, action::MAIN_GROUP + 1, action::MAIN_SUBGROUP );
+	testing::internal::CaptureStdout();
+	a1.print();
+	output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( output, "test: { {TEST1_V1} {TEST1_V1} } { {TEST1_V1} } \n" );
 	}
 
 TEST( action, check )
@@ -426,6 +432,9 @@ TEST( operation, start )
 	test_op->start();
 	EXPECT_EQ( operation::STOP, test_op->get_state() );
 	test_op->finalize();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	test_op->switch_off(); //Операция уже в "IDLE", ничего не должно измениться.
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 	G_LUA_MANAGER->free_Lua();
