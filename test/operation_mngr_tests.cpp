@@ -4,6 +4,27 @@ using namespace ::testing;
 
 const int MAX_STR_SIZE = 500;
 
+TEST( action, print )
+	{
+	action a1( "test" );
+	testing::internal::CaptureStdout();
+	a1.print();
+	auto output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( output, "" );
+
+	virtual_valve v1( "TEST1_V1" );
+	a1.add_dev( &v1 );
+	testing::internal::CaptureStdout();
+	a1.print();
+	output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( output, "test: { {TEST1_V1} } \n" );
+
+	a1.add_dev( &v1, action::MAIN_GROUP, 1 );
+	testing::internal::CaptureStdout();
+	a1.print();
+	output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( output, "test: { {TEST1_V1} {TEST1_V1} } \n" );
+	}
 
 TEST( action, check )
 	{
