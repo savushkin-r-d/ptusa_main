@@ -814,20 +814,6 @@ void off_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void off_action::init()
-    {
-    if ( is_empty() )
-        {
-        return;
-        }
-
-    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        devs[ i ]->off();
-        }
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 delay_off_action::delay_off_action() :action( "Выключать с задержкой" ),
     start_time( get_millisec() )

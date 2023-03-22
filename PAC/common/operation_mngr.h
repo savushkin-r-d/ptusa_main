@@ -204,8 +204,6 @@ class off_action: public action
             }
 
         void evaluate() override;
-
-        void init() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>

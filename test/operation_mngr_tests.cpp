@@ -170,35 +170,72 @@ TEST( off_action, evaluate )
 	virtual_valve V1( "V1" );
 	virtual_valve V2( "V2" );
 	virtual_valve V3( "V3" );
+	virtual_device DO1( "DO1", device::DT_DO, device::DST_DO_VIRT );
 	off_action action;
 	action.add_dev( &V1 );
 	action.add_dev( &V2 );
+	action.add_dev( &DO1 );
 
 	EXPECT_FALSE( V1.is_active() );
 	EXPECT_FALSE( V2.is_active() );
 	EXPECT_FALSE( V3.is_active() );
+	EXPECT_FALSE( DO1.is_active() );
 
 	V1.on();
 	V2.on();
 	V3.on();
+	DO1.on();
+	EXPECT_TRUE( V1.is_active() );
+	EXPECT_TRUE( V2.is_active() );
+	EXPECT_TRUE( V3.is_active() );
+	EXPECT_TRUE( DO1.is_active() );
 	action.init();
 	sleep_ms( 1 );
 	valve::evaluate();
-	EXPECT_FALSE( V1.is_active() );
-	EXPECT_FALSE( V2.is_active() );
+	EXPECT_TRUE( V1.is_active() );
+	EXPECT_TRUE( V2.is_active() );
 	EXPECT_TRUE( V3.is_active() );
+	EXPECT_TRUE( DO1.is_active() );
 
 	V1.on();
 	V2.on();
 	V3.on();
+	DO1.on();
 	action.evaluate();
 	sleep_ms( 1 );
 	valve::evaluate();
 	EXPECT_FALSE( V1.is_active() );
 	EXPECT_FALSE( V2.is_active() );
 	EXPECT_TRUE( V3.is_active() );
+	EXPECT_FALSE( DO1.is_active() );
 	
 	action.finalize();
+	EXPECT_FALSE( V1.is_active() );
+	EXPECT_FALSE( V2.is_active() );
+	EXPECT_TRUE( V3.is_active() );
+	EXPECT_FALSE( DO1.is_active() );
+	}
+
+
+TEST( on_reverse_action, evaluate )
+	{
+	virtual_device M1( "DO1", device::DT_M, device::DST_M_VIRT );
+	on_reverse_action action;
+	action.add_dev( &M1 );
+
+	EXPECT_FALSE( M1.is_active() );
+
+	action.init();
+	EXPECT_FALSE( M1.is_active() );
+
+	M1.off();
+	action.evaluate();
+	EXPECT_TRUE( M1.is_active() );
+	const auto REVERSE_STATE = 2;
+	EXPECT_EQ( REVERSE_STATE, M1.get_state() );
+
+	action.finalize();
+	EXPECT_FALSE( M1.is_active() );
 	}
 
 
