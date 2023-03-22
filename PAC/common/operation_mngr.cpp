@@ -10,52 +10,15 @@
 
 #include "operation_mngr.h"
 #include "g_errors.h"
-//-----------------------------------------------------------------------------
-const char* operation::state_str [ operation::STATES_MAX ] =
-    {
-    "Отключен",
-    "Выполнение",
-    "Пауза",
-    "Остановлен",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "Запускается",
-    "Становится в паузу",
-    "Выходит из паузы",
-    "Останавливается",
-    "Завершается",
-    };
-//-----------------------------------------------------------------------------
-const char* operation::en_state_str[ operation::STATES_MAX ] =
-    {
-    "OFF",
-    "RUN",
-    "PAUSE",
-    "STOP",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "STARTING",
-    "PAUSING",
-    "UNPAUSING",
-    "STOPPING",
-    "COMPLETING"
-    };
+
+const std::array <const char* const, operation::STATES_MAX> operation::state_str;
+const std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
-    current_state ( IDLE ), name( name ),
+    name( name ),
     owner( owner ),
     n( n ),
-    stub( "заглушка", owner, -1 ),
-    run_step( -1 ),
-    run_time( 0 )
+    stub( "заглушка", owner, -1 )
     {
     for ( auto state_name: en_state_str )
         {
@@ -65,16 +28,16 @@ operation::operation(const char* name, operation_manager *owner, int n) :
 //-----------------------------------------------------------------------------
 operation::~operation()
     {
-    for ( size_t i = 0; i < states.size(); i++ )
+    for ( auto& operation_state_ptr : states )
         {
-        delete states[ i ];
-        states[ i ] = nullptr;
+        delete operation_state_ptr;
+        operation_state_ptr = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
 operation::state_idx operation::get_state() const
     {
-    return ( state_idx ) current_state;
+    return current_state;
     }
 //-----------------------------------------------------------------------------
 int operation::pause()
@@ -479,16 +442,16 @@ void operation::turn_off_active_step()
         }
     }
 //-----------------------------------------------------------------------------
-step* operation::add_step( const char* name, int next_step_n,
+step* operation::add_step( const char* step_name, int next_step_n,
                           unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
-        return states[ s_idx ]->add_step( name, next_step_n,
+        return states[ s_idx ]->add_step( step_name, next_step_n,
             step_duration_par_n );
         }
 
-    return stub.add_step( name, next_step_n, step_duration_par_n );
+    return stub.add_step( step_name, next_step_n, step_duration_par_n );
     }
 //-----------------------------------------------------------------------------
 int operation::on_extra_step( int step_idx )
@@ -537,8 +500,8 @@ int operation::switch_active_extra_step( int off_step, int on_step )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-action::action( std::string name, u_int subgropups_cnt ) : name( name ),
-    par( nullptr ), subgropups_cnt( subgropups_cnt )
+action::action( std::string name, u_int subgropups_cnt ) : 
+    subgropups_cnt( subgropups_cnt ), name( name )
     {
     devices.emplace_back();
     for ( u_int i = 0; i < subgropups_cnt; i++ )

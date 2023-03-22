@@ -25,6 +25,7 @@
 #define MODE_MNGR
 
 #include <string>
+#include <array>
 
 #include "dtime.h"
 
@@ -147,9 +148,9 @@ class action
 
         // Устройства.
         std::vector < std::vector< std::vector< device* > > > devices;
-        std::string name;                               ///< Имя действия.
+        std::string name;                           ///< Имя действия.
 
-        const saved_params_float *par;      ///< Параметры действия.
+        const saved_params_float *par = nullptr;    ///< Параметры действия.
         std::vector< int >        par_idx;  ///< Индексы параметров действия.
     };
 //-----------------------------------------------------------------------------
@@ -746,8 +747,43 @@ class operation
 			STATES_MAX,
             };
 
-        static const char* state_str [ STATES_MAX ];
-        static const char* en_state_str[ STATES_MAX ];
+        static constexpr const std::array <const char* const, STATES_MAX> state_str =
+            {
+            "Отключен",
+            "Выполнение",
+            "Пауза",
+            "Остановлен",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Запускается",
+            "Становится в паузу",
+            "Выходит из паузы",
+            "Останавливается",
+            "Завершается",
+            };
+
+        static constexpr const std::array <const char* const, STATES_MAX> en_state_str =
+            {
+            "OFF",
+            "RUN",
+            "PAUSE",
+            "STOP",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "STARTING",
+            "PAUSING",
+            "UNPAUSING",
+            "STOPPING",
+            "COMPLETING"
+            };
 
         state_idx get_state() const;
 
@@ -791,7 +827,7 @@ class operation
                 }
             }
 
-        step* add_step( const char* name, int next_step_n,
+        step* add_step( const char* step_name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
@@ -830,7 +866,7 @@ class operation
     private:
         int process_auto_switch_on();
 
-        state_idx current_state;
+        state_idx current_state = IDLE;
 
         std::vector< operation_state* > states;
 
@@ -842,9 +878,9 @@ class operation
 
         /// Шаг для состояния Выполнение. Нужен для запуска после паузы,
         /// остановки и т.д.
-        u_int run_step;
+        u_int run_step = -1;
 
-        u_int run_time;  /// Время выполнения операции (состояние run).
+        u_int run_time = 0;  /// Время выполнения операции (состояние run).
 
         u_long start_warn = 0;
         u_long start_wait = 0;
