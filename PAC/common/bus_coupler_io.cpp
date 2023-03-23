@@ -14,7 +14,7 @@
 #include "bus_coupler_io_PC.h"
 #endif
 
-#if defined LINUX_OS && defined PAC_PC && !defined OPCUA
+#if defined LINUX_OS && defined PAC_PC
 #include "l_bus_coupler_io.h"
 #endif
 
@@ -29,11 +29,6 @@
 #if defined LINUX_OS && defined PAC_PLCNEXT
 #include "l_bus_coupler_io.h"
 #endif
-
-#ifdef OPCUA
-#include "OPCUA_bus_coupler_io.h"
-#endif
-
 
 #include "log.h"
 
@@ -949,7 +944,7 @@ io_manager* io_manager::get_instance()
         instance = new io_manager_PC();
 #endif // WIN_OS
 
-#if defined LINUX_OS && defined PAC_PC && !defined OPCUA
+#if defined LINUX_OS && defined PAC_PC
         instance = new io_manager_linux();
 #endif // defined LINUX_OS && defined PAC_PC
 
@@ -964,11 +959,6 @@ io_manager* io_manager::get_instance()
 #if defined LINUX_OS && defined PAC_PLCNEXT
         instance = new io_manager_linux();
 #endif // defined LINUX_OS && defined PAC_PC
-
-#ifdef OPCUA
-        instance = new io_manager_OPCUA();
-#endif // OPCUA
-
         }
 
     return instance;
