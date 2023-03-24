@@ -419,6 +419,8 @@ TEST( operation, start )
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
+	EXPECT_EQ( 0, test_op->get_run_steps_count() );
+
 	test_op->start();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 	test_op->start();
