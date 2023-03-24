@@ -126,7 +126,7 @@ void descriptive_name( type descriptive_name )
 /// @return < 0 - ошибка.
 /// @return 0 - Ок.
 int set_dev_cnt( u_int_2 new_close_dev_cnt,
- u_int_2 new_open_dev_cnt );
+u_int_2 new_open_dev_cnt );
 ```
 
 10. Комментирование объявления членов классов осуществляется в следующем виде:
