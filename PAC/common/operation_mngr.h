@@ -696,7 +696,7 @@ class operation
         int check_steps_params( char* err_dev_name, int str_len );
 
         u_int active_step() const;
-        u_int get_run_step() const;
+        int get_run_step() const;
 
         u_int get_run_steps_count() const;
         u_int get_run_active_step() const;
@@ -878,7 +878,7 @@ class operation
 
         /// Шаг для состояния Выполнение. Нужен для запуска после паузы,
         /// остановки и т.д.
-        u_int run_step = -1;
+        int run_step = -1;
 
         u_int run_time = 0;  /// Время выполнения операции (состояние run).
 

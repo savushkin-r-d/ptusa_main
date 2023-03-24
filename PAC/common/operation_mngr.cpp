@@ -368,7 +368,7 @@ u_int operation::active_step() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_int operation::get_run_step() const
+int operation::get_run_step() const
     {
     return run_step;
     }
