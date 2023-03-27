@@ -451,6 +451,22 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         str_buff );
     }
 
+TEST( valve_iol_terminal, direct_set_state )
+    {
+    valve_iol_terminal V1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par( 1, 1 );
+
+    V1.direct_set_state( valve::V_ON );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_OFF );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
 
 TEST( valve_iol_terminal_DO1, on )
     {
