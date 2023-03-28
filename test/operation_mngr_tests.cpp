@@ -1239,12 +1239,13 @@ TEST( wash_action, print )
 	action.add_dev( &test_DO, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
 	action.add_dev( &test_M1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 2 );
 	action.add_dev( &test_M2, action::MAIN_GROUP, action::MAIN_SUBGROUP + 3 );
+	action.set_param_idx( 0, 1 );
 
 	testing::internal::CaptureStdout();
 	action.print();
 	output = testing::internal::GetCapturedStdout();
 	EXPECT_EQ( "Устройства DI's DO's DEV's R_DEV's AI:"
-		" { {test_DI1} {test_DO1} {M1} {M2} {} } \n", output );
+		" { {test_DI1} {test_DO1} {M1} {M2} {} } ; FREQ_PARAM {1}\n", output );
 	}
 
 
