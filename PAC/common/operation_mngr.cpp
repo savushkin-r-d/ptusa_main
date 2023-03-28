@@ -1043,8 +1043,8 @@ int DI_DO_action::check( char* reason ) const
             d_i_device->get_type() != device::DT_LS &&
             d_i_device->get_type() != device::DT_FS )
             {
-            auto format_str = "в поле \'{}\' устройство \'{:.25} ({:.50})\' "
-                "не является входным сигналом (DI, SB, GS, LS, FS)";
+            auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                R"(не является входным сигналом (DI, SB, GS, LS, FS))";
             auto out = fmt::format_to( reason, format_str, name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             *out = 0;
@@ -1163,8 +1163,8 @@ int AI_AO_action::check( char* reason ) const
             do_device->get_type() != device::DT_QT &&
             do_device->get_type() != device::DT_TE )
             {
-            auto format_str = "в поле \'{}\' устройство \'{:.25} ({:.50})\' "
-                "не является входным сигналом (АI, PT, LT, FQT, QT, TE)";
+            auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                R"(не является входным сигналом (АI, PT, LT, FQT, QT, TE))";
             auto out = fmt::format_to( reason, format_str, name.c_str(),
                 do_device->get_name(), do_device->get_description() );
             *out = 0;
@@ -1810,13 +1810,11 @@ bool enable_step_by_signal::is_any_group_active() const
         }
 
     auto& main_group = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < main_group.size(); i++ )
+    for( auto& group : main_group )
         {
-        auto& group = main_group[ i ];
         auto is_group_ok = true;
-        for ( u_int idx = 0; idx < group.size(); idx++ )
+        for( auto& dev : group )
             {
-            auto& dev = group[ idx ];
             if ( !dev->is_active() )
                 {
                 is_group_ok = false;
