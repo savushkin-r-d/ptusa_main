@@ -1078,6 +1078,38 @@ TEST( DI_DO_action, check )
 	EXPECT_STREQ( "", msg.c_str() );
 	}
 
+TEST( DI_DO_action, evaluate )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = DI_DO_action();
+	action.add_dev( &test_DI );
+	action.add_dev( &test_DO );
+
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+
+	EXPECT_FALSE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	test_DI.set_cmd( "ST", 0, 1 );
+	EXPECT_TRUE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	test_DI.set_cmd( "ST", 0, 0.f );
+	EXPECT_FALSE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	}
+
 TEST( DI_DO_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
@@ -1097,6 +1129,39 @@ TEST( DI_DO_action, finalize )
 	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
+	}
+
+
+TEST( inverted_DI_DO_action, evaluate )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = inverted_DI_DO_action();
+	action.add_dev( &test_DI );
+	action.add_dev( &test_DO );
+
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ] );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+
+	EXPECT_FALSE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	test_DI.set_cmd( "ST", 0, 1 );
+	EXPECT_TRUE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	test_DI.set_cmd( "ST", 0, 0.f );
+	EXPECT_FALSE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
 	}
 
 
@@ -1153,53 +1218,80 @@ TEST( wash_action, finalize )
 	EXPECT_EQ( 0, test_M2.get_state() );
 	}
 
+TEST( wash_action, print )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-/*
-	TEST METHOD DEFENITION: 
-    should_turn_off()
-*/
+	virtual_motor test_M1( "M1" );
+	virtual_motor test_M2( "M2" );
+
+	auto action = wash_action();
+
+	testing::internal::CaptureStdout();
+	action.print();
+	auto output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( "", output);
+
+	action.add_dev( &test_DI, action::MAIN_GROUP, action::MAIN_SUBGROUP );
+	action.add_dev( &test_DO, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
+	action.add_dev( &test_M1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 2 );
+	action.add_dev( &test_M2, action::MAIN_GROUP, action::MAIN_SUBGROUP + 3 );
+
+	testing::internal::CaptureStdout();
+	action.print();
+	output = testing::internal::GetCapturedStdout();
+	EXPECT_EQ( "Устройства DI's DO's DEV's R_DEV's AI:"
+		" { {test_DI1} {test_DO1} {M1} {M2} {} } \n", output );
+	}
+
 
 TEST( enable_step_by_signal, should_turn_off )
     {
-	char* res = 0;
-	mock_params_manager* par_mock = new mock_params_manager();
-	test_params_manager::replaceEntity( par_mock );
+	auto action = enable_step_by_signal();
 
-	EXPECT_CALL( *par_mock, init( _ ) );
-	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
-		.Times( AtLeast( 2 ) )
-		.WillRepeatedly( Return( res ) );
-
-	par_mock->init( 0 );
-	par_mock->final_init( 0, 0, 0 );
-
-	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
-
-	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
-	auto operation_mngr = test_tank.get_modes_manager();
-	auto operation = ( *operation_mngr )[ 1 ];
-	auto operation_state = ( *operation )[ 1 ];
-	auto step = ( *operation_state )[ -1 ];
-
-	auto action = reinterpret_cast<enable_step_by_signal*>
-		( ( *step )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
-
-	EXPECT_EQ( true, action->should_turn_off() );	//Empty device list.
+	EXPECT_EQ( true, action.should_turn_off() );	//Empty device list.
 
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI );
-	EXPECT_EQ( true, action->should_turn_off() );	//Default flag value.
+	action.add_dev( &test_DI );
+	EXPECT_EQ( true, action.should_turn_off() );	//Default flag value.
 
-	action->set_bool_property( "should_turn_off", false );
-	EXPECT_EQ( false, action->should_turn_off() );	//Flag was set to false.
+	action.set_bool_property( "should_turn_off", false );
+	EXPECT_EQ( false, action.should_turn_off() );	//Flag was set to false.
 
-	action->set_bool_property( "should_turn_off", true );
-	EXPECT_EQ( true, action->should_turn_off() );	//Flag was set to true.
-
-	test_params_manager::removeObject();
+	action.set_bool_property( "should_turn_off", true );
+	EXPECT_EQ( true, action.should_turn_off() );	//Flag was set to true.
     }
+
+TEST( enable_step_by_signal, is_any_group_active )
+	{
+	auto action = enable_step_by_signal();
+
+	EXPECT_FALSE( action.is_any_group_active() );	//Empty device list.
+
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action.add_dev( &test_DI1 );
+	EXPECT_FALSE( action.is_any_group_active() );	//No active group.
+
+	test_DI1.set_cmd( "ST", 0, 1 );
+	EXPECT_TRUE( action.is_any_group_active() );	//One active group.
+
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action.add_dev( &test_DI2 );
+	EXPECT_FALSE( action.is_any_group_active() );	//No active group.
+	
+	DI1 test_DI3( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action.add_dev( &test_DI3, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
+	test_DI3.set_cmd( "ST", 0, 1 );
+	EXPECT_TRUE( action.is_any_group_active() );	//One active group.
+	}
+
 
 TEST( jump_if_action, is_goto_next_step )
 	{
