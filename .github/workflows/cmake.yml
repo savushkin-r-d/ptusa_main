@@ -53,7 +53,7 @@ jobs:
             run_tests: "true"
           }
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
@@ -111,10 +111,10 @@ jobs:
       shell: cmake -P {0}
       run: |
         string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-        message("::set-output name=timestamp::${current_date}")
+        echo "timestamp=${current_date}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
-      uses: actions/cache@v1.1.0
+      uses: actions/cache@v3
       with:
         path: .ccache
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -413,7 +413,7 @@ jobs:
     - id: set_upload_url
       run: |
         upload_url=`cat ./upload_url`
-        echo ::set-output name=upload_url::$upload_url
+        echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
     - name: Upload to Release
       id: upload_to_release
       uses: actions/upload-release-asset@v1.0.1
