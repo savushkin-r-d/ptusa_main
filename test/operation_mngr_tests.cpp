@@ -285,6 +285,61 @@ TEST( step, is_active )
 	}
 
 
+TEST( operation_state, print )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	operation->add_step( "Тестовый шаг", -1, -1 );
+	auto operation_state = ( *operation )[ 1 ];
+
+	EXPECT_EQ( true, operation_state->is_empty() );
+    testing::internal::CaptureStdout();
+    operation_state->print();
+    auto output = testing::internal::GetCapturedStdout();
+    std::string str = "RUN\n"
+        "    1     \"Тестовый шаг\" \n"
+        " { }\n";
+    EXPECT_EQ( str, output );
+
+	auto step = ( *operation_state )[ -1 ];
+	auto action = ( *step )[ step::ACTIONS::A_ON ];
+	DO1 test_DO( "test_DO", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	action->add_dev( &test_DO );
+	EXPECT_EQ( false, operation_state->is_empty() );
+    testing::internal::CaptureStdout();
+    operation_state->print();
+    output = testing::internal::GetCapturedStdout();
+    str = "RUN\n"
+        "    0     \"Шаг операции\" \n"
+        "      Включать: { {test_DO} } \n"
+        " { }\n"
+        "    1     \"Тестовый шаг\" \n"
+        " { }\n";
+    EXPECT_EQ( str, output );
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
 TEST( operation_state, is_empty )
 	{
 	char* res = 0;
@@ -522,6 +577,12 @@ TEST( operation, on_extra_step )
 	test_op->off_extra_step( ANOTHER_EXTRA_STEP );
 	EXPECT_FALSE( test_op->is_active_run_extra_step( EXTRA_STEP ) );
 	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
+
+	//Время выполнения активного шага должно быть большее нуля.
+	sleep_ms( 1 );
+	EXPECT_GT( test_op->active_step_evaluation_time(), 0 );
+	//Задание времения выполнения активного шага должно быть равно нулю.
+	EXPECT_EQ( 0, test_op->get_active_step_set_time() );
 
 	test_op->on_extra_step( EXTRA_STEP );
 	test_op->on_extra_step( ANOTHER_EXTRA_STEP );
@@ -1248,6 +1309,14 @@ TEST( wash_action, print )
 		" { {test_DI1} {test_DO1} {M1} {M2} {} } ; FREQ_PARAM {1}\n", output );
 	}
 
+
+TEST( enable_step_by_signal, set_bool_property )
+	{
+	auto action = enable_step_by_signal();
+
+	EXPECT_EQ( 0, action.set_bool_property( "should_turn_off", false ) );
+	EXPECT_EQ( 1, action.set_bool_property( "wrong_name", false ) );
+	}
 
 TEST( enable_step_by_signal, should_turn_off )
     {
