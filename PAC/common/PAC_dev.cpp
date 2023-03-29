@@ -1231,6 +1231,11 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
+u_int device_manager::get_device_count()
+{
+    return project_devices.size();
+}
+//-----------------------------------------------------------------------------
 void device_manager::print() const
     {
     printf( "Device manager [%zu]:\n", project_devices.size() );
@@ -5356,7 +5361,7 @@ void wages_eth::evaluate_io()
 #ifdef DEBUG_NO_IO_MODULES
     weth->set_wages_value(.0f);
 #else
-    weth->evaluate();
+    //weth->evaluate();
 #endif
     }
 
