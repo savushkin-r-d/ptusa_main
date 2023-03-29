@@ -4558,9 +4558,9 @@ unsigned int valve_iol_terminal::get_terminal_id(
     return terminal_id[ static_cast<unsigned int>( n ) - 1 ];
     }
 
-#ifndef DEBUG_NO_IO_MODULES
 int valve_iol_terminal::get_state()
     {
+#ifndef DEBUG_NO_IO_MODULES
     IOLINKSTATE res = get_AO_IOLINK_state(
         static_cast<u_int>( IO_CONSTANT::AO_INDEX_1 ) );
     if ( res != io_device::IOLINKSTATE::OK )
@@ -4571,8 +4571,19 @@ int valve_iol_terminal::get_state()
         {
         return valve::get_state();
         }
-    }
+#else // DEBUG_NO_IO_MODULES
+    return get_valve_state();
 #endif // DEBUG_NO_IO_MODULES
+    }
+
+void valve_iol_terminal::direct_set_state( int new_state )
+    {
+    if ( new_state )
+        {
+        direct_on();
+        }
+    else direct_off();
+    };
 
 valve::VALVE_STATE valve_iol_terminal::get_valve_state()
     {
