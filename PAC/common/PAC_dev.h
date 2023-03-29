@@ -968,7 +968,7 @@ class valve: public digital_io_device
 
         /// @brief Получение расширенного состояния клапана (учет обратной
         /// связи, ручного режима, ...).
-        int get_state();
+        int get_state() override;
 
 #ifdef DEBUG_NO_IO_MODULES
         int set_cmd( const char *prop, u_int idx, double val );
@@ -2519,9 +2519,8 @@ class valve_iol_terminal : public valve
 
         unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n ) const;
 
-#ifndef DEBUG_NO_IO_MODULES
-		int get_state() override;
-#endif // DEBUG_NO_IO_MODULES
+        int get_state() override;
+        void direct_set_state( int new_state ) override;
 
         VALVE_STATE get_valve_state() override;
 
