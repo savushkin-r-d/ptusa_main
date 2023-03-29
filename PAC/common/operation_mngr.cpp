@@ -412,7 +412,7 @@ u_long operation::get_active_step_set_time() const
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
-        return states[ current_state - 1 ]->get_active_step_set_time();
+        return states[ current_state ]->get_active_step_set_time();
         }
 
     return 0;
