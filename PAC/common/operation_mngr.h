@@ -740,7 +740,7 @@ class operation
 
             STARTING = 10,  //Запускается.
             PAUSING,        //Становится в паузу.
-            UNPAUSING,      //Выходит в паузу.            
+            UNPAUSING,      //Выходит из паузы.            
             STOPPING,       //Останавливается.
             COMPLETING,     //Завершается.
 
