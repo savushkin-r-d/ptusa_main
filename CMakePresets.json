@@ -29,6 +29,16 @@
             }
         },
         {
+            "name": "windows-VS2022-debug-OPCUA",
+            "displayName": "Visual Studio Community 2022 - x86 Debug",
+            "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
+            "inherits": "windows-VS2022-default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "USE_OPCUA": true
+            }
+        },
+        {
             "name": "windows-VS2019-default",
             "displayName": "Visual Studio Community 2019 - x86 Release",
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
@@ -179,6 +189,12 @@
             "name": "build-windows-VS2022-debug",
             "displayName": "Windows Debug",
             "configurePreset": "windows-VS2022-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "build-windows-VS2022-debug-OPCUA",
+            "displayName": "Windows Debug",
+            "configurePreset": "windows-VS2022-debug-OPCUA",
             "configuration": "Debug"
         },
         {

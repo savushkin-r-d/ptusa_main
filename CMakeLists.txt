@@ -66,6 +66,11 @@ if(NOT MINGW)
     add_subdirectory(benchmark EXCLUDE_FROM_ALL)
 endif()
 
+if(USE_OPCUA)
+    add_subdirectory(open62541 open62541 EXCLUDE_FROM_ALL)
+    add_compile_definitions(OPCUA)
+endif()
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -170,14 +175,6 @@ endif()
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
-endif()
-
-if(USE_OPCUA)
-    target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
-    target_link_libraries(libptusa_main open62541::open62541)
-    target_link_libraries(main_test open62541::open62541)
-    add_compile_definitions(OPCUA)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/open62541 open62541 EXCLUDE_FROM_ALL)
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -306,6 +303,13 @@ if(ARP_DEVICE)
     if (USE_OPCUA)
         target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
     endif()
+endif()
+
+if(USE_OPCUA)
+    target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
+    target_link_libraries(libptusa_main open62541::open62541)
+    target_link_libraries(main_test open62541::open62541)
+    target_link_libraries(main_perfomance_test open62541::open62541)
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)
