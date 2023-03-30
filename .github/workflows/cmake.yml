@@ -1,6 +1,14 @@
 name: CMake Build Matrix
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  pull_request_target:
+    branches: [ master ]
+    types: [ labeled ]
 
 env:
   NINJA_VERSION: 1.10.1
@@ -11,6 +19,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +31,7 @@ jobs:
             cc: "cl",
             cxx: "cl",
             environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat",
-            targets: "ptusa_main libptusa_main main_test",
+            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
         - {
@@ -40,12 +49,13 @@ jobs:
             os: ubuntu-latest,
             cc: "gcc",
             cxx: "g++",
-            targets: "ptusa_main libptusa_main main_test",
+            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
+        ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
         # recursively checkout submodules.
         #
@@ -104,7 +114,7 @@ jobs:
         message("::set-output name=timestamp::${current_date}")
 
     - name: ccache cache files
-      uses: actions/cache@v1.1.0
+      uses: actions/cache@v3
       with:
         path: .ccache
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -117,13 +127,13 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
           set(yasm_install_path "C:/Program Files/yasm")
-          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)  
+          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)
           # Add to PATH environment variable
           file(APPEND "$ENV{GITHUB_PATH}" ";${yasm_install_path}")
-          
+
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt-get install -y yasm)
-        endif()    
+        endif()
 
 
     - name: Configure
@@ -148,7 +158,7 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
-        
+
         if ("${{ runner.os }}" STREQUAL "Linux")
             set(ENV{CODE_COVERAGE} "ON")
         endif()
@@ -307,6 +317,21 @@ jobs:
         fail_ci_if_error: true
         verbose: true
 
+    - name: Store benchmark result (Linux only)
+      if: runner.os == 'Linux'
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: C++ Benchmark
+        tool: 'googlecpp'
+        output-file-path: demo_projects/T1-PLCnext-Demo/benchmark_result.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        # Show alert with commit comment on detecting possible performance regression
+        alert-threshold: '155%'
+        comment-on-alert: true
+        fail-on-alert: false
+        alert-comment-cc-users: '@ktrz'
+
 
     - name: Install Strip
       run: cmake --install build --prefix instdir --strip
@@ -388,7 +413,7 @@ jobs:
     - id: set_upload_url
       run: |
         upload_url=`cat ./upload_url`
-        echo ::set-output name=upload_url::$upload_url
+        echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
     - name: Upload to Release
       id: upload_to_release
       uses: actions/upload-release-asset@v1.0.1

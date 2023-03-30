@@ -4234,7 +4234,7 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
                 }
             else
                 {
-                if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+                if (program_has_cold_desinfection)
                     {
                     v = rt_par_float[P_T_SANITIZER_RINSING];
                     }
@@ -4273,7 +4273,7 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
                 }
             else
                 {
-                if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+                if (program_has_cold_desinfection)
                     {
                     p = rt_par_float[P_V_SANITIZER_RINSING];
                     }
@@ -4431,7 +4431,7 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
                 }
             else
                 {
-                if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+                if (program_has_cold_desinfection)
                     {
                     v = rt_par_float[P_T_SANITIZER_RINSING];
                     }

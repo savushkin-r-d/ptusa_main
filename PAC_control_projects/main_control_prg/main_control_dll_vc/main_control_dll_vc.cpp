@@ -20,8 +20,10 @@
 
 #include "profibus_slave.h"
 
+#ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+#endif
 
 int sleep_time_ms = 0;
 
@@ -157,7 +159,7 @@ int eval( lua_State* L )
 
 int no_print_stack_traceback( lua_State* L )
     {
-    G_LUA_MANAGER->no_print_stack_traceback();
+    lua_manager::no_print_stack_traceback();
     return 0;
     }
 

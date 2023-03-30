@@ -106,7 +106,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     {
     if ( G_DEBUG )
         {
-        printf( "Init Lua...\n" );
+        G_LOG->debug( "Init Lua..." );
         }
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
@@ -559,7 +559,7 @@ int lua_manager::error_trace( lua_State * L )
             errors.erase( errors.begin(), errors.end() - MAX_ERRORS / 2 );
             }
 
-        std::sort( errors.begin(), errors.begin() );
+        std::sort( errors.begin(), errors.end() );
         }
 
     return 0;
