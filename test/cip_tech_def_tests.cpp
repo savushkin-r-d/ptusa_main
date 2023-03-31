@@ -51,13 +51,13 @@ TEST( cipline_tech_object, _CheckErr )
     temp_sensor_supply.set_state( -1 );
     conductivity_sensor.set_state( -1 );
     cip1.curstep = *(cipline_tech_object::steps_caustic.begin( ));
-    cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_SUPPLY_TEMP_SENSOR | 1 << BE_ERR_RETURN_TEMP_SENSOR;
+    cipline_tech_object::parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_SUPPLY_TEMP_SENSOR | 1 << BE_ERR_RETURN_TEMP_SENSOR;
     EXPECT_EQ( ERR_CONCENTRATION_SENSOR, cip1._CheckErr( ));
-    cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_SUPPLY_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR;
+    cipline_tech_object::parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_SUPPLY_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR;
     EXPECT_EQ( ERR_RETURN_TEMP_SENSOR, cip1._CheckErr( ));
-    cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_RETURN_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR;
+    cipline_tech_object::parpar[ 0 ][ P_BLOCK_ERRORS ] = 1 << BE_ERR_RETURN_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR;
     EXPECT_EQ( ERR_SUPPLY_TEMP_SENSOR, cip1._CheckErr( ));
-    cip1.parpar[ 0 ][ P_BLOCK_ERRORS ] =
+    cipline_tech_object::parpar[ 0 ][ P_BLOCK_ERRORS ] =
         1 << BE_ERR_RETURN_TEMP_SENSOR | 1 << BE_ERR_CONCENTRATION_SENSOR | 1 << BE_ERR_SUPPLY_TEMP_SENSOR;
     EXPECT_EQ( 0, cip1._CheckErr( ));
 
@@ -68,7 +68,7 @@ TEST( cipline_tech_object, evaluate )
     {
     
     lua_manager::get_instance()->set_Lua( lua_open() );
-    cipline_tech_object* cip1 = new cipline_tech_object(
+    auto* cip1 = new cipline_tech_object(
         "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
 
     cip1->initline();
@@ -77,8 +77,8 @@ TEST( cipline_tech_object, evaluate )
     cip1->rt_par_float[ P_SELECT_REC ] = 1;
     EXPECT_EQ( 0, cip1->evaluate() );
 
-    cip1->statsbase->apply();
-    cip1->statsbase->evaluate();
+    cipline_tech_object::statsbase->apply();
+    cipline_tech_object::statsbase->evaluate();
 
     delete cip1;
 
@@ -87,28 +87,29 @@ TEST( cipline_tech_object, evaluate )
     cip1->initline();
     EXPECT_EQ( 0, cip1->evaluate() );
     
-    EXPECT_EQ( nullptr, cip1.PRESSURE );
-    auto current_recipe = cip1.lineRecipes->getCurrentRecipe( );
-    cip1.lineRecipes->setRecipeValue( current_recipe, TRecipeManager::RV_TO_DEFAULTS, 1 );
-    cip1.lineRecipes->EvalRecipe( );
-    EXPECT_EQ( 0, cip1.lineRecipes->getRecipeValue( current_recipe, TRecipeManager::RV_TO_DEFAULTS ));
-    EXPECT_EQ( 200, cip1.lineRecipes->getRecipeValue( current_recipe, TRecipeManager::RV_V1 ));
-    EXPECT_EQ( 0, cip1.evaluate( ));
-    cip1.rt_par_float[ P_SELECT_REC ] = 1;
-    EXPECT_EQ( 0, cip1.evaluate( ));
-    cip1.rt_par_float[ P_SELECT_PRG ] = SPROG_CAUSTIC_ACID_SANITIZER;
-    cip1.SetCommand( MCMD_EVALUATE );
-    EXPECT_EQ( 0, cip1.state );
-    EXPECT_EQ( 0, cip1.evaluate( ));
-    EXPECT_NE( 0, cip1.state );
+    EXPECT_EQ( nullptr, cip1->PRESSURE );
+    auto current_recipe = cip1->lineRecipes->getCurrentRecipe( );
+    cip1->lineRecipes->setRecipeValue( current_recipe, TRecipeManager::RV_TO_DEFAULTS, 1 );
+    cip1->lineRecipes->EvalRecipe( );
+    EXPECT_EQ( 0, cip1->lineRecipes->getRecipeValue( current_recipe, TRecipeManager::RV_TO_DEFAULTS ));
+    EXPECT_EQ( 200, cip1->lineRecipes->getRecipeValue( current_recipe, TRecipeManager::RV_V1 ));
+    EXPECT_EQ( 0, cip1->evaluate( ));
+    cip1->rt_par_float[ P_SELECT_REC ] = 1;
+    EXPECT_EQ( 0, cip1->evaluate( ));
+    cip1->rt_par_float[ P_SELECT_PRG ] = SPROG_CAUSTIC_ACID_SANITIZER;
+    cip1->SetCommand( MCMD_EVALUATE );
+    EXPECT_EQ( 0, cip1->state );
+    EXPECT_EQ( 0, cip1->evaluate( ));
+    EXPECT_NE( 0, cip1->state );
 
+    delete cip1;
     G_LUA_MANAGER->free_Lua();
     }
 
 TEST( cipline_tech_object, _LoadProgram )
     {
     lua_manager::get_instance()->set_Lua( lua_open() );
-    cipline_tech_object* cip1 = new cipline_tech_object(
+    auto* cip1 = new cipline_tech_object(
         "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
 
     cip1->initline();
@@ -237,8 +238,8 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     cip1.initline( );
     virtual_device waterTankLowLevel( "LWL", device::DT_LS, device::DST_LS_VIRT);
     virtual_device waterTankCurrentLevel( "LTW", device::DT_LT, device::DST_LT_VIRT);
-    cip1.LWL = reinterpret_cast<i_DI_device *>(&waterTankLowLevel);
-    cip1.LTW = reinterpret_cast<i_AI_device *>(&waterTankCurrentLevel);
+    cip1.LWL = static_cast<i_DI_device *>(&waterTankLowLevel);
+    cip1.LTW = static_cast<i_AI_device *>(&waterTankCurrentLevel);
 
     waterTankLowLevel.direct_set_state(0);
     waterTankCurrentLevel.set_value(0);
@@ -283,7 +284,7 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     EXPECT_EQ(false, cip1.waterTankIsEmpty());
 
     waterTankLowLevel.direct_set_state(1);
-    waterTankCurrentLevel.set_value(9.99);
+    waterTankCurrentLevel.set_value(9.99f);
     cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
     cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
     EXPECT_EQ(true, cip1.waterTankIsEmpty());
@@ -295,7 +296,7 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     EXPECT_EQ(true, cip1.waterTankIsEmpty());
 
     waterTankLowLevel.direct_set_state(1);
-    waterTankCurrentLevel.set_value(11.99);
+    waterTankCurrentLevel.set_value(11.99f);
     cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
     cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
     EXPECT_EQ(true, cip1.waterTankIsEmpty());
@@ -305,6 +306,8 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     cipline_tech_object::parpar[0][P_MIN_BULK_FOR_WATER] = 10;
     cipline_tech_object::parpar[0][P_MIN_BULK_DELTA] = 2;
     EXPECT_EQ(false, cip1.waterTankIsEmpty());
+
+    G_LUA_MANAGER->free_Lua();
     }
 
 
