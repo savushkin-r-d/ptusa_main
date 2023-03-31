@@ -565,8 +565,10 @@ TEST( valve_iol_terminal_mixproof_DO3, on )
     V1.on();
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
-    V1.init( 0, 0, 1, 0 );
+    V1.init( 0, 0, 3, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };    
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
     V1.on();
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
@@ -590,8 +592,10 @@ TEST( valve_iol_terminal_mixproof_DO3, on )
 TEST( valve_iol_terminal_mixproof_DO3, off )
     {
     valve_iol_terminal_mixproof_DO3 V1( "V1" );
-    V1.init( 0, 0, 1, 0 );
+    V1.init( 0, 0, 3, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 1 );
     V1.set_rt_par(
@@ -630,8 +634,10 @@ TEST( valve_iol_terminal_mixproof_DO3, off )
 TEST( valve_iol_terminal_mixproof_DO3, direct_set_state )
     {
     valve_iol_terminal_mixproof_DO3 V1( "V1" );
-    V1.init( 0, 0, 1, 0 );
+    V1.init( 0, 0, 3, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
     V1.set_rt_par( 1, 1 );
     V1.set_rt_par( 2, 2 );
     V1.set_rt_par( 3, 3 );
@@ -656,17 +662,19 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     {
     valve_iol_terminal_mixproof_DO3_DI2 V1( "V1" );
 
-    V1.init( 0, 2, 1, 0 );
+    V1.init( 0, 2, 3, 0 );
     V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
     V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
     V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
 
     V1.set_rt_par(
         static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 1 );
     V1.set_rt_par(
-        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 2 );
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 1 );
     V1.set_rt_par(
-        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 3 );
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 1 );
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
@@ -683,8 +691,12 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     EXPECT_EQ( false, V1.get_fb_state() );
 
     EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
     V1.direct_on();
     EXPECT_EQ( 0b1, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Бит включения 1.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
     *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
     //Есть обратная связь - должно вернуться "истина".
     EXPECT_EQ( true, V1.get_fb_state() );
@@ -698,19 +710,25 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     *( V1.DI_channels.char_read_values[ 0 ] ) = 0;
     *( V1.DI_channels.char_read_values[ 1 ] ) = 0;
     V1.open_upper_seat();
-    EXPECT_EQ( 0b10,
-        V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Бит включения верхнего седла 1.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b1,
+        V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Бит включения верхнего седла 1.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
     
     EXPECT_EQ( true,
         V1.get_fb_state() ); //Открыто верхнее седло - должно вернуться "истина".
     V1.open_lower_seat();
-    EXPECT_EQ( 0b100,
-        V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Бит включения нижнего седла 1.    
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b1,
+        V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Бит включения нижнего седла 1.    
     EXPECT_EQ( true,
         V1.get_fb_state() ); //Открыто нижнее седло - должно вернуться "истина".
 
     V1.direct_off();
     EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
     }
 
 
