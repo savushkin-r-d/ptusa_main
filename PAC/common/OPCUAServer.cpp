@@ -132,6 +132,7 @@ void OPCUAServer::CreateDevObjects()
         strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
         strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
 
+        //creating object
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
         oAttr.displayName = UA_LOCALIZEDTEXT( "en-US", deviceName );
         oAttr.description = UA_LOCALIZEDTEXT( "ru-ru", deviceDescription );
@@ -141,6 +142,42 @@ void OPCUAServer::CreateDevObjects()
             UA_QUALIFIEDNAME( 1, deviceName ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
             oAttr, NULL, &deviceId );
+
+        //creating value variable
+        UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
+        valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        UA_Int32 value = 0;
+        UA_Variant_setScalar(&valueAttr.value, &value, &UA_TYPES[UA_TYPES_INT32]);
+
+        char valueName[30];
+        strcpy(valueName, deviceName);
+        strcat(valueName, ". Value");
+        valueAttr.displayName = UA_LOCALIZEDTEXT("en-US", valueName);
+        UA_NodeId valueNodeId = UA_NODEID_STRING(0, valueName);
+
+        UA_Server_addVariableNode(server, valueNodeId, deviceId,
+            UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+            UA_QUALIFIEDNAME(1, "Value"),
+            UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+            valueAttr, NULL, NULL);
+
+        //creating state variable
+        UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
+        stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        UA_Int32 state = 0;
+        UA_Variant_setScalar(&stateAttr.value, &state, &UA_TYPES[UA_TYPES_INT32]);
+
+        char stateName[30];
+        strcpy(stateName, deviceName);
+        strcat(stateName, ". State");
+        stateAttr.displayName = UA_LOCALIZEDTEXT("en-US", stateName);
+        UA_NodeId stateNodeId = UA_NODEID_STRING(0, stateName);
+
+        UA_Server_addVariableNode(server, stateNodeId, deviceId,
+            UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
+            UA_QUALIFIEDNAME(1, "State"),
+            UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
+            stateAttr, NULL, NULL);
         }
     }
 
