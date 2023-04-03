@@ -48,7 +48,7 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 set(BUILD_SHARED_LIBS ON)
 
-add_subdirectory(lua)
+add_subdirectory(lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
@@ -157,11 +157,11 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-if(NOT MINGW)
-    add_executable(main_perfomance_test ${common_src} ${win_src}
-           test/perfomance/main_perfomance_test.cpp           
-           PAC_control_projects/main_control_prg/version.rc)
-endif()
+    if(NOT MINGW)
+        add_executable(main_perfomance_test ${common_src} ${win_src}
+               test/perfomance/main_perfomance_test.cpp           
+               PAC_control_projects/main_control_prg/version.rc)
+    endif()
 
     set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -180,6 +180,8 @@ endif()
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
 endif()
+
+add_dependencies(main_test lua)
 
 if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
