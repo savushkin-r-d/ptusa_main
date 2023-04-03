@@ -323,7 +323,7 @@ jobs:
       with:
         name: C++ Benchmark
         tool: 'googlecpp'
-        output-file-path: demo_projects/T1-PLCnext-Demo/benchmark_result.json
+        output-file-path: ./build/benchmark_result.json
         github-token: ${{ secrets.GITHUB_TOKEN }}
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
