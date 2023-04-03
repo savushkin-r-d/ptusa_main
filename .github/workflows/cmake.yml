@@ -330,7 +330,7 @@ jobs:
         alert-threshold: '155%'
         comment-on-alert: true
         fail-on-alert: false
-        alert-comment-cc-users: '@ktrz'
+        alert-comment-cc-users: '@idzm'
 
 
     - name: Install Strip
