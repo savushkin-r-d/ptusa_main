@@ -3589,6 +3589,11 @@ void valve::on()
     is_switching_off = false;
     digital_io_device::on();
     }
+
+void valve::clear_switching_off_queue()
+    {
+    to_switch_off.clear();
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
