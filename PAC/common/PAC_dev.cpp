@@ -1231,7 +1231,8 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
-u_int device_manager::get_device_count()
+u_int device_manager::get_device_count() const
+
 {
     return project_devices.size();
 }
