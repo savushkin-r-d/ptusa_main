@@ -6795,13 +6795,14 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
         G_LOG->write_log( i_log::P_DEBUG );
         }
 
-    if (prop[0] == 'E') 
+    if ( prop[ 0 ] == 'E' )
         {
         is_emulation = val != 0;
-        }    
-        else {
-             return device::set_cmd( prop, idx, val );
-             }
+        }
+    else 
+        {
+        return device::set_cmd( prop, idx, val );
+        }
 
     return 0;
     }
@@ -6809,14 +6810,14 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
 int analog_io_device::save_device_ex( char* buff )
     {
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "E={}, ", is_emulation ? 1 : 0 );
-    return static_cast<int>(res.size);
+    return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
 
 float analog_io_device::get_value()
     {
-    if ( is_emulation ) return emulator_analog.get_value();
+    if ( is_emulation ) return emulator.get_value();
     else return value;
     }
 //-----------------------------------------------------------------------------
