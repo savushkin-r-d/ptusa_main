@@ -4,12 +4,27 @@ using namespace ::testing;
 
 TEST( analog_emulator, get_value )
     {
-    analog_emulator obj = analog_emulator( 0.444f, 0.25f, 20.f, 30.f );
-    float test_variable = obj.get_value();
-    float min_t = obj.get_min();
-    float max_t = obj.get_max();
-    EXPECT_GE( test_variable, min_t );
-    EXPECT_LE( test_variable, max_t );
+    const auto MIN_VALUE = 20.f;
+    const auto MAX_VALUE = 30.f;
+    analog_emulator obj = analog_emulator( 0.444f, 0.25f, MIN_VALUE, MAX_VALUE );
+    EXPECT_GE( MIN_VALUE, obj.get_min() );
+    EXPECT_LE( MAX_VALUE, obj.get_max() );
+
+    // Заполняем вектор значениями в количестве MAX_ITER.
+    std::vector<float> res_value;
+    const size_t MAX_ITER = 100;
+    for ( size_t i = 0; i < MAX_ITER; i++ )
+        {
+        res_value.push_back( obj.get_value() );
+        }
+
+    // Значения должны быть в заданном диапазоне.
+    ASSERT_THAT( res_value, Each( AllOf( Ge( MIN_VALUE ), Le( MAX_VALUE ) ) ) );
+
+    auto res = std::unique( res_value.begin(), res_value.end() );
+    res_value.erase( res, res_value.end() );
+    // Значения должны быть с разбросом - как минимум MAX_ITER/2 уникальных.
+    EXPECT_TRUE( res_value.size() >= MAX_ITER / 2 );
     }
 
 TEST( analog_emulator, analog_emulator )
