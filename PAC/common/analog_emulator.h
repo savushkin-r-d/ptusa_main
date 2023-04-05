@@ -23,13 +23,13 @@ class analog_emulator
         void set_min( float min_in_range );
         float get_min() const;
         float get_st_deviation() const;
-       
+
     private:
         float dispersion;   ///< Дисперсия.
         float m_expec;      ///< Математическое ожидание.
         float st_deviation; ///< Стандартное отклонение.
-        float min;
-        float max;
+        float min_value;
+        float max_value;
         float x;                ///< Случайная величина.
         float p;                ///< Плотность вероятности.
         std::vector<float> fv;  ///< Вектор с заданным диапазоном значений температуры.
@@ -39,6 +39,6 @@ class analog_emulator
         /// @brief Расчет вероятности.
         bool is_p() const;
 
-        void init_vector(float min, float max);
+        void init_vector( float min, float max );
         float prev_x;
     };

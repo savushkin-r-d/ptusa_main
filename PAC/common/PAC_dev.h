@@ -810,7 +810,7 @@ class analog_io_device : public device, public io_device
 #endif // DEBUG_NO_IO_MODULES
 
         bool is_emulation = false;
-        analog_emulator emulator_analog = analog_emulator();
+        analog_emulator emulator = analog_emulator();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.

@@ -1,15 +1,16 @@
 #include "analog_emulator.h"
+#include "log.h"
 
 analog_emulator::analog_emulator( float dispersion, float m_expec,
     float min, float max, float p, float x ) : dispersion( dispersion ),
-    m_expec( m_expec ), min( min ), max( max ), x( x ), p( p )
+    m_expec( m_expec ), min_value( min ), max_value( max ), x( x ), p( p )
     {
     if ( max < min )
         {
         std::swap( min, max );
-        this->max = max;
-        this->min = min;
-        std::clog << "max > min\n";
+        max_value = max;
+        min_value = min;
+        G_LOG->alert( "analog_emulator: max > min (%f > %f)", max, min );
         }
     init_vector( min, max );
     prev_x = get_random();
@@ -20,15 +21,15 @@ void analog_emulator::init_vector( float min_t, float max_t )
     {
     if ( max_t == min_t )
         {
-        fv.resize(1);
-        std::clog << "max = min\n";
+        fv.resize( 1 );
+        G_LOG->alert( "analog_emulator: max = min (%f = %f)", max_t, min_t );
         }
     else
         {
         const auto v_size = static_cast<std::size_t>( max_t - min_t );
         fv.resize( v_size );
         }
-        std::iota(fv.begin(), fv.end(), min_t);
+    std::iota( fv.begin(), fv.end(), min_t );
     }
 
 float analog_emulator::get_st_deviation() const
@@ -38,22 +39,22 @@ float analog_emulator::get_st_deviation() const
 
 void analog_emulator::set_max( float max_in_range )
     {
-    this->max = max_in_range;
+    this->max_value = max_in_range;
     }
 
 float analog_emulator::get_max() const
     {
-    return max;
+    return max_value;
     }
 
 void analog_emulator::set_min( float min_in_range )
     {
-    this->min = min_in_range;
+    this->min_value = min_in_range;
     }
 
 float analog_emulator::get_min() const
     {
-    return min;
+    return min_value;
     }
 
 bool analog_emulator::is_p() const
@@ -69,28 +70,27 @@ bool analog_emulator::is_p() const
         exp( -( pow( x - m_expec, 2 ) / ( 2 * st_deviation * st_deviation ) ) ) > p;
     }
 
-float analog_emulator::get_value() 
+float analog_emulator::get_value()
     {
     x = get_random();
-    if (is_p()) 
+    if ( is_p() )
         {
         prev_x = x;
         return x;
-        } 
-    else 
+        }
+    else
         {
         return prev_x;
         }
     }
 
-float analog_emulator::get_random() const 
+float analog_emulator::get_random() const
     {
-     auto value = unsigned( std::time( nullptr ) );
-     std::size_t fv_size = fv.size();
-     unsigned int fv_index = value % fv_size;
-     // Вспомогательная величина для генерации случайных вещественных чисел.
-     float real = ( float )fv_index / max;
-     float round_real = ( ( float )( ( int ) ( real  *  10 ) ) ) / 10;
-     return fv.at(fv_index) + round_real;
+    auto value = unsigned( std::time( nullptr ) );
+    std::size_t fv_size = fv.size();
+    unsigned int fv_index = value % fv_size;
+    // Вспомогательная величина для генерации случайных вещественных чисел.
+    float real = (float)fv_index / max_value;
+    float round_real = ( (float)( (int)( real * 10 ) ) ) / 10;
+    return fv.at( fv_index ) + round_real;
     }
-    
