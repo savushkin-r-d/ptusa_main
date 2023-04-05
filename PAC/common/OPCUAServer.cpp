@@ -159,7 +159,13 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
             UA_QUALIFIEDNAME(1, "Value"),
             UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-            valueAttr, NULL, NULL);
+            valueAttr, G_DEVICE_MANAGER()->get_device(i), NULL);
+
+        //creating value variable read/write callback
+        UA_DataSource valueDataSource;
+        valueDataSource.read = readValue;
+        valueDataSource.write = writeValue;
+        UA_Server_setVariableNode_dataSource(server, valueNodeId, valueDataSource);
 
         //creating state variable
         UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
@@ -177,7 +183,13 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
             UA_QUALIFIEDNAME(1, "State"),
             UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-            stateAttr, NULL, NULL);
+            stateAttr, G_DEVICE_MANAGER()->get_device(i), NULL);
+
+        //creating state variable read/write callback
+        UA_DataSource stateDataSource;
+        valueDataSource.read = readState;
+        valueDataSource.write = writeState;
+        UA_Server_setVariableNode_dataSource(server, stateNodeId, stateDataSource);
         }
     }
 
