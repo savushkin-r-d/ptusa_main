@@ -1037,6 +1037,7 @@ class valve: public digital_io_device
 
         bool on_fb;
         bool off_fb;
+
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.
 #endif
@@ -1057,6 +1058,10 @@ class valve: public digital_io_device
         bool is_switching_off; ///Выключается ли клапан с задержкой.
         u_long start_off_time; ///Время начала выключения клапана с задержкой.
         bool was_on_auto;      ///Признак включения клапана управляющей программой.
+
+    public:
+        static void clear_switching_off_queue();
+
 #ifdef _MSC_VER
 #pragma endregion Отключение клапана с задержкой.
 #endif
