@@ -193,7 +193,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                             int idx = operation_n - 1;
                             state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
 
-                            op->final();
+                            op->finalize();
                             lua_final_mode( operation_n );
                             }
                         else
