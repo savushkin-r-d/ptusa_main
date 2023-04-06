@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2023.02.23.1)
+project(ptusa_main VERSION 2023.04.06.0)
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -345,7 +345,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
     add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
-            --benchmark_out=benchmark_result.json --benchmark_out_format=json 
+            --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json 
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)

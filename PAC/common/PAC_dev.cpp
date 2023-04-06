@@ -3589,6 +3589,11 @@ void valve::on()
     is_switching_off = false;
     digital_io_device::on();
     }
+
+void valve::clear_switching_off_queue()
+    {
+    to_switch_off.clear();
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
@@ -4526,15 +4531,19 @@ void valve_iol_terminal::set_rt_par( u_int idx, float value )
 
 bool valve_iol_terminal::check_config()
     {
-    auto data = (char*)get_AO_write_data(
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
-    if ( !data )
-        {
-        return false;
-        }
-
+    auto idx = 0;
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
-        []( const unsigned int & id ) { return id > 0; } );
+        [&]( const unsigned int & id ) 
+        {
+        auto data = (char*)get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
+        if ( !data )
+            {
+            return false;
+            }
+
+        return id > 0;
+        } );
     }
 
 /// @brief Установка данных состояния устройства.
@@ -4603,10 +4612,12 @@ void valve_iol_terminal::direct_on()
     auto data = (char*)( get_AO_write_data(
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
-    for ( size_t i = static_cast<size_t>( TERMINAL_OUTPUT::ON ) + 1;
-        i < terminal_id.size() + 1; i++ )
+    for ( size_t i = 1; i < terminal_id.size(); i++ )
         {
-        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>( i ) ) );
+        data = (char*)( get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>(
+            static_cast<size_t>( TERMINAL_OUTPUT::ON ) + i ) ) );
         }
     state = valve::VALVE_STATE::V_ON;
     }
@@ -4621,12 +4632,12 @@ void valve_iol_terminal::direct_off()
         start_switch_time = get_millisec();
         }
 
-    auto data = (char*)( get_AO_write_data( 
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
-    for ( auto i = static_cast<size_t>( TERMINAL_OUTPUT::ON );
-        i < terminal_id.size() + 1; i++ )
+    for ( auto i = 0; i < terminal_id.size(); i++ )
         {
-        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>( i ) ) );
+        auto data = (char*)( get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>(
+            static_cast<size_t>( TERMINAL_OUTPUT::ON ) + i ) ) );
         }
     state = valve::VALVE_STATE::V_OFF;
     }
@@ -4734,10 +4745,14 @@ void valve_iol_terminal_mixproof_DO3::open_upper_seat()
     {
     if ( !check_config() ) return;
 
-    auto data = (char*)get_AO_write_data( 
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
+    auto idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 );
+    auto data = (char*)get_AO_write_data( idx );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_2 );
+    data = (char*)get_AO_write_data( idx );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_3 );
+    data = (char*)get_AO_write_data( idx );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
 
     set_st( V_UPPER_SEAT );
@@ -4747,10 +4762,14 @@ void valve_iol_terminal_mixproof_DO3::open_lower_seat()
     {
     if ( !check_config() ) return;
 
-    auto data = (char*)get_AO_write_data(
-        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) );
+    auto idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 );
+    auto data = (char*)get_AO_write_data( idx );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_2 );
+    data = (char*)get_AO_write_data( idx );
     reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_3 );
+    data = (char*)get_AO_write_data( idx );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
 
     set_st( V_LOWER_SEAT );

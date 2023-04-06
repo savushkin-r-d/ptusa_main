@@ -1,10 +1,10 @@
-/// @file mode_mngr.h
+/// @file operation_mngr.h
 /// @brief Содержит описания классов, которые используются для организации шагов
-/// при выполнении операций танка, гребенки.
+/// при выполнении операций танка, линий.
 ///
 /// Класс @ref step, служащий для организации работы с шагом, содержит всю
 /// необходимую информацию - список открываемых\закрываемых устройств,
-/// параметры шага, связанный с ним маршрут гребенки. Шаг - представляет ход
+/// параметры шага, связанный с ним маршрут. Шаг - представляет ход
 /// протекания технологического процесса, включение\выключение которого
 /// происходит автоматически, без непосредственного участия оператора. В
 /// отличие от операции, который оператор включает\выключает сам. Для хранения
@@ -25,6 +25,7 @@
 #define MODE_MNGR
 
 #include <string>
+#include <array>
 
 #include "dtime.h"
 
@@ -44,9 +45,7 @@ class action
     public:
         action( std::string name, u_int subgropups_cnt = 1 );
 
-        virtual ~action()
-            {
-            }
+        virtual ~action() = default;
 
         /// @brief Проверка на отсутствие устройств.
         ///
@@ -66,10 +65,16 @@ class action
             }
 
         /// @brief Инициализация действия.
-        virtual void init() {}
+        virtual void init() 
+            {
+            // По умолчанию ничего не делаем.
+            }
 
         /// @brief Выполнение действия.
-        virtual void evaluate() {}
+        virtual void evaluate() 
+            {
+            // По умолчанию ничего не делаем.
+            }
 
         /// @brief Завершения действия.
         virtual void finalize();
@@ -84,17 +89,17 @@ class action
 
         /// @brief Поиск устройства с какой-либо ошибкой.
         ///
-        /// @param [out] err_dev_name Устройство.
-        /// @param [in] max_to_write Дополнительный параметр.
-        /// @return 0 - нет ошибок, 1 - есть ошибки.
-        int check_devices( char* err_dev_name, int max_to_write ) const;
+        /// @param [out] err_description Устройства, находящиеся в ошибке.
+        /// @param [in] size Дополнительный параметр.
+        /// @return 0 - нет ошибок, >0 - есть ошибки, длина строки описания.
+        int check_devices( char* err_description, int size ) const;
 
         /// @brief Установка параметров для действия.
         ///
         /// @param [in] par Параметры.
-        virtual void set_params( const saved_params_float *par )
+        virtual void set_params( const saved_params_float *new_par )
             {
-            this->par = par;
+            par = new_par;
             }
 
         /// @brief Задание индексов используемых параметров к действию.
@@ -116,7 +121,7 @@ class action
         ///
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
-        virtual int set_bool_property( const char* name, bool value )
+        virtual int set_bool_property( const char* prop_name, bool value )
             {
             return 0;
             }
@@ -143,9 +148,9 @@ class action
 
         // Устройства.
         std::vector < std::vector< std::vector< device* > > > devices;
-        std::string name;                               ///< Имя действия.
+        std::string name;                           ///< Имя действия.
 
-        const saved_params_float *par;      ///< Параметры действия.
+        const saved_params_float *par = nullptr;    ///< Параметры действия.
         std::vector< int >        par_idx;  ///< Индексы параметров действия.
     };
 //-----------------------------------------------------------------------------
@@ -186,7 +191,7 @@ class on_reverse_action : public action
             {
             }
 
-        void evaluate();
+        void evaluate() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -199,9 +204,7 @@ class off_action: public action
             {
             }
 
-        void evaluate();
-
-        void init();
+        void evaluate() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -228,9 +231,9 @@ class open_seat_action: public action
     public:
         open_seat_action( bool is_mode, operation_state *owner );
 
-        void init();
-        void evaluate();
-        void finalize();
+        void init() override;
+        void evaluate() override;
+        void finalize() override;
 
 #ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
@@ -241,11 +244,11 @@ class open_seat_action: public action
         /// @param [in] dev Устройство.
         /// @param [in] group Дополнительный параметр.
         /// @param [in] seat_type Дополнительный параметр.
-        void add_dev( device *dev, u_int group, u_int seat_type );
+        void add_dev( device *dev, u_int group, u_int seat_type ) override;
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
-        bool is_empty() const;
+        bool is_empty() const override;
 
     private:
         enum PHASES
@@ -289,11 +292,11 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        DI_DO_action( std::string name = "Группы DI->DO's" );
+        explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
-        void evaluate();
+        void evaluate() override;
 
         void finalize() override;
 
@@ -321,9 +324,9 @@ class AI_AO_action : public action
     public:
         AI_AO_action();
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
-        void evaluate();
+        void evaluate() override;
 
         void finalize() override;
     };
@@ -338,7 +341,7 @@ class required_DI_action: public action
             {
             }
 
-        int check( char* reason ) const;
+        int check( char* reason ) const override;
 
         void finalize() override;
     };
@@ -364,7 +367,7 @@ class wash_action: public action
             {
             }
 
-        void evaluate();
+        void evaluate() override;
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
@@ -396,10 +399,10 @@ class jump_if_action : public action
 
         int set_int_property( const char* name, size_t idx, int value ) override;
 
-        int get_int_property( const char* name, size_t idx );
+        int get_int_property( const char* name, size_t idx ) ;
 
         /// @brief Завершения действия.
-        void finalize();
+        void finalize() override;
 
         void print( const char* prefix = "", bool new_line = true ) const override;
 
@@ -489,7 +492,7 @@ class step
 
         void evaluate() const;
 
-        void final();
+        void finalize();
 
         /// Получение времени выполнения шага.
         u_int_4 get_eval_time() const;
@@ -525,7 +528,6 @@ class step
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
 
-    private:
         bool active;
         u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
 
@@ -562,7 +564,7 @@ class operation_state
 
         void evaluate();
 
-        void final();
+        void finalize();
 
         void reset_eval_time()
             {
@@ -598,6 +600,12 @@ class operation_state
 
         int check_steps_params( char* err_dev_name, int str_len );
 
+        /// @brief Проверка на отсутствие устройств.
+        ///
+        /// @return true  Есть устройства, над которыми что-то делается.
+        /// @return false Нет устройств, над которыми что-то делается.
+        bool is_empty() const;
+
         bool is_goto_next_state( int& next_state ) const;
 
     private:
@@ -622,7 +630,6 @@ class operation_state
         operation_manager *owner;
         int n;              /// Номер.
 
-    private:
         /// Время выполнения активного шага, для возобновления после паузы.
         u_int_4 dx_step_time;
 
@@ -635,7 +642,6 @@ class operation_state
 #pragma region Поддержка более чем одного активного шага.
 #endif
 
-    public:
         void save();
         void load();
 
@@ -685,12 +691,12 @@ class operation
 
         void evaluate();
 
-        void final();
+        void finalize();
 
         int check_steps_params( char* err_dev_name, int str_len );
 
         u_int active_step() const;
-        u_int get_run_step() const;
+        int get_run_step() const;
 
         u_int get_run_steps_count() const;
         u_int get_run_active_step() const;
@@ -732,11 +738,52 @@ class operation
             PAUSE,   // Пауза.
             STOP,    // Остановлен.
 
+            STARTING = 10,  //Запускается.
+            PAUSING,        //Становится в паузу.
+            UNPAUSING,      //Выходит из паузы.            
+            STOPPING,       //Останавливается.
+            COMPLETING,     //Завершается.
+
 			STATES_MAX,
             };
 
-        static const char* state_str [];
-        static const char* en_state_str[];
+        static constexpr const std::array <const char* const, STATES_MAX> state_str =
+            {
+            "Отключен",
+            "Выполнение",
+            "Пауза",
+            "Остановлен",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Запускается",
+            "Становится в паузу",
+            "Выходит из паузы",
+            "Останавливается",
+            "Завершается",
+            };
+
+        static constexpr const std::array <const char* const, STATES_MAX> en_state_str =
+            {
+            "OFF",
+            "RUN",
+            "PAUSE",
+            "STOP",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "STARTING",
+            "PAUSING",
+            "UNPAUSING",
+            "STOPPING",
+            "COMPLETING"
+            };
 
         state_idx get_state() const;
 
@@ -749,6 +796,9 @@ class operation
         int switch_off();
 
         int start( int new_run_step );
+
+        void to_run_state( int new_run_step );
+
 #ifndef __GNUC__
 #pragma endregion
 #endif
@@ -777,8 +827,7 @@ class operation
                 }
             }
 
-    public:
-        step* add_step( const char* name, int next_step_n,
+        step* add_step( const char* step_name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
@@ -789,7 +838,6 @@ class operation
 #pragma region Поддержка более чем одного активного шага.
 #endif
 
-    public:
         int on_extra_step( int step_idx );
 
         int off_extra_step( int step_idx );
@@ -818,7 +866,7 @@ class operation
     private:
         int process_auto_switch_on();
 
-        state_idx current_state;
+        state_idx current_state = IDLE;
 
         std::vector< operation_state* > states;
 
@@ -830,9 +878,9 @@ class operation
 
         /// Шаг для состояния Выполнение. Нужен для запуска после паузы,
         /// остановки и т.д.
-        u_int run_step;
+        int run_step = -1;
 
-        u_int run_time;  /// Время выполнения операции (состояние run).
+        u_int run_time = 0;  /// Время выполнения операции (состояние run).
 
         u_long start_warn = 0;
         u_long start_wait = 0;
@@ -899,25 +947,6 @@ class operation_manager
             {
             return owner->get_params();
             }
-
-        /////TODO. Будущая функциональность.
-        ///// @brief Обновление состояния доступности операций.
-        /////
-        ///// Для каждой операции:
-        ///// 1. Проверяем, если она включена, то можно ли ее отключить из
-        ///// соответствующего массива доступности. Если нет, то формируем
-        ///// также пояснение.
-        ///// 2. Если операция не включена, то проверяем, есть ли хотя бы одна
-        ///// активная операция (основная).
-        ///// 2.1 Если есть, то для каждой активной операции проверяем, можно ли
-        ///// с ней параллельно запустить данную операцию, если нет, то формируем
-        ///// пояснение.
-        ///// 3. Если нет активных (основных) операций, проверяем на возможность
-        ///// включения после последней выключенной операции (основной), если
-        ///// нет, то формируем пояснение.
-        ////int refresh_availability( int *modes_states, int last_mode )
-        ////    {
-        ////    }
 
         i_tech_object *owner;              ///Техобъект-владелец.
 
