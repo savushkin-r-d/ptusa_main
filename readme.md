@@ -14,7 +14,7 @@ General system architecture is shown below:
 
 <p align="center"><img src="readme_images/system_architecture_en.png"></p>
 
-General system architecture is also possible when the control program is deployed on the server:
+General system architecture when the control program is deployed on the server:
 
 <p align="center"><img src="readme_images/system_architecture_2_en.png"></p>
 
