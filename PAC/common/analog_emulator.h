@@ -5,13 +5,13 @@
 class analog_emulator
     {
     public:
-        analog_emulator( float dispersion = 0.238f, float m_expec = 27.f,
+        analog_emulator( float dispersion = 0.238f, float math_expec = 27.f,
             float min = 20.f, float max = 30.f );
 
         /// @brief Получение значения аналоговой величины.
         ///
         /// @return Случайное значение аналоговой величины.
-        float get_value();
+        float get_value() const;
 
         void set_max( float max_in_range );
         float get_max() const;

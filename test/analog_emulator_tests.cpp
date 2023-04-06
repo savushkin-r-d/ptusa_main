@@ -6,7 +6,7 @@ TEST( analog_emulator, get_value )
     {
     const auto MIN_VALUE = 20.f;
     const auto MAX_VALUE = 35.f;
-    analog_emulator obj = analog_emulator( 0.444f, 0.25f, MIN_VALUE, MAX_VALUE );
+    analog_emulator obj = analog_emulator( 0.444f, 26.f, MIN_VALUE, MAX_VALUE );
     EXPECT_GE( MIN_VALUE, obj.get_min() );
     EXPECT_LE( MAX_VALUE, obj.get_max() );
 

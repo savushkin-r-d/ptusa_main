@@ -1,9 +1,9 @@
 #include "analog_emulator.h"
 #include "log.h"
 
-analog_emulator::analog_emulator( float dispersion, float m_expec,
+analog_emulator::analog_emulator( float dispersion, float math_expec,
     float min, float max ) : dispersion( dispersion ),
-    m_expec( m_expec ), min_value( min ), max_value( max )
+    m_expec( math_expec ), min_value( min ), max_value( max )
     {
     if ( max < min ) 
        {
@@ -18,7 +18,7 @@ analog_emulator::analog_emulator( float dispersion, float m_expec,
 float analog_emulator::get_st_deviation() const
     {
     return float( sqrt( dispersion ) );
-    }
+}
 
 void analog_emulator::set_max( float max_in_range )
     {
@@ -40,13 +40,11 @@ float analog_emulator::get_min() const
     return min_value;
     }
 
-
-float analog_emulator::get_value()
+float analog_emulator::get_value() const
     {
     std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<> d{27.f, 2.f};
-    float value = static_cast<float>(d(gen));
+    std::normal_distribution<> d{ m_expec, st_deviation };
+    auto value = static_cast<float>( d ( rd ) );
     return value;
     }
 
