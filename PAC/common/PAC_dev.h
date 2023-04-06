@@ -2732,7 +2732,7 @@ class temperature_e : public AI1
 #ifdef DEBUG_NO_IO_MODULES
             float v = analog_io_device::get_value();
             return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
-                AI1::get_value();
+                   v;
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );
             return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
@@ -4761,6 +4761,9 @@ class device_manager: public i_Lua_save_device
         device_manager();
 
         virtual ~device_manager();
+
+        /// @brief Отключение сообщений о ненайденных устройствах.
+        bool disable_error_logging;
 
         /// @brief Получение устройства.
         device* get_device( int dev_type, const char *dev_name );
