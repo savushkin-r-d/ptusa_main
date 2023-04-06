@@ -8,7 +8,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2023.02.23.1)
 
-option(USE_OPCUA "Use OPC UA" OFF)
+option(USE_OPCUA "Use OPC UA" ON)
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
