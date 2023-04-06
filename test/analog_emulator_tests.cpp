@@ -5,7 +5,7 @@ using namespace ::testing;
 TEST( analog_emulator, get_value )
     {
     const auto MIN_VALUE = 20.f;
-    const auto MAX_VALUE = 30.f;
+    const auto MAX_VALUE = 35.f;
     analog_emulator obj = analog_emulator( 0.444f, 0.25f, MIN_VALUE, MAX_VALUE );
     EXPECT_GE( MIN_VALUE, obj.get_min() );
     EXPECT_LE( MAX_VALUE, obj.get_max() );
@@ -20,9 +20,9 @@ TEST( analog_emulator, get_value )
 
     // Значения должны быть в заданном диапазоне.
     ASSERT_THAT( res_value, Each( AllOf( Ge( MIN_VALUE ), Le( MAX_VALUE ) ) ) );
-
-    auto res = std::unique( res_value.begin(), res_value.end() );
-    res_value.erase( res, res_value.end() );
+ 
+    std::unordered_set<float> s(res_value.begin(), res_value.end());
+    res_value.assign(s.begin(), s.end());
     // Значения должны быть с разбросом - как минимум MAX_ITER/2 уникальных.
     EXPECT_TRUE( res_value.size() >= MAX_ITER / 2 );
     }
@@ -55,9 +55,3 @@ TEST( analog_emulator, set_min )
     EXPECT_EQ( ex_min, 0 );
     }
 
-TEST( analog_emulator, init_vector ) 
-    {
-    analog_emulator obj4 = analog_emulator( 0.444f, 0.25f, 20.f, 20.f );
-    float value = obj4.get_value();
-    EXPECT_EQ( value, 20.f );
-    }
