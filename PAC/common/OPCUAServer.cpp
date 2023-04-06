@@ -132,7 +132,7 @@ void OPCUAServer::CreateDevObjects()
         strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
         strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
 
-        //creating object
+        //creating object node
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
         oAttr.displayName = UA_LOCALIZEDTEXT( "en-US", deviceName );
         oAttr.description = UA_LOCALIZEDTEXT( "ru-ru", deviceDescription );
@@ -143,7 +143,7 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
             oAttr, NULL, &deviceId );
 
-        //creating value variable
+        //creating value variable node
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
         valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 value = 0;
@@ -167,7 +167,7 @@ void OPCUAServer::CreateDevObjects()
         valueDataSource.write = writeValue;
         UA_Server_setVariableNode_dataSource(server, valueNodeId, valueDataSource);
 
-        //creating state variable
+        //creating state variable node
         UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
         stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 state = 0;
@@ -187,8 +187,8 @@ void OPCUAServer::CreateDevObjects()
 
         //creating state variable read/write callback
         UA_DataSource stateDataSource;
-        valueDataSource.read = readState;
-        valueDataSource.write = writeState;
+        stateDataSource.read = readState;
+        stateDataSource.write = writeState;
         UA_Server_setVariableNode_dataSource(server, stateNodeId, stateDataSource);
         }
     }
