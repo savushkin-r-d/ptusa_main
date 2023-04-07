@@ -46,7 +46,7 @@ $$ \sigma ={\sqrt D} $$
 Файлы с реализацией ```analog_emulator.h``` и ```analog_emulator.cpp``` находятся в папке ```ptusa_main/Pac/common```. В классе ```analog_emulator``` определена функция расчета стандартного отклонения ```get_st_deviation()```.
 
 Переменные, используемые классом для расчета:
-```с++
+```C++
 float dispersion;   ///< Дисперсия.
 float m_expec;      ///< Математическое ожидание.
 float st_deviation; ///< Стандартное отклонение.
