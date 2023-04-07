@@ -160,7 +160,8 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
             UA_QUALIFIEDNAME(1, "Value"),
             UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-            valueAttr, G_DEVICE_MANAGER()->get_device(i), NULL);
+            valueAttr, G_DEVICE_MANAGER()->get_device(i), nullptr);
+
 
         //creating value variable read/write callback
         UA_DataSource valueDataSource;
