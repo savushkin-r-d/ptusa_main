@@ -1188,7 +1188,7 @@ device* device_manager::get_device( int dev_type,
             return get_stub_device();
             }
         }
-    else
+    else if ( !disable_error_logging )
         {
         if ( dev_type < device::C_DEVICE_TYPE_CNT )
             {
@@ -1222,7 +1222,7 @@ device* device_manager::get_device( const char* dev_name )
             return get_stub_device();
             }
         }
-    else
+    else if ( !disable_error_logging )
         {
         sprintf( G_LOG->msg, "Device \"%s\" not found!", dev_name );
         G_LOG->write_log( i_log::P_ERR );
@@ -1243,7 +1243,7 @@ void device_manager::print() const
         }
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager(): project_devices( 0 )
+device_manager::device_manager( ) : project_devices( 0 ), disable_error_logging( false )
     {
     G_DEVICE_CMMCTR->add_device( this );
     }
