@@ -142,7 +142,8 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
             UA_QUALIFIEDNAME( 1, deviceName ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
-            oAttr, NULL, &deviceId );
+            oAttr, nullptr, &deviceId );
+
 
         //creating value variable node
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
