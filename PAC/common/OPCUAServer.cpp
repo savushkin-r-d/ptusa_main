@@ -185,7 +185,8 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
             UA_QUALIFIEDNAME(1, "State"),
             UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
-            stateAttr, G_DEVICE_MANAGER()->get_device(i), NULL);
+            stateAttr, G_DEVICE_MANAGER()->get_device(i), nullptr);
+
 
         //creating state variable read/write callback
         UA_DataSource stateDataSource;
