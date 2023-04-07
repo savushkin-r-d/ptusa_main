@@ -100,7 +100,8 @@ void OPCUAServer::Init(int port)
 {
     server = UA_Server_new();
     UA_Int16 portNumber = port;
-    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, 0);
+    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, nullptr);
+
     //UA_ServerConfig_setDefault(UA_Server_getConfig(server));
 }
 
