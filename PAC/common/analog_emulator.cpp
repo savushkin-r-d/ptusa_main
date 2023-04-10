@@ -15,10 +15,9 @@ float analog_emulator::get_m_expec() const
     return d.mean();
     }
 
-void analog_emulator::set_param( float math_expec, float stddev )
+void analog_emulator::param( float math_expec, float stddev )
     {
-    std::normal_distribution<float>::param_type d1( math_expec, stddev );
-    d.param( d1 );
+    d.param( std::normal_distribution<float>::param_type { math_expec, stddev } );
     }
 
 float analog_emulator::get_value()
