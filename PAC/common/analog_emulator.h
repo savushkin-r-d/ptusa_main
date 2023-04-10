@@ -13,6 +13,7 @@ class analog_emulator
 
         float get_st_deviation() const;
         float get_m_expec() const;
+        void set_param( float math_expec, float stddev );
 
     private:
         std::random_device rd{};
