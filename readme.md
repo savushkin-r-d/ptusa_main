@@ -14,6 +14,10 @@ General system architecture is shown below:
 
 <p align="center"><img src="readme_images/system_architecture_en.png"></p>
 
+General system architecture when the control program is deployed on the server:
+
+<p align="center"><img src="readme_images/system_architecture_2_en.png"></p>
+
 ## Common description ##
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
