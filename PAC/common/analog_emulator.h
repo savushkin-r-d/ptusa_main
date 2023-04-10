@@ -12,8 +12,6 @@ class analog_emulator
         float get_value();
 
         float get_st_deviation() const;
-        float get_min() const;
-        float get_max() const;
         float get_m_expec() const;
 
     private:
