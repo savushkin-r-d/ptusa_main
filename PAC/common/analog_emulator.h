@@ -4,7 +4,7 @@
 class analog_emulator
     {
     public:
-        analog_emulator( float dispersion = 0.238f, float math_expec = 27.f );
+  analog_emulator( float math_expec = 27.f, float st_deviation = 2.f );
 
         /// @brief Получение значения аналоговой величины.
         ///
@@ -12,9 +12,11 @@ class analog_emulator
         float get_value();
 
         float get_st_deviation() const;
+        float get_min() const;
+        float get_max() const;
+        float get_m_expec() const;
 
     private:
-        float dispersion;   ///< Дисперсия.
         float m_expec;      ///< Математическое ожидание.
         float st_deviation; ///< Стандартное отклонение.
 

@@ -4,7 +4,7 @@ using namespace ::testing;
 
 TEST( analog_emulator, get_value )
     {
-    analog_emulator obj( 0.444f, 26.f );
+    analog_emulator obj( 26.f, 2.f );
 
     // Заполняем вектор значениями в количестве MAX_ITER.
     std::vector<float> res_value;
@@ -22,8 +22,9 @@ TEST( analog_emulator, get_value )
 
 TEST( analog_emulator, analog_emulator )
     {
-    analog_emulator obj1( 0.34f, 26.f );
+    analog_emulator obj1( 26.f, 1.f );
     float st_d = obj1.get_st_deviation();
-    float ex_st_d = sqrt( 0.34f );
-    EXPECT_EQ( st_d, ex_st_d );
+    float mean = obj1.get_m_expec();
+    EXPECT_EQ( mean, 26.f );
+    EXPECT_EQ( st_d, 1.f );
     }
