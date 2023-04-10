@@ -9,7 +9,7 @@ class analog_emulator
         /// @brief Получение значения аналоговой величины.
         ///
         /// @return Случайное значение аналоговой величины.
-        float get_value() const;
+        float get_value();
 
         float get_st_deviation() const;
 
@@ -17,4 +17,7 @@ class analog_emulator
         float dispersion;   ///< Дисперсия.
         float m_expec;      ///< Математическое ожидание.
         float st_deviation; ///< Стандартное отклонение.
+
+        std::random_device rd{};
+        std::normal_distribution<float> d;
     };
