@@ -1,7 +1,7 @@
 #include "analog_emulator.h"
 
-analog_emulator::analog_emulator( float math_expec, float st_deviation ) : m_expec( math_expec ),
-    st_deviation( st_deviation ), d( m_expec, st_deviation )
+analog_emulator::analog_emulator( float math_expec, float stddev ) : m_expec( math_expec ),
+    st_deviation( stddev ), d( m_expec, st_deviation )
     {
     }
 

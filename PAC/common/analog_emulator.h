@@ -4,7 +4,7 @@
 class analog_emulator
     {
     public:
-  analog_emulator( float math_expec = 27.f, float st_deviation = 2.f );
+  analog_emulator( float math_expec = 27.f, float stddev = 2.f );
 
         /// @brief Получение значения аналоговой величины.
         ///
