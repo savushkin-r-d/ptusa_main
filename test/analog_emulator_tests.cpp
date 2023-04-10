@@ -1,4 +1,5 @@
 #include "analog_emulator_tests.h"
+#include <unordered_set>
 
 using namespace ::testing;
 
@@ -20,11 +21,18 @@ TEST( analog_emulator, get_value )
     EXPECT_TRUE( res_value.size() >= MAX_ITER / 2 );
     }
 
-TEST( analog_emulator, analog_emulator )
+TEST( analog_emulator, get_st_deviation )
     {
-    analog_emulator obj1( 26.f, 1.f );
-    float st_d = obj1.get_st_deviation();
-    float mean = obj1.get_m_expec();
-    EXPECT_EQ( mean, 26.f );
-    EXPECT_EQ( st_d, 1.f );
+    const auto MATH_EXPEC = 27.f;
+    const auto ST_DEVIATION = 2.f;
+    analog_emulator obj( MATH_EXPEC, ST_DEVIATION );
+    EXPECT_EQ( ST_DEVIATION, obj.get_st_deviation() );
+    }
+
+TEST( analog_emulator, get_m_expec )
+    {
+    const auto MATH_EXPEC = 27.f;
+    const auto ST_DEVIATION = 2.f;
+    analog_emulator obj( MATH_EXPEC, ST_DEVIATION );
+    EXPECT_EQ( MATH_EXPEC, obj.get_m_expec() );
     }

@@ -17,9 +17,6 @@ class analog_emulator
         float get_m_expec() const;
 
     private:
-        float m_expec;      ///< Математическое ожидание.
-        float st_deviation; ///< Стандартное отклонение.
-
         std::random_device rd{};
         std::normal_distribution<float> d;
     };
