@@ -803,9 +803,8 @@ class analog_io_device : public device, public io_device
 
 #endif // DEBUG_NO_IO_MODULES
 
-
-#ifdef DEBUG_NO_IO_MODULES
     private:
+#ifdef DEBUG_NO_IO_MODULES
         float value = .0f;    ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
 

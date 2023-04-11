@@ -6795,11 +6795,19 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
         G_LOG->write_log( i_log::P_DEBUG );
         }
 
-    if ( prop[ 0 ] == 'E' )
+    if ( strcmp( prop, "M_EXP" ) == 0 )
+        {
+        emulator.param( static_cast<float>( val ), emulator.get_st_deviation() );
+        }
+    else if ( strcmp( prop, "S_DEV" ) == 0 )
+        {
+        emulator.param( emulator.get_m_expec(), static_cast<float>( val ) );
+        }
+    else if ( prop[ 0 ] == 'E' )
         {
         is_emulation = val != 0;
         }
-    else 
+    else
         {
         return device::set_cmd( prop, idx, val );
         }
@@ -6809,7 +6817,9 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
 
 int analog_io_device::save_device_ex( char* buff )
     {
-    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "E={}, ", is_emulation ? 1 : 0 );
+    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, 
+        "E={}, M_EXP={:.1f}, S_DEV={:.1f}",
+        is_emulation ? 1 : 0, emulator.get_m_expec(), emulator.get_st_deviation() );
     return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------
