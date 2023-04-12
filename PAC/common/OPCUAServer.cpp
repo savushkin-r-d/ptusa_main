@@ -16,73 +16,73 @@ char* Transliterate(const char* str)
         {
         switch (str[0])
             {
-            case 'а': tempStr + "a"; break;
-            case 'б': tempStr + "b"; break;
-            case 'в': tempStr + "v"; break;
-            case 'г': tempStr + "g"; break;
-            case 'д': tempStr + "d"; break;
-            case 'е': tempStr + "e"; break;
-            case 'ё': tempStr + "ye"; break;
-            case 'ж': tempStr + "zh"; break;
-            case 'з': tempStr + "z"; break;
-            case 'и': tempStr + "i"; break;
-            case 'й': tempStr + "y"; break;
-            case 'к': tempStr + "k"; break;
-            case 'л': tempStr + "l"; break;
-            case 'м': tempStr + "m"; break;
-            case 'н': tempStr + "n"; break;
-            case 'о': tempStr + "o"; break;
-            case 'п': tempStr + "p"; break;
-            case 'р': tempStr + "r"; break;
-            case 'с': tempStr + "s"; break;
-            case 'т': tempStr + "t"; break;
-            case 'у': tempStr + "u"; break;
-            case 'ф': tempStr + "f"; break;
-            case 'х': tempStr + "ch"; break;
-            case 'ц': tempStr + "z"; break;
-            case 'ч': tempStr + "ch"; break;
-            case 'ш': tempStr + "sh"; break;
-            case 'щ': tempStr + "ch"; break;
-            case 'ъ': tempStr + "''"; break;
-            case 'ы': tempStr + "y"; break;
-            case 'ь': tempStr + "''"; break;
-            case 'э': tempStr + "e"; break;
-            case 'ю': tempStr + "yu"; break;
-            case 'я': tempStr + "ya"; break;
-            case 'А': tempStr + "A"; break;
-            case 'Б': tempStr + "B"; break;
-            case 'В': tempStr + "V"; break;
-            case 'Г': tempStr + "G"; break;
-            case 'Д': tempStr + "D"; break;
-            case 'Е': tempStr + "E"; break;
-            case 'Ё': tempStr + "Ye"; break;
-            case 'Ж': tempStr + "Zh"; break;
-            case 'З': tempStr + "Z"; break;
-            case 'И': tempStr + "I"; break;
-            case 'Й': tempStr + "Y"; break;
-            case 'К': tempStr + "K"; break;
-            case 'Л': tempStr + "L"; break;
-            case 'М': tempStr + "M"; break;
-            case 'Н': tempStr + "N"; break;
-            case 'О': tempStr + "O"; break;
-            case 'П': tempStr + "P"; break;
-            case 'Р': tempStr + "R"; break;
-            case 'С': tempStr + "S"; break;
-            case 'Т': tempStr + "T"; break;
-            case 'У': tempStr + "U"; break;
-            case 'Ф': tempStr + "F"; break;
-            case 'Х': tempStr + "Ch"; break;
-            case 'Ц': tempStr + "Z"; break;
-            case 'Ч': tempStr + "Ch"; break;
-            case 'Ш': tempStr + "Sh"; break;
-            case 'Щ': tempStr + "Ch"; break;
-            case 'Ъ': tempStr + "''"; break;
-            case 'Ы': tempStr + "Y"; break;
-            case 'Ь': tempStr + "''"; break;
-            case 'Э': tempStr + "E"; break;
-            case 'Ю': tempStr + "Yu"; break;
-            case 'Я': tempStr + "Ya"; break; 
-            default: tempStr + str[0];
+            case 'а': tempStr += "a"; break;
+            case 'б': tempStr += "b"; break;
+            case 'в': tempStr += "v"; break;
+            case 'г': tempStr += "g"; break;
+            case 'д': tempStr += "d"; break;
+            case 'е': tempStr += "e"; break;
+            case 'ё': tempStr += "ye"; break;
+            case 'ж': tempStr += "zh"; break;
+            case 'з': tempStr += "z"; break;
+            case 'и': tempStr += "i"; break;
+            case 'й': tempStr += "y"; break;
+            case 'к': tempStr += "k"; break;
+            case 'л': tempStr += "l"; break;
+            case 'м': tempStr += "m"; break;
+            case 'н': tempStr += "n"; break;
+            case 'о': tempStr += "o"; break;
+            case 'п': tempStr += "p"; break;
+            case 'р': tempStr += "r"; break;
+            case 'с': tempStr += "s"; break;
+            case 'т': tempStr += "t"; break;
+            case 'у': tempStr += "u"; break;
+            case 'ф': tempStr += "f"; break;
+            case 'х': tempStr += "ch"; break;
+            case 'ц': tempStr += "z"; break;
+            case 'ч': tempStr += "ch"; break;
+            case 'ш': tempStr += "sh"; break;
+            case 'щ': tempStr += "ch"; break;
+            case 'ъ': tempStr += "''"; break;
+            case 'ы': tempStr += "y"; break;
+            case 'ь': tempStr += "''"; break;
+            case 'э': tempStr += "e"; break;
+            case 'ю': tempStr += "yu"; break;
+            case 'я': tempStr += "ya"; break;
+            case 'А': tempStr += "A"; break;
+            case 'Б': tempStr += "B"; break;
+            case 'В': tempStr += "V"; break;
+            case 'Г': tempStr += "G"; break;
+            case 'Д': tempStr += "D"; break;
+            case 'Е': tempStr += "E"; break;
+            case 'Ё': tempStr += "Ye"; break;
+            case 'Ж': tempStr += "Zh"; break;
+            case 'З': tempStr += "Z"; break;
+            case 'И': tempStr += "I"; break;
+            case 'Й': tempStr += "Y"; break;
+            case 'К': tempStr += "K"; break;
+            case 'Л': tempStr += "L"; break;
+            case 'М': tempStr += "M"; break;
+            case 'Н': tempStr += "N"; break;
+            case 'О': tempStr += "O"; break;
+            case 'П': tempStr += "P"; break;
+            case 'Р': tempStr += "R"; break;
+            case 'С': tempStr += "S"; break;
+            case 'Т': tempStr += "T"; break;
+            case 'У': tempStr += "U"; break;
+            case 'Ф': tempStr += "F"; break;
+            case 'Х': tempStr += "Ch"; break;
+            case 'Ц': tempStr += "Z"; break;
+            case 'Ч': tempStr += "Ch"; break;
+            case 'Ш': tempStr += "Sh"; break;
+            case 'Щ': tempStr += "Ch"; break;
+            case 'Ъ': tempStr += "''"; break;
+            case 'Ы': tempStr += "Y"; break;
+            case 'Ь': tempStr += "''"; break;
+            case 'Э': tempStr += "E"; break;
+            case 'Ю': tempStr += "Yu"; break;
+            case 'Я': tempStr += "Ya"; break;
+            default: tempStr += str[0];
             }
         }
     char* newStr = (char*)malloc(tempStr.length() + 1);
@@ -100,13 +100,11 @@ UA_NodeId techObjectTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1200 } };
 
 
 
-void OPCUAServer::Init(int port)
+void OPCUAServer::Init(short int port)
 {
     server = UA_Server_new();
     UA_Int16 portNumber = port;
     UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, nullptr);
-
-    //UA_ServerConfig_setDefault(UA_Server_getConfig(server));
 }
 
 
@@ -240,7 +238,7 @@ void OPCUAServer::BaseConfig(bool readonly)
     UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
     UA_Server_addVariableNode(server, myIntegerNodeId, parentNodeId,
         parentReferenceNodeId, myIntegerName,
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), attr, NULL, NULL);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), attr, nullptr, nullptr);
     
 }
 
@@ -255,7 +253,7 @@ void OPCUAServer::CreateFolders()
         UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
         UA_QUALIFIEDNAME(1, "Devices"),
         UA_NODEID_NUMERIC(0, UA_NS0ID_FOLDERTYPE),
-        devicesFolderAttr, NULL, &folderDevicesTypeId);
+        devicesFolderAttr, nullptr, &folderDevicesTypeId);
     //папка Objects\Devices\Pumps
     UA_ObjectAttributes pumpsFolderAttr = UA_ObjectAttributes_default;
     pumpsFolderAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Pumps");
@@ -264,7 +262,7 @@ void OPCUAServer::CreateFolders()
         UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
         UA_QUALIFIEDNAME(1, "Pumps"),
         UA_NODEID_NUMERIC(0, UA_NS0ID_FOLDERTYPE),
-        pumpsFolderAttr, NULL, &folderPumpsTypeId);
+        pumpsFolderAttr, nullptr, &folderPumpsTypeId);
     //папка Objects\Devices\Valves
     UA_ObjectAttributes valvesFolderAttr = UA_ObjectAttributes_default;
     valvesFolderAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Valves");
@@ -273,7 +271,7 @@ void OPCUAServer::CreateFolders()
         UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
         UA_QUALIFIEDNAME(1, "Valves"),
         UA_NODEID_NUMERIC(0, UA_NS0ID_FOLDERTYPE),
-        valvesFolderAttr, NULL, &folderValvesTypeId);
+        valvesFolderAttr, nullptr, &folderValvesTypeId);
     }
 
 void OPCUAServer::CreateDeviceTypes(bool readonly)
@@ -286,7 +284,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE),
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         UA_QUALIFIEDNAME(1, "DeviceType"), dtAttr,
-        NULL, &deviceTypeId);
+        nullptr, &deviceTypeId);
     /* Добавляем поле "Description" - описание устройства*/
     UA_VariableAttributes mnAttr = UA_VariableAttributes_default;
     mnAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Description");
@@ -295,7 +293,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_Server_addVariableNode(server, UA_NODEID_NULL, deviceTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "Description"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, NULL, &deviceDescription);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, nullptr, &deviceDescription);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, deviceDescription,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -307,7 +305,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_Server_addObjectTypeNode(server, pumpTypeId,
         deviceTypeId, UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         UA_QUALIFIEDNAME(1, "PumpType"), ptAttr,
-        NULL, NULL);
+        nullptr, nullptr);
 
     UA_DataSource stateDataSource;
     stateDataSource.read = readState;
@@ -321,7 +319,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, pumpTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "State"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), statusAttr, stateDataSource, NULL, &statusId);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), statusAttr, stateDataSource, nullptr, &statusId);
     /* Make the status variable mandatory */
     UA_Server_addReference(server, statusId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -343,15 +341,15 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, pumpTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "Frequency"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), rpmAttr, frequencyDataSource, NULL, &motorRpm);
-    ///* Make the status variable mandatory */
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), rpmAttr, frequencyDataSource, nullptr, &motorRpm);
+    /* Make the status variable mandatory */
     UA_Server_addReference(server, motorRpm,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
         UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_MODELLINGRULE_MANDATORY), true);
 
     UA_NodeTypeLifecycle lifecycle;
     lifecycle.constructor = pumpTypeConstructor;
-    lifecycle.destructor = NULL;
+    lifecycle.destructor = nullptr;
     UA_Server_setNodeTypeLifecycle(server, pumpTypeId, lifecycle);
 
     }
@@ -365,7 +363,7 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
         UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE),
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASSUBTYPE),
         UA_QUALIFIEDNAME(1, "TechObjectType"), dtAttr,
-        NULL, NULL);
+        nullptr, nullptr);
     /* Добавляем поле "Name" - имя объекта*/
     UA_VariableAttributes mnAttr = UA_VariableAttributes_default;
     mnAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Name");
@@ -373,7 +371,7 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     UA_Server_addVariableNode(server, UA_NODEID_NULL, techObjectTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "Name"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, NULL, &deviceDescription);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, nullptr, &deviceDescription);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, deviceDescription,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -386,7 +384,7 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     UA_Server_addVariableNode(server, UA_NODEID_NULL, techObjectTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "Number"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, NULL, &deviceNumber);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, nullptr, &deviceNumber);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, deviceNumber,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -398,11 +396,11 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     UA_NodeId parFloat;
     UA_DataSource parfloatDataSource;
     parfloatDataSource.read = readParFloat;
-    parfloatDataSource.write =NULL;
+    parfloatDataSource.write = nullptr;
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, techObjectTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "PAR_FLOAT"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, parfloatDataSource, NULL, &parFloat);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, parfloatDataSource, nullptr, &parFloat);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, parFloat,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -419,7 +417,7 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, techObjectTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "RT_PAR_FLOAT"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, rtparfloatDataSource, NULL, &rtparFloat);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, rtparfloatDataSource, nullptr, &rtparFloat);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, rtparFloat,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -431,12 +429,12 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     if (!readonly) mnAttr.accessLevel = UA_ACCESSLEVELMASK_WRITE + UA_ACCESSLEVELMASK_READ;
     UA_DataSource operationsDataSource;
     operationsDataSource.read = readOperations;
-    operationsDataSource.write = NULL;
+    operationsDataSource.write = nullptr;
     UA_NodeId operationsNode;
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, techObjectTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
         UA_QUALIFIEDNAME(1, "Operations"),
-        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, operationsDataSource, NULL, &operationsNode);
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, operationsDataSource, nullptr, &operationsNode);
     /* Делаем поле обязательным */
     UA_Server_addReference(server, operationsNode,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -446,7 +444,7 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
     /*Добавляем конструктор типа*/
     UA_NodeTypeLifecycle lifecycle;
     lifecycle.constructor = techObjectTypeConstructor;
-    lifecycle.destructor = NULL;
+    lifecycle.destructor = nullptr;
     UA_Server_setNodeTypeLifecycle(server, techObjectTypeId, lifecycle);
     }
 
@@ -460,8 +458,8 @@ void OPCUAServer::addPumpObject(device * dev)
         UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
         UA_QUALIFIEDNAME(1, name),
         pumpTypeId, 
-        oAttr, dev, NULL);
-    free(name);
+        oAttr, dev, nullptr);
+    delete name;
     }
 
 void OPCUAServer::addTechObject(tech_object* tobj)
@@ -474,8 +472,8 @@ void OPCUAServer::addTechObject(tech_object* tobj)
         UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
         UA_QUALIFIEDNAME(1, name),
         techObjectTypeId, 
-        oAttr, tobj, NULL);
-    free(name);
+        oAttr, tobj, nullptr);
+    delete name;
     }
 
 UA_StatusCode OPCUAServer::readState(UA_Server * server, const UA_NodeId * sessionId, void * sessionContext, const UA_NodeId * nodeId, void * nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange * range, UA_DataValue * dataValue)
@@ -640,7 +638,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     UA_Variant_setScalar(&value, &status, &UA_TYPES[UA_TYPES_INT32]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_Server_setNodeContext(server, bpr.targets[0].targetId.nodeId, nodeContext[0]);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "Frequency");
     bpr =
@@ -649,7 +647,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
         bpr.targetsSize < 1)
         return bpr.statusCode;
     UA_Server_setNodeContext(server, bpr.targets[0].targetId.nodeId, nodeContext[0]);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "Description");
     bpr =
@@ -661,7 +659,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     UA_String devdescr = UA_String_fromChars(mydd);
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     return UA_STATUSCODE_GOOD;
     }
@@ -697,7 +695,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     UA_String devdescr = UA_String_fromChars(mydd);
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "Number");
     bpr =
@@ -708,7 +706,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     UA_Int32 number = t_obj->get_number();
     UA_Variant_setScalar(&value, &number, &UA_TYPES[UA_TYPES_INT32]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "RT_PAR_FLOAT");
     bpr =
@@ -722,7 +720,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     UA_Array_delete(myarr, number, &UA_TYPES[UA_TYPES_FLOAT]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_Server_setNodeContext(server, bpr.targets[0].targetId.nodeId, nodeContext[0]);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "PAR_FLOAT");
     bpr =
@@ -736,7 +734,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     UA_Array_delete(myarr, number, &UA_TYPES[UA_TYPES_FLOAT]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_Server_setNodeContext(server, bpr.targets[0].targetId.nodeId, nodeContext[0]);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
     rpe.targetName = UA_QUALIFIEDNAME(1, "Operations");
     bpr =
@@ -750,7 +748,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     UA_Array_delete(myarr, number, &UA_TYPES[UA_TYPES_INT32]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_Server_setNodeContext(server, bpr.targets[0].targetId.nodeId, nodeContext[0]);
-    UA_BrowsePathResult_deleteMembers(&bpr);
+    UA_BrowsePathResult_clear(&bpr);
 
 
 

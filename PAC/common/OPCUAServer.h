@@ -16,7 +16,7 @@ public:
         static OPCUAServer instance;
         return instance;
     }
-    void Init(int port);
+    void Init(short int port);
     void UserInit();
     void CreateDevObjects();
     UA_StatusCode  Start();
@@ -93,7 +93,7 @@ private:
     OPCUAServer() {}
     ~OPCUAServer() {}
     OPCUAServer(OPCUAServer const&);
-    void operator=(OPCUAServer const&);
+    OPCUAServer& operator=(OPCUAServer const&);
 
 
     UA_ServerConfig* config;
