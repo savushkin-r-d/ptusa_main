@@ -9,81 +9,85 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-void Transliterate(const char* str, char* newStr)
+char* Transliterate(const char* str)
     {
+    std::string tempStr;
     for (; *str != 0; str++)
         {
         switch (str[0])
             {
-            case 'а': strcat(&newStr[0], "a"); break;
-            case 'б': strcat(&newStr[0], "b"); break;
-            case 'в': strcat(&newStr[0], "v"); break;
-            case 'г': strcat(&newStr[0], "g"); break;
-            case 'д': strcat(&newStr[0], "d"); break;
-            case 'е': strcat(&newStr[0], "e"); break;
-            case 'ё': strcat(&newStr[0], "ye"); break;
-            case 'ж': strcat(&newStr[0], "zh"); break;
-            case 'з': strcat(&newStr[0], "z"); break;
-            case 'и': strcat(&newStr[0], "i"); break;
-            case 'й': strcat(&newStr[0], "y"); break;
-            case 'к': strcat(&newStr[0], "k"); break;
-            case 'л': strcat(&newStr[0], "l"); break;
-            case 'м': strcat(&newStr[0], "m"); break;
-            case 'н': strcat(&newStr[0], "n"); break;
-            case 'о': strcat(&newStr[0], "o"); break;
-            case 'п': strcat(&newStr[0], "p"); break;
-            case 'р': strcat(&newStr[0], "r"); break;
-            case 'с': strcat(&newStr[0], "s"); break;
-            case 'т': strcat(&newStr[0], "t"); break;
-            case 'у': strcat(&newStr[0], "u"); break;
-            case 'ф': strcat(&newStr[0], "f"); break;
-            case 'х': strcat(&newStr[0], "ch"); break;
-            case 'ц': strcat(&newStr[0], "z"); break;
-            case 'ч': strcat(&newStr[0], "ch"); break;
-            case 'ш': strcat(&newStr[0], "sh"); break;
-            case 'щ': strcat(&newStr[0], "ch"); break;
-            case 'ъ': strcat(&newStr[0], "''"); break;
-            case 'ы': strcat(&newStr[0], "y"); break;
-            case 'ь': strcat(&newStr[0], "''"); break;
-            case 'э': strcat(&newStr[0], "e"); break;
-            case 'ю': strcat(&newStr[0], "yu"); break;
-            case 'я': strcat(&newStr[0], "ya"); break;
-            case 'А': strcat(&newStr[0], "A"); break;
-            case 'Б': strcat(&newStr[0], "B"); break;
-            case 'В': strcat(&newStr[0], "V"); break;
-            case 'Г': strcat(&newStr[0], "G"); break;
-            case 'Д': strcat(&newStr[0], "D"); break;
-            case 'Е': strcat(&newStr[0], "E"); break;
-            case 'Ё': strcat(&newStr[0], "Ye"); break;
-            case 'Ж': strcat(&newStr[0], "Zh"); break;
-            case 'З': strcat(&newStr[0], "Z"); break;
-            case 'И': strcat(&newStr[0], "I"); break;
-            case 'Й': strcat(&newStr[0], "Y"); break;
-            case 'К': strcat(&newStr[0], "K"); break;
-            case 'Л': strcat(&newStr[0], "L"); break;
-            case 'М': strcat(&newStr[0], "M"); break;
-            case 'Н': strcat(&newStr[0], "N"); break;
-            case 'О': strcat(&newStr[0], "O"); break;
-            case 'П': strcat(&newStr[0], "P"); break;
-            case 'Р': strcat(&newStr[0], "R"); break;
-            case 'С': strcat(&newStr[0], "S"); break;
-            case 'Т': strcat(&newStr[0], "T"); break;
-            case 'У': strcat(&newStr[0], "U"); break;
-            case 'Ф': strcat(&newStr[0], "F"); break;
-            case 'Х': strcat(&newStr[0], "Ch"); break;
-            case 'Ц': strcat(&newStr[0], "Z"); break;
-            case 'Ч': strcat(&newStr[0], "Ch"); break;
-            case 'Ш': strcat(&newStr[0], "Sh"); break;
-            case 'Щ': strcat(&newStr[0], "Ch"); break;
-            case 'Ъ': strcat(&newStr[0], "''"); break;
-            case 'Ы': strcat(&newStr[0], "Y"); break;
-            case 'Ь': strcat(&newStr[0], "''"); break;
-            case 'Э': strcat(&newStr[0], "E"); break;
-            case 'Ю': strcat(&newStr[0], "Yu"); break;
-            case 'Я': strcat(&newStr[0], "Ya"); break;
-            default: { char Temp[2] = { str[0], 0 }; strcat(&newStr[0], &Temp[0]); }
+            case 'а': tempStr + "a"; break;
+            case 'б': tempStr + "b"; break;
+            case 'в': tempStr + "v"; break;
+            case 'г': tempStr + "g"; break;
+            case 'д': tempStr + "d"; break;
+            case 'е': tempStr + "e"; break;
+            case 'ё': tempStr + "ye"; break;
+            case 'ж': tempStr + "zh"; break;
+            case 'з': tempStr + "z"; break;
+            case 'и': tempStr + "i"; break;
+            case 'й': tempStr + "y"; break;
+            case 'к': tempStr + "k"; break;
+            case 'л': tempStr + "l"; break;
+            case 'м': tempStr + "m"; break;
+            case 'н': tempStr + "n"; break;
+            case 'о': tempStr + "o"; break;
+            case 'п': tempStr + "p"; break;
+            case 'р': tempStr + "r"; break;
+            case 'с': tempStr + "s"; break;
+            case 'т': tempStr + "t"; break;
+            case 'у': tempStr + "u"; break;
+            case 'ф': tempStr + "f"; break;
+            case 'х': tempStr + "ch"; break;
+            case 'ц': tempStr + "z"; break;
+            case 'ч': tempStr + "ch"; break;
+            case 'ш': tempStr + "sh"; break;
+            case 'щ': tempStr + "ch"; break;
+            case 'ъ': tempStr + "''"; break;
+            case 'ы': tempStr + "y"; break;
+            case 'ь': tempStr + "''"; break;
+            case 'э': tempStr + "e"; break;
+            case 'ю': tempStr + "yu"; break;
+            case 'я': tempStr + "ya"; break;
+            case 'А': tempStr + "A"; break;
+            case 'Б': tempStr + "B"; break;
+            case 'В': tempStr + "V"; break;
+            case 'Г': tempStr + "G"; break;
+            case 'Д': tempStr + "D"; break;
+            case 'Е': tempStr + "E"; break;
+            case 'Ё': tempStr + "Ye"; break;
+            case 'Ж': tempStr + "Zh"; break;
+            case 'З': tempStr + "Z"; break;
+            case 'И': tempStr + "I"; break;
+            case 'Й': tempStr + "Y"; break;
+            case 'К': tempStr + "K"; break;
+            case 'Л': tempStr + "L"; break;
+            case 'М': tempStr + "M"; break;
+            case 'Н': tempStr + "N"; break;
+            case 'О': tempStr + "O"; break;
+            case 'П': tempStr + "P"; break;
+            case 'Р': tempStr + "R"; break;
+            case 'С': tempStr + "S"; break;
+            case 'Т': tempStr + "T"; break;
+            case 'У': tempStr + "U"; break;
+            case 'Ф': tempStr + "F"; break;
+            case 'Х': tempStr + "Ch"; break;
+            case 'Ц': tempStr + "Z"; break;
+            case 'Ч': tempStr + "Ch"; break;
+            case 'Ш': tempStr + "Sh"; break;
+            case 'Щ': tempStr + "Ch"; break;
+            case 'Ъ': tempStr + "''"; break;
+            case 'Ы': tempStr + "Y"; break;
+            case 'Ь': tempStr + "''"; break;
+            case 'Э': tempStr + "E"; break;
+            case 'Ю': tempStr + "Yu"; break;
+            case 'Я': tempStr + "Ya"; break; 
+            default: tempStr + str[0];
             }
         }
+    char* newStr = (char*)malloc(tempStr.length() + 1);
+    strcpy_s(newStr, tempStr.length(), tempStr.c_str());
+    return newStr;
     }
 
 /* predefined identifier for later use */
@@ -130,8 +134,8 @@ void OPCUAServer::CreateDevObjects()
     for ( u_int i = 0; i < deviceCount; i++)
         {
         UA_NodeId deviceId;
-        strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
-        strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
+        strcpy_s( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
+        strncpy_s( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description(), 50 );
 
         //creating object node
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
@@ -152,8 +156,8 @@ void OPCUAServer::CreateDevObjects()
         UA_Variant_setScalar(&valueAttr.value, &value, &UA_TYPES[UA_TYPES_INT32]);
 
         char valueName[30];
-        strcpy(valueName, deviceName);
-        strcat(valueName, ". Value");
+        strcpy_s(valueName, deviceName);
+        strcat_s(valueName, ". Value");
         valueAttr.displayName = UA_LOCALIZEDTEXT("en-US", valueName);
         UA_NodeId valueNodeId = UA_NODEID_STRING(0, valueName);
 
@@ -177,8 +181,8 @@ void OPCUAServer::CreateDevObjects()
         UA_Variant_setScalar(&stateAttr.value, &state, &UA_TYPES[UA_TYPES_INT32]);
 
         char stateName[30];
-        strcpy(stateName, deviceName);
-        strcat(stateName, ". State");
+        strcpy_s(stateName, deviceName);
+        strcat_s(stateName, ". State");
         stateAttr.displayName = UA_LOCALIZEDTEXT("en-US", stateName);
         UA_NodeId stateNodeId = UA_NODEID_STRING(0, stateName);
 
@@ -653,10 +657,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     if (bpr.statusCode != UA_STATUSCODE_GOOD ||
         bpr.targetsSize < 1)
         return bpr.statusCode;
-    int myddlen = strlen(dev->get_description());
-    char mydd[100];
-    strcpy(mydd, "");
-    Transliterate(dev->get_description(), mydd);
+    char* mydd = Transliterate(dev->get_description());
     UA_String devdescr = UA_String_fromChars(mydd);
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
@@ -691,10 +692,8 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
     if (bpr.statusCode != UA_STATUSCODE_GOOD ||
         bpr.targetsSize < 1)
         return bpr.statusCode;
-    char mydd[100];
-    strcpy(mydd, "");
     UA_Variant value;
-    Transliterate(t_obj->get_name(), mydd);
+    char* mydd = Transliterate(t_obj->get_name());
     UA_String devdescr = UA_String_fromChars(mydd);
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
