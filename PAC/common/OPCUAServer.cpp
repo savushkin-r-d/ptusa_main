@@ -9,7 +9,7 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-char* Transliterate(const char* str)
+std::string Transliterate(const char* str)
     {
     std::string tempStr;
     for (; *str != 0; str++)
@@ -85,9 +85,7 @@ char* Transliterate(const char* str)
             default: tempStr += str[0];
             }
         }
-    char* newStr = (char*)malloc(tempStr.length() + 1);
-    strcpy(newStr, tempStr.c_str());
-    return newStr;
+    return tempStr;
     }
 
 /* predefined identifier for later use */
@@ -106,7 +104,6 @@ void OPCUAServer::Init(short int port)
     UA_Int16 portNumber = port;
     UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, nullptr);
 }
-
 
 void OPCUAServer::UserInit()
     {
@@ -133,7 +130,7 @@ void OPCUAServer::CreateDevObjects()
         {
         UA_NodeId deviceId;
         strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
-        strncpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description(), 50 );
+        strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
 
         //creating object node
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
@@ -450,7 +447,8 @@ void OPCUAServer::CreateTechObjectType(bool readonly)
 
 void OPCUAServer::addPumpObject(device * dev)
     {
-    char* name = strdup(dev->get_name());
+    char name[20];
+    strcpy(name, dev->get_name());
     UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
     oAttr.displayName = UA_LOCALIZEDTEXT("en-US", name);
     UA_Server_addObjectNode(server, UA_NODEID_NULL,
@@ -459,12 +457,12 @@ void OPCUAServer::addPumpObject(device * dev)
         UA_QUALIFIEDNAME(1, name),
         pumpTypeId, 
         oAttr, dev, nullptr);
-    delete name;
     }
 
 void OPCUAServer::addTechObject(tech_object* tobj)
     {
-    char* name = strdup(tobj->get_name_in_Lua());
+    char name[100];
+    strcpy(name, tobj->get_name_in_Lua());
     UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
     oAttr.displayName = UA_LOCALIZEDTEXT("en-US", name);
     UA_Server_addObjectNode(server, UA_NODEID_NULL,
@@ -473,7 +471,6 @@ void OPCUAServer::addTechObject(tech_object* tobj)
         UA_QUALIFIEDNAME(1, name),
         techObjectTypeId, 
         oAttr, tobj, nullptr);
-    delete name;
     }
 
 UA_StatusCode OPCUAServer::readState(UA_Server * server, const UA_NodeId * sessionId, void * sessionContext, const UA_NodeId * nodeId, void * nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange * range, UA_DataValue * dataValue)
@@ -655,8 +652,8 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     if (bpr.statusCode != UA_STATUSCODE_GOOD ||
         bpr.targetsSize < 1)
         return bpr.statusCode;
-    char* mydd = Transliterate(dev->get_description());
-    UA_String devdescr = UA_String_fromChars(mydd);
+    std::string mydd = Transliterate(dev->get_description());
+    UA_String devdescr = UA_String_fromChars(const_cast<char*>(mydd.c_str()));
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_BrowsePathResult_clear(&bpr);
@@ -691,8 +688,8 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
         bpr.targetsSize < 1)
         return bpr.statusCode;
     UA_Variant value;
-    char* mydd = Transliterate(t_obj->get_name());
-    UA_String devdescr = UA_String_fromChars(mydd);
+    std::string mydd = Transliterate(t_obj->get_name());
+    UA_String devdescr = UA_String_fromChars(const_cast<char*>(mydd.c_str()));
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_BrowsePathResult_clear(&bpr);
