@@ -86,7 +86,7 @@ char* Transliterate(const char* str)
             }
         }
     char* newStr = (char*)malloc(tempStr.length() + 1);
-    strcpy_s(newStr, tempStr.length(), tempStr.c_str());
+    strcpy(newStr, tempStr.c_str());
     return newStr;
     }
 
@@ -132,8 +132,8 @@ void OPCUAServer::CreateDevObjects()
     for ( u_int i = 0; i < deviceCount; i++)
         {
         UA_NodeId deviceId;
-        strcpy_s( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
-        strncpy_s( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description(), 50 );
+        strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
+        strncpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description(), 50 );
 
         //creating object node
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
@@ -154,8 +154,8 @@ void OPCUAServer::CreateDevObjects()
         UA_Variant_setScalar(&valueAttr.value, &value, &UA_TYPES[UA_TYPES_INT32]);
 
         char valueName[30];
-        strcpy_s(valueName, deviceName);
-        strcat_s(valueName, ". Value");
+        strcpy(valueName, deviceName);
+        strcat(valueName, ". Value");
         valueAttr.displayName = UA_LOCALIZEDTEXT("en-US", valueName);
         UA_NodeId valueNodeId = UA_NODEID_STRING(0, valueName);
 
@@ -179,8 +179,8 @@ void OPCUAServer::CreateDevObjects()
         UA_Variant_setScalar(&stateAttr.value, &state, &UA_TYPES[UA_TYPES_INT32]);
 
         char stateName[30];
-        strcpy_s(stateName, deviceName);
-        strcat_s(stateName, ". State");
+        strcpy(stateName, deviceName);
+        strcat(stateName, ". State");
         stateAttr.displayName = UA_LOCALIZEDTEXT("en-US", stateName);
         UA_NodeId stateNodeId = UA_NODEID_STRING(0, stateName);
 
