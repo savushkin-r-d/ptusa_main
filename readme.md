@@ -22,9 +22,34 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
+1.  The general schema of controller program work, made with [mermaid](https://mermaid.js.org/):
 
-<p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
+``` mermaid
+
+flowchart TB
+
+    A([1 Control program]) --> B[/Initialization\]
+    B[/Initialization\] --> C[\Control cycle/]
+
+    A([1 Control program]) --> D[/Control cycle\]
+    D[/Control cycle\] --> E>Receiving input data from I/O modules, modbus devices]
+    E>Receiving input data from I/O modules, modbus devices] --> F[[2 Process execution]]
+    F[[2 Process execution]] --> G{{Writing output data to output modules, modbus devices}}
+    G{{Writing output data to output modules, modbus devices}} --> H[Interaction with the technological server SCADA-server]
+    H[Interaction with the technological server SCADA-server] --> I{Need to termnate the program?}
+    I{Need to termnate the program?} --> |No| J[\Control cycle/]
+    I{Need to termnate the program?} --> |Yes| K[\Completion/]
+
+    A([1 Control program]) --> L[/Completion\]
+    L[/Completion\] --> M([End])
+
+    C[\Control cycle/] --> D[\Control cycle/]
+
+    J[\Control cycle/] --> D[\Control cycle/]
+
+    K[\Completion/] --> L[/Completion\]
+
+```
 
 2.  Execution of the technological process:
 
@@ -69,7 +94,7 @@ You could open file CMakeList.txt cloned repository in Qt.
 Or clone repository in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
-	
+
 3.  Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
