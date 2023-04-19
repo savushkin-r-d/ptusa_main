@@ -36,9 +36,9 @@ flowchart TB
     E>Receiving input data from I/O modules, modbus devices] --> F[[2 Process execution]]
     F[[2 Process execution]] --> G{{Writing output data to output modules, modbus devices}}
     G{{Writing output data to output modules, modbus devices}} --> H[Interaction with the technological server SCADA-server]
-    H[Interaction with the technological server SCADA-server] --> I{Need to termnate the program?}
-    I{Need to termnate the program?} --> |No| J[\Control cycle/]
-    I{Need to termnate the program?} --> |Yes| K[\Completion/]
+    H[Interaction with the technological server SCADA-server] --> I{Need to terminate the program?}
+    I{Need to terminate the program?} --> |No| J[\Control cycle/]
+    I{Need to terminate the program?} --> |Yes| K[\Completion/]
 
     A([1 Control program]) --> L[/Completion\]
     L[/Completion\] --> M([End])
@@ -53,23 +53,99 @@ flowchart TB
 
 2.  Execution of the technological process:
 
-<p align="center"><img src="docs/drakon_diagram/images/execution_technological_process_en.svg" width="400"></p>
+``` mermaid
 
-<p align="center"><img src="docs/drakon_diagram/images/unit_procedure_en.svg" width="400"></p>
+flowchart TD
 
-<p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
+    A([2 Process execution]) --> B[/For each unit\]
+    B[/For each unit\] --> C[[3 Execution of the unit]]
+    C[[3 Execution of the unit]] --> D[\Next unit/]
+    D[\Next unit/] --> E([End])
 
-<p align="center"><img src="docs/drakon_diagram/images/steps_en.svg" width="500"></p>
+```
 
-<p align="center"><img src="docs/drakon_diagram/images/step_en.svg" width="300"></p>
+``` mermaid
 
-<p align="center"><img src="docs/drakon_diagram/images/action_en.svg" width="500"></p>
+flowchart TD
+
+    A([3 Execution of the unit procedure]) --> B[/For each operation\]
+    B[/For each operation\] --> C[[3 Execution of the unit]]
+    C[[4 Execution of the operation]] --> D[\Next operation/]
+    D[\Next operation/] --> E([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([4 Execution of the operation]) --> B[/Determining the current state of the operation\]
+    B[/Determining the current state of the operation\] --> C[/What is the current state?/]
+
+    C[/What is the current state?/] --> D[/Run\]
+    D[/Run\] --> E[\Run/]
+    E[\Run/] --> L[/Run\]
+    L[/Run\] --> M[[5 Execution of the steps]]
+
+    C[/What is the current state?/] --> F[/Pause\]
+    F[/Pause\] --> G[\Pause/]
+    G[\Pause/] --> G1[/Pause\]
+    G1[/Pause\] --> M[[5 Execution of the steps]]
+
+    C[/What is the current state?/] --> H[/Stopped\]
+    H[/Stopped\] --> I[\Stopped/]
+    I[\Stopped/] --> I1[/Stopped\]
+    I1[/Stopped\] --> M[[5 Execution of the steps]]
+
+    C[/What is the current state?/] --> J[\Idle/]
+    J[/Idle\] --> K[\Idle/]
+    K[\Idle/] --> K1[/Idle\]
+    K1[/Idle\] --> M[[5 Execution of the steps]]
+
+    M[[5 Execution of the steps]] --> N[/User logic\]
+    N[/User logic\] --> O[/User logic\]
+    O[/User logic\] --> P[[Execute custom logic, Lua-function]]
+    P[[Execute custom logic, Lua-function]] --> Q([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([5 Execution of the steps]) --> A1[[6 Execution of the step]]
+    A1[[6 Execution of the step]] --> B[/For each extra step\]
+    B[/For each extra step\] --> C[[6 Execution of the step]]
+    C[[6 Execution of the step]] --> D[\Next extra step/]
+    D[\Next extra step/] --> E([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([6 Execution of the step]) --> B[/For each step\]
+    B[/For each action\] --> C[[7 Execution of the action]]
+    C[[7 Execution of the action]] --> D[\Next action/]
+    D[\Next operation/] --> E([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([7 Execution of the step]) --> B(Action logic)
+    B(Action logic) --> E([End])
+
+```
 
 3.  When operation is turned on (off) happens next:
 
 <p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
 
-1.  During the execution of command happens next:
+4.  During the execution of command happens next:
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
 ## How to build the project ##
