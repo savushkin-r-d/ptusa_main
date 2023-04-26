@@ -720,6 +720,12 @@ class device : public i_DO_AO_device, public par_device
             return article;
             }
 
+        void param_emulator( float math_expec, float stddev );
+
+        analog_emulator& get_emulator();
+
+        bool is_emulation = false;
+
     private:
         u_int_4 s_number;            ///< Последовательный номер устройства.
 
@@ -732,6 +738,8 @@ class device : public i_DO_AO_device, public par_device
 
         char name[ C_MAX_NAME ];
         char *description;
+
+        analog_emulator emulator;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -798,18 +806,14 @@ class analog_io_device : public device, public io_device
         void  direct_set_value( float new_value );
 
 #else  // DEBUG_NO_IO_MODULES
-
         float get_value() = 0;
 
 #endif // DEBUG_NO_IO_MODULES
 
-    private:
 #ifdef DEBUG_NO_IO_MODULES
+    private:
         float value = .0f;    ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
-
-        bool is_emulation = false;
-        analog_emulator emulator;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -2724,6 +2728,7 @@ class temperature_e : public AI1
             {
             start_param_idx = AI1::get_params_count();
             set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
+            param_emulator( 20, 2 );    //Average room temperature.
             }
 
         float get_value()

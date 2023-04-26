@@ -75,7 +75,7 @@ TEST( device_manager, add_io_device )
     EXPECT_STREQ( 
         "t=\n"
             "\t{\n"
-            "\tT1={M=0, ST=1, V=0, E=0, M_EXP=27.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
+            "\tT1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
             "\t}\n",
         buff );
 
@@ -343,7 +343,7 @@ TEST( device, save_device )
     char buff[ BUFF_SIZE ] = { 0 };
     t1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=27.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
 TEST( device, set_article )
@@ -1455,7 +1455,7 @@ TEST( temperature_e, save_device )
 
     T1.save_device( buff, "" );
     EXPECT_STREQ(
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=27.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n", buff );
 
     T1.set_cmd( "E", 0, 1 );
     T1.save_device( buff, "" );
