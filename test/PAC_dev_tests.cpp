@@ -354,6 +354,13 @@ TEST( device, set_article )
     EXPECT_STREQ( IFM_TE, T1.get_article() );
     }
 
+TEST( device, get_type_name )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    analog_io_device obj( buff, device::DEVICE_TYPE::DT_TE, device::DEVICE_SUB_TYPE::DST_TS, 1 );
+    EXPECT_STREQ( "Температура", obj.get_type_name() );
+    }
 
 TEST( valve, evaluate )
     {

@@ -44,3 +44,10 @@ TEST( analog_emulator, param )
     EXPECT_EQ( 21.f, obj.get_m_expec() );
     EXPECT_EQ( 5.f, obj.get_st_deviation() );
     }
+
+TEST( analog_emulator, analog_emulator )
+    {
+    analog_emulator obj( 12.f, 3.f );
+    EXPECT_EQ( 12.f, obj.get_m_expec() );
+    EXPECT_EQ( 3.f, obj.get_st_deviation() );
+    }
