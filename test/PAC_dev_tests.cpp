@@ -356,11 +356,28 @@ TEST( device, set_article )
 
 TEST( device, get_type_name )
     {
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
-    analog_io_device obj( buff, device::DEVICE_TYPE::DT_TE, device::DEVICE_SUB_TYPE::DST_TS, 1 );
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 1 );
     EXPECT_STREQ( "Температура", obj.get_type_name() );
     }
+
+
+TEST( analog_io_device, set_cmd )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 0 );
+    
+    obj.set_cmd( "M_EXP", 0, 10 );
+    obj.set_cmd( "S_DEV", 0, 20 );
+    obj.set_cmd( "E", 0, 0 );
+    obj.set_cmd( "NOT_EXIST", 0, 1 );       //Несуществующее поле.
+
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
+    }
+
 
 TEST( valve, evaluate )
     {
