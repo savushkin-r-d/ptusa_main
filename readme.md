@@ -26,6 +26,8 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 ``` mermaid
 
+%%{init: { "flowchart": { "curve": "linear" } } }%%
+
 flowchart TB
 
     A([1 Control program]) --> B[/Initialization\]
@@ -33,12 +35,15 @@ flowchart TB
 
     A([1 Control program]) --> D[/Control cycle\]
     D[/Control cycle\] --> E>Receiving input data from I/O modules, modbus devices]
-    E>Receiving input data from I/O modules, modbus devices] --> F[[2 Process execution]]
+    E>Receiving input data <br/> from I/O modules, <br/> modbus devices] --> F[[2 Process execution]]
     F[[2 Process execution]] --> G{{Writing output data to output modules, modbus devices}}
-    G{{Writing output data to output modules, modbus devices}} --> H[Interaction with the technological server SCADA-server]
-    H[Interaction with the technological server SCADA-server] --> I{Need to terminate the program?}
+    G{{Writing output data <br/> to output modules, <br/> modbus devices}} --> H[Interaction with the technological server SCADA-server]
+    H["`Interaction with
+        technological server
+        (SCADA-server)`"] -->
+    I{Need to terminate the program?}
     I{Need to terminate the program?} --> |No| J[\Control cycle/]
-    I{Need to terminate the program?} --> |Yes| K[\Completion/]
+    I{Need to terminate <br/> the program?} --> |Yes| K[\Completion/]
 
     A([1 Control program]) --> L[/Completion\]
     L[/Completion\] --> M([End])
@@ -59,7 +64,7 @@ flowchart TD
 
     A([2 Process execution]) --> B[/For each unit\]
     B[/For each unit\] --> C[[3 Execution of the unit]]
-    C[[3 Execution of the unit]] --> D[\Next unit/]
+    C[[3 Execution <br/> of the unit]] --> D[\Next unit/]
     D[\Next unit/] --> E([End])
 
 ```
@@ -68,19 +73,21 @@ flowchart TD
 
 flowchart TD
 
-    A([3 Execution of the unit procedure]) --> B[/For each operation\]
+    A([3 Execution <br/> of the unit procedure]) --> B[/For each operation\]
     B[/For each operation\] --> C[[3 Execution of the unit]]
-    C[[4 Execution of the operation]] --> D[\Next operation/]
+    C[[4 Execution <br/> of the operation]] --> D[\Next operation/]
     D[\Next operation/] --> E([End])
 
 ```
 
 ``` mermaid
 
+%%{init: { "flowchart": { "curve": "linear" } } }%%
+
 flowchart TD
 
-    A([4 Execution of the operation]) --> B[/Determining the current state of the operation\]
-    B[/Determining the current state of the operation\] --> C[/What is the current state?/]
+    A([4 Execution <br/> of the operation]) --> B[/Determining the current state of the operation\]
+    B[/Determining the current state <br/> of the operation\] --> C[/What is the current state?/]
 
     C[/What is the current state?/] --> D[/Run\]
     D[/Run\] --> E[\Run/]
@@ -102,10 +109,10 @@ flowchart TD
     K[\Idle/] --> K1[/Idle\]
     K1[/Idle\] --> M[[5 Execution of the steps]]
 
-    M[[5 Execution of the steps]] --> N[/User logic\]
+    M[[5 Execution <br/> of the steps]] --> N[/User logic\]
     N[/User logic\] --> O[/User logic\]
     O[/User logic\] --> P[[Execute custom logic, Lua-function]]
-    P[[Execute custom logic, Lua-function]] --> Q([End])
+    P[[Execute <br/> custom logic, <br/> Lua-function]] --> Q([End])
 
 ```
 
@@ -113,11 +120,11 @@ flowchart TD
 
 flowchart TD
 
-    A([5 Execution of the steps]) --> A1[[6 Execution of the step]]
-    A1[[6 Execution of the step]] --> B[/For each extra step\]
-    B[/For each extra step\] --> C[[6 Execution of the step]]
-    C[[6 Execution of the step]] --> D[\Next extra step/]
-    D[\Next extra step/] --> E([End])
+    A([5 Execution <br/> of the steps]) --> A1[[6 Execution of the step]]
+    A1[[6 Execution <br/> of the step]] --> B[/For each extra step\]
+    B[/For each <br/> extra step\] --> C[[6 Execution of the step]]
+    C[[6 Execution <br/> of the step]] --> D[\Next extra step/]
+    D[\Next <br/> extra step/] --> E([End])
 
 ```
 
@@ -125,9 +132,9 @@ flowchart TD
 
 flowchart TD
 
-    A([6 Execution of the step]) --> B[/For each step\]
+    A([6 Execution <br/> of the step]) --> B[/For each step\]
     B[/For each action\] --> C[[7 Execution of the action]]
-    C[[7 Execution of the action]] --> D[\Next action/]
+    C[[7 Execution <br/> of the action]] --> D[\Next action/]
     D[\Next operation/] --> E([End])
 
 ```
@@ -136,7 +143,7 @@ flowchart TD
 
 flowchart TD
 
-    A([7 Execution of the step]) --> B(Action logic)
+    A([7 Execution <br/> of the step]) --> B(Action logic)
     B(Action logic) --> E([End])
 
 ```
