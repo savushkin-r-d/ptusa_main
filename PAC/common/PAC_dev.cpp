@@ -422,6 +422,16 @@ analog_emulator& device::get_emulator()
     return emulator;
     }
 //-----------------------------------------------------------------------------
+bool device::is_emulation() const
+    {
+    return emulation;
+    }
+//-----------------------------------------------------------------------------
+void device::set_emulation( bool new_emulation_state )
+    {
+    emulation = new_emulation_state;
+    }
+//-----------------------------------------------------------------------------
 device::~device()
     {
     delete [] description;
@@ -4622,7 +4632,7 @@ void valve_iol_terminal::direct_on()
     auto data = (char*)( get_AO_write_data(
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
-    for ( size_t i = 1; i < terminal_id.size(); i++ )
+    for ( u_int i = 1; i < static_cast<u_int>( terminal_id.size() ); i++ )
         {
         data = (char*)( get_AO_write_data(
             static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
@@ -5214,7 +5224,7 @@ float temperature_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
    {
-    return analog_io_device::get_value();
+   return analog_io_device::get_value();
    }
 #endif
 //-----------------------------------------------------------------------------
@@ -6817,7 +6827,7 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
         }
     else if ( prop[ 0 ] == 'E' )
         {
-        is_emulation = val != 0;
+        set_emulation( val != 0 );
         }
     else
         {
@@ -6831,7 +6841,7 @@ int analog_io_device::save_device_ex( char* buff )
     {
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, 
         "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
-        is_emulation ? 1 : 0, get_emulator().get_m_expec(), 
+        is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
         get_emulator().get_st_deviation());
     return static_cast<int>( res.size );
     }
@@ -6840,7 +6850,7 @@ int analog_io_device::save_device_ex( char* buff )
 
 float analog_io_device::get_value()
     {
-    if ( is_emulation ) return get_emulator().get_value();
+    if ( is_emulation() ) return get_emulator().get_value();
     else return value;
     }
 //-----------------------------------------------------------------------------

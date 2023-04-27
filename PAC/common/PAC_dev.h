@@ -722,9 +722,11 @@ class device : public i_DO_AO_device, public par_device
 
         void param_emulator( float math_expec, float stddev );
 
-        analog_emulator& get_emulator();
+        bool is_emulation() const;
 
-        bool is_emulation = false;
+        void set_emulation( bool new_emulation_state );
+
+        analog_emulator& get_emulator();
 
     private:
         u_int_4 s_number;            ///< Последовательный номер устройства.
@@ -739,6 +741,7 @@ class device : public i_DO_AO_device, public par_device
         char name[ C_MAX_NAME ];
         char *description;
 
+        bool emulation = false;
         analog_emulator emulator;
     };
 //-----------------------------------------------------------------------------
