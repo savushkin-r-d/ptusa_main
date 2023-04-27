@@ -167,12 +167,33 @@ int no_print_stack_traceback( lua_State* L )
     return 0;
     }
 
+int use_print_stack_traceback( lua_State* L )
+    {
+    lua_manager::use_print_stack_traceback();
+    return 0;
+    }
+
+int switch_on_verbose( lua_State* L )
+    {
+    G_DEBUG = 1;
+    return 0;
+    }
+
+int switch_off_verbose( lua_State* L )
+    {
+    G_DEBUG = 0;
+    return 0;
+    }
+
 //Регистрация реализованных в dll функций, что бы те стали доступны из lua.
 struct luaL_reg ls_lib[] =
     {
     { "init", lua_init },
     { "eval", eval },
     { "no_print_stack_traceback", no_print_stack_traceback },
+    { "use_print_stack_traceback", use_print_stack_traceback },
+    { "switch_on_verbose", switch_on_verbose },
+    { "switch_off_verbose", switch_off_verbose },
     { NULL, NULL },
     };
 
