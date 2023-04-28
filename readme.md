@@ -34,7 +34,6 @@ flowchart TB
     Z((_)) --- B[/Initialization\]
     B[/Initialization\] --- C[\Control cycle/]
     C[\Control cycle/] --- X((_))
-    X((_)) --- Z((_))
 
     Z((_)) --- D[/Control cycle\]
 
@@ -75,7 +74,6 @@ flowchart TB
     |No| J[\Control cycle/]
 
     J[\Control cycle/] --- X((_))
-    X((_)) --- Z((_))
 
     I{{"Need to terminate
         the program?"}}
