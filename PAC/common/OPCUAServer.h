@@ -16,6 +16,7 @@ public:
         static OPCUAServer instance;
         return instance;
     }
+    
     void Init(short int port);
     void UserInit();
     void CreateDevObjects();

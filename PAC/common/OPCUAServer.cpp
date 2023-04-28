@@ -9,85 +9,6 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-std::string Transliterate(const char* str)
-    {
-    std::string tempStr;
-    for (; *str != 0; str++)
-        {
-        switch (str[0])
-            {
-            case 'а': tempStr += "a"; break;
-            case 'б': tempStr += "b"; break;
-            case 'в': tempStr += "v"; break;
-            case 'г': tempStr += "g"; break;
-            case 'д': tempStr += "d"; break;
-            case 'е': tempStr += "e"; break;
-            case 'ё': tempStr += "ye"; break;
-            case 'ж': tempStr += "zh"; break;
-            case 'з': tempStr += "z"; break;
-            case 'и': tempStr += "i"; break;
-            case 'й': tempStr += "y"; break;
-            case 'к': tempStr += "k"; break;
-            case 'л': tempStr += "l"; break;
-            case 'м': tempStr += "m"; break;
-            case 'н': tempStr += "n"; break;
-            case 'о': tempStr += "o"; break;
-            case 'п': tempStr += "p"; break;
-            case 'р': tempStr += "r"; break;
-            case 'с': tempStr += "s"; break;
-            case 'т': tempStr += "t"; break;
-            case 'у': tempStr += "u"; break;
-            case 'ф': tempStr += "f"; break;
-            case 'х': tempStr += "ch"; break;
-            case 'ц': tempStr += "z"; break;
-            case 'ч': tempStr += "ch"; break;
-            case 'ш': tempStr += "sh"; break;
-            case 'щ': tempStr += "ch"; break;
-            case 'ъ': tempStr += "''"; break;
-            case 'ы': tempStr += "y"; break;
-            case 'ь': tempStr += "''"; break;
-            case 'э': tempStr += "e"; break;
-            case 'ю': tempStr += "yu"; break;
-            case 'я': tempStr += "ya"; break;
-            case 'А': tempStr += "A"; break;
-            case 'Б': tempStr += "B"; break;
-            case 'В': tempStr += "V"; break;
-            case 'Г': tempStr += "G"; break;
-            case 'Д': tempStr += "D"; break;
-            case 'Е': tempStr += "E"; break;
-            case 'Ё': tempStr += "Ye"; break;
-            case 'Ж': tempStr += "Zh"; break;
-            case 'З': tempStr += "Z"; break;
-            case 'И': tempStr += "I"; break;
-            case 'Й': tempStr += "Y"; break;
-            case 'К': tempStr += "K"; break;
-            case 'Л': tempStr += "L"; break;
-            case 'М': tempStr += "M"; break;
-            case 'Н': tempStr += "N"; break;
-            case 'О': tempStr += "O"; break;
-            case 'П': tempStr += "P"; break;
-            case 'Р': tempStr += "R"; break;
-            case 'С': tempStr += "S"; break;
-            case 'Т': tempStr += "T"; break;
-            case 'У': tempStr += "U"; break;
-            case 'Ф': tempStr += "F"; break;
-            case 'Х': tempStr += "Ch"; break;
-            case 'Ц': tempStr += "Z"; break;
-            case 'Ч': tempStr += "Ch"; break;
-            case 'Ш': tempStr += "Sh"; break;
-            case 'Щ': tempStr += "Ch"; break;
-            case 'Ъ': tempStr += "''"; break;
-            case 'Ы': tempStr += "Y"; break;
-            case 'Ь': tempStr += "''"; break;
-            case 'Э': tempStr += "E"; break;
-            case 'Ю': tempStr += "Yu"; break;
-            case 'Я': tempStr += "Ya"; break;
-            default: tempStr += str[0];
-            }
-        }
-    return tempStr;
-    }
-
 /* predefined identifier for later use */
 UA_NodeId folderDevicesTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1001 } };
 UA_NodeId folderPumpsTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1002 } };
@@ -96,14 +17,12 @@ UA_NodeId pumpTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1101 } };
 UA_NodeId valveTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1102 } };
 UA_NodeId techObjectTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1200 } };
 
-
-
 void OPCUAServer::Init(short int port)
-{
+    {
     server = UA_Server_new();
     UA_Int16 portNumber = port;
     UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, nullptr);
-}
+    }
 
 void OPCUAServer::UserInit()
     {
@@ -652,8 +571,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     if (bpr.statusCode != UA_STATUSCODE_GOOD ||
         bpr.targetsSize < 1)
         return bpr.statusCode;
-    std::string mydd = Transliterate(dev->get_description());
-    UA_String devdescr = UA_String_fromChars(const_cast<char*>(mydd.c_str()));
+    UA_String devdescr = UA_String_fromChars(dev->get_description());
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_BrowsePathResult_clear(&bpr);
@@ -688,8 +606,7 @@ UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA
         bpr.targetsSize < 1)
         return bpr.statusCode;
     UA_Variant value;
-    std::string mydd = Transliterate(t_obj->get_name());
-    UA_String devdescr = UA_String_fromChars(const_cast<char*>(mydd.c_str()));
+    UA_String devdescr = UA_String_fromChars(t_obj->get_name());
     UA_Variant_setScalar(&value, &devdescr, &UA_TYPES[UA_TYPES_STRING]);
     UA_Server_writeValue(server, bpr.targets[0].targetId.nodeId, value);
     UA_BrowsePathResult_clear(&bpr);
