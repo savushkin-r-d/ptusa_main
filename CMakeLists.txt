@@ -82,7 +82,7 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/IoT/*.cpp)
 
 if(USE_OPCUA)
-list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
+    list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
 else()
     list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
 endif()
@@ -90,6 +90,10 @@ endif()
 file(GLOB test_src CONFIGURE_DEPENDS
     	    test/*.cpp
             test/dll/*.cpp)
+
+if(NOT USE_OPCUA)
+    list(FILTER test_src EXCLUDE REGEX ".*OPCUA*")
+endif()
 
 if(LINUX)
     file(GLOB linux_src CONFIGURE_DEPENDS
