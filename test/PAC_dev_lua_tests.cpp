@@ -96,3 +96,33 @@ TEST( toLuapp, tolua_PAC_dev_C00 )
 
     lua_close( L );
     }
+
+TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
+    {
+    lua_State* L = lua_open();    
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L, 
+        "G_DEVICE_MANAGER():add_io_device( 4, 1, \'TE1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "TE1 = G_DEVICE_MANAGER():get_device( 4, \'TE1\')" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "TE1" );
+    auto TE1 = static_cast<device*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, TE1 );
+    lua_remove( L, -1 );    
+
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    TE1->save_device( buff, "" );
+    EXPECT_STREQ(
+        "TE1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n",
+        buff );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "TE1:param_emulator( 50, 5 )" ) );
+    TE1->save_device( buff, "" );
+    EXPECT_STREQ(
+        "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR_T=0},\n",
+        buff );
+
+    lua_close( L );
+    }
