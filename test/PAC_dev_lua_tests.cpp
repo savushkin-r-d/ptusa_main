@@ -118,6 +118,9 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n",
         buff );
 
+    //Некорректные параметры при вызове метода.
+    ASSERT_EQ( 1, luaL_dostring( L, "TE1:param_emulator( 50 )" ) );
+
     ASSERT_EQ( 0, luaL_dostring( L, "TE1:param_emulator( 50, 5 )" ) );
     TE1->save_device( buff, "" );
     EXPECT_STREQ(

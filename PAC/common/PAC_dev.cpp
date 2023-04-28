@@ -6839,7 +6839,8 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
 
 int analog_io_device::save_device_ex( char* buff )
     {
-    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, 
+    auto res = fmt::format_to_n( 
+        buff, MAX_COPY_SIZE, 
         "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
         is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
         get_emulator().get_st_deviation());
