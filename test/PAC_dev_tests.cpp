@@ -69,13 +69,13 @@ TEST( device_manager, add_io_device )
         device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
     EXPECT_NE( nullptr, res );
 
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     G_DEVICE_MANAGER()->save_device( buff );
     EXPECT_STREQ( 
         "t=\n"
             "\t{\n"
-            "\tT1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
+            "\tT1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
             "\t}\n",
         buff );
 
@@ -339,11 +339,11 @@ TEST( dev_stub, get_min_flow )
 TEST( device, save_device )
     {
     temperature_e_analog t1( "T1" );
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     t1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
 TEST( device, set_article )
@@ -352,6 +352,30 @@ TEST( device, set_article )
     auto IFM_TE = "IFM.TE11";
     T1.set_article( IFM_TE );
     EXPECT_STREQ( IFM_TE, T1.get_article() );
+    }
+
+TEST( device, get_type_name )
+    {
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 1 );
+    EXPECT_STREQ( "Температура", obj.get_type_name() );
+    }
+
+
+TEST( analog_io_device, set_cmd )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 0 );
+    
+    obj.set_cmd( "M_EXP", 0, 10 );
+    obj.set_cmd( "S_DEV", 0, 20 );
+    obj.set_cmd( "E", 0, 0 );
+    obj.set_cmd( "NOT_EXIST", 0, 1 );       //Несуществующее поле.
+
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
     }
 
 
@@ -1444,6 +1468,23 @@ TEST( wages_eth, set_string_property )
     auto ip = "0.0.0.0";
     auto field = "NOT_IP";
     w1.set_string_property( field, ip );
+    }
+
+
+TEST( temperature_e, save_device )
+    {
+    temperature_e T1( "T1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    T1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n", buff );
+
+    T1.set_cmd( "E", 0, 1 );
+    T1.save_device( buff, "" );
+    EXPECT_STRNE(
+        "T1={M=0, ST=1, V=0, E=1, P_CZ=0, P_ERR_T=0},\n", buff );
     }
 
 

@@ -244,6 +244,8 @@ class device : public i_DO_AO_device
 
         const char* get_type_str() const;
 
+        void param_emulator( float math_expec, float stddev );
+
         enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.

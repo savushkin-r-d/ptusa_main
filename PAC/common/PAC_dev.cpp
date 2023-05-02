@@ -78,7 +78,7 @@ int par_device::save_device( char* str )
     return size;
     }
 //-----------------------------------------------------------------------------
-int par_device::set_cmd( const char *name, double val )
+int par_device::set_par_by_name( const char *name, double val )
     {
     if ( par )
         {
@@ -316,7 +316,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             break;
 
         case 'P': //Параметры.
-            par_device::set_cmd( prop, val );
+            par_device::set_par_by_name( prop, val );
             break;
 
         default:
@@ -410,6 +410,26 @@ const char* device::get_type_name() const
         default:
             return "???";
         }
+    }
+//-----------------------------------------------------------------------------
+void device::param_emulator( float math_expec, float stddev )
+    {
+    emulator.param( math_expec, stddev );
+    }
+//-----------------------------------------------------------------------------
+analog_emulator& device::get_emulator()
+    {
+    return emulator;
+    }
+//-----------------------------------------------------------------------------
+bool device::is_emulation() const
+    {
+    return emulation;
+    }
+//-----------------------------------------------------------------------------
+void device::set_emulation( bool new_emulation_state )
+    {
+    emulation = new_emulation_state;
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -4612,7 +4632,7 @@ void valve_iol_terminal::direct_on()
     auto data = (char*)( get_AO_write_data(
         static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
     set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
-    for ( size_t i = 1; i < terminal_id.size(); i++ )
+    for ( u_int i = 1; i < static_cast<u_int>( terminal_id.size() ); i++ )
         {
         data = (char*)( get_AO_write_data(
             static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
@@ -4632,7 +4652,7 @@ void valve_iol_terminal::direct_off()
         start_switch_time = get_millisec();
         }
 
-    for ( auto i = 0; i < terminal_id.size(); i++ )
+    for ( size_t i = 0; i < terminal_id.size(); i++ )
         {
         auto data = (char*)( get_AO_write_data(
             static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
@@ -5133,6 +5153,7 @@ temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
     set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
     set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    param_emulator( 20, 2 );    //Average room temperature.
     }
 //-----------------------------------------------------------------------------
 float temperature_e_analog::get_value()
@@ -6784,12 +6805,54 @@ void analog_io_device::direct_off()
     {
     direct_set_value( 0 );
     }
+
+int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        fmt::format_to( G_LOG->msg,
+            "{}\t analog_io_device::set_cmd() - prop = {}, idx = {}, val = {}",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    analog_emulator& emulator = get_emulator();
+    if ( strcmp( prop, "M_EXP" ) == 0 )
+        {
+        emulator.param( static_cast<float>( val ), emulator.get_st_deviation() );
+        }
+    else if ( strcmp( prop, "S_DEV" ) == 0 )
+        {
+        emulator.param( emulator.get_m_expec(), static_cast<float>( val ) );
+        }
+    else if ( prop[ 0 ] == 'E' )
+        {
+        set_emulation( val != 0 );
+        }
+    else
+        {
+        return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+
+int analog_io_device::save_device_ex( char* buff )
+    {
+    auto res = fmt::format_to_n( 
+        buff, MAX_COPY_SIZE, 
+        "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
+        is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
+        get_emulator().get_st_deviation());
+    return static_cast<int>( res.size );
+    }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
 
 float analog_io_device::get_value()
     {
-    return value;
+    if ( is_emulation() ) return get_emulator().get_value();
+    else return value;
     }
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_set_value( float new_value )

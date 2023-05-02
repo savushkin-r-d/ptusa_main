@@ -29,7 +29,7 @@
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
-
+#include "analog_emulator.h"
 #include "smart_ptr.h"
 
 #include "dtime.h"
@@ -84,7 +84,7 @@ class par_device
         ///
         /// @return 0 - ок.
         /// @return 1 - ошибка, параметр с таким именем не найден.
-        int set_cmd( const char *name, double val );
+        int set_par_by_name( const char *name, double val );
 
         /// @brief Установка значения параметра.
         ///
@@ -720,6 +720,14 @@ class device : public i_DO_AO_device, public par_device
             return article;
             }
 
+        void param_emulator( float math_expec, float stddev );
+
+        bool is_emulation() const;
+
+        void set_emulation( bool new_emulation_state );
+
+        analog_emulator& get_emulator();
+
     private:
         u_int_4 s_number;            ///< Последовательный номер устройства.
 
@@ -732,6 +740,9 @@ class device : public i_DO_AO_device, public par_device
 
         char name[ C_MAX_NAME ];
         char *description;
+
+        bool emulation = false;
+        analog_emulator emulator;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -790,16 +801,17 @@ class analog_io_device : public device, public io_device
         void  direct_on();
         void  direct_off();
 
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+        int save_device_ex( char* buff ) override;
+
 #ifdef DEBUG_NO_IO_MODULES
         float get_value();
         void  direct_set_value( float new_value );
 
 #else  // DEBUG_NO_IO_MODULES
-
         float get_value() = 0;
 
 #endif // DEBUG_NO_IO_MODULES
-
 
 #ifdef DEBUG_NO_IO_MODULES
     private:
@@ -2719,6 +2731,7 @@ class temperature_e : public AI1
             {
             start_param_idx = AI1::get_params_count();
             set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
+            param_emulator( 20, 2 );    //Average room temperature.
             }
 
         float get_value()
@@ -2804,6 +2817,7 @@ class temperature_e_iolink : public AI1
 
         TE_data *info;
 		u_int start_param_idx;
+        
 		enum CONSTANTS
 			{
 			P_ERR_T = 1,                ///< Аварийное значение температуры.
