@@ -24,9 +24,8 @@ void OPCUAServer::Init(short int port)
     UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, nullptr);
     }
 
-void OPCUAServer::UserInit()
+void OPCUAServer::UserInit() const
     {
-    //G_LUA_MANAGER->void_exec_lua_method(0, "OPCUA_userinit", 0);
     lua_State* L = G_LUA_MANAGER->get_Lua();
     lua_getfield(L, LUA_GLOBALSINDEX, "OPCUA_userinit");
     if (lua_isfunction(L, -1))
@@ -46,9 +45,9 @@ void OPCUAServer::CreateDevObjects()
     for ( u_int i = 0; i < deviceCount; i++)
         {
         UA_NodeId deviceId;
-        char* deviceName = ( char* )malloc( ( strlen( G_DEVICE_MANAGER()->get_device( i )->get_name() ) + 1 ) * sizeof( char ) );
+        char* deviceName = new char[ strlen( G_DEVICE_MANAGER()->get_device( i )->get_name() ) + 1 ];
         strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
-        char* deviceDescription = ( char* )malloc( ( strlen( G_DEVICE_MANAGER()->get_device( i )->get_description() ) + 1 ) * sizeof( char ) );
+        char* deviceDescription = new char[ strlen( G_DEVICE_MANAGER()->get_device( i )->get_description() ) + 1 ];
         strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
 
         //creating object node
@@ -69,7 +68,7 @@ void OPCUAServer::CreateDevObjects()
         UA_Int32 value = 0;
         UA_Variant_setScalar(&valueAttr.value, &value, &UA_TYPES[UA_TYPES_INT32]);
 
-        char* valueName = ( char* )malloc( ( strlen (deviceName ) + strlen ( ". Value" ) + 1 ) * sizeof( char ) );
+        char* valueName = new char[ strlen (deviceName ) + strlen ( ". Value" ) + 1 ];
         strcpy(valueName, deviceName);
         strcat(valueName, ". Value");
         valueAttr.displayName = UA_LOCALIZEDTEXT("en-US", valueName);
@@ -94,8 +93,7 @@ void OPCUAServer::CreateDevObjects()
         UA_Int32 state = 0;
         UA_Variant_setScalar(&stateAttr.value, &state, &UA_TYPES[UA_TYPES_INT32]);
 
-        char* stateName = ( char* )malloc( ( strlen( deviceName ) + strlen( ". State" ) + 1 ) * sizeof( char ) );
-        strcpy(valueName, deviceName);
+        char* stateName = new char[ strlen( deviceName ) + strlen( ". State" ) + 1 ];
         strcpy(stateName, deviceName);
         strcat(stateName, ". State");
         stateAttr.displayName = UA_LOCALIZEDTEXT("en-US", stateName);
@@ -393,7 +391,7 @@ void OPCUAServer::addTechObject(tech_object* tobj)
         oAttr, tobj, nullptr);
     }
 
-UA_StatusCode OPCUAServer::readState(UA_Server * server, const UA_NodeId * sessionId, void * sessionContext, const UA_NodeId * nodeId, void * nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange * range, UA_DataValue * dataValue)
+UA_StatusCode OPCUAServer::readState(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void * nodeContext, UA_Boolean, const UA_NumericRange *, UA_DataValue * dataValue)
     {
     if (nodeContext != nullptr)
         {
@@ -404,10 +402,10 @@ UA_StatusCode OPCUAServer::readState(UA_Server * server, const UA_NodeId * sessi
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::writeState(UA_Server *server,
-    const UA_NodeId *sessionId, void *sessionContext,
-    const UA_NodeId *nodeId, void *nodeContext,
-    const UA_NumericRange *range,
+UA_StatusCode OPCUAServer::writeState(UA_Server *,
+    const UA_NodeId *, void *,
+    const UA_NodeId *, void *nodeContext,
+    const UA_NumericRange *,
     const UA_DataValue *value)
     {
     if (nodeContext != nullptr)
@@ -422,7 +420,7 @@ UA_StatusCode OPCUAServer::writeState(UA_Server *server,
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::readValue(UA_Server * server, const UA_NodeId * sessionId, void * sessionContext, const UA_NodeId * nodeId, void * nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange * range, UA_DataValue * dataValue)
+UA_StatusCode OPCUAServer::readValue(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void * nodeContext, UA_Boolean, const UA_NumericRange *, UA_DataValue * dataValue)
     {
     if (nodeContext != nullptr)
         {
@@ -433,10 +431,10 @@ UA_StatusCode OPCUAServer::readValue(UA_Server * server, const UA_NodeId * sessi
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::writeValue(UA_Server *server,
-    const UA_NodeId *sessionId, void *sessionContext,
-    const UA_NodeId *nodeId, void *nodeContext,
-    const UA_NumericRange *range,
+UA_StatusCode OPCUAServer::writeValue(UA_Server *,
+    const UA_NodeId *, void *,
+    const UA_NodeId *, void *nodeContext,
+    const UA_NumericRange *,
     const UA_DataValue *value)
     {
     if (nodeContext != nullptr)
@@ -451,7 +449,7 @@ UA_StatusCode OPCUAServer::writeValue(UA_Server *server,
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::readParFloat(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext, const UA_NodeId *nodeId, void *nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *dataValue)
+UA_StatusCode OPCUAServer::readParFloat(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void *nodeContext, UA_Boolean, const UA_NumericRange *, UA_DataValue *dataValue)
     {
     if (nodeContext != nullptr)
         {
@@ -470,7 +468,7 @@ UA_StatusCode OPCUAServer::readParFloat(UA_Server *server, const UA_NodeId *sess
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::readRtParFloat(UA_Server * server, const UA_NodeId * sessionId, void * sessionContext, const UA_NodeId * nodeId, void * nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange * range, UA_DataValue * dataValue)
+UA_StatusCode OPCUAServer::readRtParFloat(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void * nodeContext, UA_Boolean, const UA_NumericRange *, UA_DataValue * dataValue)
     {
     if (nodeContext != nullptr)
         {
@@ -489,8 +487,7 @@ UA_StatusCode OPCUAServer::readRtParFloat(UA_Server * server, const UA_NodeId * 
     return UA_STATUSCODE_GOOD;
     }
 
-
-UA_StatusCode OPCUAServer::readOperations(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext, const UA_NodeId *nodeId, void *nodeContext, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *dataValue)
+UA_StatusCode OPCUAServer::readOperations(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void *nodeContext, UA_Boolean, const UA_NumericRange *, UA_DataValue *dataValue)
     {
     if (nodeContext != nullptr)
         {
@@ -509,7 +506,7 @@ UA_StatusCode OPCUAServer::readOperations(UA_Server *server, const UA_NodeId *se
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::writeRtParFloat(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext, const UA_NodeId *nodeId, void *nodeContext, const UA_NumericRange *range, const UA_DataValue *value)
+UA_StatusCode OPCUAServer::writeRtParFloat(UA_Server *, const UA_NodeId *, void *, const UA_NodeId *, void *nodeContext, const UA_NumericRange *, const UA_DataValue *value)
     {
     if (nodeContext != nullptr)
         {
@@ -521,7 +518,7 @@ UA_StatusCode OPCUAServer::writeRtParFloat(UA_Server *server, const UA_NodeId *s
     return UA_STATUSCODE_GOOD;
     }
 
-UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext, const UA_NodeId *typeId, void *typeContext, const UA_NodeId *nodeId, void **nodeContext)
+UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeId *, void *, const UA_NodeId *, void *, const UA_NodeId *nodeId, void **nodeContext)
     {
     device* dev = (device*)(nodeContext[0]);
     
@@ -581,7 +578,7 @@ UA_StatusCode OPCUAServer::pumpTypeConstructor(UA_Server *server, const UA_NodeI
     }
 
 
-UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA_NodeId *sessionId, void *sessionContext, const UA_NodeId *typeId, void *typeContext, const UA_NodeId *nodeId, void **nodeContext)
+UA_StatusCode OPCUAServer::techObjectTypeConstructor(UA_Server *server, const UA_NodeId *, void *, const UA_NodeId *, void *, const UA_NodeId *nodeId, void **nodeContext)
     {
     tech_object* t_obj = (tech_object*)(nodeContext[0]);
     if (G_DEBUG)
