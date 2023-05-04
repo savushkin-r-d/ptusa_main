@@ -16,5 +16,6 @@ ax.grid(alpha=0.8,color='b') # добавляем сетку с прозрачн
 ax.vlines(x=mean, ymin=0, ymax=0.795, linewidths=2.0) # отрисовка линии по координатам x, y и верхней границе
 ax.set_ylabel(r'$p$ (TE)') # называем ось y
 ax.set_xlabel('TE values') # называем ось x
+ax.text(28, 0.1,r'$\mu $', fontsize=15, color='w') # ставим обозначение мат. ожидания 
 ax.plot(x, norm.pdf(x, loc=mean, scale=stdev)) # рисуем график 
 plt.show()
