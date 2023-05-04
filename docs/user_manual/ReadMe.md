@@ -35,7 +35,8 @@ $$ D={\sum (x-\mu)^2 \over n}$$
 
 $$ \sigma ={\sqrt D} $$
 
-При $D$ = 0.695 получим $ \sigma ={\sqrt {0.695} \approx 0.833667} $ °C
+При $D = 0.695$ получим 
+$$ \sigma ={\sqrt {0.695} \approx 0.833667} °C$$
 
 <p align="center">
 <img align="center" src="../../readme_images/st_dev.png"> </p>
