@@ -22,7 +22,7 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1. The general schema of controller program work, made with [Mermaid](https://mermaid.js.org/):
+1.  The general schema of controller program work, made with [Mermaid](https://mermaid.js.org/):
 
 ``` mermaid
 
