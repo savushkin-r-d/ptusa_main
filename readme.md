@@ -43,6 +43,9 @@ flowchart TD
     B --- C[[4 Execution <br/> of the operation]]
     C --- D[\Next operation/]
     D --- E([End])
+
+```
+
 <p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
 ``` mermaid
