@@ -1372,6 +1372,41 @@ static int tolua_PAC_dev_device_get_type_str00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: param_emulator of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_param_emulator00
+static int tolua_PAC_dev_device_param_emulator00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  float math_expec = ((float)  tolua_tonumber(tolua_S,2,0));
+  float stddev = ((float)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'param_emulator'", NULL);
+#endif
+  {
+   self->param_emulator(math_expec,stddev);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'param_emulator'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: tare of class  i_wages */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_i_wages_tare00
 static int tolua_PAC_dev_i_wages_tare00(lua_State* tolua_S)
@@ -9819,6 +9854,36 @@ static int tolua_set_cipline_tech_object_use_internal_medium_recipes(lua_State* 
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: disable_final_rinsing of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_disable_final_rinsing
+static int tolua_get_cipline_tech_object_disable_final_rinsing(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'disable_final_rinsing'",NULL);
+#endif
+  tolua_pushboolean(tolua_S,(bool)self->disable_final_rinsing);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: disable_final_rinsing of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_disable_final_rinsing
+static int tolua_set_cipline_tech_object_disable_final_rinsing(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'disable_final_rinsing'",NULL);
+  if (!tolua_isboolean(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->disable_final_rinsing = ((bool)  tolua_toboolean(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: V00 of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V00_ptr
 static int tolua_get_cipline_tech_object_V00_ptr(lua_State* tolua_S)
@@ -14559,6 +14624,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_string_property",tolua_PAC_dev_device_set_string_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
    tolua_function(tolua_S,"get_type_str",tolua_PAC_dev_device_get_type_str00);
+   tolua_function(tolua_S,"param_emulator",tolua_PAC_dev_device_param_emulator00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_VC",device::DT_VC);
@@ -15048,6 +15114,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"scoldvalves",tolua_get_cipline_tech_object_scoldvalves,tolua_set_cipline_tech_object_scoldvalves);
    tolua_variable(tolua_S,"no_acid_wash_max",tolua_get_cipline_tech_object_no_acid_wash_max,tolua_set_cipline_tech_object_no_acid_wash_max);
    tolua_variable(tolua_S,"use_internal_medium_recipes",tolua_get_cipline_tech_object_use_internal_medium_recipes,tolua_set_cipline_tech_object_use_internal_medium_recipes);
+   tolua_variable(tolua_S,"disable_final_rinsing",tolua_get_cipline_tech_object_disable_final_rinsing,tolua_set_cipline_tech_object_disable_final_rinsing);
    tolua_variable(tolua_S,"V00",tolua_get_cipline_tech_object_V00_ptr,tolua_set_cipline_tech_object_V00_ptr);
    tolua_variable(tolua_S,"V01",tolua_get_cipline_tech_object_V01_ptr,tolua_set_cipline_tech_object_V01_ptr);
    tolua_variable(tolua_S,"V02",tolua_get_cipline_tech_object_V02_ptr,tolua_set_cipline_tech_object_V02_ptr);

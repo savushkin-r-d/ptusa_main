@@ -34,43 +34,10 @@ TEST( signal_column, turn_off_blue )
     char get_state_data( char* data )
 */
 
-TEST( valve_iolink_vtug, get_state_data )
+TEST( valve_iol_terminal, get_state_data )
     {
-    class valve_iolink_vtug_test : public valve_iolink_vtug
-        {
-        public:
-            valve_iolink_vtug_test( bool is_on_fb, bool is_off_fb,
-                const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-                valve_iolink_vtug( is_on_fb, is_off_fb, dev_name, sub_type ) {};
-
-            valve_iolink_vtug_test( const char* dev_name,
-                device::DEVICE_SUB_TYPE sub_type ) :valve_iolink_vtug(
-                dev_name, sub_type ) {};
-
-            /// @brief Получение данных состояния устройства.
-            char get_state_data( char* data )
-                {
-                return valve_iolink_vtug::get_state_data( data );
-                }
-
-        };
-
-    valve_iolink_vtug_test v1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
-
-    EXPECT_EQ( 0, v1.get_state_data( nullptr ) );
-    char state = 0b1;
-    EXPECT_EQ( 0, v1.get_state_data( &state ) );
-    const int VTUG_NUMBER_IDX = 1;
-    v1.set_rt_par( VTUG_NUMBER_IDX, 1 );            //Set vtug number to 1.
-    EXPECT_EQ( 1, v1.get_state_data( &state ) );
-
-    valve_iolink_vtug_test v2( false, false, "V2",
-        device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
-
-    v2.set_rt_par( VTUG_NUMBER_IDX, 2 );			//Set vtug number to 2.
-    EXPECT_EQ( 0, v2.get_state_data( &state ) );
-    state = 0b10;
-    EXPECT_EQ( 1, v2.get_state_data( &state ) );
+    valve_iol_terminal_DO1_DI1_on v1( "V1" );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
 
@@ -102,13 +69,13 @@ TEST( device_manager, add_io_device )
         device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
     EXPECT_NE( nullptr, res );
 
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     G_DEVICE_MANAGER()->save_device( buff );
     EXPECT_STREQ( 
         "t=\n"
             "\t{\n"
-            "\tT1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
+            "\tT1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
             "\t}\n",
         buff );
 
@@ -120,8 +87,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V1 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V1 ) );
+    auto Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
     name = std::string( "V2" );
@@ -131,8 +98,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V2 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V2 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_V, device::DST_V_MINI_FLUSHING, Test
     name = std::string( "V3" );
@@ -142,9 +109,74 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto V3 = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( V3 ) );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
+    //device::DT_V, device::V_IOLINK_VTUG_DO1
+    name = std::string( "V4" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_VTUG_DO1, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF
+    name = std::string( "V5" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON
+    name = std::string( "V6" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOLINK_VTUG_DO1_DI2
+    name = std::string( "V7" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
+    name = std::string( "V8" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+
+    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
+    name = std::string( "V9" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
@@ -307,11 +339,11 @@ TEST( dev_stub, get_min_flow )
 TEST( device, save_device )
     {
     temperature_e_analog t1( "T1" );
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     t1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
 TEST( device, set_article )
@@ -320,6 +352,30 @@ TEST( device, set_article )
     auto IFM_TE = "IFM.TE11";
     T1.set_article( IFM_TE );
     EXPECT_STREQ( IFM_TE, T1.get_article() );
+    }
+
+TEST( device, get_type_name )
+    {
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 1 );
+    EXPECT_STREQ( "Температура", obj.get_type_name() );
+    }
+
+
+TEST( analog_io_device, set_cmd )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+        device::DEVICE_SUB_TYPE::DST_TS, 0 );
+    
+    obj.set_cmd( "M_EXP", 0, 10 );
+    obj.set_cmd( "S_DEV", 0, 20 );
+    obj.set_cmd( "E", 0, 0 );
+    obj.set_cmd( "NOT_EXIST", 0, 1 );       //Несуществующее поле.
+
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
     }
 
 
@@ -417,6 +473,316 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
+    }
+
+TEST( valve_iol_terminal, direct_set_state )
+    {
+    valve_iol_terminal V1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par( 1, 1 );
+
+    V1.direct_set_state( valve::V_ON );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_OFF );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_DO1, on )
+    {
+    valve_iol_terminal_DO1 V1( "V1" );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.init( 0, 0, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 5, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 1, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+
+TEST( valve_iol_terminal_DO1_DI1_off, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI1_off V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    const auto WAIT_TIME = 10;
+    V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    sleep_ms( 2 * WAIT_TIME );
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;    
+    EXPECT_EQ( true, V1.get_fb_state() );
+    }
+
+TEST( valve_iol_terminal_DO1_DI1_off, get_on_fb_value )
+    {
+    valve_iol_terminal_DO1_DI1_off V1( "V1" );
+    EXPECT_EQ( false, V1.get_on_fb_value() );
+    }
+
+
+TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI1_on V1( "V1" );
+
+    V1.init( 0, 1, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+    const auto WAIT_TIME = 10;
+    V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    EXPECT_EQ( true, V1.get_fb_state() );
+    sleep_ms( 2 * WAIT_TIME );
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    V1.on();
+    EXPECT_EQ( true, V1.get_fb_state() );
+    }
+
+TEST( valve_iol_terminal_DO1_DI1_on, get_off_fb_value )
+    {
+    valve_iol_terminal_DO1_DI1_on V1( "V1" );
+    EXPECT_EQ( false, V1.get_off_fb_value() );
+    }
+
+
+TEST( valve_iol_terminal_mixproof_DO3, on )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.init( 0, 0, 3, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };    
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 5, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 1, 1 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 2, 2 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.set_rt_par( 3, 3 );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_mixproof_DO3, off )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.init( 0, 0, 3, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 1 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 2 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 3 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0},\n", buff );
+
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+    V1.instant_off();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.open_upper_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    V1.open_lower_seat();
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+    V1.on();
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_mixproof_DO3, direct_set_state )
+    {
+    valve_iol_terminal_mixproof_DO3 V1( "V1" );
+    V1.init( 0, 0, 3, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
+    V1.set_rt_par( 1, 1 );
+    V1.set_rt_par( 2, 2 );
+    V1.set_rt_par( 3, 3 );
+
+    V1.direct_set_state( valve::V_ON );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_UPPER_SEAT );
+    EXPECT_EQ( valve::VALVE_STATE::V_UPPER_SEAT, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT );
+    EXPECT_EQ( valve::VALVE_STATE::V_LOWER_SEAT, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_OFF );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+
+    V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    }
+
+TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
+    {
+    valve_iol_terminal_mixproof_DO3_DI2 V1( "V1" );
+
+    V1.init( 0, 2, 3, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 1 ] = new int_2[ 2 ]{ 0 };
+    V1.AO_channels.int_write_values[ 2 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
+
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 1 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::UPPER_SEAT ), 1 );
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::LOWER_SEAT ), 1 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
+    const auto WAIT_TIME = 10;
+    V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
+    //Не прошёл заданый интервал - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    sleep_ms( 2 * WAIT_TIME );
+    //Прошёл заданый интервал - должно вернуться "ложь".
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
+    V1.direct_on();
+    EXPECT_EQ( 0b1, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Бит включения 1.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;
+    //Есть обратная связь - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    V1.direct_off();
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 0;
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 1;
+    //Есть обратная связь - должно вернуться "истина".
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 0;
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 0;
+    V1.open_upper_seat();
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b1,
+        V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Бит включения верхнего седла 1.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
+    
+    EXPECT_EQ( true,
+        V1.get_fb_state() ); //Открыто верхнее седло - должно вернуться "истина".
+    V1.open_lower_seat();
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b1,
+        V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Бит включения нижнего седла 1.    
+    EXPECT_EQ( true,
+        V1.get_fb_state() ); //Открыто нижнее седло - должно вернуться "истина".
+
+    V1.direct_off();
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
+    EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Все биты 0.
+    }
+
+
+TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
+    {
+    valve_iol_terminal_DO1_DI2 V1( "V1" );
+
+    V1.init( 0, 2, 1, 0 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
+    V1.set_rt_par(
+        static_cast<u_int>( valve_iol_terminal::TERMINAL_OUTPUT::ON ), 2 );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 1;//ОС для отключенного состояния.
+    EXPECT_EQ( true, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 0 ] ) = 1;//ОС для включенного состояния.
+    EXPECT_EQ( false, V1.get_fb_state() );
+
+    *( V1.DI_channels.char_read_values[ 1 ] ) = 0;//ОС для отключенного состояния.
+    V1.direct_on();
+    EXPECT_EQ( true, V1.get_fb_state() );
     }
 
 
@@ -1102,6 +1468,23 @@ TEST( wages_eth, set_string_property )
     auto ip = "0.0.0.0";
     auto field = "NOT_IP";
     w1.set_string_property( field, ip );
+    }
+
+
+TEST( temperature_e, save_device )
+    {
+    temperature_e T1( "T1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    T1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n", buff );
+
+    T1.set_cmd( "E", 0, 1 );
+    T1.save_device( buff, "" );
+    EXPECT_STRNE(
+        "T1={M=0, ST=1, V=0, E=1, P_CZ=0, P_ERR_T=0},\n", buff );
     }
 
 
