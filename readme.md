@@ -22,95 +22,27 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1.  The general schema of controller program work, made with [Mermaid](https://mermaid.js.org/):
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/):
 
-``` mermaid
-
-%%{init: { "flowchart": { "curve": "linear" } } }%%
-
-flowchart TB
-
-    A([1 Control program]) --- Z((_))
-    Z((_)) --- B[/Initialization\]
-    B[/Initialization\] --- C[\Control cycle/]
-    C[\Control cycle/] -------- X((_))
-
-    Z((_)) --- D[/Control cycle\]
-
-    D[/Control cycle\]
-    ---
-    E>"Receiving input data
-      from I/O modules,
-      modbus devices"]
-
-    E>"Receiving input data
-       from I/O modules,
-       modbus devices"]
-    ---
-    F[[2 Process execution]]
-
-    F[[2 Process execution]]
-    ---
-    G{{"Writing output data
-        to output modules,
-        modbus devices"}}
-
-    G{{"Writing output data
-        to output modules,
-        modbus devices"}}
-    ---
-    H["Interaction with
-      the technological
-      server SCADA-server"]
-
-    H["Interaction with
-       technological server
-       (SCADA-server)"]
-    ---
-    I{{Need to terminate the program?}}
-
-    I{{Need to terminate the program?}}
-    ---
-    |No| J[\Control cycle/]
-
-    J[\Control cycle/] --- X((_))
-
-    I{{"Need to terminate
-        the program?"}}
-    ---
-    |Yes| K[\Completion/]
-
-    K[\Completion/] --- X((_))
-    X((_)) --- Z((_))
-
-    Z((_)) --- L[/Completion\]
-    L[/Completion\] --- M([End])
-
-```
+<p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
 2.  Execution of the technological process:
 
 ``` mermaid
-
 flowchart TD
-
     A([2 Process execution]) --- B[/For each unit\]
-    B[/For each unit\] --- C[[3 Execution of the unit]]
-    C[[3 Execution <br/> of the unit]] --- D[\Next unit/]
-    D[\Next unit/] --- E([End])
+    B --- C[[3 Execution of the unit <br/> procedure]]
+    C --- D[\Next unit/]
+    D --- E([End])
 
 ```
 
 ``` mermaid
-
 flowchart TD
-
     A([3 Execution <br/> of the unit procedure]) --- B[/For each operation\]
-    B[/For each operation\] --- C[[3 Execution of the unit]]
-    C[[4 Execution <br/> of the operation]] --- D[\Next operation/]
-    D[\Next operation/] --- E([End])
-
-```
+    B --- C[[4 Execution <br/> of the operation]]
+    C --- D[\Next operation/]
+    D --- E([End])
 <p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
 ``` mermaid
