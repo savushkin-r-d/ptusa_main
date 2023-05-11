@@ -22,7 +22,7 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/):
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/)):
 
 <p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
@@ -52,7 +52,7 @@ flowchart TD
 
 flowchart TD
 
-    A([5 Execution <br/> of the steps]) --- A1[[6 Execution of the step]]
+    A([5 Execution <br/> of the steps]) --- A1[[6 Execution of the <br/> main step]]
     A1 --- B[/For each extra step\]
     B --- C[[6 Execution of the step]]
     C --- D[\Next extra step/]
