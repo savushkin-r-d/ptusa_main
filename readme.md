@@ -53,10 +53,10 @@ flowchart TD
 flowchart TD
 
     A([5 Execution <br/> of the steps]) --- A1[[6 Execution of the step]]
-    A1[[6 Execution <br/> of the step]] --- B[/For each extra step\]
-    B[/For each <br/> extra step\] --- C[[6 Execution of the step]]
-    C[[6 Execution <br/> of the step]] --- D[\Next extra step/]
-    D[\Next <br/> extra step/] --- E([End])
+    A1 --- B[/For each extra step\]
+    B --- C[[6 Execution of the step]]
+    C --- D[\Next extra step/]
+    D --- E([End])
 
 ```
 
@@ -65,9 +65,9 @@ flowchart TD
 flowchart TD
 
     A([6 Execution <br/> of the step]) --- B[/For each step\]
-    B[/For each action\] --- C[[7 Execution of the action]]
-    C[[7 Execution <br/> of the action]] --- D[\Next action/]
-    D[\Next operation/] --- E([End])
+    B --- C[[7 Execution of the action]]
+    C --- D[\Next action/]
+    D --- E([End])
 
 ```
 
@@ -76,7 +76,7 @@ flowchart TD
 flowchart TD
 
     A([7 Execution <br/> of the step]) --- B(Action logic)
-    B(Action logic) --- E([End])
+    B --- E([End])
 
 ```
 
