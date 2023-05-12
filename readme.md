@@ -75,7 +75,7 @@ flowchart TD
 
 flowchart TD
 
-    A([7 Execution <br/> of the step]) --- B(Action logic)
+    A([7 Execution <br/> of the action]) --- B(Action logic)
     B --- E([End])
 
 ```
