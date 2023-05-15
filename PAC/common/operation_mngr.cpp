@@ -1720,7 +1720,7 @@ bool jump_if_action::is_jump( int& next )
     }
 //-----------------------------------------------------------------------------
 bool jump_if_action::check(
-    const std::vector< device* > &checked_devices, bool check_is_opened ) const
+    const std::vector< device* >& checked_devices, bool check_is_opened ) const
     {
     for ( auto dev : checked_devices )
         {
@@ -1731,12 +1731,10 @@ bool jump_if_action::check(
             if ( check_is_opened && !v->is_opened() ||
                 !check_is_opened && !v->is_closed() ) return false;
             }
-        else if ( type == device::DT_DI || type == device::DT_GS ||
-            type == device::DT_DO )
+        else
             {
-            auto d = dynamic_cast<i_DI_device*>( dev );
-            if ( check_is_opened && !d->is_active() ||
-                !check_is_opened && d->is_active() ) return false;
+            if ( check_is_opened && !dev->is_active() ||
+                !check_is_opened && dev->is_active() ) return false;
             }
         }
     return true;
