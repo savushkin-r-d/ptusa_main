@@ -22,29 +22,69 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/)):
 
 <p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
 2.  Execution of the technological process:
 
-<p align="center"><img src="docs/drakon_diagram/images/execution_technological_process_en.svg" width="400"></p>
+``` mermaid
+flowchart TD
+    A([2 Process execution]) --- B[/For each unit\]
+    B --- C[[3 Execution of the unit <br/> procedure]]
+    C --- D[\Next unit/]
+    D --- E([End])
 
-<p align="center"><img src="docs/drakon_diagram/images/unit_procedure_en.svg" width="400"></p>
+```
+
+``` mermaid
+flowchart TD
+    A([3 Execution <br/> of the unit procedure]) --- B[/For each operation\]
+    B --- C[[4 Execution <br/> of the operation]]
+    C --- D[\Next operation/]
+    D --- E([End])
+
+```
 
 <p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/steps_en.svg" width="500"></p>
+``` mermaid
 
-<p align="center"><img src="docs/drakon_diagram/images/step_en.svg" width="300"></p>
+flowchart TD
 
-<p align="center"><img src="docs/drakon_diagram/images/action_en.svg" width="500"></p>
+    A([5 Execution <br/> of the steps]) --- A1[[6 Execution of the <br/> main step]]
+    A1 --- B[/For each extra step\]
+    B --- C[[6 Execution of the step]]
+    C --- D[\Next extra step/]
+    D --- E([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([6 Execution <br/> of the step]) --- B[/For each step\]
+    B --- C[[7 Execution of the action]]
+    C --- D[\Next action/]
+    D --- E([End])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([7 Execution <br/> of the action]) --- B(Action logic)
+    B --- E([End])
+
+```
 
 3.  When operation is turned on (off) happens next:
 
 <p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
 
-1.  During the execution of command happens next:
+4.  During the execution of command happens next:
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
 ## How to build the project ##
@@ -69,7 +109,7 @@ You could open file CMakeList.txt cloned repository in Qt.
 Or clone repository in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
-	
+
 3.  Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.

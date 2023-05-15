@@ -20,17 +20,63 @@
 
 2.  Выполнение технологического процесса:
 
-<p align="center"><img src="../docs/drakon_diagram/images/execution_technological_process.svg" width="400"></p>
+``` mermaid
 
-<p align="center"><img src="../docs/drakon_diagram/images/unit_procedure.svg" width="400"></p>
+flowchart TD
+
+    A(["2 Выполнение <br/> технологического <br/> процесса"])
+    ---
+    B[/"Для каждого <br/> аппарата (unit)"\]
+    B --- C[["3 Выполнение <br/> аппаратной <br/> процедуры"]]
+    C --- D[\"Следующий <br/> аппарат (unit)"/]
+    D --- E([Конец])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A(["3 Выполнение <br/> аппаратной процедуры"]) --- B[/Для каждой операции\]
+    B --- C[[4 Выполнение операции]]
+    C --- D[\Следующая операция/]
+    D --- E([Конец])
+
+```
 
 <p align="center"><img src="../docs/drakon_diagram/images/operation.svg"></p>
 
-<p align="center"><img src="../docs/drakon_diagram/images/steps.svg" width="500"></p>
+``` mermaid
 
-<p align="center"><img src="../docs/drakon_diagram/images/step.svg" width="300"></p>
+flowchart TD
 
-<p align="center"><img src="../docs/drakon_diagram/images/action.svg" width="500"></p>
+    A([5 Выполнение шагов]) --- A1[[6 Выполнение <br/> главного шага]]
+    A1 --- B[/Для каждого <br/> дополнительного шага\]
+    B --- C[[6 Выполнение шага]]
+    C --- D[\"Следующий <br/> дополнительный шаг"/]
+    D --- E([Конец])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([6 Выполнение шага]) --- B[/Для каждого действия\]
+    B --- C[[7 Выполнение действия]]
+    C --- D[\Следующее действие/]
+    D --- E([Конец])
+
+```
+
+``` mermaid
+
+flowchart TD
+
+    A([7 Выполнение действия]) --- B[Логика действия]
+    B --- E([Конец])
+
+```
 
 3. При включении/выключении операции происходит следующее:
 
