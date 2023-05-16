@@ -12,7 +12,7 @@
 #include <sstream>
 
 
-#define NOCONC       0.1
+#define NOCONC       0.1f
 
 #define  TECH_TYPE_SELF_CLEAN 112
 #define TECH_TYPE_CAR_WASH 113
