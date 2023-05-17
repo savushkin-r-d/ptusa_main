@@ -5054,7 +5054,6 @@ int cipline_tech_object::_FromObject( int what, int where )
                 if (c >= noConc)
                     {
                     concentration_ok = 1;
-                    //	   T[TMR_CHK_CONC]->R();
                     }
                 else
                     {
@@ -5068,11 +5067,9 @@ int cipline_tech_object::_FromObject( int what, int where )
                     }
                 break;
             case 2: //must not BE
-                if ( ((c<= parpar[0][P_CKANAL_S]) && (where == TANK_S)) ||
-                    ((c<= parpar[0][P_CKANAL_K]) && (where == TANK_K)))
+                if ( c <= noConc)
                     {
                     concentration_ok = 1;
-                    //	   T[TMR_CHK_CONC]->R();
                     }
                 else
                     {
