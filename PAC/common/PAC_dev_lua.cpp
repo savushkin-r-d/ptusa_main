@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Nov 28 16:17:33 2022.
+** Generated automatically by tolua++-1.0.92 on Wed Apr 26 17:10:10 2023.
 */
 
 #ifndef __cplusplus
@@ -1367,6 +1367,41 @@ static int tolua_PAC_dev_device_get_type_str00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_type_str'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: param_emulator of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_param_emulator00
+static int tolua_PAC_dev_device_param_emulator00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  float math_expec = ((float)  tolua_tonumber(tolua_S,2,0));
+  float stddev = ((float)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'param_emulator'", NULL);
+#endif
+  {
+   self->param_emulator(math_expec,stddev);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'param_emulator'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14589,6 +14624,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_string_property",tolua_PAC_dev_device_set_string_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
    tolua_function(tolua_S,"get_type_str",tolua_PAC_dev_device_get_type_str00);
+   tolua_function(tolua_S,"param_emulator",tolua_PAC_dev_device_param_emulator00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_VC",device::DT_VC);
