@@ -30,7 +30,8 @@ TEST( cipline_tech_object, _CheckErr )
         if ( cipline_tech_object::steps_caustic.count( step ) || cipline_tech_object::steps_acid.count( step ))
             {
             EXPECT_EQ( ERR_CONCENTRATION_SENSOR, cip1._CheckErr( ));
-            } else
+            }
+        else
             {
             EXPECT_EQ( 0, cip1._CheckErr( ));
             }
@@ -329,7 +330,7 @@ TEST( cipline_tech_object, OpolRR )
     testVal = 0.12f;
     auto isCheckPoint = false;
     cipline_tech_object::set_station_par( P_CKANAL_K, testVal );
-    for ( currentConcentration = 20; currentConcentration >= 0;)
+    for ( currentConcentration = 20; currentConcentration >= 0; )
         {
         reinterpret_cast<device *>(cip1.Q)->set_value( currentConcentration );
         cVal = cip1.GetConc( KISL );
@@ -338,24 +339,26 @@ TEST( cipline_tech_object, OpolRR )
             if ( isCheckPoint )
                 {
                 EXPECT_EQ( 1, cip1.OpolRR( TANK_K ));
-                } else
+                }
+            else
                 {
                 EXPECT_EQ( 0, cip1.OpolRR( TANK_K ));
                 std::this_thread::sleep_for( std::chrono::milliseconds( 1 ));
                 EXPECT_EQ( 1, cip1.OpolRR( TANK_K ));
                 isCheckPoint = true;
                 }
-            } else
+            }
+        else
             {
             EXPECT_EQ( 0, cip1.OpolRR( TANK_K ));
             }
-            currentConcentration -= 0.25;
+        currentConcentration -= 0.25;
         }
 
     testVal = 0.15f;
     isCheckPoint = false;
     cipline_tech_object::set_station_par( P_CKANAL_S, testVal );
-    for ( currentConcentration = 20; currentConcentration >= 0;)
+    for ( currentConcentration = 20; currentConcentration >= 0; )
         {
         reinterpret_cast<device *>(cip1.Q)->set_value( currentConcentration );
         cVal = cip1.GetConc( SHCH );
@@ -364,16 +367,93 @@ TEST( cipline_tech_object, OpolRR )
             if ( isCheckPoint )
                 {
                 EXPECT_EQ( 1, cip1.OpolRR( TANK_S ));
-                } else
+                }
+            else
                 {
                 EXPECT_EQ( 0, cip1.OpolRR( TANK_S ));
                 std::this_thread::sleep_for( std::chrono::milliseconds( 1 ));
                 EXPECT_EQ( 1, cip1.OpolRR( TANK_S ));
                 isCheckPoint = true;
                 }
-            } else
+            }
+        else
             {
             EXPECT_EQ( 0, cip1.OpolRR( TANK_K ));
+            }
+        currentConcentration -= 0.25;
+        }
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
+
+TEST( cipline_tech_object, _FromObject )
+    {
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    cip1.T[ TMR_CHK_CONC ]->set_countdown_time( 0 );
+    float currentConcentration;
+    float cVal;
+    float testVal;
+    testVal = 0.12f;
+    cipline_tech_object::set_station_par( P_CKANAL_K, testVal );
+    for ( currentConcentration = 20; currentConcentration >= 0; )
+        {
+        reinterpret_cast<device *>(cip1.Q)->set_value( currentConcentration );
+        cVal = cip1.GetConc( KISL );
+        cip1.concentration_ok = 0;
+        cip1._FromObject( TANK_W, TANK_K );
+        if ( cVal <= testVal )
+            {
+            EXPECT_EQ( 1, cip1.concentration_ok );
+            }
+        else
+            {
+            EXPECT_EQ( 0, cip1.concentration_ok);
+            }
+        cip1.concentration_ok = 0;
+        cip1._FromObject( TANK_K, KANAL );
+        if ( cVal >= testVal )
+            {
+            EXPECT_EQ( 1, cip1.concentration_ok );
+            }
+        else
+            {
+            EXPECT_EQ( 0, cip1.concentration_ok);
+            }
+        currentConcentration -= 0.25;
+        }
+
+    testVal = 0.15f;
+    cipline_tech_object::set_station_par( P_CKANAL_S, testVal );
+    for ( currentConcentration = 20; currentConcentration >= 0; )
+        {
+        reinterpret_cast<device *>(cip1.Q)->set_value( currentConcentration );
+        cVal = cip1.GetConc( SHCH );
+        cip1.concentration_ok = 0;
+        cip1._FromObject( TANK_W, TANK_S );
+        if ( cVal <= testVal )
+            {
+            EXPECT_EQ( 1, cip1.concentration_ok );
+            }
+        else
+            {
+            EXPECT_EQ( 0, cip1.concentration_ok);
+            }
+        cip1.concentration_ok = 0;
+        cip1._FromObject( TANK_S, KANAL );
+        if ( cVal >= testVal )
+            {
+            EXPECT_EQ( 1, cip1.concentration_ok );
+            }
+        else
+            {
+            EXPECT_EQ( 0, cip1.concentration_ok);
             }
         currentConcentration -= 0.25;
         }
