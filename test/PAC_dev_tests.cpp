@@ -305,7 +305,9 @@ TEST( device_manager, add_io_device )
     name = std::string( "W1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_WT, device::DST_WT_ETH, name.c_str(), "Test wages", "W" );
-    EXPECT_EQ( nullptr, res );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto W1 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
     }
@@ -1432,6 +1434,19 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+    }
+
+TEST( wages_eth, direct_set_state )
+    {
+    wages_eth w1( "W1" );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    w1.set_string_property( field, ip );
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
     }
 
 TEST( wages_eth, direct_set_tcp_buff )
