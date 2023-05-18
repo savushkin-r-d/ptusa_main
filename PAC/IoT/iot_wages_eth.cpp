@@ -30,6 +30,11 @@ void iot_wages_eth::set_wages_value( float new_value )
     if ( new_value >= .0f ) value = new_value;
     }
 
+void iot_wages_eth::set_wages_state( int new_state )
+    {
+    state = new_state;
+    }
+
 void iot_wages_eth::convert_value()
     {
     if ( tc->buff[ 8 ] != 'k' || tc->buff[ 9 ] != 'g' || !status )

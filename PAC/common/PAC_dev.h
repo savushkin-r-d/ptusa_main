@@ -3276,9 +3276,9 @@ class virtual_wages : public device, public i_wages
 
         virtual void direct_off();
 
-        virtual void direct_set_value( float new_value );
-
         virtual float get_value();
+
+        virtual void direct_set_value(float new_value);
 
         virtual void direct_set_state( int new_state );
 
@@ -3334,7 +3334,7 @@ class wages_RS232 : public analog_io_device, public i_wages
         float value = .0f;
     };
 //-----------------------------------------------------------------------------
-class wages_eth : public device, public i_wages
+class wages_eth : public analog_io_device, public i_wages
     {
     public:
         explicit wages_eth( const char* dev_name );
