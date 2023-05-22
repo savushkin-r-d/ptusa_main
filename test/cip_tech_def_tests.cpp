@@ -397,6 +397,7 @@ TEST( cipline_tech_object, _FromObject )
     InitStationParams( );
 
     cip1.T[ TMR_CHK_CONC ]->set_countdown_time( 0 );
+    cip1.FL->set_cmd("ST", 0, 1);
     float currentConcentration;
     float cVal;
     float testVal;
