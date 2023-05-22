@@ -61,6 +61,7 @@ TEST( temperature_e_analog, get_value )
 
 TEST( device_manager, add_io_device )
     {
+    G_DEVICE_MANAGER()->clear_io_devices();
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
