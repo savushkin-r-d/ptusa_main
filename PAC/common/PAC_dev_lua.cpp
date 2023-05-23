@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Apr 26 17:10:10 2023.
+** Generated automatically by tolua++-1.0.92 on Tue May 23 13:17:38 2023.
 */
 
 #ifndef __cplusplus
@@ -1465,6 +1465,38 @@ static int tolua_PAC_dev_i_wages_get_value00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_value'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_state of class  i_wages */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_wages_get_state00
+static int tolua_PAC_dev_i_wages_get_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_wages",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_wages* self = (i_wages*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_state();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14656,6 +14688,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"i_wages");
    tolua_function(tolua_S,"tare",tolua_PAC_dev_i_wages_tare00);
    tolua_function(tolua_S,"get_value",tolua_PAC_dev_i_wages_get_value00);
+   tolua_function(tolua_S,"get_state",tolua_PAC_dev_i_wages_get_state00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_motor","i_motor","device",NULL);
   tolua_beginmodule(tolua_S,"i_motor");
