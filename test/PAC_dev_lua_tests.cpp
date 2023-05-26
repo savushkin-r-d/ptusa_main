@@ -132,8 +132,6 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
 
 TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     {
-
-   
     lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
@@ -142,7 +140,7 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     ASSERT_EQ( 0, luaL_dostring( L,
         "WT1 = G_DEVICE_MANAGER():get_device( 17, \'WT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
-    auto WT1 = static_cast<device*>( tolua_touserdata( L, -1, 0 ) );
+    auto WT1 = static_cast<wages*>( tolua_touserdata( L, -1, 0 ) );
     EXPECT_NE( nullptr, WT1 );
     lua_remove( L, -1 );
 
