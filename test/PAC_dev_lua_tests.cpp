@@ -136,15 +136,21 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
     ASSERT_EQ( 0, luaL_dostring( L,
-        "G_DEVICE_MANAGER():add_io_device( 17, 1, \'WT1\', \'Test wages\', \'\' )" ) );
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_WT, device.DST_WT_ETH, \'WT1\', \'Test wages\', \'\' )" ) );
     ASSERT_EQ( 0, luaL_dostring( L,
         "WT1 = G_DEVICE_MANAGER():get_device( 17, \'WT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
-    auto WT1 = static_cast<wages*>( tolua_touserdata( L, -1, 0 ) );
+    auto WT1 = static_cast<wages_eth*>( tolua_touserdata( L, -1, 0 ) );
     EXPECT_NE( nullptr, WT1 );
     lua_remove( L, -1 );
 
-    ASSERT_EQ( 0, luaL_dostring( L, "WT1:get_state()" ) );
+    auto st = WT1->get_state();
+    ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto lua_st = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( st, lua_st );
 
     lua_close( L );
     }
