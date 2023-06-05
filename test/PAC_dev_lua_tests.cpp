@@ -145,6 +145,10 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     EXPECT_NE( nullptr, WT1 );
     lua_remove( L, -1 );
 
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    WT1->set_string_property( field, ip );
+
     auto st = WT1->get_state();
     ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
