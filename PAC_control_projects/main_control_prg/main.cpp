@@ -44,6 +44,10 @@
 #include "rfid_reader.h"
 #endif
 
+#ifdef soem
+#include "ethercat.h"
+#endif
+
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
@@ -151,6 +155,15 @@ int main( int argc, const char *argv[] )
         return EXIT_FAILURE;
         }
 #endif
+
+#ifdef soem
+    // Инициализация сети EtherCAT
+    if (ec_init("eth0") > 0) {
+        G_LOG->info("EtherCAT initialization successful.\n");
+    } else {
+        G_LOG->info("EtherCAT initialization failed.\n");
+    }
+#endif //soem
 
     //Инициализация дополнительных устройств
     IOT_INIT();
