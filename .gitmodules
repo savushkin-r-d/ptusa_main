@@ -23,3 +23,6 @@
 [submodule "benchmark"]
 	path = benchmark
 	url = https://github.com/google/benchmark.git
+[submodule "EIPScanner/EIPScanner"]
+	path = EIPScanner/EIPScanner
+	url = https://github.com/nimbuscontrols/EIPScanner

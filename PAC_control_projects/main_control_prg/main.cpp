@@ -44,6 +44,10 @@
 #include "rfid_reader.h"
 #endif
 
+#ifdef EIPScanner
+#include "EIPScanner.h"
+#endif
+
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
@@ -150,6 +154,22 @@ int main( int argc, const char *argv[] )
         debug_break;
         return EXIT_FAILURE;
         }
+#endif
+
+#ifdef EIPScanner
+    auto devices = scanner.discover();
+    if (!devices.empty())
+    {
+        auto device = devices.front();
+        G_LOG->info("Found device: IP: {}, MAC: {}, Product name: {}",
+            device.getIp(), device.getMac(), device.getIdentityObject().getProductName());
+    }
+    else 
+    {
+        G_LOG->critical("No devices found");
+        debug_break;
+        return EXIT_FAILURE;
+    }
 #endif
 
     //Инициализация дополнительных устройств
