@@ -172,21 +172,6 @@ int main( int argc, const char *argv[] )
             return -1;
         }
 
-        /* Run the Profinet stack */
-        while (1)
-        {
-            ret = pnet_handle_periodic(pnet);
-            if (ret < 0)
-            {
-                printf("Failed to handle periodic events\n");
-                break;
-            }
-            usleep(10000);
-        }
-
-        /* Cleanup */
-        pnet_exit(pnet);
-
         return 0;
         }
 
