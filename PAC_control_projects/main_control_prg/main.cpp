@@ -159,9 +159,11 @@ int main( int argc, const char *argv[] )
 #ifdef soem
     // Инициализация сети EtherCAT
     if (ec_init("eth0") > 0) {
-        G_LOG->info("EtherCAT initialization successful.\n");
+        G_LOG->info("EtherCAT initialization successful.");
     } else {
-        G_LOG->info("EtherCAT initialization failed.\n");
+        G_LOG->critical("EtherCAT initialization failed.");
+        debug_break;
+        return EXIT_FAILURE;
     }
 #endif //soem
 
