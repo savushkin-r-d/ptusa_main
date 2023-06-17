@@ -23,3 +23,6 @@
 [submodule "benchmark"]
 	path = benchmark
 	url = https://github.com/google/benchmark.git
+[submodule "soem/SOEM"]
+	path = soem/SOEM
+	url = https://github.com/OpenEtherCATsociety/SOEM
