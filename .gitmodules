@@ -23,3 +23,6 @@
 [submodule "benchmark"]
 	path = benchmark
 	url = https://github.com/google/benchmark.git
+[submodule "p-net/p-net"]
+	path = p-net/p-net
+	url = https://github.com/rtlabs-com/p-net

@@ -57,6 +57,8 @@ add_subdirectory(zlib EXCLUDE_FROM_ALL)
 
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
 
+add_subdirectory(p-net EXCLUDE_FROM_ALL)
+
 set(SUBHOOK_TESTS OFF)
 add_subdirectory(subhook EXCLUDE_FROM_ALL)
 

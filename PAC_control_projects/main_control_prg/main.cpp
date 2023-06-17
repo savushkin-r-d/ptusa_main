@@ -24,6 +24,7 @@
 #include "PAC_err.h"
 #include "version_info.h"
 
+
 #ifdef WIN_OS
 #include <shellapi.h>
 #endif
@@ -42,6 +43,10 @@
 
 #ifdef RFID
 #include "rfid_reader.h"
+#endif
+
+#ifdef p-net
+#include <pnet_api.h>
 #endif
 
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
@@ -150,6 +155,41 @@ int main( int argc, const char *argv[] )
         debug_break;
         return EXIT_FAILURE;
         }
+#endif
+
+#ifdef p-net
+        int main(int argc, char *argv[])
+        {
+        int ret = 0;
+        pnet_t *pnet;
+
+        /* Initialize the Profinet stack */
+        pnet = pnet_init("eth0", 1, 0x0001, 0x00000001);
+
+        if (pnet == NULL)
+        {
+            printf("Failed to initialize the Profinet stack\n");
+            return -1;
+        }
+
+        /* Run the Profinet stack */
+        while (1)
+        {
+            ret = pnet_handle_periodic(pnet);
+            if (ret < 0)
+            {
+                printf("Failed to handle periodic events\n");
+                break;
+            }
+            usleep(10000);
+        }
+
+        /* Cleanup */
+        pnet_exit(pnet);
+
+        return 0;
+        }
+
 #endif
 
     //Инициализация дополнительных устройств
