@@ -158,8 +158,7 @@ int main( int argc, const char *argv[] )
 #endif
 
 #ifdef p-net
-        int main(int argc, char *argv[])
-        {
+
         int ret = 0;
         pnet_t *pnet;
 
@@ -173,7 +172,7 @@ int main( int argc, const char *argv[] )
         }
 
         return 0;
-        }
+
 
 #endif
 
