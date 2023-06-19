@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687157136863,
+  "lastUpdate": 1687157152887,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9250,6 +9250,38 @@ window.BENCHMARK_DATA = {
             "value": 122.61552459312665,
             "unit": "us/iter",
             "extra": "iterations: 5530\ncpu: 122.59499095840869 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "pumpezny",
+            "username": "pumpezny"
+          },
+          "committer": {
+            "name": "pumpezny",
+            "username": "pumpezny"
+          },
+          "id": "7061f12da399ce9639e66adedbbea03649169d8a",
+          "message": "profinet module implementation",
+          "timestamp": "2023-06-17T13:01:31Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/593/commits/7061f12da399ce9639e66adedbbea03649169d8a"
+        },
+        "date": 1687157151643,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.547363783292784,
+            "unit": "us/iter",
+            "extra": "iterations: 29699\ncpu: 23.543829758577733 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 117.00770651444097,
+            "unit": "us/iter",
+            "extra": "iterations: 5956\ncpu: 116.99063129617194 us\nthreads: 1"
           }
         ]
       }
