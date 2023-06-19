@@ -58,6 +58,7 @@ add_subdirectory(zlib EXCLUDE_FROM_ALL)
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
 
 add_subdirectory(EIPScanner EXCLUDE_FROM_ALL)
+add_compile_definitions(EIPScanner)
 
 set(SUBHOOK_TESTS OFF)
 add_subdirectory(subhook EXCLUDE_FROM_ALL)
