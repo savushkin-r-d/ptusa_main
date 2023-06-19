@@ -138,16 +138,15 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     ASSERT_EQ( 0, luaL_dostring( L,
         "G_DEVICE_MANAGER():add_io_device( "
         "device.DT_WT, device.DST_WT_ETH, \'WT1\', \'Test wages\', \'\' )" ) );
-    ASSERT_EQ( 0, luaL_dostring( L,
-        "WT1 = G_DEVICE_MANAGER():get_device( 17, \'WT1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "WT1 = WT( \'WT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
-    auto WT1 = static_cast<wages_eth*>( tolua_touserdata( L, -1, 0 ) );
+    auto WT1 = static_cast<i_wages*>( tolua_touserdata( L, -1, 0 ) );
     EXPECT_NE( nullptr, WT1 );
     lua_remove( L, -1 );
 
     auto ip = "0.0.0.0";
     auto field = "IP";
-    WT1->set_string_property( field, ip );
+    dynamic_cast<wages_eth*>( WT1 )->set_string_property( field, ip );
 
     auto st = WT1->get_state();
     ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
