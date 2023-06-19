@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686566660825,
+  "lastUpdate": 1687157072676,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9186,6 +9186,38 @@ window.BENCHMARK_DATA = {
             "value": 98.52836740761613,
             "unit": "us/iter",
             "extra": "iterations: 7063\ncpu: 98.51097267450092 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "uuujjin",
+            "username": "uuujjin"
+          },
+          "committer": {
+            "name": "uuujjin",
+            "username": "uuujjin"
+          },
+          "id": "429a2cffe1ed51dda1db83a4a9bc9f4b23f0a6bd",
+          "message": "Add EtherNet/IP implementation ",
+          "timestamp": "2023-06-17T13:27:46Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/595/commits/429a2cffe1ed51dda1db83a4a9bc9f4b23f0a6bd"
+        },
+        "date": 1687157071926,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 18.926953866514246,
+            "unit": "us/iter",
+            "extra": "iterations: 37023\ncpu: 18.91661399670475 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 99.43884768400093,
+            "unit": "us/iter",
+            "extra": "iterations: 7038\ncpu: 99.42674055129298 us\nthreads: 1"
           }
         ]
       }
