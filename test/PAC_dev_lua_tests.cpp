@@ -149,6 +149,9 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     dynamic_cast<wages_eth*>( WT1 )->set_string_property( field, ip );
 
     auto st = WT1->get_state();
+    //Некорректный вызов - отсуствует self.
+    ASSERT_NE( 0, luaL_dostring( L, "res = WT1.get_state()" ) );    
+    //Корректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     auto lua_st = tolua_tonumber( L, -1, 0 );
