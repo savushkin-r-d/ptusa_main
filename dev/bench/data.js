@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687178935533,
+  "lastUpdate": 1687180764468,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9444,6 +9444,38 @@ window.BENCHMARK_DATA = {
             "value": 98.41416874469147,
             "unit": "us/iter",
             "extra": "iterations: 7058\ncpu: 98.40371209974498 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "YarickBSTU",
+            "username": "YarickBSTU"
+          },
+          "committer": {
+            "name": "YarickBSTU",
+            "username": "YarickBSTU"
+          },
+          "id": "2b9758acc54919be596806f65b6a5edf0a7ce35f",
+          "message": "Added the get_state method for wages",
+          "timestamp": "2023-01-24T13:08:26Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/591/commits/2b9758acc54919be596806f65b6a5edf0a7ce35f"
+        },
+        "date": 1687180763348,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.365856051378316,
+            "unit": "us/iter",
+            "extra": "iterations: 36124\ncpu: 19.36349795150039 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 98.17134196818382,
+            "unit": "us/iter",
+            "extra": "iterations: 7103\ncpu: 98.06200197099817 us\nthreads: 1"
           }
         ]
       }
