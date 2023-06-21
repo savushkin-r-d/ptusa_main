@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687183290430,
+  "lastUpdate": 1687327411352,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9512,6 +9512,38 @@ window.BENCHMARK_DATA = {
             "value": 99.0986822946159,
             "unit": "us/iter",
             "extra": "iterations: 7060\ncpu: 99.09236543909353 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "egor-evseenko",
+            "username": "egor-evseenko"
+          },
+          "committer": {
+            "name": "egor-evseenko",
+            "username": "egor-evseenko"
+          },
+          "id": "a1893567523930b4d5bb4b683bf14b248cec29c0",
+          "message": "Add EtherCAT implementation",
+          "timestamp": "2023-06-17T13:51:04Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/594/commits/a1893567523930b4d5bb4b683bf14b248cec29c0"
+        },
+        "date": 1687327410498,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.56909074626881,
+            "unit": "us/iter",
+            "extra": "iterations: 28475\ncpu: 24.565383669885865 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 118.90449061112766,
+            "unit": "us/iter",
+            "extra": "iterations: 5858\ncpu: 118.88287811539777 us\nthreads: 1"
           }
         ]
       }
