@@ -6,7 +6,6 @@
 
 #include "bus_coupler_io_PC.h"
 
-extern int errno;
 //-----------------------------------------------------------------------------
 int io_manager_PC::net_init(io_node* node)
 {
