@@ -821,11 +821,19 @@ class analog_io_device : public device, public io_device
         int set_cmd( const char* prop, u_int idx, double val ) override;
         int save_device_ex( char* buff ) override;
 
-        float get_value() override;
-        void  direct_set_value( float new_value ) override;
+#ifdef DEBUG_NO_IO_MODULES
+        float get_value();
+        void  direct_set_value( float new_value );
 
+#else  // DEBUG_NO_IO_MODULES
+        float get_value() = 0;
+
+#endif // DEBUG_NO_IO_MODULES
+
+#ifdef DEBUG_NO_IO_MODULES
     private:
         float value = .0f;    ///< Состояние устройства.
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
