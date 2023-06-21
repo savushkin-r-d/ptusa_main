@@ -6851,8 +6851,6 @@ int analog_io_device::save_device_ex( char* buff )
     return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
-
 float analog_io_device::get_value()
     {
     if ( is_emulation() ) return get_emulator().get_value();
@@ -6863,7 +6861,6 @@ void analog_io_device::direct_set_value( float new_value )
     {
     value = new_value;
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int timer::save( char *buff )
