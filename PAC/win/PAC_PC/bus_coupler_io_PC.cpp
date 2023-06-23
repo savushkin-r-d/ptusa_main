@@ -164,7 +164,7 @@ int io_manager_PC::write_outputs()
                 buff[7] = 0x0F;
                 buff[8] = 0;
                 buff[9] = 0;
-                buff[10] = (unsigned char)nd->DO_cnt >> 8;
+                buff[10] = (unsigned char)nd->DO_cnt >> 7 >> 1;
                 buff[11] = (unsigned char)nd->DO_cnt & 0xFF;
                 buff[12] = bytes_cnt;
 
@@ -562,7 +562,7 @@ int io_manager_PC::read_inputs()
                 buff[7] = 0x02;
                 buff[8] = 0;
                 buff[9] = 0;
-                buff[10] = (unsigned char)nd->DI_cnt >> 8;
+                buff[10] = (unsigned char)nd->DI_cnt >> 7 >> 1;
                 buff[11] = (unsigned char)nd->DI_cnt & 0xFF;
 
                 u_int bytes_cnt = nd->DI_cnt / 8 + (nd->DI_cnt % 8 > 0 ? 1 : 0);
@@ -682,7 +682,8 @@ int io_manager_PC::read_inputs()
                     registers_count = nd->AI_cnt;
                 }
 
-                int res, k, index_source = 0, analog_dest = 0, bit_dest = 0;
+                int res, k, index_source = 0;
+                unsigned int analog_dest = 0, bit_dest = 0;
 
                 do
                 {
