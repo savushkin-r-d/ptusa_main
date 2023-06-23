@@ -7,11 +7,15 @@
 
 #ifdef WIN_OS
 #include "w_tcp_cmctr.h"
+#include "WSA_err_decode.h"
 #endif // WIN_OS
 
 #ifdef LINUX_OS
 #include "l_tcp_cmctr.h"
+#include <errno.h>
 #endif
+
+#include "PAC_info.h"
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 int tcp_communicator::port = 10000;
@@ -131,3 +135,305 @@ int tcp_communicator::remove_async_client( tcp_client* client )
     }
 
 //------------------------------------------------------------------------------
+int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
+    int sec, int usec, const char* IP, const char* name,
+    stat_time* stat )
+    {
+    //Network performance info.
+    if ( stat )
+        {
+        static time_t t_;
+        struct tm* timeInfo_;
+        t_ = time( 0 );
+        timeInfo_ = localtime( &t_ );
+
+        //Once per hour writes performance info.
+        if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+            {
+            u_int t =
+                G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
+
+            stat->print_cycle_last_h = timeInfo_->tm_hour;
+
+            u_long avg_time = stat->all_time / stat->cycles_cnt;
+            sprintf( G_LOG->msg,
+                "Network performance : send : s%d->\"%s\":\"%s\" "
+                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                sockfd, name, IP,
+                avg_time, stat->min_iteration_cycle_time,
+                stat->max_iteration_cycle_time, t );
+            G_LOG->write_log( i_log::P_DEBUG );
+
+            if ( t < avg_time )
+                {
+                sprintf( G_LOG->msg,
+                    "Network performance : send : s%d->\"%s\":\"%s\" "
+                    "avg %lu > tresh %u (ms).",
+                    sockfd, name, IP, avg_time, t );
+                G_LOG->write_log( i_log::P_ALERT );
+                }
+
+            stat->clear();
+            }
+        }
+
+    int total_size = 0;
+    char* p = reinterpret_cast<char*> ( buf );
+
+    // Настраиваем  file descriptor set.
+    fd_set fds;
+    FD_ZERO( &fds );
+    FD_SET( sockfd, &fds );
+
+    // Настраиваем время на таймаут.
+    timeval rec_tv;
+    rec_tv.tv_sec = sec;
+    rec_tv.tv_usec = usec;
+
+    //Network performance info.
+    static u_long st_time;
+    static u_int select_wait_time;
+    st_time = get_millisec();
+
+    int res = 0;
+
+    for ( int i = len; i > 0; )
+        {
+        // Ждем таймаута или возможности отсылки данных.
+        res = select( sockfd + 1, NULL, &fds, NULL, &rec_tv );
+
+        if ( 0 == res )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select write try : timeout (%d ms).",
+                sockfd, name, IP, sec * 1000 + usec / 1000 );
+
+            G_LOG->write_log( i_log::P_ERR );
+
+            return -2;  // timeout!
+            }
+
+        if ( -1 == res )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select write try : %s.",
+                sockfd, name, IP, 
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            G_LOG->write_log( i_log::P_ERR );
+
+            return -1; // error
+            }
+
+        int n = 0;
+
+        if ( ( n = send( sockfd, p, i,
+#ifdef WIN_OS
+            0
+#else
+            MSG_NOSIGNAL
+#endif // WIN_OS            
+            ) ) < 0 )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on write try : %s.",
+                sockfd, name, IP, 
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            G_LOG->write_log( i_log::P_ERR );
+
+            res = -3; //send error
+            break;
+            }
+#ifdef LINUX
+        usleep( 1 );
+#else
+        sleep_ms( 0 );
+#endif // LINUX
+
+        i -= n;
+        p += n;
+
+        total_size += n;
+        }
+
+    //Network performance info.
+    select_wait_time = get_delta_millisec( st_time );
+
+    if ( stat )
+        {
+        stat->cycles_cnt++;
+        stat->all_time += select_wait_time;
+
+        if ( select_wait_time > stat->max_iteration_cycle_time )
+            {
+            stat->max_iteration_cycle_time = select_wait_time;
+            }
+        if ( select_wait_time < stat->min_iteration_cycle_time )
+            {
+            stat->min_iteration_cycle_time = select_wait_time;
+            }
+        }
+
+    return res;
+    }
+    //------------------------------------------------------------------------------
+    int tcp_communicator::recvtimeout( int s, u_char* buf,
+        int len, long int sec, long int usec, const char* IP, const char* name,
+        stat_time* stat, char first_connect )
+        {
+
+        //Network performance info.
+        if ( stat )
+            {
+            static time_t t_;
+            struct tm* timeInfo_;
+            t_ = time( 0 );
+            timeInfo_ = localtime( &t_ );
+
+            //Once per hour writes performance info.
+            if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+                {
+                u_int t =
+                    G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
+
+                stat->print_cycle_last_h = timeInfo_->tm_hour;
+
+                u_long avg_time = stat->all_time / stat->cycles_cnt;
+                sprintf( G_LOG->msg,
+                    "Network performance : recv : s%d->\"%s\":\"%s\" "
+                    "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                    s, name, IP,
+                    avg_time, stat->min_iteration_cycle_time,
+                    stat->max_iteration_cycle_time, t );
+                G_LOG->write_log( i_log::P_DEBUG );
+
+                if ( t < avg_time )
+                    {
+                    sprintf( G_LOG->msg,
+                        "Network performance : recv : s%d->\"%s\":\"%s\" "
+                        "avg %lu > tresh %u (ms).",
+                        s, name, IP, avg_time, t );
+                    G_LOG->write_log( i_log::P_ALERT );
+                    }
+
+                stat->clear();
+                }
+            }
+
+        errno = 0;
+
+        // Настраиваем  file descriptor set.
+        fd_set fds;
+        FD_ZERO( &fds );
+        FD_SET( s, &fds );
+
+        // Настраиваем время на таймаут.
+        timeval rec_tv;
+        rec_tv.tv_sec = sec;
+        rec_tv.tv_usec = usec;
+
+        //Network performance info.
+        static u_long st_time;
+        static u_int select_wait_time;
+        st_time = get_millisec();
+
+        // Ждем таймаута или полученных данных.
+        int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
+
+        if ( 0 == n )
+            {
+            if ( !first_connect )
+                {
+                sprintf( G_LOG->msg,
+                    "Network device : s%d->\"%s\":\"%s\""
+                    " disconnected on select read try : timeout (%ld ms).",
+                    s, name, IP, sec * 1000 + usec / 1000 );
+
+                G_LOG->write_log( i_log::P_ERR );
+                }
+            return -2;  // timeout!
+            }
+
+        if ( -1 == n )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select read try : %s.",
+                s, name, IP,
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+                );
+            G_LOG->write_log( i_log::P_ERR );
+
+            return -1; // error
+            }
+
+        // Данные должны быть здесь, поэтому делаем обычный recv().
+        char* p = reinterpret_cast<char*> ( buf );
+        int res = recv( s, p, len,
+#ifdef WIN_OS
+            0
+#else
+            MSG_NOSIGNAL
+#endif // WIN_OS            
+        );
+
+        select_wait_time = get_delta_millisec( st_time );
+
+        if ( 0 == res )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " was closed.",
+                s, name, IP );
+            G_LOG->write_log( i_log::P_WARNING );
+            }
+
+        if ( res < 0 )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on read try : %s.",
+                s, name, IP,
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            G_LOG->write_log( i_log::P_ERR );
+            }
+
+        //Network performance info.
+        if ( stat )
+            {
+            stat->cycles_cnt++;
+            stat->all_time += select_wait_time;
+
+            if ( select_wait_time > stat->max_iteration_cycle_time )
+                {
+                stat->max_iteration_cycle_time = select_wait_time;
+                }
+            if ( select_wait_time < stat->min_iteration_cycle_time )
+                {
+                stat->min_iteration_cycle_time = select_wait_time;
+                }
+            }
+
+        return res;
+        }
