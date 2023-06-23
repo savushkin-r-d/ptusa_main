@@ -12,6 +12,7 @@
 
 #ifdef LINUX_OS
 #include "l_tcp_cmctr.h"
+#include <errno.h>
 #endif
 
 #include "PAC_info.h"
