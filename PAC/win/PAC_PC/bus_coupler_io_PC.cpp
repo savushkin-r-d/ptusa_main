@@ -6,6 +6,10 @@
 
 #include "bus_coupler_io_PC.h"
 
+#ifdef WIN_OS
+#include "WSA_err_decode.h"
+#endif // WIN_OS
+
 //-----------------------------------------------------------------------------
 int io_manager_PC::net_init(io_node* node)
 {
@@ -114,7 +118,13 @@ int io_manager_PC::net_init(io_node* node)
                 sprintf(G_LOG->msg,
                     "Network device : s%d->\"%s\":\"%s\""
                     " error during connect : %s.",
-                    sock, node->name, node->ip_address, strerror(errno));
+                    sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                    WSA_Last_Err_Decode()
+#else
+                    strerror(errno)
+#endif // WIN_OS
+                    );
                 G_LOG->write_log(i_log::P_CRIT);
             }
 
