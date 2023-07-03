@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1687770221267,
+  "lastUpdate": 1688375023840,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9578,6 +9578,40 @@ window.BENCHMARK_DATA = {
             "value": 96.5439988971593,
             "unit": "us/iter",
             "extra": "iterations: 7254\ncpu: 96.519382409705 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yaroslav Ozimok",
+            "username": "YarickBSTU",
+            "email": "102078275+YarickBSTU@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "98b228b162ca13244d20774198a0f83c0dde29ee",
+          "message": "Added the \"get_state\" method for wages (#591)\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2023-06-19T13:59:40Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/98b228b162ca13244d20774198a0f83c0dde29ee"
+        },
+        "date": 1688375022929,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 20.501598716596728,
+            "unit": "us/iter",
+            "extra": "iterations: 34128\ncpu: 20.49205051570558 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 100.25940817501244,
+            "unit": "us/iter",
+            "extra": "iterations: 6948\ncpu: 100.25236039147957 us\nthreads: 1"
           }
         ]
       }
