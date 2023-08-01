@@ -3733,9 +3733,22 @@ class valve_DO1 : public valve
 class valve_DO2 : public valve
     {
     public:
-        valve_DO2( const char *dev_name ): valve( dev_name, DT_V, DST_V_DO2 )
+        explicit valve_DO2( const char *dev_name ): valve( dev_name, DT_V, DST_V_DO2 )
             {
             }
+#ifndef DEBUG_NO_IO_MODULES
+    public:
+        int  get_state();
+        void direct_on();
+        void direct_off();
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
+            DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
+            };
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class i_motor : public device

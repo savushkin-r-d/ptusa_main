@@ -3229,6 +3229,31 @@ digital_io_device::~digital_io_device()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+int valve_DO2::get_state()
+    {
+    int b1 = get_DO( DO_INDEX_1 );
+    int b2 = get_DO( DO_INDEX_2 );
+    if ( b1 == b2 ) return -1;
+    return b2;
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2::direct_on()
+    {
+    set_DO( DO_INDEX_1, 0 );
+    set_DO( DO_INDEX_2, 1 );
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2::direct_off()
+    {
+    set_DO( DO_INDEX_1, 1 );
+    set_DO( DO_INDEX_2, 0 );
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
              device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
 digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
