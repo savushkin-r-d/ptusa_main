@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1690890991648,
+  "lastUpdate": 1690893349705,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -9842,6 +9842,38 @@ window.BENCHMARK_DATA = {
             "value": 123.60516045177695,
             "unit": "us/iter",
             "extra": "iterations: 5578\ncpu: 123.55645392613839 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "id": "9c0e1e3094c171e58a9a6e136139392911824005",
+          "message": "Change inheritance valve_DO2",
+          "timestamp": "2023-02-16T14:09:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/598/commits/9c0e1e3094c171e58a9a6e136139392911824005"
+        },
+        "date": 1690893348226,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.433667905618776,
+            "unit": "us/iter",
+            "extra": "iterations: 30133\ncpu: 23.423213752364525 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 119.96282522013699,
+            "unit": "us/iter",
+            "extra": "iterations: 6019\ncpu: 119.95030736002657 us\nthreads: 1"
           }
         ]
       }
