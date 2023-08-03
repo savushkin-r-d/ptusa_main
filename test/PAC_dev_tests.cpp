@@ -788,6 +788,25 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
     EXPECT_EQ( true, V1.get_fb_state() );
     }
 
+TEST( valve_DO2, valve_DO2 )
+    {
+    valve_DO2 V2( "V2" );
+    EXPECT_STREQ( "Клапан", V2.get_type_name() );
+    EXPECT_STREQ( "V2", V2.get_name());
+    }
+
+TEST( valve_DO2, get_valve_state )
+    {
+    valve_DO2 V2( "V2" );
+    V2.direct_on();
+    EXPECT_EQ( 1, V2.get_valve_state() );
+    }
+
+TEST( valve_DO2, get_fb_state )
+    {
+    valve_DO2 V2( "V2" );
+    EXPECT_EQ( true, V2.get_fb_state() );
+    }
 
 TEST( level_s, is_active )
     {
