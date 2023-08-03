@@ -30,6 +30,22 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
+    //int step::get_tag() const
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:get_tag()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_EQ( -1, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
+    //int step::set_tag( int new_tag )
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:set_tag( 20 )" ) );
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:get_tag()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_EQ( 20, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
