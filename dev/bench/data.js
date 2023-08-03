@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691054938038,
+  "lastUpdate": 1691055215574,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10194,6 +10194,42 @@ window.BENCHMARK_DATA = {
             "value": 116.757651275211,
             "unit": "us/iter",
             "extra": "iterations: 5999\ncpu: 116.72678779796631 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "68400442+NogameNo-life@users.noreply.github.com",
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b726d0771b3e9fdc528307acdbcd05572a9faa8",
+          "message": "Fix inheritance \"valve_DO2\" (#598)\n\n* Remove DO2\r\n\r\n* Add test valve_DO2\r\n\r\n* Add explict to constructor valve_DO2\r\n\r\n* Add get_state\r\n\r\n* Add test  for valve state\r\n\r\n* Group public methods\r\n\r\n* Update get_valve_state test",
+          "timestamp": "2023-08-03T12:32:12+03:00",
+          "tree_id": "f923435a1489c91f0b2bfcbdf063f3182804277d",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/8b726d0771b3e9fdc528307acdbcd05572a9faa8"
+        },
+        "date": 1691055214756,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 21.366631118453615,
+            "unit": "us/iter",
+            "extra": "iterations: 32688\ncpu: 21.36292829172785 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 108.934173607862,
+            "unit": "us/iter",
+            "extra": "iterations: 6411\ncpu: 108.87051941974731 us\nthreads: 1"
           }
         ]
       }
