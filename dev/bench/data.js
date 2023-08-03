@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691055215574,
+  "lastUpdate": 1691061691708,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10230,6 +10230,38 @@ window.BENCHMARK_DATA = {
             "value": 108.934173607862,
             "unit": "us/iter",
             "extra": "iterations: 6411\ncpu: 108.87051941974731 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "6dd698e54383bb4505190391d8ebf96bc53fa8a3",
+          "message": "[config][github actions]  Update \"actions/setup-java\" to v3",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/600/commits/6dd698e54383bb4505190391d8ebf96bc53fa8a3"
+        },
+        "date": 1691061690337,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 26.1142059380217,
+            "unit": "us/iter",
+            "extra": "iterations: 26945\ncpu: 26.098953423640747 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 136.1054689615082,
+            "unit": "us/iter",
+            "extra": "iterations: 5171\ncpu: 136.0543608586347 us\nthreads: 1"
           }
         ]
       }
