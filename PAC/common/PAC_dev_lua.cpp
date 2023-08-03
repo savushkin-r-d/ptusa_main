@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon May 29 10:15:41 2023.
+** Generated automatically by tolua++-1.0.92 on Thu Aug  3 08:56:26 2023.
 */
 
 #ifndef __cplusplus
@@ -6020,6 +6020,36 @@ static int tolua_PAC_dev_step_is_active00(lua_State* tolua_S)
  tolua_error(tolua_S,"#ferror in function 'is_active'.",&tolua_err);
  return 0;
 #endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tag of class  step */
+#ifndef TOLUA_DISABLE_tolua_get_step_tag
+static int tolua_get_step_tag(lua_State* tolua_S)
+{
+  step* self = (step*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tag'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tag);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tag of class  step */
+#ifndef TOLUA_DISABLE_tolua_set_step_tag
+static int tolua_set_step_tag(lua_State* tolua_S)
+{
+  step* self = (step*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tag'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tag = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -15025,6 +15055,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_DELAY_OFF",step::A_DELAY_OFF);
    tolua_constant(tolua_S,"A_JUMP_IF",step::A_JUMP_IF);
    tolua_function(tolua_S,"is_active",tolua_PAC_dev_step_is_active00);
+   tolua_variable(tolua_S,"tag",tolua_get_step_tag,tolua_set_step_tag);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);
   tolua_beginmodule(tolua_S,"action");
