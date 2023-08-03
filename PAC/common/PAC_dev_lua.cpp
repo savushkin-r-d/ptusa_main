@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Aug  3 10:16:34 2023.
+** Generated automatically by tolua++-1.0.92 on Thu Aug  3 11:03:15 2023.
 */
 
 #ifndef __cplusplus
@@ -6071,12 +6071,12 @@ static int tolua_PAC_dev_step_set_tag00(lua_State* tolua_S)
 #endif
  {
   step* self = (step*)  tolua_tousertype(tolua_S,1,0);
-  int tag = ((int)  tolua_tonumber(tolua_S,2,0));
+  int new_tag = ((int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_tag'", NULL);
 #endif
   {
-   self->set_tag(tag);
+   self->set_tag(new_tag);
   }
  }
  return 0;
