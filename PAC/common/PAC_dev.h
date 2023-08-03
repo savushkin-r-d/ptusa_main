@@ -3736,6 +3736,22 @@ class valve_DO2 : public valve
         explicit valve_DO2( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO2 )
             {
             }
+        /// @brief Получение состояния клапана без учета обратной связи.
+        VALVE_STATE get_valve_state() override
+            {
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
+#else
+            return ( VALVE_STATE ) get_state();
+#endif // DEBUG_NO_IO_MODULES
+            }
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state() override
+            {
+            return true;
+            }
+
 #ifndef DEBUG_NO_IO_MODULES
     public:
         int  get_state();
@@ -3749,23 +3765,6 @@ class valve_DO2 : public valve
             DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
             };
 #endif // DEBUG_NO_IO_MODULES
-
-    public:
-        /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state() override
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            return ( VALVE_STATE ) get_state();
-#endif // DEBUG_NO_IO_MODULES
-            };
-
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override
-            {
-            return true;
-            }
     };
 //-----------------------------------------------------------------------------
 class i_motor : public device
