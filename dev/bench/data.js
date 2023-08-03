@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691071549501,
+  "lastUpdate": 1691071568935,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10426,6 +10426,42 @@ window.BENCHMARK_DATA = {
             "value": 105.94716449560879,
             "unit": "us/iter",
             "extra": "iterations: 6602\ncpu: 105.92743108149048 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0054d598a1d358588e75c93d1068db639ca66a70",
+          "message": "[config][github actions]  Update \"actions/setup-java\" to v3 (#600)",
+          "timestamp": "2023-08-03T17:03:22+03:00",
+          "tree_id": "bcebe1797ffaf7d14d2f879f8c8e5547cdee24f7",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/0054d598a1d358588e75c93d1068db639ca66a70"
+        },
+        "date": 1691071567188,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 25.24043529156818,
+            "unit": "us/iter",
+            "extra": "iterations: 27678\ncpu: 25.23974275597948 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 126.26000268559805,
+            "unit": "us/iter",
+            "extra": "iterations: 5213\ncpu: 126.24116631498177 us\nthreads: 1"
           }
         ]
       }
