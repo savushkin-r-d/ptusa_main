@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Aug  3 08:56:26 2023.
+** Generated automatically by tolua++-1.0.92 on Thu Aug  3 10:16:34 2023.
 */
 
 #ifndef __cplusplus
@@ -6023,33 +6023,68 @@ static int tolua_PAC_dev_step_is_active00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: tag of class  step */
-#ifndef TOLUA_DISABLE_tolua_get_step_tag
-static int tolua_get_step_tag(lua_State* tolua_S)
+/* method: get_tag of class  step */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_step_get_tag00
+static int tolua_PAC_dev_step_get_tag00(lua_State* tolua_S)
 {
-  step* self = (step*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tag'",NULL);
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const step",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
 #endif
-  tolua_pushnumber(tolua_S,(lua_Number)self->tag);
+ {
+  const step* self = (const step*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_tag'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_tag();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
  return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_tag'.",&tolua_err);
+ return 0;
+#endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: tag of class  step */
-#ifndef TOLUA_DISABLE_tolua_set_step_tag
-static int tolua_set_step_tag(lua_State* tolua_S)
+/* method: set_tag of class  step */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_step_set_tag00
+static int tolua_PAC_dev_step_set_tag00(lua_State* tolua_S)
 {
-  step* self = (step*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  tolua_Error tolua_err;
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tag'",NULL);
-  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
-   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"step",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
 #endif
-  self->tag = ((int)  tolua_tonumber(tolua_S,2,0))
-;
+ {
+  step* self = (step*)  tolua_tousertype(tolua_S,1,0);
+  int tag = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_tag'", NULL);
+#endif
+  {
+   self->set_tag(tag);
+  }
+ }
  return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_tag'.",&tolua_err);
+ return 0;
+#endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -15055,7 +15090,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_DELAY_OFF",step::A_DELAY_OFF);
    tolua_constant(tolua_S,"A_JUMP_IF",step::A_JUMP_IF);
    tolua_function(tolua_S,"is_active",tolua_PAC_dev_step_is_active00);
-   tolua_variable(tolua_S,"tag",tolua_get_step_tag,tolua_set_step_tag);
+   tolua_function(tolua_S,"get_tag",tolua_PAC_dev_step_get_tag00);
+   tolua_function(tolua_S,"set_tag",tolua_PAC_dev_step_set_tag00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);
   tolua_beginmodule(tolua_S,"action");
