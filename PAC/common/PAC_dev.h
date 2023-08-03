@@ -847,33 +847,6 @@ class DO1 : public digital_io_device
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство с двумя дискретными выходами.
-///
-/// Это может быть клапан, насос...
-class DO2 : public digital_io_device
-    {
-    public:
-        DO2( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_io_device( dev_name, type, sub_type, par_cnt )
-            {
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        int  get_state();
-        void direct_on();
-        void direct_off();
-
-    private:
-        enum CONSTANTS
-            {
-            DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
-            DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
-            };
-#endif // DEBUG_NO_IO_MODULES
-    };
-//-----------------------------------------------------------------------------
 class valve_DO2_DI2_bistable;
 
 /// @brief Устройство с обратными связями.
@@ -3757,12 +3730,41 @@ class valve_DO1 : public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления.
-class valve_DO2 : public DO2
+class valve_DO2 : public valve
     {
     public:
-        valve_DO2( const char *dev_name ): DO2( dev_name, DT_V, DST_V_DO2, 0 )
+        explicit valve_DO2( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO2 )
             {
             }
+        /// @brief Получение состояния клапана без учета обратной связи.
+        VALVE_STATE get_valve_state() override
+            {
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
+#else
+            return ( VALVE_STATE ) get_state();
+#endif // DEBUG_NO_IO_MODULES
+            }
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state() override
+            {
+            return true;
+            }
+
+#ifndef DEBUG_NO_IO_MODULES
+    public:
+        int  get_state();
+        void direct_on();
+        void direct_off();
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
+            DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
+            };
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class i_motor : public device
@@ -3775,7 +3777,7 @@ class i_motor : public device
         void reverse();
 
         /// @brief Получение линейной скорости (например, приводимого в
-        // движение конвейра).
+        // движение конвейера).
         virtual float get_linear_speed() const;
 
         /// @brief Получение текущего тока мотора

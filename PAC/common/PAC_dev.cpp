@@ -3231,7 +3231,7 @@ digital_io_device::~digital_io_device()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 
-int DO2::get_state()
+int valve_DO2::get_state()
     {
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
@@ -3239,13 +3239,13 @@ int DO2::get_state()
     return b2;
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_on()
+void valve_DO2::direct_on()
     {
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_off()
+void valve_DO2::direct_off()
     {
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
