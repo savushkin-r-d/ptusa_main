@@ -799,7 +799,7 @@ TEST( valve_DO2, get_valve_state )
     {
     valve_DO2 V2( "V2" );
     V2.direct_on();
-    EXPECT_EQ( 1, V2.get_state() );
+    EXPECT_EQ( 1, V2.get_valve_state() );
     }
 
 TEST( valve_DO2, get_fb_state )
