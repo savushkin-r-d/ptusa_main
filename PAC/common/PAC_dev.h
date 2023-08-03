@@ -3750,9 +3750,9 @@ class valve_DO2 : public valve
             };
 #endif // DEBUG_NO_IO_MODULES
 
-    protected:
+    public:
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state()
+        VALVE_STATE get_valve_state() override
             {
 #ifdef DEBUG_NO_IO_MODULES
             return ( VALVE_STATE ) digital_io_device::get_state();
@@ -3762,7 +3762,7 @@ class valve_DO2 : public valve
             };
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state()
+        bool get_fb_state() override
             {
             return true;
             }
@@ -3778,7 +3778,7 @@ class i_motor : public device
         void reverse();
 
         /// @brief Получение линейной скорости (например, приводимого в
-        // движение конвейра).
+        // движение конвейера).
         virtual float get_linear_speed() const;
 
         /// @brief Получение текущего тока мотора
