@@ -61,6 +61,7 @@ TEST( temperature_e_analog, get_value )
 
 TEST( device_manager, add_io_device )
     {
+    G_DEVICE_MANAGER()->clear_io_devices();
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
@@ -305,7 +306,9 @@ TEST( device_manager, add_io_device )
     name = std::string( "W1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_WT, device::DST_WT_ETH, name.c_str(), "Test wages", "W" );
-    EXPECT_EQ( nullptr, res );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto W1 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
     }
@@ -785,6 +788,25 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
     EXPECT_EQ( true, V1.get_fb_state() );
     }
 
+TEST( valve_DO2, valve_DO2 )
+    {
+    valve_DO2 V2( "V2" );
+    EXPECT_STREQ( "Клапан", V2.get_type_name() );
+    EXPECT_STREQ( "V2", V2.get_name());
+    }
+
+TEST( valve_DO2, get_valve_state )
+    {
+    valve_DO2 V2( "V2" );
+    V2.direct_on();
+    EXPECT_EQ( 1, V2.get_valve_state() );
+    }
+
+TEST( valve_DO2, get_fb_state )
+    {
+    valve_DO2 V2( "V2" );
+    EXPECT_EQ( true, V2.get_fb_state() );
+    }
 
 TEST( level_s, is_active )
     {
@@ -1432,6 +1454,19 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+    }
+
+TEST( wages_eth, direct_set_state )
+    {
+    wages_eth w1( "W1" );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    w1.set_string_property( field, ip );
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
     }
 
 TEST( wages_eth, direct_set_tcp_buff )

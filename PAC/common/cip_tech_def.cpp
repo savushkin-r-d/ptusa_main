@@ -4069,20 +4069,24 @@ int cipline_tech_object::AddRR( int where )
 int cipline_tech_object::OpolRR( int where )
     {
     float c = 0;
+    float noConc = NOCONC;
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
     switch (where)
         {
         case TANK_K:
             c=GetConc(KISL);
+            noConc = get_station_par(P_CKANAL_K);
             break;
         case TANK_S:
             c=GetConc(SHCH);
+            noConc = get_station_par(P_CKANAL_S);
             break;
         }
     rt_par_float[P_CONC] = c;
     SortRR(where, 1);
-    if (c>=NOCONC)
+
+    if (c >= noConc)
         {
         T[TMR_CHK_CONC]->reset();
         }
@@ -4989,6 +4993,7 @@ int cipline_tech_object::_ToObject( int from, int where )
 int cipline_tech_object::_FromObject( int what, int where )
     {
     float c = 0;
+    float noConc = NOCONC;
     int dst;
     unsigned long tmp;
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
@@ -5019,10 +5024,12 @@ int cipline_tech_object::_FromObject( int what, int where )
             case TANK_K:
                 dst=1;
                 c=GetConc(KISL);
+                noConc = get_station_par(P_CKANAL_K);
                 break;
             case TANK_S:
                 dst=1;
                 c=GetConc(SHCH);
+                noConc = get_station_par(P_CKANAL_S);
                 break;
             }
         switch (where)
@@ -5030,10 +5037,12 @@ int cipline_tech_object::_FromObject( int what, int where )
             case TANK_K:
                 dst=2;
                 c=GetConc(KISL);
+                noConc = get_station_par(P_CKANAL_K);
                 break;
             case TANK_S:
                 dst=2;
                 c=GetConc(SHCH);
+                noConc = get_station_par(P_CKANAL_S);
                 break;
             }
         switch (dst)
@@ -5042,10 +5051,9 @@ int cipline_tech_object::_FromObject( int what, int where )
                 concentration_ok = 1;
                 break;
             case 1:  //must BE
-                if (c>=NOCONC)
+                if (c >= noConc)
                     {
                     concentration_ok = 1;
-                    //	   T[TMR_CHK_CONC]->R();
                     }
                 else
                     {
@@ -5059,11 +5067,9 @@ int cipline_tech_object::_FromObject( int what, int where )
                     }
                 break;
             case 2: //must not BE
-                if ( ((c<= parpar[0][P_CKANAL_S]) && (where == TANK_S)) ||
-                    ((c<= parpar[0][P_CKANAL_K]) && (where == TANK_K)))
+                if ( c <= noConc)
                     {
                     concentration_ok = 1;
-                    //	   T[TMR_CHK_CONC]->R();
                     }
                 else
                     {

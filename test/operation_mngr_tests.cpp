@@ -284,6 +284,19 @@ TEST( step, is_active )
 	EXPECT_FALSE( st1.is_active() );
 	}
 
+TEST( step, get_tag )
+	{
+	step st1( "test_step", 0 );
+	EXPECT_EQ( -1, st1.get_tag() );
+	}
+
+TEST( step, set_tag )
+	{
+	step st1( "test_step", 0 );
+	auto new_tag = 10;
+	st1.set_tag( new_tag );
+	EXPECT_EQ( new_tag, st1.get_tag() );
+	}
 
 TEST( operation_state, print )
 	{
@@ -1449,6 +1462,25 @@ TEST( jump_if_action, is_goto_next_step )
 	//Выполняем операцию, должен осуществиться переход к новому шагу.
 	operation->evaluate();
 	EXPECT_EQ( SET_NEXT_STEP, operation->get_run_active_step() );	
+	
+
+	//Проверяем переход по состоянию устройства "кнопка" ("SB").
+	operation->switch_off();
+	virtual_device test_SB1( "test_SB1", device::DT_SB, device::DST_SB_VIRT );
+	action->clear_dev();
+	action->add_dev( &test_SB1 );	
+
+	//По умолчанию кнопка неактивна, к новому шагу не должно быть
+	//перехода.
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_FALSE( is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+	//Устанавливаем состояние кнопки, к новому шагу должен быть переход.
+	test_SB1.on();
+	is_goto_next_step = action->is_jump( next_step );
+	EXPECT_TRUE( is_goto_next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	test_params_manager::removeObject();
 	}
