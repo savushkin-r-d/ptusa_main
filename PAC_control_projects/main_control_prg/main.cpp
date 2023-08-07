@@ -140,13 +140,12 @@ int main( int argc, const char *argv[] )
 #endif
 
 #ifdef OPCUA
-    OPCUAServer::getInstance().UserInit();
-
     OPCUAServer::getInstance().CreateDevObjects();
     UA_StatusCode retval = OPCUAServer::getInstance().Start();
-    if(retval != UA_STATUSCODE_GOOD)
+    if( retval != UA_STATUSCODE_GOOD )
         {
-        G_LOG->critical( "OPC UA server start failed. Returned error code %d!", retval );
+        G_LOG->critical( "OPC UA server start failed. Returned error code %d!",
+            retval );
         debug_break;
         return EXIT_FAILURE;
         }

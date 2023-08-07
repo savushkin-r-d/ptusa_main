@@ -248,9 +248,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 #ifdef RFID
     tolua_rfid_reader_open( L );
 #endif
-#ifdef OPCUA
-    tolua_OPC_UA_open(L);
-#endif
 
     //-Загрузка параметров.
     if ( G_DEBUG )
