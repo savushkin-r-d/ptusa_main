@@ -392,7 +392,8 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_MAX_NAME = 20
+            C_MAX_NAME = 20,
+            C_MAX_DESCRIPTION = 100
             };
 
         /// Типы устройств.
@@ -729,6 +730,20 @@ class device : public i_DO_AO_device, public par_device
         void set_emulation( bool new_emulation_state );
 
         analog_emulator& get_emulator();
+
+        /// @brief Получение максимальной длины имени устройства (с учётом 
+        /// символа завершения строки).
+        static int get_max_name_length()
+            {
+            return C_MAX_NAME;
+            }
+
+        /// @brief Получение максимальной длины описания устройства (с учётом 
+        /// символа завершения строки).
+        static int get_max_description_length()
+            {
+            return C_MAX_DESCRIPTION;
+            }
 
     private:
         u_int_4 s_number;            ///< Последовательный номер устройства.

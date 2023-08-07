@@ -45,10 +45,17 @@ void OPCUAServer::CreateDevObjects()
     for ( u_int i = 0; i < deviceCount; i++)
         {
         UA_NodeId deviceId;
-        char* deviceName = new char[ strlen( G_DEVICE_MANAGER()->get_device( i )->get_name() ) + 1 ];
-        strcpy( deviceName, G_DEVICE_MANAGER()->get_device( i )->get_name() );
-        char* deviceDescription = new char[ strlen( G_DEVICE_MANAGER()->get_device( i )->get_description() ) + 1 ];
-        strcpy( deviceDescription, G_DEVICE_MANAGER()->get_device( i )->get_description() );
+
+        auto dev = G_DEVICE_MANAGER()->get_device( i );
+        auto l = device::get_max_name_length();
+        char* deviceName = new char[ l ];
+        auto r = fmt::format_to_n( deviceName, l - 1, "{}", dev->get_name() );
+        deviceName[ r.size ] = '\0';
+
+        l = device::get_max_description_length();
+        char* deviceDescription = new char[ l ];
+        r = fmt::format_to_n( deviceDescription, l, "{}", dev->get_description() );
+        deviceDescription[ r.size ] = '\0';
 
         //creating object node
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
@@ -61,16 +68,17 @@ void OPCUAServer::CreateDevObjects()
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
             oAttr, nullptr, &deviceId );
 
-
         //creating value variable node
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
         valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 value = 0;
         UA_Variant_setScalar(&valueAttr.value, &value, &UA_TYPES[UA_TYPES_INT32]);
 
-        char* valueName = new char[ strlen (deviceName ) + strlen ( ". Value" ) + 1 ];
-        strcpy(valueName, deviceName);
-        strcat(valueName, ". Value");
+        l = device::get_max_name_length() + 6; // Extra ".Value" or ".State";
+        char* valueName = new char[ l ];
+        r = fmt::format_to_n( valueName, l - 1, "{}.Value", deviceName );
+        valueName[ r.size ] = '\0';
+
         valueAttr.displayName = UA_LOCALIZEDTEXT("en-US", valueName);
         UA_NodeId valueNodeId = UA_NODEID_STRING(0, valueName);
 
@@ -93,9 +101,10 @@ void OPCUAServer::CreateDevObjects()
         UA_Int32 state = 0;
         UA_Variant_setScalar(&stateAttr.value, &state, &UA_TYPES[UA_TYPES_INT32]);
 
-        char* stateName = new char[ strlen( deviceName ) + strlen( ". State" ) + 1 ];
-        strcpy(stateName, deviceName);
-        strcat(stateName, ". State");
+        char* stateName = new char[ l ];
+        r = fmt::format_to_n( stateName, l - 1, "{}.State", deviceName );
+        stateName[ r.size ] = '\0';
+
         stateAttr.displayName = UA_LOCALIZEDTEXT("en-US", stateName);
         UA_NodeId stateNodeId = UA_NODEID_STRING(0, stateName);
 
@@ -104,7 +113,6 @@ void OPCUAServer::CreateDevObjects()
             UA_QUALIFIEDNAME(1, "State"),
             UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE),
             stateAttr, G_DEVICE_MANAGER()->get_device(i), nullptr);
-
 
         //creating state variable read/write callback
         UA_DataSource stateDataSource;
