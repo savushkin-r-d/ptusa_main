@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691416131098,
+  "lastUpdate": 1691416970724,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10660,6 +10660,38 @@ window.BENCHMARK_DATA = {
             "value": 113.50774841470893,
             "unit": "us/iter",
             "extra": "iterations: 6308\ncpu: 113.38609701965761 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "3875867bd6763d7de897ee3fe19c1b11debb469e",
+          "message": "[config][sonar] Update sonar scanner version to 5.0.1.3006",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/603/commits/3875867bd6763d7de897ee3fe19c1b11debb469e"
+        },
+        "date": 1691416969510,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 21.11557229935673,
+            "unit": "us/iter",
+            "extra": "iterations: 32483\ncpu: 21.110380814579933 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 107.29705146436372,
+            "unit": "us/iter",
+            "extra": "iterations: 5907\ncpu: 107.01198577958357 us\nthreads: 1"
           }
         ]
       }
