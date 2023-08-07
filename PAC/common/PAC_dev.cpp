@@ -1272,6 +1272,8 @@ void device_manager::print() const
 device_manager::device_manager( ) : project_devices( 0 ), disable_error_logging( false )
     {
     G_DEVICE_CMMCTR->add_device( this );
+    previous_states.resize( 64 );
+    std::fill( previous_states.begin(), previous_states.end(), 0 );
     }
 //-----------------------------------------------------------------------------
 device_manager::~device_manager()
@@ -2276,6 +2278,23 @@ void device_manager::clear_io_devices()
         }
 
     project_devices.clear();
+    }
+//-----------------------------------------------------------------------------
+void device_manager::check_state()
+    {
+    for ( int i = 0; i < project_devices.size(); ++i )
+        {
+        if ( project_devices[ i ]->get_state() != previous_states[ i ] && project_devices[ i ]->get_state() == 1 )
+            {
+            ++active_counter;
+            previous_states[ i ] = true;
+            }
+        else
+            {
+            --active_counter;
+            previous_states[ i ] = false;
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 int device_manager::init_params()
