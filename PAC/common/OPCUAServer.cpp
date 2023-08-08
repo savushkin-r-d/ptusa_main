@@ -109,6 +109,7 @@ void OPCUAServer::Shutdown()
     {
     UA_Server_run_shutdown( server );
     UA_Server_delete( server );
+    server = 0;
     }
 
 void OPCUAServer::Evaluate()

@@ -18,7 +18,7 @@ class OPCUAServer
             return instance;
             }
 
-        void Init( short int port );
+        void Init( short int port = 4841 );
 
         void CreateDevObjects();
         UA_StatusCode  Start();
@@ -50,15 +50,9 @@ class OPCUAServer
             const UA_DataValue* value );
 
     private:
-        OPCUAServer() {}
-        ~OPCUAServer() {}
-        OPCUAServer( OPCUAServer const& );
-        OPCUAServer& operator=( OPCUAServer const& );
+        OPCUAServer() = default;
 
-
-        UA_ServerConfig* config;
         UA_Server* server;
-        UA_Node* devicefolder;
     };
 
 OPCUAServer& OPC_UA_SERV();

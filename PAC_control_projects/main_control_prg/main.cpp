@@ -97,7 +97,7 @@ int main( int argc, const char *argv[] )
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 #ifdef OPCUA
-    OPCUAServer::getInstance().Init(4841);
+    OPCUAServer::getInstance().Init();
 #endif
 
     G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
