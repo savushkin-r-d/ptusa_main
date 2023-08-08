@@ -11,9 +11,12 @@
 
 void OPCUAServer::Init( short int port )
     {
-    server = UA_Server_new();
-    UA_Int16 portNumber = port;
-    UA_ServerConfig_setMinimal( UA_Server_getConfig( server ), portNumber, nullptr );
+    if ( nullptr == server )
+        {
+        server = UA_Server_new();
+        UA_Int16 portNumber = port;
+        UA_ServerConfig_setMinimal( UA_Server_getConfig( server ), portNumber, nullptr );
+        }
     }
 
 void OPCUAServer::CreateDevObjects()
@@ -107,9 +110,12 @@ UA_StatusCode OPCUAServer::Start()
 
 void OPCUAServer::Shutdown()
     {
-    UA_Server_run_shutdown( server );
-    UA_Server_delete( server );
-    server = 0;
+    if ( server )
+        {
+        UA_Server_run_shutdown( server );
+        UA_Server_delete( server );
+        server = nullptr;
+        }
     }
 
 void OPCUAServer::Evaluate()
@@ -178,6 +184,11 @@ UA_StatusCode OPCUAServer::writeValue( UA_Server*,
             }
         }
     return UA_STATUSCODE_GOOD;
+    }
+
+OPCUAServer::~OPCUAServer()
+    {
+    Shutdown();
     }
 
 OPCUAServer& OPC_UA_SERV()

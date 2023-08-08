@@ -49,10 +49,13 @@ class OPCUAServer
             const UA_NumericRange* range,
             const UA_DataValue* value );
 
+        ~OPCUAServer();
+
     private:
         OPCUAServer() = default;
 
-        UA_Server* server;
+
+        UA_Server* server = nullptr;
     };
 
 OPCUAServer& OPC_UA_SERV();
