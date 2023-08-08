@@ -9,9 +9,6 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-/* predefined identifier for later use */
-UA_NodeId folderDevicesTypeId = { 1, UA_NODEIDTYPE_NUMERIC,{ 1001 } };
-
 void OPCUAServer::Init( short int port )
     {
     server = UA_Server_new();
@@ -29,12 +26,12 @@ void OPCUAServer::CreateDevObjects()
 
         auto dev = G_DEVICE_MANAGER()->get_device( i );
         auto l = device::get_max_name_length();
-        char* deviceName = new char[ l ];
+        auto deviceName = new char[ l ];
         auto r = fmt::format_to_n( deviceName, l - 1, "{}", dev->get_name() );
         deviceName[ r.size ] = '\0';
 
         l = device::get_max_description_length();
-        char* deviceDescription = new char[ l ];
+        auto deviceDescription = new char[ l ];
         r = fmt::format_to_n( deviceDescription, l, "{}", dev->get_description() );
         deviceDescription[ r.size ] = '\0';
 
@@ -56,7 +53,7 @@ void OPCUAServer::CreateDevObjects()
         UA_Variant_setScalar( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_INT32 ] );
 
         l = device::get_max_name_length() + 6; // Extra ".Value" or ".State";
-        char* valueName = new char[ l ];
+        auto valueName = new char[ l ];
         r = fmt::format_to_n( valueName, l - 1, "{}.Value", deviceName );
         valueName[ r.size ] = '\0';
 
@@ -82,7 +79,7 @@ void OPCUAServer::CreateDevObjects()
         UA_Int32 state = 0;
         UA_Variant_setScalar( &stateAttr.value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
 
-        char* stateName = new char[ l ];
+        auto stateName = new char[ l ];
         r = fmt::format_to_n( stateName, l - 1, "{}.State", deviceName );
         stateName[ r.size ] = '\0';
 
@@ -126,7 +123,7 @@ UA_StatusCode OPCUAServer::readState( UA_Server*, const UA_NodeId*, void*,
     {
     if ( nodeContext != nullptr )
         {
-        device* dev = (device*)nodeContext;
+        auto dev = (device*)nodeContext;
         UA_Int32 state = dev->get_state();
         UA_Variant_setScalarCopy( &dataValue->value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
         }
@@ -141,7 +138,7 @@ UA_StatusCode OPCUAServer::writeState( UA_Server*,
     {
     if ( nodeContext != nullptr )
         {
-        device* dev = (device*)nodeContext;
+        auto dev = (device*)nodeContext;
         if ( value->hasValue )
             {
             UA_Int32 state = ( (UA_Int32*)( value->value.data ) )[ 0 ];
@@ -157,7 +154,7 @@ UA_StatusCode OPCUAServer::readValue( UA_Server*, const UA_NodeId*, void*,
     {
     if ( nodeContext != nullptr )
         {
-        device* dev = (device*)nodeContext;
+        auto dev = (device*)nodeContext;
         UA_Float newvalue = dev->get_value();
         UA_Variant_setScalarCopy( &dataValue->value, &newvalue, &UA_TYPES[ UA_TYPES_FLOAT ] );
         }
@@ -172,7 +169,7 @@ UA_StatusCode OPCUAServer::writeValue( UA_Server*,
     {
     if ( nodeContext != nullptr )
         {
-        device* dev = (device*)nodeContext;
+        auto dev = (device*)nodeContext;
         if ( value->hasValue )
             {
             UA_Float newvalue = ( (UA_Float*)( value->value.data ) )[ 0 ];
