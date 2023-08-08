@@ -27,7 +27,7 @@ void OPCUAServer::CreateDevObjects()
         UA_NodeId deviceId;
         auto dev = G_DEVICE_MANAGER()->get_device( i );
 
-        //Creating object node.
+        //Create object node.
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
         oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", dev->get_name() );
         oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", dev->get_description() );
@@ -41,14 +41,15 @@ void OPCUAServer::CreateDevObjects()
         //Creating value variable node.
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
         valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-        UA_Int32 value = 0;
-        UA_Variant_setScalar( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_INT32 ] );
+        UA_Float value = 0;
+        UA_Variant_setScalar( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_FLOAT ] );
 
         const std::string VALUE = "Value";
         std::string node_name = dev->get_name();
         node_name += "." + VALUE;
 
         valueAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", VALUE.c_str() );
+        valueAttr.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
         UA_NodeId valueNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         UA_Server_addVariableNode( server, valueNodeId, deviceId,
@@ -75,6 +76,7 @@ void OPCUAServer::CreateDevObjects()
         node_name += "." + STATE;
 
         stateAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", STATE.c_str() );
+        stateAttr.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
         UA_NodeId stateNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         UA_Server_addVariableNode( server, stateNodeId, deviceId,
