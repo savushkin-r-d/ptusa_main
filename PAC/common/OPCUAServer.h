@@ -51,9 +51,14 @@ class OPCUAServer
 
         ~OPCUAServer();
 
+        //Explicitly delete the copy constructors.
+        OPCUAServer( OPCUAServer const& ) = delete;
+        OPCUAServer( OPCUAServer&& ) = delete;
+        OPCUAServer& operator=( OPCUAServer const& ) = delete;
+        OPCUAServer& operator=( OPCUAServer&& ) = delete;
+
     private:
         OPCUAServer() = default;
-
 
         UA_Server* server = nullptr;
     };

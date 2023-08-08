@@ -4888,7 +4888,7 @@ class device_manager: public i_Lua_save_device
         static device_manager* get_instance();
 
         ///@brief Получение количества всех устройств.
-        u_int get_device_count() const;
+        size_t get_device_count() const;
 
 
         /// @brief Отладочная печать объекта в консоль.

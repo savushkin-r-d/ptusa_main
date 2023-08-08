@@ -21,81 +21,69 @@ void OPCUAServer::Init( short int port )
 
 void OPCUAServer::CreateDevObjects()
     {
-    u_int deviceCount = G_DEVICE_MANAGER()->get_device_count();
-
+    auto deviceCount = static_cast<u_int>( G_DEVICE_MANAGER()->get_device_count() );
     for ( u_int i = 0; i < deviceCount; i++ )
         {
         UA_NodeId deviceId;
-
         auto dev = G_DEVICE_MANAGER()->get_device( i );
-        auto l = device::get_max_name_length();
-        auto deviceName = new char[ l ];
-        auto r = fmt::format_to_n( deviceName, l - 1, "{}", dev->get_name() );
-        deviceName[ r.size ] = '\0';
 
-        l = device::get_max_description_length();
-        auto deviceDescription = new char[ l ];
-        r = fmt::format_to_n( deviceDescription, l, "{}", dev->get_description() );
-        deviceDescription[ r.size ] = '\0';
-
-        //creating object node
+        //Creating object node.
         UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
-        oAttr.displayName = UA_LOCALIZEDTEXT( "en-US", deviceName );
-        oAttr.description = UA_LOCALIZEDTEXT( "ru-ru", deviceDescription );
+        oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", dev->get_name() );
+        oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", dev->get_description() );
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
-            UA_QUALIFIEDNAME( 1, deviceName ),
+            UA_QUALIFIEDNAME_ALLOC( 1, dev->get_name() ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
             oAttr, nullptr, &deviceId );
 
-        //creating value variable node
+        //Creating value variable node.
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
         valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 value = 0;
         UA_Variant_setScalar( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_INT32 ] );
 
-        l = device::get_max_name_length() + 6; // Extra ".Value" or ".State";
-        auto valueName = new char[ l ];
-        r = fmt::format_to_n( valueName, l - 1, "{}.Value", deviceName );
-        valueName[ r.size ] = '\0';
+        const std::string VALUE = "Value";
+        std::string node_name = dev->get_name();
+        node_name += "." + VALUE;
 
-        valueAttr.displayName = UA_LOCALIZEDTEXT( "en-US", valueName );
-        UA_NodeId valueNodeId = UA_NODEID_STRING( 0, valueName );
+        valueAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", VALUE.c_str() );
+        UA_NodeId valueNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         UA_Server_addVariableNode( server, valueNodeId, deviceId,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
-            UA_QUALIFIEDNAME( 1, "Value" ),
+            UA_QUALIFIEDNAME_ALLOC( 1, VALUE.c_str() ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
-            valueAttr, G_DEVICE_MANAGER()->get_device( i ), nullptr );
+            valueAttr, dev, nullptr );
 
 
-        //creating value variable read/write callback
+        //Creating value variable read/write callbacks.
         UA_DataSource valueDataSource;
         valueDataSource.read = readValue;
         valueDataSource.write = writeValue;
         UA_Server_setVariableNode_dataSource( server, valueNodeId, valueDataSource );
 
-        //creating state variable node
+        //Creating state variable node.
         UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
         stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 state = 0;
         UA_Variant_setScalar( &stateAttr.value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
 
-        auto stateName = new char[ l ];
-        r = fmt::format_to_n( stateName, l - 1, "{}.State", deviceName );
-        stateName[ r.size ] = '\0';
+        const std::string STATE = "State";
+        node_name = dev->get_name();
+        node_name += "." + STATE;
 
-        stateAttr.displayName = UA_LOCALIZEDTEXT( "en-US", stateName );
-        UA_NodeId stateNodeId = UA_NODEID_STRING( 0, stateName );
+        stateAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", STATE.c_str() );
+        UA_NodeId stateNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         UA_Server_addVariableNode( server, stateNodeId, deviceId,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
-            UA_QUALIFIEDNAME( 1, "State" ),
+            UA_QUALIFIEDNAME_ALLOC( 1, STATE.c_str() ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
-            stateAttr, G_DEVICE_MANAGER()->get_device( i ), nullptr );
+            stateAttr, dev, nullptr );
 
-        //creating state variable read/write callback
+        //Creating state variable read/write callbacks.
         UA_DataSource stateDataSource;
         stateDataSource.read = readState;
         stateDataSource.write = writeState;
