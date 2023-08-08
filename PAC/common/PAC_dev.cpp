@@ -1269,11 +1269,9 @@ void device_manager::print() const
         }
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager( ) : project_devices( 0 ), disable_error_logging( false )
+device_manager::device_manager() : project_devices( 0 ), previous_states( 0 ), disable_error_logging( false ), active_counter( 0 )
     {
     G_DEVICE_CMMCTR->add_device( this );
-    previous_states.resize( 64 );
-    std::fill( previous_states.begin(), previous_states.end(), 0 );
     }
 //-----------------------------------------------------------------------------
 device_manager::~device_manager()
@@ -2246,6 +2244,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );
+    previous_states.push_back( false );
     new_device->set_serial_n( new_dev_index );
     new_device->set_article( article );
 
@@ -2276,11 +2275,11 @@ void device_manager::clear_io_devices()
         dev_types_ranges[ idx ].end_pos = -1;
         is_first_device[ idx ] = 0;
         }
-
+    previous_states.clear();
     project_devices.clear();
     }
 //-----------------------------------------------------------------------------
-void device_manager::check_state()
+int device_manager::check_state()
     {
     for ( int i = 0; i < project_devices.size(); ++i )
         {
@@ -2295,6 +2294,7 @@ void device_manager::check_state()
             previous_states[ i ] = false;
             }
         }
+    return active_counter;
     }
 //-----------------------------------------------------------------------------
 int device_manager::init_params()

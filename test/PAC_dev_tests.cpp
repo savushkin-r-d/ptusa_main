@@ -372,6 +372,18 @@ TEST( device_manager, clear_io_devices )
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
     }
 
+TEST( device_manager, check_state )
+    {
+    G_DEVICE_MANAGER()->clear_io_devices();
+    auto name = std::string( "WT1" );
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+    device::DT_WT, device::DST_WT_RS232, name.c_str(), "Test scales", "W" );
+    auto dev =G_DEVICE_MANAGER()->get_WT("WT1");
+    EXPECT_EQ( 1, G_DEVICE_MANAGER()->check_state() );
+    dev->direct_off();
+    EXPECT_EQ( 0, G_DEVICE_MANAGER()->check_state() );
+    }
+
 TEST( dev_stub, get_pump_dt )
     {
     EXPECT_EQ( .0f, STUB()->get_pump_dt() );
