@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691473181276,
+  "lastUpdate": 1691473403394,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10856,6 +10856,38 @@ window.BENCHMARK_DATA = {
             "value": 99.37281605589172,
             "unit": "us/iter",
             "extra": "iterations: 7013\ncpu: 99.36315414230712 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "c4b00c9c8e4a057b32df9ee23e9f37aa061b3b36",
+          "message": "[config][git] Ignore PAC memory file",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/604/commits/c4b00c9c8e4a057b32df9ee23e9f37aa061b3b36"
+        },
+        "date": 1691473402580,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.48909018264849,
+            "unit": "us/iter",
+            "extra": "iterations: 35916\ncpu: 19.48747354939303 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 99.26152374202788,
+            "unit": "us/iter",
+            "extra": "iterations: 7055\ncpu: 99.25169383416018 us\nthreads: 1"
           }
         ]
       }
