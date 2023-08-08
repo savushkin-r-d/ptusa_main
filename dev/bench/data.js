@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691471580357,
+  "lastUpdate": 1691472898027,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -10788,6 +10788,42 @@ window.BENCHMARK_DATA = {
             "value": 120.37116837082301,
             "unit": "us/iter",
             "extra": "iterations: 5868\ncpu: 120.06509884117246 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dfa6e804af900f8e192abdac690b087e609e6b2d",
+          "message": "[config][sonar] Update sonar scanner version to 5.0.1.3006 (#603)",
+          "timestamp": "2023-08-08T08:33:15+03:00",
+          "tree_id": "e196047260f15a6f2c93dc730c88a4d333851e83",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/dfa6e804af900f8e192abdac690b087e609e6b2d"
+        },
+        "date": 1691472896476,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 22.24028874354468,
+            "unit": "us/iter",
+            "extra": "iterations: 29050\ncpu: 22.23754905335629 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 112.72941978287446,
+            "unit": "us/iter",
+            "extra": "iterations: 6632\ncpu: 112.67279855247287 us\nthreads: 1"
           }
         ]
       }
