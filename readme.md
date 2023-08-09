@@ -8,12 +8,17 @@
 
 Russian readme is [here](russian_readme/readme.md).
 
-+ [1. General system architecture](#1-general-system-architecture)
-+ [2. Common description](#2-common-description)
-+ [3. How to build the project](#3-how-to-build-the-project )
-+ [4. Downloading PLCnext Technology C++ Toolchain](#4-downloading-0plcnext-technology-c-toolchain)
-+ [5. How to run a project](#5-how-to-run-a-project)
-+ [6. Libraries used](#6-libraries-used)
+[1. General system architecture](#1-general-system-architecture)
+
+[2. Common description](#2-common-description)
+
+[3. How to build the project](#3-how-to-build-the-project )
+
+[4. Downloading PLCnext Technology C++ Toolchain](#4-downloading-plcnext-technology-c-toolchain)
+
+[5. How to run a project](#5-how-to-run-a-project)
+
+[6. Libraries used](#6-libraries-used)
 
 ## 1. General system architecture ##
 
@@ -105,7 +110,8 @@ or, if you are clonned without initializing and updating submodules, try next:
 ### win ###
 
 Requirements:
-+  Microsoft Visual Studio Community 2019
+
++ Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
@@ -169,7 +175,7 @@ More information is located [here](https://www.plcnext.help/te/Programming/Cpp/C
 
 To run demo project you should use this command line:
 
-### win
+### windows ###
 
 5.1.  After building and deploying *`windows-default`* cmake-configuration:
 
