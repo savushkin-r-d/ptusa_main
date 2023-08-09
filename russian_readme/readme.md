@@ -26,11 +26,11 @@
 
 Управляющая логика реализуется в виде скрипта Lua. В ходе выполнения программы управление передается в отдельные специальные функции Lua, которые отвечают за отдельные этапы.
 
- + Общая схема работы программы контроллера (в [Drakon](https://drakonhub.com) diagram language)
++ Общая схема работы программы контроллера (в [Drakon](https://drakonhub.com) diagram language)
 
 <p align="center"><img src="../docs/drakon_diagram/images/control_program.svg"></p>
 
-  + Выполнение технологического процесса:
++ Выполнение технологического процесса:
 
 ``` mermaid
 
@@ -90,11 +90,11 @@ flowchart TD
 
 ```
 
- + При включении/выключении операции происходит следующее:
++ При включении/выключении операции происходит следующее:
 
 ![Clone repository](../readme_images/tech_object__set_mode.png)
 
- + При выполнении команды происходит следующее:
++ При выполнении команды происходит следующее:
 
 ![Clone repository](../readme_images/tech_object__exec_cmd.png)
 
@@ -110,11 +110,11 @@ flowchart TD
 
 Требования:
 
-  + Microsoft Visual Studio Community 2019
++ Microsoft Visual Studio Community 2019
 
 Вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake.
 
-  + Qt Creator
++ Qt Creator
 
 В Qt вы можете открыть файл CMakeList.txt клонированного репозитория.
 
@@ -122,7 +122,7 @@ flowchart TD
     Добавить -> Импортировать проект -> Клонирование Git
     указать ссылку на репозиторий и поставить галочку для рекурсивного клонирования.
 
-  + Microsoft Visual Studio Community 2022
++ Microsoft Visual Studio Community 2022
 
 Перед запуском проекта необходимо убедиться в том, что у вас установлен C++ CMake tools for Windows.
 Средства C++ CMake для Windows устанавливаются с помощью:
@@ -175,13 +175,13 @@ plcncli.exe install sdk -d C:\CLI\sdks\AXCF2152\2022_0 \ -p pxc-glibc-x86_64-min
 
 ### windows ###
 
- + После сборки и развертывания *`windows-default`* конфигурации cmake:
++ После сборки и развертывания *`windows-default`* конфигурации cmake:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
 
- + Запуск проекта в Microsoft Visual Studio Community 2022: `Выбрать элемент запуска -> ptusa_main.exe`.
++ Запуск проекта в Microsoft Visual Studio Community 2022: `Выбрать элемент запуска -> ptusa_main.exe`.
 
 ## Используемые библиотеки ##
 
