@@ -34,11 +34,11 @@ General system architecture when the control program is deployed on the server:
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
- + The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/)):
++ The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/)):
 
 <p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
- + Execution of the technological process:
++ Execution of the technological process:
 
 ``` mermaid
 flowchart TD
@@ -92,11 +92,11 @@ flowchart TD
 
 ```
 
- + When operation is turned on (off) happens next:
++ When operation is turned on (off) happens next:
 
 <p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
 
- + During the execution of command happens next:
++ During the execution of command happens next:
 
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
@@ -112,11 +112,11 @@ or, if you are clonned without initializing and updating submodules, try next:
 
 Requirements:
 
-  + Microsoft Visual Studio Community 2019
++ Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
-  + Qt Creator
++ Qt Creator
 
 You could open file CMakeList.txt cloned repository in Qt.
 
@@ -124,7 +124,7 @@ Or clone repository in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
 
-  + Microsoft Visual Studio Community 2022
++ Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
 C++ CMake tools for Windows are installed using:
@@ -178,13 +178,13 @@ To run demo project you should use this command line:
 
 ### windows ###
 
- + After building and deploying *`windows-default`* cmake-configuration:
++ After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
 
- + Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
++ Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
 
 ## Libraries used ##
 
