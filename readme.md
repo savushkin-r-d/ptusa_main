@@ -8,17 +8,17 @@
 
 Russian readme is [here](russian_readme/readme.md).
 
- 1. [General system architecture](#general-system-architecture)
+1. [General system architecture](#general-system-architecture)
 
- 2. [Common description](#common-description)
+2. [Common description](#common-description)
 
- 3. [How to build the project](#how-to-build-the-project )
+3. [How to build the project](#how-to-build-the-project )
 
- 4. [Downloading PLCnext Technology C++ Toolchain](#downloading-plcnext-technology-c-toolchain)
+4. [Downloading PLCnext Technology C++ Toolchain](#downloading-plcnext-technology-c-toolchain)
 
- 5. [How to run a project](#how-to-run-a-project)
+5. [How to run a project](#how-to-run-a-project)
 
- 6. [Libraries used](#libraries-used)
+6. [Libraries used](#libraries-used)
 
 ## General system architecture ##
 
