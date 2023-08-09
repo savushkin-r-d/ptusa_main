@@ -57,6 +57,10 @@ class OPCUAServer
         OPCUAServer& operator=( OPCUAServer const& ) = delete;
         OPCUAServer& operator=( OPCUAServer&& ) = delete;
 
+        UA_Server* get_server()
+            {
+            return server;
+            }
     private:
         OPCUAServer() = default;
 
