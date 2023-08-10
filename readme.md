@@ -13,7 +13,7 @@ Russian readme is [here](russian_readme/readme.md).
 1. [General system architecture](#general-system-architecture)
 2. [Common description](#common-description)
 3. [How to build the project](#how-to-build-the-project )
-4. [Downloading PLCnext Technology C++ Toolchain](#downloading-plcnext-technology-c-toolchain)
+4. [Using PLCnext Technology C++ Toolchain](#using-plcnext-technology-c-toolchain)
 5. [How to run a project](#how-to-run-a-project)
 6. [Libraries used](#libraries-used)
 
@@ -137,7 +137,7 @@ If an error occurs after startup, then you should clear the CMake cache `Project
 
 Eclipse IDE with CMake based project on Linux.
 
-## Downloading PLCnext Technology C++ Toolchain ##
+## Using PLCnext Technology C++ Toolchain ##
 
 Download the latest version (current is 2022.0.4 LTS) ```sdk for Windows 64 bit``` from the Phoenix Contact website https://www.phoenixcontact.com/products (for example from the **AXC F 2152** area, in the section Downloads->Software $-$ http://www.phoenixcontact.com/qr/2404267/softw).
 
@@ -153,7 +153,7 @@ plcncli.exe install sdk –d [installation path] –p [path to archive file]
 
 >If you install several SDKs, Phoenix Contact recommends to use the "target name/firmware version" folder structure.
 
-Also your  installation path must match with path in CMake.
+Also your installation path must match with path in CMake.
 
 E.g.:
 
@@ -162,12 +162,6 @@ plcncli.exe install sdk -d C:\CLI\sdks\AXCF2152\2022_0\ -p pxc-glibc-x86_64-ming
 ```
 
 >The SDK is specified to the controller. The full list of controllers can be found on the PHOENIX CONTACT International site ([Home > Products > PLCs and I/O systems > PLCnext Control > Product list PLCnext Technology components](https://www.phoenixcontact.com/online/portal/pi?1dmy&urile=wcm%3apath%3a/pien/web/main/products/list_pages/PLCnext_technology_components_P-21-14-01/f77f0eb0-2a70-40c3-8679-7df2450e26db)).
-
-### Creating a new C++ project in Visual Studio ###
-
-Now you can create a C++ project from a **PLCnext** template. Start Visual Studio, select `"Create a new project"` and search for **plcnext** in the Dialog box to show the **PLCnext** project templates and select the template that fits your needs, then click Next.
-
-More information is located [here](https://www.plcnext.help/te/Programming/Cpp/Cpp_programming/Working_with_Visual_Studio.htm).
 
 ## How to run a project ##
 
