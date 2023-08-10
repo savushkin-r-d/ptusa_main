@@ -123,8 +123,10 @@ UA_StatusCode OPCUAServer::readState( UA_Server*, const UA_NodeId*, void*,
         auto dev = (device*)nodeContext;
         UA_Int32 state = dev->get_state();
         UA_Variant_setScalarCopy( &dataValue->value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
+        return UA_STATUSCODE_GOOD;
         }
-    return UA_STATUSCODE_GOOD;
+
+    return UA_STATUSCODE_BAD;
     }
 
 UA_StatusCode OPCUAServer::writeState( UA_Server*,
@@ -140,9 +142,10 @@ UA_StatusCode OPCUAServer::writeState( UA_Server*,
             {
             UA_Int32 state = ( (UA_Int32*)( value->value.data ) )[ 0 ];
             dev->set_state( state );
+            return UA_STATUSCODE_GOOD;
             }
         }
-    return UA_STATUSCODE_GOOD;
+    return UA_STATUSCODE_BAD;
     }
 
 UA_StatusCode OPCUAServer::readValue( UA_Server*, const UA_NodeId*, void*,
@@ -154,8 +157,9 @@ UA_StatusCode OPCUAServer::readValue( UA_Server*, const UA_NodeId*, void*,
         auto dev = (device*)nodeContext;
         UA_Float newvalue = dev->get_value();
         UA_Variant_setScalarCopy( &dataValue->value, &newvalue, &UA_TYPES[ UA_TYPES_FLOAT ] );
+        return UA_STATUSCODE_GOOD;
         }
-    return UA_STATUSCODE_GOOD;
+    return UA_STATUSCODE_BAD;
     }
 
 UA_StatusCode OPCUAServer::writeValue( UA_Server*,
@@ -171,9 +175,10 @@ UA_StatusCode OPCUAServer::writeValue( UA_Server*,
             {
             UA_Float newvalue = ( (UA_Float*)( value->value.data ) )[ 0 ];
             dev->set_value( newvalue );
+            return UA_STATUSCODE_GOOD;
             }
         }
-    return UA_STATUSCODE_GOOD;
+    return UA_STATUSCODE_BAD;
     }
 
 OPCUAServer::~OPCUAServer()
