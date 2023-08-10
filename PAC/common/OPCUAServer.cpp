@@ -180,8 +180,3 @@ OPCUAServer::~OPCUAServer()
     {
     Shutdown();
     }
-
-OPCUAServer& OPC_UA_SERV()
-    {
-    return OPCUAServer::getInstance();
-    }

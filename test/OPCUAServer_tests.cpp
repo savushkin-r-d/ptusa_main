@@ -51,7 +51,7 @@ TEST( OPCUAServer, Evaluate )
 
     bool is_exist_node = false;
     size_t total = br.referencesSize;   
-    for ( size_t i = 0; i < br.referencesSize; ++i )
+    for ( size_t i = 0; i < total; ++i )
         {
         
         auto name = br.references[ i ].browseName.name;
@@ -72,16 +72,37 @@ TEST( OPCUAServer, Evaluate )
     res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_INT32 ] );
-    auto state = (UA_Int32*)out.data;
+    auto state = static_cast<UA_Int32*>( out.data );
     EXPECT_EQ( 1, *state );
+
 
     UA_NodeId valve1_value_NodeId = UA_NODEID_STRING( 0, "Valve1.Value" );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
-
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_FLOAT ] );
-    auto value = (UA_Float*)out.data;
+    auto value = static_cast<UA_Float*>( out.data );
     EXPECT_EQ( 1.0f, *value );
+
+
+    UA_Variant val;
+    UA_Variant_init( &val );
+    UA_Int32 new_state = 10;
+    UA_Variant_setScalar( &val, &new_state, &UA_TYPES[ UA_TYPES_INT32 ] );
+    res = UA_Server_writeValue( UA_server, valve1_state_NodeId, val );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    state = static_cast<UA_Int32*>( out.data );
+    EXPECT_EQ( 10, *state );
+
+    UA_Float new_value = 100.f;
+    UA_Variant_setScalar( &val, &new_value, &UA_TYPES[ UA_TYPES_FLOAT ] );
+    res = UA_Server_writeValue( UA_server, valve1_value_NodeId, val );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    value = static_cast<UA_Float*>( out.data );
+    EXPECT_EQ( 100.f, *value );
 
     OPCUAServer::getInstance().Shutdown();
     }

@@ -67,6 +67,4 @@ class OPCUAServer
         UA_Server* server = nullptr;
     };
 
-OPCUAServer& OPC_UA_SERV();
-
 #endif /* PAC_COMMON_OPCUA_OPCUASERVER_H_ */
