@@ -30,6 +30,22 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
+    //int step::get_tag() const
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:get_tag()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_EQ( -1, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
+    //int step::set_tag( int new_tag )
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:set_tag( 20 )" ) );
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:get_tag()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_EQ( 20, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
@@ -126,6 +142,37 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
     EXPECT_STREQ(
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR_T=0},\n",
         buff );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_WT, device.DST_WT_ETH, \'WT1\', \'Test wages\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "WT1 = WT( \'WT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
+    auto WT1 = static_cast<i_wages*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, WT1 );
+    lua_remove( L, -1 );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    dynamic_cast<wages_eth*>( WT1 )->set_string_property( field, ip );
+
+    auto st = WT1->get_state();
+    //Некорректный вызов - отсуствует self.
+    ASSERT_NE( 0, luaL_dostring( L, "res = WT1.get_state()" ) );    
+    //Корректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto lua_st = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( st, lua_st );
 
     lua_close( L );
     }

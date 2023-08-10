@@ -2081,6 +2081,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::DST_WT_ETH:
                     new_device = new wages_eth( dev_name );
+                    new_io_device = (wages_eth*)new_device;
                     break;
 
                 default:
@@ -3230,7 +3231,7 @@ digital_io_device::~digital_io_device()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 
-int DO2::get_state()
+int valve_DO2::get_state()
     {
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
@@ -3238,13 +3239,13 @@ int DO2::get_state()
     return b2;
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_on()
+void valve_DO2::direct_on()
     {
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_off()
+void valve_DO2::direct_off()
     {
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
@@ -5375,8 +5376,8 @@ void wages_RS232::tare()
     }
 //-----------------------------------------------------------------------------
 wages_eth::wages_eth( const char* dev_name ) :
-    device( dev_name, device::DT_WT, device::DST_WT_ETH,
-        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_ETH,
+        static_cast< int >( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     }
@@ -5393,9 +5394,7 @@ int wages_eth::get_state()
 
 void wages_eth::evaluate_io()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    weth->set_wages_value(.0f);
-#else
+#ifndef DEBUG_NO_IO_MODULES
     weth->evaluate();
 #endif
     }
@@ -5418,13 +5417,18 @@ void wages_eth::set_string_property( const char* field, const char* value )
 
 void wages_eth::direct_set_value( float new_value )
     {
+#ifdef DEBUG_NO_IO_MODULES
     weth->set_wages_value( new_value );
+#endif
     }
 
 void wages_eth::direct_set_state( int state )
     {
-    weth->set_state( state );
+#ifdef DEBUG_NO_IO_MODULES
+    weth->set_wages_state( state );
+#endif
     }
+
 
 void wages_eth::direct_off()
     {
