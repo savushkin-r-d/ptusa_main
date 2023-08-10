@@ -8,16 +8,13 @@
 
 Russian readme is [here](russian_readme/readme.md).
 
+## Content ##
+
 1. [General system architecture](#general-system-architecture)
-
 2. [Common description](#common-description)
-
 3. [How to build the project](#how-to-build-the-project )
-
 4. [Downloading PLCnext Technology C++ Toolchain](#downloading-plcnext-technology-c-toolchain)
-
 5. [How to run a project](#how-to-run-a-project)
-
 6. [Libraries used](#libraries-used)
 
 ## General system architecture ##
@@ -193,7 +190,9 @@ To run demo project you should use this command line:
 Lua is a scripting programming language. A characteristic feature of Lua is implementation of a large number of program entities with a minimum of syntactic means.
 Thus, all composite user data types (arrays, structures, sets, queues, lists) are implemented through the mechanism of tables, and the mechanisms of object-oriented programming, including multiple inheritance, are implemented using metatables, which are also responsible for overloading operations and a number of other features.
 Lua is a procedural dynamically typed modular language with automatic memory management. Includes basic elements to support functional and object programming styles. Thus, Lua can be called a multi-paradigm language. Built-in parallel programming tools allow you to write multithreaded programs only by means of the language, without accessing the operating system API or external libraries.
+
 Since the main purpose of Lua is embedding, it has effective means of interlanguage interaction, focused mainly on calling C libraries and working in a C environment. The language supports a small number of built-in data types: boolean values, numbers, strings, functions, streams. There are no typical combined data structures, such as arrays, sets, lists, and records; instead of all of them, one basic Lua structure is used a table.
+
 A separate type of *userdata* is designed specifically for low-level programming and data exchange with external code in other languages. Functions in Lua are objects of the first class, can be assigned and passed in parameters. Closures are supported, it is possible to create higher-order functions. The object system is prototypical, there is no explicit support for inheritance, but it is easily implemented using metatables.
 
 Detailed information can be obtained [here](https://www.lua.org).
