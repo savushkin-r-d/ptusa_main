@@ -5,7 +5,7 @@
  1. [Общая архитектура системы](#общая-архитектура-системы)
  2. [Общее описание](#общее-описание)
  3. [Как собрать проект](#как-собрать-проект)
- 4. [Загрузка набора инструментов PLCnext Technology C++](#загрузка-набора-инструментов-plcnext-technology-c)
+ 4. [Использование набора инструментов PLCnext Technology C++](#использование-набора-инструментов-plcnext-technology-c)
  5. [Как запустить проект](#как-запустить-проект)
  6. [Используемые библиотеки](#используемые-библиотеки)
 
@@ -134,7 +134,7 @@ flowchart TD
 
 Eclipse IDE с проектом на базе CMake в Linux.
 
-## Загрузка набора инструментов PLCnext Technology C++ ##
+## Использование набора инструментов PLCnext Technology C++ ##
 
 Загрузите последнюю версию (текущая $-$ 2022.0.4 LTS) `sdk для Windows 64 bit` с веб-сайта Phoenix Contact https://www.phoenixcontact.com/products (например, из области **AXC F 2152**, в разделе Загрузки->Программное обеспечение $-$ http://www.phoenixcontact.com/qr/2404267/softw ).
 
@@ -159,12 +159,6 @@ plcncli.exe install sdk -d C:\CLI\sdks\AXCF2152\2022_0 \ -p pxc-glibc-x86_64-min
 ```
 
 >SDK указан для контроллера. Полный список контроллеров можно найти на сайте PHOENIX CONTACT ([Главная страница > Продукция > ПЛК и системы ввода-вывода > Управление PLCnext > Список продуктов Технология PLCnext components](https://www.phoenixcontact.com/online/portal/pi?1dmy&urile=wcm%3apath%3a/pien/web/main/products/list_pages/PLCnext_technology_components_P-21-14-01/f77f0eb0-2a70-40c3-8679-7df2450e26db))
-
-### Создание нового проекта на C++ в Visual Studio ###
-
-Теперь вы можете создать проект на C++ из шаблона **PLC next**. Запустите Visual Studio, выберите "Создать новый проект" и выполните поиск **plcnext** в диалоговом окне, выберите нужный вам шаблон, затем нажмите кнопку далее.
-
-Более подробная информация находится [здесь](https://www.plcnext.help/te/Programming/Cpp/Cpp_programming/Working_with_Visual_Studio.htm ).
 
 ## Как запустить проект ##
 
