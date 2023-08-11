@@ -112,7 +112,7 @@ namespace PtusaPLCnextEngineer
 #ifdef OPCUA
             if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
                 {
-                G_OPCUA_SERVER.Evaluate();
+                G_OPCUA_SERVER.evaluate();
                 }
 #endif
             //Основной цикл работы с дополнительными устройствами
@@ -206,7 +206,7 @@ namespace PtusaPLCnextEngineer
             }
 
 #ifdef OPCUA
-            G_OPCUA_SERVER.Shutdown();
+            G_OPCUA_SERVER.shutdown();
 #endif
         }
 
