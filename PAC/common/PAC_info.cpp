@@ -327,16 +327,16 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         {
         cmd_answer[ 0 ] = 0;
 
-        auto prev_val = par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ];
+        auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
         if ( val == 0 && prev_val == 1 )
             {
-            par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, 0 );
+            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
 
             G_OPCUA_SERVER.shutdown();
             }
         else if ( val == 1 && prev_val == 0 )
             {
-            par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, 1 );
+            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
             UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
             if ( retval != UA_STATUSCODE_GOOD )
                 {
