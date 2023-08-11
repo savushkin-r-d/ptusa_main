@@ -17,6 +17,9 @@ TEST( PAC_info, reset_params )
 
 TEST( PAC_info, save_device )
     {   
+    G_PAC_INFO()->reset_params();
+    G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::CLEAR_RESULT_CMD );
+
     const auto MAX_SIZE = 1000;
     const auto REF_STR =
         "t.SYSTEM = \n"
@@ -37,9 +40,9 @@ TEST( PAC_info, save_device )
             "\tP_RESTRICTIONS_MODE=0,\n"
             "\tP_RESTRICTIONS_MANUAL_TIME=120000,\n"
             "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=0,\n"
-            "\tCMD=1,\n"
+            "\tCMD=0,\n"
             "\tCMD_ANSWER=\"\",\n"
-            "\tVERSION=\"2023.8.3.0\",\n"
+            "\tVERSION=\"" PRODUCT_VERSION_FULL_STR "\",\n"
             "\tNODEENABLED = \n"
             "\t{\n"
             "\t\n"
@@ -49,5 +52,5 @@ TEST( PAC_info, save_device )
     char buff[ MAX_SIZE ] = {0};
 
     G_PAC_INFO()->save_device( buff );
-    EXPECT_STRNE( "", buff );
+    EXPECT_STREQ( REF_STR, buff );
     }

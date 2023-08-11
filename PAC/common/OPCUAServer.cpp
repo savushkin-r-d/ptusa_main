@@ -15,12 +15,6 @@ OPCUA_server& OPCUA_server::get_instance()
     return instance;
     }
 
-
-bool OPCUA_server::is_init() const
-    {
-    return server != nullptr;
-    }
-
 void OPCUA_server::init( short int port )
     {
     if ( nullptr == server )

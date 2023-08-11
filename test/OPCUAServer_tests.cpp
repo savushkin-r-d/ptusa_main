@@ -4,11 +4,10 @@ using namespace ::testing;
 
 TEST( OPCUA_server, evaluate )
     {    
-    G_OPCUA_SERVER.evaluate(); //Correct evaluate with no initialization.
+    G_OPCUA_SERVER.evaluate();  //Correct evaluate() with no initialization.
 
     G_OPCUA_SERVER.init();
-
-    G_OPCUA_SERVER.init(); //Correct init even call again.
+    G_OPCUA_SERVER.init();      //Correct init() even call again.
 
     G_DEVICE_MANAGER()->clear_io_devices();
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
@@ -20,6 +19,8 @@ TEST( OPCUA_server, evaluate )
 
     auto res = G_OPCUA_SERVER.start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res  );
+    res = G_OPCUA_SERVER.start();
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );   //Correct start() even call again.
 
     G_OPCUA_SERVER.evaluate();
     

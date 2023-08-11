@@ -92,67 +92,72 @@ void PAC_info::reset_params()
 //-----------------------------------------------------------------------------
 int PAC_info::save_device( char* buff )
     {
-    int answer_size = sprintf( buff, "t.SYSTEM = \n\t{\n" );
+    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.SYSTEM = \n\t{{\n" ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tRESET_BY={},\n", reset_type ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tUP_DAYS={},\n", up_days ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tUP_HOURS={},\n", up_hours ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tUP_MINS={},\n", up_mins ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tUP_SECS={},\n", up_secs ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tUP_TIME=\"{}\",\n", up_time_str ).size;
 
-    answer_size += sprintf( buff + answer_size, "\tRESET_BY=%u,\n", reset_type );
-    answer_size += sprintf( buff + answer_size, "\tUP_DAYS=%u,\n", up_days );
-    answer_size += sprintf( buff + answer_size, "\tUP_HOURS=%u,\n", up_hours );
-    answer_size += sprintf( buff + answer_size, "\tUP_MINS=%u,\n", up_mins );
-    answer_size += sprintf( buff + answer_size, "\tUP_SECS=%u,\n", up_secs );
-    answer_size += sprintf( buff + answer_size, "\tUP_TIME=\"%s\",\n",
-        up_time_str );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tWASH_VALVE_SEAT_PERIOD={},\n", par[ P_MIX_FLIP_PERIOD ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tWASH_VALVE_UPPER_SEAT_TIME={},\n", par[ P_MIX_FLIP_UPPER_TIME ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tWASH_VALVE_LOWER_SEAT_TIME={},\n",par[ P_MIX_FLIP_LOWER_TIME ] ).size;
 
-    answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n",
-        par[ P_MIX_FLIP_PERIOD ] );
-    answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_UPPER_SEAT_TIME=%d,\n",
-        par[ P_MIX_FLIP_UPPER_TIME ] );
-    answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_LOWER_SEAT_TIME=%d,\n",
-        par[ P_MIX_FLIP_LOWER_TIME ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_V_OFF_DELAY_TIME={},\n", par[ P_V_OFF_DELAY_TIME ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_V_BOTTOM_ON_DELAY_TIME={},\n", par[ P_V_BOTTOM_OFF_DELAY_TIME ] ).size;
 
-    answer_size += sprintf( buff + answer_size, "\tP_V_OFF_DELAY_TIME=%d,\n",
-        par[ P_V_OFF_DELAY_TIME ] );
-    answer_size += sprintf( buff + answer_size, "\tP_V_BOTTOM_ON_DELAY_TIME=%d,\n",
-        par[ P_V_BOTTOM_OFF_DELAY_TIME ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME={},\n", par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME={},\n", par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tP_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME=%d,\n",
-        par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] );
-    answer_size += sprintf( buff + answer_size,
-        "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME=%d,\n",
-        par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_RESTRICTIONS_MODE={},\n", par[ P_RESTRICTIONS_MODE ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_RESTRICTIONS_MANUAL_TIME={},\n", par[ P_RESTRICTIONS_MANUAL_TIME ] ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tP_RESTRICTIONS_MODE=%d,\n", par[ P_RESTRICTIONS_MODE ] );
-    answer_size += sprintf( buff + answer_size,
-        "\tP_RESTRICTIONS_MANUAL_TIME=%d,\n", par[ P_RESTRICTIONS_MANUAL_TIME ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR={},\n", par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=%d,\n",
-        par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tCMD={},\n", cmd ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tCMD_ANSWER=\"{}\",\n", cmd_answer ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tCMD=%d,\n", cmd );
-    answer_size += sprintf( buff + answer_size,
-        "\tCMD_ANSWER=\"%s\",\n", cmd_answer );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tVERSION=\"{}\",\n", PRODUCT_VERSION_FULL_STR ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tVERSION=\"%s\",\n", PRODUCT_VERSION_FULL_STR );
-
-    answer_size += sprintf( buff + answer_size, "\tNODEENABLED = \n\t{\n\t" );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tNODEENABLED = \n\t{{\n\t" ).size;
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
         io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
-        answer_size += sprintf( buff + answer_size, wn->is_active ? "1, " : "0, " );
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+            wn->is_active ? "1, " : "0, " ).size;
         }
-    answer_size += sprintf( buff + answer_size, "\n\t},\n" );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 
-    answer_size += sprintf( buff + answer_size,
-        "\tP_IS_OPC_UA_SERVER_ACTIVE=%d,\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
 
-    answer_size += sprintf( buff + answer_size, "\t}\n" );
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
-    return answer_size;
+    buff[ size ] = '\0';
+
+    return size;
     }
 //-----------------------------------------------------------------------------
 PAC_info* PAC_info::get_instance()
@@ -176,6 +181,10 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         {
         switch ((COMMANDS)(int)val)
             {
+            case CLEAR_RESULT_CMD:
+                cmd = 0;
+                break;
+
             case RELOAD_RESTRICTIONS:
                 {
                 if (G_DEBUG)
@@ -328,18 +337,16 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         else if ( val == 1 && prev_val == 0 )
             {
             par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, 1 );
-
-            if ( !G_OPCUA_SERVER.is_init() )
+            UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
+            if ( retval != UA_STATUSCODE_GOOD )
                 {
-                UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
-                if ( retval != UA_STATUSCODE_GOOD )
-                    {
-                    G_LOG->error( "OPC UA server start failed. Returned error code %d!",
-                        retval );
-                    strncpy( cmd_answer, G_LOG->msg, sizeof( cmd_answer ) );
-                    cmd_answer[ sizeof( cmd_answer ) - 1 ] = 0;
-                    return 1;
-                    }
+                G_LOG->error( "OPC UA server start failed. Returned error code %d!",
+                    retval );
+
+                auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
+                    G_LOG->msg );
+                cmd_answer[ r.size ] = '\0';
+                return 1;
                 }
             }
         }

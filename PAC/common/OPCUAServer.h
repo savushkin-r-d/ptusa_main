@@ -15,8 +15,6 @@ class OPCUA_server
 
         void init( short int port = 4841 );
 
-        bool is_init() const;
-
         void create_dev_objects();
 
         UA_StatusCode start();
