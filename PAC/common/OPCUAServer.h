@@ -1,5 +1,4 @@
-#ifndef PAC_COMMON_OPCUA_OPCUASERVER_H_
-#define PAC_COMMON_OPCUA_OPCUASERVER_H_
+#pragma once
 
 #include <open62541/plugin/log_stdout.h>
 #include <open62541/server.h>
@@ -9,62 +8,70 @@
 #include "PAC_dev.h"
 #include "tech_def.h"
 
-class OPCUAServer
+class OPCUA_server
     {
     public:
-        static OPCUAServer& getInstance()
+        static OPCUA_server& get_instance();
+
+        void init( short int port = 4841 );
+
+        bool is_init() const;
+
+        void create_dev_objects();
+
+        UA_StatusCode start();
+
+        void evaluate();
+
+        void shutdown();
+
+        UA_StatusCode init_all_and_start()
             {
-            static OPCUAServer instance;
-            return instance;
+            init();
+            create_dev_objects();
+            return start();
             }
 
-        void Init( short int port = 4841 );
-
-        void CreateDevObjects();
-        UA_StatusCode  Start();
-        void Shutdown();
-        void Evaluate();
-
-        static UA_StatusCode readState( UA_Server* server,
+        static UA_StatusCode read_state( UA_Server* server,
             const UA_NodeId* sessionId, void* sessionContext,
             const UA_NodeId* nodeId, void* nodeContext,
             UA_Boolean sourceTimeStamp, const UA_NumericRange* range,
             UA_DataValue* dataValue );
 
-        static UA_StatusCode writeState( UA_Server* server,
+        static UA_StatusCode write_state( UA_Server* server,
             const UA_NodeId* sessionId, void* sessionContext,
             const UA_NodeId* nodeId, void* nodeContext,
             const UA_NumericRange* range,
             const UA_DataValue* value );
 
-        static UA_StatusCode readValue( UA_Server* server,
+        static UA_StatusCode read_value( UA_Server* server,
             const UA_NodeId* sessionId, void* sessionContext,
             const UA_NodeId* nodeId, void* nodeContext,
             UA_Boolean sourceTimeStamp, const UA_NumericRange* range,
             UA_DataValue* dataValue );
 
-        static UA_StatusCode writeValue( UA_Server* server,
+        static UA_StatusCode write_value( UA_Server* server,
             const UA_NodeId* sessionId, void* sessionContext,
             const UA_NodeId* nodeId, void* nodeContext,
             const UA_NumericRange* range,
             const UA_DataValue* value );
 
-        ~OPCUAServer();
+        ~OPCUA_server();
 
         //Explicitly delete the copy constructors.
-        OPCUAServer( OPCUAServer const& ) = delete;
-        OPCUAServer( OPCUAServer&& ) = delete;
-        OPCUAServer& operator=( OPCUAServer const& ) = delete;
-        OPCUAServer& operator=( OPCUAServer&& ) = delete;
+        OPCUA_server( OPCUA_server const& ) = delete;
+        OPCUA_server( OPCUA_server&& ) = delete;
+        OPCUA_server& operator=( OPCUA_server const& ) = delete;
+        OPCUA_server& operator=( OPCUA_server&& ) = delete;
 
-        UA_Server* get_server()
-            {
-            return server;
-            }
+        UA_Server* get_server() const;
+
     private:
-        OPCUAServer() = default;
+        OPCUA_server() = default;
 
         UA_Server* server = nullptr;
+
+        bool is_dev_objects_created = false;
     };
 
-#endif /* PAC_COMMON_OPCUA_OPCUASERVER_H_ */
+#define G_OPCUA_SERVER OPCUA_server::get_instance()

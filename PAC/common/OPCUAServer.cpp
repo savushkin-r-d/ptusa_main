@@ -9,7 +9,19 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-void OPCUAServer::Init( short int port )
+OPCUA_server& OPCUA_server::get_instance()
+    {
+    static OPCUA_server instance;
+    return instance;
+    }
+
+
+bool OPCUA_server::is_init() const
+    {
+    return server != nullptr;
+    }
+
+void OPCUA_server::init( short int port )
     {
     if ( nullptr == server )
         {
@@ -19,8 +31,11 @@ void OPCUAServer::Init( short int port )
         }
     }
 
-void OPCUAServer::CreateDevObjects()
+void OPCUA_server::create_dev_objects()
     {
+    if ( !server ) return;
+    if ( is_dev_objects_created ) return;
+
     auto deviceCount = static_cast<u_int>( G_DEVICE_MANAGER()->get_device_count() );
     for ( u_int i = 0; i < deviceCount; i++ )
         {
@@ -61,8 +76,8 @@ void OPCUAServer::CreateDevObjects()
 
         //Creating value variable read/write callbacks.
         UA_DataSource valueDataSource;
-        valueDataSource.read = readValue;
-        valueDataSource.write = writeValue;
+        valueDataSource.read = read_value;
+        valueDataSource.write = write_value;
         UA_Server_setVariableNode_dataSource( server, valueNodeId, valueDataSource );
 
         //Creating state variable node.
@@ -87,34 +102,38 @@ void OPCUAServer::CreateDevObjects()
 
         //Creating state variable read/write callbacks.
         UA_DataSource stateDataSource;
-        stateDataSource.read = readState;
-        stateDataSource.write = writeState;
+        stateDataSource.read = read_state;
+        stateDataSource.write = write_state;
         UA_Server_setVariableNode_dataSource( server, stateNodeId, stateDataSource );
         }
+
+    is_dev_objects_created = true;
     }
 
-UA_StatusCode OPCUAServer::Start()
+UA_StatusCode OPCUA_server::start()
     {
     return UA_Server_run_startup( server );
     }
 
-void OPCUAServer::Shutdown()
+void OPCUA_server::shutdown()
     {
     if ( server )
         {
         UA_Server_run_shutdown( server );
         UA_Server_delete( server );
         server = nullptr;
+
+        is_dev_objects_created = false;
         }
     }
 
-void OPCUAServer::Evaluate()
+void OPCUA_server::evaluate()
     {
-    UA_Server_run_iterate( server, true );
+    if ( server ) UA_Server_run_iterate( server, true );
     }
 
 
-UA_StatusCode OPCUAServer::readState( UA_Server*, const UA_NodeId*, void*,
+UA_StatusCode OPCUA_server::read_state( UA_Server*, const UA_NodeId*, void*,
     const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
     UA_DataValue* dataValue )
     {
@@ -129,7 +148,7 @@ UA_StatusCode OPCUAServer::readState( UA_Server*, const UA_NodeId*, void*,
     return UA_STATUSCODE_BAD;
     }
 
-UA_StatusCode OPCUAServer::writeState( UA_Server*,
+UA_StatusCode OPCUA_server::write_state( UA_Server*,
     const UA_NodeId*, void*,
     const UA_NodeId*, void* nodeContext,
     const UA_NumericRange*,
@@ -148,7 +167,7 @@ UA_StatusCode OPCUAServer::writeState( UA_Server*,
     return UA_STATUSCODE_BAD;
     }
 
-UA_StatusCode OPCUAServer::readValue( UA_Server*, const UA_NodeId*, void*,
+UA_StatusCode OPCUA_server::read_value( UA_Server*, const UA_NodeId*, void*,
     const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
     UA_DataValue* dataValue )
     {
@@ -162,7 +181,7 @@ UA_StatusCode OPCUAServer::readValue( UA_Server*, const UA_NodeId*, void*,
     return UA_STATUSCODE_BAD;
     }
 
-UA_StatusCode OPCUAServer::writeValue( UA_Server*,
+UA_StatusCode OPCUA_server::write_value( UA_Server*,
     const UA_NodeId*, void*,
     const UA_NodeId*, void* nodeContext,
     const UA_NumericRange*,
@@ -181,7 +200,12 @@ UA_StatusCode OPCUAServer::writeValue( UA_Server*,
     return UA_STATUSCODE_BAD;
     }
 
-OPCUAServer::~OPCUAServer()
+UA_Server* OPCUA_server::get_server() const
     {
-    Shutdown();
+    return server;
+    }
+
+OPCUA_server::~OPCUA_server()
+    {
+    shutdown();
     }

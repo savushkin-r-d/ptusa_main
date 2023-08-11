@@ -96,10 +96,6 @@ int main( int argc, const char *argv[] )
 #endif
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
-#ifdef OPCUA
-    OPCUAServer::getInstance().Init();
-#endif
-
     G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
 
     //-Инициализация Lua.
@@ -139,14 +135,12 @@ int main( int argc, const char *argv[] )
     argv_utf8 = 0;
 #endif
 
-#ifdef OPCUA
-    OPCUAServer::getInstance().CreateDevObjects();
-    UA_StatusCode retval = OPCUAServer::getInstance().Start();
+#ifdef OPCUA    
+    UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
     if( retval != UA_STATUSCODE_GOOD )
         {
         G_LOG->critical( "OPC UA server start failed. Returned error code %d!",
             retval );
-        debug_break;
         return EXIT_FAILURE;
         }
 #endif
@@ -195,7 +189,7 @@ int main( int argc, const char *argv[] )
 
         G_CMMCTR->evaluate();
 #ifdef OPCUA
-        OPCUAServer::getInstance().Evaluate();
+        G_OPCUA_SERVER.evaluate();
 #endif
         //Основной цикл работы с дополнительными устройствами
         IOT_EVALUATE();
@@ -271,11 +265,10 @@ int main( int argc, const char *argv[] )
 #endif // TEST_SPEED
         }
 #ifdef OPCUA
-    OPCUAServer::getInstance().Shutdown();
+    G_OPCUA_SERVER.shutdown();
 #endif
     //Деинициализация дополнительных устройств.
     IOT_FINAL();
 
     return( EXIT_SUCCESS );
     }
-

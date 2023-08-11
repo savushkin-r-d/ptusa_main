@@ -2,44 +2,47 @@
 
 using namespace ::testing;
 
-TEST( OPCUAServer, Evaluate )
-    {
-    OPCUAServer::getInstance().Init();
+TEST( OPCUA_server, evaluate )
+    {    
+    G_OPCUA_SERVER.evaluate(); //Correct evaluate with no initialization.
 
-    OPCUAServer::getInstance().Init(); //Correct init even call again.
+    G_OPCUA_SERVER.init();
+
+    G_OPCUA_SERVER.init(); //Correct init even call again.
+
     G_DEVICE_MANAGER()->clear_io_devices();
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
         "Valve1", "Test Valve", "" );
     auto valve1 = G_DEVICE_MANAGER()->get_V( "Valve1" );  
     valve1->on();
 
-    OPCUAServer::getInstance().CreateDevObjects();
+    G_OPCUA_SERVER.create_dev_objects();
 
-    auto res = OPCUAServer::getInstance().Start();
+    auto res = G_OPCUA_SERVER.start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res  );
 
-    OPCUAServer::getInstance().Evaluate();
+    G_OPCUA_SERVER.evaluate();
     
-    res = OPCUAServer::getInstance().readState( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.read_state( nullptr, nullptr, nullptr,
         nullptr, nullptr, false, nullptr, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
 
-    res = OPCUAServer::getInstance().writeState( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.write_state( nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
     UA_DataValue v;
-    res = OPCUAServer::getInstance().writeState( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.write_state( nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, &v );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
 
-    res = OPCUAServer::getInstance().readValue( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.read_value( nullptr, nullptr, nullptr,
         nullptr, nullptr, false, nullptr, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
 
-    res = OPCUAServer::getInstance().writeValue( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.write_value( nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
-    res = OPCUAServer::getInstance().writeValue( nullptr, nullptr, nullptr,
+    res = G_OPCUA_SERVER.write_value( nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, &v );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
 
@@ -54,7 +57,7 @@ TEST( OPCUAServer, Evaluate )
     bd.browseDirection = UA_BROWSEDIRECTION_FORWARD;
     bd.includeSubtypes = true;
 
-    auto UA_server = OPCUAServer::getInstance().get_server();
+    auto UA_server = G_OPCUA_SERVER.get_server();
     UA_BrowseResult br = UA_Server_browse( UA_server, 0, &bd );
     EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
 
@@ -113,5 +116,9 @@ TEST( OPCUAServer, Evaluate )
     value = static_cast<UA_Float*>( out.data );
     EXPECT_EQ( 100.f, *value );
 
-    OPCUAServer::getInstance().Shutdown();
+    G_OPCUA_SERVER.shutdown();
+
+    res = G_OPCUA_SERVER.init_all_and_start();
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    G_OPCUA_SERVER.shutdown();
     }
