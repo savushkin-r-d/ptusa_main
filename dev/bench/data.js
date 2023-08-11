@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691733319392,
+  "lastUpdate": 1691736427549,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -11308,6 +11308,38 @@ window.BENCHMARK_DATA = {
             "value": 101.1448757684043,
             "unit": "us/iter",
             "extra": "iterations: 6995\ncpu: 100.41296640457472 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "id": "7df6f02db1ab864207420139a701467856880963",
+          "message": "[doc] Add installation toolchain description",
+          "timestamp": "2023-02-16T14:09:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/602/commits/7df6f02db1ab864207420139a701467856880963"
+        },
+        "date": 1691736426258,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.34923913653935,
+            "unit": "us/iter",
+            "extra": "iterations: 28490\ncpu: 24.31994032994033 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 117.42900440827202,
+            "unit": "us/iter",
+            "extra": "iterations: 5898\ncpu: 117.41342828077315 us\nthreads: 1"
           }
         ]
       }
