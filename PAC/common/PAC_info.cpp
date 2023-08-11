@@ -85,6 +85,8 @@ void PAC_info::reset_params()
     par[ P_AUTO_OPERATION_WAIT_TIME ] = 60000;
     par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
 
+    par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -144,6 +146,9 @@ int PAC_info::save_device( char* buff )
         answer_size += sprintf( buff + answer_size, wn->is_active ? "1, " : "0, " );
         }
     answer_size += sprintf( buff + answer_size, "\n\t},\n" );
+
+    answer_size += sprintf( buff + answer_size,
+        "\tP_IS_OPC_UA_SERVER_ACTIVE=%d,\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] );
 
     answer_size += sprintf( buff + answer_size, "\t}\n" );
 
