@@ -136,12 +136,15 @@ int main( int argc, const char *argv[] )
 #endif
 
 #ifdef OPCUA    
-    UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
-    if( retval != UA_STATUSCODE_GOOD )
+    if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
-        G_LOG->critical( "OPC UA server start failed. Returned error code %d!",
-            retval );
-        return EXIT_FAILURE;
+        UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
+        if ( retval != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->critical( "OPC UA server start failed. Returned error code %d!",
+                retval );
+            return EXIT_FAILURE;
+            }
         }
 #endif
 
@@ -189,7 +192,10 @@ int main( int argc, const char *argv[] )
 
         G_CMMCTR->evaluate();
 #ifdef OPCUA
-        G_OPCUA_SERVER.evaluate();
+        if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
+            {
+            G_OPCUA_SERVER.evaluate();
+            }
 #endif
         //Основной цикл работы с дополнительными устройствами
         IOT_EVALUATE();

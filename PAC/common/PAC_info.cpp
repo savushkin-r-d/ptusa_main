@@ -7,6 +7,10 @@
 
 #include "bus_coupler_io.h"
 
+#ifdef OPCUA
+#include "OPCUAServer.h"
+#endif
+
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр класса.
 
 const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
@@ -303,6 +307,38 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 }
             }
         }
+
+#ifdef OPCUA
+    if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
+        {
+        cmd_answer[ 0 ] = 0;
+
+        auto prev_val = par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ];
+        if ( val == 0 && prev_val == 1 )
+            {
+            par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, 0 );
+
+            G_OPCUA_SERVER.shutdown();
+            }
+        else if ( val == 1 && prev_val == 0 )
+            {
+            par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, 1 );
+
+            if ( !G_OPCUA_SERVER.is_init() )
+                {
+                UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
+                if ( retval != UA_STATUSCODE_GOOD )
+                    {
+                    G_LOG->error( "OPC UA server start failed. Returned error code %d!",
+                        retval );
+                    strncpy( cmd_answer, G_LOG->msg, sizeof( cmd_answer ) );
+                    cmd_answer[ sizeof( cmd_answer ) - 1 ] = 0;
+                    return 1;
+                    }
+                }
+            }
+        }
+#endif
 
     return 0;
     }

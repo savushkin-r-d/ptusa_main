@@ -132,7 +132,6 @@ void OPCUA_server::evaluate()
     if ( server ) UA_Server_run_iterate( server, true );
     }
 
-
 UA_StatusCode OPCUA_server::read_state( UA_Server*, const UA_NodeId*, void*,
     const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
     UA_DataValue* dataValue )

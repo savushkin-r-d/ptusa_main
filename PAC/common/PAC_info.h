@@ -50,6 +50,9 @@ class PAC_info: public i_Lua_save_device
             ///< сигналам, мсек.
             P_AUTO_OPERATION_WARN_TIME,
 
+            ///< Активность сервера OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_ACTIVE,
 
             ///< Количество параметров.
             P_PARAMS_COUNT
