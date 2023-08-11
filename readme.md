@@ -182,6 +182,7 @@ To run demo project you should use this command line:
 ### lua ###
 
 Lua is a scripting programming language. A characteristic feature of Lua is implementation of a large number of program entities with a minimum of syntactic means.
+
 Thus, all composite user data types (arrays, structures, sets, queues, lists) are implemented through the mechanism of tables, and the mechanisms of object-oriented programming, including multiple inheritance, are implemented using metatables, which are also responsible for overloading operations and a number of other features.
 Lua is a procedural dynamically typed modular language with automatic memory management. Includes basic elements to support functional and object programming styles. Thus, Lua can be called a multi-paradigm language. Built-in parallel programming tools allow you to write multithreaded programs only by means of the language, without accessing the operating system API or external libraries.
 
