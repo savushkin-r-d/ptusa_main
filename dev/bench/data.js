@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691994864703,
+  "lastUpdate": 1692003828762,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -11532,6 +11532,40 @@ window.BENCHMARK_DATA = {
             "value": 128.29826392427412,
             "unit": "us/iter",
             "extra": "iterations: 5494\ncpu: 128.25833636694577 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "0cf30333f57c8d24cf33f67573c9dad241ce3cec",
+          "message": "[config][git] Clean ignore files pattern (#604)",
+          "timestamp": "2023-08-11T05:53:53Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/0cf30333f57c8d24cf33f67573c9dad241ce3cec"
+        },
+        "date": 1692003827096,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.60683519172255,
+            "unit": "us/iter",
+            "extra": "iterations: 28609\ncpu: 24.60331014715649 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 128.3725829324734,
+            "unit": "us/iter",
+            "extra": "iterations: 5613\ncpu: 128.34988419739895 us\nthreads: 1"
           }
         ]
       }
