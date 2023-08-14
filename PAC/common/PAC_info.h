@@ -80,6 +80,11 @@ class PAC_info: public i_Lua_save_device
             return "SYSTEM";
             }
 
+        const char* get_up_time_str() const
+            {
+            return up_time_str;
+            }
+
         enum COMMANDS
             {
             CLEAR_RESULT_CMD = 0,

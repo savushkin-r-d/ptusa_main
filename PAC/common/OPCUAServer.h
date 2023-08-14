@@ -17,6 +17,8 @@ class OPCUA_server
 
         void create_dev_objects();
 
+        void create_PAC_info();
+
         UA_StatusCode start();
 
         void evaluate();
@@ -27,6 +29,8 @@ class OPCUA_server
             {
             init();
             create_dev_objects();
+            create_PAC_info();
+
             return start();
             }
 
@@ -54,6 +58,11 @@ class OPCUA_server
             const UA_NumericRange* range,
             const UA_DataValue* value );
 
+
+        static UA_StatusCode read_PAC_info_value( UA_Server*, const UA_NodeId*, void*,
+            const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
+            UA_DataValue* dataValue );
+
         ~OPCUA_server();
 
         //Explicitly delete the copy constructors.
@@ -70,6 +79,7 @@ class OPCUA_server
         UA_Server* server = nullptr;
 
         bool is_dev_objects_created = false;
+        bool is_PAC_info_created = false;
     };
 
 #define G_OPCUA_SERVER OPCUA_server::get_instance()

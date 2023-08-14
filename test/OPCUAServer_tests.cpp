@@ -70,7 +70,7 @@ TEST( OPCUA_server, evaluate )
         auto name = br.references[ i ].browseName.name;
         char str_name[ 100 ] = { 0 };
         memcpy( str_name, name.data, name.length );
-        if ( strcmp( str_name, "Valve1" ) == 0 )
+        if ( strcmp( str_name, "devices" ) == 0 )
             {
             //auto node = br.references[ i ].nodeId.nodeId;
             is_exist_node = true;
@@ -81,7 +81,7 @@ TEST( OPCUA_server, evaluate )
 
     UA_Variant out;
     UA_Variant_init( &out );
-    UA_NodeId valve1_state_NodeId = UA_NODEID_STRING( 0, "Valve1.State" );
+    UA_NodeId valve1_state_NodeId = UA_NODEID_STRING( 0, "Valve1.state" );
     res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_INT32 ] );
@@ -89,7 +89,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( 1, *state );
 
 
-    UA_NodeId valve1_value_NodeId = UA_NODEID_STRING( 0, "Valve1.Value" );
+    UA_NodeId valve1_value_NodeId = UA_NODEID_STRING( 0, "Valve1.value" );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_FLOAT ] );

@@ -30,6 +30,18 @@ void OPCUA_server::create_dev_objects()
     if ( !server ) return;
     if ( is_dev_objects_created ) return;
 
+    UA_NodeId dev_root;
+    //Create root object node.
+    UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
+    oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "devices" );
+    oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", "devices" );
+    UA_Server_addObjectNode( server, UA_NODEID_NULL,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
+        UA_QUALIFIEDNAME_ALLOC( 1, "devices" ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
+        oAttr, nullptr, &dev_root );
+
     auto deviceCount = static_cast<u_int>( G_DEVICE_MANAGER()->get_device_count() );
     for ( u_int i = 0; i < deviceCount; i++ )
         {
@@ -41,7 +53,7 @@ void OPCUA_server::create_dev_objects()
         oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", dev->get_name() );
         oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", dev->get_description() );
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
-            UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
+            dev_root,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
             UA_QUALIFIEDNAME_ALLOC( 1, dev->get_name() ),
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
@@ -53,7 +65,7 @@ void OPCUA_server::create_dev_objects()
         UA_Float value = 0;
         UA_Variant_setScalar( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_FLOAT ] );
 
-        const std::string VALUE = "Value";
+        const std::string VALUE = "value";
         std::string node_name = dev->get_name();
         node_name += "." + VALUE;
 
@@ -80,7 +92,7 @@ void OPCUA_server::create_dev_objects()
         UA_Int32 state = 0;
         UA_Variant_setScalar( &stateAttr.value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
 
-        const std::string STATE = "State";
+        const std::string STATE = "state";
         node_name = dev->get_name();
         node_name += "." + STATE;
 
@@ -102,6 +114,60 @@ void OPCUA_server::create_dev_objects()
         }
 
     is_dev_objects_created = true;
+    }
+
+void OPCUA_server::create_PAC_info()
+    {
+    if ( !server ) return;
+    if ( is_PAC_info_created ) return;
+
+    UA_NodeId PAC_NodeId;
+
+    //Create object node.
+    UA_ObjectAttributes PAC_InfoObjAttr = UA_ObjectAttributes_default;
+    PAC_InfoObjAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "PAC_info" );
+    PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", "PAC_info" );
+    UA_Server_addObjectNode( server, UA_NODEID_NULL,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
+        UA_QUALIFIEDNAME_ALLOC( 1, "PAC_info" ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
+        PAC_InfoObjAttr, nullptr, &PAC_NodeId );
+
+    //Uptime variable.
+    UA_VariableAttributes uptimeVarAttr = UA_VariableAttributes_default;
+    UA_String value = UA_String_fromChars( "0 дн. " );
+    UA_Variant_setScalar( &uptimeVarAttr.value, &value, &UA_TYPES[ UA_TYPES_STRING ] );
+    std::string node_name = "uptime";
+    uptimeVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", node_name.c_str() );
+    uptimeVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
+    UA_NodeId uptimeNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
+    UA_Server_addVariableNode( server, uptimeNodeId, PAC_NodeId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        UA_QUALIFIEDNAME_ALLOC( 1, node_name.c_str() ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
+        uptimeVarAttr, nullptr, nullptr );
+
+    //PRODUCT_VERSION_FULL_STR variable.
+    UA_VariableAttributes versionVarAttr = UA_VariableAttributes_default;
+    UA_String version = UA_String_fromChars( PRODUCT_VERSION_FULL_STR );
+    UA_Variant_setScalar( &versionVarAttr.value, &version, &UA_TYPES[ UA_TYPES_STRING ] );
+    node_name = "version";
+    versionVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", node_name.c_str() );
+    versionVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
+    UA_NodeId versionNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
+    UA_Server_addVariableNode( server, versionNodeId, PAC_NodeId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        UA_QUALIFIEDNAME_ALLOC( 1, node_name.c_str() ),
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
+        versionVarAttr, nullptr, nullptr );    
+
+    //Creating Uptime variable read callback.
+    UA_DataSource uptimeDataSource;
+    uptimeDataSource.read = read_PAC_info_value;
+    UA_Server_setVariableNode_dataSource( server, uptimeNodeId, uptimeDataSource );
+
+    is_PAC_info_created = true;
     }
 
 UA_StatusCode OPCUA_server::start()
@@ -191,6 +257,16 @@ UA_StatusCode OPCUA_server::write_value( UA_Server*,
             }
         }
     return UA_STATUSCODE_BAD;
+    }
+
+UA_StatusCode OPCUA_server::read_PAC_info_value( UA_Server*, const UA_NodeId*, void*,
+    const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
+    UA_DataValue* dataValue )
+    {
+    auto value = UA_String_fromChars( G_PAC_INFO()->get_up_time_str() );
+    UA_Variant_setScalarCopy( &dataValue->value,
+        &value, &UA_TYPES[ UA_TYPES_STRING ] );
+    return UA_STATUSCODE_GOOD;
     }
 
 UA_Server* OPCUA_server::get_server() const
