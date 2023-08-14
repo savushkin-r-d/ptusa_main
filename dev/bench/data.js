@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692003828762,
+  "lastUpdate": 1692014043043,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -11566,6 +11566,42 @@ window.BENCHMARK_DATA = {
             "value": 128.3725829324734,
             "unit": "us/iter",
             "extra": "iterations: 5613\ncpu: 128.34988419739895 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "68400442+NogameNo-life@users.noreply.github.com",
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "59243c1dc08ac2f58ee16dc4eef96c6899a65ee7",
+          "message": "[doc] Add toolchain installation description (#602)",
+          "timestamp": "2023-08-14T14:52:05+03:00",
+          "tree_id": "24eb9470ba7498fc0e273f55f626b019f4e19282",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/59243c1dc08ac2f58ee16dc4eef96c6899a65ee7"
+        },
+        "date": 1692014042179,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 20.559919068020157,
+            "unit": "us/iter",
+            "extra": "iterations: 34078\ncpu: 20.556191677915372 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 99.75400215269873,
+            "unit": "us/iter",
+            "extra": "iterations: 6968\ncpu: 99.73447187141218 us\nthreads: 1"
           }
         ]
       }
