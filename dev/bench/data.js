@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692014043043,
+  "lastUpdate": 1692016616699,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -11602,6 +11602,42 @@ window.BENCHMARK_DATA = {
             "value": 99.75400215269873,
             "unit": "us/iter",
             "extra": "iterations: 6968\ncpu: 99.73447187141218 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "06e9b112cec4b0faa7b1eec5a7c09e0bde846849",
+          "message": "Update {fmt} library to version 10.1.0 (#606)",
+          "timestamp": "2023-08-14T15:34:42+03:00",
+          "tree_id": "cd83d8f6edc5209ea150db747244b7f77292b646",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/06e9b112cec4b0faa7b1eec5a7c09e0bde846849"
+        },
+        "date": 1692016615697,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.065593320032477,
+            "unit": "us/iter",
+            "extra": "iterations: 29072\ncpu: 24.062651348376445 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 125.88640470208328,
+            "unit": "us/iter",
+            "extra": "iterations: 5572\ncpu: 125.19138549892321 us\nthreads: 1"
           }
         ]
       }
