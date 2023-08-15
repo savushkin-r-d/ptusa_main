@@ -60,6 +60,7 @@ TEST( PAC_info, save_device )
             "\t1, \n"
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
+            "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"        
             "\t}\n";
     char buff[ MAX_SIZE ] = {0};
 

@@ -86,6 +86,7 @@ void PAC_info::reset_params()
     par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
 
     par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+    par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
 
     par.save_all();
     }
@@ -152,6 +153,8 @@ int PAC_info::save_device( char* buff )
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;    
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
@@ -350,6 +353,13 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 }
             }
         }
+
+    if ( strcmp( prop, "P_IS_OPC_UA_SERVER_CONTROL" ) == 0 )
+        {
+        par.save( P_IS_OPC_UA_SERVER_CONTROL, (u_int_4)val );
+        return 0;
+        }
+    
 #endif
 
     return 0;

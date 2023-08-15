@@ -54,6 +54,10 @@ class PAC_info: public i_Lua_save_device
             /// 0 - нет, 1 - да.
             P_IS_OPC_UA_SERVER_ACTIVE,
 
+            ///< Возможность управлять через сервер OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_CONTROL,
+
             ///< Количество параметров.
             P_PARAMS_COUNT
             };

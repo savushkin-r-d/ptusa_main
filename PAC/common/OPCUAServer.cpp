@@ -217,9 +217,16 @@ UA_StatusCode OPCUA_server::write_state( UA_Server*,
         auto dev = (device*)nodeContext;
         if ( value->hasValue )
             {
-            UA_Int32 state = ( (UA_Int32*)( value->value.data ) )[ 0 ];
-            dev->set_state( state );
-            return UA_STATUSCODE_GOOD;
+            if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] == 1 )
+                {
+                UA_Int32 state = ( (UA_Int32*)( value->value.data ) )[ 0 ];
+                dev->set_state( state );
+                return UA_STATUSCODE_GOOD;
+                }
+            else
+                {
+                return UA_STATUSCODE_BADUSERACCESSDENIED;
+                }
             }
         }
     return UA_STATUSCODE_BAD;
@@ -249,11 +256,16 @@ UA_StatusCode OPCUA_server::write_value( UA_Server*,
         {
         auto dev = (device*)nodeContext;
         if ( value->hasValue )
-            {
-            UA_Float newvalue = ( (UA_Float*)( value->value.data ) )[ 0 ];
-            dev->set_value( newvalue );
-            return UA_STATUSCODE_GOOD;
-            }
+            if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] == 1 )
+                {
+                UA_Float newvalue = ( (UA_Float*)( value->value.data ) )[ 0 ];
+                dev->set_value( newvalue );
+                return UA_STATUSCODE_GOOD;
+                }
+            else
+                {
+                return UA_STATUSCODE_BADUSERACCESSDENIED;
+                }
         }
     return UA_STATUSCODE_BAD;
     }

@@ -112,6 +112,10 @@ TEST( OPCUA_server, evaluate )
     UA_Variant_init( &val );
     UA_Int32 new_state = 10;
     UA_Variant_setScalar( &val, &new_state, &UA_TYPES[ UA_TYPES_INT32 ] );
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+    res = UA_Server_writeValue( UA_server, valve1_state_NodeId, val );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 1;
     res = UA_Server_writeValue( UA_server, valve1_state_NodeId, val );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
@@ -121,6 +125,10 @@ TEST( OPCUA_server, evaluate )
 
     UA_Float new_value = 100.f;
     UA_Variant_setScalar( &val, &new_value, &UA_TYPES[ UA_TYPES_FLOAT ] );
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+    res = UA_Server_writeValue( UA_server, valve1_value_NodeId, val );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 1;
     res = UA_Server_writeValue( UA_server, valve1_value_NodeId, val );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
