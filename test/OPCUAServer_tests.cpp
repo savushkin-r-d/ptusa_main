@@ -129,12 +129,19 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( 100.f, *value );
 
 
-    UA_NodeId uptime_NodeId = UA_NODEID_STRING( 0, "uptime" );
+    UA_NodeId uptime_NodeId = UA_NODEID_STRING( 0, "PAC_info.uptime" );
     res = UA_Server_readValue( UA_server, uptime_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     auto str = static_cast<UA_String*>( out.data );
     EXPECT_EQ( "0 дн. 0:0:0", std::string( reinterpret_cast<char*>( str->data ),
         str->length ) );
+
+    UA_NodeId version_NodeId = UA_NODEID_STRING( 0, "PAC_info.version" );
+    res = UA_Server_readValue( UA_server, version_NodeId, &out );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    str = static_cast<UA_String*>( out.data );
+    EXPECT_EQ( PRODUCT_VERSION_FULL_STR,
+        std::string( reinterpret_cast<char*>( str->data ), str->length ) );    
 
     G_OPCUA_SERVER.shutdown();
 

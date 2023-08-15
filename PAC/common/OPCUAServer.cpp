@@ -137,8 +137,8 @@ void OPCUA_server::create_PAC_info()
     UA_VariableAttributes uptimeVarAttr = UA_VariableAttributes_default;
     UA_String value = UA_String_fromChars( "0 дн. " );
     UA_Variant_setScalar( &uptimeVarAttr.value, &value, &UA_TYPES[ UA_TYPES_STRING ] );
-    std::string node_name = "uptime";
-    uptimeVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", node_name.c_str() );
+    std::string node_name = "PAC_info.uptime";
+    uptimeVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "uptime" );
     uptimeVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
     UA_NodeId uptimeNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
     UA_Server_addVariableNode( server, uptimeNodeId, PAC_NodeId,
@@ -151,8 +151,8 @@ void OPCUA_server::create_PAC_info()
     UA_VariableAttributes versionVarAttr = UA_VariableAttributes_default;
     UA_String version = UA_String_fromChars( PRODUCT_VERSION_FULL_STR );
     UA_Variant_setScalar( &versionVarAttr.value, &version, &UA_TYPES[ UA_TYPES_STRING ] );
-    node_name = "version";
-    versionVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", node_name.c_str() );
+    node_name = "PAC_info.version";
+    versionVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "version" );
     versionVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
     UA_NodeId versionNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
     UA_Server_addVariableNode( server, versionNodeId, PAC_NodeId,
