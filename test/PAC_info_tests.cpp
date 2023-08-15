@@ -1,4 +1,5 @@
 #include "PAC_info_tests.h"
+#include "bus_coupler_io.h"
 
 using namespace ::testing;
 
@@ -23,6 +24,11 @@ TEST( PAC_info, reset_params )
 
 TEST( PAC_info, save_device )
     {   
+    io_manager::get_instance()->init( 1 );
+    io_manager::get_instance()->add_node( 0, 
+        io_manager::io_node::TYPES::PHOENIX_BK_ETH, 100, "127.0.0.1", "A100",
+        0, 0, 0, 0, 0, 0 );
+
     G_PAC_INFO()->reset_params();
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::CLEAR_RESULT_CMD );
 
@@ -51,7 +57,7 @@ TEST( PAC_info, save_device )
             "\tVERSION=\"" PRODUCT_VERSION_FULL_STR "\",\n"
             "\tNODEENABLED = \n"
             "\t{\n"
-            "\t\n"
+            "\t1, \n"
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
             "\t}\n";

@@ -68,7 +68,8 @@ TEST( OPCUA_server, evaluate )
     for ( auto i = 0u; i < total; ++i )
         {        
         auto name = br.references[ i ].browseName.name;
-        if ( std::string( (char*)name.data, name.length ) == "devices" )
+        if ( std::string( reinterpret_cast<char*>( name.data ),
+            name.length ) == "devices" )
             {            
             bd.nodeId = br.references[ i ].nodeId.nodeId;
             br = UA_Server_browse( UA_server, 0, &bd );
@@ -78,7 +79,8 @@ TEST( OPCUA_server, evaluate )
             for ( auto l = 0u; l < devices_count; ++l )
                 {
                 name = br.references[ l ].browseName.name;
-                if ( std::string( (char*)name.data, name.length ) == "Valve1" )
+                if ( std::string( reinterpret_cast<char*>( name.data ),
+                    name.length ) == "Valve1" )
                     {
                     is_exist_node = true;
                     }
@@ -131,7 +133,8 @@ TEST( OPCUA_server, evaluate )
     res = UA_Server_readValue( UA_server, uptime_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     auto str = static_cast<UA_String*>( out.data );
-    EXPECT_EQ( "0 дн. 0:0:0", std::string( (char*)str->data, str->length ) );
+    EXPECT_EQ( "0 дн. 0:0:0", std::string( reinterpret_cast<char*>( str->data ),
+        str->length ) );
 
     G_OPCUA_SERVER.shutdown();
 
