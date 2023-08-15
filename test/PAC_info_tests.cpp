@@ -60,3 +60,13 @@ TEST( PAC_info, save_device )
     G_PAC_INFO()->save_device( buff );
     EXPECT_STREQ( REF_STR, buff );
     }
+
+TEST( PAC_info, get_name_in_Lua )
+    {
+    EXPECT_STREQ( "SYSTEM", G_PAC_INFO()->get_name_in_Lua() );
+    }
+
+TEST( PAC_info, get_up_time_str )
+    {
+    EXPECT_STREQ( "0 дн. 0:0:0", G_PAC_INFO()->get_up_time_str() );
+    }

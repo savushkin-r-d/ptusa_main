@@ -49,7 +49,6 @@ void OPCUA_server::create_dev_objects()
         auto dev = G_DEVICE_MANAGER()->get_device( i );
 
         //Create object node.
-        UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
         oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", dev->get_name() );
         oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", dev->get_description() );
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
@@ -160,10 +159,10 @@ void OPCUA_server::create_PAC_info()
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         UA_QUALIFIEDNAME_ALLOC( 1, node_name.c_str() ),
         UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
-        versionVarAttr, nullptr, nullptr );    
+        versionVarAttr, nullptr, nullptr );
 
     //Creating Uptime variable read callback.
-    UA_DataSource uptimeDataSource;
+    UA_DataSource uptimeDataSource{ read_PAC_info_value, nullptr };
     uptimeDataSource.read = read_PAC_info_value;
     UA_Server_setVariableNode_dataSource( server, uptimeNodeId, uptimeDataSource );
 

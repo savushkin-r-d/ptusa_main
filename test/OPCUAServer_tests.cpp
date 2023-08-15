@@ -16,6 +16,7 @@ TEST( OPCUA_server, evaluate )
     valve1->on();
 
     G_OPCUA_SERVER.create_dev_objects();
+    G_OPCUA_SERVER.create_PAC_info();
 
     auto res = G_OPCUA_SERVER.start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res  );
@@ -63,17 +64,25 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
 
     bool is_exist_node = false;
-    size_t total = br.referencesSize;   
-    for ( size_t i = 0; i < total; ++i )
-        {
-        
+    auto total = br.referencesSize;   
+    for ( auto i = 0u; i < total; ++i )
+        {        
         auto name = br.references[ i ].browseName.name;
-        char str_name[ 100 ] = { 0 };
-        memcpy( str_name, name.data, name.length );
-        if ( strcmp( str_name, "devices" ) == 0 )
-            {
-            //auto node = br.references[ i ].nodeId.nodeId;
-            is_exist_node = true;
+        if ( std::string( (char*)name.data, name.length ) == "devices" )
+            {            
+            bd.nodeId = br.references[ i ].nodeId.nodeId;
+            br = UA_Server_browse( UA_server, 0, &bd );
+            EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
+
+            auto devices_count = br.referencesSize;
+            for ( auto l = 0u; l < devices_count; ++l )
+                {
+                name = br.references[ l ].browseName.name;
+                if ( std::string( (char*)name.data, name.length ) == "Valve1" )
+                    {
+                    is_exist_node = true;
+                    }
+                }            
             }
         }   
     EXPECT_TRUE( is_exist_node );
@@ -116,6 +125,13 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     value = static_cast<UA_Float*>( out.data );
     EXPECT_EQ( 100.f, *value );
+
+
+    UA_NodeId uptime_NodeId = UA_NODEID_STRING( 0, "uptime" );
+    res = UA_Server_readValue( UA_server, uptime_NodeId, &out );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    auto str = static_cast<UA_String*>( out.data );
+    EXPECT_EQ( "0 дн. 0:0:0", std::string( (char*)str->data, str->length ) );
 
     G_OPCUA_SERVER.shutdown();
 
