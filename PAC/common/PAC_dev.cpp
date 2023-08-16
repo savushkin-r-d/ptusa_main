@@ -1270,7 +1270,7 @@ void device_manager::print() const
     }
 //-----------------------------------------------------------------------------
 device_manager::device_manager() : project_devices( 0 ), previous_states( 0 ), disable_error_logging( false ), active_counter( 0 )
-    {
+	{
     G_DEVICE_CMMCTR->add_device( this );
     }
 //-----------------------------------------------------------------------------
@@ -2245,6 +2245,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );
     previous_states.push_back( false );
+    std::string dev_name_str = dev_name;
+    active_devices[ dev_name_str ] = 0;
     new_device->set_serial_n( new_dev_index );
     new_device->set_article( article );
 
@@ -2275,25 +2277,44 @@ void device_manager::clear_io_devices()
         dev_types_ranges[ idx ].end_pos = -1;
         is_first_device[ idx ] = 0;
         }
+
     previous_states.clear();
     project_devices.clear();
+    active_devices.clear();
     }
 //-----------------------------------------------------------------------------
-int device_manager::check_state()
+void device_manager::check_state()
+	{
+	const char* name_device = nullptr;
+	for ( int i = 0; i < project_devices.size(); ++i )
+		{
+		if ( project_devices[ i ]->get_state() != previous_states[ i ] && project_devices[ i ]->get_state() == 1 )
+			{
+			++active_counter;
+			previous_states[ i ] = true;
+			++active_devices[ project_devices[ i ]->get_name() ];
+			}
+		else if ( project_devices[ i ]->get_state() == 0 )
+			{
+			continue;
+			}
+		else
+			{
+			--active_counter;
+			previous_states[ i ] = false;
+			}
+		}
+	}
+//-----------------------------------------------------------------------------
+int device_manager::get_active_by_name( const char* dev_name )
+	{
+    check_state();
+	return active_devices[ dev_name ];
+	}
+//-----------------------------------------------------------------------------
+int device_manager::get_all_active_devices()
     {
-    for ( int i = 0; i < project_devices.size(); ++i )
-        {
-        if ( project_devices[ i ]->get_state() != previous_states[ i ] && project_devices[ i ]->get_state() == 1 )
-            {
-            ++active_counter;
-            previous_states[ i ] = true;
-            }
-        else
-            {
-            --active_counter;
-            previous_states[ i ] = false;
-            }
-        }
+    check_state();
     return active_counter;
     }
 //-----------------------------------------------------------------------------
@@ -6942,6 +6963,7 @@ void analog_io_device::print() const
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_on()
     {
+    
     }
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_off()

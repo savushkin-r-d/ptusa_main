@@ -23,6 +23,7 @@
 #include <fmt/core.h>
 
 #include <vector>
+#include <map>
 #include <string>
 #include <algorithm>
 #include <memory>
@@ -5045,8 +5046,14 @@ class device_manager: public i_Lua_save_device
 
         int get_device_n( const char* dev_name );
 
-        std::vector< device* > project_devices; ///< Все устройства.
-        std::vector<bool> previous_states; //< Предыдущие состояния устройств 
+        // @brief Подсчет включенных устройств.
+        //
+        // Проверяет изменилось ли состояние.
+        void check_state();
+
+		std::vector< device* > project_devices; ///< Все устройства.
+		std::vector< bool>  previous_states; //< Предыдущие состояния устройств 
+		std::map< std::string, int > active_devices;
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
@@ -5063,10 +5070,8 @@ class device_manager: public i_Lua_save_device
         // Для тестирования.
         void clear_io_devices();
 
-        // @brief Подсчет включенных устройств.
-        //
-        // Проверяет изменилось ли состояние.
-        int check_state();
+        int get_active_by_name( const char* dev_name );
+        int get_all_active_devices();
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
