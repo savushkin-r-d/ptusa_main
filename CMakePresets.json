@@ -29,16 +29,6 @@
             }
         },
         {
-            "name": "windows-VS2022-debug-OPCUA",
-            "displayName": "Visual Studio Community 2022 - x86 Debug",
-            "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
-            "inherits": "windows-VS2022-default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "USE_OPCUA": true
-            }
-        },
-        {
             "name": "windows-VS2019-default",
             "displayName": "Visual Studio Community 2019 - x86 Release",
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
@@ -146,21 +136,6 @@
           }
         },
         {
-            "name": "build-OPCUA-windows-AXCF2152-2022-LTS-Release",
-            "displayName": "Windows AXCF2152 2022 OPCUA LTS Release",
-            "description": "Using Windows OS",
-            "inherits": "windows-AXCF-default",
-          "environment": {
-            "ARP_DEVICE": "AXCF2152",
-            "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.144)",
-            "ARP_DEVICE_SHORT_VERSION": "2022_0"
-          },
-          "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "USE_OPCUA": true
-            }
-        },    
-        {
             "name": "build-windows-AXCF3152-2021-LTS-Release",
             "displayName": "Windows AXCF3152 2021 LTS Release",
             "description": "Using Windows OS",
@@ -207,12 +182,6 @@
             "configuration": "Debug"
         },
         {
-            "name": "build-windows-VS2022-debug-OPCUA",
-            "displayName": "Windows Debug",
-            "configurePreset": "windows-VS2022-debug-OPCUA",
-            "configuration": "Debug"
-        },
-        {
             "name": "build-windows-VS2019-release",
             "displayName": "Windows Release",
             "configurePreset": "windows-VS2019-default",
@@ -238,11 +207,6 @@
             "name": "build-windows-AXCF2152-2022-LTS-Release",
             "displayName": "AXCF2152 2022 LTS",
             "configurePreset": "build-windows-AXCF2152-2022-LTS-Release"
-        },
-        {
-            "name": "build-OPCUA-windows-AXCF2152-2022-LTS-Release",
-            "displayName": "AXCF2152 2022 LTS OPCUA",
-            "configurePreset": "build-OPCUA-windows-AXCF2152-2022-LTS-Release"
         },
         {
             "name": "build-linux-AXCF2152-2020-LTS-Release",
