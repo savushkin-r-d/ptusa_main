@@ -50,6 +50,13 @@ class PAC_info: public i_Lua_save_device
             ///< сигналам, мсек.
             P_AUTO_OPERATION_WARN_TIME,
 
+            ///< Активность сервера OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_ACTIVE,
+
+            ///< Возможность управлять через сервер OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_CONTROL,
 
             ///< Количество параметров.
             P_PARAMS_COUNT
@@ -77,10 +84,17 @@ class PAC_info: public i_Lua_save_device
             return "SYSTEM";
             }
 
+        const char* get_up_time_str() const
+            {
+            return up_time_str;
+            }
+
         enum COMMANDS
             {
+            CLEAR_RESULT_CMD = 0,
+
             RELOAD_RESTRICTIONS = 100,
-            RESET_PARAMS,
+            RESET_PARAMS = 101,
             };
 
     private:

@@ -8,6 +8,8 @@ set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2023.08.03.0)
 
+option(USE_OPCUA "Use OPC UA" ON)
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
@@ -64,6 +66,11 @@ if(NOT MINGW)
     add_subdirectory(benchmark EXCLUDE_FROM_ALL)
 endif()
 
+if(USE_OPCUA)
+    add_subdirectory(open62541 open62541 EXCLUDE_FROM_ALL)
+    add_compile_definitions(OPCUA)
+endif()
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -74,11 +81,19 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/common/sys/*.cpp
         PAC/IoT/*.cpp)
 
-list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
+if(USE_OPCUA)
+    list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
+else()
+    list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
+endif()
 
 file(GLOB test_src CONFIGURE_DEPENDS
     	    test/*.cpp
             test/dll/*.cpp)
+
+if(NOT USE_OPCUA)
+    list(FILTER test_src EXCLUDE REGEX ".*OPCUA*")
+endif()
 
 if(LINUX)
     file(GLOB linux_src CONFIGURE_DEPENDS
@@ -98,7 +113,7 @@ if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main.cpp)
 
-    add_library(libptusa_main ${common_src} ${linux_src}
+    add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
@@ -132,7 +147,7 @@ elseif(WIN32)
             PAC_control_projects/main_control_prg/main.cpp
             PAC_control_projects/main_control_prg/version.rc)
 
-    add_library(libptusa_main ${common_src} ${win_src}
+    add_library(libptusa_main SHARED ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
             PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp
             PAC_control_projects/main_control_prg/version.rc)
@@ -158,6 +173,12 @@ endif()
         COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    if (USE_OPCUA)
+        add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
+            COMMAND toluapp -n OPC_UA -o PAC/common/OPCUA_tolua.cpp PAC/common/toloa++/pkg/OPC_UA.hh
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    endif()
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -218,6 +239,13 @@ if(ARP_DEVICE)
 endif()
 
 endif ()
+        if (USE_OPCUA)
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/plugins/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/arch>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/deps>
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/open62541/open62541/src_generated>
+        endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
@@ -276,6 +304,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static z
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
 if(ARP_DEVICE)
     target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
+    if (USE_OPCUA)
+        target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
+    endif()
+endif()
+
+if(USE_OPCUA)
+    target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
+    target_link_libraries(libptusa_main open62541::open62541)
+    target_link_libraries(main_test open62541::open62541)
+    if(NOT MINGW)
+        target_link_libraries(main_perfomance_test open62541::open62541)
+    endif()
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)

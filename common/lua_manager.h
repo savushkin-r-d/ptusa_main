@@ -22,9 +22,6 @@ TOLUA_API int tolua_IOT_dev_open(lua_State* tolua_S);
 TOLUA_API int tolua_rfid_reader_open( lua_State* tolua_S );
 #endif
 
-#ifdef OPCUA
-TOLUA_API int tolua_OPC_UA_open(lua_State* tolua_S);
-#endif
 //-----------------------------------------------------------------------------
 const int SYS_FILE_CNT = 3;
 const int FILE_CNT     = 8;
