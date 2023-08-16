@@ -107,6 +107,7 @@ class tcp_communicator_linux : public tcp_communicator
             static int  recvtimeout( int s, u_char *buf, int len,
                 long int sec, long int usec, const char* IP, const char* name,
                 stat_time *stat, char first_connect = 0 );
+            static bool checkBuff(int s);
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

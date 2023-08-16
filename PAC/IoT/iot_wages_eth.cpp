@@ -10,10 +10,13 @@ iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port
     }
 
 void iot_wages_eth::evaluate()
+{
+    status = tc->AsyncRecive();
+    if (status > 0)
     {
-    status = tc->Communicate( 0 );
-    convert_value();
+        convert_value();
     }
+}
 
 int iot_wages_eth::get_wages_state() const
     {
