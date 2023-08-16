@@ -71,6 +71,13 @@ int tcp_client::AsyncSend( unsigned int bytestosend )
     return 0;
     }
 
+int tcp_client::AsyncRecive()
+{
+    async_result = AR_BUSY;
+    tcp_communicator::get_instance()->add_async_client(this);
+    return 0;
+}
+
 int tcp_client::get_async_result()
     {
     return async_result;

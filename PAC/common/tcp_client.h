@@ -46,6 +46,7 @@ class tcp_client
             unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
         virtual int Communicate(unsigned int bytestosend);
         virtual int AsyncSend(unsigned int bytestosend);
+        virtual int AsyncRecive();
         unsigned int buff_size;
         virtual int get_socket();
         virtual void Disconnect() = 0;

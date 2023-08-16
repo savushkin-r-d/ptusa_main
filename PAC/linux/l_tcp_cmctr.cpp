@@ -761,6 +761,31 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     return res;
     }
 //------------------------------------------------------------------------------
+bool tcp_communicator_linux::checkBuff(int s)
+    {
+
+        errno = 0;
+
+        // Настраиваем  file descriptor set.
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(s, &fds);
+
+        // Настраиваем время на таймаут.
+        timeval rec_tv;
+        rec_tv.tv_sec = 0;
+        rec_tv.tv_usec = 0;
+
+        // Ждем таймаута или полученных данных.
+        int n = select(s + 1, &fds, NULL, NULL, &rec_tv);
+        if (n < 1)
+        {
+                return 0;
+        }
+
+        return 1;
+    }
+//------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int idx )
     {
     socket_state &sock_state = sst[ idx ];
