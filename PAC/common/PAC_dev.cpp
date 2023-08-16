@@ -1251,6 +1251,11 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
+size_t device_manager::get_device_count() const
+    {
+    return project_devices.size();
+    }
+//-----------------------------------------------------------------------------
 void device_manager::print() const
     {
     printf( "Device manager [%zu]:\n", project_devices.size() );
@@ -3231,7 +3236,7 @@ digital_io_device::~digital_io_device()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 
-int DO2::get_state()
+int valve_DO2::get_state()
     {
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
@@ -3239,13 +3244,13 @@ int DO2::get_state()
     return b2;
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_on()
+void valve_DO2::direct_on()
     {
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO2::direct_off()
+void valve_DO2::direct_off()
     {
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
@@ -5285,7 +5290,7 @@ float wages_RS232::get_value_from_wages()
     //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
     //данных, вернуть старое значение (3). После переключения в режим
     //считывания данных получаем данные и обрабатываем (4)
-    //Если данные корректные, в 4м бите символ "+" (ASCII - 43), иначе -
+    //Если данные корректные, то в 4м байте символ "+" (ASCII - 43), иначе -
     //ошибка (5).
 
     char* data = (char*)get_AI_data(

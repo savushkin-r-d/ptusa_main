@@ -284,6 +284,19 @@ TEST( step, is_active )
 	EXPECT_FALSE( st1.is_active() );
 	}
 
+TEST( step, get_tag )
+	{
+	step st1( "test_step", 0 );
+	EXPECT_EQ( -1, st1.get_tag() );
+	}
+
+TEST( step, set_tag )
+	{
+	step st1( "test_step", 0 );
+	auto new_tag = 10;
+	st1.set_tag( new_tag );
+	EXPECT_EQ( new_tag, st1.get_tag() );
+	}
 
 TEST( operation_state, print )
 	{
