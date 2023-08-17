@@ -64,6 +64,11 @@ int tcp_client::get_id()
     return id;
     }
 
+int tcp_client::checkConnection()
+    {
+    return 0;
+    }
+
 int tcp_client::AsyncSend( unsigned int bytestosend )
     {
     async_result = AR_BUSY;

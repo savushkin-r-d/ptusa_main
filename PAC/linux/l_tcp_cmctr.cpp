@@ -778,14 +778,13 @@ bool tcp_communicator_linux::checkBuff(int s)
 
         //Network performance info.
         static u_long st_time;
-        static u_int select_wait_time;
         st_time = get_millisec();
 
         // Ждем таймаута или полученных данных.
-        int n = select(s + 1, &fds, NULL, NULL, &rec_tv);
+        int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
 
-        if ( n < 1 ) return 0;
-        return 1;
+        if ( n < 1 ) return false;
+        return true;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int idx )

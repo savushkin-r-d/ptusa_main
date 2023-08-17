@@ -268,11 +268,8 @@ void linux_tcp_client::Disconnect()
     connectedstate = 0;
     }
 
-int linux_tcp_client::AsyncSend(unsigned int bytestosend)
+int linux_tcp_client::checkConnection()
     {
-    async_result = AR_BUSY;
-    async_bytes_to_send = bytestosend;
-
     if (connectedstate != ACS_CONNECTED)
         {
         if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
@@ -290,9 +287,9 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
                 async_result = AR_SOCKETERROR;
                 reconnectTimeout *= 2;
                 if (reconnectTimeout > maxreconnectTimeout)
-                {
+                    {
                     reconnectTimeout = maxreconnectTimeout;
-                }
+                    }
                 return 0;
                 }
 
@@ -314,6 +311,17 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
             }
         }
 
+    return 1;
+    }
+
+int linux_tcp_client::AsyncSend(unsigned int bytestosend)
+    {
+    async_result = AR_BUSY;
+    async_bytes_to_send = bytestosend;
+
+    auto connectionState = checkConnection();
+
+    if (!connectionState) return 0;
 
     int res = tcp_communicator_linux::sendall(socket_number, (unsigned char*) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0);
     
@@ -336,46 +344,9 @@ int linux_tcp_client::AsyncRecive()
 {
     async_result = AR_BUSY;
 
-    if (connectedstate != ACS_CONNECTED)
-    {
-        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
-        {
-            if (connectedstate == ACS_DISCONNECTED)
-            {
-                async_last_connect_try = get_millisec();
-            }
+    auto connectionState = checkConnection();
 
-
-            int connectres = AsyncConnect();
-
-            if (connectres == ACS_DISCONNECTED)
-            {
-                async_result = AR_SOCKETERROR;
-                reconnectTimeout *= 2;
-                if (reconnectTimeout > maxreconnectTimeout)
-                {
-                    reconnectTimeout = maxreconnectTimeout;
-                }
-                return 0;
-            }
-
-            if (connectres == ACS_CONNECTING)
-            {
-                connectedstate = ACS_CONNECTING;
-                return 0;
-            }
-
-            if (connectres == ACS_CONNECTED)
-            {
-                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
-            }
-        }
-        else
-        {
-            async_result = AR_SOCKETERROR;
-            return 0;
-        }
-    }
+    if (!connectionState) return 0;
 
     bool isNewData = tcp_communicator_linux::checkBuff(socket_number);
 
