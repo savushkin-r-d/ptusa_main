@@ -44,11 +44,6 @@ class io_device
 			DEVICEERROR,
 			};
 
-        bool is_DI_io_active = false;
-        bool is_DO_io_active = false;
-        bool is_AI_io_active = false;
-        bool is_AO_io_active = false;
-
     protected:
         /// @brief Получение состояния канала дискретного выхода.
         ///
@@ -422,6 +417,8 @@ class io_manager
 
 		/// @brief Завершает соединение с узлом
 		virtual void disconnect(io_node *node);
+
+
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

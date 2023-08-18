@@ -442,26 +442,24 @@ device::~device()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-DO1::DO1( const char* dev_name, device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type ) :
-    digital_io_device( dev_name, type, sub_type, 0 )
+#ifndef DEBUG_NO_IO_MODULES
+
+int DO1::get_state()
     {
+    return get_DO( DO_INDEX );
     }
 //-----------------------------------------------------------------------------
-void DO1::evaluate_io()
+void DO1::direct_on()
     {
-    if ( is_DO_io_active )
-        {
-        if ( 0 == get_state() )
-            {
-            set_DO( DO_INDEX, 0 );
-            }
-        else
-            {
-            set_DO( DO_INDEX, 1 );
-            }
-        }
+    set_DO( DO_INDEX, 1 );
     }
+//-----------------------------------------------------------------------------
+void DO1::direct_off()
+    {
+    set_DO( DO_INDEX, 0 );
+    }
+
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
@@ -3188,7 +3186,15 @@ void digital_io_device::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 void digital_io_device::direct_set_state( int new_state )
     {
+#ifdef DEBUG_NO_IO_MODULES
     state = new_state;
+#else
+    if ( new_state )
+        {
+        direct_on();
+        }
+    else direct_off();
+#endif //DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void digital_io_device::print() const
@@ -3197,6 +3203,7 @@ void digital_io_device::print() const
     //io_device::print();
     }
 //-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
 int digital_io_device::get_state()
     {
     return state;
@@ -3211,11 +3218,15 @@ void digital_io_device::direct_off()
     {
     state = 0;
     }
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 digital_io_device::digital_io_device( const char *dev_name, device::DEVICE_TYPE type,
                                          device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
     device( dev_name, type, sub_type, par_cnt ),
     io_device( dev_name )
+#ifdef DEBUG_NO_IO_MODULES
+    , state( 0 )
+#endif // DEBUG_NO_IO_MODULES
     {
     }
 //-----------------------------------------------------------------------------
@@ -4954,41 +4965,64 @@ inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val
 #endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-DI1::DI1( const char* dev_name,
-    device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val ) :
-    digital_io_device( dev_name, type, sub_type,
-    ADDITIONAL_PARAMS_COUNT + par_cnt ),
-    time( 0 )
+#ifndef DEBUG_NO_IO_MODULES
+void DI1::direct_on()
     {
-    digital_io_device::set_state( current_state_init_val );
-    set_par_name( P_DT, 0, "P_DT" );
     }
 //-----------------------------------------------------------------------------
-void DI1::evaluate_io()
+void DI1::direct_off()
     {
-    if ( is_DI_io_active )
+    }
+//-----------------------------------------------------------------------------
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( dt > 0 )
         {
-        auto dt = (u_int_4)get_par( P_DT, 0 );
-        auto current_state = get_DI( DI_INDEX );
-        if ( dt > 0 )
+        if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( digital_io_device::get_state() != current_state )
+            if ( get_delta_millisec( time ) > dt )
                 {
-                if ( get_delta_millisec( time ) > dt )
-                    {
-                    digital_io_device::set_state( current_state );
-                    time = get_millisec();
-                    }
-                }
-            else
-                {
+                current_state = get_DI( DI_INDEX );
                 time = get_millisec();
                 }
             }
-        else digital_io_device::set_state( current_state );
+        else
+            {
+            time = get_millisec();
+            }
         }
+    else current_state = get_DI( DI_INDEX );
+
+    return current_state;
     }
+//-----------------------------------------------------------------------------
+#else
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( dt > 0 )
+        {
+        if ( current_state != digital_io_device::get_state() )
+            {
+            if ( get_delta_millisec( time ) > dt  )
+                {
+                current_state = digital_io_device::get_state();
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = digital_io_device::get_state();
+
+    return current_state;
+    }
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iol_terminal_DO1_DI2::valve_iol_terminal_DO1_DI2( const char* dev_name ) :
@@ -6756,15 +6790,6 @@ float analog_input::get_min_val()
     return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-analog_io_device::analog_io_device( const char* dev_name,
-    device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type,
-    u_int par_cnt ) :
-    device( dev_name, type, sub_type, par_cnt ),
-    io_device( dev_name )
-    {
-    }
 //-----------------------------------------------------------------------------
 void analog_io_device::direct_set_state( int new_state )
     {
