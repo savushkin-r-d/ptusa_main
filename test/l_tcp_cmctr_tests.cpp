@@ -29,7 +29,7 @@ TEST(tcp_communicator_linux, checkBuff )
     {
     SOCKET s = socket(AF_INET, SOCK_STREAM, NULL);
 
-    auto res = linux_tcp_client::checkBuff(s);
+    auto res = tcp_communicator_linux::checkBuff(s);
     EXPECT_EQ(false, res);
     }
 
