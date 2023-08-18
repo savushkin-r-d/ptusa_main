@@ -2248,6 +2248,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
+    project_devices.push_back( new_device );
     new_device->set_serial_n( new_dev_index );
     new_device->set_article( article );
 
