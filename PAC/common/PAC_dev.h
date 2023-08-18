@@ -774,26 +774,22 @@ class digital_io_device : public device,
 
         virtual ~digital_io_device();
 
-        float   get_value();
-        void    direct_set_value( float new_value );
-        void    direct_set_state( int new_state );
+        float get_value() override;
+        void direct_set_value( float new_value ) override;
+        void direct_set_state( int new_state ) override;
 
-#ifdef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния объекта.
         ///
         /// @return - состояние объекта.
-        int  get_state();
+        int  get_state() override;
 
-        void direct_on();
-        void direct_off();
-#endif // DEBUG_NO_IO_MODULES
+        void direct_on() override;
+        void direct_off() override;
 
-        virtual void print() const;
+        virtual void print() const override;
 
-#ifdef DEBUG_NO_IO_MODULES
     private:
-        int state;  ///< Состояние устройства.
-#endif // DEBUG_NO_IO_MODULES
+        int state = 0;  ///< Дискретное состояние устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.
@@ -802,21 +798,17 @@ class digital_io_device : public device,
 class analog_io_device : public device, public io_device
     {
     public:
-        analog_io_device( const char *dev_name,
+        analog_io_device( const char* dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt ):
-        device( dev_name, type, sub_type, par_cnt ),
-            io_device( dev_name )
-            {
-            }
+            u_int par_cnt );
 
-        void  direct_set_state( int new_state );
-        int   get_state();
+        void direct_set_state( int new_state ) override;
+        int get_state() override;
 
-        virtual void  print() const;
-        void  direct_on();
-        void  direct_off();
+        virtual void print() const override;
+        void direct_on() override;
+        void direct_off() override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
         int save_device_ex( char* buff ) override;
@@ -825,7 +817,8 @@ class analog_io_device : public device, public io_device
         void  direct_set_value( float new_value ) override;
 
     private:
-        float value = .0f;    ///< Состояние устройства.
+        float value = .0f;    ///< Аналоговое состояние устройства.
+        int state = 0;  ///< Дискретное состояние устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -834,24 +827,16 @@ class analog_io_device : public device, public io_device
 class DO1 : public digital_io_device
     {
     public:
-        DO1( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type ):
-        digital_io_device( dev_name, type, sub_type, 0 )
-            {
-            }
+        DO1( const char* dev_name, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type );
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        int  get_state();
-        void direct_on();
-        void direct_off();
+        void evaluate_io() override;
 
     private:
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class valve_DO2_DI2_bistable;
@@ -3658,33 +3643,13 @@ class analog_valve_iolink : public AO1
 class DI1 : public digital_io_device
     {
     public:
-        DI1( const char *dev_name,
+        DI1( const char* dev_name,
             device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val = 0 ):
-        digital_io_device( dev_name, type, sub_type,
-            ADDITIONAL_PARAMS_COUNT + par_cnt ),
-            current_state( current_state_init_val ),
-            time( 0 )
-            {
-            set_par_name( P_DT,  0, "P_DT" );
-            }
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val = 0 );
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-
-        int get_state();
-#else
-        /// @brief Получение состояния объекта.
-        ///
-        /// @return - состояние объекта.
-        int  get_state();
-#endif // DEBUG_NO_IO_MODULES
-
+        void evaluate_io() override;
 
     private:
-        int current_state;
         u_int_4 time;
 
         enum CONSTANTS

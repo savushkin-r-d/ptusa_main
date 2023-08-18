@@ -683,18 +683,22 @@ void io_device::init( int DO_count, int DI_count, int AO_count,
     if ( DO_count > 0 )
         {
         DO_channels.init( DO_count );
+        is_DO_io_active = true;
         }
     if ( DI_count > 0 )
         {
         DI_channels.init( DI_count );
+        is_DI_io_active = true;
         }
     if ( AO_count > 0 )
         {
         AO_channels.init( AO_count );
+        is_AO_io_active = true;
         }
     if ( AI_count > 0 )
         {
         AI_channels.init( AI_count );
+        is_AI_io_active = true;
         }
     }
 //-----------------------------------------------------------------------------
