@@ -363,7 +363,7 @@ TEST( device_manager, clear_io_devices )
 
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
-    ASSERT_EQ( nullptr, res );    
+    ASSERT_EQ( nullptr, res );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search should find device.
 

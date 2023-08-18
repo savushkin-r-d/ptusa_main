@@ -356,6 +356,17 @@ class i_DO_AO_device: public i_AO_device, public i_DO_device
         virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
+class device_activity
+    {
+    int active_devices;
+    void check_state();
+    public:
+        device_activity();
+        int get_active();
+        std::vector<bool> previous_states;
+        std::vector<bool> device_states;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в
 /// режимах.
 class device : public i_DO_AO_device, public par_device
@@ -733,6 +744,7 @@ class device : public i_DO_AO_device, public par_device
         void set_emulation( bool new_emulation_state );
 
         analog_emulator& get_emulator();
+        device_activity& get_activity();
 
         /// @brief Получение максимальной длины имени устройства (с учётом 
         /// символа завершения строки).
@@ -763,6 +775,7 @@ class device : public i_DO_AO_device, public par_device
 
         bool emulation = false;
         analog_emulator emulator;
+        device_activity activity;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -5027,7 +5040,6 @@ class device_manager: public i_Lua_save_device
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство.
-        int active_counter; //< Количество включенных устройств
         struct range    ///< Диапазон устройств одного типа.
             {
             int start_pos;
@@ -5046,14 +5058,7 @@ class device_manager: public i_Lua_save_device
 
         int get_device_n( const char* dev_name );
 
-        // @brief Подсчет включенных устройств.
-        //
-        // Проверяет изменилось ли состояние.
-        void check_state();
-
 		std::vector< device* > project_devices; ///< Все устройства.
-		std::vector< bool>  previous_states; //< Предыдущие состояния устройств 
-		std::map< std::string, int > active_devices;
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
@@ -5070,8 +5075,6 @@ class device_manager: public i_Lua_save_device
         // Для тестирования.
         void clear_io_devices();
 
-        int get_active_by_name( const char* dev_name );
-        int get_all_active_devices();
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
