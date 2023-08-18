@@ -17,11 +17,20 @@ TEST( tcp_communicator_linux, evaluate )
     cl.buff[ 0 ] = 33;
     cl.buff[ 1 ] = 33;
     cl.AsyncSend( 2 );
+    cl.AsyncRecive();
 
     sleep( 0 );
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+    }
+
+TEST(tcp_communicator_linux, checkBuff )
+    {
+    SOCKET s = socket(AF_INET, SOCK_STREAM, NULL);
+
+    auto res = linux_tcp_client::checkBuff(s);
+    EXPECT_EQ(false, res);
     }
 
 #endif
