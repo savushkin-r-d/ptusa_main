@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692626961142,
+  "lastUpdate": 1692627050994,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -12220,6 +12220,38 @@ window.BENCHMARK_DATA = {
             "value": 131.168930195095,
             "unit": "us/iter",
             "extra": "iterations: 5587\ncpu: 130.89355647037763 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "c32e846d344603fff1bfe529ec9c7c4c2e5fd018",
+          "message": "Save operation time and main step time as tags",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/609/commits/c32e846d344603fff1bfe529ec9c7c4c2e5fd018"
+        },
+        "date": 1692627050058,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.90947525565857,
+            "unit": "us/iter",
+            "extra": "iterations: 35301\ncpu: 19.843321718931474 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 107.61668789320451,
+            "unit": "us/iter",
+            "extra": "iterations: 6517\ncpu: 107.2081018873715 us\nthreads: 1"
           }
         ]
       }
