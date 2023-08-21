@@ -228,8 +228,6 @@ t.TANK1=
     const unsigned int OPER_N1 = 1;
     auto operation_1 = ( *tank1.get_modes_manager() )[ OPER_N1 ];
 
-    const unsigned int STEP_N1 = 1;
-    const unsigned int STEP_N2 = 2;
     operation_1->add_step( "Init", 2, -1 );
     operation_1->add_step( "Process #1", 3, -1 );
     operation_1->add_step( "Process #2", 2, -1 );
