@@ -2,6 +2,8 @@
 #include <vector>
 #include <stdio.h>
 
+#include <fmt/chrono.h>
+
 #include "tech_def.h"
 
 #include "lua_manager.h"
@@ -834,61 +836,53 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    //Время простоя или текущей активной операции.
-    static char up_time_str [ 50 ] = { 0 };
-    auto up_secs = operations_manager->get_idle_time() / 1000;
-    auto up_hours = up_secs / ( 60 * 60 );
-    auto up_mins = up_secs / 60 % 60 ;
-    up_secs %= 60;
-    sprintf( up_time_str, "\tACTIVE_OPERATION_OR_IDLE_TIME=\'%02lu:%02lu:%02lu\',\n",
-        ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
-    res += sprintf( buff + res, "%s", up_time_str );
+    //Время простоя или текущей активной операции.    
+    std::chrono::seconds duration{ operations_manager->get_idle_time() / 1000 };
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "\tACTIVE_OPERATION_OR_IDLE_TIME=\'{:%H:%M:%S}\',\n", duration ).size;
 
     //Время главного шага текущей активной операции.
-    up_secs = 0;
+    duration = std::chrono::seconds( 0 );
     for ( u_int i = 1; i <= operations_count; i++ )
         {
         if ( get_operation_state( i ) == 1 )
             {
-            up_secs = ( *operations_manager )[ i ]->active_step_evaluation_time() / 1000;
-            up_hours = up_secs / ( 60 * 60 );
-            up_mins = up_secs / 60 % 60;
-            up_secs %= 60;
+            duration = std::chrono::seconds(
+                ( *operations_manager )[ i ]->active_step_evaluation_time() / 1000 );
             }
         }
-    sprintf( up_time_str, "\tACTIVE_STEP_TIME=\'%02lu:%02lu:%02lu\',\n",
-        (u_long)up_hours, (u_long)up_mins, (u_long)up_secs );
-    res += sprintf( buff + res, "%s", up_time_str );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "\tACTIVE_STEP_TIME=\'{:%H:%M:%S}\',\n", duration ).size;
 
     //Время операций.
+    static char up_time_str[ 50 ] = { 0 };
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
 
-    for ( u_int i = 1; i <= modes_time.get_count(); i++ )
+     for ( u_int i = 1; i <= modes_time.get_count(); i++ )
         {
-        up_secs = modes_time[ i ];
-
-        up_hours = up_secs / ( 60 * 60 );
-        up_mins = up_secs / 60 % 60 ;
+        auto up_secs = modes_time[ i ];
+        auto up_hours = up_secs / ( 60 * 60 );
+        auto up_mins = up_secs / 60 % 60;
         up_secs %= 60;
 
         if ( up_hours )
             {
             sprintf( up_time_str, "\'%02lu:%02lu:%02lu\', ",
-                ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
+                (u_long)up_hours, (u_long)up_mins, (u_long)up_secs );
             }
         else
             {
             if ( up_mins )
                 {
                 sprintf( up_time_str, "\'   %02lu:%02lu\', ",
-                    ( u_long ) up_mins, ( u_long ) up_secs );
+                    (u_long)up_mins, (u_long)up_secs );
                 }
             else
                 {
-                    sprintf( up_time_str, "\'      %02lu\', ",
-                        (u_long)up_secs );
-                    }
-                    }
+                sprintf( up_time_str, "\'      %02lu\', ",
+                    (u_long)up_secs );
+                }
+            }
 
         res += sprintf( buff + res, "%s", up_time_str );
         }
