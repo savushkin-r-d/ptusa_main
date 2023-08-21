@@ -969,7 +969,7 @@ class operation_manager
         operation *oper_stub;                 ///< Операция-заглушка.
 
         /// @brief Время активной операции (или бездействия).
-        u_int_4 active_operation_or_idle_time;
+        u_int_4 active_operation_or_idle_time = get_millisec();
 
         static const char* UNKN_OPER_NAME;    ///Имя для "неизвестной" операции.
     };

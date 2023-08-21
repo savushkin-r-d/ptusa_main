@@ -2510,8 +2510,7 @@ void operation_manager::print()
     }
 //-----------------------------------------------------------------------------
 operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
-    owner( owner ),
-    active_operation_or_idle_time( get_millisec() )
+    owner( owner )    
     {
     oper_stub = new operation( "Операция-заглушка", this, -1 );
     }
