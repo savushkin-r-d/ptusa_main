@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692604665521,
+  "lastUpdate": 1692608648336,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -12154,6 +12154,40 @@ window.BENCHMARK_DATA = {
             "value": 126.61835493264746,
             "unit": "us/iter",
             "extra": "iterations: 5494\ncpu: 126.57182380779034 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yaroslav Ozimok",
+            "username": "YarickBSTU",
+            "email": "102078275+YarickBSTU@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "32a643d659b4b7053d6ca2d8326abb26a48962fe",
+          "message": "Embed OPC UA (#563)\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2023-08-16T09:57:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/32a643d659b4b7053d6ca2d8326abb26a48962fe"
+        },
+        "date": 1692608647468,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.820361822235988,
+            "unit": "us/iter",
+            "extra": "iterations: 35429\ncpu: 19.785096954472326 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 100.83152038751213,
+            "unit": "us/iter",
+            "extra": "iterations: 6916\ncpu: 100.74858299595142 us\nthreads: 1"
           }
         ]
       }
