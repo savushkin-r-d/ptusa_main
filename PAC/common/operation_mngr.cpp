@@ -2495,7 +2495,7 @@ operation* operation_manager::operator[]( unsigned int idx )
 //-----------------------------------------------------------------------------
 unsigned long operation_manager::get_idle_time()
     {
-    return get_delta_millisec( last_action_time );
+    return get_delta_millisec( active_operation_or_idle_time );
     }
 //-----------------------------------------------------------------------------
 void operation_manager::print()
@@ -2511,7 +2511,7 @@ void operation_manager::print()
 //-----------------------------------------------------------------------------
 operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
     owner( owner ),
-    last_action_time( get_millisec() )
+    active_operation_or_idle_time( get_millisec() )
     {
     oper_stub = new operation( "Операция-заглушка", this, -1 );
     }

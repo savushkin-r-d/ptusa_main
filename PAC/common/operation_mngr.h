@@ -939,9 +939,9 @@ class operation_manager
         /// @return - время системы без активных операций.
         unsigned long get_idle_time();
 
-        void reset_idle_time()
+        void reset_active_operation_or_idle_time()
             {
-            last_action_time = get_millisec();
+            active_operation_or_idle_time = get_millisec();
             }
 
         /// @brief Отладочный вывод объекта в консоль.
@@ -968,8 +968,8 @@ class operation_manager
         std::vector< operation* > operations; ///< Операции.
         operation *oper_stub;                 ///< Операция-заглушка.
 
-        /// @brief Время последнего вкл/выкл операции.
-        u_int_4 last_action_time;
+        /// @brief Время активной операции (или бездействия).
+        u_int_4 active_operation_or_idle_time;
 
         static const char* UNKN_OPER_NAME;    ///Имя для "неизвестной" операции.
     };

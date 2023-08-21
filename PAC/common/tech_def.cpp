@@ -235,6 +235,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
                                     set_err_msg( res_str, operation_n, 0, ERR_ON_WITH_ERRORS );
                                     }
                                 //Проверка режима на проверку ОС устройств.
+
+
+                                operations_manager->reset_active_operation_or_idle_time();
                                 }
                             else
                                 {
@@ -376,7 +379,7 @@ int tech_object::final_mode( u_int mode )
     {
     if ( mode > operations_count || 0 == mode ) return 1;
 
-    operations_manager->reset_idle_time();
+    operations_manager->reset_active_operation_or_idle_time();
 
     return 0;
     }
@@ -831,23 +834,33 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    //Время простоя.
+    //Время простоя или текущей активной операции.
     static char up_time_str [ 50 ] = { 0 };
-    u_int_4 up_hours;
-    u_int_4 up_mins;
-    u_int_4 up_secs;
-
-    up_secs = operations_manager->get_idle_time() / 1000;
-
-    up_hours = up_secs / ( 60 * 60 );
-    up_mins = up_secs / 60 % 60 ;
+    auto up_secs = operations_manager->get_idle_time() / 1000;
+    auto up_hours = up_secs / ( 60 * 60 );
+    auto up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
-
-    sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
+    sprintf( up_time_str, "\tACTIVE_OPERATION_OR_IDLE_TIME=\'%02lu:%02lu:%02lu\',\n",
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
     res += sprintf( buff + res, "%s", up_time_str );
 
-    //Время режимов.
+    //Время главного шага текущей активной операции.
+    up_secs = 0;
+    for ( u_int i = 1; i <= operations_count; i++ )
+        {
+        if ( get_operation_state( i ) == 1 )
+            {
+            up_secs = ( *operations_manager )[ i ]->active_step_evaluation_time() / 1000;
+            up_hours = up_secs / ( 60 * 60 );
+            up_mins = up_secs / 60 % 60;
+            up_secs %= 60;
+            }
+        }
+    sprintf( up_time_str, "\tACTIVE_STEP_TIME=\'%02lu:%02lu:%02lu\',\n",
+        (u_long)up_hours, (u_long)up_mins, (u_long)up_secs );
+    res += sprintf( buff + res, "%s", up_time_str );
+
+    //Время операций.
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
 
     for ( u_int i = 1; i <= modes_time.get_count(); i++ )

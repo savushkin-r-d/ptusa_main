@@ -154,3 +154,151 @@ TEST( tech_object, lua_check_function )
 
     G_LUA_MANAGER->free_Lua();
     }
+
+TEST( tech_object, save )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+
+    tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
+    tank1.get_modes_manager()->add_operation( "Test operation" );
+    
+    const auto BUFF_SIZE = 1000;
+    char buff[ BUFF_SIZE ];
+    tank1.save_device( buff );
+    auto REF_STR1 = R"(t.TANK1 = t.TANK1 or {}
+t.TANK1=
+	{
+	CMD=0,
+	ST=
+		{
+		0, 
+		},
+	MODES=
+		{
+		0, 0, 
+		},
+	OPERATIONS=
+		{
+		0, 0, 
+		},
+	AVAILABILITY=
+		{
+		1, 1, 
+		},
+	ACTIVE_OPERATION_OR_IDLE_TIME='00:00:00',
+	ACTIVE_STEP_TIME='00:00:00',
+	MODES_TIME=
+		{
+		'      00', '      00', 
+		},
+	MODES_STEPS=
+		{
+		0, 0, 
+		},
+	MODES_RUN_STEPS=
+		{
+		-1, -1, 
+		},
+	S_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	S_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	}
+)";
+
+    ASSERT_STREQ( buff, REF_STR1 );
+
+
+    //Время активной операции и её главного шага.
+    const unsigned int OPER_N1 = 1;
+    auto operation_1 = ( *tank1.get_modes_manager() )[ OPER_N1 ];
+
+    const unsigned int STEP_N1 = 1;
+    const unsigned int STEP_N2 = 2;
+    operation_1->add_step( "Init", 2, -1 );
+    operation_1->add_step( "Process #1", 3, -1 );
+    operation_1->add_step( "Process #2", 2, -1 );
+
+    tank1.set_mode( OPER_N1, operation::RUN );
+    tank1.evaluate();
+    sleep_ms( 1000 );
+    tank1.save_device( buff );
+
+    auto REF_STR2 = R"(t.TANK1 = t.TANK1 or {}
+t.TANK1=
+	{
+	CMD=0,
+	ST=
+		{
+		1, 
+		},
+	MODES=
+		{
+		1, 0, 
+		},
+	OPERATIONS=
+		{
+		1, 0, 
+		},
+	AVAILABILITY=
+		{
+		1, 1, 
+		},
+	ACTIVE_OPERATION_OR_IDLE_TIME='00:00:01',
+	ACTIVE_STEP_TIME='00:00:01',
+	MODES_TIME=
+		{
+		'      00', '      00', 
+		},
+	MODES_STEPS=
+		{
+		1, 0, 
+		},
+	MODES_RUN_STEPS=
+		{
+		-1, -1, 
+		},
+	STEPS1=
+		{
+		1, 0, 0, 
+		},
+	RUN_STEPS1=
+		{
+		1, 0, 0, 
+		},
+	S_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	S_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	}
+)";
+
+    ASSERT_STREQ( buff, REF_STR2 );
+    }
