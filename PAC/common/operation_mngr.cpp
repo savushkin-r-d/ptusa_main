@@ -2490,7 +2490,7 @@ operation* operation_manager::operator[]( unsigned int idx )
             idx, operations.size() );
         }
 
-    return oper_stub;
+    return &oper_stub;
     }
 //-----------------------------------------------------------------------------
 unsigned long operation_manager::get_idle_time()
@@ -2521,9 +2521,6 @@ operation_manager::~operation_manager()
         delete operations[ i ];
         operations[ i ] = nullptr;
         }
-
-    delete oper_stub;
-    oper_stub = nullptr;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

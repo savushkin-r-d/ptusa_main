@@ -913,7 +913,7 @@ class operation_manager
         /// @brief Конструктор с параметрами.
         ///
         /// @param i_tech_object - техобъект-владелец.
-        operation_manager( i_tech_object *owner );
+        explicit operation_manager( i_tech_object *owner );
 
         ~operation_manager();
 
@@ -967,7 +967,7 @@ class operation_manager
         std::vector< operation* > operations; ///< Операции.
         
         ///< Операция-заглушка.
-        operation *oper_stub = new operation( "Операция-заглушка", this, -1 );
+        operation oper_stub{ "Операция-заглушка", this, -1 };
 
         /// @brief Время активной операции (или бездействия).
         u_long active_operation_or_idle_time = get_millisec();
