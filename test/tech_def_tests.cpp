@@ -261,7 +261,7 @@ t.TANK1=
 	ACTIVE_STEP_TIME='00:00:01',
 	MODES_TIME=
 		{
-		'      00', '      00', 
+		'      01', '      00', 
 		},
 	MODES_STEPS=
 		{

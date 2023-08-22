@@ -2,8 +2,6 @@
 #include <vector>
 #include <stdio.h>
 
-#include <fmt/chrono.h>
-
 #include "tech_def.h"
 
 #include "lua_manager.h"
@@ -31,7 +29,6 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         type( type ),
         cmd( 0 ),
         operations_count( operations_count ),
-        modes_time( run_time_params_u_int_4( operations_count, "MODES_TIME" ) ),
         operations_manager( 0 )
     {
     u_int state_size_in_int4 = operations_count / 32; // Размер состояния в double word.
@@ -329,9 +326,7 @@ int tech_object::evaluate()
     for ( u_int i = 0; i < operations_count; i++ )
         {
         int idx = i + 1;
-        operation* op = ( *operations_manager )[ idx ];
-
-        modes_time[ idx ] = op->evaluation_time() / 1000;
+        auto op = ( *operations_manager )[ idx ];
         op->evaluate();
 
         const int ERR_STR_SIZE = 80;
@@ -857,34 +852,14 @@ int tech_object::save_device( char *buff )
     //Время операций.
     static char up_time_str[ 50 ] = { 0 };
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
-
-     for ( u_int i = 1; i <= modes_time.get_count(); i++ )
+    for ( u_int i = 0; i < operations_count; i++ )
         {
-        auto up_secs = modes_time[ i ];
-        auto up_hours = up_secs / ( 60 * 60 );
-        auto up_mins = up_secs / 60 % 60;
-        up_secs %= 60;
-
-        if ( up_hours )
-            {
-            sprintf( up_time_str, "\'%02lu:%02lu:%02lu\', ",
-                (u_long)up_hours, (u_long)up_mins, (u_long)up_secs );
-            }
-        else
-            {
-            if ( up_mins )
-                {
-                sprintf( up_time_str, "\'   %02lu:%02lu\', ",
-                    (u_long)up_mins, (u_long)up_secs );
-                }
-            else
-                {
-                sprintf( up_time_str, "\'      %02lu\', ",
-                    (u_long)up_secs );
-                }
-            }
-
-        res += sprintf( buff + res, "%s", up_time_str );
+        auto op = ( *operations_manager )[ i + 1 ];
+        auto t = std::chrono::seconds( op->evaluation_time() / 1000 );
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+            t > std::chrono::minutes( 60 ) ? "\'{:%H:%M:%S}\', " :
+            ( t > std::chrono::seconds( 60 ) ? "\'{:>8%M:%S}\', " : "\'{:>8%S}\', " ),
+            t ).size;
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
