@@ -315,6 +315,8 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
             return operations_manager;
             }
 
+        static constexpr const char* get_format_str( std::chrono::seconds t );
+
         virtual int save_device( char *buff );
 
         virtual int set_cmd( const char *prop, u_int idx, double val );

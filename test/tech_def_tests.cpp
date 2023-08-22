@@ -164,7 +164,7 @@ TEST( tech_object, save )
 
     tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
     tank1.get_modes_manager()->add_operation( "Test operation" );
-    
+
     const auto BUFF_SIZE = 1000;
     char buff[ BUFF_SIZE ];
     tank1.save_device( buff );
@@ -299,4 +299,41 @@ t.TANK1=
 )";
 
     ASSERT_STREQ( buff, REF_STR2 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( tech_object_manager, save_params_as_Lua_str )
+    {
+    tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
+    tank1.get_modes_manager()->add_operation( "Test operation" );
+
+    G_TECH_OBJECT_MNGR()->add_tech_object( &tank1 );
+
+    const auto BUFF_SIZE = 1000;
+    char buff[ BUFF_SIZE ];
+    G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( buff );
+    auto REF_STR1 = R"(params{ object = 'TANK1', param_name = 'par_float', par_id = 1,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'rt_par_float', par_id = 2,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'par_uint', par_id = 3,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'rt_par_uint', par_id = 4,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+)";
+
+    ASSERT_STREQ( buff, REF_STR1 );
     }

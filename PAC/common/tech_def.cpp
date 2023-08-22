@@ -793,6 +793,12 @@ int  tech_object::lua_on_start( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
+constexpr const char* tech_object::get_format_str( std::chrono::seconds t )
+    {
+    return t > std::chrono::minutes( 60 ) ? "\'{:%H:%M:%S}\', " :
+        ( t > std::chrono::seconds( 60 ) ? "\'{:>8%M:%S}\', " : "\'{:>8%S}\', " );
+    }
+//-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
     int res =
@@ -850,16 +856,13 @@ int tech_object::save_device( char *buff )
         "\tACTIVE_STEP_TIME=\'{:%H:%M:%S}\',\n", duration ).size;
 
     //Время операций.
-    static char up_time_str[ 50 ] = { 0 };
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
     for ( u_int i = 0; i < operations_count; i++ )
         {
         auto op = ( *operations_manager )[ i + 1 ];
         auto t = std::chrono::seconds( op->evaluation_time() / 1000 );
         res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
-            t > std::chrono::minutes( 60 ) ? "\'{:%H:%M:%S}\', " :
-            ( t > std::chrono::seconds( 60 ) ? "\'{:>8%M:%S}\', " : "\'{:>8%S}\', " ),
-            t ).size;
+            get_format_str( t ), t ).size;
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
@@ -1584,6 +1587,7 @@ void tech_object_manager::add_tech_object( tech_object* new_tech_object )
 
     G_ERRORS_MANAGER->add_error( new tech_obj_error( new_tech_object ) );
     }
+
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )
     {
