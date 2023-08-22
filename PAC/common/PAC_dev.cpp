@@ -422,6 +422,19 @@ analog_emulator& device::get_emulator()
     {
     return emulator;
     }
+void device::check_state()
+    {
+    if ( this->get_state() != prev_state && this->get_state() == 1 )
+        {
+        ++active_counter;
+        prev_state = true;
+        }
+    else
+        {
+        --active_counter;
+        prev_state = false;
+        }
+    }
 //-----------------------------------------------------------------------------
 bool device::is_emulation() const
     {
@@ -431,11 +444,6 @@ bool device::is_emulation() const
 void device::set_emulation( bool new_emulation_state )
     {
     emulation = new_emulation_state;
-    }
-//-----------------------------------------------------------------------------
-device_activity& device::get_activity()
-    {
-    return activity;
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -1223,7 +1231,7 @@ device* device_manager::get_device( int dev_type,
         else
             {
             sprintf( G_LOG->msg, "unknown " );
-            }
+            }-
         sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
             dev_name );
 
@@ -2361,22 +2369,6 @@ int device_manager::init_rt_params()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-device_activity::device_activity() :active_devices( 0 ), previous_states( 0 ), device_states( 0 )
-    {
-    }
-//-----------------------------------------------------------------------------
-void device_activity::check_state()
-    {
-    }
-//-----------------------------------------------------------------------------
-int device_activity::get_active()
-    {
-    check_state();
-    return active_devices;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
 void i_counter::restart()
     {
     reset();

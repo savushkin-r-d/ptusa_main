@@ -356,17 +356,6 @@ class i_DO_AO_device: public i_AO_device, public i_DO_device
         virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
-class device_activity
-    {
-    int active_devices;
-    void check_state();
-    public:
-        device_activity();
-        int get_active();
-        std::vector<bool> previous_states;
-        std::vector<bool> device_states;
-    };
-//-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в
 /// режимах.
 class device : public i_DO_AO_device, public par_device
@@ -704,6 +693,12 @@ class device : public i_DO_AO_device, public par_device
             return sub_type;
             }
 
+        /// @brief Получение количества активных утсройств.
+		int get_active()
+			{
+			return active_counter;
+			}
+
         /// @brief Установка дополнительных свойств, значения которых -
         /// устройства.
         ///
@@ -744,7 +739,6 @@ class device : public i_DO_AO_device, public par_device
         void set_emulation( bool new_emulation_state );
 
         analog_emulator& get_emulator();
-        device_activity& get_activity();
 
         /// @brief Получение максимальной длины имени устройства (с учётом 
         /// символа завершения строки).
@@ -775,7 +769,11 @@ class device : public i_DO_AO_device, public par_device
 
         bool emulation = false;
         analog_emulator emulator;
-        device_activity activity;
+        
+        int active_counter = 0;
+        bool prev_state = false;
+
+        void check_state();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
