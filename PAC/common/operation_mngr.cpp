@@ -2509,10 +2509,9 @@ void operation_manager::print()
         }
     }
 //-----------------------------------------------------------------------------
-operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
+operation_manager::operation_manager( i_tech_object *owner ):
     owner( owner )    
     {
-    oper_stub = new operation( "Операция-заглушка", this, -1 );
     }
 //-----------------------------------------------------------------------------
 operation_manager::~operation_manager()

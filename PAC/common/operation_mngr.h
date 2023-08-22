@@ -912,9 +912,8 @@ class operation_manager
     public:
         /// @brief Конструктор с параметрами.
         ///
-        /// @param modes_cnt - количество операций.
         /// @param i_tech_object - техобъект-владелец.
-        operation_manager( u_int modes_cnt, i_tech_object *owner );
+        operation_manager( i_tech_object *owner );
 
         ~operation_manager();
 
@@ -966,12 +965,12 @@ class operation_manager
 
     private:
         std::vector< operation* > operations; ///< Операции.
-        operation *oper_stub;                 ///< Операция-заглушка.
+        
+        ///< Операция-заглушка.
+        operation *oper_stub = new operation( "Операция-заглушка", this, -1 );
 
         /// @brief Время активной операции (или бездействия).
         u_long active_operation_or_idle_time = get_millisec();
-
-        static const char* UNKN_OPER_NAME;    ///Имя для "неизвестной" операции.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

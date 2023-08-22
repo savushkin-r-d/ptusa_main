@@ -54,7 +54,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     full_name = new char[ MAX_LENGTH ];
     snprintf( full_name, MAX_LENGTH, "%s%s%d", new_name, sign_str, number );
 
-    operations_manager = new operation_manager( operations_count, this );
+    operations_manager = new operation_manager( this );
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
