@@ -425,20 +425,16 @@ analog_emulator& device::get_emulator()
 //-----------------------------------------------------------------------------
 void device::check_state()
     {
-    if ( this->get_state() != prev_state && this->get_state() == 1 )
-        {
-        ++active_counter;
-        prev_state = 1;
-        }
-	else if ( this->get_state() == prev_state )
+	if ( this->get_state() == 1 && this->get_state() != prev_state )
 		{
-
+		++active_counter;
+		prev_state = 1;
 		}
-    else
-        {
-        --active_counter;
-        prev_state = 0;
-        }
+	else if ( this->get_state() == 0 && this->get_state() != prev_state )
+		{
+		--active_counter;
+		prev_state = 0;
+		}
     }
 //-----------------------------------------------------------------------------
 bool device::is_emulation() const
