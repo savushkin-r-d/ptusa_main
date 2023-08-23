@@ -407,6 +407,12 @@ TEST( device, get_type_name )
     EXPECT_STREQ( "Температура", obj.get_type_name() );
     }
 
+TEST( device, get_active )
+    {
+    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
+                          device::DEVICE_SUB_TYPE::DST_TS, 1 );
+    EXPECT_EQ( 0, obj.get_active() );
+    }
 
 TEST( analog_io_device, set_cmd )
     {

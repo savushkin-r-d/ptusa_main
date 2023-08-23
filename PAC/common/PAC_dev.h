@@ -23,7 +23,6 @@
 #include <fmt/core.h>
 
 #include <vector>
-#include <map>
 #include <string>
 #include <algorithm>
 #include <memory>
@@ -344,7 +343,7 @@ class i_AO_device: public i_AI_device
 class i_DO_AO_device: public i_AO_device, public i_DO_device
     {
     public:
-        /// @brief Выключение устройства.
+        /// @brief Выключение устройства.-
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
@@ -696,6 +695,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Получение количества активных утсройств.
 		int get_active()
 			{
+            check_state();
 			return active_counter;
 			}
 
@@ -771,8 +771,9 @@ class device : public i_DO_AO_device, public par_device
         analog_emulator emulator;
         
         int active_counter = 0;
-        bool prev_state = false;
+        int prev_state = 0;
 
+        /// @brief Проверка изменения состояния 
         void check_state();
     };
 //-----------------------------------------------------------------------------

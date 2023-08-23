@@ -422,17 +422,22 @@ analog_emulator& device::get_emulator()
     {
     return emulator;
     }
+//-----------------------------------------------------------------------------
 void device::check_state()
     {
     if ( this->get_state() != prev_state && this->get_state() == 1 )
         {
         ++active_counter;
-        prev_state = true;
+        prev_state = 1;
         }
+	else if ( this->get_state() == prev_state )
+		{
+
+		}
     else
         {
         --active_counter;
-        prev_state = false;
+        prev_state = 0;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1231,7 +1236,7 @@ device* device_manager::get_device( int dev_type,
         else
             {
             sprintf( G_LOG->msg, "unknown " );
-            }-
+            }
         sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
             dev_name );
 
