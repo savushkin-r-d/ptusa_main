@@ -186,8 +186,8 @@ t.TANK0=
 		{
 		
 		},
-	ACTIVE_OPERATION_OR_IDLE_TIME='00:00:00',
-	ACTIVE_STEP_TIME='00:00:00',
+	ACTIVE_OPERATION_OR_IDLE_TIME=0,
+	ACTIVE_STEP_TIME=0,
 	MODES_TIME=
 		{
 		
@@ -218,7 +218,7 @@ t.TANK0=
 		},
 	}
 )";
-	ASSERT_STREQ( buff, REF_STR0 );
+	EXPECT_STREQ( REF_STR0, buff );
 
 	tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
     tank1.get_modes_manager()->add_operation( "Test operation" );
@@ -243,11 +243,11 @@ t.TANK1=
 		{
 		1, 1, 
 		},
-	ACTIVE_OPERATION_OR_IDLE_TIME='00:00:00',
-	ACTIVE_STEP_TIME='00:00:00',
+	ACTIVE_OPERATION_OR_IDLE_TIME=0,
+	ACTIVE_STEP_TIME=0,
 	MODES_TIME=
 		{
-		'      00', '      00', 
+		0, 0, 
 		},
 	MODES_STEPS=
 		{
@@ -275,7 +275,7 @@ t.TANK1=
 		},
 	}
 )";
-    ASSERT_STREQ( buff, REF_STR1 );
+	EXPECT_STREQ( REF_STR1, buff );
 
 
     //Время активной операции и её главного шага.
@@ -311,11 +311,11 @@ t.TANK1=
 		{
 		1, 1, 
 		},
-	ACTIVE_OPERATION_OR_IDLE_TIME='00:00:01',
-	ACTIVE_STEP_TIME='00:00:01',
+	ACTIVE_OPERATION_OR_IDLE_TIME=1,
+	ACTIVE_STEP_TIME=1,
 	MODES_TIME=
 		{
-		'      01', '      00', 
+		1, 0, 
 		},
 	MODES_STEPS=
 		{
@@ -351,7 +351,7 @@ t.TANK1=
 		},
 	}
 )";
-    ASSERT_STREQ( buff, REF_STR2 );
+	EXPECT_STREQ( REF_STR2, buff );
 
 	G_LUA_MANAGER->free_Lua();
     }
@@ -392,7 +392,7 @@ values=
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	} }
 )";
-    ASSERT_STREQ( buff, REF_STR1 );
+	EXPECT_STREQ( REF_STR1, buff );
 
 	G_LUA_MANAGER->free_Lua();
     }

@@ -793,12 +793,6 @@ int  tech_object::lua_on_start( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-constexpr const char* tech_object::get_format_str( std::chrono::seconds t )
-    {
-    return t > std::chrono::minutes( 60 ) ? "\'{:%H:%M:%S}\', " :
-        ( t > std::chrono::seconds( 60 ) ? "\'{:>8%M:%S}\', " : "\'{:>8%S}\', " );
-    }
-//-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
     int res =
@@ -838,31 +832,30 @@ int tech_object::save_device( char *buff )
     res += sprintf( buff + res, "\n\t\t},\n" );
 
     //Время простоя или текущей активной операции.    
-    std::chrono::seconds duration{ operations_manager->get_idle_time() / 1000 };
+    auto duration = operations_manager->get_idle_time() / 1000;
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
-        "\tACTIVE_OPERATION_OR_IDLE_TIME=\'{:%H:%M:%S}\',\n", duration ).size;
+        "\tACTIVE_OPERATION_OR_IDLE_TIME={},\n", duration ).size;
 
     //Время главного шага текущей активной операции.
-    duration = std::chrono::seconds( 0 );
+    duration = 0L;
     for ( u_int i = 1; i <= operations_count; i++ )
         {
         if ( get_operation_state( i ) == 1 )
             {
-            duration = std::chrono::seconds(
-                ( *operations_manager )[ i ]->active_step_evaluation_time() / 1000 );
+            auto op = ( *operations_manager )[ i ];
+            duration = op->active_step_evaluation_time() / 1000;
             }
         }
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
-        "\tACTIVE_STEP_TIME=\'{:%H:%M:%S}\',\n", duration ).size;
+        "\tACTIVE_STEP_TIME={},\n", duration ).size;
 
     //Время операций.
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
     for ( u_int i = 0; i < operations_count; i++ )
         {
-        auto op = ( *operations_manager )[ i + 1 ];
-        auto t = std::chrono::seconds( op->evaluation_time() / 1000 );
-        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
-            get_format_str( t ), t ).size;
+        auto op = ( *operations_manager )[ i + 1 ];    
+        auto t = op->evaluation_time() / 1000;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "{}, ", t ).size;
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 

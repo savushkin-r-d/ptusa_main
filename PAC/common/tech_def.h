@@ -19,8 +19,6 @@
 #include <vector>
 #include <locale>
 
-#include <fmt/chrono.h>
-
 #include "i_tech_def.h"
 
 #include "g_device.h"
@@ -314,8 +312,6 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
             {
             return operations_manager;
             }
-
-        static constexpr const char* get_format_str( std::chrono::seconds t );
 
         virtual int save_device( char *buff );
 
