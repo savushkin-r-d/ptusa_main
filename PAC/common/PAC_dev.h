@@ -5042,6 +5042,7 @@ class device_manager: public i_Lua_save_device
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство.
+
         struct range    ///< Диапазон устройств одного типа.
             {
             int start_pos;
@@ -5060,7 +5061,7 @@ class device_manager: public i_Lua_save_device
 
         int get_device_n( const char* dev_name );
 
-	std::vector< device* > project_devices; ///< Все устройства.
+        std::vector< device* > project_devices; ///< Все устройства.
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
@@ -5076,7 +5077,6 @@ class device_manager: public i_Lua_save_device
         //
         // Для тестирования.
         void clear_io_devices();
-
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
