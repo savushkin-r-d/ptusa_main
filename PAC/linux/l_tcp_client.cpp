@@ -358,7 +358,7 @@ int linux_tcp_client::AsyncRecive()
 
     int res = 0;
 
-    if (get_delta_millisec(asyncReciveTime) >= async_timeout && flag)\
+    if (get_delta_millisec(asyncReciveTime) >= async_timeout && flag)
     {
         flag = false;
         res = tcp_communicator_linux::recvtimeout(socket_number, (unsigned char*)buff,
