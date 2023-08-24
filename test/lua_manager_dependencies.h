@@ -42,6 +42,7 @@ int         mock_lua_gc(lua_State *L, int what, int data);
 void        mock_luaL_openlibs(lua_State *L);
 int         mock_tolua_PAC_dev_open(lua_State* tolua_S);
 int         mock_tolua_IOT_dev_open(lua_State* tolua_S);
+int         mock_tolua_OPC_UA_open(lua_State* tolua_S);
 void        mock_lua_close(lua_State *L);
 int         mock_check_file(const char* file_name, char* err_str);
 tech_object_manager* mock_G_TECH_OBJECT_MNGR();
