@@ -365,12 +365,12 @@ int linux_tcp_client::AsyncRecive()
             buff_size, 0, 0, ip, "tcp client", 0);
     }
 
-    if (res < 0)
-    {
-        async_result = AR_SOCKETERROR;
-        Disconnect();
-        return 0;
-    }
+    if ( res < 0 )
+       {
+       async_result = AR_SOCKETERROR;
+       Disconnect();
+       return 0;
+       }
     return res;
 }
 
