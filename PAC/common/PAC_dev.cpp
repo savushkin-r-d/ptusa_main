@@ -1286,8 +1286,8 @@ void device_manager::print() const
         }
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager() : project_devices( 0 ), disable_error_logging( false )
-	{
+device_manager::device_manager( ) : project_devices( 0 ), disable_error_logging( false )
+    {
     G_DEVICE_CMMCTR->add_device( this );
     }
 //-----------------------------------------------------------------------------
