@@ -423,11 +423,11 @@ analog_emulator& device::get_emulator()
     return emulator;
     }
 //-----------------------------------------------------------------------------
-void device::check_state()
+void device::check_changes_state()
     {
 	if ( this->get_state() == 1 && this->get_state() != prev_state )
 		{
-		++active_counter;
+		++inclusions_counter;
 		prev_state = 1;
 		}
 	else if ( this->get_state() == 0 && this->get_state() != prev_state )
@@ -436,9 +436,9 @@ void device::check_state()
 		}
     }
 //-----------------------------------------------------------------------------
-void device::reset_statistic()
+void device::reset_stat()
     {
-    this->active_counter = 0;
+    this->inclusions_counter = 0;
     }
 bool device::is_emulation() const
     {

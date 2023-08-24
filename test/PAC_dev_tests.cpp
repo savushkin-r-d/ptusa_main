@@ -407,36 +407,36 @@ TEST( device, get_type_name )
     EXPECT_STREQ( "Температура", obj.get_type_name() );
     }
 
-TEST( device, get_active )
+TEST( device, get_active_stat )
     {
     analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
                           device::DEVICE_SUB_TYPE::DST_TS, 1 );
-    EXPECT_EQ( 0, obj.get_active() );
+    EXPECT_EQ( 0, obj.get_active_stat() );
     obj.direct_set_state( 1 );
-    EXPECT_EQ( 1, obj.get_active() );
+    EXPECT_EQ( 1, obj.get_active_stat() );
     obj.direct_set_state( 0 );
-    EXPECT_EQ( 1, obj.get_active() );
+    EXPECT_EQ( 1, obj.get_active_stat() );
     obj.direct_set_state( 1 );
-    EXPECT_EQ( 2, obj.get_active() );
+    EXPECT_EQ( 2, obj.get_active_stat() );
     }
 
-TEST( device, reset_statistic )
+TEST( device, reset_stat )
     {
     motor M1( "M1", device::DST_M_FREQ );
     M1.set_state( 1 );
-    EXPECT_EQ( 1, M1.get_active() );
+    EXPECT_EQ( 1, M1.get_active_stat() );
     M1.set_state( 0 );
-    EXPECT_EQ( 1, M1.get_active() );
+    EXPECT_EQ( 1, M1.get_active_stat() );
     M1.set_state( 1 );
-    EXPECT_EQ( 2, M1.get_active() );
-    M1.reset_statistic();
-    EXPECT_EQ( 0, M1.get_active() );
+    EXPECT_EQ( 2, M1.get_active_stat() );
+    M1.reset_stat();
+    EXPECT_EQ( 0, M1.get_active_stat() );
     EXPECT_EQ( 1, M1.get_state() );
-    EXPECT_EQ( 0, M1.get_active() );
+    EXPECT_EQ( 0, M1.get_active_stat() );
     M1.set_state( 0 );
-    EXPECT_EQ( 0, M1.get_active() );
+    EXPECT_EQ( 0, M1.get_active_stat() );
     M1.set_state( 1 );
-    EXPECT_EQ( 1, M1.get_active() );
+    EXPECT_EQ( 1, M1.get_active_stat() );
     }
 
 TEST( analog_io_device, set_cmd )

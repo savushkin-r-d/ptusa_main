@@ -692,11 +692,11 @@ class device : public i_DO_AO_device, public par_device
             return sub_type;
             }
 
-        /// @brief Получение количества активных утсройств.
-		int get_active()
+        /// @brief Получение количества включений утсройства.
+		int get_active_stat()
 			{
-            check_state();
-			return active_counter;
+            check_changes_state();
+			return inclusions_counter;
 			}
 
         /// @brief Установка дополнительных свойств, значения которых -
@@ -738,7 +738,8 @@ class device : public i_DO_AO_device, public par_device
 
         void set_emulation( bool new_emulation_state );
 
-        void reset_statistic();
+        /// @brief Сброс статистики
+        void reset_stat();
 
         analog_emulator& get_emulator();
 
@@ -772,11 +773,11 @@ class device : public i_DO_AO_device, public par_device
         bool emulation = false;
         analog_emulator emulator;
         
-        int active_counter = 0;
+        int inclusions_counter = 0; ///< счетчик включений устройства
         int prev_state = 0;
 
         /// @brief Проверка изменения состояния 
-        void check_state();
+        void check_changes_state();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
