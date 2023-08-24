@@ -738,6 +738,8 @@ class device : public i_DO_AO_device, public par_device
 
         void set_emulation( bool new_emulation_state );
 
+        void reset_statistic();
+
         analog_emulator& get_emulator();
 
         /// @brief Получение максимальной длины имени устройства (с учётом 

@@ -412,6 +412,31 @@ TEST( device, get_active )
     analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
                           device::DEVICE_SUB_TYPE::DST_TS, 1 );
     EXPECT_EQ( 0, obj.get_active() );
+    obj.direct_set_state( 1 );
+    EXPECT_EQ( 1, obj.get_active() );
+    obj.direct_set_state( 0 );
+    EXPECT_EQ( 1, obj.get_active() );
+    obj.direct_set_state( 1 );
+    EXPECT_EQ( 2, obj.get_active() );
+    }
+
+TEST( device, reset_statistic )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.set_state( 1 );
+    EXPECT_EQ( 1, M1.get_active() );
+    M1.set_state( 0 );
+    EXPECT_EQ( 1, M1.get_active() );
+    M1.set_state( 1 );
+    EXPECT_EQ( 2, M1.get_active() );
+    M1.reset_statistic();
+    EXPECT_EQ( 0, M1.get_active() );
+    EXPECT_EQ( 1, M1.get_state() );
+    EXPECT_EQ( 0, M1.get_active() );
+    M1.set_state( 0 );
+    EXPECT_EQ( 0, M1.get_active() );
+    M1.set_state( 1 );
+    EXPECT_EQ( 1, M1.get_active() );
     }
 
 TEST( analog_io_device, set_cmd )

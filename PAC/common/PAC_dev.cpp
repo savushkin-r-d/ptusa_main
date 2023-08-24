@@ -432,11 +432,14 @@ void device::check_state()
 		}
 	else if ( this->get_state() == 0 && this->get_state() != prev_state )
 		{
-		--active_counter;
 		prev_state = 0;
 		}
     }
 //-----------------------------------------------------------------------------
+void device::reset_statistic()
+    {
+    this->active_counter = 0;
+    }
 bool device::is_emulation() const
     {
     return emulation;
