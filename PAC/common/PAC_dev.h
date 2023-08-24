@@ -343,7 +343,7 @@ class i_AO_device: public i_AI_device
 class i_DO_AO_device: public i_AO_device, public i_DO_device
     {
     public:
-        /// @brief Выключение устройства.-
+        /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
@@ -694,10 +694,10 @@ class device : public i_DO_AO_device, public par_device
 
         /// @brief Получение количества включений утсройства.
 		int get_active_stat()
-			{
-            check_changes_state();
-			return inclusions_counter;
-			}
+		{
+                check_changes_state();
+		return inclusions_counter;
+		}
 
         /// @brief Установка дополнительных свойств, значения которых -
         /// устройства.
@@ -5060,7 +5060,7 @@ class device_manager: public i_Lua_save_device
 
         int get_device_n( const char* dev_name );
 
-		std::vector< device* > project_devices; ///< Все устройства.
+	std::vector< device* > project_devices; ///< Все устройства.
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
