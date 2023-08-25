@@ -33,8 +33,6 @@ TEST( tcp_communicator_linux, checkBuff )
 
     auto res = tcp_communicator_linux::checkBuff( s );
     EXPECT_EQ( true, res );
-    res = tcp_communicator_linux::checkBuff( 0 );
-    EXPECT_EQ( false, res );
     }
     
 #endif

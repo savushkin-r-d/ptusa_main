@@ -359,7 +359,7 @@ int linux_tcp_client::AsyncRecive()
     if (get_delta_millisec(asyncReciveTime) >= async_timeout && newDataIsAvailable)
     {
         newDataIsAvailable = false;
-        res = tcp_communicator_linux::recvtimeout(socket_number, (unsigned char*)buff,
+        res = tcp_communicator_linux::recvtimeout(socket_number, reinterpret_cast<unsigned char*>(buff),
             buff_size, 0, 0, ip, "tcp client", 0);
     }
 
