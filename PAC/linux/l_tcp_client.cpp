@@ -348,19 +348,17 @@ int linux_tcp_client::AsyncRecive()
 
     if (!connectionState) return 0;
 
-    bool isNewData = tcp_communicator_linux::checkBuff(socket_number);
-
-    if (isNewData && !flag)
+    if (tcp_communicator_linux::checkBuff(socket_number) && !newDataIsAvailable)
     {
         asyncReciveTime = get_millisec();
-        flag = true;
+        newDataIsAvailable = true;
     }
 
     int res = 0;
 
-    if (get_delta_millisec(asyncReciveTime) >= async_timeout && flag)
+    if (get_delta_millisec(asyncReciveTime) >= async_timeout && newDataIsAvailable)
     {
-        flag = false;
+        newDataIsAvailable = false;
         res = tcp_communicator_linux::recvtimeout(socket_number, (unsigned char*)buff,
             buff_size, 0, 0, ip, "tcp client", 0);
     }
