@@ -776,10 +776,6 @@ bool tcp_communicator_linux::checkBuff(int s)
         rec_tv.tv_sec = 0;
         rec_tv.tv_usec = 0;
 
-        //Network performance info.
-        static u_long st_time;
-        st_time = get_millisec();
-
         // Ждем таймаута или полученных данных.
         int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
 
