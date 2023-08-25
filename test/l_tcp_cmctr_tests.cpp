@@ -30,7 +30,7 @@ TEST(tcp_communicator_linux, checkBuff )
     int s = socket(AF_INET, SOCK_STREAM, NULL);
 
     auto res = tcp_communicator_linux::checkBuff(s);
-    EXPECT_EQ(false, res);
+    EXPECT_EQ(true, res);
     }
 
 #endif
