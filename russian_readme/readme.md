@@ -136,7 +136,7 @@ Eclipse IDE с проектом на базе CMake в Linux.
 
 ## Использование набора инструментов PLCnext Technology C++ ##
 
-Загрузите последнюю версию (текущая $-$ 2022.0.4 LTS) `sdk для Windows 64 bit` с веб-сайта Phoenix Contact https://www.phoenixcontact.com/products (например, из области **AXC F 2152**, в разделе Загрузки->Программное обеспечение $-$ http://www.phoenixcontact.com/qr/2404267/softw).
+Загрузите последние версии (текущие 2023.0 LTS и 2022.0.4 LTS) `PLCnext Technology C++ Toolchain для Windows, включая компилятор` и `sdk для Windows 64 bit` с веб-сайта Phoenix Contact https://www.phoenixcontact.com/products (например, из области **AXC F 2152**, в разделе Загрузки->Программное обеспечение $-$ http://www.phoenixcontact.com/qr/2404267/softw).
 
 Перейдите в папку, где находятся загрузки (типичный путь `%userprofile%/Downloads`), распакуйте архив (`SDK_2021.9_Windows_AXC_F_2152.tar.xz.zip`).
 
