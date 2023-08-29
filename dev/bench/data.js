@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693303937895,
+  "lastUpdate": 1693303951410,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -12828,6 +12828,38 @@ window.BENCHMARK_DATA = {
             "value": 125.87812018099555,
             "unit": "us/iter",
             "extra": "iterations: 5525\ncpu: 125.85851583710411 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "831ffa7318f323eebfb78166d176799543da0c7b",
+          "message": "Fix controller self-assigment bug",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/611/commits/831ffa7318f323eebfb78166d176799543da0c7b"
+        },
+        "date": 1693303949869,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.00344712651526,
+            "unit": "us/iter",
+            "extra": "iterations: 29372\ncpu: 24.001031594716057 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 141.23240296268384,
+            "unit": "us/iter",
+            "extra": "iterations: 5333\ncpu: 141.17719857491096 us\nthreads: 1"
           }
         ]
       }
