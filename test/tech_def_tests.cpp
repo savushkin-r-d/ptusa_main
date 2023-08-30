@@ -154,3 +154,245 @@ TEST( tech_object, lua_check_function )
 
     G_LUA_MANAGER->free_Lua();
     }
+
+TEST( tech_object, save )
+    {
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	//Tank with no operations.
+    tech_object tank0( "TANK", 1, 1, "TANK0", 0, 1, 10, 10, 10, 10 );
+	const auto BUFF_SIZE = 1000;
+	char buff[ BUFF_SIZE ];
+	tank0.save_device( buff );
+	auto REF_STR0 = R"(t.TANK0 = t.TANK0 or {}
+t.TANK0=
+	{
+	CMD=0,
+	ST=
+		{
+		
+		},
+	MODES=
+		{
+		
+		},
+	OPERATIONS=
+		{
+		
+		},
+	AVAILABILITY=
+		{
+		
+		},
+	ACTIVE_OPERATION_OR_IDLE_TIME=0,
+	ACTIVE_STEP_TIME=0,
+	MODES_TIME=
+		{
+		
+		},
+	MODES_STEPS=
+		{
+		
+		},
+	MODES_RUN_STEPS=
+		{
+		
+		},
+	S_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	S_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	}
+)";
+	EXPECT_STREQ( REF_STR0, buff );
+
+	tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
+    tank1.get_modes_manager()->add_operation( "Test operation" );
+    tank1.save_device( buff );
+    auto REF_STR1 = R"(t.TANK1 = t.TANK1 or {}
+t.TANK1=
+	{
+	CMD=0,
+	ST=
+		{
+		0, 
+		},
+	MODES=
+		{
+		0, 0, 
+		},
+	OPERATIONS=
+		{
+		0, 0, 
+		},
+	AVAILABILITY=
+		{
+		1, 1, 
+		},
+	ACTIVE_OPERATION_OR_IDLE_TIME=0,
+	ACTIVE_STEP_TIME=0,
+	MODES_TIME=
+		{
+		0, 0, 
+		},
+	MODES_STEPS=
+		{
+		0, 0, 
+		},
+	MODES_RUN_STEPS=
+		{
+		-1, -1, 
+		},
+	S_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	S_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	}
+)";
+	EXPECT_STREQ( REF_STR1, buff );
+
+
+    //Время активной операции и её главного шага.
+    const unsigned int OPER_N1 = 1;
+    auto operation_1 = ( *tank1.get_modes_manager() )[ OPER_N1 ];
+
+    operation_1->add_step( "Init", 2, -1 );
+    operation_1->add_step( "Process #1", 3, -1 );
+    operation_1->add_step( "Process #2", 2, -1 );
+
+    tank1.set_mode( OPER_N1, operation::RUN );
+    tank1.evaluate();
+    sleep_ms( 1000 );
+    tank1.save_device( buff );
+
+    auto REF_STR2 = R"(t.TANK1 = t.TANK1 or {}
+t.TANK1=
+	{
+	CMD=0,
+	ST=
+		{
+		1, 
+		},
+	MODES=
+		{
+		1, 0, 
+		},
+	OPERATIONS=
+		{
+		1, 0, 
+		},
+	AVAILABILITY=
+		{
+		1, 1, 
+		},
+	ACTIVE_OPERATION_OR_IDLE_TIME=1,
+	ACTIVE_STEP_TIME=1,
+	MODES_TIME=
+		{
+		1, 0, 
+		},
+	MODES_STEPS=
+		{
+		1, 0, 
+		},
+	MODES_RUN_STEPS=
+		{
+		-1, -1, 
+		},
+	STEPS1=
+		{
+		1, 0, 0, 
+		},
+	RUN_STEPS1=
+		{
+		1, 0, 0, 
+		},
+	S_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	S_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_F=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	RT_PAR_UI=
+		{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		},
+	}
+)";
+	EXPECT_STREQ( REF_STR2, buff );
+
+	G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( tech_object_manager, save_params_as_Lua_str )
+    {
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+
+    tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
+    tank1.get_modes_manager()->add_operation( "Test operation" );
+
+    G_TECH_OBJECT_MNGR()->add_tech_object( &tank1 );
+
+    const auto BUFF_SIZE = 1000;
+    char buff[ BUFF_SIZE ];
+    G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( buff );
+    auto REF_STR1 = R"(params{ object = 'TANK1', param_name = 'par_float', par_id = 1,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'rt_par_float', par_id = 2,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'par_uint', par_id = 3,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+params{ object = 'TANK1', param_name = 'rt_par_uint', par_id = 4,
+values=
+	{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	} }
+)";
+	EXPECT_STREQ( REF_STR1, buff );
+
+	G_LUA_MANAGER->free_Lua();
+    }
