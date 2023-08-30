@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693387602248,
+  "lastUpdate": 1693387734826,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -13154,6 +13154,40 @@ window.BENCHMARK_DATA = {
             "value": 99.85305590416394,
             "unit": "us/iter",
             "extra": "iterations: 7012\ncpu: 99.84130062749573 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "699cbcd49b50711fc0da6c49715124b810d8699f",
+          "message": "Fix threshold regulator processing (#612)",
+          "timestamp": "2023-08-30T09:25:40Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/699cbcd49b50711fc0da6c49715124b810d8699f"
+        },
+        "date": 1693387733395,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.534730921805064,
+            "unit": "us/iter",
+            "extra": "iterations: 29746\ncpu: 23.531903449203256 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 126.04232124910155,
+            "unit": "us/iter",
+            "extra": "iterations: 5572\ncpu: 125.93725771715722 us\nthreads: 1"
           }
         ]
       }
