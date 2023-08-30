@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693403703563,
+  "lastUpdate": 1693403714739,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -13830,6 +13830,42 @@ window.BENCHMARK_DATA = {
             "value": 97.34557365419565,
             "unit": "us/iter",
             "extra": "iterations: 7189\ncpu: 97.34157740993184 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd5f4f4e4b83cb726004f4593a8d6c5a46b8688d",
+          "message": "[config][github actions] Update actions to v3 version (#616)\n\nhttps://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/",
+          "timestamp": "2023-08-30T16:52:32+03:00",
+          "tree_id": "cb8803da5db61b243710ea895d097d922fd82e3f",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/cd5f4f4e4b83cb726004f4593a8d6c5a46b8688d"
+        },
+        "date": 1693403711987,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 22.397708500989662,
+            "unit": "us/iter",
+            "extra": "iterations: 31314\ncpu: 22.37510059398352 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.30634621765161,
+            "unit": "us/iter",
+            "extra": "iterations: 6028\ncpu: 113.14115792966162 us\nthreads: 1"
           }
         ]
       }
