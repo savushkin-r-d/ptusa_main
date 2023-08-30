@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693387584961,
+  "lastUpdate": 1693387602248,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -13120,6 +13120,40 @@ window.BENCHMARK_DATA = {
             "value": 129.97838384229377,
             "unit": "us/iter",
             "extra": "iterations: 5174\ncpu: 129.87906841901815 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "aa5f982d63ba74943edceb252e8ce304c481330b",
+          "message": "Fix controller self-assigment bug (#611)",
+          "timestamp": "2023-08-30T09:23:54Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/aa5f982d63ba74943edceb252e8ce304c481330b"
+        },
+        "date": 1693387601195,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 18.904681242746005,
+            "unit": "us/iter",
+            "extra": "iterations: 37047\ncpu: 18.89580532836667 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 99.85305590416394,
+            "unit": "us/iter",
+            "extra": "iterations: 7012\ncpu: 99.84130062749573 us\nthreads: 1"
           }
         ]
       }
