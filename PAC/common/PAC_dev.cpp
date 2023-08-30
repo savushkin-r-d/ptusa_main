@@ -316,8 +316,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             break;
 
         case 'P': //Параметры.
-            par_device::set_par_by_name( prop, val );
-            break;
+            return par_device::set_par_by_name( prop, val );
 
         default:
             if ( G_DEBUG )
@@ -325,7 +324,9 @@ int device::set_cmd( const char *prop, u_int idx, double val )
                 printf( "Error device::set_cmd() - prop = %s, val = %f\n",
                     prop, val );
                 }
+            return 1;
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -2557,7 +2558,7 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
 threshold_regulator::threshold_regulator( const char* name ) :device( name,
     device::DEVICE_TYPE::DT_REGULATOR,
     device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
-    static_cast<int>( PARAM::PARAMS_COUNT ) )
+    static_cast<int>( PARAM::PARAMS_COUNT ) - 1 )
     {
     set_par_name( static_cast<int>( PARAM::P_DELTA ), 0, "P_DELTA" );
     set_par_name( static_cast<int>( PARAM::P_IS_REVERSE ), 0, "P_IS_REVERSE" );

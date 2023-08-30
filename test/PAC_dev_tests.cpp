@@ -1628,8 +1628,17 @@ TEST( threshold_regulator, set_cmd )
     EXPECT_STREQ(
         "\tC1={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
 
-    p1.set_cmd( "P_DELTA", 0, 10 );
-    p1.set_cmd( "P_IS_REVERSE", 0, 1 );
+    //Set a property that does not exist.
+    auto res = p1.set_cmd( "NO_SUCH_PROPERTY", 0, 1 );
+    EXPECT_EQ( 1, res );
+    //Set a parameter that does not exist.
+    res = p1.set_cmd( "P_NO_SUCH_PARAMETER", 0, 1 );
+    EXPECT_EQ( 1, res );
+
+    res = p1.set_cmd( "P_DELTA", 0, 10 );
+    EXPECT_EQ( 0, res );
+    res = p1.set_cmd( "P_IS_REVERSE", 0, 1 );
+    EXPECT_EQ( 0, res );
     p1.on();
     p1.save_device( buff );
     EXPECT_STREQ(
