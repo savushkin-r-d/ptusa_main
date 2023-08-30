@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693389788386,
+  "lastUpdate": 1693389792396,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -13288,6 +13288,42 @@ window.BENCHMARK_DATA = {
             "value": 99.89521532534205,
             "unit": "us/iter",
             "extra": "iterations: 7008\ncpu: 99.88530251141552 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80366e7d0e748fb8ec9c16f340b38179744f721f",
+          "message": "[config][github actions] Add \"merge_group\" event processing (#615)",
+          "timestamp": "2023-08-30T13:00:39+03:00",
+          "tree_id": "72fc6802b1e37ac654638321e420c8b9f2c57c20",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/80366e7d0e748fb8ec9c16f340b38179744f721f"
+        },
+        "date": 1693389790926,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.67438095372331,
+            "unit": "us/iter",
+            "extra": "iterations: 35482\ncpu: 19.664970971196666 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 100.37351984357214,
+            "unit": "us/iter",
+            "extra": "iterations: 6904\ncpu: 100.36438296639632 us\nthreads: 1"
           }
         ]
       }
