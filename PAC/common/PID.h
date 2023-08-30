@@ -115,6 +115,8 @@ class PID : public device, public i_Lua_save_device
 
         const char* get_name_in_Lua() const;
 
+        device* get_actuator() const;
+
     private:
         enum class STATE
             {
