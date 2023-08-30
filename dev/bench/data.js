@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693387734826,
+  "lastUpdate": 1693388283637,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -13188,6 +13188,40 @@ window.BENCHMARK_DATA = {
             "value": 126.04232124910155,
             "unit": "us/iter",
             "extra": "iterations: 5572\ncpu: 125.93725771715722 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "8eb56ee1cde524d9f80cb10c2bee7ed6bc708ec9",
+          "message": "Save operation time and main step time as \"tech_object\" tags (#609)\n\n* Save operation time and main step time as tags\n\n* Use \"fmt::format_to_n\" function\n\n* Refactor test\n\n* Refactor code\n\n* Refactor code\n\n* Refactor code\n\n* Add test\n\n* Refactor code\n\n* Refactor code\n\n* Save time as number (seconds)",
+          "timestamp": "2023-08-30T09:34:44Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/8eb56ee1cde524d9f80cb10c2bee7ed6bc708ec9"
+        },
+        "date": 1693388281886,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 18.98547788380497,
+            "unit": "us/iter",
+            "extra": "iterations: 36783\ncpu: 18.983329255362534 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 101.77931815536847,
+            "unit": "us/iter",
+            "extra": "iterations: 6874\ncpu: 101.64557753855107 us\nthreads: 1"
           }
         ]
       }
