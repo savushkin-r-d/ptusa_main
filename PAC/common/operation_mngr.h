@@ -886,7 +886,7 @@ class operation
 
         std::string name;
         operation_manager *owner;
-        int n;                                /// Номер операции у владельца.
+        int num_operation;                                /// Номер операции у владельца.
 
         operation_state stub;
 
