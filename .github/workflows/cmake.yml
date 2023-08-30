@@ -9,6 +9,8 @@ on:
   pull_request_target:
     branches: [ master ]
     types: [ labeled ]
+  merge_group:
+    types: [ checks_requested ]
 
 env:
   NINJA_VERSION: 1.10.1
@@ -19,7 +21,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
+    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
