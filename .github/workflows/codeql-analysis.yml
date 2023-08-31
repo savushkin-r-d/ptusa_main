@@ -21,7 +21,6 @@ on:
       - '**/*.md'
   schedule:
     - cron: '0 9 * * 1'
-  merge_group:
 
 jobs:
   analyze:
