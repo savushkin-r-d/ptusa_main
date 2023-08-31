@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693487238940,
+  "lastUpdate": 1693487666173,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -14338,6 +14338,38 @@ window.BENCHMARK_DATA = {
             "value": 136.4423707909128,
             "unit": "us/iter",
             "extra": "iterations: 5108\ncpu: 136.40440485512926 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "b0b30514a80f660229d55c0f64e741c2229cc755",
+          "message": "Fix threshold regulator parameters name",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/618/commits/b0b30514a80f660229d55c0f64e741c2229cc755"
+        },
+        "date": 1693487663391,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.13698091427807,
+            "unit": "us/iter",
+            "extra": "iterations: 30494\ncpu: 23.124283465599788 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 128.74118355010089,
+            "unit": "us/iter",
+            "extra": "iterations: 5459\ncpu: 128.66893203883492 us\nthreads: 1"
           }
         ]
       }
