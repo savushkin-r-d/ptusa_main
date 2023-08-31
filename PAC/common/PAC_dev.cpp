@@ -2560,8 +2560,8 @@ threshold_regulator::threshold_regulator( const char* name ) :device( name,
     device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
     static_cast<int>( PARAM::PARAMS_COUNT ) - 1 )
     {
-    set_par_name( static_cast<int>( PARAM::P_DELTA ), 0, "P_DELTA" );
-    set_par_name( static_cast<int>( PARAM::P_IS_REVERSE ), 0, "P_IS_REVERSE" );
+    set_par_name( static_cast<int>( PARAM::P_delta ), 0, "P_delta" );
+    set_par_name( static_cast<int>( PARAM::P_is_reverse ), 0, "P_is_reverse" );
     }
 //-----------------------------------------------------------------------------
 int threshold_regulator::get_state()
@@ -2624,7 +2624,7 @@ void threshold_regulator::direct_set_value( float val )
             in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
             }
 
-        auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
+        auto idx = static_cast<int>( PARAM::P_is_reverse );
         auto is_reverse = get_par( idx ) > 0;
         if ( STATE::OFF == state )
             {
@@ -2633,7 +2633,7 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            auto delta = get_par( static_cast<int>( PARAM::P_DELTA ) );
+            auto delta = get_par( static_cast<int>( PARAM::P_delta ) );
             if ( in_value > set_value + delta )
                 {
                 out_state = is_reverse ? 1 : 0;
