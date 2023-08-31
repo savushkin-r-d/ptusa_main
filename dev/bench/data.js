@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693472250418,
+  "lastUpdate": 1693472395924,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -14200,6 +14200,42 @@ window.BENCHMARK_DATA = {
             "value": 120.30004742197089,
             "unit": "us/iter",
             "extra": "iterations: 5799\ncpu: 120.28273840317294 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yana.sitkowecz@yandex.ru",
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": false,
+          "id": "0fd0e4032b213e2a455c094f55fe30079e6022ba",
+          "message": "Rename \"operation number\"  variable (#614)\n\n* Rename number operation variable\n\n* Fix name operation number variable",
+          "timestamp": "2023-08-31T08:46:23Z",
+          "tree_id": "c08a0e9a31836e2ec5f03fa2aef64dc63a3aa3fc",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/0fd0e4032b213e2a455c094f55fe30079e6022ba"
+        },
+        "date": 1693472394772,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.61811637101211,
+            "unit": "us/iter",
+            "extra": "iterations: 29088\ncpu: 23.48948707370737 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 124.59891252485309,
+            "unit": "us/iter",
+            "extra": "iterations: 5533\ncpu: 124.55472618832457 us\nthreads: 1"
           }
         ]
       }
