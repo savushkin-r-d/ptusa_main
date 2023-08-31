@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693471769947,
+  "lastUpdate": 1693471892488,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -14132,6 +14132,40 @@ window.BENCHMARK_DATA = {
             "value": 99.77605681001036,
             "unit": "us/iter",
             "extra": "iterations: 6953\ncpu: 99.76451891269954 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "882d525e6a3aa17832aa757448d8f6a815e1b31a",
+          "message": "[config][github actions] Remove event \"merge_group\" (#617)\n\nCheck on event \"merge_group\" is not necessary during merge queue processing.",
+          "timestamp": "2023-08-31T08:48:56Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/882d525e6a3aa17832aa757448d8f6a815e1b31a"
+        },
+        "date": 1693471891537,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.577031395901738,
+            "unit": "us/iter",
+            "extra": "iterations: 35769\ncpu: 19.562302552489587 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 100.09395433003128,
+            "unit": "us/iter",
+            "extra": "iterations: 6963\ncpu: 100.08295275025134 us\nthreads: 1"
           }
         ]
       }
