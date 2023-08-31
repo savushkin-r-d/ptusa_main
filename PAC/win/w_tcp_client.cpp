@@ -363,57 +363,82 @@ win_tcp_client::~win_tcp_client()
         }
     }
 
+bool win_tcp_client::checkBuff(int s)
+{
+
+    errno = 0;
+
+    // Настраиваем  file descriptor set.
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(s, &fds);
+
+    // Настраиваем время на таймаут.
+    timeval rec_tv;
+    rec_tv.tv_sec = 0;
+    rec_tv.tv_usec = 0;
+
+    // Ждем таймаута или полученных данных.
+    int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
+
+    if (n < 1) return false;
+    return true;
+}
+
+int win_tcp_client::checkConnection()
+{
+    if ( connectedstate != ACS_CONNECTED )
+    {
+        if ( get_delta_millisec( async_last_connect_try ) > reconnectTimeout || connectedstate == ACS_CONNECTING )
+        {
+            if ( connectedstate == ACS_DISCONNECTED )
+            {
+                async_last_connect_try = get_millisec();
+            }
+
+
+            int connectres = AsyncConnect();
+
+            if ( connectres == ACS_DISCONNECTED )
+            {
+                async_result = AR_SOCKETERROR;
+                reconnectTimeout *= 2;
+                if ( reconnectTimeout > maxreconnectTimeout )
+                {
+                    reconnectTimeout = maxreconnectTimeout;
+                }
+                return 0;
+            }
+
+            if ( connectres == ACS_CONNECTING )
+            {
+                connectedstate = ACS_CONNECTING;
+                return 0;
+            }
+
+            if ( connectres == ACS_CONNECTED )
+            {
+                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+            }
+        }
+        else
+        {
+            async_result = AR_SOCKETERROR;
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 int win_tcp_client::AsyncSend( unsigned int bytestosend )
     {
     async_result = AR_BUSY;
 	async_bytes_to_send = bytestosend;
-    if(!is_initialized)
-        {
-        if (!InitLib())
-            {
-            async_result = AR_SOCKETERROR;
-            return 0;
-            }
-        }
-    if (connectedstate != ACS_CONNECTED)
-        {
-        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
-            {
-			if (connectedstate == ACS_DISCONNECTED)
-			{
-				async_last_connect_try = get_millisec();
-			}
-            
-			int connectres = AsyncConnect();
 
-			if (connectres == ACS_DISCONNECTED)
-			{
-				async_result = AR_SOCKETERROR;
-				reconnectTimeout *= 2;
-				if (reconnectTimeout > maxreconnectTimeout)
-				{
-					reconnectTimeout = maxreconnectTimeout;
-				}
-				return 0;
-			}
+    auto connectionState = checkConnection();
 
-			if (connectres == ACS_CONNECTING)
-			{
-				connectedstate = ACS_CONNECTING;
-				return 0;
-			}
-			
-			if (connectres == ACS_CONNECTED)
-			{
-				reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
-			}
-		}
-		else
-		{
-			async_result = AR_SOCKETERROR;
-			return 0;
-            }
-        }
+    if ( !connectionState ) return 0;
 
 
     int res = send(socket_number, buff, bytestosend, 0 );
@@ -432,6 +457,37 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
         return tcp_client::AsyncSend(bytestosend);
         }
     }
+
+int win_tcp_client::AsyncRecive()
+{
+    async_result = AR_BUSY;
+
+    auto connectionState = checkConnection();
+
+    if ( !connectionState ) return 0;
+
+    if ( checkBuff( socket_number ) && !newDataIsAvailable )
+    {
+        asyncReciveTime = get_millisec();
+        newDataIsAvailable = true;
+    }
+
+    int res = 0;
+
+    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
+    {
+        newDataIsAvailable = false;
+        res = recv(socket_number, buff, buff_size, 0);
+    }
+
+    if ( res < 0 )
+    {
+        async_result = AR_SOCKETERROR;
+        Disconnect();
+        return 0;
+    }
+    return res;
+}
 
 int win_tcp_client::get_async_result()
 {
