@@ -1685,3 +1685,18 @@ TEST( threshold_regulator, set_string_property )
     p1.set_string_property( "OUT_VALUE", "M1" );
     p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
     }
+
+
+TEST( par_device, set_par_name )
+    {
+    par_device dev( 1 );
+    dev.set_par_name( 1, 0, "TEST_VERY_VERY_VERY_LONG_NAME" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    dev.save_device( buff );
+    EXPECT_STREQ( "", buff );
+
+    dev.set_par_name( 1, 0, "TEST_NAME" );
+    dev.save_device( buff );
+    EXPECT_STREQ( "TEST_NAME=0, ", buff );
+    } 
