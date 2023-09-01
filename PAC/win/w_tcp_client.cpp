@@ -464,18 +464,18 @@ int win_tcp_client::AsyncRecive()
 
     if ( !checkConnection()) return 0;
 
-    if ( checkBuff( socket_number ) && !newDataIsAvailable )
+    if ( checkBuff( socket_number ) && !isNewData)
     {
         asyncReciveTime = get_millisec();
-        newDataIsAvailable = true;
+        isNewData = true;
     }
 
     int res = 0;
 
-    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
+    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && isNewData)
     {
-        newDataIsAvailable = false;
         res = recv(socket_number, buff, buff_size, 0);
+        isNewData = false;
     }
 
     if ( res < 0 )

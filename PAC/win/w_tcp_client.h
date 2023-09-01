@@ -13,7 +13,7 @@ class win_tcp_client: public tcp_client
 		sockaddr_in async_sock_address;
 		unsigned int async_bytes_to_send;
 		u_long asyncReciveTime;
-		bool newDataIsAvailable;
+		bool isNewData;
 	public:
 		int InitLib();
 		void DeinitLib();
