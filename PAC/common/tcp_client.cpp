@@ -66,6 +66,52 @@ int tcp_client::get_id()
 
 int tcp_client::checkConnection()
     {
+    if ( connectedstate != ACS_CONNECTED )
+        {
+        if ( get_delta_millisec( async_last_connect_try ) > reconnectTimeout || connectedstate == ACS_CONNECTING )
+            {
+            if ( connectedstate == ACS_DISCONNECTED )
+                {
+                async_last_connect_try = get_millisec();
+                }
+
+
+            int connectres = AsyncConnect();
+
+            if ( connectres == ACS_DISCONNECTED )
+                {
+                async_result = AR_SOCKETERROR;
+                reconnectTimeout *= 2;
+                if ( reconnectTimeout > maxreconnectTimeout )
+                    {
+                    reconnectTimeout = maxreconnectTimeout;
+                    }
+                return 0;
+                }
+
+            if ( connectres == ACS_CONNECTING )
+                {
+                connectedstate = ACS_CONNECTING;
+                return 0;
+                }
+
+            if ( connectres == ACS_CONNECTED )
+                {
+                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+                }
+            }
+        else
+            {
+            async_result = AR_SOCKETERROR;
+            return 0;
+            }
+        }
+
+    return 1;
+    }
+
+int tcp_client::AsyncConnect()
+    {
     return 0;
     }
 

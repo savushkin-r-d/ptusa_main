@@ -45,7 +45,8 @@ class tcp_client
         static tcp_client* Create(const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass,
             unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
         virtual int Communicate(unsigned int bytestosend);
-        virtual int checkConnection();
+        int checkConnection();
+        virtual int AsyncConnect();
         virtual int AsyncSend(unsigned int bytestosend);
         virtual int AsyncRecive();
         unsigned int buff_size;

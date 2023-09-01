@@ -18,11 +18,10 @@ class win_tcp_client: public tcp_client
 		int InitLib();
 		void DeinitLib();
 		int Connect();
-		int AsyncConnect();
+		int AsyncConnect() override;
 		virtual void Disconnect();
 		virtual int Communicate( unsigned int bytestosend ) override;
 		bool checkBuff(int s);
-		int checkConnection();
 		virtual int AsyncSend(unsigned int bytestosend);
 		int AsyncRecive() override;
 		virtual int get_async_result() override;
