@@ -462,9 +462,7 @@ int win_tcp_client::AsyncRecive()
 {
     async_result = AR_BUSY;
 
-    auto connectionState = checkConnection();
-
-    if ( !connectionState ) return 0;
+    if ( !checkConnection()) return 0;
 
     if ( checkBuff( socket_number ) && !newDataIsAvailable )
     {
