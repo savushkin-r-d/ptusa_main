@@ -2,6 +2,7 @@
 
 using namespace ::testing;
 
+#ifdef WIN_OS
 TEST( tcp_client, checkConnection )
 	{
 	win_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
@@ -12,3 +13,4 @@ TEST( tcp_client, checkConnection )
 	 
 	EXPECT_EQ( 0, cl.checkConnection() );
 	}
+#endif
