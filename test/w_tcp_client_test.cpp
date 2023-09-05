@@ -3,9 +3,12 @@
 using namespace ::testing;
 
 #ifdef WIN_OS
-TEST( tcp_client, checkConnection )
+TEST( win_tcp_client, checkConnection )
 	{
 	win_tcp_client cl( "127.0.0.0", 10000, 1, 1 );
+
+	cl.AsyncSend( 2 );
+	cl.AsyncRecive();
 
 	EXPECT_EQ( 0, cl.checkConnection() );
 
