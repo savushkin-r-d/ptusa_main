@@ -11,6 +11,8 @@ TEST( tcp_communicator_linux, evaluate )
 
     linux_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
     cl.checkConnection();
+    cl.reconnectTimeout = 1000000;
+    cl.checkConnection();
     cl.Connect();
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
