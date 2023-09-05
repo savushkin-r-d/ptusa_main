@@ -1410,6 +1410,11 @@ TEST( wages_eth, evaluate_io )
 
     w1.evaluate_io();
     EXPECT_EQ( 0, w1.get_value() );
+
+    iot_wages_eth w2( 1, "127.0.0.1", 10000 );
+
+    w2.evaluate();
+    EXPECT_EQ( 0, w2.get_wages_value() );
     }
 
 TEST( wages_eth, get_value )
