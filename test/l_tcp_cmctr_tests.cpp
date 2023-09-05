@@ -20,6 +20,7 @@ TEST( tcp_communicator_linux, evaluate )
     cl.AsyncRecive();
     cl.async_timeout = 0;
     cl.AsyncRecive();
+    cl.checkConnection();
 
     sleep( 0 );
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );

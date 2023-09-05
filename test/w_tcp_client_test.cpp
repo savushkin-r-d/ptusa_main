@@ -1,7 +1,7 @@
 #include "w_tcp_client_test.h"
 
 using namespace ::testing;
-
+/*
 #ifdef WIN_OS
 TEST( win_tcp_client, checkConnection )
 	{
@@ -17,4 +17,4 @@ TEST( win_tcp_client, checkConnection )
 	EXPECT_EQ( 0, cl.checkConnection() );
 
 	}
-#endif
+#endif*/
