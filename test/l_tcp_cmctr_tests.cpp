@@ -10,6 +10,7 @@ TEST( tcp_communicator_linux, evaluate )
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
     linux_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
+    cl.checkConnection();
     cl.Connect();
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
@@ -34,6 +35,10 @@ TEST( tcp_communicator_linux, checkBuff )
 
     auto res = tcp_communicator_linux::checkBuff( s );
     EXPECT_TRUE( res );
+
+    res = tcp_communicator_linux::checkBuff( -10 );
+
+    EXPECT_FALSE( res );
     }
     
 #endif
