@@ -88,11 +88,11 @@ TEST( OPCUA_server, evaluate )
             }
         }   
     EXPECT_TRUE( is_exist_node );
-    UA_BrowseResult_deleteMembers( &br );
+    UA_BrowseResult_clear( &br );
 
     UA_Variant out;
     UA_Variant_init( &out );
-    UA_NodeId valve1_state_NodeId = UA_NODEID_STRING( 0, "Valve1.state" );
+    UA_NodeId valve1_state_NodeId = UA_NODEID_STRING_ALLOC( 0, "Valve1.state" );
     res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_INT32 ] );
@@ -100,7 +100,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( 1, *state );
 
 
-    UA_NodeId valve1_value_NodeId = UA_NODEID_STRING( 0, "Valve1.value" );
+    UA_NodeId valve1_value_NodeId = UA_NODEID_STRING_ALLOC( 0, "Valve1.value" );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_FLOAT ] );
@@ -137,14 +137,14 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( 100.f, *value );
 
 
-    UA_NodeId uptime_NodeId = UA_NODEID_STRING( 0, "PAC_info.uptime" );
+    UA_NodeId uptime_NodeId = UA_NODEID_STRING_ALLOC( 0, "PAC_info.uptime" );
     res = UA_Server_readValue( UA_server, uptime_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     auto str = static_cast<UA_String*>( out.data );
     EXPECT_EQ( "0 дн. 0:0:0", std::string( reinterpret_cast<char*>( str->data ),
         str->length ) );
 
-    UA_NodeId version_NodeId = UA_NODEID_STRING( 0, "PAC_info.version" );
+    UA_NodeId version_NodeId = UA_NODEID_STRING_ALLOC( 0, "PAC_info.version" );
     res = UA_Server_readValue( UA_server, version_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     str = static_cast<UA_String*>( out.data );
