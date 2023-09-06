@@ -1,7 +1,7 @@
 #include "w_tcp_client_test.h"
 
 using namespace ::testing;
-/*
+
 #ifdef WIN_OS
 TEST( win_tcp_client, checkConnection )
 	{
@@ -10,6 +10,8 @@ TEST( win_tcp_client, checkConnection )
 	cl.AsyncSend( 2 );
 	cl.AsyncRecive();
 
+	EXPECT_EQ( 0, cl.tcp_client::AsyncConnect() );
+
 	EXPECT_EQ( 0, cl.checkConnection() );
 
 	cl.reconnectTimeout = 1000000;
@@ -17,4 +19,4 @@ TEST( win_tcp_client, checkConnection )
 	EXPECT_EQ( 0, cl.checkConnection() );
 
 	}
-#endif*/
+#endif

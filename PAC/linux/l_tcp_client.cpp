@@ -306,7 +306,7 @@ int linux_tcp_client::AsyncRecive()
         newDataIsAvailable = true;
     }
 
-    int res = 0;
+    int res = -1;
 
     if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
     {

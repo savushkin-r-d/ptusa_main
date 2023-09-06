@@ -11,7 +11,7 @@ TEST( tcp_communicator_linux, evaluate )
 
     linux_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
     cl.checkConnection();
-    cl.reconnectTimeout = 1000000;
+    cl.reconnectTimeout = 0;
     cl.checkConnection();
     cl.Connect();
 
@@ -21,7 +21,7 @@ TEST( tcp_communicator_linux, evaluate )
     cl.buff[ 1 ] = 33;
     cl.AsyncSend( 2 );
     cl.AsyncRecive();
-    cl.async_timeout = 0;
+    cl.async_timeout = 10000000;
     cl.AsyncRecive();
     cl.checkConnection();
 
