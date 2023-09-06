@@ -137,7 +137,7 @@ If an error occurs after startup, then you should clear the CMake cache `Project
 
 Eclipse IDE with CMake based project on Linux.
 
-## Using PLCnext Technology C++ Toolchain ##
+## Using PLCnext Technology C++ Toolchain in Windows ##
 
 Download the latest versions from the Phoenix Contact [website](https://www.phoenixcontact.com/products) (for example, from the **AXC F 2152** area) ```PLCnext Technology C++ toolchain for Windows```(current is 2023.0 LTS) and ```sdk for Windows 64 bit``` (current is 2022.0.4 LTS), in the section Downloads->Software $-$ http://www.phoenixcontact.com/qr/2404267/softw.
 
