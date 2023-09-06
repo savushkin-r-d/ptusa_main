@@ -310,7 +310,7 @@ template < class type, bool is_float > class parameters
 
         int save_device_ex( char *buff, const char *prefix, const char *new_name )
             {
-            int res = sprintf( buff, "%s%s = \n", prefix, new_name );
+            int res = sprintf( buff, "%s%s=\n", prefix, new_name );
             res += save_dev( buff + res, prefix );
 
             return res;
@@ -318,7 +318,7 @@ template < class type, bool is_float > class parameters
 
         int save_device( char *buff, const char *prefix )
             {
-            int res = sprintf( buff, "%s%s = \n", prefix, name );
+            int res = sprintf( buff, "%s%s=\n", prefix, name );
             res += save_dev( buff + res, prefix );
 
             return res;

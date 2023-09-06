@@ -427,6 +427,11 @@ void PID::set_string_property( const char* field, const char* value )
         //OUT_VALUE
         case 'O':
             actuator = G_DEVICE_MANAGER()->get_device( value );
+            if ( this == actuator )
+                {
+                G_LOG->error( "\'%s\' - self asigment (out set to self).", get_name() );
+                actuator = nullptr;
+                }
             break;
 
         default:
@@ -474,5 +479,10 @@ int PID::save_device( char *buff )
         }
 
     return answer_size;
+    }
+//-----------------------------------------------------------------------------
+device* PID::get_actuator() const
+    {
+    return actuator;
     }
 //-----------------------------------------------------------------------------

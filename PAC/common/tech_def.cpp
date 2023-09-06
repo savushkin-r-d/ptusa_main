@@ -29,7 +29,6 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         type( type ),
         cmd( 0 ),
         operations_count( operations_count ),
-        modes_time( run_time_params_u_int_4( operations_count, "MODES_TIME" ) ),
         operations_manager( 0 )
     {
     u_int state_size_in_int4 = operations_count / 32; // Размер состояния в double word.
@@ -55,7 +54,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     full_name = new char[ MAX_LENGTH ];
     snprintf( full_name, MAX_LENGTH, "%s%s%d", new_name, sign_str, number );
 
-    operations_manager = new operation_manager( operations_count, this );
+    operations_manager = new operation_manager( this );
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
@@ -235,6 +234,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
                                     set_err_msg( res_str, operation_n, 0, ERR_ON_WITH_ERRORS );
                                     }
                                 //Проверка режима на проверку ОС устройств.
+
+
+                                operations_manager->reset_active_operation_or_idle_time();
                                 }
                             else
                                 {
@@ -324,9 +326,7 @@ int tech_object::evaluate()
     for ( u_int i = 0; i < operations_count; i++ )
         {
         int idx = i + 1;
-        operation* op = ( *operations_manager )[ idx ];
-
-        modes_time[ idx ] = op->evaluation_time() / 1000;
+        auto op = ( *operations_manager )[ idx ];
         op->evaluate();
 
         const int ERR_STR_SIZE = 80;
@@ -376,7 +376,7 @@ int tech_object::final_mode( u_int mode )
     {
     if ( mode > operations_count || 0 == mode ) return 1;
 
-    operations_manager->reset_idle_time();
+    operations_manager->reset_active_operation_or_idle_time();
 
     return 0;
     }
@@ -831,53 +831,31 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    //Время простоя.
-    static char up_time_str [ 50 ] = { 0 };
-    u_int_4 up_hours;
-    u_int_4 up_mins;
-    u_int_4 up_secs;
+    //Время простоя или текущей активной операции.    
+    auto duration = operations_manager->get_idle_time() / 1000;
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "\tACTIVE_OPERATION_OR_IDLE_TIME={},\n", duration ).size;
 
-    up_secs = operations_manager->get_idle_time() / 1000;
-
-    up_hours = up_secs / ( 60 * 60 );
-    up_mins = up_secs / 60 % 60 ;
-    up_secs %= 60;
-
-    sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
-        ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
-    res += sprintf( buff + res, "%s", up_time_str );
-
-    //Время режимов.
-    res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
-
-    for ( u_int i = 1; i <= modes_time.get_count(); i++ )
+    //Время главного шага текущей активной операции.
+    duration = 0L;
+    for ( u_int i = 1; i <= operations_count; i++ )
         {
-        up_secs = modes_time[ i ];
-
-        up_hours = up_secs / ( 60 * 60 );
-        up_mins = up_secs / 60 % 60 ;
-        up_secs %= 60;
-
-        if ( up_hours )
+        if ( get_operation_state( i ) == 1 )
             {
-            sprintf( up_time_str, "\'%02lu:%02lu:%02lu\', ",
-                ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
+            auto op = ( *operations_manager )[ i ];
+            duration = op->active_step_evaluation_time() / 1000;
             }
-        else
-            {
-            if ( up_mins )
-                {
-                sprintf( up_time_str, "\'   %02lu:%02lu\', ",
-                    ( u_long ) up_mins, ( u_long ) up_secs );
-                }
-            else
-                {
-                    sprintf( up_time_str, "\'      %02lu\', ",
-                        (u_long)up_secs );
-                    }
-                    }
+        }
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "\tACTIVE_STEP_TIME={},\n", duration ).size;
 
-        res += sprintf( buff + res, "%s", up_time_str );
+    //Время операций.
+    res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
+    for ( u_int i = 0; i < operations_count; i++ )
+        {
+        auto op = ( *operations_manager )[ i + 1 ];    
+        auto t = op->evaluation_time() / 1000;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "{}, ", t ).size;
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
@@ -1602,6 +1580,7 @@ void tech_object_manager::add_tech_object( tech_object* new_tech_object )
 
     G_ERRORS_MANAGER->add_error( new tech_obj_error( new_tech_object ) );
     }
+
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )
     {
