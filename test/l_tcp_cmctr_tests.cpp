@@ -21,7 +21,7 @@ TEST( tcp_communicator_linux, evaluate )
     cl.buff[ 1 ] = 33;
     cl.AsyncSend( 2 );
     cl.AsyncRecive();
-    cl.async_timeout = 10000000;
+    cl.async_timeout = 0;
     cl.AsyncRecive();
     cl.checkConnection();
 
