@@ -334,10 +334,8 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         u_int_4 cmd;                ///< Хранение команды объекта.
         u_int   operations_count;   ///< Количество операций.
 
-        std::vector< u_int_4 >  state;  ///< Состояние объекта (битовое).
-        run_time_params_u_int_4 modes_time;    ///< Время операций, сек.
-
-        std::vector< u_int_4 >  available;     ///< Доступность операций.
+        std::vector< u_int_4 >  state;          ///< Состояние объекта (битовое).
+        std::vector< u_int_4 >  available;      ///< Доступность операций.
 
         char *name;        ///< Имя объекта.
         char* full_name;   ///< Имя объекта + номер.

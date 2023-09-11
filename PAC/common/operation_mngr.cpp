@@ -17,7 +17,7 @@ const std::array <const char* const, operation::STATES_MAX> operation::en_state_
 operation::operation(const char* name, operation_manager *owner, int n) :
     name( name ),
     owner( owner ),
-    n( n ),
+    operation_num( n ),
     stub( "заглушка", owner, -1 )
     {
     for ( auto state_name: en_state_str )
@@ -254,25 +254,25 @@ void operation::evaluate()
                 case state_idx::RUN:
                     //Из выполнения по сигналам операция может быть отключена
                     //(перейти в состояние простоя).
-                    unit->set_mode( n, state_idx::IDLE );
+                    unit->set_mode( operation_num, state_idx::IDLE );
                     unit->set_err_msg( "автоотключение по запросу",
-                        n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                        operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
                     break;
 
                 case state_idx::STARTING:
-                    unit->set_mode( n, state_idx::RUN );
+                    unit->set_mode( operation_num, state_idx::RUN );
                     break;
 
                 case state_idx::PAUSING:
-                    unit->set_mode( n, state_idx::PAUSE );
+                    unit->set_mode( operation_num, state_idx::PAUSE );
                     break;
 
                 case state_idx::UNPAUSING:
-                    unit->set_mode( n, state_idx::RUN );
+                    unit->set_mode( operation_num, state_idx::RUN );
                     break;
 
                 case state_idx::STOPPING:
-                    unit->set_mode( n, state_idx::STOP );
+                    unit->set_mode( operation_num, state_idx::STOP );
                     break;                    
 
                 default:
@@ -298,15 +298,15 @@ int operation::process_auto_switch_on()
 
     if ( is_first_goto_next_state )
         {
-        auto result = unit->set_mode( n, operation::RUN );
+        auto result = unit->set_mode( operation_num, operation::RUN );
         if ( result == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
             return 0;
             }
         else
             {
-            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
             start_warn = get_millisec();
             start_wait = get_millisec();
             is_first_goto_next_state = false;
@@ -317,25 +317,25 @@ int operation::process_auto_switch_on()
         auto dt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WARN_TIME ];
         auto wt = G_PAC_INFO()->par[ PAC_info::P_AUTO_OPERATION_WAIT_TIME ];
 
-        if ( unit->check_operation_on( n, false ) == 0 )
+        if ( unit->check_operation_on( operation_num, false ) == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
-            unit->set_mode( n, operation::RUN );
+            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
+            unit->set_mode( operation_num, operation::RUN );
             return 0;
             }
 
         // Прошел заданный интервал для уведомления.
         if ( get_delta_millisec( start_warn ) > dt )
             {
-            unit->check_operation_on( n );
-            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            unit->check_operation_on( operation_num );
+            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
             start_warn = get_millisec();
             }
 
         // Прошел заданный интервал для ожидания возможности включения операции.
         if ( get_delta_millisec( start_wait ) > wt )
             {
-            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            unit->set_err_msg( "автовключение по запросу отключено", operation_num, 0, ERR );
             was_fail = true;
             }
         }
@@ -2490,12 +2490,12 @@ operation* operation_manager::operator[]( unsigned int idx )
             idx, operations.size() );
         }
 
-    return oper_stub;
+    return &oper_stub;
     }
 //-----------------------------------------------------------------------------
 unsigned long operation_manager::get_idle_time()
     {
-    return get_delta_millisec( last_action_time );
+    return get_delta_millisec( active_operation_or_idle_time );
     }
 //-----------------------------------------------------------------------------
 void operation_manager::print()
@@ -2509,11 +2509,9 @@ void operation_manager::print()
         }
     }
 //-----------------------------------------------------------------------------
-operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
-    owner( owner ),
-    last_action_time( get_millisec() )
+operation_manager::operation_manager( i_tech_object *owner ):
+    owner( owner )    
     {
-    oper_stub = new operation( "Операция-заглушка", this, -1 );
     }
 //-----------------------------------------------------------------------------
 operation_manager::~operation_manager()
@@ -2523,9 +2521,6 @@ operation_manager::~operation_manager()
         delete operations[ i ];
         operations[ i ] = nullptr;
         }
-
-    delete oper_stub;
-    oper_stub = nullptr;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

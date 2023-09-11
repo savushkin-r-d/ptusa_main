@@ -4736,8 +4736,8 @@ class threshold_regulator :public device, public i_Lua_save_device
     public:
         enum class PARAM
             {
-            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
-            P_DELTA,
+            P_is_reverse = 1,	        ///Обратного (реверсивного) действия.
+            P_delta,
 
             PARAMS_COUNT
             };
