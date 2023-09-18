@@ -49,7 +49,8 @@ class tcp_client
 
         int checkConnection();
         virtual int AsyncConnect();
-        virtual int AsyncSend(unsigned int bytestosend);
+        virtual int AsyncSend( unsigned int bytestosend );
+
         virtual int AsyncRecive();
         unsigned int buff_size;
         virtual int get_socket();
