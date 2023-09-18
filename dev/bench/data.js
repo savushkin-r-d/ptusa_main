@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695044373543,
+  "lastUpdate": 1695044766224,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15060,6 +15060,38 @@ window.BENCHMARK_DATA = {
             "value": 113.47431070622292,
             "unit": "us/iter",
             "extra": "iterations: 6202\ncpu: 113.05622379877462 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "473fd01fecad4169c87d05b6366414cdc96666d6",
+          "message": "Add Codecov token",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/620/commits/473fd01fecad4169c87d05b6366414cdc96666d6"
+        },
+        "date": 1695044765194,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.627234729737644,
+            "unit": "us/iter",
+            "extra": "iterations: 35854\ncpu: 19.56097227645451 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.7151007252195,
+            "unit": "us/iter",
+            "extra": "iterations: 6205\ncpu: 113.29302175664787 us\nthreads: 1"
           }
         ]
       }
