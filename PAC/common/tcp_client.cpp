@@ -81,11 +81,7 @@ int tcp_client::checkConnection()
             if ( connectres == ACS_DISCONNECTED )
                 {
                 async_result = AR_SOCKETERROR;
-                reconnectTimeout *= 2;
-                if ( reconnectTimeout > maxreconnectTimeout )
-                    {
-                    reconnectTimeout = maxreconnectTimeout;
-                    }
+                reconnectTimeout > maxreconnectTimeout ? maxreconnectTimeout : reconnectTimeout *= 2;
                 return 0;
                 }
 
@@ -124,8 +120,8 @@ int tcp_client::AsyncSend( unsigned int bytestosend )
 
 int tcp_client::AsyncRecive()
     {
-    async_result = AR_BUSY;
     tcp_communicator::get_instance()->add_async_client(this);
+    async_result = AR_BUSY;
     return 0;
     }
 

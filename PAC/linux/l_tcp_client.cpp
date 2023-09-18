@@ -312,7 +312,7 @@ int linux_tcp_client::AsyncRecive()
     {
         newDataIsAvailable = false;
         res = tcp_communicator_linux::recvtimeout( socket_number, reinterpret_cast<unsigned char*>( buff ),
-            buff_size, 0, 0, ip, "tcp client", 0 );
+            buff_size, 0, 0, ip, "tcp client", nullptr );
     }
 
     if ( res < 0 )
