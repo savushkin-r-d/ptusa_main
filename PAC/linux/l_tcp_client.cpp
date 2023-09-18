@@ -326,7 +326,7 @@ int linux_tcp_client::AsyncRecive()
 
 int linux_tcp_client::get_async_result() {
     /// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
-    if (connectedstate == ACS_CONNECTING)
+    if ( connectedstate == ACS_CONNECTING )
     {
         AsyncSend(async_bytes_to_send);
     }
