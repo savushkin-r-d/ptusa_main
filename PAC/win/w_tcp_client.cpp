@@ -363,7 +363,8 @@ win_tcp_client::~win_tcp_client()
         }
     }
 
-bool win_tcp_client::checkBuff(int s)
+bool win_tcp_client::checkBuff( int s )
+
 {
 
     errno = 0;
