@@ -373,7 +373,8 @@ bool win_tcp_client::checkBuff( int s )
     fd_set fds;
     FD_ZERO( &fds );
 
-    FD_SET(s, &fds);
+    FD_SET( s, &fds );
+
 
     // Настраиваем время на таймаут.
     timeval rec_tv;
