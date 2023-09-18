@@ -22,7 +22,8 @@ class win_tcp_client: public tcp_client
 		virtual void Disconnect();
 		virtual int Communicate( unsigned int bytestosend ) override;
 		bool checkBuff(int s);
-		virtual int AsyncSend(unsigned int bytestosend);
+		virtual int AsyncSend( unsigned int bytestosend );
+
 		int AsyncRecive() override;
 		virtual int get_async_result() override;
 		win_tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100 );
