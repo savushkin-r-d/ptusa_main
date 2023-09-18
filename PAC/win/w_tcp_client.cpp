@@ -380,7 +380,8 @@ bool win_tcp_client::checkBuff( int s )
     rec_tv.tv_usec = 0;
 
     // Ждем таймаута или полученных данных.
-    int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
+    int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
+
 
     if (n < 1) return false;
     return true;
