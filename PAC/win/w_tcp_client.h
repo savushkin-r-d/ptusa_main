@@ -21,7 +21,8 @@ class win_tcp_client: public tcp_client
 		int AsyncConnect() override;
 		virtual void Disconnect();
 		virtual int Communicate( unsigned int bytestosend ) override;
-		bool checkBuff(int s);
+		bool checkBuff( int s );
+
 		virtual int AsyncSend( unsigned int bytestosend );
 
 		int AsyncRecive() override;
