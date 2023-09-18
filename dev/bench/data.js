@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695027852051,
+  "lastUpdate": 1695040112034,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -14888,6 +14888,40 @@ window.BENCHMARK_DATA = {
             "value": 110.35027110213088,
             "unit": "us/iter",
             "extra": "iterations: 6433\ncpu: 109.1661899580289 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life",
+            "email": "yana.sitkowecz@yandex.ru"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "0794d025b8c322a8d8c01193c82c9569f034c9e6",
+          "message": "[doc] Fix toolchain docs (#610)\n\n* Add toolchain downloading\n\n* Update toolchain readme\n\n* Update readme.md\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update russian_readme/readme.md\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update readme.md\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2023-09-18T12:26:09Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/0794d025b8c322a8d8c01193c82c9569f034c9e6"
+        },
+        "date": 1695040110921,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.666554702817706,
+            "unit": "us/iter",
+            "extra": "iterations: 35702\ncpu: 19.648504285474203 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.33268467011813,
+            "unit": "us/iter",
+            "extra": "iterations: 6184\ncpu: 112.91018758085382 us\nthreads: 1"
           }
         ]
       }
