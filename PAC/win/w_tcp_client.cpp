@@ -413,33 +413,34 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
     }
 
 int win_tcp_client::AsyncRecive()
-{
+    {
     async_result = AR_BUSY;
 
     if ( !checkConnection() ) return 0;
 
     if ( checkBuff( socket_number ) && !isNewData )
-    {
+        {
         asyncReciveTime = get_millisec();
         isNewData = true;
-    }
+        }
 
     int res = 0;
 
     if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && isNewData )
-    {
+        {
         res = recv( socket_number, buff, buff_size, 0 );
         isNewData = false;
-    }
+        }
 
     if ( res < 0 )
-    {
+        {
         async_result = AR_SOCKETERROR;
         Disconnect();
         return 0;
-    }
+        }
     return res;
-}
+    }
+
 
 int win_tcp_client::get_async_result()
 {
