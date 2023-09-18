@@ -295,25 +295,25 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     }
 
 int linux_tcp_client::AsyncRecive()
-{
+    {
     async_result = AR_BUSY;
 
     if ( !checkConnection() ) return 0;
 
     if ( tcp_communicator_linux::checkBuff( socket_number ) && !newDataIsAvailable )
-    {
+        {
         asyncReciveTime = get_millisec();
         newDataIsAvailable = true;
-    }
+        }
 
     int res = -1;
 
     if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
-    {
+        {
         newDataIsAvailable = false;
         res = tcp_communicator_linux::recvtimeout( socket_number, reinterpret_cast<unsigned char*>( buff ),
             buff_size, 0, 0, ip, "tcp client", nullptr );
-    }
+        }
 
     if ( res < 0 )
        {
@@ -322,7 +322,7 @@ int linux_tcp_client::AsyncRecive()
        return 0;
        }
     return res;
-}
+    }
 
 int linux_tcp_client::get_async_result() {
     /// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
