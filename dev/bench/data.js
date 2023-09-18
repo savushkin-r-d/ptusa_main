@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695043811627,
+  "lastUpdate": 1695044373543,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15024,6 +15024,42 @@ window.BENCHMARK_DATA = {
             "value": 109.38079514699206,
             "unit": "us/iter",
             "extra": "iterations: 6429\ncpu: 108.88344999222275 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "989cca7b01115a92b94143d83573436fd64df1a3",
+          "message": "Fix OPC UA test (#619)\n\nCorrect nodes creation.",
+          "timestamp": "2023-09-18T13:27:47Z",
+          "tree_id": "232c97f80c47ca44b196364542a697d7cd21ce98",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/989cca7b01115a92b94143d83573436fd64df1a3"
+        },
+        "date": 1695044372401,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.540162181026798,
+            "unit": "us/iter",
+            "extra": "iterations: 35818\ncpu: 19.5345301245184 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.47431070622292,
+            "unit": "us/iter",
+            "extra": "iterations: 6202\ncpu: 113.05622379877462 us\nthreads: 1"
           }
         ]
       }
