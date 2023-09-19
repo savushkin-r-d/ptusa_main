@@ -385,8 +385,8 @@ bool win_tcp_client::checkBuff( int s )
     int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
 
 
-    if (n < 1) return false;
-    return true;
+   return n >= 1;
+
 }
 
 int win_tcp_client::AsyncSend( unsigned int bytestosend )
