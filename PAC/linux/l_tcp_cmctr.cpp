@@ -779,8 +779,7 @@ bool tcp_communicator_linux::checkBuff( int s )
         // Ждем таймаута или полученных данных.
         int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
 
-        if ( n < 1 ) return false;
-        return true;
+      return n >= 1;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int idx )
