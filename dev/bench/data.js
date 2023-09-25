@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695109204528,
+  "lastUpdate": 1695632670291,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15256,6 +15256,40 @@ window.BENCHMARK_DATA = {
             "value": 114.09515404572919,
             "unit": "us/iter",
             "extra": "iterations: 6167\ncpu: 113.65745094859739 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "293fb0e200391126aa9fb3a1f6a049f89e5b82cf",
+          "message": "Add Codecov token (#620)\n\nFix this issue - https://github.com/codecov/codecov-action/issues/837.",
+          "timestamp": "2023-09-19T06:10:08Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/293fb0e200391126aa9fb3a1f6a049f89e5b82cf"
+        },
+        "date": 1695632669396,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.797285314333497,
+            "unit": "us/iter",
+            "extra": "iterations: 35361\ncpu: 19.796187890613957 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 114.02481980520382,
+            "unit": "us/iter",
+            "extra": "iterations: 6160\ncpu: 113.61173701298704 us\nthreads: 1"
           }
         ]
       }
