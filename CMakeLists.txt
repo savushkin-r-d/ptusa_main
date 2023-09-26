@@ -182,7 +182,9 @@ endif()
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
-target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+if(NOT MINGW)
+    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+endif()
 
 if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
