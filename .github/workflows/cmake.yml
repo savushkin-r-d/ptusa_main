@@ -318,6 +318,7 @@ jobs:
       with:
         fail_ci_if_error: true
         verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Store benchmark result (Linux only)
       if: runner.os == 'Linux'
