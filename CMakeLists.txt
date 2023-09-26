@@ -24,7 +24,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-add_compile_definitions(PAC_PC)
+if(NOT ARP_DEVICE)
+    add_compile_definitions(PAC_PC)
+endif()
 
 if(LINUX)
     add_compile_definitions(LINUX_OS)
@@ -154,11 +156,11 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-if(NOT MINGW)
-    add_executable(main_perfomance_test ${common_src} ${win_src}
-           test/perfomance/main_perfomance_test.cpp           
-           PAC_control_projects/main_control_prg/version.rc)
-endif()
+    if(NOT MINGW)
+        add_executable(main_perfomance_test ${common_src} ${win_src}
+               test/perfomance/main_perfomance_test.cpp
+               PAC_control_projects/main_control_prg/version.rc)
+    endif()
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -177,6 +179,10 @@ endif()
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
 endif()
+
+target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
 
 if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
