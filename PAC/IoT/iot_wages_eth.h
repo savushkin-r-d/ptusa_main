@@ -28,7 +28,7 @@ class iot_wages_eth : public i_iot_node
         enum class CONSTANTS
             {
             BUFF_SIZE = 256,
-            SEND_RECEIVE_TIMEOUT = 300,
+            SEND_RECEIVE_TIMEOUT = 150,
             };
 
         int status = 0;

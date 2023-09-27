@@ -273,49 +273,11 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     async_result = AR_BUSY;
     async_bytes_to_send = bytestosend;
 
-    if (connectedstate != ACS_CONNECTED)
-        {
-        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
-            {
-            if (connectedstate == ACS_DISCONNECTED)
-                {
-                async_last_connect_try = get_millisec();
-                }
+    auto connectionState = checkConnection();
 
+    if ( !connectionState ) return 0;
 
-            int connectres = AsyncConnect();
-
-            if (connectres == ACS_DISCONNECTED)
-                {
-                async_result = AR_SOCKETERROR;
-                reconnectTimeout *= 2;
-                if (reconnectTimeout > maxreconnectTimeout)
-                {
-                    reconnectTimeout = maxreconnectTimeout;
-                }
-                return 0;
-                }
-
-            if (connectres == ACS_CONNECTING)
-                {
-                connectedstate = ACS_CONNECTING;
-                return 0;
-                }
-
-            if (connectres == ACS_CONNECTED)
-                {
-                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
-                }
-            }
-        else
-            {
-            async_result = AR_SOCKETERROR;
-            return 0;
-            }
-        }
-
-
-    int res = tcp_communicator_linux::sendall(socket_number, (unsigned char*) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0);
+    int res = tcp_communicator_linux::sendall( socket_number, ( unsigned char* ) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0 );
     
 
     if (res < 0)
@@ -332,9 +294,39 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
         }
     }
 
+int linux_tcp_client::AsyncRecive()
+    {
+    async_result = AR_BUSY;
+
+    if ( !checkConnection() ) return 0;
+
+    if ( tcp_communicator_linux::checkBuff( socket_number ) && !newDataIsAvailable )
+        {
+        asyncReciveTime = get_millisec();
+        newDataIsAvailable = true;
+        }
+
+    int res = -1;
+
+    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
+        {
+        newDataIsAvailable = false;
+        res = tcp_communicator_linux::recvtimeout( socket_number, reinterpret_cast<unsigned char*>( buff ),
+            buff_size, 0, 0, ip, "tcp client", nullptr );
+        }
+
+    if ( res < 0 )
+       {
+       async_result = AR_SOCKETERROR;
+       Disconnect();
+       return 0;
+       }
+    return res;
+    }
+
 int linux_tcp_client::get_async_result() {
     /// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
-    if (connectedstate == ACS_CONNECTING)
+    if ( connectedstate == ACS_CONNECTING )
     {
         AsyncSend(async_bytes_to_send);
     }
