@@ -64,10 +64,66 @@ int tcp_client::get_id()
     return id;
     }
 
+int tcp_client::checkConnection()
+    {
+    if ( connectedstate != ACS_CONNECTED )
+        {
+        if ( get_delta_millisec( async_last_connect_try ) > reconnectTimeout || connectedstate == ACS_CONNECTING )
+            {
+            if ( connectedstate == ACS_DISCONNECTED )
+                {
+                async_last_connect_try = get_millisec();
+                }
+
+
+            int connectres = AsyncConnect();
+
+            if ( connectres == ACS_DISCONNECTED )
+                {
+                async_result = AR_SOCKETERROR;
+                reconnectTimeout > maxreconnectTimeout ? maxreconnectTimeout : reconnectTimeout *= 2;
+                return 0;
+                }
+
+            if ( connectres == ACS_CONNECTING )
+                {
+                connectedstate = ACS_CONNECTING;
+                return 0;
+                }
+
+            if ( connectres == ACS_CONNECTED )
+                {
+                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+                }
+            }
+        else
+            {
+            async_result = AR_SOCKETERROR;
+            return 0;
+            }
+        }
+
+    return 1;
+    }
+
+int tcp_client::AsyncConnect()
+    {
+    return 0;
+    }
+
 int tcp_client::AsyncSend( unsigned int bytestosend )
     {
     async_result = AR_BUSY;
-    tcp_communicator::get_instance()->add_async_client(this);
+    tcp_communicator::get_instance()->add_async_client( this );
+
+    return 0;
+    }
+
+int tcp_client::AsyncRecive()
+    {
+    tcp_communicator::get_instance()->add_async_client( this );
+
+    async_result = AR_BUSY;
     return 0;
     }
 
