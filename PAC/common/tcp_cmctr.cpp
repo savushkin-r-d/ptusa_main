@@ -156,7 +156,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             stat->print_cycle_last_h = timeInfo_->tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG -> msg),
                 "Network performance : send : s%d->\"%s\":\"%s\" "
                 "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
                 sockfd, name, IP,
@@ -166,7 +166,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
             if ( t < avg_time )
                 {
-                sprintf( G_LOG->msg,
+                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                     "Network performance : send : s%d->\"%s\":\"%s\" "
                     "avg %lu > tresh %u (ms).",
                     sockfd, name, IP, avg_time, t );
@@ -204,7 +204,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( 0 == res )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on select write try : timeout (%d ms).",
                 sockfd, name, IP, sec * 1000 + usec / 1000 );
@@ -216,7 +216,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( -1 == res )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on select write try : %s.",
                 sockfd, name, IP, 
@@ -241,7 +241,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 #endif // WIN_OS            
             ) ) < 0 )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on write try : %s.",
                 sockfd, name, IP, 
@@ -311,7 +311,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
                 stat->print_cycle_last_h = timeInfo_->tm_hour;
 
                 u_long avg_time = stat->all_time / stat->cycles_cnt;
-                sprintf( G_LOG->msg,
+                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                     "Network performance : recv : s%d->\"%s\":\"%s\" "
                     "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
                     s, name, IP,
@@ -321,7 +321,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
                 if ( t < avg_time )
                     {
-                    sprintf( G_LOG->msg,
+                    snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                         "Network performance : recv : s%d->\"%s\":\"%s\" "
                         "avg %lu > tresh %u (ms).",
                         s, name, IP, avg_time, t );
@@ -356,7 +356,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             {
             if ( !first_connect )
                 {
-                sprintf( G_LOG->msg,
+                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                     "Network device : s%d->\"%s\":\"%s\""
                     " disconnected on select read try : timeout (%ld ms).",
                     s, name, IP, sec * 1000 + usec / 1000 );
@@ -368,7 +368,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( -1 == n )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on select read try : %s.",
                 s, name, IP,
@@ -397,7 +397,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( 0 == res )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " was closed.",
                 s, name, IP );
@@ -406,7 +406,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( res < 0 )
             {
-            sprintf( G_LOG->msg,
+            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on read try : %s.",
                 s, name, IP,
