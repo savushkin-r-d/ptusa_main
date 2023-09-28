@@ -2038,6 +2038,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_device( dev_name, device::DT_GS, device::DST_GS_VIRT );
                     break;
 
+                case device::DST_GS_INVERSE:
+                    new_device = new state_s_inverse( dev_name );
+                    new_io_device = (state_s_inverse*)new_device;
+                    break;                    
+
                 default:
                     if ( G_DEBUG )
                         {
