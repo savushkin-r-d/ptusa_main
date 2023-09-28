@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695797612797,
+  "lastUpdate": 1695909375785,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15390,6 +15390,38 @@ window.BENCHMARK_DATA = {
             "value": 113.39280710823734,
             "unit": "us/iter",
             "extra": "iterations: 6190\ncpu: 112.93754442649437 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "4f29f00ff0a262d779e3fff50f5e524baa1e19cf",
+          "message": "Add \"inverse GS\" subtype",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/621/commits/4f29f00ff0a262d779e3fff50f5e524baa1e19cf"
+        },
+        "date": 1695909374346,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.65197330001715,
+            "unit": "us/iter",
+            "extra": "iterations: 35618\ncpu: 19.649800662586337 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 114.99916229427727,
+            "unit": "us/iter",
+            "extra": "iterations: 6137\ncpu: 114.58372168812127 us\nthreads: 1"
           }
         ]
       }
