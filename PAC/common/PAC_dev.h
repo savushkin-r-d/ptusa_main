@@ -4078,7 +4078,7 @@ class flow_s : public DI1
 class state_s : public DI1
     {
     public:
-        state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_GS,
+        explicit state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_GS,
             0 )
             {
             }
@@ -4088,14 +4088,14 @@ class state_s : public DI1
 class state_s_inverse : public DI1
     {
     public:
-        state_s_inverse( const char* dev_name ) : DI1( dev_name, DT_GS,
+        explicit state_s_inverse( const char* dev_name ) : DI1( dev_name, DT_GS,
             DST_GS_INVERSE, 0, 1 )
             {
             }
 
         bool is_active() override
             {
-            return get_state() == 0 ? 1 : 0;
+            return get_state() == 0 ? true : false;
             }
     };
 //-----------------------------------------------------------------------------
