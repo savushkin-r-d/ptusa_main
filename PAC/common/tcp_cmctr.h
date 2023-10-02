@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <map>
+#include <fmt/core.h>
 
 #include "smart_ptr.h"
 #include "dtime.h"

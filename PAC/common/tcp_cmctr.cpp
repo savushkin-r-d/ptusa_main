@@ -140,6 +140,9 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
     stat_time* stat )
     {
     //Network performance info.
+
+    int res = 0;
+
     if ( stat )
         {
         static time_t t_;
@@ -156,20 +159,20 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             stat->print_cycle_last_h = timeInfo_->tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
-            snprintf( G_LOG->msg, sizeof(G_LOG -> msg),
-                "Network performance : send : s%d->\"%s\":\"%s\" "
-                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network performance : send : s{}->\"{}\":\"{}\" "
+                "avg = {}, min = {}, max = {}, tresh = {} (ms).",
                 sockfd, name, IP,
                 avg_time, stat->min_iteration_cycle_time,
-                stat->max_iteration_cycle_time, t );
+                stat->max_iteration_cycle_time, t ).size;
             G_LOG->write_log( i_log::P_DEBUG );
 
             if ( t < avg_time )
                 {
-                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                    "Network performance : send : s%d->\"%s\":\"%s\" "
-                    "avg %lu > tresh %u (ms).",
-                    sockfd, name, IP, avg_time, t );
+                res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    "Network performance : send : s{}->\"{}\":\"{}\" "
+                    "avg {} > tresh {} (ms).",
+                    sockfd, name, IP, avg_time, t ).size;
                 G_LOG->write_log( i_log::P_ALERT );
                 }
 
@@ -195,8 +198,6 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
     static u_int select_wait_time;
     st_time = get_millisec();
 
-    int res = 0;
-
     for ( int i = len; i > 0; )
         {
         // Ждем таймаута или возможности отсылки данных.
@@ -204,11 +205,10 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( 0 == res )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on select write try : timeout (%d ms).",
-                sockfd, name, IP, sec * 1000 + usec / 1000 );
-
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
+                " disconnected on select write try : timeout ({} ms).",
+                sockfd, name, IP, sec * 1000 + usec / 1000 ).size;
             G_LOG->write_log( i_log::P_ERR );
 
             return -2;  // timeout!
@@ -216,16 +216,16 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( -1 == res )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on select write try : %s.",
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
+                " disconnected on select write try : {}.",
                 sockfd, name, IP, 
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
                 strerror( errno )
 #endif // WIN_OS
-            );
+            ).size;
             G_LOG->write_log( i_log::P_ERR );
 
             return -1; // error
@@ -241,16 +241,16 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 #endif // WIN_OS            
             ) ) < 0 )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on write try : %s.",
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
+                " disconnected on write try : {}.",
                 sockfd, name, IP, 
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
                 strerror( errno )
 #endif // WIN_OS
-            );
+            ).size;
             G_LOG->write_log( i_log::P_ERR );
 
             res = -3; //send error
@@ -293,8 +293,16 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         int len, long int sec, long int usec, const char* IP, const char* name,
         stat_time* stat, char first_connect )
         {
-
         //Network performance info.
+        // Данные должны быть здесь, поэтому делаем обычный recv().
+        char* p = reinterpret_cast<char*> (buf);
+        int res = recv(s, p, len,
+#ifdef WIN_OS
+            0
+#else
+            MSG_NOSIGNAL
+#endif // WIN_OS            
+        );
         if ( stat )
             {
             static time_t t_;
@@ -311,20 +319,20 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
                 stat->print_cycle_last_h = timeInfo_->tm_hour;
 
                 u_long avg_time = stat->all_time / stat->cycles_cnt;
-                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                    "Network performance : recv : s%d->\"%s\":\"%s\" "
-                    "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    "Network performance : recv : s{}->\"{}\":\"{}\" "
+                    "avg = {}, min = {}, max = {}, tresh = {} (ms).",
                     s, name, IP,
                     avg_time, stat->min_iteration_cycle_time,
-                    stat->max_iteration_cycle_time, t );
+                    stat->max_iteration_cycle_time, t ).size;
                 G_LOG->write_log( i_log::P_DEBUG );
 
                 if ( t < avg_time )
                     {
-                    snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                        "Network performance : recv : s%d->\"%s\":\"%s\" "
-                        "avg %lu > tresh %u (ms).",
-                        s, name, IP, avg_time, t );
+                    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                        "Network performance : recv : s{}->\"{}\":\"{}\" "
+                        "avg {} > tresh {} (ms).",
+                        s, name, IP, avg_time, t ).size;
                     G_LOG->write_log( i_log::P_ALERT );
                     }
 
@@ -356,11 +364,10 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             {
             if ( !first_connect )
                 {
-                snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " disconnected on select read try : timeout (%ld ms).",
-                    s, name, IP, sec * 1000 + usec / 1000 );
-
+                res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    "Network device : s{}->\"{}\":\"{}\""
+                    " disconnected on select read try : timeout ({} ms).",
+                    s, name, IP, sec * 1000 + usec / 1000 ).size;
                 G_LOG->write_log( i_log::P_ERR );
                 }
             return -2;  // timeout!
@@ -368,54 +375,44 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         if ( -1 == n )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on select read try : %s.",
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
+                " disconnected on select read try : {}.",
                 s, name, IP,
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
                 strerror( errno )
 #endif // WIN_OS
-                );
+                ).size;
             G_LOG->write_log( i_log::P_ERR );
 
             return -1; // error
             }
 
-        // Данные должны быть здесь, поэтому делаем обычный recv().
-        char* p = reinterpret_cast<char*> ( buf );
-        int res = recv( s, p, len,
-#ifdef WIN_OS
-            0
-#else
-            MSG_NOSIGNAL
-#endif // WIN_OS            
-        );
-
         select_wait_time = get_delta_millisec( st_time );
 
         if ( 0 == res )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
                 " was closed.",
-                s, name, IP );
+                s, name, IP ).size;
             G_LOG->write_log( i_log::P_WARNING );
             }
 
         if ( res < 0 )
             {
-            snprintf( G_LOG->msg, sizeof(G_LOG->msg),
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on read try : %s.",
+            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network device : s{}->\"{}\":\"{}\""
+                " disconnected on read try : {}.",
                 s, name, IP,
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
                 strerror( errno )
 #endif // WIN_OS
-            );
+            ).size;
             G_LOG->write_log( i_log::P_ERR );
             }
 
