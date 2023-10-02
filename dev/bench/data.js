@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696230428217,
+  "lastUpdate": 1696237462452,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15550,6 +15550,40 @@ window.BENCHMARK_DATA = {
             "value": 152.48288929663158,
             "unit": "us/iter",
             "extra": "iterations: 4905\ncpu: 150.75412844036697 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yaroslav Ozimok",
+            "username": "YarickBSTU",
+            "email": "102078275+YarickBSTU@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "d46b282280e024cef49a4c78db1e962e1f4e4546",
+          "message": "Program performance when working with Ethernet scales (#608)\n\nCo-authored-by: Yana Sitkovets  <yana.sitkowecz@yandex.ru>\r\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2023-09-27T06:50:54Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/d46b282280e024cef49a4c78db1e962e1f4e4546"
+        },
+        "date": 1696237461351,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.546222826997194,
+            "unit": "us/iter",
+            "extra": "iterations: 35826\ncpu: 19.54236029699101 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.1627315662645,
+            "unit": "us/iter",
+            "extra": "iterations: 6225\ncpu: 112.5018795180723 us\nthreads: 1"
           }
         ]
       }
