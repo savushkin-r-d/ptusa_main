@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696254502424,
+  "lastUpdate": 1696342763665,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15616,6 +15616,38 @@ window.BENCHMARK_DATA = {
             "value": 108.08535975892467,
             "unit": "us/iter",
             "extra": "iterations: 6471\ncpu: 107.6094266728481 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "id": "ca1adaf440791cb452ca83cfe56b30e29926cca2",
+          "message": "Add axcf 3152 configurations",
+          "timestamp": "2023-02-16T14:09:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/622/commits/ca1adaf440791cb452ca83cfe56b30e29926cca2"
+        },
+        "date": 1696342762347,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 24.083898612957682,
+            "unit": "us/iter",
+            "extra": "iterations: 29343\ncpu: 24.013604607572507 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 141.4436124950575,
+            "unit": "us/iter",
+            "extra": "iterations: 5058\ncpu: 140.77325029655992 us\nthreads: 1"
           }
         ]
       }
