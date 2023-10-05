@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696498510242,
+  "lastUpdate": 1696510871944,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15750,6 +15750,42 @@ window.BENCHMARK_DATA = {
             "value": 142.22223930793302,
             "unit": "us/iter",
             "extra": "iterations: 5144\ncpu: 139.73069595645416 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "asutp10@pda.savushkin.by",
+            "name": "AlexandrBehunkov",
+            "username": "AlexandrBehunkov"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3ca836814ff7069c9a372a858e207ccfa82cf847",
+          "message": "[doc] Fix link in content (#624)",
+          "timestamp": "2023-10-05T15:58:50+03:00",
+          "tree_id": "36dce80659636104fa015e5346ee23bda5903dbe",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/3ca836814ff7069c9a372a858e207ccfa82cf847"
+        },
+        "date": 1696510870905,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.508234455633346,
+            "unit": "us/iter",
+            "extra": "iterations: 35849\ncpu: 19.481650813132866 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 114.28848501719534,
+            "unit": "us/iter",
+            "extra": "iterations: 6107\ncpu: 113.8575405272638 us\nthreads: 1"
           }
         ]
       }
