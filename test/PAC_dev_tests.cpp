@@ -80,8 +80,42 @@ TEST( device_manager, add_io_device )
             "\t}\n",
         buff );
 
+
+    //device::DST_GS, device::DST_GS_INVERSE
+    auto name = std::string( "GS1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS, name.c_str(), "Test GS", "Firma 1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS1 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS1 ) );
+
+    //device::DST_GS, device::DST_GS_VIRT
+    name = std::string( "GS2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS_VIRT, name.c_str(), "Test GS",
+        "Firma 1" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS2 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS2 ) );
+
+    //device::DST_GS, device::DST_GS_INVERSE
+    name = std::string( "GS3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS_INVERSE, name.c_str(), "Test GS",
+        "Firma 1");
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS3 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS3 ) );
+
+
     //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
-    auto name = std::string( "V1" );
+    name = std::string( "V1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
         valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
@@ -379,6 +413,31 @@ TEST( analog_io_device, set_cmd )
 
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
+    }
+
+
+TEST( state_s, is_active )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    state_s GS1( "GS1" );
+
+    EXPECT_FALSE( GS1.is_active() );
+
+    GS1.save_device( buff, "" );
+    EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+TEST( state_s_inverse, is_active )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    state_s_inverse GS1( "GS1" );
+
+    EXPECT_TRUE( GS1.is_active() );
+        
+    GS1.save_device( buff, "" );
+    EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
 
