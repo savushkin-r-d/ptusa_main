@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696497772348,
+  "lastUpdate": 1696498510242,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -15714,6 +15714,42 @@ window.BENCHMARK_DATA = {
             "value": 130.32464127098788,
             "unit": "us/iter",
             "extra": "iterations: 5539\ncpu: 129.76567972558223 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7b4e9932455e19a2b993bda0eb23de2944e97595",
+          "message": "Add \"inverse GS\" subtype (#621)\n\n* Add \"inverse GS\" subtype\n\n* Fix code smells",
+          "timestamp": "2023-10-05T09:19:58Z",
+          "tree_id": "42a214a623445ebc9a09cc98674b7640946ba486",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/7b4e9932455e19a2b993bda0eb23de2944e97595"
+        },
+        "date": 1696498509044,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.335723977353577,
+            "unit": "us/iter",
+            "extra": "iterations: 29849\ncpu: 23.331793359911558 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 142.22223930793302,
+            "unit": "us/iter",
+            "extra": "iterations: 5144\ncpu: 139.73069595645416 us\nthreads: 1"
           }
         ]
       }
