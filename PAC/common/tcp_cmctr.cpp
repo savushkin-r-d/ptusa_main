@@ -147,7 +147,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         {
         static time_t t_;
         struct tm* timeInfo_;
-        t_ = time( 0 );
+        t_ = time( nullptr );
         timeInfo_ = localtime( &t_ );
 
         //Once per hour writes performance info.
@@ -201,7 +201,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
     for ( int i = len; i > 0; )
         {
         // Ждем таймаута или возможности отсылки данных.
-        res = select( sockfd + 1, NULL, &fds, NULL, &rec_tv );
+        res = select( sockfd + 1, nullptr, &fds, nullptr, &rec_tv );
 
         if ( 0 == res )
             {
@@ -307,7 +307,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             {
             static time_t t_;
             struct tm* timeInfo_;
-            t_ = time( 0 );
+            t_ = time( nullptr );
             timeInfo_ = localtime( &t_ );
 
             //Once per hour writes performance info.
@@ -358,7 +358,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         st_time = get_millisec();
 
         // Ждем таймаута или полученных данных.
-        int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
+        int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
 
         if ( 0 == n )
             {
