@@ -146,17 +146,17 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
     if ( stat )
         {
         static time_t t_;
-        struct tm* timeInfo_;
+        struct tm timeInfo_;
         t_ = time( nullptr );
-        timeInfo_ = localtime( &t_ );
+        localtime_s( &timeInfo_, &t_ );
 
         //Once per hour writes performance info.
-        if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+        if ( stat->print_cycle_last_h != timeInfo_.tm_hour )
             {
             u_int t =
                 G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
 
-            stat->print_cycle_last_h = timeInfo_->tm_hour;
+            stat->print_cycle_last_h = timeInfo_.tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
             res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -306,17 +306,17 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         if ( stat )
             {
             static time_t t_;
-            struct tm* timeInfo_;
+            struct tm timeInfo_;
             t_ = time( nullptr );
-            timeInfo_ = localtime( &t_ );
+            localtime_s( &timeInfo_, &t_ );
 
             //Once per hour writes performance info.
-            if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+            if ( stat->print_cycle_last_h != timeInfo_.tm_hour )
                 {
                 u_int t =
                     G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
 
-                stat->print_cycle_last_h = timeInfo_->tm_hour;
+                stat->print_cycle_last_h = timeInfo_.tm_hour;
 
                 u_long avg_time = stat->all_time / stat->cycles_cnt;
                 res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
