@@ -181,7 +181,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         }
 
     int total_size = 0;
-    char* p = reinterpret_cast<char*> ( buf );
+    auto p = reinterpret_cast<char*> ( buf );
 
     // Настраиваем  file descriptor set.
     fd_set fds;
@@ -295,7 +295,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         {
         //Network performance info.
         // Данные должны быть здесь, поэтому делаем обычный recv().
-        char* p = reinterpret_cast<char*> (buf);
+        auto p = reinterpret_cast<char*> (buf);
         int res = recv(s, p, len,
 #ifdef WIN_OS
             0
