@@ -53,6 +53,8 @@ class tcp_communicator_linux : public tcp_communicator
             /// @brief Итерация обмена данными с сервером.
             int evaluate();
 
+            static bool checkBuff( int s );
+
     private:
             sockaddr_in ssin; 	        ///< Адрес клиента.
             u_int       sin_len;    	///< Длина адреса.
@@ -82,30 +84,6 @@ class tcp_communicator_linux : public tcp_communicator
 
             /// @brief Закрытие сети.
             void net_terminate();
-
-        public:
-            static int sendall (int sockfd, unsigned char *buf, int len,
-                int sec, int usec, const char* IP, const char* name,
-                stat_time *stat );
-
-            /// @brief Получение данных с таймаутом.
-            ///
-            /// @param s        - сокет.
-            /// @param buf      - буфер для записи полученных данных.
-            /// @param len      - количество считываемых байт.
-            /// @param timeout  - время ожидания, сек.
-            /// @param usec     - время ожидания, мк сек.
-            /// @param usec     - время ожидания, мк сек.
-            /// @param IP       - IP-адрес источника.
-            /// @param name     - имя источника.
-            ///
-            /// @return -1   - ошибка работы с сокетом.
-            /// @return -2   - ошибка таймаута.
-            /// @return >= 0 - размер реально считанных данных.
-            static int  recvtimeout( int s, u_char *buf, int len,
-                long int sec, long int usec, const char* IP, const char* name,
-                stat_time *stat, char first_connect = 0 );
-            static bool checkBuff( int s );
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX
