@@ -24,6 +24,31 @@
 
 class tcp_client;
 
+struct SendAllParameters
+{
+    int sockfd;
+    unsigned char* buf;
+    int len;
+    int sec;
+    int usec;
+    const char* IP;
+    const char* name;
+    stat_time* stat;
+};
+
+struct RecvtimeoutAllParameters
+{
+    int s;
+    u_char* buf;
+    int len;
+    long int sec;
+    long int usec; 
+    const char* IP = ""; 
+    const char* name = "";
+    stat_time* stat = nullptr;
+    char first_connect = 0;
+};
+
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
 class tcp_communicator
@@ -82,9 +107,7 @@ class tcp_communicator
             port_modbus = new_port_modbus;
             }
 
-        static int sendall( int sockfd, unsigned char* buf, int len,
-            int sec, int usec, const char* IP, const char* name,
-            stat_time* stat );
+        static int sendall( const SendAllParameters& params );
 
         /// @brief Получение данных с таймаутом.
         ///
@@ -99,9 +122,7 @@ class tcp_communicator
         /// @return -1   - ошибка работы с сокетом.
         /// @return -2   - ошибка таймаута.
         /// @return >= 0 - размер реально считанных данных.
-        static int  recvtimeout( int s, u_char* buf, int len,
-            long int sec, long int usec, const char* IP = "", const char* name = "",
-            stat_time* stat = nullptr, char first_connect = 0 );
+        static int  recvtimeout( const RecvtimeoutAllParameters& params );
 
         enum CONSTANTS
             {
