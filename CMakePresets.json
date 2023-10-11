@@ -94,7 +94,7 @@
         "PLCNEXT_SDK_ROOT": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
       },
       "cacheVariables": {
-        "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/x86_64-pokysdk-mingw32/usr/bin/make.exe"
+        "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/$env{PATH_TO_SDK}/usr/bin/make.exe"
       }
     },
     {
@@ -110,7 +110,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF1152",
         "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.96)",
-        "ARP_DEVICE_SHORT_VERSION": "2022_0"
+        "ARP_DEVICE_SHORT_VERSION": "2022_0",
+        "PATH_TO_SDK": "x86_64-pokysdk-mingw32"
       }
     },
     {
@@ -121,7 +122,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF2152",
         "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
-        "ARP_DEVICE_SHORT_VERSION": "2021_0"
+        "ARP_DEVICE_SHORT_VERSION": "2021_0",
+        "PATH_TO_SDK": "x86_64-pokysdk-mingw32"
       }
     },
     {
@@ -132,7 +134,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF2152",
         "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.144)",
-        "ARP_DEVICE_SHORT_VERSION": "2022_0"
+        "ARP_DEVICE_SHORT_VERSION": "2022_0",
+        "PATH_TO_SDK": "x86_64-pokysdk-mingw32"
       }
     },
     {
@@ -143,7 +146,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF3152",
         "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
-        "ARP_DEVICE_SHORT_VERSION": "2021_0"
+        "ARP_DEVICE_SHORT_VERSION": "2021_0",
+        "PATH_TO_SDK": "x86_64-pokysdk-mingw32"
       }
     },
     {
@@ -154,7 +158,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF3152",
         "ARP_DEVICE_VERSION": "2022.0.5 LTS (22.0.5.102)",
-        "ARP_DEVICE_SHORT_VERSION": "2022_0"
+        "ARP_DEVICE_SHORT_VERSION": "2022_0",
+        "PATH_TO_SDK": "x86_64-pokysdk-mingw32"
       }
     },
     {
@@ -165,7 +170,8 @@
       "environment": {
         "ARP_DEVICE": "AXCF3152",
         "ARP_DEVICE_VERSION": "2023.0.2 LTS (23.0.2.56)",
-        "ARP_DEVICE_SHORT_VERSION": "2023_0"
+        "ARP_DEVICE_SHORT_VERSION": "2023_0",
+        "PATH_TO_SDK": "x86_64-w64-mingw32"
       }
     },
     {
