@@ -135,19 +135,11 @@ int tcp_communicator::remove_async_client( tcp_client* client )
     }
 
 //------------------------------------------------------------------------------
-int tcp_communicator::sendall(const SendAllParameters& params)
+int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
+    int sec, int usec, const char* IP, const char* name,
+    stat_time* stat )
     {
     //Network performance info.
-
-    int sockfd = params.sockfd;
-    unsigned char* buf = params.buf;
-    int len = params.len;
-    int sec = params.sec;
-    int usec = params.usec;
-    const char* IP = params.IP;
-    const char* name = params.name;
-    stat_time* stat = params.stat;
-
     int res = 0;
 
     if ( stat )
@@ -212,7 +204,7 @@ int tcp_communicator::sendall(const SendAllParameters& params)
 
         if ( 0 == res )
             {
-            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            res += fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"raw(Network device : s{}->\"{}\":\"{}\""
                 " disconnected on select write try : timeout ({} ms).")raw",
                 sockfd, name, IP, sec * 1000 + usec / 1000 ).size;
@@ -223,7 +215,7 @@ int tcp_communicator::sendall(const SendAllParameters& params)
 
         if ( -1 == res )
             {
-            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            res += fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"raw(Network device : s{}->\"{}\":\"{}\""
                 " disconnected on select write try : {}.")raw",
                 sockfd, name, IP, 
@@ -248,7 +240,7 @@ int tcp_communicator::sendall(const SendAllParameters& params)
 #endif // WIN_OS            
             ) ) < 0 )
             {
-            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            res += fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"raw(Network device : s{}->\"{}\":\"{}\""
                 " disconnected on write try : {}.")raw",
                 sockfd, name, IP, 
@@ -296,21 +288,12 @@ int tcp_communicator::sendall(const SendAllParameters& params)
     return res;
     }
     //------------------------------------------------------------------------------
-    int tcp_communicator::recvtimeout( const RecvtimeoutAllParameters& params )
+    int tcp_communicator::recvtimeout( int s, u_char* buf, int len,
+        long int sec, long int usec, const char* IP, const char* name,
+        stat_time* stat, char first_connect )
         {
         //Network performance info.
         // Данные должны быть здесь, поэтому делаем обычный recv().
-        
-        int s = params.s;
-        u_char* buf = params.buf;
-        int len = params.len;
-        long int sec = params.sec;
-        long int usec = params.usec;
-        const char* IP = "";
-        const char* name = "";
-        stat_time* stat = nullptr;
-        char first_connect = 0;
-
         auto p = reinterpret_cast<char*> (buf);
         int res = recv(s, p, len,
 #ifdef WIN_OS
@@ -380,7 +363,7 @@ int tcp_communicator::sendall(const SendAllParameters& params)
             {
             if ( !first_connect )
                 {
-                res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                res += fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                     R"raw(Network device : s{}->\"{}\":\"{}\""
                     " disconnected on select read try : timeout ({} ms).")raw",
                     s, name, IP, sec * 1000 + usec / 1000 ).size;
@@ -391,7 +374,7 @@ int tcp_communicator::sendall(const SendAllParameters& params)
 
         if ( -1 == n )
             {
-            res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            res += fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"raw(Network device : s{}->\"{}\":\"{}\""
                 " disconnected on select read try : {}.")raw",
                 s, name, IP,
