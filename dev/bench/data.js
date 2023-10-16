@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697450332898,
+  "lastUpdate": 1697451041033,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -16278,6 +16278,42 @@ window.BENCHMARK_DATA = {
             "value": 143.25464571768447,
             "unit": "us/iter",
             "extra": "iterations: 5044\ncpu: 142.48935368754957 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yana.sitkowecz@yandex.ru",
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bbc63ff4e760b0d24e2958252e28af19450b737f",
+          "message": "[config][cmake] Use path variable (#625)",
+          "timestamp": "2023-10-16T13:08:25+03:00",
+          "tree_id": "8d088326314859de59d60bd04548456c9b19e881",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/bbc63ff4e760b0d24e2958252e28af19450b737f"
+        },
+        "date": 1697451039814,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 19.458554818855493,
+            "unit": "us/iter",
+            "extra": "iterations: 35745\ncpu: 19.455593789341165 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 113.12411069872375,
+            "unit": "us/iter",
+            "extra": "iterations: 6197\ncpu: 112.61255446183635 us\nthreads: 1"
           }
         ]
       }
