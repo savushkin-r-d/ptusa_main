@@ -9,6 +9,8 @@ on:
   pull_request_target:
     branches: [ master ]
     types: [ labeled ]
+  merge_group:
+    types: [ checks_requested ]
 
 env:
   NINJA_VERSION: 1.10.1
@@ -19,7 +21,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
+    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
@@ -312,10 +314,11 @@ jobs:
 
     - name: Upload coverage to Codecov (Linux only)
       if: runner.os == 'Linux'
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         fail_ci_if_error: true
         verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Store benchmark result (Linux only)
       if: runner.os == 'Linux'
@@ -343,7 +346,7 @@ jobs:
 
 
     - name: Upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         path: ./${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact }}
@@ -368,7 +371,7 @@ jobs:
     - name: Store Release url
       run: |
         echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         path: ./upload_url
         name: upload_url
@@ -400,13 +403,13 @@ jobs:
 
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v3
       with:
         name: ${{ matrix.config.artifact }}
         path: ./
 
     - name: Download URL
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v3
       with:
         name: upload_url
         path: ./

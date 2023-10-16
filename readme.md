@@ -13,7 +13,7 @@ Russian readme is [here](russian_readme/readme.md).
 1. [General system architecture](#general-system-architecture)
 2. [Common description](#common-description)
 3. [How to build the project](#how-to-build-the-project )
-4. [Using PLCnext Technology C++ Toolchain](#using-plcnext-technology-c-toolchain)
+4. [Using PLCnext Technology C++ Toolchain in Windows](#using-plcnext-technology-c-toolchain-in-windows)
 5. [How to run a project](#how-to-run-a-project)
 6. [Libraries used](#libraries-used)
 
@@ -137,9 +137,9 @@ If an error occurs after startup, then you should clear the CMake cache `Project
 
 Eclipse IDE with CMake based project on Linux.
 
-## Using PLCnext Technology C++ Toolchain ##
+## Using PLCnext Technology C++ Toolchain in Windows ##
 
-Download the latest version (current is 2022.0.4 LTS) ```sdk for Windows 64 bit``` from the Phoenix Contact website https://www.phoenixcontact.com/products (for example from the **AXC F 2152** area, in the section Downloads->Software $-$ http://www.phoenixcontact.com/qr/2404267/softw).
+Download the latest versions from the Phoenix Contact [website](https://www.phoenixcontact.com/products) (for example, from the **AXC F 2152** area) ```PLCnext Technology C++ toolchain for Windows```(current is 2023.0 LTS) and ```sdk for Windows 64 bit``` (current is 2022.0.4 LTS), in the section Downloads->Software $-$ http://www.phoenixcontact.com/qr/2404267/softw.
 
 Navigate to the folder where downloads are located (typical path `%userprofile%/Downloads`), unzip the archive (`SDK_2021.9_Windows_AXC_F_2152.tar.xz.zip`).
 

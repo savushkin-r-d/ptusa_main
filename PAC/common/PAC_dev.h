@@ -577,8 +577,9 @@ class device : public i_DO_AO_device, public par_device
             DST_HLA_IOLINK, ///< Сигнальная колонна IO-Link.
 
             //GS
-            DST_GS = 1,  ///< Датчик положения.
-            DST_GS_VIRT, ///< Виртуальный датчик положения (без привязки к модулям).
+            DST_GS = 1,     ///< Датчик положения.
+            DST_GS_VIRT,    ///< Виртуальный датчик положения (без привязки к модулям).
+            DST_GS_INVERSE, ///< Датчик положения инверсный (0 - активное значение).
 
             //HA
             DST_HA = 1,  ///< Сирена.
@@ -4077,9 +4078,24 @@ class flow_s : public DI1
 class state_s : public DI1
     {
     public:
-        state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_NONE,
+        explicit state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_GS,
             0 )
             {
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик положения инверсный.
+class state_s_inverse : public DI1
+    {
+    public:
+        explicit state_s_inverse( const char* dev_name ) : DI1( dev_name, DT_GS,
+            DST_GS_INVERSE, 0, 1 )
+            {
+            }
+
+        bool is_active() override
+            {
+            return get_state() == 0 ? true : false;
             }
     };
 //-----------------------------------------------------------------------------
@@ -4736,8 +4752,8 @@ class threshold_regulator :public device, public i_Lua_save_device
     public:
         enum class PARAM
             {
-            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
-            P_DELTA,
+            P_is_reverse = 1,	        ///Обратного (реверсивного) действия.
+            P_delta,
 
             PARAMS_COUNT
             };

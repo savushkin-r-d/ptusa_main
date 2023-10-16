@@ -886,7 +886,7 @@ class operation
 
         std::string name;
         operation_manager *owner;
-        int n;                                /// Номер операции у владельца.
+        int operation_num;                                /// Номер операции у владельца.
 
         operation_state stub;
 
@@ -912,9 +912,8 @@ class operation_manager
     public:
         /// @brief Конструктор с параметрами.
         ///
-        /// @param modes_cnt - количество операций.
         /// @param i_tech_object - техобъект-владелец.
-        operation_manager( u_int modes_cnt, i_tech_object *owner );
+        explicit operation_manager( i_tech_object *owner );
 
         ~operation_manager();
 
@@ -939,9 +938,9 @@ class operation_manager
         /// @return - время системы без активных операций.
         unsigned long get_idle_time();
 
-        void reset_idle_time()
+        void reset_active_operation_or_idle_time()
             {
-            last_action_time = get_millisec();
+            active_operation_or_idle_time = get_millisec();
             }
 
         /// @brief Отладочный вывод объекта в консоль.
@@ -966,12 +965,12 @@ class operation_manager
 
     private:
         std::vector< operation* > operations; ///< Операции.
-        operation *oper_stub;                 ///< Операция-заглушка.
+        
+        ///< Операция-заглушка.
+        operation oper_stub{ "Операция-заглушка", this, -1 };
 
-        /// @brief Время последнего вкл/выкл операции.
-        u_int_4 last_action_time;
-
-        static const char* UNKN_OPER_NAME;    ///Имя для "неизвестной" операции.
+        /// @brief Время активной операции (или бездействия).
+        u_long active_operation_or_idle_time = get_millisec();
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

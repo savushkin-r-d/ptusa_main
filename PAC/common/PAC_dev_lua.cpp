@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Aug  3 11:03:15 2023.
+** Generated automatically by tolua++-1.0.92 on Thu Sep 28 15:33:35 2023.
 */
 
 #ifndef __cplusplus
@@ -14825,6 +14825,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_HLA_IOLINK",device::DST_HLA_IOLINK);
    tolua_constant(tolua_S,"DST_GS",device::DST_GS);
    tolua_constant(tolua_S,"DST_GS_VIRT",device::DST_GS_VIRT);
+   tolua_constant(tolua_S,"DST_GS_INVERSE",device::DST_GS_INVERSE);
    tolua_constant(tolua_S,"DST_HA",device::DST_HA);
    tolua_constant(tolua_S,"DST_HA_VIRT",device::DST_HA_VIRT);
    tolua_constant(tolua_S,"DST_HL",device::DST_HL);

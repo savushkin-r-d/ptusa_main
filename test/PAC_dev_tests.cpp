@@ -80,8 +80,42 @@ TEST( device_manager, add_io_device )
             "\t}\n",
         buff );
 
+
+    //device::DST_GS, device::DST_GS_INVERSE
+    auto name = std::string( "GS1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS, name.c_str(), "Test GS", "Firma 1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS1 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS1 ) );
+
+    //device::DST_GS, device::DST_GS_VIRT
+    name = std::string( "GS2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS_VIRT, name.c_str(), "Test GS",
+        "Firma 1" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS2 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS2 ) );
+
+    //device::DST_GS, device::DST_GS_INVERSE
+    name = std::string( "GS3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_GS, device::DST_GS_INVERSE, name.c_str(), "Test GS",
+        "Firma 1");
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto GS3 = GS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS3 ) );
+
+
     //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
-    auto name = std::string( "V1" );
+    name = std::string( "V1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
         valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
@@ -379,6 +413,31 @@ TEST( analog_io_device, set_cmd )
 
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
+    }
+
+
+TEST( state_s, is_active )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    state_s GS1( "GS1" );
+
+    EXPECT_FALSE( GS1.is_active() );
+
+    GS1.save_device( buff, "" );
+    EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+TEST( state_s_inverse, is_active )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    state_s_inverse GS1( "GS1" );
+
+    EXPECT_TRUE( GS1.is_active() );
+        
+    GS1.save_device( buff, "" );
+    EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
 
@@ -1410,6 +1469,11 @@ TEST( wages_eth, evaluate_io )
 
     w1.evaluate_io();
     EXPECT_EQ( 0, w1.get_value() );
+
+    iot_wages_eth w2( 1, "127.0.0.1", 10000 );
+
+    w2.evaluate();
+    EXPECT_EQ( 0, w2.get_wages_value() );
     }
 
 TEST( wages_eth, get_value )
@@ -1579,7 +1643,7 @@ TEST( threshold_regulator, set_value )
     dev->set_value( SET_VALUE );
     EXPECT_EQ( 0, M1->get_state() );
 
-    dev->set_cmd( "P_IS_REVERSE", 0, 1 );
+    dev->set_cmd( "P_is_reverse", 0, 1 );
 
     //Regulator switched on, temperature is above range, but reverse is on -
     //it should switch on actuators.
@@ -1593,7 +1657,7 @@ TEST( threshold_regulator, set_value )
     dev->set_value( SET_VALUE * 2 );
     EXPECT_EQ( 0, M1->get_state() );
 
-    dev->set_cmd( "P_IS_REVERSE", 0, .0 );
+    dev->set_cmd( "P_is_reverse", 0, .0 );
     dev->off();
 
     //Regulator switched off.    
@@ -1626,14 +1690,23 @@ TEST( threshold_regulator, set_cmd )
 
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
+        "\tC1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
 
-    p1.set_cmd( "P_DELTA", 0, 10 );
-    p1.set_cmd( "P_IS_REVERSE", 0, 1 );
+    //Set a property that does not exist.
+    auto res = p1.set_cmd( "NO_SUCH_PROPERTY", 0, 1 );
+    EXPECT_EQ( 1, res );
+    //Set a parameter that does not exist.
+    res = p1.set_cmd( "P_NO_SUCH_PARAMETER", 0, 1 );
+    EXPECT_EQ( 1, res );
+
+    res = p1.set_cmd( "P_delta", 0, 10 );
+    EXPECT_EQ( 0, res );
+    res = p1.set_cmd( "P_is_reverse", 0, 1 );
+    EXPECT_EQ( 0, res );
     p1.on();
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=1, V=0, P_IS_REVERSE=1, P_DELTA=10},\n", buff );
+        "\tC1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
     }
 
 TEST( threshold_regulator, set_state )
@@ -1676,3 +1749,18 @@ TEST( threshold_regulator, set_string_property )
     p1.set_string_property( "OUT_VALUE", "M1" );
     p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
     }
+
+
+TEST( par_device, set_par_name )
+    {
+    par_device dev( 1 );
+    dev.set_par_name( 1, 0, "TEST_VERY_VERY_VERY_LONG_NAME" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    dev.save_device( buff );
+    EXPECT_STREQ( "", buff );
+
+    dev.set_par_name( 1, 0, "TEST_NAME" );
+    dev.save_device( buff );
+    EXPECT_STREQ( "TEST_NAME=0, ", buff );
+    } 

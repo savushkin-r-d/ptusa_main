@@ -316,8 +316,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             break;
 
         case 'P': //Параметры.
-            par_device::set_par_by_name( prop, val );
-            break;
+            return par_device::set_par_by_name( prop, val );
 
         default:
             if ( G_DEBUG )
@@ -325,7 +324,9 @@ int device::set_cmd( const char *prop, u_int idx, double val )
                 printf( "Error device::set_cmd() - prop = %s, val = %f\n",
                     prop, val );
                 }
+            return 1;
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -2037,6 +2038,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_device( dev_name, device::DT_GS, device::DST_GS_VIRT );
                     break;
 
+                case device::DST_GS_INVERSE:
+                    new_device = new state_s_inverse( dev_name );
+                    new_io_device = (state_s_inverse*)new_device;
+                    break;                    
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -2557,10 +2563,10 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
 threshold_regulator::threshold_regulator( const char* name ) :device( name,
     device::DEVICE_TYPE::DT_REGULATOR,
     device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
-    static_cast<int>( PARAM::PARAMS_COUNT ) )
+    static_cast<int>( PARAM::PARAMS_COUNT ) - 1 )
     {
-    set_par_name( static_cast<int>( PARAM::P_DELTA ), 0, "P_DELTA" );
-    set_par_name( static_cast<int>( PARAM::P_IS_REVERSE ), 0, "P_IS_REVERSE" );
+    set_par_name( static_cast<int>( PARAM::P_delta ), 0, "P_delta" );
+    set_par_name( static_cast<int>( PARAM::P_is_reverse ), 0, "P_is_reverse" );
     }
 //-----------------------------------------------------------------------------
 int threshold_regulator::get_state()
@@ -2623,7 +2629,7 @@ void threshold_regulator::direct_set_value( float val )
             in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
             }
 
-        auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
+        auto idx = static_cast<int>( PARAM::P_is_reverse );
         auto is_reverse = get_par( idx ) > 0;
         if ( STATE::OFF == state )
             {
@@ -2632,7 +2638,7 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            auto delta = get_par( static_cast<int>( PARAM::P_DELTA ) );
+            auto delta = get_par( static_cast<int>( PARAM::P_delta ) );
             if ( in_value > set_value + delta )
                 {
                 out_state = is_reverse ? 1 : 0;
