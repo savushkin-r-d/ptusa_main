@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697445915210,
+  "lastUpdate": 1697447099909,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -16178,6 +16178,40 @@ window.BENCHMARK_DATA = {
             "value": 113.45893239980427,
             "unit": "us/iter",
             "extra": "iterations: 6213\ncpu: 113.03928858844358 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life",
+            "email": "yana.sitkowecz@yandex.ru"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "14bdc307ec852f0dcec4fbc5ed0402ecc2edc757",
+          "message": "[cmake] Add \"axcf 3152\" configurations (#622)\n\n* Add axcf 3152 2022 Release config\n\n* Add axc f 2023 config",
+          "timestamp": "2023-10-05T13:09:05Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/14bdc307ec852f0dcec4fbc5ed0402ecc2edc757"
+        },
+        "date": 1697447097893,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 25.147337548852676,
+            "unit": "us/iter",
+            "extra": "iterations: 27122\ncpu: 25.138640218272997 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 155.20132006810266,
+            "unit": "us/iter",
+            "extra": "iterations: 4699\ncpu: 154.52243030432007 us\nthreads: 1"
           }
         ]
       }
