@@ -742,6 +742,7 @@ TEST( operation, evaluate )
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
+	if_action_in_run->set_int_property( "next_step_n", 0, 0 );
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
 	test_op->evaluate();
