@@ -270,6 +270,7 @@ void operation::evaluate()
                                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
                             break;
                         }
+                    break;
 
                 case state_idx::STARTING:
                     unit->set_mode( operation_num, state_idx::RUN );
