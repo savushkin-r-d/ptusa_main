@@ -252,12 +252,24 @@ void operation::evaluate()
                     break;
 
                 case state_idx::RUN:
-                    //Из выполнения по сигналам операция может быть отключена
-                    //(перейти в состояние простоя).
-                    unit->set_mode( operation_num, state_idx::IDLE );
-                    unit->set_err_msg( "автоотключение по запросу",
-                        operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
-                    break;
+                    switch ( static_cast<state_idx>( next_state ) )
+                        {
+                        case state_idx::IDLE:
+                            //Из выполнения по сигналам операция может быть
+                            //отключена (перейти в состояние простоя).
+                            unit->set_mode( operation_num, state_idx::IDLE );
+                            unit->set_err_msg( "автоотключение по запросу",
+                                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                            break;
+
+                        case state_idx::PAUSE:
+                            //Из выполнения по сигналам операция может быть
+                            //поставлена на паузу.
+                            unit->set_mode( operation_num, state_idx::PAUSE );
+                            unit->set_err_msg( "пауза по запросу",
+                                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
+                            break;
+                        }
 
                 case state_idx::STARTING:
                     unit->set_mode( operation_num, state_idx::RUN );
