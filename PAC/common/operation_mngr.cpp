@@ -252,24 +252,7 @@ void operation::evaluate()
                     break;
 
                 case state_idx::RUN:
-                    switch ( static_cast<state_idx>( next_state ) )
-                        {
-                        case state_idx::IDLE:
-                            //Из выполнения по сигналам операция может быть
-                            //отключена (перейти в состояние простоя).
-                            unit->set_mode( operation_num, state_idx::IDLE );
-                            unit->set_err_msg( "автоотключение по запросу",
-                                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
-                            break;
-
-                        case state_idx::PAUSE:
-                            //Из выполнения по сигналам операция может быть
-                            //поставлена на паузу.
-                            unit->set_mode( operation_num, state_idx::PAUSE );
-                            unit->set_err_msg( "пауза по запросу",
-                                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
-                            break;
-                        }
+                    process_new_state_from_run( next_state );
                     break;
 
                 case state_idx::STARTING:
@@ -354,6 +337,35 @@ int operation::process_auto_switch_on()
         }
 
     return 1;
+    }
+//-----------------------------------------------------------------------------
+int operation::process_new_state_from_run( int next_state )
+    {
+    auto unit = owner->owner;
+    switch ( static_cast<state_idx>( next_state ) )
+        {
+        case state_idx::IDLE:
+            //Из выполнения по сигналам операция может быть
+            //отключена (перейти в состояние простоя).
+            unit->set_mode( operation_num, state_idx::IDLE );
+            unit->set_err_msg( "автоотключение по запросу",
+                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+            break;
+
+        case state_idx::PAUSE:
+            //Из выполнения по сигналам операция может быть
+            //поставлена на паузу.
+            unit->set_mode( operation_num, state_idx::PAUSE );
+            unit->set_err_msg( "пауза по запросу",
+                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
+            break;
+
+        default:
+            //Остальные варианты игнорируем.
+            break;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void operation::finalize()
@@ -1756,7 +1768,8 @@ bool jump_if_action::check(
 int jump_if_action::set_int_property( const char* name, size_t idx, int value )
     {
     action::set_int_property( name, idx, value );
-    if ( strcmp( name, "next_step_n" ) == 0 )
+    if ( strcmp( name, "next_step_n" ) == 0 || //Для перехода к новому шагу.
+        strcmp( name, "next_state_n" ) == 0 )  //Для перехода к новому состоянию.
         {
         while ( idx >= next_n.size() )
             {

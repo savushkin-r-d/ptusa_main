@@ -880,6 +880,8 @@ class operation
     private:
         int process_auto_switch_on();
 
+        int process_new_state_from_run( int next_state );
+
         state_idx current_state = IDLE;
 
         std::vector< operation_state* > states;
