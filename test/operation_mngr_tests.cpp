@@ -973,14 +973,21 @@ TEST( operation, evaluate )
 		DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 			device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 		if_action_in_run->add_dev( &test_DI_one );
-		if_action_in_run->set_int_property( "next_state_n", 0, 2 );
 
 		//Сигнал не активен, операция не должна стать на паузу.
 		test_op->start();
 		test_op->evaluate();
 		EXPECT_EQ( operation::RUN, test_op->get_state() );
 
+		//Сигнал активен,но операция должна не должна стать на паузу, так как
+		//не задано к какому состоянию переходить.
+		test_DI_one.on();
+		test_op->evaluate();
+		EXPECT_EQ( operation::RUN, test_op->get_state() );
+
 		//Сигнал активен, операция должна стать на паузу.
+		if_action_in_run->set_int_property( "next_state_n", 0,
+			operation::state_idx::PAUSE );
 		test_DI_one.on();
 		test_op->evaluate();
 		EXPECT_EQ( operation::PAUSE, test_op->get_state() );
