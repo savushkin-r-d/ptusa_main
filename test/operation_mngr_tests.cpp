@@ -935,6 +935,64 @@ TEST( operation, evaluate )
     test_params_manager::removeObject();
 	}
 
+
+	TEST( operation, evaluate_from_run_to_pause )
+		{
+		char* res = 0;
+		mock_params_manager* par_mock = new mock_params_manager();
+		test_params_manager::replaceEntity( par_mock );
+
+		EXPECT_CALL( *par_mock, init( _ ) );
+		EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+		EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+			.Times( AtLeast( 2 ) )
+			.WillRepeatedly( Return( res ) );
+
+		par_mock->init( 0 );
+		par_mock->final_init( 0, 0, 0 );
+
+		lua_State* L = lua_open();
+		ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+		G_LUA_MANAGER->set_Lua( L );
+
+		tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+		auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+
+		//Корректный переход к паузе.	
+		auto operation_run_state = ( *test_op )[ operation::RUN ];
+		auto main_step_in_run = ( *operation_run_state )[ -1 ];
+
+		int next = 0;
+		auto is_goto_next_state = operation_run_state->is_goto_next_state( next );
+		EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+		EXPECT_EQ( -1, next );
+
+		auto if_action_in_run = reinterpret_cast<jump_if_action*>
+			( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
+		DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+			device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+		if_action_in_run->add_dev( &test_DI_one );
+		if_action_in_run->set_int_property( "next_state_n", 0, 2 );
+
+		//Сигнал не активен, операция не должна стать на паузу.
+		test_op->start();
+		test_op->evaluate();
+		EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+		//Сигнал активен, операция должна стать на паузу.
+		test_DI_one.on();
+		test_op->evaluate();
+		EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+		
+		test_op->finalize();
+
+	    G_LUA_MANAGER->free_Lua();
+		test_params_manager::removeObject();
+		}
+
+
 /*
 	TEST METHOD DEFENITION:
 	void check()
