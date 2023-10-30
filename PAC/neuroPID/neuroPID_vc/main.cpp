@@ -3,17 +3,18 @@
 
 #include "stdafx.h"
 #include "main.h"
-
+#include <cstdio>
 #include "vector"
 
-#include "PID.h"
-#include "plant.h"
+#include "../PID.h"
+#include "../plant.h"
 
-#include "mlp.h"
-#include "nn_manager.h"
+#include "../mlp.h"
+#include "../nn_manager.h"
 
 #include <fcntl.h>
 #include <io.h>
+#include<iostream>
 
 
 bool g_is_start = false;
