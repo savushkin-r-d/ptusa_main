@@ -177,9 +177,10 @@ void init( HWND hWnd )
     {
     if (AllocConsole())
         {
-        int hCrt = _open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), 4);
+        hCrt = _open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT );
         *stdout = *(::_fdopen(hCrt, "w"));
         ::setvbuf(stdout, NULL, _IONBF, 0);
+        hCrt = _open_osfhandle( (long)GetStdHandle( STD_ERROR_HANDLE ), _O_TEXT );
         *stderr = *(::_fdopen(hCrt, "w"));
         ::setvbuf(stderr, NULL, _IONBF, 0);
         std::ios::sync_with_stdio();
