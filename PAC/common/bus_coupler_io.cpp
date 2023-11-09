@@ -1171,13 +1171,22 @@ int io_manager::net_init( io_node* node )
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
         closesocket( sock );
+#else
+        close( sock );
+#endif
+
         return -5;
         }
 
     // Переводим в неблокирующий режим.
+#ifdef WIN_OS
     u_long mode = 1;
     err = ioctlsocket( sock, FIONBIO, &mode );
+#else
+    err = fcntl( sock, F_SETFL, O_NONBLOCK );
+#endif
     if ( err != 0 )
         {
         sprintf( G_LOG->msg,
@@ -1185,7 +1194,11 @@ int io_manager::net_init( io_node* node )
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
         closesocket( sock );
+#else
+        close( sock );
+#endif
         return -5;
         }
 
@@ -1227,7 +1240,11 @@ int io_manager::net_init( io_node* node )
                 }
             }
 
+#ifdef WIN_OS
         closesocket( sock );
+#else
+        close( sock );
+#endif
         return -5;
         }
 
@@ -1254,7 +1271,11 @@ int io_manager::net_init( io_node* node )
                 G_LOG->write_log( i_log::P_CRIT );
                 }
 
+#ifdef WIN_OS
             closesocket( sock );
+#else
+            close( sock );
+#endif
             return -6;
             }
         }
@@ -1276,7 +1297,7 @@ void io_manager::disconnect( io_node* node )
     {
     if ( node->sock )
         {
-#ifdef LINUX
+#ifdef LINUX_OS
         shutdown( node->sock, SHUT_RDWR );
         close( node->sock );        
 #else

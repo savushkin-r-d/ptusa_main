@@ -14,9 +14,12 @@
 #ifndef IO_H
 #define IO_H
 
-#if defined LINUX
+#if defined LINUX_OS
 #include <sys/socket.h>
+#include <unistd.h>
 #include <errno.h>
+
+#include "l_tcp_cmctr.h"
 #endif
 
 #if defined WIN_OS
@@ -451,13 +454,13 @@ class io_manager
         /// @param node - узел, от которого отключаемся.
         void disconnect( io_node* node );
 
-        int io_manager::e_communicate( io_node* node, int bytes_to_send,
+        int e_communicate( io_node* node, int bytes_to_send,
             int bytes_to_receive );
 
-        int io_manager::write_holding_registers( io_node* node,
+        int write_holding_registers( io_node* node,
             unsigned int address, unsigned int quantity, unsigned char station = 0 );
 
-        int io_manager::read_input_registers( io_node* node, unsigned int address,
+        int read_input_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
     };
 //-----------------------------------------------------------------------------
