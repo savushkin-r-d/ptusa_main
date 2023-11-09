@@ -13,6 +13,26 @@ class nn_manager
         ~nn_manager()
             {
             fclose( data_stream );
+            data_stream = nullptr;
+
+            delete p_plant;
+            p_plant = nullptr;
+            delete p_pid;
+            p_pid = nullptr;
+            delete nn2_emulator;
+            nn2_emulator = nullptr;
+            delete nn1_tuner;
+            nn1_tuner = nullptr;
+
+            delete p_plant_data;
+            p_plant_data = nullptr;
+            delete PID_data;
+            PID_data = nullptr;
+
+            delete nn2_out;
+            nn2_out = nullptr;
+            delete nn2_in;
+            nn2_in = nullptr;
             }
 
         nn_manager( int time_interval, 
