@@ -1,5 +1,7 @@
-#include "WSA_err_decode.h"
 #include <windows.h>
+#include <winsock.h>
+
+#include "WSA_err_decode.h"
 //-----------------------------------------------------------------------------
 const char* WSA_Last_Err_Decode ()
     {

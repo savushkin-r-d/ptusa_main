@@ -178,6 +178,11 @@ elseif(WIN32)
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
+
+    target_compile_definitions(${PROJECT_NAME} PUBLIC WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(libptusa_main PUBLIC WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(main_test PUBLIC WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(main_perfomance_test PUBLIC WIN32_LEAN_AND_MEAN)
 endif()
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)

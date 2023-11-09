@@ -14,6 +14,16 @@
 #ifndef IO_H
 #define IO_H
 
+#if defined LINUX
+#include <sys/socket.h>
+#include <errno.h>
+#endif
+
+#if defined WIN_OS
+#include <ws2tcpip.h>
+#include "WSA_err_decode.h"
+#endif
+
 #include "smart_ptr.h"
 
 #include "dtime.h"
@@ -219,6 +229,14 @@ class io_device
 class io_manager
     {
     public:
+        enum CONSTANTS
+            {
+            MAX_MODBUS_REGISTERS_PER_QUERY = 123,
+            BUFF_SIZE = 262,
+            PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
+            PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
+
+            };
         virtual ~io_manager();
 
         void print() const;
@@ -227,12 +245,12 @@ class io_manager
         /// @brief Чтение модулей ввода.
         ///
         /// @return - 0 - Ок.
-        virtual int read_inputs() = 0;
+        virtual int read_inputs();
 
         /// @brief Чтение модулей вывода.
         ///
         /// @return - 0 - Ок.
-        virtual int write_outputs() = 0;
+        virtual int write_outputs();
 
         /// @brief Получение единственного экземпляра класса.
         static io_manager* get_instance();
@@ -386,6 +404,10 @@ class io_manager
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
+        u_char buff[ BUFF_SIZE ];
+        u_char* resultbuff;
+        u_char* writebuff;
+
     public:
         io_node * get_node( int node_n );
 
@@ -415,10 +437,28 @@ class io_manager
         void init_node_AI( u_int node_index, u_int AI_index,
             u_int type, u_int offset );
 
-		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
 
+        /// @brief Инициализация соединения с узлом I/O.
+        ///
+        /// @param node - узел I/O, с которым осуществляется соединение.
+        ///
+        /// @return -   0 - ок.
+        /// @return - < 0 - ошибка.
+        int net_init( io_node* node );
 
+        /// @brief Отключение от узла.
+        ///
+        /// @param node - узел, от которого отключаемся.
+        void disconnect( io_node* node );
+
+        int io_manager::e_communicate( io_node* node, int bytes_to_send,
+            int bytes_to_receive );
+
+        int io_manager::write_holding_registers( io_node* node,
+            unsigned int address, unsigned int quantity, unsigned char station = 0 );
+
+        int io_manager::read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();
