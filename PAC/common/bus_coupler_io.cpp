@@ -1214,7 +1214,7 @@ int io_manager::net_init( io_node* node )
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
-    err = select( sock + 1, 0, &rdevents, 0, &tv );
+    err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
 
     if ( err <= 0 )
         {
