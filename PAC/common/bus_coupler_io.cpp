@@ -1142,7 +1142,7 @@ int io_manager::net_init( io_node* node )
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
     int err;
-    int sock = err = socket( AF_INET, type, protocol ); // Cоздание сокета.
+    int sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
 
     if ( sock < 0 )
         {
@@ -1203,7 +1203,7 @@ int io_manager::net_init( io_node* node )
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    err = connect( sock, (struct sockaddr*)&socket_remote_server,
+    connect( sock, (struct sockaddr*)&socket_remote_server,
         sizeof( socket_remote_server ) );
 
     fd_set rdevents;
@@ -1223,16 +1223,16 @@ int io_manager::net_init( io_node* node )
             if ( err < 0 )
                 {
                 sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : %s.",
+                    R"raw(Network device : s%d->\"%s\":\"%s\""
+                    " can't connect : %s.")raw",
                     sock, node->name, node->ip_address, strerror( errno ) );
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
                 sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : timeout (%d ms).",
+                    R"raw(Network device : s%d->\"%s\":\"%s\""
+                    " can't connect : timeout (%d ms).")raw",
                     sock, node->name, node->ip_address,
                     io_node::C_CNT_TIMEOUT_US / 1000 );
 
@@ -1259,8 +1259,8 @@ int io_manager::net_init( io_node* node )
             if ( node->is_set_err == false )
                 {
                 sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " error during connect : %s.",
+                    R"raw(Network device : s%d->\"%s\":\"%s\""
+                    " error during connect : %s.")raw",
                     sock, node->name, node->ip_address,
 #ifdef WIN_OS
                     WSA_Last_Err_Decode()
@@ -1732,7 +1732,7 @@ int io_manager::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x02;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
@@ -1785,7 +1785,7 @@ int io_manager::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x04;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
@@ -1856,8 +1856,11 @@ int io_manager::read_inputs()
                     registers_count = nd->AI_cnt;
                     }
 
-                int res, k, index_source = 0;
-                unsigned int analog_dest = 0, bit_dest = 0;
+                int res;
+                int k;
+                int index_source = 0;
+                unsigned int analog_dest = 0;
+                unsigned int bit_dest = 0;
 
                 do
                     {
