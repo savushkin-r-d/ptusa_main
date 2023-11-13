@@ -1344,13 +1344,10 @@ int io_manager::write_outputs()
                 for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                     {
                     u_char b = 0;
-                    for ( u_int k = 0; k < 8; k++ )
+                    for ( u_int k = 0; k < 8 && idx < nd->DO_cnt; k++ )
                         {
-                        if ( idx < nd->DO_cnt )
-                            {
-                            b = b | ( nd->DO_[ idx ] & 1 ) << k;
-                            idx++;
-                            }
+                           b |= ( nd->DO_[ idx ] & 1 ) << k;
+                           idx++;
                         }
                     buff[ j + 13 ] = b;
                     }
@@ -1906,7 +1903,7 @@ int io_manager::read_inputs()
 
                             for ( index_source = 0; bit_dest < ( start_register + registers_count ) * 2 * 8; index_source++ )
                                 {
-                                for ( k = 0; k < 8; k++ )
+                                for ( int k = 0; k < 8; k++ )
                                     {
                                     nd->DI[ bit_dest ] = ( resultbuff[ index_source ] >> k ) & 1;
 #ifdef DEBUG_BK
