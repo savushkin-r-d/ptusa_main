@@ -1146,8 +1146,8 @@ int io_manager::net_init( io_node* node )
 
     if ( sock < 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't create I/O node socket : %s.",
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't create I/O node socket : {}.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -1166,8 +1166,8 @@ int io_manager::net_init( io_node* node )
 
     if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't setsockopt I/O node socket : %s.",
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't setsockopt I/O node socket : {}.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -1189,8 +1189,8 @@ int io_manager::net_init( io_node* node )
 #endif
     if ( err != 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't fcntl I/O node socket : %s.",
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't fcntl I/O node socket : {}.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -1222,17 +1222,17 @@ int io_manager::net_init( io_node* node )
             {
             if ( err < 0 )
                 {
-                sprintf( G_LOG->msg,
-                    R"raw(Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : %s.")raw",
+                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"raw(Network device : s{}->\"{}\":\"{}\""
+                    " can't connect : {}.")raw",
                     sock, node->name, node->ip_address, strerror( errno ) );
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
-                sprintf( G_LOG->msg,
-                    R"raw(Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : timeout (%d ms).")raw",
+                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"raw(Network device : s{}->\"{}\":\"{}\""
+                    " can't connect : timeout ({} ms).")raw",
                     sock, node->name, node->ip_address,
                     io_node::C_CNT_TIMEOUT_US / 1000 );
 
@@ -1258,9 +1258,9 @@ int io_manager::net_init( io_node* node )
             {
             if ( node->is_set_err == false )
                 {
-                sprintf( G_LOG->msg,
-                    R"raw(Network device : s%d->\"%s\":\"%s\""
-                    " error during connect : %s.")raw",
+                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"raw(Network device : s{}->\"{}\":\"{}\""
+                    " error during connect : {}.")raw",
                     sock, node->name, node->ip_address,
 #ifdef WIN_OS
                     WSA_Last_Err_Decode()
@@ -1765,7 +1765,8 @@ int io_manager::read_inputs()
                         }
                     else
                         {
-                        sprintf( G_LOG->msg, "Read DI:bus coupler returned error. Node %d)",
+                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                            "Read DI:bus coupler returned error. Node {})",
                             nd->number );
                         G_LOG->write_log( i_log::P_ERR );
 
@@ -1820,7 +1821,8 @@ int io_manager::read_inputs()
                         }
                     else
                         {
-                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} )",
                             nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
                         G_LOG->write_log( i_log::P_ERR );
                         }
