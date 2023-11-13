@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699866258986,
+  "lastUpdate": 1699869654106,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17046,6 +17046,38 @@ window.BENCHMARK_DATA = {
             "value": 109.83760777881602,
             "unit": "us/iter",
             "extra": "iterations: 6402\ncpu: 109.41786941580759 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "0d07cdde988634bee584d3bbdd7abb438e2e941a",
+          "message": "[doc] Better system architecture description",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/631/commits/0d07cdde988634bee584d3bbdd7abb438e2e941a"
+        },
+        "date": 1699869652794,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.148364494391938,
+            "unit": "us/iter",
+            "extra": "iterations: 43334\ncpu: 16.147966954354548 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.4871492938813,
+            "unit": "us/iter",
+            "extra": "iterations: 7435\ncpu: 96.02546065904505 us\nthreads: 1"
           }
         ]
       }
