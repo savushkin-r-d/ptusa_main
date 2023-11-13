@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699858947149,
+  "lastUpdate": 1699866258986,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17012,6 +17012,40 @@ window.BENCHMARK_DATA = {
             "value": 96.84766715660001,
             "unit": "us/iter",
             "extra": "iterations: 7484\ncpu: 96.29028594334581 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "13f700573e87a4d2857b8185fd4d18e299e597e5",
+          "message": "[test] Fix Linux test (#627)",
+          "timestamp": "2023-10-25T08:07:20Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/13f700573e87a4d2857b8185fd4d18e299e597e5"
+        },
+        "date": 1699866257692,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 18.785269456740522,
+            "unit": "us/iter",
+            "extra": "iterations: 37275\ncpu: 18.782985915492958 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 109.83760777881602,
+            "unit": "us/iter",
+            "extra": "iterations: 6402\ncpu: 109.41786941580759 us\nthreads: 1"
           }
         ]
       }
