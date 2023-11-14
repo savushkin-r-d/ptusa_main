@@ -1076,10 +1076,17 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node * io_manager::get_node( int node_n )
+io_manager::io_node* io_manager::get_node(int node_n)
+{
+    if (node_n >= 0 && node_n < nodes_count)
     {
-    return nodes[ node_n ];
+        return nodes[node_n];
     }
+    else
+    {
+        return nullptr;
+    }
+}
 u_int io_manager::get_nodes_count()
 	{
 	return nodes_count;
@@ -1795,27 +1802,23 @@ int io_manager::read_inputs()
 
                 if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                     {
-                    if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
-                        {
+                    if (buff[7] == 0x04 && buff[8] == bytes_cnt)
+                    {
                         int idx = 0;
-                        for ( unsigned int l = 0; l < nd->AI_cnt; l++ )
+                        for (unsigned int l = 0; l < nd->AI_cnt; l++)
+                        {
+                            if (nd->AI_types[l] == 638)
                             {
-                            switch ( nd->AI_types[ l ] )
-                                {
-                                case 638:
-                                    nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] +
-                                        buff[ 9 + idx + 3 ];
-                                    idx += 4;
-                                    break;
-
-                                default:
-                                    nd->AI[ l ] = 256 * buff[ 9 + idx ] +
-                                        buff[ 9 + idx + 1 ];
-                                    idx += 2;
-                                    break;
-                                }
+                                nd->AI[l] = 256 * buff[9 + idx + 2] + buff[9 + idx + 3];
+                                idx += 4;
+                            }
+                            else
+                            {
+                                nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                                idx += 2;
                             }
                         }
+                    }
                     else
                         {
                         fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -1903,7 +1906,7 @@ int io_manager::read_inputs()
 
                             for ( index_source = 0; bit_dest < ( start_register + registers_count ) * 2 * 8; index_source++ )
                                 {
-                                for ( int k = 0; k < 8; k++ )
+                                for ( k = 0; k < 8; k++ )
                                     {
                                     nd->DI[ bit_dest ] = ( resultbuff[ index_source ] >> k ) & 1;
 #ifdef DEBUG_BK
