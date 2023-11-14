@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699941022269,
+  "lastUpdate": 1699948499201,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17174,6 +17174,38 @@ window.BENCHMARK_DATA = {
             "value": 95.49549052517496,
             "unit": "us/iter",
             "extra": "iterations: 7388\ncpu: 94.99210882512182 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Vasiliysamuilik",
+            "username": "Vasiliysamuilik"
+          },
+          "committer": {
+            "name": "Vasiliysamuilik",
+            "username": "Vasiliysamuilik"
+          },
+          "id": "50822c98b2dfac1005479d5b0662ec4d80ab56d7",
+          "message": "Add exchange module I/O nodes for Windows",
+          "timestamp": "2022-11-11T12:57:44Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/537/commits/50822c98b2dfac1005479d5b0662ec4d80ab56d7"
+        },
+        "date": 1699948497571,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.834043437003388,
+            "unit": "us/iter",
+            "extra": "iterations: 32668\ncpu: 23.781939512672952 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 119.8114675079929,
+            "unit": "us/iter",
+            "extra": "iterations: 5309\ncpu: 119.38123940478431 us\nthreads: 1"
           }
         ]
       }
