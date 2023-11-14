@@ -1339,14 +1339,14 @@ int io_manager::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast<unsigned char>(7 + bytes_cnt);
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x0F;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
                 buff[ 10 ] = (unsigned char)nd->DO_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DO_cnt & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast<unsigned char>(bytes_cnt);
 
                 for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                     {
@@ -1384,14 +1384,14 @@ int io_manager::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast<unsigned char>(7 + bytes_cnt);
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x10;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 10 ] = static_cast<unsigned char>(bytes_cnt / 2 >> 8);
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast<unsigned char>(bytes_cnt);
 
                 for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
@@ -1467,7 +1467,7 @@ int io_manager::write_outputs()
                         u_char b = 0;
                         for ( u_int k = 0; k < 8; k++ )
                             {
-                            b = b | ( nd->DO_[ bit_src ] & 1 ) << k;
+                            b |= static_cast<unsigned char>( ( nd->DO_[ bit_src ] & 1 ) << k );
                             bit_src++;
                             }
                         writebuff[ j ] = b;
@@ -1689,14 +1689,14 @@ int io_manager::write_holding_registers( io_node* node, unsigned int address,
     buff[ 2 ] = 0;
     buff[ 3 ] = 0;
     buff[ 4 ] = 0;
-    buff[ 5 ] = 7 + bytes_cnt;
+    buff[ 5 ] = static_cast<unsigned char>(7 + bytes_cnt);
     buff[ 6 ] = station;
     buff[ 7 ] = 0x10;
     buff[ 8 ] = (u_int_2)address >> 8;
     buff[ 9 ] = (u_int_2)address & 0xFF;
     buff[ 10 ] = (u_int_2)quantity >> 8;
     buff[ 11 ] = (u_int_2)quantity & 0xFF;
-    buff[ 12 ] = bytes_cnt;
+    buff[ 12 ] = static_cast<unsigned char>(bytes_cnt);
     if ( e_communicate( node, bytes_cnt + 13, 12 ) == 0 )
         {
         if ( buff[ 7 ] == 0x10 )
@@ -1857,7 +1857,6 @@ int io_manager::read_inputs()
                     }
 
                 int res;
-                int k;
                 int index_source = 0;
                 unsigned int analog_dest = 0;
                 unsigned int bit_dest = 0;
@@ -1904,7 +1903,7 @@ int io_manager::read_inputs()
 
                             for ( index_source = 0; bit_dest < ( start_register + registers_count ) * 2 * 8; index_source++ )
                                 {
-                                for ( k = 0; k < 8; k++ )
+                                for ( int k = 0; k < 8; k++ )
                                     {
                                     if (bit_dest >= (start_register + registers_count) * 2 * 8)
                                         {

@@ -296,7 +296,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         //Network performance info.
         // Данные должны быть здесь, поэтому делаем обычный recv().
         auto p = reinterpret_cast<char*> (buf);
-        int res = static_cast<int>(recv(s, p, len,
+        auto res = static_cast<int>(recv(s, p, len,
 #ifdef WIN_OS
             0
 #else
