@@ -233,13 +233,13 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
 
         int n = 0;
 
-        if ( ( n = send( sockfd, p, i,
+        if ( ( n = static_cast<int>(send( sockfd, p, i,
 #ifdef WIN_OS
             0
 #else
             MSG_NOSIGNAL
 #endif // WIN_OS            
-            ) ) < 0 )
+            ) ) ) < 0 )
             {
             fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"raw(Network device : s{}->\"{}\":\"{}\""
@@ -269,7 +269,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         }
 
     //Network performance info.
-    select_wait_time = get_delta_millisec( st_time );
+    select_wait_time = static_cast<u_int>(get_delta_millisec( st_time ));
 
     if ( stat )
         {
@@ -296,13 +296,13 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
         //Network performance info.
         // Данные должны быть здесь, поэтому делаем обычный recv().
         auto p = reinterpret_cast<char*> (buf);
-        int res = recv(s, p, len,
+        int res = static_cast<int>(recv(s, p, len,
 #ifdef WIN_OS
             0
 #else
             MSG_NOSIGNAL
 #endif // WIN_OS            
-        );
+        ));
         if ( stat )
             {
             static time_t t_;
@@ -390,7 +390,7 @@ int tcp_communicator::sendall( int sockfd, unsigned char* buf, int len,
             return -1; // error
             }
 
-        select_wait_time = get_delta_millisec( st_time );
+        select_wait_time = static_cast<u_int>(get_delta_millisec( st_time ));
 
         if ( 0 == res )
             {

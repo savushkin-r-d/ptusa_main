@@ -1395,23 +1395,21 @@ int io_manager::write_outputs()
 
                 for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    switch ( nd->AO_types[ idx ] )
-                        {
-                        case 638:
-                            buff[ 13 + l ] = 0;
-                            buff[ 13 + l + 1 ] = 0;
-                            buff[ 13 + l + 2 ] = 0;
-                            buff[ 13 + l + 3 ] = 0;
-                            l += 4;
-                            break;
-
-                        default:
-                            buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
-                            buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
-                            l += 2;
-                            break;
-                        }
+                    if (nd->AO_types[idx] == 638)
+                    {
+                        buff[13 + l] = 0;
+                        buff[13 + l + 1] = 0;
+                        buff[13 + l + 2] = 0;
+                        buff[13 + l + 3] = 0;
+                        l += 4;
                     }
+                    else
+                    {
+                        buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
+                        buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
+                        l += 2;
+                    }
+                }
 
                 if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
                     {
@@ -1908,6 +1906,10 @@ int io_manager::read_inputs()
                                 {
                                 for ( k = 0; k < 8; k++ )
                                     {
+                                    if (bit_dest >= (start_register + registers_count) * 2 * 8)
+                                        {
+                                            break;
+                                        }
                                     nd->DI[ bit_dest ] = ( resultbuff[ index_source ] >> k ) & 1;
 #ifdef DEBUG_BK
                                     G_LOG->notice( "%d %d", bit_dest, ( resultbuff[ index_source ] >> k ) & 1 );

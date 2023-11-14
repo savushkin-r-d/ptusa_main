@@ -240,7 +240,6 @@ class io_manager
             BUFF_SIZE = 262,
             PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
             PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
-
             };
         virtual ~io_manager();
 
