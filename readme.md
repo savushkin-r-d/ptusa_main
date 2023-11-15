@@ -8,6 +8,8 @@
 
 Russian readme is [here](russian_readme/readme.md).
 
+Program **``ptusa_main``** directly controls technological process.
+
 ## Content ##
 
 1. [General system architecture](#general-system-architecture)
@@ -19,7 +21,7 @@ Russian readme is [here](russian_readme/readme.md).
 
 ## General system architecture ##
 
-General system architecture is shown below:
+General system architecture of the automated process control system (**APCS**) is shown below:
 
 <p align="center"><img src="readme_images/system_architecture_en.png"></p>
 
