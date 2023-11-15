@@ -1446,7 +1446,7 @@ int io_manager::write_outputs()
             if ( nd->AO_cnt > 0 )
                 {
                 unsigned int start_register = 0;
-                unsigned int start_write_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_HOLDINGREGISTERS_STARTADDRESS);
+                auto start_write_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_HOLDINGREGISTERS_STARTADDRESS);
                 unsigned int registers_count;
 
                 if ( nd->AO_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY) )
@@ -1715,16 +1715,25 @@ int io_manager::read_inputs()
 {
     if (nodes_count == 0) return 0;
 
-    for (u_int i = 0; i < nodes_count; i++) {
+    for (u_int i = 0; i < nodes_count; i++)
+    {
         io_node* nd = nodes[i];
 
         if (!nd->is_active) continue;
 
-        if (nd->type == io_node::WAGO_750_XXX_ETHERNET) {
-            read_DI(nd);
-            read_AI(nd);
+        if (nd->type == io_node::WAGO_750_XXX_ETHERNET)
+        {
+            if (nd->DI_cnt > 0)
+            {
+                read_DI(nd);
+            }
+            else if (nd->AI_cnt > 0)
+            {
+                read_AI(nd);
+            }
         }
-        else if (nd->type == io_node::PHOENIX_BK_ETH) {
+        else if (nd->type == io_node::PHOENIX_BK_ETH)
+        {
             readPhoenixInputs(nd);
         }
     }
@@ -1733,106 +1742,100 @@ int io_manager::read_inputs()
 }
 void io_manager::read_DI(io_node* nd)
 {
-    if (nd->DI_cnt > 0)
+    buff[0] = 's';
+    buff[1] = 's';
+    buff[2] = 0;
+    buff[3] = 0;
+    buff[4] = 0;
+    buff[5] = 6;
+    buff[6] = 0;
+    buff[7] = 0x02;
+    buff[8] = 0;
+    buff[9] = 0;
+    buff[10] = (unsigned char)nd->DI_cnt >> 7 >> 1;
+    buff[11] = (unsigned char)nd->DI_cnt & 0xFF;
+
+    u_int bytes_cnt = nd->DI_cnt / 8 + (nd->DI_cnt % 8 > 0 ? 1 : 0);
+
+    if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
     {
-        buff[0] = 's';
-        buff[1] = 's';
-        buff[2] = 0;
-        buff[3] = 0;
-        buff[4] = 0;
-        buff[5] = 6;
-        buff[6] = 0;
-        buff[7] = 0x02;
-        buff[8] = 0;
-        buff[9] = 0;
-        buff[10] = (unsigned char)nd->DI_cnt >> 7 >> 1;
-        buff[11] = (unsigned char)nd->DI_cnt & 0xFF;
-
-        u_int bytes_cnt = nd->DI_cnt / 8 + (nd->DI_cnt % 8 > 0 ? 1 : 0);
-
-        if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
+        if (buff[7] == 0x02 && buff[8] == bytes_cnt)
         {
-            if (buff[7] == 0x02 && buff[8] == bytes_cnt)
+            for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
             {
-                for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
+                for (int k = 0; k < 8; k++)
                 {
-                    for (int k = 0; k < 8; k++)
+                    if (idx < nd->DI_cnt)
                     {
-                        if (idx < nd->DI_cnt)
-                        {
-                            nd->DI[idx] = (buff[j + 9] >> k) & 1;
+                        nd->DI[idx] = (buff[j + 9] >> k) & 1;
 #ifdef DEBUG_KBUS
-                            printf("%d -> %d, ", idx, nd->DI[idx]);
+                        printf("%d -> %d, ", idx, nd->DI[idx]);
 #endif // DEBUG_KBUS
-                            idx++;
-                        }
+                        idx++;
                     }
                 }
-#ifdef DEBUG_KBUS
-                printf("\n");
-#endif // DEBUG_KBUS
             }
-            else
-            {
-                fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                    "Read DI:bus coupler returned error. Node {})",
-                    nd->number);
-                G_LOG->write_log(i_log::P_ERR);
+#ifdef DEBUG_KBUS
+            printf("\n");
+#endif // DEBUG_KBUS
+        }
+        else
+        {
+            fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Read DI:bus coupler returned error. Node {})",
+                nd->number);
+            G_LOG->write_log(i_log::P_ERR);
 
-                if (G_DEBUG)
-                {
-                    //printf("\nRead DI:I/O returned error...\n");
-                }
+            if (G_DEBUG)
+            {
+                //printf("\nRead DI:I/O returned error...\n");
             }
         }
     }
 }
 void io_manager::read_AI(io_node* nd)
 {
-    if (nd->AI_cnt > 0)
+    buff[0] = 's';
+    buff[1] = 's';
+    buff[2] = 0;
+    buff[3] = 0;
+    buff[4] = 0;
+    buff[5] = 6;
+    buff[6] = 0;
+    buff[7] = 0x04;
+    buff[8] = 0;
+    buff[9] = 0;
+
+    u_int bytes_cnt = nd->AI_size;
+
+    buff[10] = (unsigned char)bytes_cnt / 2 >> 8;
+    buff[11] = (unsigned char)bytes_cnt / 2 & 0xFF;
+
+    if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
     {
-        buff[0] = 's';
-        buff[1] = 's';
-        buff[2] = 0;
-        buff[3] = 0;
-        buff[4] = 0;
-        buff[5] = 6;
-        buff[6] = 0;
-        buff[7] = 0x04;
-        buff[8] = 0;
-        buff[9] = 0;
-
-        u_int bytes_cnt = nd->AI_size;
-
-        buff[10] = (unsigned char)bytes_cnt / 2 >> 8;
-        buff[11] = (unsigned char)bytes_cnt / 2 & 0xFF;
-
-        if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
+        if (buff[7] == 0x04 && buff[8] == bytes_cnt)
         {
-            if (buff[7] == 0x04 && buff[8] == bytes_cnt)
+            int idx = 0;
+            for (unsigned int l = 0; l < nd->AI_cnt; l++)
             {
-                int idx = 0;
-                for (unsigned int l = 0; l < nd->AI_cnt; l++)
+                if (nd->AI_types[l] == 638)
                 {
-                    if (nd->AI_types[l] == 638)
-                    {
-                        nd->AI[l] = 256 * buff[9 + idx + 2] + buff[9 + idx + 3];
-                        idx += 4;
-                    }
-                    else
-                    {
-                        nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
-                        idx += 2;
-                    }
+                    nd->AI[l] = 256 * buff[9 + idx + 2] + buff[9 + idx + 3];
+                    idx += 4;
+                }
+                else
+                {
+                    nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                    idx += 2;
                 }
             }
-            else
-            {
-                fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                    "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} )",
-                    nd->number, (int)buff[7], (int)buff[8], bytes_cnt);
-                G_LOG->write_log(i_log::P_ERR);
-            }
+        }
+        else
+        {
+            fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} )",
+                nd->number, (int)buff[7], (int)buff[8], bytes_cnt);
+            G_LOG->write_log(i_log::P_ERR);
         }
     }
 }
@@ -1841,7 +1844,7 @@ void io_manager::readPhoenixInputs(io_node* nd)
     if (!nd->is_active || nd->AI_cnt == 0) return;
 
     unsigned int start_register = 0;
-    unsigned int start_read_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_INPUTREGISTERS_STARTADDRESS);
+    auto start_read_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_INPUTREGISTERS_STARTADDRESS);
     unsigned int registers_count;
 
     if (nd->AI_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
