@@ -34,19 +34,23 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 + Execution of the technological process:
 
 ``` mermaid
+%%{ init: {'theme': 'neutral'} }%%
+
 flowchart TD
-    A([2 Process execution]) --- B[/For each unit\]
+    A([<b>2 Process execution</b>]) --- B[/<p style='width:150px'> For each unit\]
     B --- C[[3 Execution of the unit <br/> procedure]]
-    C --- D[\Next unit/]
+    C --- D[\<p style='width:150px'> Next unit/]
     D --- E([End])
 
 ```
 
 ``` mermaid
+%%{ init: {'theme': 'neutral'} }%%
+
 flowchart TD
-    A([3 Execution <br/> of the unit procedure]) --- B[/For each operation\]
-    B --- C[[4 Execution <br/> of the operation]]
-    C --- D[\Next operation/]
+    A([<b>3 Execution <br/> of the unit procedure</b>]) --- B[/<p style='width:150px'> For each operation\]
+    B --- C[[<p style='width:150px'>4 Execution <br/> of the operation]]
+    C --- D[\<p style='width:150px'> Next operation/]
     D --- E([End])
 
 ```
@@ -54,33 +58,33 @@ flowchart TD
 <p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
 
 ``` mermaid
+%%{ init: {'theme': 'neutral'} }%%
 
 flowchart TD
-
-    A([5 Execution <br/> of the steps]) --- A1[[6 Execution of the <br/> main step]]
-    A1 --- B[/For each extra step\]
+    A([<b>5 Execution of the steps</b>]) --- A1[[6 Execution of the <br/> main step]]
+    A1 --- B[/<p style='width:150px'> For each extra step\]
     B --- C[[6 Execution of the step]]
-    C --- D[\Next extra step/]
+    C --- D[\<p style='width:150px'> Next extra step/]
     D --- E([End])
 
 ```
 
 ``` mermaid
+%%{ init: {'theme': 'neutral'} }%%
 
 flowchart TD
-
-    A([6 Execution <br/> of the step]) --- B[/For each step\]
+    A([<b>6 Execution of the step</b>]) --- B[/<p style='width:150px'> For each step\]
     B --- C[[7 Execution of the action]]
-    C --- D[\Next action/]
+    C --- D[\<p style='width:150px'> Next action/]
     D --- E([End])
 
 ```
 
 ``` mermaid
+%%{ init: {'theme': 'neutral'} }%%
 
 flowchart TD
-
-    A([7 Execution <br/> of the action]) --- B(Action logic)
+    A([<b>7 Execution of the action</b>]) --- B(<p style='width:150px'>Action logic)
     B --- E([End])
 
 ```
