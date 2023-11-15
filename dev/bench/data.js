@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699952014694,
+  "lastUpdate": 1700031064615,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17238,6 +17238,42 @@ window.BENCHMARK_DATA = {
             "value": 94.20574438122362,
             "unit": "us/iter",
             "extra": "iterations: 7030\ncpu: 93.71550497866288 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1eae12a6a3339eed898b8a7ccab86b15f59581eb",
+          "message": "[doc] Better system architecture description (#631)",
+          "timestamp": "2023-11-15T09:49:06+03:00",
+          "tree_id": "ee75958b323fe1a00d2648b62c4fb4e11be74724",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/1eae12a6a3339eed898b8a7ccab86b15f59581eb"
+        },
+        "date": 1700031062933,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.07832555972341,
+            "unit": "us/iter",
+            "extra": "iterations: 42923\ncpu: 16.077480604803952 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 97.04708527676559,
+            "unit": "us/iter",
+            "extra": "iterations: 7118\ncpu: 96.5795026692891 us\nthreads: 1"
           }
         ]
       }
