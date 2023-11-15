@@ -1144,7 +1144,7 @@ void io_manager::print_log() const
         }
     }
 //-----------------------------------------------------------------------------
-int io_manager::net_init( io_node* node )
+int io_manager::net_init( io_node* node ) const
     {
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
@@ -1300,7 +1300,7 @@ int io_manager::net_init( io_node* node )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void io_manager::disconnect( io_node* node )
+void io_manager::disconnect( io_node* node ) const
     {
     if ( node->sock )
         {
@@ -1446,12 +1446,12 @@ int io_manager::write_outputs()
             if ( nd->AO_cnt > 0 )
                 {
                 unsigned int start_register = 0;
-                unsigned int start_write_address = PHOENIX_HOLDINGREGISTERS_STARTADDRESS;
+                unsigned int start_write_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_HOLDINGREGISTERS_STARTADDRESS);
                 unsigned int registers_count;
 
-                if ( nd->AO_cnt > MAX_MODBUS_REGISTERS_PER_QUERY )
+                if ( nd->AO_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY) )
                     {
-                    registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
+                    registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
                     }
                 else
                     {
@@ -1560,9 +1560,9 @@ int io_manager::write_outputs()
 
                     start_register += registers_count;
                     registers_count = nd->AO_cnt - start_register;
-                    if ( registers_count > MAX_MODBUS_REGISTERS_PER_QUERY )
+                    if ( registers_count > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY) )
                         {
-                        registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
+                        registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
                         }
 
                     } while ( start_register < nd->AO_cnt );
@@ -1712,238 +1712,228 @@ int io_manager::write_holding_registers( io_node* node, unsigned int address,
     }
 //-----------------------------------------------------------------------------
 int io_manager::read_inputs()
+{
+    if (nodes_count == 0) return 0;
+
+    for (u_int i = 0; i < nodes_count; i++) {
+        io_node* nd = nodes[i];
+
+        if (!nd->is_active) continue;
+
+        if (nd->type == io_node::WAGO_750_XXX_ETHERNET) {
+            read_DI(nd);
+            read_AI(nd);
+        }
+        else if (nd->type == io_node::PHOENIX_BK_ETH) {
+            readPhoenixInputs(nd);
+        }
+    }
+
+    return 0;
+}
+void io_manager::read_DI(io_node* nd)
+{
+    if (nd->DI_cnt > 0)
     {
-    if ( 0 == nodes_count ) return 0;
+        buff[0] = 's';
+        buff[1] = 's';
+        buff[2] = 0;
+        buff[3] = 0;
+        buff[4] = 0;
+        buff[5] = 6;
+        buff[6] = 0;
+        buff[7] = 0x02;
+        buff[8] = 0;
+        buff[9] = 0;
+        buff[10] = (unsigned char)nd->DI_cnt >> 7 >> 1;
+        buff[11] = (unsigned char)nd->DI_cnt & 0xFF;
 
-    for ( u_int i = 0; i < nodes_count; i++ )
+        u_int bytes_cnt = nd->DI_cnt / 8 + (nd->DI_cnt % 8 > 0 ? 1 : 0);
+
+        if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
         {
-        io_node* nd = nodes[ i ];
-
-        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET ) // Ethernet I/O nodes.
+            if (buff[7] == 0x02 && buff[8] == bytes_cnt)
             {
-            if ( !nd->is_active )
+                for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
                 {
-                continue;
+                    for (int k = 0; k < 8; k++)
+                    {
+                        if (idx < nd->DI_cnt)
+                        {
+                            nd->DI[idx] = (buff[j + 9] >> k) & 1;
+#ifdef DEBUG_KBUS
+                            printf("%d -> %d, ", idx, nd->DI[idx]);
+#endif // DEBUG_KBUS
+                            idx++;
+                        }
+                    }
                 }
-
-            if ( nd->DI_cnt > 0 )
-                {
-                buff[ 0 ] = 's';
-                buff[ 1 ] = 's';
-                buff[ 2 ] = 0;
-                buff[ 3 ] = 0;
-                buff[ 4 ] = 0;
-                buff[ 5 ] = 6;
-                buff[ 6 ] = 0;
-                buff[ 7 ] = 0x02;
-                buff[ 8 ] = 0;
-                buff[ 9 ] = 0;
-                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 7 >> 1;
-                buff[ 11 ] = (unsigned char)nd->DI_cnt & 0xFF;
-
-                u_int bytes_cnt = nd->DI_cnt / 8 + ( nd->DI_cnt % 8 > 0 ? 1 : 0 );
-
-                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
-                    {
-                    if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
-                        {
-                        for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
-                            {
-                            for ( int k = 0; k < 8; k++ )
-                                {
-                                if ( idx < nd->DI_cnt )
-                                    {
-                                    nd->DI[ idx ] = ( buff[ j + 9 ] >> k ) & 1;
 #ifdef DEBUG_KBUS
-                                    printf( "%d -> %d, ", idx, nd->DI[ idx ] );
+                printf("\n");
 #endif // DEBUG_KBUS
-                                    idx++;
-                                    }
-                                }
-                            }
-#ifdef DEBUG_KBUS
-                        printf( "\n" );
-#endif // DEBUG_KBUS
-                        }
-                    else
-                        {
-                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node {})",
-                            nd->number );
-                        G_LOG->write_log( i_log::P_ERR );
+            }
+            else
+            {
+                fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                    "Read DI:bus coupler returned error. Node {})",
+                    nd->number);
+                G_LOG->write_log(i_log::P_ERR);
 
-                        if ( G_DEBUG )
-                            {
-                            //printf("\nRead DI:I/O returned error...\n");
-                            }
-                        }
-                    }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
-                }// if ( nd->DI_cnt > 0 )
-
-            if ( nd->AI_cnt > 0 )
+                if (G_DEBUG)
                 {
-                buff[ 0 ] = 's';
-                buff[ 1 ] = 's';
-                buff[ 2 ] = 0;
-                buff[ 3 ] = 0;
-                buff[ 4 ] = 0;
-                buff[ 5 ] = 6;
-                buff[ 6 ] = 0;
-                buff[ 7 ] = 0x04;
-                buff[ 8 ] = 0;
-                buff[ 9 ] = 0;
+                    //printf("\nRead DI:I/O returned error...\n");
+                }
+            }
+        }
+    }
+}
+void io_manager::read_AI(io_node* nd)
+{
+    if (nd->AI_cnt > 0)
+    {
+        buff[0] = 's';
+        buff[1] = 's';
+        buff[2] = 0;
+        buff[3] = 0;
+        buff[4] = 0;
+        buff[5] = 6;
+        buff[6] = 0;
+        buff[7] = 0x04;
+        buff[8] = 0;
+        buff[9] = 0;
 
-                u_int bytes_cnt = nd->AI_size;
+        u_int bytes_cnt = nd->AI_size;
 
-                buff[ 10 ] = (unsigned char)bytes_cnt / 2 >> 8;
-                buff[ 11 ] = (unsigned char)bytes_cnt / 2 & 0xFF;
+        buff[10] = (unsigned char)bytes_cnt / 2 >> 8;
+        buff[11] = (unsigned char)bytes_cnt / 2 & 0xFF;
 
-                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+        if (e_communicate(nd, 12, bytes_cnt + 9) == 0)
+        {
+            if (buff[7] == 0x04 && buff[8] == bytes_cnt)
+            {
+                int idx = 0;
+                for (unsigned int l = 0; l < nd->AI_cnt; l++)
+                {
+                    if (nd->AI_types[l] == 638)
                     {
-                    if (buff[7] == 0x04 && buff[8] == bytes_cnt)
-                    {
-                        int idx = 0;
-                        for (unsigned int l = 0; l < nd->AI_cnt; l++)
-                        {
-                            if (nd->AI_types[l] == 638)
-                            {
-                                nd->AI[l] = 256 * buff[9 + idx + 2] + buff[9 + idx + 3];
-                                idx += 4;
-                            }
-                            else
-                            {
-                                nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
-                                idx += 2;
-                            }
-                        }
+                        nd->AI[l] = 256 * buff[9 + idx + 2] + buff[9 + idx + 3];
+                        idx += 4;
                     }
                     else
-                        {
-                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} )",
-                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                        G_LOG->write_log( i_log::P_ERR );
-                        }
+                    {
+                        nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                        idx += 2;
                     }
-                }// if ( nd->AI_cnt > 0 )
-
-            }// if ( nd->type == io_node::T_750_341 || ...
-        }// for ( u_int i = 0; i < nodes_count; i++ )
-
-    for ( u_int i = 0; i < nodes_count; i++ )
-        {
-        io_node* nd = nodes[ i ];
-
-        if ( nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
-            {
-            if ( !nd->is_active )
-                {
-                continue;
                 }
+            }
+            else
+            {
+                fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                    "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} )",
+                    nd->number, (int)buff[7], (int)buff[8], bytes_cnt);
+                G_LOG->write_log(i_log::P_ERR);
+            }
+        }
+    }
+}
+void io_manager::readPhoenixInputs(io_node* nd)
+{
+    if (!nd->is_active || nd->AI_cnt == 0) return;
 
-            if ( nd->AI_cnt > 0 )
-                {
-                unsigned int start_register = 0;
-                unsigned int start_read_address = PHOENIX_INPUTREGISTERS_STARTADDRESS;
-                unsigned int registers_count;
+    unsigned int start_register = 0;
+    unsigned int start_read_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_INPUTREGISTERS_STARTADDRESS);
+    unsigned int registers_count;
 
-                if ( nd->AI_cnt > MAX_MODBUS_REGISTERS_PER_QUERY )
-                    {
-                    registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
-                    }
-                else
-                    {
-                    registers_count = nd->AI_cnt;
-                    }
+    if (nd->AI_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
+    {
+        registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
+    }
+    else
+    {
+        registers_count = nd->AI_cnt;
+    }
 
-                int res;
-                int index_source = 0;
-                unsigned int analog_dest = 0;
-                unsigned int bit_dest = 0;
+    int res;
+    int index_source = 0;
+    unsigned int analog_dest = 0;
+    unsigned int bit_dest = 0;
 
-                do
-                    {
+    do
+    {
 #ifdef DEBUG_BK_MIN
-                    G_LOG->warning( "Read %d node registers from %d", registers_count, start_read_address + start_register );
+        G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    res = read_input_registers( nd, start_read_address + start_register, registers_count );
+        res = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
-                    printf( "\n\r" );
-                    for ( int ideb = 0; ideb < registers_count; ideb++ )
-                        {
-                        printf( "%d = %d, ", start_read_address + start_register + ideb, 256 * resultbuff[ ideb * 2 ] + resultbuff[ ideb * 2 + 1 ] );
-                        }
+        printf("\n\r");
+        for (int ideb = 0; ideb < registers_count; ideb++)
+        {
+            printf("%d = %d, ", start_read_address + start_register + ideb, 256 * resultbuff[ideb * 2] + resultbuff[ideb * 2 + 1]);
+        }
 #endif
 
 
-                    if ( res >= 0 )
-                        {
-                        if ( res )
-                            {
-                            for ( index_source = 0; analog_dest < start_register + registers_count; analog_dest++ )
-                                {
-                                switch ( nd->AI_types[ analog_dest ] )
-                                    {
-                                    case 1027843:           //AXL F IOL8
-                                    case 1088132:           //AXL SE IOL4
-                                        memcpy( &nd->AI[ analog_dest ], resultbuff + index_source, 2 );
-                                        index_source += 2;
-                                        break;
-
-                                    default:
-                                        nd->AI[ analog_dest ] = 256 * resultbuff[ index_source ] + resultbuff[ index_source + 1 ];
-                                        index_source += 2;
-                                        break;
-                                    }
-#ifdef DEBUG_BK
-                                G_LOG->warning( "%d %u", analog_dest, nd->AI[ analog_dest ] );
-#endif // DEBUG_BK
-                                }
-
-                            for ( index_source = 0; bit_dest < ( start_register + registers_count ) * 2 * 8; index_source++ )
-                                {
-                                for ( int k = 0; k < 8; k++ )
-                                    {
-                                    if (bit_dest >= (start_register + registers_count) * 2 * 8)
-                                        {
-                                            break;
-                                        }
-                                    nd->DI[ bit_dest ] = ( resultbuff[ index_source ] >> k ) & 1;
-#ifdef DEBUG_BK
-                                    G_LOG->notice( "%d %d", bit_dest, ( resultbuff[ index_source ] >> k ) & 1 );
-#endif // DEBUG_BK
-                                    bit_dest++;
-                                    }
-                                }
-                            }
-                        else
-                            {
-                            G_LOG->error( "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                                nd->number, (int)buff[ 7 ], (int)buff[ 8 ], registers_count * 2 );
-                            break;
-                            }
-                        }
-                    else
-                        {
-                        //node doesn't respond
+        if (res >= 0)
+        {
+            if (res)
+            {
+                for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
+                {
+                    switch (nd->AI_types[analog_dest])
+                    {
+                    case 1027843:           //AXL F IOL8
+                    case 1088132:           //AXL SE IOL4
+                        memcpy(&nd->AI[analog_dest], resultbuff + index_source, 2);
+                        index_source += 2;
                         break;
-                        }
-                    start_register += registers_count;
-                    registers_count = nd->AI_cnt - start_register;
-                    if ( registers_count > MAX_MODBUS_REGISTERS_PER_QUERY )
-                        {
-                        registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
-                        }
-                    } while ( start_register < nd->AI_cnt );
+
+                    default:
+                        nd->AI[analog_dest] = 256 * resultbuff[index_source] + resultbuff[index_source + 1];
+                        index_source += 2;
+                        break;
+                    }
+#ifdef DEBUG_BK
+                    G_LOG->warning("%d %u", analog_dest, nd->AI[analog_dest]);
+#endif // DEBUG_BK
                 }
 
-            }// nd->type == io_node::PHOENIX_BK_ETH
-        }// for ( u_int i = 0; i < nodes_count; i++ )
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
+                for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
+                {
+                    for (int k = 0; k < 8; k++)
+                    {
+                        if (bit_dest >= (start_register + registers_count) * 2 * 8)
+                        {
+                            break;
+                        }
+                        nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
+#ifdef DEBUG_BK
+                        G_LOG->notice("%d %d", bit_dest, (resultbuff[index_source] >> k) & 1);
+#endif // DEBUG_BK
+                        bit_dest++;
+                    }
+                }
+            }
+            else
+            {
+                G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                    nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+                break;
+            }
+        }
+        else
+        {
+            //node doesn't respond
+            break;
+        }
+        start_register += registers_count;
+        registers_count = nd->AI_cnt - start_register;
+        if (registers_count > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
+        {
+            registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
+        }
+    } while (start_register < nd->AI_cnt);
+}
 //-----------------------------------------------------------------------------
 io_manager::io_node::~io_node()
     {

@@ -234,7 +234,7 @@ class io_device
 class io_manager
     {
     public:
-        enum CONSTANTS
+        enum class CONSTANTS : uint32_t
             {
             MAX_MODBUS_REGISTERS_PER_QUERY = 123,
             BUFF_SIZE = 262,
@@ -408,7 +408,7 @@ class io_manager
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
-        u_char buff[ BUFF_SIZE ];
+        u_char buff[ static_cast <uint32_t> ( CONSTANTS::BUFF_SIZE ) ];
         u_char* resultbuff;
         u_char* writebuff;
 
@@ -416,6 +416,10 @@ class io_manager
         io_node * get_node( int node_n );
 
 		u_int get_nodes_count();
+
+        void read_DI(io_node* nd);
+        void read_AI(io_node* nd);
+        void readPhoenixInputs(io_node* nd);
 
         /// @brief Установка числа модулей.
         ///
@@ -448,12 +452,12 @@ class io_manager
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int net_init( io_node* node );
+        int net_init( io_node* node ) const;
 
         /// @brief Отключение от узла.
         ///
         /// @param node - узел, от которого отключаемся.
-        void disconnect( io_node* node );
+        void disconnect( io_node* node ) const;
 
         int e_communicate( io_node* node, int bytes_to_send,
             int bytes_to_receive );
