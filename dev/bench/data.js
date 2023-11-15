@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700031064615,
+  "lastUpdate": 1700036409615,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17274,6 +17274,38 @@ window.BENCHMARK_DATA = {
             "value": 97.04708527676559,
             "unit": "us/iter",
             "extra": "iterations: 7118\ncpu: 96.5795026692891 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "a824a71188381afdd3d7eaf6b0029e62883d85d1",
+          "message": "[doc] Better diagrams style",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/632/commits/a824a71188381afdd3d7eaf6b0029e62883d85d1"
+        },
+        "date": 1700036408736,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.22267032686456,
+            "unit": "us/iter",
+            "extra": "iterations: 43076\ncpu: 16.22213297427802 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.53603655739803,
+            "unit": "us/iter",
+            "extra": "iterations: 7413\ncpu: 95.07747200863348 us\nthreads: 1"
           }
         ]
       }
