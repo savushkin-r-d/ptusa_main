@@ -1889,18 +1889,18 @@ void io_manager::read_phoenix_inputs(io_node* nd)
         registers_count = nd->AI_cnt - start_register;
     } while (start_register < nd->AI_cnt);
 }
-bool io_manager::is_phoenix_input_reading_required(io_node* nd)
+bool io_manager::is_phoenix_input_reading_required(const io_node* nd) const
 {
     return (nd->is_active && nd->AI_cnt > 0);
 }
-unsigned int io_manager::calculate_registers_count(io_node* nd)
+unsigned int io_manager::calculate_registers_count(const io_node* nd) const
 {
     return (nd->AI_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
         ? static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY)
         : nd->AI_cnt;
 }
 void io_manager::process_analog_inputs(io_node* nd, unsigned int& analog_dest, int& index_source,
-    unsigned int start_register, unsigned int registers_count)
+    unsigned int start_register, unsigned int registers_count) const
 {
     for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
     {
@@ -1923,7 +1923,7 @@ void io_manager::process_analog_inputs(io_node* nd, unsigned int& analog_dest, i
     }
 }
 void io_manager::process_digital_inputs(io_node* nd, unsigned int& bit_dest, int& index_source,
-    unsigned int start_register, unsigned int registers_count)
+    unsigned int start_register, unsigned int registers_count) const
 {
     for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
     {
@@ -1941,7 +1941,7 @@ void io_manager::process_digital_inputs(io_node* nd, unsigned int& bit_dest, int
         }
     }
 }
-void io_manager::handle_ai_error(io_node* nd, unsigned int registers_count)
+void io_manager::handle_ai_error(const io_node* nd, unsigned int registers_count) const
 {
     G_LOG->error("Read AI: bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
         nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
