@@ -419,7 +419,17 @@ class io_manager
 
         void read_DI(io_node* nd);
         void read_AI(io_node* nd);
-        void readPhoenixInputs(io_node* nd);
+
+        void read_phoenix_inputs(io_node* nd);
+
+        bool is_phoenix_input_reading_required(io_node* nd);
+        unsigned int calculate_registers_count(io_node* nd);
+        
+        void process_analog_inputs(io_node* nd, unsigned int& analog_dest, int& index_source,
+                                 unsigned int start_register, unsigned int registers_count);
+        void process_digital_inputs(io_node* nd, unsigned int& bit_dest, int& index_source,
+                                  unsigned int start_register, unsigned int registers_count);
+        void handle_ai_error(io_node* nd, unsigned int registers_count);
 
         /// @brief Установка числа модулей.
         ///

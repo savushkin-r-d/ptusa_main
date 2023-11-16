@@ -1734,7 +1734,7 @@ int io_manager::read_inputs()
         }
         else if (nd->type == io_node::PHOENIX_BK_ETH)
         {
-            readPhoenixInputs(nd);
+            read_phoenix_inputs(nd);
         }
     }
 
@@ -1839,22 +1839,16 @@ void io_manager::read_AI(io_node* nd)
         }
     }
 }
-void io_manager::readPhoenixInputs(io_node* nd)
+void io_manager::read_phoenix_inputs(io_node* nd)
 {
-    if (!nd->is_active || nd->AI_cnt == 0) return;
+    if (!is_phoenix_input_reading_required(nd))
+    {
+        return;
+    }
 
     unsigned int start_register = 0;
     auto start_read_address = static_cast<unsigned int>(CONSTANTS::PHOENIX_INPUTREGISTERS_STARTADDRESS);
-    unsigned int registers_count;
-
-    if (nd->AI_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
-    {
-        registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
-    }
-    else
-    {
-        registers_count = nd->AI_cnt;
-    }
+    unsigned int registers_count = calculate_registers_count(nd);
 
     int res;
     int index_source = 0;
@@ -1876,66 +1870,81 @@ void io_manager::readPhoenixInputs(io_node* nd)
         }
 #endif
 
-
-        if (res >= 0)
-        {
-            if (res)
-            {
-                for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
-                {
-                    switch (nd->AI_types[analog_dest])
-                    {
-                    case 1027843:           //AXL F IOL8
-                    case 1088132:           //AXL SE IOL4
-                        memcpy(&nd->AI[analog_dest], resultbuff + index_source, 2);
-                        index_source += 2;
-                        break;
-
-                    default:
-                        nd->AI[analog_dest] = 256 * resultbuff[index_source] + resultbuff[index_source + 1];
-                        index_source += 2;
-                        break;
-                    }
-#ifdef DEBUG_BK
-                    G_LOG->warning("%d %u", analog_dest, nd->AI[analog_dest]);
-#endif // DEBUG_BK
-                }
-
-                for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
-                {
-                    for (int k = 0; k < 8; k++)
-                    {
-                        if (bit_dest >= (start_register + registers_count) * 2 * 8)
-                        {
-                            break;
-                        }
-                        nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
-#ifdef DEBUG_BK
-                        G_LOG->notice("%d %d", bit_dest, (resultbuff[index_source] >> k) & 1);
-#endif // DEBUG_BK
-                        bit_dest++;
-                    }
-                }
+        if (res >= 0) {
+            if (res) {
+                process_analog_inputs(nd, analog_dest, index_source, start_register, registers_count);
+                process_digital_inputs(nd, bit_dest, index_source, start_register, registers_count);
             }
-            else
-            {
-                G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                    nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+            else {
+                handle_ai_error(nd, registers_count);
                 break;
             }
         }
-        else
-        {
-            //node doesn't respond
+        else {
+            // node doesn't respond
             break;
         }
+
         start_register += registers_count;
         registers_count = nd->AI_cnt - start_register;
-        if (registers_count > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
-        {
-            registers_count = static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY);
-        }
     } while (start_register < nd->AI_cnt);
+}
+bool io_manager::is_phoenix_input_reading_required(io_node* nd)
+{
+    return (nd->is_active && nd->AI_cnt > 0);
+}
+unsigned int io_manager::calculate_registers_count(io_node* nd)
+{
+    return (nd->AI_cnt > static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY))
+        ? static_cast<unsigned int>(CONSTANTS::MAX_MODBUS_REGISTERS_PER_QUERY)
+        : nd->AI_cnt;
+}
+void io_manager::process_analog_inputs(io_node* nd, unsigned int& analog_dest, int& index_source,
+    unsigned int start_register, unsigned int registers_count)
+{
+    for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
+    {
+        switch (nd->AI_types[analog_dest])
+        {
+        case 1027843:           //AXL F IOL8
+        case 1088132:           //AXL SE IOL4
+            memcpy(&nd->AI[analog_dest], resultbuff + index_source, 2);
+            index_source += 2;
+            break;
+
+        default:
+            nd->AI[analog_dest] = 256 * resultbuff[index_source] + resultbuff[index_source + 1];
+            index_source += 2;
+            break;
+        }
+#ifdef DEBUG_BK
+        G_LOG->warning("%d %u", analog_dest, nd->AI[analog_dest]);
+#endif // DEBUG_BK
+    }
+}
+void io_manager::process_digital_inputs(io_node* nd, unsigned int& bit_dest, int& index_source,
+    unsigned int start_register, unsigned int registers_count)
+{
+    for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
+    {
+        for (int k = 0; k < 8; k++)
+        {
+            if (bit_dest >= (start_register + registers_count) * 2 * 8)
+            {
+                break;
+            }
+            nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
+#ifdef DEBUG_BK
+            G_LOG->notice("%d %d", bit_dest, (resultbuff[index_source] >> k) & 1);
+#endif // DEBUG_BK
+            bit_dest++;
+        }
+    }
+}
+void io_manager::handle_ai_error(io_node* nd, unsigned int registers_count)
+{
+    G_LOG->error("Read AI: bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+        nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
 }
 //-----------------------------------------------------------------------------
 io_manager::io_node::~io_node()
