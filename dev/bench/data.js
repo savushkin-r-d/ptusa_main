@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700141907308,
+  "lastUpdate": 1700142451020,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17568,6 +17568,42 @@ window.BENCHMARK_DATA = {
             "value": 96.46352412758931,
             "unit": "us/iter",
             "extra": "iterations: 7336\ncpu: 95.99882769901855 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9b9a6a4e64c84ca876e0658ac72f4dca9c15acf1",
+          "message": "[doc] Better diagrams style (#632)",
+          "timestamp": "2023-11-16T16:45:30+03:00",
+          "tree_id": "c6440925368fda762474580a557cc3ebaab7daf2",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/9b9a6a4e64c84ca876e0658ac72f4dca9c15acf1"
+        },
+        "date": 1700142449423,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.11275983799018,
+            "unit": "us/iter",
+            "extra": "iterations: 43454\ncpu: 16.11207023519124 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.22443240299799,
+            "unit": "us/iter",
+            "extra": "iterations: 7345\ncpu: 95.71886997957796 us\nthreads: 1"
           }
         ]
       }
