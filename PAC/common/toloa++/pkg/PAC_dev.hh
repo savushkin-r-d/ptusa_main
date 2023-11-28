@@ -2041,9 +2041,16 @@ class ParamsRecipeStorage
         float getRecPar(int recNo, int parNo);
     };
 
+class ParamsRecipeAdapter
+    {
+        void addMap(unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity);
+        void loadParams(ParamsRecipeStorage* recStorage, tech_object* techObject, unsigned int recNo);
+    };
+
 class ParamsRecipeManager
     {
         ParamsRecipeStorage* createRecipes(int size, int quantity);
+        ParamsRecipeAdapter* createAdapter( ParamsRecipeStorage* recStorage );
     };
 
 ParamsRecipeManager* G_PARAMS_RECIPE_MANAGER();

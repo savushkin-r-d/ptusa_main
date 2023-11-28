@@ -58,12 +58,23 @@ struct ParamsRecipeMapRecord
 class ParamsRecipeAdapter
     {
     private:
-        std::vector<ParamsRecipeMapRecord> paramsMap;
-        ParamsRecipeStorage* recStorage;
+        std::vector<ParamsRecipeMapRecord> mParamsMap;
+        std::vector<int> mActiveRecipes;
+        ParamsRecipeStorage* mRecStorage;
+        int mId;
+        void serialize(const std::string& filename);
+        void deserialize(const std::string& filename);
     public:
-        explicit ParamsRecipeAdapter( ParamsRecipeStorage *recStorage );
-        void addMap(uInt startRecPar, uInt startObjPar, uInt quantity);
-        void loadParams(ParamsRecipeStorage* recStorage, tech_object* techObject, uInt recNo);
+        explicit ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage );
+        void addMap( unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity);
+        void loadParams( ParamsRecipeStorage* recStorage, tech_object* techObject, unsigned int recNo);
+        void serialize();
+        void deserialize();
+        int getActiveState() const;
+        ParamsRecipeStorage* getRecStorage() const;
+        void setActiveState(int state);
+        bool isChanged = false;
+        int set_cmd(const std::string& varName, int index, float value, const std::string& strValue);
     };
 
 class ParamsRecipeManager: public i_Lua_save_device
@@ -86,13 +97,16 @@ class ParamsRecipeManager: public i_Lua_save_device
         ParamsRecipeManager(ParamsRecipeManager &outer) = delete;
         void operator=(const ParamsRecipeManager &) = delete;
 
+        const long MIN_SAVE_INTERVAL_MS = 10000;
+
     protected:
         ParamsRecipeManager();
 
     private:
-        int sId = 0;
-        unsigned long lastSaveTimer;
-        unsigned long minSaveTimeout;
+        int mId = 0;
+        int mAdaptersId = 0;
+        unsigned long mLastSaveTimer;
+        unsigned long mMinSaveTimeout;
         static auto_smart_ptr <ParamsRecipeManager> sInstance;
 
     };
