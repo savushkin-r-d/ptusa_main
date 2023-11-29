@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1701075832818,
+  "lastUpdate": 1701245071330,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17708,6 +17708,38 @@ window.BENCHMARK_DATA = {
             "value": 95.65051608372028,
             "unit": "us/iter",
             "extra": "iterations: 7119\ncpu: 95.04367186402585 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "id": "b0fef0ffb9c5bda34d0a6da66a493c0525c9093c",
+          "message": "Add CMake build for neuroPID",
+          "timestamp": "2023-02-16T14:09:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/630/commits/b0fef0ffb9c5bda34d0a6da66a493c0525c9093c"
+        },
+        "date": 1701245068884,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.834332319501573,
+            "unit": "us/iter",
+            "extra": "iterations: 41427\ncpu: 16.833502305259856 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.81697623019502,
+            "unit": "us/iter",
+            "extra": "iterations: 7194\ncpu: 95.33026132888519 us\nthreads: 1"
           }
         ]
       }
