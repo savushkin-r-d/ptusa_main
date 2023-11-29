@@ -39,6 +39,8 @@ class ParamsRecipeStorage
         void setRecPar(int recNo, int parNo, float newValue);
         float getRecPar( uInt recNo, uInt parNo);
         void serialize(const std::string& filename);
+        void serialize();
+        void deserialize();
         void deserialize(const std::string& filename);
         int getActiveRecipe() const;
         int setActiveRecipe(int recipe);
@@ -74,6 +76,8 @@ class ParamsRecipeAdapter
         ParamsRecipeStorage* getRecStorage() const;
         void setActiveState(int state);
         bool isChanged = false;
+        std::string LastLoadedRecipeName = "Не выбран";
+        int LastLoadedRecipeIndex = 0;
         int set_cmd(const std::string& varName, int index, float value, const std::string& strValue);
     };
 

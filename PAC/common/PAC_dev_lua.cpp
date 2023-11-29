@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Nov 28 16:29:45 2023.
+** Generated automatically by tolua++-1.0.92 on Wed Nov 29 11:37:24 2023.
 */
 
 #ifndef __cplusplus
@@ -14934,6 +14934,37 @@ static int tolua_PAC_dev_ParamsRecipeAdapter_loadParams00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: evaluate of class  ParamsRecipeManager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_evaluate00
+static int tolua_PAC_dev_ParamsRecipeManager_evaluate00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeManager",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeManager* self = (ParamsRecipeManager*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'evaluate'", NULL);
+#endif
+  {
+   self->evaluate();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'evaluate'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: createRecipes of class  ParamsRecipeManager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_createRecipes00
 static int tolua_PAC_dev_ParamsRecipeManager_createRecipes00(lua_State* tolua_S)
@@ -15874,6 +15905,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ParamsRecipeManager","ParamsRecipeManager","",NULL);
   tolua_beginmodule(tolua_S,"ParamsRecipeManager");
+   tolua_function(tolua_S,"evaluate",tolua_PAC_dev_ParamsRecipeManager_evaluate00);
    tolua_function(tolua_S,"createRecipes",tolua_PAC_dev_ParamsRecipeManager_createRecipes00);
    tolua_function(tolua_S,"createAdapter",tolua_PAC_dev_ParamsRecipeManager_createAdapter00);
   tolua_endmodule(tolua_S);

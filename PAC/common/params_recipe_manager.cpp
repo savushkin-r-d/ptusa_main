@@ -145,7 +145,22 @@ ParamsRecipeAdapter *ParamsRecipeManager::createAdapter( ParamsRecipeStorage* re
 
 void ParamsRecipeManager::evaluate( )
     {
-
+    for ( auto adapter: recAdapters )
+        {
+        if ( adapter->isChanged )
+            {
+            adapter->isChanged = false;
+            adapter->serialize( );
+            }
+        }
+    for ( auto recipeStorage: recPacks )
+        {
+        if ( recipeStorage->isChanged )
+            {
+            recipeStorage->isChanged = false;
+            recipeStorage->serialize( );
+            }
+        }
     }
 
 ParamsRecipe::ParamsRecipe( std::string name, std::vector<float> params )
@@ -172,6 +187,7 @@ ParamsRecipeStorage::ParamsRecipeStorage( int id, int recipeCount, int recipePar
         std::vector<float> params( recipeParamsCount, 0);
         recipes.emplace_back( "none", params );
         }
+    deserialize( );
     }
 
 int ParamsRecipeStorage::getId( ) const
@@ -191,21 +207,21 @@ int ParamsRecipeStorage::getParamsCount( ) const
 
 void ParamsRecipeStorage::setRecPar( int recNo, int parNo, float newValue )
     {
-    if (recNo < mRecipeCount && parNo < mRecipeParamsCount && recNo >= 0 && parNo >= 0)
+    if (recNo <= mRecipeCount && parNo <= mRecipeParamsCount && recNo > 0 && parNo > 0)
         {
-        if (recipes[recNo].params[parNo] != newValue)
+        if (recipes[recNo - 1].params[parNo - 1] != newValue)
             {
             isChanged = true;
-            recipes[recNo].params[parNo] = newValue;
+            recipes[recNo - 1].params[parNo - 1] = newValue;
             }
         }
     }
 
 float ParamsRecipeStorage::getRecPar( uInt recNo, uInt parNo )
     {
-    if ((int)recNo < mRecipeCount && (int)parNo < mRecipeParamsCount)
+    if ((int)recNo <= mRecipeCount && (int)parNo <= mRecipeParamsCount && (int)recNo > 0 && (int)parNo > 0)
         {
-        return recipes[recNo].params[parNo];
+        return recipes[recNo - 1].params[parNo - 1];
         }
     else
         {
@@ -248,25 +264,32 @@ void ParamsRecipeStorage::deserialize( const std::string &filename )
         if (rc != mRecipeCount || pc != mRecipeParamsCount) { // check if they match with the current values
             G_LOG->debug("The file has different values for recipe_count and param_count.\n");
             G_LOG->debug("Current values: %d, %d.\n", mRecipeCount, mRecipeParamsCount);
-            G_LOG->debug("File values: %d, %d.\n", mRecipeCount, mRecipeParamsCount);
+            G_LOG->debug("File values: %d, %d.\n", rc, pc);
             G_LOG->debug("Proceeding with deserialization anyway.\n");
             }
 
         int min_rc = std::min<int>(rc, mRecipeCount); // find the minimum of the two recipe_count values
         int min_pc = std::min<int>(pc, mRecipeParamsCount); // find the minimum of the two param_count values
 
-        for (int i = 0; i < min_rc; i++) { // loop through the recipes in the file
+        for (int i = 0; i < rc; i++) { // loop through the recipes in the file
             std::string name; // variable to store the name of the recipe
-            std::vector<float> params; // vector to store the params of the recipe
-            infile.ignore(); // ignore the newline character after reading the recipe_count and param_count
-            std::getline(infile, name); // read the name of the recipe from the file
-            for (int j = 0; j < min_pc; j++) { // loop through the params in the file
+            std::vector<float> params(mRecipeParamsCount, 0); // vector to store the params of the recipe
+            infile.ignore(); // ignore the newline character
+            infile >> name; // read the name of the recipe from the file
+            infile.ignore(); // ignore the newline character
+            for (int j = 0; j < pc; j++) { // loop through the params in the file
                 float param; // variable to store each param
                 infile >> param; // read each param from the file
-                params.push_back(param); // add the param to the params vector
+                if (j < min_pc)
+                    {
+                    params[j] = param; // add the param to the params vector
+                    }
                 }
-            ParamsRecipe recipe(name, params); // create a recipe object with the name and params
-            recipes[i] = recipe; // replace the recipe at the index i with the deserialized recipe
+            if (i < min_rc)
+                {
+                recipes[ i ].name = name; // replace the recipe at the index i with the deserialized recipe
+                recipes[ i ].params = std::move(params); // replace the recipe at the index i with the deserialized recipe
+                }
             }
 
         infile.close(); // close the file stream
@@ -304,6 +327,18 @@ ParamsRecipe &ParamsRecipeStorage::getActiveRecipeRef( )
         return recipes[0];
     }
 
+void ParamsRecipeStorage::serialize( )
+    {
+    std::string filename = std::string("recipes_") + std::to_string(mId) + ".serialized";
+    serialize( filename );
+    }
+
+void ParamsRecipeStorage::deserialize( )
+    {
+    std::string filename = std::string("recipes_") + std::to_string(mId) + ".serialized";
+    deserialize( filename );
+    }
+
 void ParamsRecipeAdapter::addMap( unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity )
     {
     mParamsMap.emplace_back( startRecPar, startObjPar, quantity);
@@ -312,7 +347,7 @@ void ParamsRecipeAdapter::addMap( unsigned int startRecPar, unsigned int startOb
 void ParamsRecipeAdapter::loadParams( ParamsRecipeStorage *recStorage, tech_object *techObject, unsigned int recNo )
     {
     if (recStorage == nullptr || techObject == nullptr) return;
-    if ((int)recNo >= recStorage->getCount()) return;
+    if ((int)recNo > recStorage->getCount()) return;
     auto recSize = recStorage->getParamsCount();
     auto parSize = techObject->par_float.get_count();
     for (auto map : mParamsMap)
@@ -323,6 +358,8 @@ void ParamsRecipeAdapter::loadParams( ParamsRecipeStorage *recStorage, tech_obje
             techObject->par_float[map.startObjPar + i] = recStorage->getRecPar(recNo, map.startRecPar + i);
             }
         }
+        LastLoadedRecipeIndex = (int)recNo;
+        LastLoadedRecipeName = recStorage->recipes[recNo-1].name;
     }
 
 ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage )
@@ -330,6 +367,7 @@ ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorag
     this->mId = id;
     this->mRecStorage = recStorage;
     mActiveRecipes.assign( recStorage->getCount(), 1 );
+    deserialize( );
     }
 
 void ParamsRecipeAdapter::serialize( const std::string &filename )
@@ -360,17 +398,20 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
     if ( infile.is_open( ))
         {
         int recipeCount;
+        int actualRecipeCount = mActiveRecipes.size();
         infile >> recipeCount;
         if ( recipeCount > (int)mActiveRecipes.size( ))
             { // check if they match with the current values
-            recipeCount = mActiveRecipes.size( );
             G_LOG->debug( "The file has different values for recipe_count.\n" );
             }
         for ( int i = 0; i < recipeCount; i++ )
             {
             int active;
             infile >> active;
-            mActiveRecipes[ i ] = active;
+            if (i < actualRecipeCount)
+                {
+                mActiveRecipes[ i ] = active;
+                }
             }
         }
     else
@@ -409,6 +450,10 @@ ParamsRecipeStorage *ParamsRecipeAdapter::getRecStorage( ) const
 
 int ParamsRecipeAdapter::set_cmd( const std::string& varName, int index, float value, const std::string& strValue )
     {
+    if ( varName == "ACT" )
+        {
+        setActiveState( (int)value );
+        }
     if ( varName == "NAME" )
         {
         mRecStorage->getActiveRecipeRef().name = strValue;
