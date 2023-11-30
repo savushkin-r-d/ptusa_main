@@ -9,3 +9,5 @@ obj
 cmake-build-*
 CMakeSettings.json
 nvram.txt
+
+Debug

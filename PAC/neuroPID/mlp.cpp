@@ -529,7 +529,7 @@ int mlp::prognose( int cnt, float *x_in, float *y_out )
         {
         printf( " % .3f\n", x_in[ i ] );        
         }
-    printf( "\n", x_in[ i ] );       
+    printf( "\n" );       
 #endif // _DEBUG
 
     for ( int idx = 0; idx < cnt; idx++ )

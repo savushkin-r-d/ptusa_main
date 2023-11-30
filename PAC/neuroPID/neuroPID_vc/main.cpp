@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "main.h"
-
+#include <cstdio>
 #include "vector"
 
 #include "PID.h"
@@ -14,12 +14,13 @@
 
 #include <fcntl.h>
 #include <io.h>
+#include <iostream>
 
 
 bool g_is_start = false;
 
 //Эмулятор.
-nn_manager* nn_emul_manager = new nn_manager( 100, 10 );
+nn_manager nn_emul_manager( 100, 10 );
 
 #ifdef SAVE_DATA_FOR_LEARNING
 FILE *emulator_learning_data_stream;
@@ -176,15 +177,16 @@ void init( HWND hWnd )
     {
     if (AllocConsole())
         {
-        int hCrt = _open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), 4);
+        int hCrt = _open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT );
         *stdout = *(::_fdopen(hCrt, "w"));
         ::setvbuf(stdout, NULL, _IONBF, 0);
+        hCrt = _open_osfhandle( (long)GetStdHandle( STD_ERROR_HANDLE ), _O_TEXT );
         *stderr = *(::_fdopen(hCrt, "w"));
         ::setvbuf(stderr, NULL, _IONBF, 0);
         std::ios::sync_with_stdio();
         }  
     SetConsoleCP ( 1251 );
-    SetConsoleOutputCP ( 1251 );   
+    SetConsoleOutputCP ( 1251 );
 
 #ifdef SAVE_DATA_FOR_LEARNING
     fopen_s( &emulator_learning_data_stream, "..\\PID_tuner_learning.data", "w+" );
@@ -194,7 +196,7 @@ void init( HWND hWnd )
     }
 //----------------------------------------------------------------------------
 void final()
-    {  
+    {   
 #ifdef SAVE_DATA_FOR_LEARNING
     fclose( emulator_learning_data_stream );
     emulator_learning_data_stream = 0;
@@ -203,7 +205,7 @@ void final()
 //----------------------------------------------------------------------------
 void eval()
     {
-    nn_emul_manager->eval();
+    nn_emul_manager.eval();
 
 #ifdef SAVE_DATA_FOR_LEARNING
     fprintf_s( emulator_learning_data_stream, "%f\t%f\t%f\t%f\t%f\n", 
@@ -213,7 +215,7 @@ void eval()
         nn_emul_manager->get_PID()->get_d() );
 #endif
 
-    nn_emul_manager->get_PID()->get_p();
+    nn_emul_manager.get_PID()->get_p();
     }
 //----------------------------------------------------------------------------
 #define MAX_LOADSTRING 100
@@ -327,7 +329,7 @@ LRESULT CALLBACK NewEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                
                 GetWindowText( hwnd, str, 255 );
                 float new_val = ( float ) _wtof( str );
-                nn_emul_manager->get_plant()->set_k1( new_val );
+                nn_emul_manager.get_plant()->set_k1( new_val );
                 
                 return( 0 );
                 }
@@ -346,7 +348,7 @@ LRESULT CALLBACK NewEditProc2(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
                 GetWindowText( hwnd, str, 255 );
                 float new_val = ( float ) _wtof( str );
-                nn_emul_manager->get_PID()->SetZ( new_val );
+                nn_emul_manager.get_PID()->SetZ( new_val );
                 return( 0 );
                 }
         }
@@ -400,7 +402,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 
     //k1
-    int k = nn_emul_manager->get_plant()->get_k1();
+    int k = nn_emul_manager.get_plant()->get_k1();
     wchar_t str[ 10 ];        
     _itow( k, str, 10 );
     
@@ -558,7 +560,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     // Если галочка стоит.
                     if(res == BST_CHECKED)
                         {
-                        nn_emul_manager->set_learning( true );
+                        nn_emul_manager.set_learning( true );
 
                         //SetWindowText( hWnd, L"Checked" );
                         }
@@ -567,7 +569,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         {
                         //SetWindowText( hWnd, L"Unchecked" );
 
-                        nn_emul_manager->set_learning( false );
+                        nn_emul_manager.set_learning( false );
                         }
                     break;
                     }
@@ -617,10 +619,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 //Рисуем график ПИД.
                 DrawSeries( hdc, rect.left, rect.top, rect.right, rect.bottom,
-                    10, nn_emul_manager->get_plant_data(),
-                    nn_emul_manager->get_PID_data(), 
+                    10, nn_emul_manager.get_plant_data(),
+                    nn_emul_manager.get_PID_data(), 
                     //emulator_output );
-                    nn_emul_manager->get_nn2_emul_data() );
+                    nn_emul_manager.get_nn2_emul_data() );
 
                 ReleaseDC( hWnd, hdc );
 
