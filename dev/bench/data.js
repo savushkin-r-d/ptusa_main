@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1701265119082,
+  "lastUpdate": 1701321447424,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17774,6 +17774,40 @@ window.BENCHMARK_DATA = {
             "value": 95.27339624425781,
             "unit": "us/iter",
             "extra": "iterations: 7402\ncpu: 94.79889219129967 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life",
+            "email": "yana.sitkowecz@yandex.ru"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "9e10b881abe9e76b9ec00dfbc85667bdc5337cab",
+          "message": "Add CMake build for neuroPID (#630)\n\n* Add CMake build for neuroPID\n\n* Fix console allocation\n\n* Ignore debug directories\n\n* Better include files\n\n* Fix print\n\n* Better memory management\n\n* Build neuroPID only on Windows\n\n* Remove obsolete files\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2023-11-30T05:15:26Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/9e10b881abe9e76b9ec00dfbc85667bdc5337cab"
+        },
+        "date": 1701321446267,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.31525663902339,
+            "unit": "us/iter",
+            "extra": "iterations: 42928\ncpu: 16.314340290719343 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.05313553276844,
+            "unit": "us/iter",
+            "extra": "iterations: 6729\ncpu: 95.5556992123644 us\nthreads: 1"
           }
         ]
       }
