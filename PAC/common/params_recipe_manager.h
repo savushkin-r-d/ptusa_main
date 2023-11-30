@@ -76,6 +76,9 @@ class ParamsRecipeAdapter
         ParamsRecipeStorage* getRecStorage() const;
         void setActiveState(int state);
         bool isChanged = false;
+        bool recipeListChanged = false;
+        void refreshRecipeList();
+        std::string RecipeList;
         std::string LastLoadedRecipeName = "Не выбран";
         int LastLoadedRecipeIndex = 0;
         int set_cmd(const std::string& varName, int index, float value, const std::string& strValue);
@@ -91,7 +94,7 @@ class ParamsRecipeManager: public i_Lua_save_device
         static ParamsRecipeManager* getInstance();
 
         int save_device( char *buff ) override;
-        int parseDriverCmd( char *buff);
+        int parseDriverCmd( const char *buff);
 
         const char *get_name_in_Lua( ) const override;
 
@@ -110,7 +113,7 @@ class ParamsRecipeManager: public i_Lua_save_device
         int mId = 0;
         int mAdaptersId = 0;
         unsigned long mLastSaveTimer;
-        unsigned long mMinSaveTimeout;
+        unsigned long mLastRefreshTimer;
         static auto_smart_ptr <ParamsRecipeManager> sInstance;
 
     };

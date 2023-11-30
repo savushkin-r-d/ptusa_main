@@ -24,24 +24,27 @@ ParamsRecipeManager *ParamsRecipeManager::getInstance( )
 
 int ParamsRecipeManager::save_device( char *buff )
     {
-    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
+    int size = (int)fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
     for ( auto rm: recAdapters )
         {
         //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
         auto activeRecipe = rm->getRecStorage( )->getActiveRecipeRef();
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tACT={},", rm->getActiveState()).size;
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},", rm->getRecStorage()->getActiveRecipe()).size;
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tACT={},", rm->getActiveState()).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},", rm->getRecStorage()->getActiveRecipe()).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTNAME='{}',", rm->LastLoadedRecipeName).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTIDX='{}',", rm->LastLoadedRecipeIndex).size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->RecipeList).size;
 
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
         for (auto par : activeRecipe.params )
             {
-            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
+            size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
             }
 
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}},").size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}},").size;
         /*for (auto rec: rm->recipes)
             {
             size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t{{").size;
@@ -55,10 +58,10 @@ int ParamsRecipeManager::save_device( char *buff )
 
             size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}\n\t\t\t}},").size;
             }*/
-        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
+        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
         }
 
-    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
+    size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
 
 //    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "t.RECLOADER =\n\t{{" ).size;
 //    for ( auto rm: recAdapters )
@@ -90,8 +93,8 @@ ParamsRecipeStorage *ParamsRecipeManager::createRecipes( int size, int quantity 
 
 ParamsRecipeManager::ParamsRecipeManager( )
     {
-    mMinSaveTimeout = 10000L;
     mLastSaveTimer = get_millisec();
+    mLastRefreshTimer = get_millisec();
     }
 
 ParamsRecipeManager::~ParamsRecipeManager( )
@@ -108,7 +111,7 @@ ParamsRecipeManager::~ParamsRecipeManager( )
         recAdapters.clear();
     }
 
-int ParamsRecipeManager::parseDriverCmd( char *buff )
+int ParamsRecipeManager::parseDriverCmd( const char *buff )
     {
 
     std::string cmd = buff;
@@ -151,6 +154,11 @@ void ParamsRecipeManager::evaluate( )
             {
             adapter->isChanged = false;
             adapter->serialize( );
+            }
+        if ( adapter->recipeListChanged )
+            {
+            adapter->recipeListChanged = false;
+            adapter->refreshRecipeList( );
             }
         }
     for ( auto recipeStorage: recPacks )
@@ -360,6 +368,7 @@ void ParamsRecipeAdapter::loadParams( ParamsRecipeStorage *recStorage, tech_obje
         }
         LastLoadedRecipeIndex = (int)recNo;
         LastLoadedRecipeName = recStorage->recipes[recNo-1].name;
+        isChanged = true;
     }
 
 ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage )
@@ -368,6 +377,7 @@ ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorag
     this->mRecStorage = recStorage;
     mActiveRecipes.assign( recStorage->getCount(), 1 );
     deserialize( );
+    refreshRecipeList( );
     }
 
 void ParamsRecipeAdapter::serialize( const std::string &filename )
@@ -398,7 +408,7 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
     if ( infile.is_open( ))
         {
         int recipeCount;
-        int actualRecipeCount = mActiveRecipes.size();
+        int actualRecipeCount = (int)mActiveRecipes.size();
         infile >> recipeCount;
         if ( recipeCount > (int)mActiveRecipes.size( ))
             { // check if they match with the current values
@@ -453,11 +463,13 @@ int ParamsRecipeAdapter::set_cmd( const std::string& varName, int index, float v
     if ( varName == "ACT" )
         {
         setActiveState( (int)value );
+        recipeListChanged = true;
         }
     if ( varName == "NAME" )
         {
         mRecStorage->getActiveRecipeRef().name = strValue;
         mRecStorage->isChanged = true;
+        recipeListChanged = true;
         return 1;
         }
     if ( varName == "NMR" )
@@ -476,6 +488,18 @@ int ParamsRecipeAdapter::set_cmd( const std::string& varName, int index, float v
             }
         }
     return  0;
+    }
+
+void ParamsRecipeAdapter::refreshRecipeList( )
+    {
+        RecipeList.clear( );
+        for ( int i = 0; i < mRecStorage->getCount( ); i++ )
+            {
+            if ( mActiveRecipes[ i ] )
+                {
+                RecipeList.append( mRecStorage->recipes[ i ].name );
+                }
+            }
     }
 
 
