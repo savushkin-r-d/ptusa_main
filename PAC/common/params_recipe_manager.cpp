@@ -10,41 +10,44 @@ auto_smart_ptr<ParamsRecipeManager> ParamsRecipeManager::sInstance = nullptr;
 
 ParamsRecipeManager *G_PARAMS_RECIPE_MANAGER( )
     {
-    return ParamsRecipeManager::getInstance();
+    return ParamsRecipeManager::getInstance( );
     }
 
 ParamsRecipeManager *ParamsRecipeManager::getInstance( )
     {
-    if ( sInstance.is_null() )
+    if ( sInstance.is_null( ))
         {
-        sInstance = new ParamsRecipeManager();
+        sInstance = new ParamsRecipeManager( );
         }
     return sInstance;
     }
 
 int ParamsRecipeManager::save_device( char *buff )
     {
-    int size = (int)fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
+    int size = ( int ) fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
     for ( auto rm: recAdapters )
         {
         //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
-        auto activeRecipe = rm->getRecStorage( )->getActiveRecipeRef();
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tACT={},", rm->getActiveState()).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},", rm->getRecStorage()->getActiveRecipe()).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTNAME='{}',", rm->LastLoadedRecipeName).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTIDX='{}',", rm->LastLoadedRecipeIndex).size;
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->RecipeList).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{" ).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0," ).size;
+        auto activeRecipe = rm->getRecStorage( )->getActiveRecipeRef( );
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tACT={},", rm->getActiveState( )).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},",
+                                          rm->getRecStorage( )->getActiveRecipe( )).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name ).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTNAME='{}',",
+                                          rm->LastLoadedRecipeName ).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTIDX='{}',",
+                                          rm->LastLoadedRecipeIndex ).size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->RecipeList ).size;
 
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
-        for (auto par : activeRecipe.params )
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t" ).size;
+        for ( auto par: activeRecipe.params )
             {
-            size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
+            size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par ).size;
             }
 
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}},").size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}," ).size;
         /*for (auto rec: rm->recipes)
             {
             size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t{{").size;
@@ -58,10 +61,10 @@ int ParamsRecipeManager::save_device( char *buff )
 
             size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}\n\t\t\t}},").size;
             }*/
-        size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}}," ).size;
         }
 
-    size += (int)fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
+    size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
 
 //    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "t.RECLOADER =\n\t{{" ).size;
 //    for ( auto rm: recAdapters )
@@ -86,29 +89,29 @@ const char *ParamsRecipeManager::get_name_in_Lua( ) const
 
 ParamsRecipeStorage *ParamsRecipeManager::createRecipes( int size, int quantity )
     {
-    auto recStorage = new ParamsRecipeStorage( mId++, size, quantity);
-    recPacks.push_back(recStorage);
+    auto recStorage = new ParamsRecipeStorage( mId++, size, quantity );
+    recPacks.push_back( recStorage );
     return recStorage;
     }
 
 ParamsRecipeManager::ParamsRecipeManager( )
     {
-    mLastSaveTimer = get_millisec();
-    mLastRefreshTimer = get_millisec();
+    mLastSaveTimer = get_millisec( );
+    mLastRefreshTimer = get_millisec( );
     }
 
 ParamsRecipeManager::~ParamsRecipeManager( )
     {
-    for (auto rs : recPacks)
+    for ( auto rs: recPacks )
         {
         delete rs;
         }
-        recPacks.clear();
-    for (auto rs : recAdapters)
+    recPacks.clear( );
+    for ( auto rs: recAdapters )
         {
         delete rs;
         }
-        recAdapters.clear();
+    recAdapters.clear( );
     }
 
 int ParamsRecipeManager::parseDriverCmd( const char *buff )
@@ -116,9 +119,9 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
 
     std::string cmd = buff;
     std::cout << cmd << "\n";
-    std::regex rmCommand(R"lit(__RECMAN\[(\d+)\]:set_cmd\( "(\w+)", (\d+), ((?:"(.*)")|([\d\.]+)) \))lit");
+    std::regex rmCommand( R"lit(__RECMAN\[(\d+)\]:set_cmd\( "(\w+)", (\d+), ((?:"(.*)")|([\d\.]+)) \))lit" );
     std::smatch rmMatch;
-    if (std::regex_match(cmd, rmMatch, rmCommand))
+    if ( std::regex_match( cmd, rmMatch, rmCommand ))
         {
         printf( "Is match\n" );
 
@@ -130,7 +133,7 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
         std::cout << recMgrIdx << ' ' << varName << ' ' << idx << " str=" << strval << " float=" << floatval
                   << std::endl;
 
-        if ( recMgrIdx - 1 < (int)recAdapters.size( ))
+        if ( recMgrIdx - 1 < ( int ) recAdapters.size( ))
             {
             recAdapters[ recMgrIdx - 1 ]->set_cmd( varName, idx, floatval, strval );
             }
@@ -139,11 +142,11 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
     return 0;
     }
 
-ParamsRecipeAdapter *ParamsRecipeManager::createAdapter( ParamsRecipeStorage* recStorage )
+ParamsRecipeAdapter *ParamsRecipeManager::createAdapter( ParamsRecipeStorage *recStorage )
     {
-        auto adapter = new ParamsRecipeAdapter( mAdaptersId++, recStorage );
-        recAdapters.push_back(adapter);
-        return adapter;
+    auto adapter = new ParamsRecipeAdapter( mAdaptersId++, recStorage );
+    recAdapters.push_back( adapter );
+    return adapter;
     }
 
 void ParamsRecipeManager::evaluate( )
@@ -173,8 +176,8 @@ void ParamsRecipeManager::evaluate( )
 
 ParamsRecipe::ParamsRecipe( std::string name, std::vector<float> params )
     {
-    this->name = std::move( name);
-    this->params = std::move( params);
+    this->name = std::move( name );
+    this->params = std::move( params );
     }
 
 ParamsRecipe::ParamsRecipe( )
@@ -190,9 +193,9 @@ ParamsRecipeStorage::ParamsRecipeStorage( int id, int recipeCount, int recipePar
     this->mRecipeParamsCount = recipeParamsCount;
     this->isChanged = false;
     this->mActiveRecipe = 0;
-    for (int i = 0; i < recipeCount; i++ )
+    for ( int i = 0; i < recipeCount; i++ )
         {
-        std::vector<float> params( recipeParamsCount, 0);
+        std::vector<float> params( recipeParamsCount, 0 );
         recipes.emplace_back( "none", params );
         }
     deserialize( );
@@ -215,21 +218,21 @@ int ParamsRecipeStorage::getParamsCount( ) const
 
 void ParamsRecipeStorage::setRecPar( int recNo, int parNo, float newValue )
     {
-    if (recNo <= mRecipeCount && parNo <= mRecipeParamsCount && recNo > 0 && parNo > 0)
+    if ( recNo <= mRecipeCount && parNo <= mRecipeParamsCount && recNo > 0 && parNo > 0 )
         {
-        if (recipes[recNo - 1].params[parNo - 1] != newValue)
+        if ( recipes[ recNo - 1 ].params[ parNo - 1 ] != newValue )
             {
             isChanged = true;
-            recipes[recNo - 1].params[parNo - 1] = newValue;
+            recipes[ recNo - 1 ].params[ parNo - 1 ] = newValue;
             }
         }
     }
 
 float ParamsRecipeStorage::getRecPar( uInt recNo, uInt parNo )
     {
-    if ((int)recNo <= mRecipeCount && (int)parNo <= mRecipeParamsCount && (int)recNo > 0 && (int)parNo > 0)
+    if (( int ) recNo <= mRecipeCount && ( int ) parNo <= mRecipeParamsCount && ( int ) recNo > 0 && ( int ) parNo > 0 )
         {
-        return recipes[recNo - 1].params[parNo - 1];
+        return recipes[ recNo - 1 ].params[ parNo - 1 ];
         }
     else
         {
@@ -254,128 +257,148 @@ void ParamsRecipeStorage::serialize( const std::string &filename )
             outfile << "\n"; // write a new line after each recipe
             }
         outfile.close( ); // close the file stream
-        G_LOG->debug("Successfully serialized the recipes to %s\n", filename.c_str());
+        G_LOG->debug( "Successfully serialized the recipes to %s\n", filename.c_str( ));
         }
     else
         {
-        G_LOG->debug("Failed to open %s for serialization.\n", filename.c_str());
+        G_LOG->debug( "Failed to open %s for serialization.\n", filename.c_str( ));
         }
     }
 
 void ParamsRecipeStorage::deserialize( const std::string &filename )
     {
-    std::ifstream infile(filename); // create an input file stream with the given filename
-    if (infile.is_open()) { // check if the file is opened successfully
+    std::ifstream infile( filename ); // create an input file stream with the given filename
+    if ( infile.is_open( ))
+        { // check if the file is opened successfully
         int rc, pc; // variables to store the recipe_count and param_count from the file
         infile >> rc >> pc; // read the recipe_count and param_count from the file
 
-        if (rc != mRecipeCount || pc != mRecipeParamsCount) { // check if they match with the current values
-            G_LOG->debug("The file has different values for recipe_count and param_count.\n");
-            G_LOG->debug("Current values: %d, %d.\n", mRecipeCount, mRecipeParamsCount);
-            G_LOG->debug("File values: %d, %d.\n", rc, pc);
-            G_LOG->debug("Proceeding with deserialization anyway.\n");
+        if ( rc != mRecipeCount || pc != mRecipeParamsCount )
+            { // check if they match with the current values
+            G_LOG->debug( "The file has different values for recipe_count and param_count.\n" );
+            G_LOG->debug( "Current values: %d, %d.\n", mRecipeCount, mRecipeParamsCount );
+            G_LOG->debug( "File values: %d, %d.\n", rc, pc );
+            G_LOG->debug( "Proceeding with deserialization anyway.\n" );
             }
 
-        int min_rc = std::min<int>(rc, mRecipeCount); // find the minimum of the two recipe_count values
-        int min_pc = std::min<int>(pc, mRecipeParamsCount); // find the minimum of the two param_count values
+        int min_rc = std::min<int>( rc, mRecipeCount ); // find the minimum of the two recipe_count values
+        int min_pc = std::min<int>( pc, mRecipeParamsCount ); // find the minimum of the two param_count values
 
-        for (int i = 0; i < rc; i++) { // loop through the recipes in the file
+        for ( int i = 0; i < rc; i++ )
+            { // loop through the recipes in the file
             std::string name; // variable to store the name of the recipe
-            std::vector<float> params(mRecipeParamsCount, 0); // vector to store the params of the recipe
-            infile.ignore(); // ignore the newline character
+            std::vector<float> params( mRecipeParamsCount, 0 ); // vector to store the params of the recipe
+            infile.ignore( ); // ignore the newline character
             infile >> name; // read the name of the recipe from the file
-            infile.ignore(); // ignore the newline character
-            for (int j = 0; j < pc; j++) { // loop through the params in the file
+            infile.ignore( ); // ignore the newline character
+            for ( int j = 0; j < pc; j++ )
+                { // loop through the params in the file
                 float param; // variable to store each param
                 infile >> param; // read each param from the file
-                if (j < min_pc)
+                if ( j < min_pc )
                     {
-                    params[j] = param; // add the param to the params vector
+                    params[ j ] = param; // add the param to the params vector
                     }
                 }
-            if (i < min_rc)
+            if ( i < min_rc )
                 {
                 recipes[ i ].name = name; // replace the recipe at the index i with the deserialized recipe
-                recipes[ i ].params = std::move(params); // replace the recipe at the index i with the deserialized recipe
+                recipes[ i ].params = std::move(
+                    params ); // replace the recipe at the index i with the deserialized recipe
                 }
             }
 
-        infile.close(); // close the file stream
-        G_LOG->debug("Successfully deserialized the recipes from %s.\n", filename.c_str());
+        infile.close( ); // close the file stream
+        G_LOG->debug( "Successfully deserialized the recipes from %s.\n", filename.c_str( ));
         }
-    else {
-        G_LOG->debug("Failed to open %s for deserialization.\n", filename.c_str());
+    else
+        {
+        G_LOG->debug( "Failed to open %s for deserialization.\n", filename.c_str( ));
         }
     }
 
 int ParamsRecipeStorage::getActiveRecipe( ) const
     {
-        return mActiveRecipe + 1;
+    return mActiveRecipe + 1;
     }
 
 int ParamsRecipeStorage::setActiveRecipe( int recipe )
     {
-     if (recipe - 1 < mRecipeCount && recipe > 0)
+    if ( recipe - 1 < mRecipeCount && recipe > 0 )
         {
-        if (mActiveRecipe!= recipe - 1)
+        if ( mActiveRecipe != recipe - 1 )
             {
             mActiveRecipe = recipe - 1;
             return recipe - 1;
             }
         }
-        return -1;
+    return -1;
     }
 
 ParamsRecipe &ParamsRecipeStorage::getActiveRecipeRef( )
     {
-     if (mActiveRecipe < mRecipeCount)
+    if ( mActiveRecipe < mRecipeCount )
         {
-        return recipes[mActiveRecipe];
+        return recipes[ mActiveRecipe ];
         }
-        return recipes[0];
+    return recipes[ 0 ];
     }
 
 void ParamsRecipeStorage::serialize( )
     {
-    std::string filename = std::string("recipes_") + std::to_string(mId) + ".serialized";
+    std::string filename = std::string( "recipes_" ) + std::to_string( mId ) + ".serialized";
     serialize( filename );
     }
 
 void ParamsRecipeStorage::deserialize( )
     {
-    std::string filename = std::string("recipes_") + std::to_string(mId) + ".serialized";
+    std::string filename = std::string( "recipes_" ) + std::to_string( mId ) + ".serialized";
     deserialize( filename );
     }
 
 void ParamsRecipeAdapter::addMap( unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity )
     {
-    mParamsMap.emplace_back( startRecPar, startObjPar, quantity);
+    if ( startRecPar > 0 && startObjPar > 0 && quantity > 0 )
+        {
+        mParamsMap.emplace_back( startRecPar, startObjPar, quantity );
+        }
+    else
+        {
+        G_LOG->error(
+            "Values can't be zero. ParamsRecipeAdapter::addMap: startRecPar=%d, startObjPar=%d, quantity=%d\n",
+            startRecPar, startObjPar, quantity );
+        }
     }
 
-void ParamsRecipeAdapter::loadParams( ParamsRecipeStorage *recStorage, tech_object *techObject, unsigned int recNo )
+void ParamsRecipeAdapter::loadParams( int techObject, unsigned int recNo )
     {
-    if (recStorage == nullptr || techObject == nullptr) return;
-    if ((int)recNo > recStorage->getCount()) return;
-    auto recSize = recStorage->getParamsCount();
-    auto parSize = techObject->par_float.get_count();
-    for (auto map : mParamsMap)
+    auto recStorage = mRecStorage;
+    if ( G_TECH_OBJECT_MNGR( )->get_count( ) < techObject || techObject < 1 ) return;
+    auto techObj = G_TECH_OBJECTS( techObject - 1 );
+    if ( recStorage == nullptr || techObj == nullptr ) return;
+    if (( int ) recNo > recStorage->getCount( ) || recNo == 0) return;
+    auto recSize = recStorage->getParamsCount( );
+    auto parSize = techObj->rt_par_float.get_count( );
+    for ( auto map: mParamsMap )
         {
-        if ((int)map.startRecPar + (int)map.quantity > recSize || map.startObjPar + map.quantity > (int)parSize) return;
-        for (int i = 0; i < (int)map.quantity; i++)
+        if (( int ) map.startRecPar + ( int ) map.quantity > recSize ||
+            map.startObjPar + map.quantity > ( int ) parSize )
+            return;
+        for ( int i = 0; i < ( int ) map.quantity; i++ )
             {
-            techObject->par_float[map.startObjPar + i] = recStorage->getRecPar(recNo, map.startRecPar + i);
+            techObj->rt_par_float[ map.startObjPar + i ] = recStorage->getRecPar( recNo, map.startRecPar + i );
             }
         }
-        LastLoadedRecipeIndex = (int)recNo;
-        LastLoadedRecipeName = recStorage->recipes[recNo-1].name;
-        isChanged = true;
+    LastLoadedRecipeIndex = ( int ) recNo;
+    LastLoadedRecipeName = recStorage->recipes[ recNo - 1 ].name;
+    isChanged = true;
     }
 
 ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage )
     {
     this->mId = id;
     this->mRecStorage = recStorage;
-    mActiveRecipes.assign( recStorage->getCount(), 1 );
+    mActiveRecipes.assign( recStorage->getCount( ), 1 );
     deserialize( );
     refreshRecipeList( );
     }
@@ -385,7 +408,7 @@ void ParamsRecipeAdapter::serialize( const std::string &filename )
     std::ofstream outfile( filename ); // create an output file stream with the given filename
     if ( outfile.is_open( ))
         {
-        outfile << mActiveRecipes.size() << "\n"; // write the recipe_count
+        outfile << mActiveRecipes.size( ) << "\n"; // write the recipe_count
         for ( int mActiveRecipe: mActiveRecipes )
             {
             outfile << mActiveRecipe << " "; // write the active state of the recipe to the file separated by space
@@ -393,13 +416,13 @@ void ParamsRecipeAdapter::serialize( const std::string &filename )
         }
     else
         {
-        G_LOG->debug("Failed to open %s for serialization.\n", filename.c_str());
+        G_LOG->debug( "Failed to open %s for serialization.\n", filename.c_str( ));
         }
     }
 
 void ParamsRecipeAdapter::serialize( )
     {
-    serialize(std::string("paramsadapter") + std::to_string(mId) + ".serialized");
+    serialize( std::string( "paramsadapter" ) + std::to_string( mId ) + ".serialized" );
     }
 
 void ParamsRecipeAdapter::deserialize( const std::string &filename )
@@ -408,9 +431,9 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
     if ( infile.is_open( ))
         {
         int recipeCount;
-        int actualRecipeCount = (int)mActiveRecipes.size();
+        int actualRecipeCount = ( int ) mActiveRecipes.size( );
         infile >> recipeCount;
-        if ( recipeCount > (int)mActiveRecipes.size( ))
+        if ( recipeCount > ( int ) mActiveRecipes.size( ))
             { // check if they match with the current values
             G_LOG->debug( "The file has different values for recipe_count.\n" );
             }
@@ -418,7 +441,7 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
             {
             int active;
             infile >> active;
-            if (i < actualRecipeCount)
+            if ( i < actualRecipeCount )
                 {
                 mActiveRecipes[ i ] = active;
                 }
@@ -432,12 +455,12 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
 
 void ParamsRecipeAdapter::deserialize( )
     {
-     deserialize(std::string("paramsadapter") + std::to_string(mId) + ".serialized");
+    deserialize( std::string( "paramsadapter" ) + std::to_string( mId ) + ".serialized" );
     }
 
 int ParamsRecipeAdapter::getActiveState( ) const
     {
-    return mActiveRecipes[ mRecStorage->getActiveRecipe() - 1 ];
+    return mActiveRecipes[ mRecStorage->getActiveRecipe( ) - 1 ];
     }
 
 void ParamsRecipeAdapter::setActiveState( int state )
@@ -450,7 +473,7 @@ void ParamsRecipeAdapter::setActiveState( int state )
         {
         mActiveRecipes[ mRecStorage->getActiveRecipe( ) - 1 ] = 0;
         }
-        isChanged = true;
+    isChanged = true;
     }
 
 ParamsRecipeStorage *ParamsRecipeAdapter::getRecStorage( ) const
@@ -458,16 +481,26 @@ ParamsRecipeStorage *ParamsRecipeAdapter::getRecStorage( ) const
     return mRecStorage;
     }
 
-int ParamsRecipeAdapter::set_cmd( const std::string& varName, int index, float value, const std::string& strValue )
+int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float value, const std::string &strValue )
     {
     if ( varName == "ACT" )
         {
-        setActiveState( (int)value );
+        setActiveState(( int ) value );
         recipeListChanged = true;
+        }
+    if ( varName == "CMD" )
+        {
+        auto command = ( int ) value;
+        if ( command > 1000)
+            {
+            auto objNmr = command / 1000;
+            auto recNmr = command % 1000;
+            loadParams( objNmr, recNmr );
+            }
         }
     if ( varName == "NAME" )
         {
-        mRecStorage->getActiveRecipeRef().name = strValue;
+        mRecStorage->getActiveRecipeRef( ).name = strValue;
         mRecStorage->isChanged = true;
         recipeListChanged = true;
         return 1;
@@ -480,26 +513,26 @@ int ParamsRecipeAdapter::set_cmd( const std::string& varName, int index, float v
         {
         if ( index <= mRecStorage->getParamsCount( ) && index > 0 )
             {
-            if ( mRecStorage->getActiveRecipeRef( ).params[ index - 1 ]!= value )
+            if ( mRecStorage->getActiveRecipeRef( ).params[ index - 1 ] != value )
                 {
                 mRecStorage->getActiveRecipeRef( ).params[ index - 1 ] = value;
                 mRecStorage->isChanged = true;
                 }
             }
         }
-    return  0;
+    return 0;
     }
 
 void ParamsRecipeAdapter::refreshRecipeList( )
     {
-        RecipeList.clear( );
-        for ( int i = 0; i < mRecStorage->getCount( ); i++ )
+    RecipeList.clear( );
+    for ( int i = 0; i < mRecStorage->getCount( ); i++ )
+        {
+        if ( mActiveRecipes[ i ] )
             {
-            if ( mActiveRecipes[ i ] )
-                {
-                RecipeList.append( mRecStorage->recipes[ i ].name );
-                }
+            RecipeList.append( fmt::format( "{}##{}||", i + 1, mRecStorage->recipes[ i ].name ));
             }
+        }
     }
 
 

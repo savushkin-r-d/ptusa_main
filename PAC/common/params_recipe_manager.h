@@ -69,7 +69,7 @@ class ParamsRecipeAdapter
     public:
         explicit ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage );
         void addMap( unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity);
-        void loadParams( ParamsRecipeStorage* recStorage, tech_object* techObject, unsigned int recNo);
+        void loadParams( int techObject, unsigned int recNo );
         void serialize();
         void deserialize();
         int getActiveState() const;
