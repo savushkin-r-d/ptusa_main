@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Nov 29 11:37:24 2023.
+** Generated automatically by tolua++-1.0.92 on Fri Dec  1 14:35:59 2023.
 */
 
 #ifndef __cplusplus
@@ -14905,24 +14905,22 @@ static int tolua_PAC_dev_ParamsRecipeAdapter_loadParams00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"ParamsRecipeAdapter",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"ParamsRecipeStorage",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,3,"tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   ParamsRecipeAdapter* self = (ParamsRecipeAdapter*)  tolua_tousertype(tolua_S,1,0);
-  ParamsRecipeStorage* recStorage = ((ParamsRecipeStorage*)  tolua_tousertype(tolua_S,2,0));
-  tech_object* techObject = ((tech_object*)  tolua_tousertype(tolua_S,3,0));
-  unsigned int recNo = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  int techObject = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int recNo = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'loadParams'", NULL);
 #endif
   {
-   self->loadParams(recStorage,techObject,recNo);
+   self->loadParams(techObject,recNo);
   }
  }
  return 0;

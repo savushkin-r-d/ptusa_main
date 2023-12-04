@@ -35,11 +35,8 @@ int ParamsRecipeManager::save_device( char *buff )
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},",
                                           rm->getRecStorage( )->getActiveRecipe( )).size;
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name ).size;
-        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTNAME='{}',",
-                                          rm->LastLoadedRecipeName ).size;
-        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLASTIDX='{}',",
-                                          rm->LastLoadedRecipeIndex ).size;
-        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->RecipeList ).size;
+
+        size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->recipeList ).size;
 
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t" ).size;
         for ( auto par: activeRecipe.params )
@@ -98,6 +95,7 @@ ParamsRecipeManager::ParamsRecipeManager( )
     {
     mLastSaveTimer = get_millisec( );
     mLastRefreshTimer = get_millisec( );
+    loadTechObjects();
     }
 
 ParamsRecipeManager::~ParamsRecipeManager( )
@@ -151,6 +149,7 @@ ParamsRecipeAdapter *ParamsRecipeManager::createAdapter( ParamsRecipeStorage *re
 
 void ParamsRecipeManager::evaluate( )
     {
+    auto wasLoaded = false;
     for ( auto adapter: recAdapters )
         {
         if ( adapter->isChanged )
@@ -163,13 +162,65 @@ void ParamsRecipeManager::evaluate( )
             adapter->recipeListChanged = false;
             adapter->refreshRecipeList( );
             }
+        if ( adapter->isLoaded )
+            {
+            adapter->isLoaded = false;
+            wasLoaded = true;
+            }
         }
+        if ( wasLoaded )
+            {
+            saveTechObjects();
+            }
     for ( auto recipeStorage: recPacks )
         {
         if ( recipeStorage->isChanged )
             {
             recipeStorage->isChanged = false;
             recipeStorage->serialize( );
+            }
+        }
+    }
+
+void ParamsRecipeManager::saveTechObjects( )
+    {
+    std::ofstream outfile( "paramstech.serialized" );
+    if ( outfile.is_open( ))
+        {
+        auto count = G_TECH_OBJECT_MNGR( )->get_count( );
+        outfile << count << std::endl;
+        for ( int i = 0; i < (int)count; i++ )
+            {
+            outfile << G_TECH_OBJECTS(i)->lastLoadedRecipeName << std::endl;
+            outfile << G_TECH_OBJECTS(i)->lastLoadedRecipeNmr << std::endl;
+            }
+        }
+    else
+        {
+        G_LOG->debug( "Failed to open paramstech.serialized" );
+        }
+    }
+
+void ParamsRecipeManager::loadTechObjects( )
+    {
+    std::ifstream infile( "paramstech.serialized" );
+    if ( infile.is_open( ))
+        {
+        auto count = 0;
+        auto techObjectsCount = G_TECH_OBJECT_MNGR()->get_count( );
+        infile >> count;
+        for ( int i = 0; i < count; i++ )
+            {
+            std::string recipeName;
+            int recipeNmr = 0;
+            infile.ignore();
+            std::getline( infile, recipeName );
+            infile >> recipeNmr;
+            if ( i < (int)techObjectsCount )
+                {
+                G_TECH_OBJECTS(i)->lastLoadedRecipeName = recipeName;
+                G_TECH_OBJECTS(i)->lastLoadedRecipeNmr = recipeNmr;
+                }
             }
         }
     }
@@ -252,7 +303,7 @@ void ParamsRecipeStorage::serialize( const std::string &filename )
             outfile << recipes[ i ].name << "\n"; // write the name of the recipe to the file
             for ( int j = 0; j < mRecipeParamsCount; j++ )
                 { // loop through the params of the recipe
-                outfile << recipes[ i ].params[ j ] << " "; // write each param to the file separated by space
+                outfile << recipes[ i ].params[ j ] << ' '; // write each param to the file
                 }
             outfile << "\n"; // write a new line after each recipe
             }
@@ -289,8 +340,7 @@ void ParamsRecipeStorage::deserialize( const std::string &filename )
             std::string name; // variable to store the name of the recipe
             std::vector<float> params( mRecipeParamsCount, 0 ); // vector to store the params of the recipe
             infile.ignore( ); // ignore the newline character
-            infile >> name; // read the name of the recipe from the file
-            infile.ignore( ); // ignore the newline character
+            std::getline( infile, name ); // read the name of the recipe from the file
             for ( int j = 0; j < pc; j++ )
                 { // loop through the params in the file
                 float param; // variable to store each param
@@ -300,6 +350,7 @@ void ParamsRecipeStorage::deserialize( const std::string &filename )
                     params[ j ] = param; // add the param to the params vector
                     }
                 }
+            infile.ignore( ); // ignore the last space character
             if ( i < min_rc )
                 {
                 recipes[ i ].name = name; // replace the recipe at the index i with the deserialized recipe
@@ -373,10 +424,10 @@ void ParamsRecipeAdapter::addMap( unsigned int startRecPar, unsigned int startOb
 void ParamsRecipeAdapter::loadParams( int techObject, unsigned int recNo )
     {
     auto recStorage = mRecStorage;
-    if ( G_TECH_OBJECT_MNGR( )->get_count( ) < techObject || techObject < 1 ) return;
+    if (( int ) G_TECH_OBJECT_MNGR( )->get_count( ) < techObject || techObject < 1 ) return;
     auto techObj = G_TECH_OBJECTS( techObject - 1 );
     if ( recStorage == nullptr || techObj == nullptr ) return;
-    if (( int ) recNo > recStorage->getCount( ) || recNo == 0) return;
+    if (( int ) recNo > recStorage->getCount( ) || recNo == 0 ) return;
     auto recSize = recStorage->getParamsCount( );
     auto parSize = techObj->rt_par_float.get_count( );
     for ( auto map: mParamsMap )
@@ -389,9 +440,9 @@ void ParamsRecipeAdapter::loadParams( int techObject, unsigned int recNo )
             techObj->rt_par_float[ map.startObjPar + i ] = recStorage->getRecPar( recNo, map.startRecPar + i );
             }
         }
-    LastLoadedRecipeIndex = ( int ) recNo;
-    LastLoadedRecipeName = recStorage->recipes[ recNo - 1 ].name;
-    isChanged = true;
+    techObj->lastLoadedRecipeNmr = ( int ) recNo;
+    techObj->lastLoadedRecipeName = recStorage->recipes[ recNo - 1 ].name;
+    isLoaded = true;
     }
 
 ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorage )
@@ -413,6 +464,7 @@ void ParamsRecipeAdapter::serialize( const std::string &filename )
             {
             outfile << mActiveRecipe << " "; // write the active state of the recipe to the file separated by space
             }
+        outfile.close( ); // close the file stream
         }
     else
         {
@@ -422,7 +474,7 @@ void ParamsRecipeAdapter::serialize( const std::string &filename )
 
 void ParamsRecipeAdapter::serialize( )
     {
-    serialize( std::string( "paramsadapter" ) + std::to_string( mId ) + ".serialized" );
+    serialize( std::string( "paramsadapter_" ) + std::to_string( mId ) + ".serialized" );
     }
 
 void ParamsRecipeAdapter::deserialize( const std::string &filename )
@@ -455,7 +507,7 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
 
 void ParamsRecipeAdapter::deserialize( )
     {
-    deserialize( std::string( "paramsadapter" ) + std::to_string( mId ) + ".serialized" );
+    deserialize( std::string( "paramsadapter_" ) + std::to_string( mId ) + ".serialized" );
     }
 
 int ParamsRecipeAdapter::getActiveState( ) const
@@ -491,7 +543,7 @@ int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float v
     if ( varName == "CMD" )
         {
         auto command = ( int ) value;
-        if ( command > 1000)
+        if ( command > 1000 )
             {
             auto objNmr = command / 1000;
             auto recNmr = command % 1000;
@@ -525,12 +577,12 @@ int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float v
 
 void ParamsRecipeAdapter::refreshRecipeList( )
     {
-    RecipeList.clear( );
+    recipeList.clear( );
     for ( int i = 0; i < mRecStorage->getCount( ); i++ )
         {
         if ( mActiveRecipes[ i ] )
             {
-            RecipeList.append( fmt::format( "{}##{}||", i + 1, mRecStorage->recipes[ i ].name ));
+            recipeList.append( fmt::format( "{}##{}||", i + 1, mRecStorage->recipes[ i ].name ));
             }
         }
     }

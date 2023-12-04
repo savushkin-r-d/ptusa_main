@@ -76,11 +76,10 @@ class ParamsRecipeAdapter
         ParamsRecipeStorage* getRecStorage() const;
         void setActiveState(int state);
         bool isChanged = false;
+        bool isLoaded = false;
         bool recipeListChanged = false;
         void refreshRecipeList();
-        std::string RecipeList;
-        std::string LastLoadedRecipeName = "Не выбран";
-        int LastLoadedRecipeIndex = 0;
+        std::string recipeList;
         int set_cmd(const std::string& varName, int index, float value, const std::string& strValue);
     };
 
@@ -100,6 +99,9 @@ class ParamsRecipeManager: public i_Lua_save_device
 
         std::vector<ParamsRecipeStorage*> recPacks;
         std::vector<ParamsRecipeAdapter*> recAdapters;
+
+        void saveTechObjects();
+        void loadTechObjects();
 
         ParamsRecipeManager(ParamsRecipeManager &outer) = delete;
         void operator=(const ParamsRecipeManager &) = delete;
