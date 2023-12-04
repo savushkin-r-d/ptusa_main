@@ -7492,7 +7492,7 @@ saved_params<float, true>* cipline_tech_object::parpar = nullptr;
 bool cipline_tech_object::waterTankIsEmpty( )
     {
     auto ret = !LWL->is_active( );
-    if ( ret ) return ret;
+    if ( ret || dont_use_water_tank) return true;
     auto lowLevelExtreme = parpar[ 0 ][ P_MIN_BULK_FOR_WATER ];
     if ( lowLevelExtreme > 0 )
         {
