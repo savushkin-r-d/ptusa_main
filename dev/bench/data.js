@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1701780818289,
+  "lastUpdate": 1701849195759,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -17944,6 +17944,38 @@ window.BENCHMARK_DATA = {
             "value": 94.01901961563881,
             "unit": "us/iter",
             "extra": "iterations: 7545\ncpu: 93.53142478462556 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "269828651772d9205e79c1dd5dec681eaf36f0e1",
+          "message": "Move neuroPID to other repository",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/634/commits/269828651772d9205e79c1dd5dec681eaf36f0e1"
+        },
+        "date": 1701849194300,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.819896911751597,
+            "unit": "us/iter",
+            "extra": "iterations: 43196\ncpu: 15.819210112047413 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.75311707970562,
+            "unit": "us/iter",
+            "extra": "iterations: 7465\ncpu: 95.26265237776292 us\nthreads: 1"
           }
         ]
       }
