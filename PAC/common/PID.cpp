@@ -246,6 +246,9 @@ void PID::direct_set_state( int st )
         case STATE::ON:
             direct_on();
             break;
+
+        case STATE::STOPPING:
+            break;
         }
     }
 //-----------------------------------------------------------------------------

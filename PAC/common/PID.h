@@ -118,12 +118,12 @@ class PID : public device, public i_Lua_save_device
         device* get_actuator() const;
 
         /// @brief Отключаем, если перешли в состояние отключения.
-        void evaluate_io();
+        void evaluate_io() override;
 
         enum class STATE
             {
-            OFF,
-            ON,
+            OFF = 0,
+            ON = 1,
 
             STOPPING = 10,
             };
