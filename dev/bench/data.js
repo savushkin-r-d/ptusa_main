@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1702283435553,
+  "lastUpdate": 1702285435864,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18210,6 +18210,40 @@ window.BENCHMARK_DATA = {
             "value": 96.83966608649031,
             "unit": "us/iter",
             "extra": "iterations: 7469\ncpu: 96.32364439684027 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "609e6a26f56621102e9153f2515cad5b5712be44",
+          "message": "Move neuroPID to other repository (#634)\n\nMove neuroPID to https://github.com/idzm/neuroPID",
+          "timestamp": "2023-12-11T06:41:58Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/609e6a26f56621102e9153f2515cad5b5712be44"
+        },
+        "date": 1702285434175,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.35894307681501,
+            "unit": "us/iter",
+            "extra": "iterations: 42531\ncpu: 16.35838799934166 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.91680272739482,
+            "unit": "us/iter",
+            "extra": "iterations: 7553\ncpu: 94.47492387130941 us\nthreads: 1"
           }
         ]
       }
