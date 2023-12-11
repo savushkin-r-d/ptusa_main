@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1702277380206,
+  "lastUpdate": 1702281525646,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18146,6 +18146,38 @@ window.BENCHMARK_DATA = {
             "value": 99.06687518473565,
             "unit": "us/iter",
             "extra": "iterations: 7443\ncpu: 98.49290608625552 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "90aac1254300c123e13a86c3c8faff2ce3d467f9",
+          "message": "Add stopping state to PID-control device",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/637/commits/90aac1254300c123e13a86c3c8faff2ce3d467f9"
+        },
+        "date": 1702281524679,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.656526058413943,
+            "unit": "us/iter",
+            "extra": "iterations: 44784\ncpu: 15.656252232940338 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.67966152208771,
+            "unit": "us/iter",
+            "extra": "iterations: 7516\ncpu: 95.21012506652474 us\nthreads: 1"
           }
         ]
       }
