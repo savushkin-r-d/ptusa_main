@@ -79,4 +79,21 @@ TEST( PID, direct_set_value )
     p1_dev->off();
     EXPECT_EQ( 0, m1->get_state() );
     EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
+
+    //Нельзя установить состояние "Выключаюсь" - в него ПИД-регулятор переходит
+    //при выключении из работы.
+    p1_dev->set_state( static_cast<int>( PID::STATE::STOPPING ) );
+    EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
+
+    p1_dev->set_state( static_cast<int>( PID::STATE::ON ) );
+    EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1_dev->get_state() );
+
+    //ПИД-регулятор переходит в состояние "Выключаюсь" при выключении из
+    //состояния "Работа".
+    p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
+    EXPECT_EQ( static_cast<int>( PID::STATE::STOPPING ), p1_dev->get_state() );
+    //ПИД-регулятор переходит в состояние "Выключено" при выключении из 
+    //состояни "Выключаюсь".
+    p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
+    EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
     }
