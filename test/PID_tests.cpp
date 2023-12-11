@@ -61,16 +61,22 @@ TEST( PID, direct_set_value )
     //PID switched off.
     p1_dev->set_value( 10 );
     EXPECT_EQ( .0f, m1->get_value() );
-    EXPECT_EQ( .0f, m1->get_state() );
+    EXPECT_EQ( 0, m1->get_state() );
+    EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
 
     //PID switched on.
     p1_dev->on();
     p1_dev->set_value( 10 );
     EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 1, m1->get_state() );
+    EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1_dev->get_state() );
 
     //PID switched off.
     p1_dev->off();
     EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 1, m1->get_state() );
+    EXPECT_EQ( static_cast<int>( PID::STATE::STOPPING ), p1_dev->get_state() );
+    p1_dev->off();
     EXPECT_EQ( 0, m1->get_state() );
+    EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
     }
