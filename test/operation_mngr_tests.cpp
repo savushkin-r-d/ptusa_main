@@ -1,4 +1,5 @@
 #include "operation_mngr_tests.h"
+#include "PID.h"
 
 using namespace ::testing;
 
@@ -934,6 +935,68 @@ TEST( operation, evaluate )
     G_LUA_MANAGER->free_Lua();
     test_params_manager::removeObject();
 	}
+
+	TEST( operation, evaluate_PID )
+		{
+		char* res = 0;
+		mock_params_manager* par_mock = new mock_params_manager();
+		test_params_manager::replaceEntity( par_mock );
+
+		EXPECT_CALL( *par_mock, init( _ ) );
+		EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+		EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+			.Times( AtLeast( 2 ) )
+			.WillRepeatedly( Return( res ) );
+
+		par_mock->init( 0 );
+		par_mock->final_init( 0, 0, 0 );
+
+		lua_State* L = lua_open();
+		ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+		G_LUA_MANAGER->set_Lua( L );
+
+		tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+		auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+
+		test_op->add_step( "Init", 2, -1 );
+		test_op->add_step( "Process #1", 3, -1 );
+		test_op->add_step( "Process #2", 2, -1 );
+
+		G_DEVICE_MANAGER()->add_io_device(
+			device::DT_REGULATOR, device::DST_REGULATOR_PID, "TC1",
+			"Test controller", "T" );
+		auto p1_dev = G_DEVICE_MANAGER()->get_C( "TC1" );
+		ASSERT_NE( nullptr, p1_dev );
+		PID* p1 = dynamic_cast<PID*>( p1_dev );
+
+		auto operation_run_state = ( *test_op )[ operation::RUN ];
+		auto step1_in_run = ( *operation_run_state )[ 1 ];
+		auto on_action_in_step1 = ( *step1_in_run )[ step::ACTIONS::A_ON ];
+		on_action_in_step1->add_dev( p1 );
+
+		auto step2_in_run = ( *operation_run_state )[ 2 ];
+		auto on_action_in_step2 = ( *step2_in_run )[ step::ACTIONS::A_ON ];
+		on_action_in_step2->add_dev( p1 );
+
+		test_op->start();
+		EXPECT_EQ( operation::RUN, test_op->get_state() );
+		test_op->evaluate();
+		EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1->get_state() );
+		test_op->to_next_step();
+		EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1->get_state() );
+		test_op->to_next_step();
+		EXPECT_EQ( static_cast<int>( PID::STATE::STOPPING ), p1->get_state() );
+		p1->evaluate_io();
+		EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1->get_state() );
+		
+
+		test_op->finalize();
+
+
+		G_LUA_MANAGER->free_Lua();
+		test_params_manager::removeObject();
+		}
 
 
 	TEST( operation, evaluate_from_run_to_pause )
