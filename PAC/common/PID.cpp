@@ -225,13 +225,15 @@ float PID::eval( float currentValue, int deltaSign )
 void  PID::direct_on()
     {
     if ( state != STATE::ON )
-        {
+        {        
+        if ( STATE::OFF == state )
+            {
+            // Только для отключенного состояния.
+            start_time = get_millisec(); // Для разгона регулятора.
+            last_time = get_millisec();  // Интервал пересчета значений.
+            reset();
+            }
         state = STATE::ON;
-
-        start_time = get_millisec(); // Для разгона регулятора.
-        last_time = get_millisec();  // Интервал пересчета значений.
-
-        reset();
         }
     }
 //-----------------------------------------------------------------------------
