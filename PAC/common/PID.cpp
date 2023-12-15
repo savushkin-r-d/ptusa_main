@@ -225,13 +225,15 @@ float PID::eval( float currentValue, int deltaSign )
 void  PID::direct_on()
     {
     if ( state != STATE::ON )
-        {
+        {        
+        if ( STATE::OFF == state )
+            {
+            // Только для отключенного состояния.
+            start_time = get_millisec(); // Для разгона регулятора.
+            last_time = get_millisec();  // Интервал пересчета значений.
+            reset();
+            }
         state = STATE::ON;
-
-        start_time = get_millisec(); // Для разгона регулятора.
-        last_time = get_millisec();  // Интервал пересчета значений.
-
-        reset();
         }
     }
 //-----------------------------------------------------------------------------
@@ -246,13 +248,16 @@ void PID::direct_set_state( int st )
         case STATE::ON:
             direct_on();
             break;
+
+        case STATE::STOPPING:
+            break;
         }
     }
 //-----------------------------------------------------------------------------
 /// @brief Выключение ПИД.
 void PID::direct_off()
     {
-    if ( state != STATE::OFF )
+    if ( STATE::STOPPING == state )
         {
         reset();
         state = STATE::OFF;
@@ -260,6 +265,10 @@ void PID::direct_off()
             {
             actuator->off();
             }
+        }
+    else if ( STATE::ON == state )
+        {
+        state = STATE::STOPPING;
         }
     }
 //-----------------------------------------------------------------------------
@@ -484,5 +493,13 @@ int PID::save_device( char *buff )
 device* PID::get_actuator() const
     {
     return actuator;
+    }
+//-----------------------------------------------------------------------------
+void PID::evaluate_io()
+    {
+    if ( STATE::STOPPING == state )
+        {
+        off();
+        }
     }
 //-----------------------------------------------------------------------------
