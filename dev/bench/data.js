@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1702623749821,
+  "lastUpdate": 1702624314835,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18342,6 +18342,42 @@ window.BENCHMARK_DATA = {
             "value": 95.1227929439758,
             "unit": "us/iter",
             "extra": "iterations: 7568\ncpu: 94.67468287526428 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "35e1cb54f47761c4e9d9b763284fe531e96ff7fb",
+          "message": "Add stopping state to PID-control device (#637)\n\n* Add stopping state to PID-control device\n\n* Fix code smells\n\n* Add test\n\n* Add comments\n\n* Fix swtch on after stop",
+          "timestamp": "2023-12-15T07:00:16Z",
+          "tree_id": "a7fdd841384dcae7e585c3f3b008dabc2a1989f7",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/35e1cb54f47761c4e9d9b763284fe531e96ff7fb"
+        },
+        "date": 1702624313088,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.178782126261595,
+            "unit": "us/iter",
+            "extra": "iterations: 43259\ncpu: 16.17826348274348 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 98.44861276536612,
+            "unit": "us/iter",
+            "extra": "iterations: 7254\ncpu: 97.66757650951196 us\nthreads: 1"
           }
         ]
       }
