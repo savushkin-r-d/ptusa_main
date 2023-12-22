@@ -93,8 +93,8 @@ ParamsRecipeStorage *ParamsRecipeManager::createRecipes( int size, int quantity 
 
 ParamsRecipeManager::ParamsRecipeManager( )
     {
-    mLastSaveTimer = get_millisec( );
-    mLastRefreshTimer = get_millisec( );
+    mLastAdapterSaveTimer = get_millisec( );
+    mLastRecipeSaveTimer = get_millisec( );
     loadTechObjects();
     }
 
@@ -154,8 +154,13 @@ void ParamsRecipeManager::evaluate( )
         {
         if ( adapter->isChanged )
             {
-            adapter->isChanged = false;
-            adapter->serialize( );
+            if ( get_delta_millisec( mLastAdapterSaveTimer ) > MIN_SAVE_INTERVAL_MS )
+                {
+                adapter->isChanged = false;
+                adapter->serialize( );
+                mLastAdapterSaveTimer = get_millisec( );
+                break;
+                }
             }
         if ( adapter->recipeListChanged )
             {
@@ -164,20 +169,29 @@ void ParamsRecipeManager::evaluate( )
             }
         if ( adapter->isLoaded )
             {
-            adapter->isLoaded = false;
-            wasLoaded = true;
+            if ( get_delta_millisec( mLastTechObjectSaveTimer ) > MIN_SAVE_INTERVAL_MS )
+                {
+                adapter->isLoaded = false;
+                wasLoaded = true;
+                }
             }
         }
-        if ( wasLoaded )
-            {
-            saveTechObjects();
-            }
+    if ( wasLoaded )
+        {
+        mLastTechObjectSaveTimer = get_millisec( );
+        saveTechObjects( );
+        }
     for ( auto recipeStorage: recPacks )
         {
         if ( recipeStorage->isChanged )
             {
-            recipeStorage->isChanged = false;
-            recipeStorage->serialize( );
+            if ( get_delta_millisec( mLastRecipeSaveTimer ) > MIN_SAVE_INTERVAL_MS )
+                {
+                recipeStorage->isChanged = false;
+                recipeStorage->serialize( );
+                mLastRecipeSaveTimer = get_millisec( );
+                break;
+                }
             }
         }
     }

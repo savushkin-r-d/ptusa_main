@@ -106,7 +106,7 @@ class ParamsRecipeManager: public i_Lua_save_device
         ParamsRecipeManager(ParamsRecipeManager &outer) = delete;
         void operator=(const ParamsRecipeManager &) = delete;
 
-        const long MIN_SAVE_INTERVAL_MS = 10000;
+        const unsigned long MIN_SAVE_INTERVAL_MS = 10000;
 
     protected:
         ParamsRecipeManager();
@@ -114,8 +114,9 @@ class ParamsRecipeManager: public i_Lua_save_device
     private:
         int mId = 0;
         int mAdaptersId = 0;
-        unsigned long mLastSaveTimer;
-        unsigned long mLastRefreshTimer;
+        unsigned long mLastAdapterSaveTimer;
+        unsigned long mLastRecipeSaveTimer;
+        unsigned long mLastTechObjectSaveTimer;
         static auto_smart_ptr <ParamsRecipeManager> sInstance;
 
     };
