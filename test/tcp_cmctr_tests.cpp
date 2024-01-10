@@ -1,6 +1,7 @@
 #include "tcp_cmctr_tests.h"
 #include "dtime.h"
 #include "fmt/chrono.h"
+#include "mock_tcp_communicator.h"
 
 using namespace ::testing;
 
@@ -11,18 +12,24 @@ TEST(tcp_communicator, get_millisec_test)
     ASSERT_GE(milliseconds, 0);
 }
 
-TEST(tcp_communicator, local_time_test)
+TEST(tcp_communicator, evaluate_test)
 {
-    auto now = std::chrono::system_clock::now();
+    mock_tcp_communicator communicator;
 
-    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    EXPECT_CALL(communicator, evaluate()).Times(::testing::AtLeast(1));
 
-    auto timeInfo = fmt::localtime(now_time_t);
+    communicator.evaluate();
+}
 
-    ASSERT_NE(timeInfo.tm_year, -1);
-    ASSERT_NE(timeInfo.tm_mon, -1);
-    ASSERT_NE(timeInfo.tm_mday, -1);
-    ASSERT_NE(timeInfo.tm_hour, -1);
-    ASSERT_NE(timeInfo.tm_min, -1);
-    ASSERT_NE(timeInfo.tm_sec, -1);
+TEST(tcp_communicator, reg_service)
+{
+    mock_tcp_communicator communicator;
+
+    tcp_communicator::srv_ptr mockService = [](long int, u_char*, u_char*) -> long int { return 0; };
+
+    EXPECT_CALL(communicator, reg_service(42, mockService)).Times(1);
+
+    tcp_communicator::srv_ptr result = communicator.reg_service(42, mockService);
+
+    ASSERT_EQ(result, nullptr);
 }
