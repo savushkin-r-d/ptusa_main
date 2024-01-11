@@ -158,10 +158,24 @@ i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
     temperature_signal-->DI1
     end
 
+ subgraph sub_analog_io_device[" "]
+    direction RL
+    analog_io_device[analog_io_device]
+    AI1[AI1]-->analog_io_device
+    AO1[AO1]-->analog_io_device
+    circuit_breaker[circuit_breaker]-->analog_io_device
+    concetration_e_iolink[concetration_e_iolink]-->analog_io_device
+    level_s_iolink[level_s_iolink]-->analog_io_device
+    pressure_e_iolink[pressure_e_iolink]-->analog_io_device
+    wages[wages]-->analog_io_device
+    wages_RS232[wages_RS232]-->analog_io_device
+    wages_eth[wages_eth]-->analog_io_device
+    end
+
 sub_DO1-->digital_io_device
 sub_valve-->digital_io_device
 sub_DI1-->digital_io_device
-
+sub_analog_io_device-->digital_io_device
 ```
 
 ## How to build the project ##
