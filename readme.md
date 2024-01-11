@@ -99,7 +99,7 @@ flowchart TD
 
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
-## Class scheme
+## Class scheme ##
 
 ```mermaid
 flowchart BT
