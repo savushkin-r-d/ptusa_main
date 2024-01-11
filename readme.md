@@ -99,6 +99,71 @@ flowchart TD
 
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
+## Class scheme
+
+```mermaid
+flowchart BT
+digital_io_device[digital_io_device]
+digital_io_device-->device[device]
+digital_io_device-->io_device[io_device]
+device-->i_DO_AO_device[i_DO_AO_device]
+device-->par_device[par_device]
+i_DO_AO_device-->i_AO_device[i_AO_device]
+i_DO_AO_device-->i_DO_device[i_DO_device]
+i_AO_device-->i_AI_device[i_AI_device]
+i_DO_device-->i_DI_device[i_DI_device]
+i_AI_device-->i_cmd_device[i_cmd_device]
+i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
+
+    subgraph sub_DO1[" "]
+    direction RL
+    DO1[DO1]
+    DO_signal[DO_signal]-->DO1
+    lamp[lamp]-->DO1
+    siren[siren]-->DO1
+    end
+
+    subgraph sub_valve[" "]
+    direction RL
+    valve[valve]
+    dev_stub[dev_stub]-->valve
+    valve_AS[valve_AS]-->valve
+    valve_DO1[valve_DO1]-->valve
+    valve_DO1_DI1_off[valve_DO1_DI1_off]-->valve
+    valve_DO1_DI1_on[valve_DO1_DI1_on]-->valve
+    valve_DO1_DI2[valve_DO1_DI2]-->valve
+    valve_DO1_DI2[valve_DO1_DI2]-->valve
+    valve_DO2[valve_DO2]-->valve
+    valve_DO2_DI2[valve_DO2_DI2]-->valve
+    valve_DO2_DI2_bistable[valve_DO2_DI2_bistable]-->valve
+    valve_bottom_mix_proof[valve_bottom_mix_proof]-->valve
+    valve_iol_terminal[valve_iol_terminal]-->valve
+    valve_iolink_mix_proof[valve_iolink_mix_proof]-->valve
+    valve_iolink_shut_off_sorio[valve_iolink_shut_off_sorio]-->valve
+    valve_iolink_shut_off_thinktop[valve_iolink_shut_off_thinktop]-->valve
+    valve_mini_flushing[valve_mini_flushing]-->valve
+    valve_mix_proof[valve_mix_proof]-->valve
+    virtual_valve[virtual_valve]-->valve
+    end
+
+    subgraph sub_DI1[" "]
+    direction RL
+    DI_signal-->DI1
+    button-->DI1
+    diff_pressure-->DI1
+    flow_s-->DI1
+    level_s-->DI1
+    state_s-->DI1
+    state_s_inverse-->DI1
+    temperature_signal-->DI1
+    end
+
+sub_DO1-->digital_io_device
+sub_valve-->digital_io_device
+sub_DI1-->digital_io_device
+
+```
+
 ## How to build the project ##
 
 You could clone repository by next command:
