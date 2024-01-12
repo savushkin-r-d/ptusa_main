@@ -7,7 +7,9 @@ class mock_tcp_communicator : public tcp_communicator
 {
     public:
     MOCK_METHOD0(evaluate, int());
-    MOCK_METHOD(srv_ptr, reg_service, (u_char srv_id, srv_ptr fk));    
+    MOCK_METHOD(srv_ptr, reg_service, (u_char srv_id, srv_ptr fk));  
+
+    char* get_host_name_eng() { return host_name_eng; };
 
     //int evaluate() { return 0; };
 };

@@ -33,3 +33,12 @@ TEST(tcp_communicator, reg_service)
 
     ASSERT_EQ(result, nullptr);
 }
+
+TEST(tcp_communicator, get_host_name_eng_test)
+{
+    mock_tcp_communicator communicator;
+
+    char* host_name = communicator.get_host_name_eng();
+
+    assert(host_name != nullptr);
+}
