@@ -33,7 +33,7 @@ TEST( tcp_communicator_linux, evaluate )
 
 TEST( tcp_communicator_linux, checkBuff )
     {
-    int s = socket( AF_INET, SOCK_STREAM, NULL );
+    int s = socket( AF_INET, SOCK_STREAM, 0 );
 
     auto res = tcp_communicator_linux::checkBuff( s );
     EXPECT_TRUE( res );

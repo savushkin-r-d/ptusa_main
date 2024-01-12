@@ -1,4 +1,5 @@
 #include "operation_mngr_tests.h"
+#include "PID.h"
 
 using namespace ::testing;
 
@@ -742,6 +743,7 @@ TEST( operation, evaluate )
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
+	if_action_in_run->set_int_property( "next_step_n", 0, 0 );
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
 	test_op->evaluate();
@@ -933,6 +935,142 @@ TEST( operation, evaluate )
     G_LUA_MANAGER->free_Lua();
     test_params_manager::removeObject();
 	}
+
+TEST( operation, evaluate_PID )
+	{
+	//При переходе между шагами в пределах операции если ПИД-регулятор описан
+	//в данных шагах, то он должен продолжать свою работу, а на начинать с 0.
+
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	//Добавляем три шага для того, чтобы проверить работу регулятора при
+	//переходе от одного шага к другому.
+	test_op->add_step( "Init", 2, -1 );
+	test_op->add_step( "Process #1", 3, -1 );
+	test_op->add_step( "Process #2", 1, -1 );
+
+	//Создаем тестовый ПИД-регулятор.
+	G_DEVICE_MANAGER()->add_io_device(
+		device::DT_REGULATOR, device::DST_REGULATOR_PID, "TC1",
+		"Test controller", "T" );
+	auto p1_dev = G_DEVICE_MANAGER()->get_C( "TC1" );
+	ASSERT_NE( nullptr, p1_dev );
+	PID* p1 = dynamic_cast<PID*>( p1_dev );
+
+	//Добавляем работу ПИД-регулятора в 2-х шагах.
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	auto step1_in_run = ( *operation_run_state )[ 1 ];
+	auto on_action_in_step1 = ( *step1_in_run )[ step::ACTIONS::A_ON ];
+	on_action_in_step1->add_dev( p1 );
+	auto step2_in_run = ( *operation_run_state )[ 2 ];
+	auto on_action_in_step2 = ( *step2_in_run )[ step::ACTIONS::A_ON ];
+	on_action_in_step2->add_dev( p1 );
+
+	//Включаем операцию.
+	test_op->start();
+	test_op->evaluate();
+	//ПИД-регулятор должен включиться - он работает в первом шаге.
+	EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1->get_state() );
+	test_op->to_next_step();
+	//ПИД-регулятор должен остаться работать - он работает во втором шаге.
+	EXPECT_EQ( static_cast<int>( PID::STATE::ON ), p1->get_state() );
+	test_op->to_next_step();
+	//ПИД-регулятор должен перейти в выключение - он не работает в третьем шаге.
+	EXPECT_EQ( static_cast<int>( PID::STATE::STOPPING ), p1->get_state() );
+	p1->evaluate_io();
+	//ПИД-регулятор должен выключиться.
+	EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1->get_state() );
+		
+
+	test_op->finalize();
+
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
+
+TEST( operation, evaluate_from_run_to_pause )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+
+	//Корректный переход к паузе.	
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	auto main_step_in_run = ( *operation_run_state )[ -1 ];
+
+	int next = 0;
+	auto is_goto_next_state = operation_run_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+	EXPECT_EQ( -1, next );
+
+	auto if_action_in_run = reinterpret_cast<jump_if_action*>
+		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
+	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	if_action_in_run->add_dev( &test_DI_one );
+
+	//Сигнал не активен, операция не должна стать на паузу.
+	test_op->start();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал активен,но операция должна не должна стать на паузу, так как
+	//не задано к какому состоянию переходить.
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал активен, операция должна стать на паузу.
+	if_action_in_run->set_int_property( "next_state_n", 0,
+		operation::state_idx::PAUSE );
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+		
+	test_op->finalize();
+
+	G_LUA_MANAGER->free_Lua();
+	test_params_manager::removeObject();
+	}
+
 
 /*
 	TEST METHOD DEFENITION:
