@@ -124,7 +124,6 @@ analog_io_device[analog_io_device]-->digital_io_device
 
 ```mermaid
 flowchart RL
-valve[valve]
     dev_stub[dev_stub]-->valve
     valve_AS[valve_AS]-->valve
     valve_DO1[valve_DO1]-->valve
