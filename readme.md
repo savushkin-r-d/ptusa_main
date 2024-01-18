@@ -120,6 +120,15 @@ DI1[DI1]-->digital_io_device
 analog_io_device[analog_io_device]-->digital_io_device
 ```
 
+## Class DO1 scheme ##
+
+```mermaid
+flowchart TB
+    DO1-->DO_signal
+    DO1-->lamp
+    DO1-->siren
+```
+
 ## Class DI1 scheme ##
 
 ```mermaid
