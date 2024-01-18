@@ -148,7 +148,6 @@ flowchart RL
 
 ```mermaid
 flowchart RL
-valve[valve]
     DI_signal-->DI1
     button-->DI1
     diff_pressure-->DI1
