@@ -99,33 +99,32 @@ flowchart TD
 
 <p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
 
-## Class scheme ##
+## General class scheme ##
 
 ```mermaid
 flowchart BT
 digital_io_device[digital_io_device]
 digital_io_device-->device[device]
-digital_io_device-->io_device[io_device]
-device-->i_DO_AO_device[i_DO_AO_device]
+digital_io_device-->io_device[<i>io_device</i>]
+device-->i_DO_AO_device[<i>i_DO_AO_device</i>]
 device-->par_device[par_device]
-i_DO_AO_device-->i_AO_device[i_AO_device]
-i_DO_AO_device-->i_DO_device[i_DO_device]
-i_AO_device-->i_AI_device[i_AI_device]
-i_DO_device-->i_DI_device[i_DI_device]
-i_AI_device-->i_cmd_device[i_cmd_device]
-i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
+i_DO_AO_device-->i_AO_device[<i>i_AO_device</i>]
+i_DO_AO_device-->i_DO_device[<i>i_DO_device</i>]
+i_AO_device-->i_AI_device[<i>i_AI_device</i>]
+i_DO_device-->i_DI_device[<i>i_DI_device</i>]
+i_AI_device-->i_cmd_device[<i>i_cmd_device</i>]
+i_DI_device[<i>i_DI_device</i>]-->i_cmd_device[<i>i_cmd_device</i>]
+DO1[DO1]-->digital_io_device
+valve[valve]-->digital_io_device
+DI1[DI1]-->digital_io_device
+analog_io_device[analog_io_device]-->digital_io_device
+```
 
-    subgraph sub_DO1[" "]
-    direction RL
-    DO1[DO1]
-    DO_signal[DO_signal]-->DO1
-    lamp[lamp]-->DO1
-    siren[siren]-->DO1
-    end
+## Class valve scheme ##
 
-    subgraph sub_valve[" "]
-    direction RL
-    valve[valve]
+```mermaid
+flowchart RL
+valve[valve]
     dev_stub[dev_stub]-->valve
     valve_AS[valve_AS]-->valve
     valve_DO1[valve_DO1]-->valve
@@ -144,10 +143,13 @@ i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
     valve_mini_flushing[valve_mini_flushing]-->valve
     valve_mix_proof[valve_mix_proof]-->valve
     virtual_valve[virtual_valve]-->valve
-    end
+```
 
-    subgraph sub_DI1[" "]
-    direction RL
+## Class DI1 scheme ##
+
+```mermaid
+flowchart RL
+valve[valve]
     DI_signal-->DI1
     button-->DI1
     diff_pressure-->DI1
@@ -156,11 +158,13 @@ i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
     state_s-->DI1
     state_s_inverse-->DI1
     temperature_signal-->DI1
-    end
+```
 
- subgraph sub_analog_io_device[" "]
-    direction RL
-    analog_io_device[analog_io_device]
+## Class analog_io_device scheme ##
+
+```mermaid
+flowchart RL
+ analog_io_device[analog_io_device]
     AI1[AI1]-->analog_io_device
     AO1[AO1]-->analog_io_device
     circuit_breaker[circuit_breaker]-->analog_io_device
@@ -170,12 +174,6 @@ i_DI_device[i_DI_device]-->i_cmd_device[i_cmd_device]
     wages[wages]-->analog_io_device
     wages_RS232[wages_RS232]-->analog_io_device
     wages_eth[wages_eth]-->analog_io_device
-    end
-
-sub_DO1-->digital_io_device
-sub_valve-->digital_io_device
-sub_DI1-->digital_io_device
-sub_analog_io_device-->digital_io_device
 ```
 
 ## How to build the project ##
@@ -196,7 +194,7 @@ You should open (in Visual Studio) root directory. This you get a CMake based pr
 
 + Qt Creator
 
-You could open file CMakeList.txt cloned repository in Qt.
+You could open file CMakeLists.txt cloned repository in Qt.
 
 Or clone repository in Qt:
     New -> Import Project -> Git Clone
