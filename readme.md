@@ -120,6 +120,36 @@ DI1[DI1]-->digital_io_device
 analog_io_device[analog_io_device]-->digital_io_device
 ```
 
+## Class DI1 scheme ##
+
+```mermaid
+flowchart BT
+    DI_signal-->DI1
+    button-->DI1
+    diff_pressure-->DI1
+    flow_s-->DI1
+    level_s-->DI1
+    state_s-->DI1
+    state_s_inverse-->DI1
+    temperature_signal-->DI1
+```
+
+## Class analog_io_device scheme ##
+
+```mermaid
+flowchart BT
+ analog_io_device[analog_io_device]
+    AI1[AI1]-->analog_io_device
+    AO1[AO1]-->analog_io_device
+    circuit_breaker[circuit_breaker]-->analog_io_device
+    concetration_e_iolink[concetration_e_iolink]-->analog_io_device
+    level_s_iolink[level_s_iolink]-->analog_io_device
+    pressure_e_iolink[pressure_e_iolink]-->analog_io_device
+    wages[wages]-->analog_io_device
+    wages_RS232[wages_RS232]-->analog_io_device
+    wages_eth[wages_eth]-->analog_io_device
+```
+
 ## Class valve scheme ##
 
 ```mermaid
@@ -142,36 +172,6 @@ flowchart RL
     valve_mini_flushing[valve_mini_flushing]-->valve
     valve_mix_proof[valve_mix_proof]-->valve
     virtual_valve[virtual_valve]-->valve
-```
-
-## Class DI1 scheme ##
-
-```mermaid
-flowchart RL
-    DI_signal-->DI1
-    button-->DI1
-    diff_pressure-->DI1
-    flow_s-->DI1
-    level_s-->DI1
-    state_s-->DI1
-    state_s_inverse-->DI1
-    temperature_signal-->DI1
-```
-
-## Class analog_io_device scheme ##
-
-```mermaid
-flowchart RL
- analog_io_device[analog_io_device]
-    AI1[AI1]-->analog_io_device
-    AO1[AO1]-->analog_io_device
-    circuit_breaker[circuit_breaker]-->analog_io_device
-    concetration_e_iolink[concetration_e_iolink]-->analog_io_device
-    level_s_iolink[level_s_iolink]-->analog_io_device
-    pressure_e_iolink[pressure_e_iolink]-->analog_io_device
-    wages[wages]-->analog_io_device
-    wages_RS232[wages_RS232]-->analog_io_device
-    wages_eth[wages_eth]-->analog_io_device
 ```
 
 ## How to build the project ##
