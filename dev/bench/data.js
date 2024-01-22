@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1705914257208,
+  "lastUpdate": 1705931941839,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18712,6 +18712,42 @@ window.BENCHMARK_DATA = {
             "value": 95.22642404281598,
             "unit": "us/iter",
             "extra": "iterations: 7287\ncpu: 94.75673116508852 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "distinct": true,
+          "id": "17175a5c7e6712f1690c18e7bc83810eb394260d",
+          "message": "Return error when reading incorrect I/O modules data",
+          "timestamp": "2024-01-22T16:56:44+03:00",
+          "tree_id": "ce1e0c682c67cf1c7386d82b95b689e6d08e8235",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/17175a5c7e6712f1690c18e7bc83810eb394260d"
+        },
+        "date": 1705931940200,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.898813148316647,
+            "unit": "us/iter",
+            "extra": "iterations: 43960\ncpu: 15.897709281164696 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.34112763967025,
+            "unit": "us/iter",
+            "extra": "iterations: 7482\ncpu: 94.89238171611868 us\nthreads: 1"
           }
         ]
       }
