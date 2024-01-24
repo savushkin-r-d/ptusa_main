@@ -2095,6 +2095,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (wages_eth*)new_device;
                     break;
 
+                case device::DST_WT_PXC_AXL:
+                    new_device = new wages_pxc_axl( dev_name );
+                    new_io_device = (wages_pxc_axl*)new_device;
+                    break;                    
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -5456,7 +5461,31 @@ void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
     {
     weth->direct_set_tcp_buff( new_value, size, new_status );
     }
+//-----------------------------------------------------------------------------
+wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_PXC_AXL,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    }
 
+void wages_pxc_axl::evaluate_io()
+    {
+    }
+
+void wages_pxc_axl::tare()
+    {
+    }
+
+float wages_pxc_axl::get_value()
+    {
+    return 0.f;
+    }
+
+int wages_pxc_axl::get_state()
+    {
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )

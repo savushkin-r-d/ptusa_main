@@ -598,10 +598,11 @@ class device : public i_DO_AO_device, public par_device
             DST_SB_VIRT, ///< Виртуальная кнопка (без привязки к модулям).
 
             //WT
-            DST_WT = 1,  ///< Весы.
-            DST_WT_VIRT, ///< Виртуальные весы.
-            DST_WT_RS232,///< Весы c RS232 интерфейсом.
-            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
+            DST_WT = 1,     ///< Весы.
+            DST_WT_VIRT,    ///< Виртуальные весы.
+            DST_WT_RS232,   ///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,     ///< Весы c интерфейсом ethernet.
+            DST_WT_PXC_AXL, ///< Весы c подключением к модулю Phoenix Axioline.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -3361,6 +3362,29 @@ class wages_eth : public analog_io_device, public i_wages
             P_CZ,           ///< Сдвиг нуля.
             LAST_PARAM_IDX,
         };
+    };
+//-----------------------------------------------------------------------------
+class wages_pxc_axl : public analog_io_device, public i_wages
+    {
+    public:
+        explicit wages_pxc_axl( const char* dev_name );
+
+        void evaluate_io() override;
+
+        void tare() override;
+
+        float get_value() override;
+
+        int get_state() override;
+
+    private:
+        enum class CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            P_DT,               ///< Пороговый фильтр времени.
+            LAST_PARAM_IDX,
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
