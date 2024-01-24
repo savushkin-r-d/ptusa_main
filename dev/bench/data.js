@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706093125786,
+  "lastUpdate": 1706095158556,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18880,6 +18880,38 @@ window.BENCHMARK_DATA = {
             "value": 94.89365460832627,
             "unit": "us/iter",
             "extra": "iterations: 7519\ncpu: 94.07704481978985 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "54eff878e4c18420c766c58916e2a7b1f5af8eb8",
+          "message": "Return error when reading incorrect I/O modules data",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/641/commits/54eff878e4c18420c766c58916e2a7b1f5af8eb8"
+        },
+        "date": 1706095157545,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.070002125889594,
+            "unit": "us/iter",
+            "extra": "iterations: 43276\ncpu: 16.069144560495427 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 97.13457544001058,
+            "unit": "us/iter",
+            "extra": "iterations: 7443\ncpu: 96.66005642885932 us\nthreads: 1"
           }
         ]
       }
