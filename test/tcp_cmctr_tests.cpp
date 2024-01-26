@@ -17,7 +17,11 @@ TEST(tcp_communicator, get_host_name_eng_test)
     const char* name_rus = "";
     const char* name_eng = "";
 
+#ifdef WIN_OS
     tcp_communicator_win* communicator = new tcp_communicator_win( name_rus, name_eng );
+#else
+    tcp_communicator_linux* communicator = new tcp_communicator_linux( name_rus, name_eng );
+#endif
 
     char* host_name = communicator->get_host_name_eng();
 
