@@ -5471,15 +5471,22 @@ wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
 
 void wages_pxc_axl::evaluate_io()
     {
+    auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
+    char* data = reinterpret_cast<char*>( get_AI_data( idx ) );
+    std::swap( data[ 0 ], data[ 1 ] ); //Reverse byte order to get correct int.
+    std::swap( data[ 2 ], data[ 3 ] );
+    int weigth = reinterpret_cast<int*>( data )[ 0 ];
+    w = 0.01f * weigth;
     }
 
+// Temporarily do nothing.
 void wages_pxc_axl::tare()
     {
     }
 
 float wages_pxc_axl::get_value()
     {
-    return 0.f;
+    return w;
     }
 
 int wages_pxc_axl::get_state()

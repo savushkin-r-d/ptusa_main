@@ -3385,6 +3385,8 @@ class wages_pxc_axl : public analog_io_device, public i_wages
             P_DT,               ///< Пороговый фильтр времени.
             LAST_PARAM_IDX,
             };
+
+        float w = .0f;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса

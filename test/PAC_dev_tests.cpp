@@ -1352,6 +1352,7 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
+
 TEST( wages_RS232, get_value_from_wages )
     {
     wages_RS232 w1( "W1" );
@@ -1469,6 +1470,7 @@ TEST( wages_RS232, evaluate_io )
     w1.evaluate_io();
     }
 
+
 TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
@@ -1577,6 +1579,22 @@ TEST( wages_eth, set_string_property )
     auto ip = "0.0.0.0";
     auto field = "NOT_IP";
     w1.set_string_property( field, ip );
+    }
+
+
+TEST( wages_pxc_axl, evaluate_io )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    std::swap( buff[ 0 ], buff[ 1 ] );//Reverse byte order to save correct int.
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.01f * VALUE, w1.get_value() );
     }
 
 
