@@ -1,7 +1,11 @@
 #include "tcp_cmctr_tests.h"
 #include "dtime.h"
 #include "fmt/chrono.h"
+#ifdef WIN_OS
 #include "w_tcp_cmctr.h"
+#else
+#include "l_tcp_cmctr.h"
+#endif
 
 using namespace ::testing;
 
