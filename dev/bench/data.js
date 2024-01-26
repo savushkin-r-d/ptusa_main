@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706105238250,
+  "lastUpdate": 1706257430042,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -18976,6 +18976,38 @@ window.BENCHMARK_DATA = {
             "value": 96.75597253044575,
             "unit": "us/iter",
             "extra": "iterations: 7390\ncpu: 96.29552097428959 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "5132cc7310498ad0ed53b024052161ec6a243e3b",
+          "message": "Add new control device DST_WT_PXC_AXL",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/642/commits/5132cc7310498ad0ed53b024052161ec6a243e3b"
+        },
+        "date": 1706257429116,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.582183914660312,
+            "unit": "us/iter",
+            "extra": "iterations: 45184\ncpu: 15.580920237252126 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 97.35210957213398,
+            "unit": "us/iter",
+            "extra": "iterations: 7292\ncpu: 96.27033735600659 us\nthreads: 1"
           }
         ]
       }
