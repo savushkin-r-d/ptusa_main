@@ -1654,6 +1654,58 @@ TEST( wages_pxc_axl, evaluate_io )
     EXPECT_EQ( -7, w1.get_state() );
     }
 
+TEST( wages_pxc_axl, tare )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    w1.AO_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    w1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto buff = w1.AO_channels.int_write_values[ 0 ];
+
+    auto wait_time_par_idx =
+        static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_TARE_CMD_T );
+    w1.set_par( wait_time_par_idx, 0, 1 );
+    w1.tare();
+    EXPECT_EQ( 1 << static_cast<int>( wages_pxc_axl::IO_CMDS::TARE_BIT_IDX ),
+        *buff );
+
+    w1.evaluate_io();
+    EXPECT_EQ( 1 << static_cast<int>( wages_pxc_axl::IO_CMDS::TARE_BIT_IDX ),
+        *buff );
+
+    auto sleep_time = static_cast<unsigned int>( w1.get_par( wait_time_par_idx ) );
+    sleep_ms( sleep_time + 1 );
+    w1.evaluate_io();
+    EXPECT_EQ( 0, *buff );
+    }
+
+TEST( wages_pxc_axl, reset_tare )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    w1.AO_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    w1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto buff = w1.AO_channels.int_write_values[ 0 ];
+
+    auto wait_time_par_idx =
+        static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_TARE_CMD_T );
+    w1.set_par( wait_time_par_idx, 0, 1 );
+    w1.reset_tare();
+    EXPECT_EQ( 1 << static_cast<int>( wages_pxc_axl::IO_CMDS::RESET_TARE_BIT_IDX ),
+        *buff );
+
+    w1.evaluate_io();
+    EXPECT_EQ( 1 << static_cast<int>( wages_pxc_axl::IO_CMDS::RESET_TARE_BIT_IDX ),
+        *buff );
+
+    auto sleep_time = static_cast<unsigned int>( w1.get_par( wait_time_par_idx ) );
+    sleep_ms( sleep_time + 1 );
+    w1.evaluate_io();
+    EXPECT_EQ( 0, *buff );
+    }
+
 
 TEST( temperature_e, save_device )
     {

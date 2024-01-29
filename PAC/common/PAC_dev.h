@@ -3372,10 +3372,13 @@ class wages_pxc_axl : public analog_io_device, public i_wages
         void evaluate_io() override;
 
         void tare() override;
+        void reset_tare();
 
         float get_value() override;
 
         int get_state() override;
+
+        void direct_set_state( int new_state ) override;
 
         void direct_set_value( float new_value ) override;
 
@@ -3401,17 +3404,37 @@ class wages_pxc_axl : public analog_io_device, public i_wages
             ERR_UNDERRANGE = -7     // Below measuring range (underrange).
             };
 
-    private:
+        enum class IO_CMDS
+            {
+            TARE_BIT_IDX       = 12 - 8,
+            RESET_TARE_BIT_IDX = 13 - 8,
+
+            S_TARE = 1,
+            };
+
+        enum class CMDS
+            {
+            TARE = 1,
+            RESET_TARE = 2,
+            };
+
         enum class CONSTANTS
             {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
 
-            P_DT,               ///< Пороговый фильтр времени.
+            C_TARE_TIME = 5000, ///< Время ожидания установления тары.
+
+            P_DT = 1,           ///< Пороговый фильтр времени.
+            P_TARE_CMD_T,       ///< Время установки бита команд тарировки.
             LAST_PARAM_IDX,
             };
-
+    
+    private:
         float w = .0f;
         int st = 0;
+
+        unsigned long tare_time = 0;
+        unsigned long reset_tare_time = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
