@@ -3377,6 +3377,30 @@ class wages_pxc_axl : public analog_io_device, public i_wages
 
         int get_state() override;
 
+        void direct_set_value( float new_value ) override;
+
+        enum class ERR_VALUES : unsigned int
+            {
+            ERR_OVERRANGE = 0x80000001, // Measuring range exceeded (overrange).
+            ERR_WIRE_BREAK = 0x80000002,            // Wire break.
+            ERR_SHORT_CIRCUIT = 0x80000003,         // Short-circuit.
+            ERR_INVALID_VALUE = 0x80000004,         // Measured value is invalid.
+            ERR_FAULTY_SUPPLY_VOLTAGE = 0x80000020, // Faulty supply voltage.
+            ERR_FAULTY_DEVICE = 0x80000040,         // Device faulty.
+            ERR_UNDERRANGE = 0x80000080 // Below measuring range (underrange).
+            };
+
+        enum class ERR_STATES
+            {
+            ERR_OVERRANGE = -1,     // Measuring range exceeded (overrange).
+            ERR_WIRE_BREAK = -2,            // Wire break.
+            ERR_SHORT_CIRCUIT = -3,         // Short-circuit.
+            ERR_INVALID_VALUE = -4,         // Measured value is invalid.
+            ERR_FAULTY_SUPPLY_VOLTAGE = -5, // Faulty supply voltage.
+            ERR_FAULTY_DEVICE = -6,         // Device faulty.
+            ERR_UNDERRANGE = -7     // Below measuring range (underrange).
+            };
+
     private:
         enum class CONSTANTS
             {
@@ -3387,6 +3411,7 @@ class wages_pxc_axl : public analog_io_device, public i_wages
             };
 
         float w = .0f;
+        int st = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса

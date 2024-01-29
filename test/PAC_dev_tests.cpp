@@ -1591,10 +1591,67 @@ TEST( wages_pxc_axl, evaluate_io )
 
     const int VALUE = 65900;
     *reinterpret_cast<int_4*>( buff ) = VALUE;
-    std::swap( buff[ 0 ], buff[ 1 ] );//Reverse byte order to save correct int.
-    std::swap( buff[ 2 ], buff[ 3 ] );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
     w1.evaluate_io();
-    EXPECT_EQ( 0.01f * VALUE, w1.get_value() );
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_OVERRANGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -1, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_WIRE_BREAK );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -2, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_SHORT_CIRCUIT );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -3, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_INVALID_VALUE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -4, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_FAULTY_SUPPLY_VOLTAGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -5, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_FAULTY_DEVICE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -6, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_UNDERRANGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -7, w1.get_state() );
     }
 
 
