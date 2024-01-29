@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706536342477,
+  "lastUpdate": 1706537246739,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19170,6 +19170,38 @@ window.BENCHMARK_DATA = {
             "value": 93.51996744496621,
             "unit": "us/iter",
             "extra": "iterations: 7495\ncpu: 93.0448965977318 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "de2a262f86ee26430eb7b10824c6cb2970708cde",
+          "message": "Update zlib version to 1.3.1",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/643/commits/de2a262f86ee26430eb7b10824c6cb2970708cde"
+        },
+        "date": 1706537245766,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.925070487379015,
+            "unit": "us/iter",
+            "extra": "iterations: 44093\ncpu: 15.924364411584605 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.14507934336481,
+            "unit": "us/iter",
+            "extra": "iterations: 7310\ncpu: 95.64796169630642 us\nthreads: 1"
           }
         ]
       }
