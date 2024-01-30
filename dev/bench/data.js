@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706609046043,
+  "lastUpdate": 1706609374996,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19300,6 +19300,42 @@ window.BENCHMARK_DATA = {
             "value": 94.51801880501485,
             "unit": "us/iter",
             "extra": "iterations: 7498\ncpu: 94.03199519871966 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "45803ca0bdc198cc69fc3c368ea51137cb073b57",
+          "message": "Return error when reading incorrect I/O modules data (#641)\n\n* Return error when reading incorrect I/O modules data\n\n* Add simple test\n\n* Improve test\n\n* Improve test\n\n* Refactor test\n\n* Refactor test",
+          "timestamp": "2024-01-30T10:01:17Z",
+          "tree_id": "8f7ce6d100fdcf0dc00bc612cdd420b7a6cbea56",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/45803ca0bdc198cc69fc3c368ea51137cb073b57"
+        },
+        "date": 1706609373252,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.090660685306368,
+            "unit": "us/iter",
+            "extra": "iterations: 43134\ncpu: 16.089991653915707 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.3060193384904,
+            "unit": "us/iter",
+            "extra": "iterations: 7498\ncpu: 93.80425446785807 us\nthreads: 1"
           }
         ]
       }
