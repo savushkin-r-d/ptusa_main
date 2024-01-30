@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706609374996,
+  "lastUpdate": 1706623227627,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19336,6 +19336,42 @@ window.BENCHMARK_DATA = {
             "value": 94.3060193384904,
             "unit": "us/iter",
             "extra": "iterations: 7498\ncpu: 93.80425446785807 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77f44eb6dc02b25f25cd822d29a2c99b303831b7",
+          "message": "Update zlib to version 1.3.1 (#643)",
+          "timestamp": "2024-01-30T16:58:24+03:00",
+          "tree_id": "c1f2677d181fa6e69aab0ed8aa3dbc86fdfa931b",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/77f44eb6dc02b25f25cd822d29a2c99b303831b7"
+        },
+        "date": 1706623226622,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.258726518427856,
+            "unit": "us/iter",
+            "extra": "iterations: 42544\ncpu: 16.258346652877023 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.28498315508185,
+            "unit": "us/iter",
+            "extra": "iterations: 7480\ncpu: 95.82368983957217 us\nthreads: 1"
           }
         ]
       }
