@@ -5476,7 +5476,8 @@ wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
     static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     set_par_name( static_cast<int>( CONSTANTS::P_DT ), 0, "P_DT" );
-    set_par_name( static_cast<int>( CONSTANTS::P_TARE_CMD_T ), 0, "P_TARE_CMD_T" );
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<int>( CONSTANTS::P_K ), 0, "P_K" );
     }
 
 void wages_pxc_axl::evaluate_io()
@@ -5489,6 +5490,7 @@ void wages_pxc_axl::evaluate_io()
     int weigth = 0;
     std::memcpy( &weigth, data, sizeof( weigth ) );
     w = 0.001f * static_cast<float>( weigth );
+    w *= get_par( static_cast<int>( CONSTANTS::P_K ) );
 
     switch ( static_cast<ERR_VALUES>( weigth ) )
         {
@@ -5524,45 +5526,21 @@ void wages_pxc_axl::evaluate_io()
             st = 0;
             break;
         }
-
-    auto ao_data = get_AO_write_data( idx );
-    auto w_time = static_cast< unsigned long >( 
-        get_par( static_cast<int>( CONSTANTS::P_TARE_CMD_T )  ) );
-    if ( tare_time > 0 && get_delta_millisec( tare_time ) > w_time )
-        {
-        tare_time = 0;
-        *ao_data &= ~( 1 << static_cast<int>( IO_CMDS::TARE_BIT_IDX ) );
-        }
-    if ( reset_tare_time > 0 && get_delta_millisec( reset_tare_time ) > w_time )
-        {
-        reset_tare_time = 0;
-        *ao_data &= ~( 1 << static_cast<int>( IO_CMDS::RESET_TARE_BIT_IDX ) );
-        }
     }
 
 void wages_pxc_axl::tare()
     {
-    auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
-    auto data = get_AO_write_data( idx );
-
-    *data |= ( 1 << static_cast<int>( IO_CMDS::TARE_BIT_IDX ) );
-
-    tare_time = get_millisec();
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, -w );
     }
 
 void wages_pxc_axl::reset_tare()
     {
-    auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
-    auto data = get_AO_write_data( idx );
-
-    *data |= ( 1 << static_cast<int>( IO_CMDS::RESET_TARE_BIT_IDX ) );
-
-    reset_tare_time = get_millisec();
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, 0 );
     }
 
 float wages_pxc_axl::get_value()
     {
-    return w;
+    return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
     }
 
 int wages_pxc_axl::get_state()
