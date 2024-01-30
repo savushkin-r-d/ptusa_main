@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706623269139,
+  "lastUpdate": 1706623290926,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19404,6 +19404,38 @@ window.BENCHMARK_DATA = {
             "value": 97.75855778414703,
             "unit": "us/iter",
             "extra": "iterations: 7329\ncpu: 97.21324873789058 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "name": "NogameNo-life",
+            "username": "NogameNo-life"
+          },
+          "id": "586d27bbb23dd88708c976f8bb12d0b5d006a16b",
+          "message": "[doc] Add class scheme",
+          "timestamp": "2023-02-16T14:09:14Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/640/commits/586d27bbb23dd88708c976f8bb12d0b5d006a16b"
+        },
+        "date": 1706623289922,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.012361315040533,
+            "unit": "us/iter",
+            "extra": "iterations: 43588\ncpu: 16.011347159768746 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.02762329134309,
+            "unit": "us/iter",
+            "extra": "iterations: 7462\ncpu: 94.54714553738944 us\nthreads: 1"
           }
         ]
       }
