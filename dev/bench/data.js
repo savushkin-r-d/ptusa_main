@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706623290926,
+  "lastUpdate": 1706693089692,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19436,6 +19436,42 @@ window.BENCHMARK_DATA = {
             "value": 95.02762329134309,
             "unit": "us/iter",
             "extra": "iterations: 7462\ncpu: 94.54714553738944 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yana.sitkowecz@yandex.ru",
+            "name": "Yana Sitkovets",
+            "username": "NogameNo-life"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "baaa1426c300d422bd55806d437d4dea8007b766",
+          "message": "[doc] Add class scheme (#640)",
+          "timestamp": "2024-01-31T12:23:08+03:00",
+          "tree_id": "46a17b81878b7b9748e6dd647ddb4e856ff816d7",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/baaa1426c300d422bd55806d437d4dea8007b766"
+        },
+        "date": 1706693088774,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.154242632179216,
+            "unit": "us/iter",
+            "extra": "iterations: 42991\ncpu: 16.153646111976926 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.57587556742402,
+            "unit": "us/iter",
+            "extra": "iterations: 7490\ncpu: 94.12184245660882 us\nthreads: 1"
           }
         ]
       }
