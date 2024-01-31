@@ -1742,7 +1742,6 @@ TEST( wages_pxc_axl, direct_set_value )
     wages_pxc_axl w1( "W1" );
     w1.init( 0, 0, 1, 1 );
     w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
-    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
     auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
     w1.set_par( par_idx, 0, 0 );
     par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
