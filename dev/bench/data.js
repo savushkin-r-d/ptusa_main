@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706695628162,
+  "lastUpdate": 1706701862840,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19632,6 +19632,40 @@ window.BENCHMARK_DATA = {
             "value": 95.4283266595028,
             "unit": "us/iter",
             "extra": "iterations: 7442\ncpu: 94.66787153990865 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "00895558a997030e95c0b5379c63083511e19768",
+          "message": "Add new control device DST_WT_PXC_AXL (#642)\n\n* Add new control device DST_WT_PXC_AXL\n\n* Implement weight reading from the module\n\n* Remove issues from Sonar\n\n* Fix work with process data\n\n* Add tare commands\n\n* Rework tare commands\n\n* Add tests\n\n* Fix code smell",
+          "timestamp": "2024-01-31T11:48:39Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/00895558a997030e95c0b5379c63083511e19768"
+        },
+        "date": 1706701861831,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.669827284402874,
+            "unit": "us/iter",
+            "extra": "iterations: 42046\ncpu: 16.669840175046378 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.46502086138027,
+            "unit": "us/iter",
+            "extra": "iterations: 7430\ncpu: 94.88034993270526 us\nthreads: 1"
           }
         ]
       }
