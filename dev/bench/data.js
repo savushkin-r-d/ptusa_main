@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706708015788,
+  "lastUpdate": 1706709254049,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19770,6 +19770,42 @@ window.BENCHMARK_DATA = {
             "value": 94.26651208053688,
             "unit": "us/iter",
             "extra": "iterations: 7450\ncpu: 93.75825503355705 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "artem.rudnitsky@gmail.com",
+            "name": "Artem Rudnitsky",
+            "username": "rartem"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2cde52668fe940212cadf838ab97e546a6054f02",
+          "message": "Работа опции \"не отключать возвратный насос\" на холодной дезинфекции (#646)\n\n* tank empty logic\r\n\r\n* Работа опции \"не останавливать возвратный насос\" на холодной дезинфекции",
+          "timestamp": "2024-01-31T16:52:21+03:00",
+          "tree_id": "be8d084dbc9c822cdb513894d5d8a07c5b0560e6",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/2cde52668fe940212cadf838ab97e546a6054f02"
+        },
+        "date": 1706709252827,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.137586368843266,
+            "unit": "us/iter",
+            "extra": "iterations: 43650\ncpu: 16.13592439862543 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 97.78135456445862,
+            "unit": "us/iter",
+            "extra": "iterations: 7175\ncpu: 97.2947456445993 us\nthreads: 1"
           }
         ]
       }
