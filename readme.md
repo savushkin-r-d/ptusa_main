@@ -117,7 +117,7 @@ You should open (in Visual Studio) root directory. This you get a CMake based pr
 
 + Qt Creator
 
-You could open file CMakeList.txt cloned repository in Qt.
+You could open file CMakeLists.txt cloned repository in Qt.
 
 Or clone repository in Qt:
     New -> Import Project -> Git Clone
