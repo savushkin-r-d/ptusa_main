@@ -2095,6 +2095,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (wages_eth*)new_device;
                     break;
 
+                case device::DST_WT_PXC_AXL:
+                    new_device = new wages_pxc_axl( dev_name );
+                    new_io_device = (wages_pxc_axl*)new_device;
+                    break;                    
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -3074,6 +3079,7 @@ void counter_iolink::evaluate_io()
         std::swap( buff[ 1 ], buff[ 2 ] );
         //Reverse byte order to get correct int16.
         std::swap( buff[ 4 ], buff[ 5 ] );
+        //Reverse byte order to get correct int16.
         std::swap( buff[ 6 ], buff[ 7 ] );
 
 #ifdef DEBUG_FQT_IOLINK
@@ -3931,7 +3937,9 @@ void valve_iolink_mix_proof::evaluate_io()
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 2 ], buff[ 3 ] );
 
 #ifdef DEBUG_IOLINK_MIXPROOF
@@ -4185,7 +4193,9 @@ void valve_iolink_shut_off_sorio::evaluate_io()
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 2 ], buff[ 3 ] );
 
 #ifdef DEBUG_IOLINK_
@@ -4380,7 +4390,9 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
     std::swap( buff[ 2 ], buff[ 3 ] );
 
 #ifdef DEBUG_IOLINK_
@@ -4879,6 +4891,7 @@ void analog_valve_iolink::evaluate_io()
     //Reverse byte order to get correct float.
     std::swap( buff[ 3 ], buff[ 0 ] );
     std::swap( buff[ 1 ], buff[ 2 ] );
+    //Reverse byte order to get correct float.
     std::swap( buff[ 7 ], buff[ 4 ] );
     std::swap( buff[ 5 ], buff[ 6 ] );
 
@@ -4927,7 +4940,8 @@ void analog_valve_iolink::direct_set_value( float new_value )
     out_info->position = new_value;
 
     char *buff = (char*) &out_info->position;
-    std::swap( buff[ 3 ], buff[ 0 ] );//Reverse byte order to get correct float.
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 3 ], buff[ 0 ] );
     std::swap( buff[ 1 ], buff[ 2 ] );
     }
 //-----------------------------------------------------------------------------
@@ -5456,7 +5470,102 @@ void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
     {
     weth->direct_set_tcp_buff( new_value, size, new_status );
     }
+//-----------------------------------------------------------------------------
+wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_PXC_AXL,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<int>( CONSTANTS::P_K ), 0, "P_K" );
+    }
 
+void wages_pxc_axl::evaluate_io()
+    {
+    auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
+    auto data = reinterpret_cast<char*>( get_AI_data( idx ) );
+    //Reverse byte order to get correct int32.
+    std::swap( data[ 0 ], data[ 2 ] );
+    std::swap( data[ 1 ], data[ 3 ] );
+    int weigth = 0;
+    std::memcpy( &weigth, data, sizeof( weigth ) );
+    w = 0.001f * static_cast<float>( weigth ) *
+        get_par( static_cast<int>( CONSTANTS::P_K ) );
+
+    switch ( static_cast<ERR_VALUES>( weigth ) )
+        {
+        case ERR_VALUES::ERR_OVERRANGE:
+            st = static_cast<int>( ERR_STATES::ERR_OVERRANGE );
+            break;
+
+        case ERR_VALUES::ERR_WIRE_BREAK:
+            st = static_cast<int>( ERR_STATES::ERR_WIRE_BREAK );
+            break;
+
+        case ERR_VALUES::ERR_SHORT_CIRCUIT:
+            st = static_cast<int>( ERR_STATES::ERR_SHORT_CIRCUIT );
+            break;
+
+        case ERR_VALUES::ERR_INVALID_VALUE:
+            st = static_cast<int>( ERR_STATES::ERR_INVALID_VALUE );
+            break;
+
+        case ERR_VALUES::ERR_FAULTY_SUPPLY_VOLTAGE:
+            st = static_cast<int>( ERR_STATES::ERR_FAULTY_SUPPLY_VOLTAGE );
+            break;
+
+        case ERR_VALUES::ERR_FAULTY_DEVICE:
+            st = static_cast<int>( ERR_STATES::ERR_FAULTY_DEVICE );
+            break;
+
+        case ERR_VALUES::ERR_UNDERRANGE:
+            st = static_cast<int>( ERR_STATES::ERR_UNDERRANGE );
+            break;
+
+        default:
+            st = 0;
+            break;
+        }
+    }
+
+void wages_pxc_axl::tare()
+    {
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, -w );
+    }
+
+void wages_pxc_axl::reset_tare()
+    {
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, 0 );
+    }
+
+float wages_pxc_axl::get_value()
+    {
+    return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
+    }
+
+int wages_pxc_axl::get_state()
+    {
+    return st;
+    }
+
+void wages_pxc_axl::direct_set_state( int new_state )
+    {
+    switch ( static_cast<CMDS>( new_state ) )
+        {
+        case CMDS::TARE:
+            tare();
+            break;
+
+        case CMDS::RESET_TARE:
+            reset_tare();
+            break;
+        }
+    }
+
+void wages_pxc_axl::direct_set_value( float new_value )
+    {
+    // Do nothing.
+    }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )

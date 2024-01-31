@@ -345,6 +345,16 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto W1 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
+
+    //device::DT_WT, DST_WT_PXC_AXL
+    name = std::string( "W2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WT, device::DST_WT_PXC_AXL, name.c_str(), "Test wages", "W" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto W2 = WT( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W2 ) );
     }
 
 TEST( device_manager, clear_io_devices )
@@ -1342,6 +1352,7 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
+
 TEST( wages_RS232, get_value_from_wages )
     {
     wages_RS232 w1( "W1" );
@@ -1459,6 +1470,7 @@ TEST( wages_RS232, evaluate_io )
     w1.evaluate_io();
     }
 
+
 TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
@@ -1567,6 +1579,177 @@ TEST( wages_eth, set_string_property )
     auto ip = "0.0.0.0";
     auto field = "NOT_IP";
     w1.set_string_property( field, ip );
+    }
+
+
+TEST( wages_pxc_axl, evaluate_io )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_OVERRANGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -1, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_WIRE_BREAK );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -2, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_SHORT_CIRCUIT );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -3, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_INVALID_VALUE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -4, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_FAULTY_SUPPLY_VOLTAGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -5, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_FAULTY_DEVICE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -6, w1.get_state() );
+
+    *reinterpret_cast<int_4*>( buff ) =
+        static_cast<int_4>( wages_pxc_axl::ERR_VALUES::ERR_UNDERRANGE );
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( -7, w1.get_state() );
+    }
+
+TEST( wages_pxc_axl, tare )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.tare();
+    EXPECT_EQ( .0f, w1.get_value() );
+    }
+
+TEST( wages_pxc_axl, reset_tare )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.tare();
+    EXPECT_EQ( .0f, w1.get_value() );
+
+    w1.reset_tare();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+    }
+
+TEST( wages_pxc_axl, direct_set_state )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.direct_set_state( 1 );   // CMDS::TARE
+    EXPECT_EQ( .0f, w1.get_value() );
+
+    w1.direct_set_state( 2 );   // CMDS::RESET_TARE
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.direct_set_state( 0 );   // No such command.
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+    }
+
+TEST( wages_pxc_axl, direct_set_value )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    w1.direct_set_value( VALUE );   // Do nothing.
+    EXPECT_EQ( 0, w1.get_value() );
     }
 
 
