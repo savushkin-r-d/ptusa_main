@@ -1708,6 +1708,51 @@ TEST( wages_pxc_axl, reset_tare )
     EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
     }
 
+TEST( wages_pxc_axl, direct_set_state )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    *reinterpret_cast<int_4*>( buff ) = VALUE;
+    //Reverse byte order to get correct int32.
+    std::swap( buff[ 0 ], buff[ 2 ] );
+    std::swap( buff[ 1 ], buff[ 3 ] );
+    w1.evaluate_io();
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.direct_set_state( 1 );   // CMDS::TARE
+    EXPECT_EQ( .0f, w1.get_value() );
+
+    w1.direct_set_state( 2 );   // CMDS::RESET_TARE
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+
+    w1.direct_set_state( 0 );   // No such command.
+    EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
+    }
+
+TEST( wages_pxc_axl, direct_set_value )
+    {
+    wages_pxc_axl w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( w1.AI_channels.int_read_values[ 0 ] );
+    auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
+    w1.set_par( par_idx, 0, 0 );
+    par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_K );
+    w1.set_par( par_idx, 0, 1 );
+
+    const int VALUE = 65900;
+    w1.direct_set_value( VALUE );   // Do nothing.
+    EXPECT_EQ( 0, w1.get_value() );
+    }
+
 
 TEST( temperature_e, save_device )
     {

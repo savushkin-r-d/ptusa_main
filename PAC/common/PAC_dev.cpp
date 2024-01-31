@@ -5489,8 +5489,8 @@ void wages_pxc_axl::evaluate_io()
     std::swap( data[ 1 ], data[ 3 ] );
     int weigth = 0;
     std::memcpy( &weigth, data, sizeof( weigth ) );
-    w = 0.001f * static_cast<float>( weigth );
-    w *= get_par( static_cast<int>( CONSTANTS::P_K ) );
+    w = 0.001f * static_cast<float>( weigth ) *
+        get_par( static_cast<int>( CONSTANTS::P_K ) );
 
     switch ( static_cast<ERR_VALUES>( weigth ) )
         {
@@ -5564,7 +5564,7 @@ void wages_pxc_axl::direct_set_state( int new_state )
 
 void wages_pxc_axl::direct_set_value( float new_value )
     {
-    // Temporarily do nothing.
+    // Do nothing.
     }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
