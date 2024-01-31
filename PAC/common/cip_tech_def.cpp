@@ -5335,7 +5335,7 @@ int cipline_tech_object::_Circ( int what )
 
     char dont_stop_pump = 0;
 
-    if (curstep == 66 && circ_water_no_pump_stop)
+    if ((curstep == 66 || curstep == 77) && circ_water_no_pump_stop)
         {
         dont_stop_pump = 1;
         }
