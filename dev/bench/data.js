@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706706887806,
+  "lastUpdate": 1706708015788,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -19738,6 +19738,38 @@ window.BENCHMARK_DATA = {
             "value": 97.21498890259093,
             "unit": "us/iter",
             "extra": "iterations: 7299\ncpu: 96.41457733936157 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "committer": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "id": "3dded3a19c1b5dcbb00c7c90d0369263fbeeac32",
+          "message": "Работа опции \"не отключать возвратный насос\" на холодной дезинфекции",
+          "timestamp": "2021-12-15T13:17:00Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/646/commits/3dded3a19c1b5dcbb00c7c90d0369263fbeeac32"
+        },
+        "date": 1706708014818,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.074056465131346,
+            "unit": "us/iter",
+            "extra": "iterations: 43549\ncpu: 16.07287652988588 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.26651208053688,
+            "unit": "us/iter",
+            "extra": "iterations: 7450\ncpu: 93.75825503355705 us\nthreads: 1"
           }
         ]
       }
