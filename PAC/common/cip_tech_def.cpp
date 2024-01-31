@@ -5335,7 +5335,7 @@ int cipline_tech_object::_Circ( int what )
 
     char dont_stop_pump = 0;
 
-    if (curstep == 66 && circ_water_no_pump_stop)
+    if ((curstep == 66 || curstep == 77) && circ_water_no_pump_stop)
         {
         dont_stop_pump = 1;
         }
@@ -7492,7 +7492,7 @@ saved_params<float, true>* cipline_tech_object::parpar = nullptr;
 bool cipline_tech_object::waterTankIsEmpty( )
     {
     auto ret = !LWL->is_active( );
-    if ( ret ) return ret;
+    if ( ret || dont_use_water_tank) return true;
     auto lowLevelExtreme = parpar[ 0 ][ P_MIN_BULK_FOR_WATER ];
     if ( lowLevelExtreme > 0 )
         {
