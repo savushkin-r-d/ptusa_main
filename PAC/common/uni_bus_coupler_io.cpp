@@ -3,6 +3,8 @@
 #include "uni_bus_coupler_io.h"
 #include "log.h"
 
+#include <fmt/core.h>
+
 #ifdef WIN_OS
 #include <winsock2.h>
 #include "w_tcp_cmctr.h"
@@ -24,9 +26,14 @@ int uni_io_manager::net_init( io_node* node )
 
     if ( sock < 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't create I/O node socket : %s.",
-            strerror( errno ) );
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't create I/O node socket : {}.",
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
         G_LOG->write_log( i_log::P_CRIT );
 
         return -4;
@@ -55,8 +62,8 @@ int uni_io_manager::net_init( io_node* node )
 #endif // WIN_OS        
         )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't setsockopt I/O node socket : %s.",
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't setsockopt I/O node socket : {}.",
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
@@ -84,9 +91,14 @@ int uni_io_manager::net_init( io_node* node )
     
     if ( err != 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't fcntl I/O node socket : %s.",
-            strerror( errno ) );
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't fcntl I/O node socket : {}.",
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
         G_LOG->write_log( i_log::P_CRIT );
 
 #ifdef WIN_OS
