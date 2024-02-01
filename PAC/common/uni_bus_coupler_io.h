@@ -13,20 +13,24 @@
 #ifndef WAGO_L_H
 #define WAGO_L_H
 
+#ifdef WIN_OS
+#include <winsock2.h>
+#else
 #include <sys/socket.h>
 #include <unistd.h>
 #include <errno.h>
+#endif // WIN_OS
 
 #include "bus_coupler_io.h"
 
 #include "dtime.h"
 #include "PAC_err.h"
-#include "l_tcp_cmctr.h"
+
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода для OC Linux.
 ///
 ///
-class io_manager_linux : public io_manager
+class uni_io_manager : public io_manager
     {
     protected:
         enum CONSTANTS
@@ -66,9 +70,9 @@ class io_manager_linux : public io_manager
         int write_outputs();
 
     public:
-        io_manager_linux();
+        uni_io_manager();
 
-        virtual ~io_manager_linux();
+        virtual ~uni_io_manager();
 
 		/// @brief Отключение от узла.
 		///

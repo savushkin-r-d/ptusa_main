@@ -11,11 +11,11 @@
 #include "dtime.h"
 
 #ifdef WIN_OS
-#include "bus_coupler_io_PC.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_PC
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
@@ -27,7 +27,7 @@
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #include "log.h"
@@ -941,11 +941,11 @@ io_manager* io_manager::get_instance()
     if ( instance.is_null() )
         {
 #ifdef WIN_OS
-        instance = new io_manager_PC();
+        instance = new uni_io_manager();
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-        instance = new io_manager_linux();
+        instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
@@ -957,7 +957,7 @@ io_manager* io_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-        instance = new io_manager_linux();
+        instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
         }
 

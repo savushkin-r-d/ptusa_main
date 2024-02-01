@@ -1,12 +1,21 @@
 #include <errno.h>
 
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #include "log.h"
 
+#ifdef WIN_OS
+#include <winsock2.h>
+#include "w_tcp_cmctr.h"
+
+const char* WSA_Last_Err_Decode();
+#else
+#include "l_tcp_cmctr.h"
 
 extern int errno;
+#endif // WIN_OS
+
 //-----------------------------------------------------------------------------
-int io_manager_linux::net_init( io_node* node )
+int uni_io_manager::net_init( io_node* node )
     {
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
@@ -31,21 +40,48 @@ int io_manager_linux::net_init( io_node* node )
     socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
     socket_remote_server.sin_port = htons( PORT );
 
+#ifdef WIN_OS
+    unsigned long timeout = io_node::C_CNT_TIMEOUT_US;
+    int vlen = sizeof( timeout );
+#else
     const int C_ON = 1;
+#endif // WIN_OS
 
-    if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
+    if (
+#ifdef WIN_OS
+        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, (char*)&timeout, vlen )
+#else
+        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
+#endif // WIN_OS        
+        )
         {
         sprintf( G_LOG->msg,
             "Network communication : can't setsockopt I/O node socket : %s.",
-            strerror( errno ) );
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
+#endif // WIN_OS
+
         return -5;
         }
 
     // Переводим в неблокирующий режим.
+#ifdef WIN_OS
+    u_long mode = 1;
+    err = ioctlsocket( sock, FIONBIO, &mode );
+#else
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
+#endif // WIN_OS    
+    
     if ( err != 0 )
         {
         sprintf( G_LOG->msg,
@@ -53,7 +89,11 @@ int io_manager_linux::net_init( io_node* node )
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
+#endif // WIN_OS
         return -5;
         }
 
@@ -95,17 +135,32 @@ int io_manager_linux::net_init( io_node* node )
                 }
             }
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
+#endif // WIN_OS
         return -5;
         }
 
     if ( FD_ISSET( sock, &rdevents ) )
         {
+#ifdef WIN_OS
+        int err_len = sizeof( int );
+#else
         socklen_t err_len;
+#endif // WIN_OS        
+
         int error;
 
         err_len = sizeof( error );
-        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
+        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
+#ifdef WIN_OS
+            (char*)&error,
+#else
+            &error,
+#endif // WIN_OS            
+            &err_len ) < 0 || error != 0 )
             {
             if ( node->is_set_err == false )
                 {
@@ -116,14 +171,18 @@ int io_manager_linux::net_init( io_node* node )
                 G_LOG->write_log( i_log::P_CRIT );
                 }
 
+#ifdef WIN_OS
+            closesocket( sock );
+#else
             close( sock );
+#endif // WIN_OS
             return -6;
             }
         }
 
     if ( G_DEBUG )
         {
-        printf( "io_manager_linux:net_init() : socket %d is successfully"
+        printf( "uni_io_manager:net_init() : socket %d is successfully"
             " connected to \"%s\":\"%s\":%d\n",
             sock, node->name, node->ip_address, PORT );
         }
@@ -134,7 +193,7 @@ int io_manager_linux::net_init( io_node* node )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int io_manager_linux::write_outputs()
+int uni_io_manager::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
 
@@ -162,7 +221,7 @@ int io_manager_linux::write_outputs()
                 buff[ 7 ] = 0x0F;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = (unsigned char)nd->DO_cnt >> 8;
+                buff[ 10 ] = (unsigned char)nd->DO_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DO_cnt & 0xFF;
                 buff[ 12 ] = bytes_cnt;
 
@@ -400,7 +459,7 @@ int io_manager_linux::write_outputs()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
+int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
     // Проверка связи с узлом I/O.
@@ -450,9 +509,13 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     node->delay_time = io_node::C_INITIAL_RECONNECT_DELAY;
 
     // Посылка данных.
+#ifdef WIN_OS
+    int res = send( node->sock, (char*) buff, bytes_to_send, 0 );
+#else
     int res = tcp_communicator_linux::sendall( node->sock, buff,
         bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat );
+#endif // WIN_OS
 
     if ( res < 0 )
         {
@@ -461,9 +524,14 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
         }
 
     // Получение данных.
+#ifdef WIN_OS
+    tcp_communicator_win::recvtimeout( node->sock, buff,bytes_to_receive, 0,
+        io_node::C_RCV_TIMEOUT_US );
+#else
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
         bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->recv_stat );
+#endif // WIN_OS
 
     if ( res <= 0 ) /* read error */
         {
@@ -475,7 +543,7 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     return 0;
     }
 
-int io_manager_linux::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
+int uni_io_manager::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
     {
     buff[0] = 's';
     buff[1] = 's';
@@ -505,7 +573,7 @@ int io_manager_linux::read_input_registers(io_node* node, unsigned int address, 
     return -1;
     }
 
-int io_manager_linux::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
+int uni_io_manager::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
     {
     unsigned int bytes_cnt = quantity * 2;
     buff[0] = 's';
@@ -536,7 +604,7 @@ int io_manager_linux::write_holding_registers(io_node* node, unsigned int addres
     }
 
 //-----------------------------------------------------------------------------
-int io_manager_linux::read_inputs()
+int uni_io_manager::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
@@ -563,7 +631,7 @@ int io_manager_linux::read_inputs()
                 buff[ 7 ] = 0x02;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 8;
+                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DI_cnt & 0xFF;
 
                 u_int bytes_cnt = nd->DI_cnt / 8 + ( nd->DI_cnt % 8 > 0 ? 1 : 0 );
@@ -683,7 +751,8 @@ int io_manager_linux::read_inputs()
                     registers_count = nd->AI_cnt;
                     }
 
-                int res, k, index_source = 0, analog_dest = 0, bit_dest = 0;
+                int res, k, index_source = 0;
+                unsigned int analog_dest = 0, bit_dest = 0;
 
                 do
                     {
@@ -765,23 +834,35 @@ int io_manager_linux::read_inputs()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void io_manager_linux::disconnect( io_node* node )
+void uni_io_manager::disconnect( io_node* node )
     {
     if ( node->sock )
         {
-        shutdown( node->sock, SHUT_RDWR );
+        shutdown( node->sock,
+#ifdef WIN_OS
+            SD_BOTH
+#else
+            SHUT_RDWR
+#endif // WIN_OS
+        );
+
+#ifdef WIN_OS
+        closesocket( node->sock );
+#else
         close( node->sock );
+#endif // WIN_OS
+        
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
-io_manager_linux::io_manager_linux()
+uni_io_manager::uni_io_manager()
     {
     writebuff = &buff[13];
     }
 //-----------------------------------------------------------------------------
-io_manager_linux::~io_manager_linux()
+uni_io_manager::~uni_io_manager()
     {
     }
 //-----------------------------------------------------------------------------

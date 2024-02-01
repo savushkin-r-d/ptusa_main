@@ -173,10 +173,8 @@ int main( int argc, const char *argv[] )
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( sleep_time_ms );
 
-#ifndef DEBUG_NO_IO_MODULES
         G_IO_MANAGER()->read_inputs();
         sleep_ms( sleep_time_ms );
-#endif // DEBUG_NO_IO_MODULES
 
         G_DEVICE_MANAGER()->evaluate_io();
 
@@ -185,10 +183,8 @@ int main( int argc, const char *argv[] )
         G_TECH_OBJECT_MNGR()->evaluate();
         sleep_ms( sleep_time_ms );
 
-#ifndef DEBUG_NO_IO_MODULES
         G_IO_MANAGER()->write_outputs();
         sleep_ms( sleep_time_ms );
-#endif // ifndef
 
         G_CMMCTR->evaluate();
 #ifdef OPCUA
