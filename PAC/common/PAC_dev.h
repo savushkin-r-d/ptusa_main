@@ -695,8 +695,8 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Получение количества включений утсройства.
 		int get_active_stat()
 		{
-                check_changes_state();
-		return inclusions_counter;
+                check_state_changes();
+		return state_changes_counter;
 		}
 
         /// @brief Установка дополнительных свойств, значения которых -
@@ -773,11 +773,11 @@ class device : public i_DO_AO_device, public par_device
         bool emulation = false;
         analog_emulator emulator;
         
-        int inclusions_counter = 0; ///< счетчик включений устройства
+        int state_changes_counter = 0; ///< счетчик включений устройства
         int prev_state = 0;
 
         /// @brief Проверка изменения состояния 
-        void check_changes_state();
+        void check_state_changes();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
