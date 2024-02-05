@@ -11,6 +11,7 @@ TEST( tcp_communicator, evaluate )
     linux_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
 #else
     win_tcp_client cl( "127.0.0.1", 10000, 1, 1 );
+    cl.InitLib();
 #endif
 
     cl.checkConnection();
