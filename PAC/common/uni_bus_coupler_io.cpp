@@ -129,7 +129,7 @@ int uni_io_manager::net_init( io_node* node ) const
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    connect( sock, ( struct sockaddr* ) & socket_remote_server,
+    connect( sock, reinterpret_cast<sockaddr*>( &socket_remote_server ),
         sizeof( socket_remote_server ) );
 
     fd_set rdevents;
