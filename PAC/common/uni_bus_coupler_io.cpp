@@ -74,7 +74,8 @@ int uni_io_manager::net_init( io_node* node ) const
 
     if (
 #ifdef WIN_OS
-        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, (char*)&timeout, vlen )
+        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR,
+            reinterpret_cast<char*>( &timeout ), vlen)
 #else
         setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
 #endif // WIN_OS        
@@ -128,7 +129,7 @@ int uni_io_manager::net_init( io_node* node ) const
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    err = connect( sock, ( struct sockaddr* ) & socket_remote_server,
+    connect( sock, ( struct sockaddr* ) & socket_remote_server,
         sizeof( socket_remote_server ) );
 
     fd_set rdevents;
@@ -184,7 +185,7 @@ int uni_io_manager::net_init( io_node* node ) const
         err_len = sizeof( error );
         if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
 #ifdef WIN_OS
-            (char*)&error,
+            reinterpret_cast<char*>( &error ),
 #else
             &error,
 #endif // WIN_OS            
@@ -537,7 +538,7 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
 
     // Посылка данных.
 #ifdef WIN_OS
-    int res = send( node->sock, (char*) buff, bytes_to_send, 0 );
+    int res = send( node->sock, reinterpret_cast<char*>( buff ), bytes_to_send, 0 );
 #else
     int res = tcp_communicator_linux::sendall( node->sock, buff,
         bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
@@ -780,7 +781,6 @@ int uni_io_manager::read_inputs()
                     registers_count = nd->AI_cnt;
                     }
 
-                int res = 0;
                 unsigned int analog_dest = 0;
                 unsigned int bit_dest = 0;
 
@@ -789,7 +789,7 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_BK_MIN
                     G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    res = read_input_registers(nd, start_read_address + start_register, registers_count);
+                    int res = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
                     printf("\n\r");
@@ -889,6 +889,7 @@ void uni_io_manager::disconnect( io_node* node )
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
     {
-    writebuff = &buff[13];
+    writebuff = &buff[ 13 ];
+    resultbuff = &buff[ 9 ];
     }
 //-----------------------------------------------------------------------------
