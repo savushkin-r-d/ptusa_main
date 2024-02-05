@@ -32,7 +32,7 @@
 ///
 class uni_io_manager : public io_manager
     {
-    protected:
+    private:
         enum CONSTANTS
             {
             MAX_MODBUS_REGISTERS_PER_QUERY = 123,
@@ -41,7 +41,7 @@ class uni_io_manager : public io_manager
             PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
             };
 
-        u_char buff[ BUFF_SIZE ];
+        u_char buff[ BUFF_SIZE ] = { 0 };
         u_char* resultbuff;
         u_char* writebuff;
 
@@ -51,7 +51,7 @@ class uni_io_manager : public io_manager
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int net_init( io_node *node );
+        int net_init( io_node* node ) const;
 
         /// @brief Обмен с узлом I/O.
         ///
@@ -61,23 +61,25 @@ class uni_io_manager : public io_manager
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int e_communicate( io_node *node, int bytes_to_send, int bytes_to_receive );
+        int e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive );
 
-        int read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
-        int write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
+        int read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
+        int write_holding_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
 
-        int read_inputs();
-        int write_outputs();
+        int read_inputs() override;
+        int write_outputs() override;
 
     public:
         uni_io_manager();
 
-        virtual ~uni_io_manager();
+        ~uni_io_manager() override = default;
 
-		/// @brief Отключение от узла.
-		///
-		/// @param node - узел, от которого отключаемся.
-		void disconnect(io_node *node) override;
+        /// @brief Отключение от узла.
+        ///
+        /// @param node - узел, от которого отключаемся.
+        void disconnect( io_node* node ) override;
     };
 //-----------------------------------------------------------------------------
 #endif // WAGO_L_H

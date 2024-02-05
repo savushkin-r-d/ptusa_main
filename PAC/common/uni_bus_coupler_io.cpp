@@ -17,12 +17,12 @@ extern int errno;
 #endif // WIN_OS
 
 //-----------------------------------------------------------------------------
-int uni_io_manager::net_init( io_node* node )
+int uni_io_manager::net_init( io_node* node ) const
     {
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
     int err;
-    int sock = err = socket( AF_INET, type, protocol ); // Cоздание сокета.
+    int sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
 
     if ( sock < 0 )
         {
@@ -121,7 +121,7 @@ int uni_io_manager::net_init( io_node* node )
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
-    err = select( sock + 1, 0, &rdevents, 0, &tv );
+    err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
 
     if ( err <= 0 )
         {
@@ -130,16 +130,14 @@ int uni_io_manager::net_init( io_node* node )
             if ( err < 0 )
                 {
                 fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    "Network device : s{}->\"{}\":\"{}\""
-                    " can't connect : {}.",
+                    R"(Network device : s{}->"{}":"{}" can't connect : {}.)",
                     sock, node->name, node->ip_address, strerror( errno ) );
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
                 fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    "Network device : s{}->\"{}\":\"{}\""
-                    " can't connect : timeout ({} ms).",
+                    R"(Network device : s{}->"{}":"{}" can't connect : timeout ({} ms).)",
                     sock, node->name, node->ip_address,
                     io_node::C_CNT_TIMEOUT_US / 1000 );
 
@@ -177,8 +175,7 @@ int uni_io_manager::net_init( io_node* node )
             if ( node->is_set_err == false )
                 {
                 fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    "Network device : s{}->\"{}\":\"{}\""
-                    " error during connect : {}.",
+                    R"(Network device : s{}->"{}":"{}" error during connect : {}.)",
                     sock, node->name, node->ip_address, strerror( errno ) );
                 G_LOG->write_log( i_log::P_CRIT );
                 }
@@ -639,7 +636,7 @@ int uni_io_manager::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x02;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
@@ -693,7 +690,7 @@ int uni_io_manager::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x04;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
@@ -765,8 +762,9 @@ int uni_io_manager::read_inputs()
                     registers_count = nd->AI_cnt;
                     }
 
-                int res, k, index_source = 0;
-                unsigned int analog_dest = 0, bit_dest = 0;
+                int res = 0;
+                unsigned int analog_dest = 0;
+                unsigned int bit_dest = 0;
 
                 do
                     {
@@ -788,7 +786,7 @@ int uni_io_manager::read_inputs()
                         {
                         if (res)
                             {
-                            for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
+                            for (int index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
                                 switch (nd->AI_types[analog_dest])
                                     {
@@ -808,9 +806,9 @@ int uni_io_manager::read_inputs()
 #endif // DEBUG_BK
                                 }
 
-                            for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
+                            for (int index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
                                 {
-                                for (k = 0; k < 8; k++)
+                                for (int k = 0; k < 8; k++)
                                     {
                                     nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
 #ifdef DEBUG_BK
@@ -874,9 +872,5 @@ void uni_io_manager::disconnect( io_node* node )
 uni_io_manager::uni_io_manager()
     {
     writebuff = &buff[13];
-    }
-//-----------------------------------------------------------------------------
-uni_io_manager::~uni_io_manager()
-    {
     }
 //-----------------------------------------------------------------------------
