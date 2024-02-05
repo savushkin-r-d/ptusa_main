@@ -27,14 +27,15 @@ TEST( uni_io_manager, read_inputs )
     auto res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
 
-    mngr.init( 1 );
+    mngr.init( 2 );
     mngr.add_node( 0,io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1000, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.add_node( 1, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
 
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
     }
-
 
 TEST( uni_io_manager, write_outputs )
     {
@@ -44,9 +45,11 @@ TEST( uni_io_manager, write_outputs )
     auto res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
 
-    mngr.init( 1 );
+    mngr.init( 2 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1000, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.add_node( 1, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
     res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
     }
