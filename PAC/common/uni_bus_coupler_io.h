@@ -45,14 +45,6 @@ class uni_io_manager : public io_manager
         u_char* resultbuff;
         u_char* writebuff;
 
-        /// @brief Инициализация соединения с узлом I/O.
-        ///
-        /// @param node - узел I/O, с которым осуществляется соединение.
-        ///
-        /// @return -   0 - ок.
-        /// @return - < 0 - ошибка.
-        int net_init( io_node* node ) const;
-
         /// @brief Обмен с узлом I/O.
         ///
         /// @param node             - узел I/O, с которым осуществляется обмен.
@@ -75,6 +67,14 @@ class uni_io_manager : public io_manager
         uni_io_manager();
 
         ~uni_io_manager() override = default;
+
+        /// @brief Инициализация соединения с узлом I/O.
+        ///
+        /// @param node - узел I/O, с которым осуществляется соединение.
+        ///
+        /// @return -   0 - ок.
+        /// @return - < 0 - ошибка.
+        int net_init( io_node* node ) const;
 
         /// @brief Отключение от узла.
         ///

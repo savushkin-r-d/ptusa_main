@@ -19,6 +19,24 @@ extern int errno;
 //-----------------------------------------------------------------------------
 int uni_io_manager::net_init( io_node* node ) const
     {
+    if ( node == nullptr )
+        {
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Не задан узел." );
+        return -1;
+        }
+
+#ifdef WIN_OS
+    WSAData tmp_WSA_data;
+    if ( WSAStartup( 0x202, &tmp_WSA_data ) )
+        {
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Ошибка инициализации сетевой библиотеки: {}.",
+            WSA_Last_Err_Decode() );
+        return -1;
+        }
+#endif // WIN_OS
+
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
     int err;
