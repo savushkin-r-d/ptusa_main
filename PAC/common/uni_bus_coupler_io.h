@@ -60,10 +60,10 @@ class uni_io_manager : public io_manager
         int write_holding_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
 
+    public:
         int read_inputs() override;
         int write_outputs() override;
 
-    public:
         uni_io_manager();
 
         ~uni_io_manager() override = default;
