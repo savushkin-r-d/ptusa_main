@@ -6,13 +6,8 @@
 #include <fmt/core.h>
 
 #ifdef WIN_OS
-#include <winsock2.h>
-#include "w_tcp_cmctr.h"
-
 const char* WSA_Last_Err_Decode();
 #else
-#include "l_tcp_cmctr.h"
-
 extern int errno;
 #endif // WIN_OS
 
@@ -23,7 +18,7 @@ int uni_io_manager::net_init( io_node* node ) const
         {
         fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "Не задан узел." );
-        return -1;
+        return 1;
         }
 
 #ifdef WIN_OS
@@ -33,7 +28,7 @@ int uni_io_manager::net_init( io_node* node ) const
         fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "Ошибка инициализации сетевой библиотеки: {}.",
             WSA_Last_Err_Decode() );
-        return -1;
+        return 2;
         }
 #endif // WIN_OS
 
@@ -54,7 +49,7 @@ int uni_io_manager::net_init( io_node* node ) const
         );
         G_LOG->write_log( i_log::P_CRIT );
 
-        return -4;
+        return 3;
         }
 
     // Адресация мастер-сокета.
@@ -97,7 +92,7 @@ int uni_io_manager::net_init( io_node* node ) const
         close( sock );
 #endif // WIN_OS
 
-        return -5;
+        return 4;
         }
 
     // Переводим в неблокирующий режим.
@@ -125,7 +120,7 @@ int uni_io_manager::net_init( io_node* node ) const
 #else
         close( sock );
 #endif // WIN_OS
-        return -5;
+        return 5;
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
@@ -169,20 +164,19 @@ int uni_io_manager::net_init( io_node* node ) const
 #else
         close( sock );
 #endif // WIN_OS
-        return -5;
+        return 6;
         }
 
     if ( FD_ISSET( sock, &rdevents ) )
         {
+        int error = 0;
 #ifdef WIN_OS
-        int err_len = sizeof( int );
+        int err_len;
 #else
         socklen_t err_len;
-#endif // WIN_OS        
-
-        int error;
-
+#endif // WIN_OS
         err_len = sizeof( error );
+
         if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
 #ifdef WIN_OS
             reinterpret_cast<char*>( &error ),
@@ -204,7 +198,7 @@ int uni_io_manager::net_init( io_node* node ) const
 #else
             close( sock );
 #endif // WIN_OS
-            return -6;
+            return 7;
             }
         }
 
