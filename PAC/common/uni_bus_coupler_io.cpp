@@ -16,8 +16,9 @@ int uni_io_manager::net_init( io_node* node ) const
     {
     if ( node == nullptr )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "Не задан узел." );
+        *res.out = '\0';
         return 1;
         }
 
@@ -25,9 +26,10 @@ int uni_io_manager::net_init( io_node* node ) const
     WSAData tmp_WSA_data;
     if ( WSAStartup( 0x202, &tmp_WSA_data ) )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Ошибка инициализации сетевой библиотеки: {}.",
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Ошибка инициализации сетевой библиотеки: {}",
             WSA_Last_Err_Decode() );
+        *res.out = '\0';
         return 2;
         }
 #endif // WIN_OS
@@ -39,14 +41,15 @@ int uni_io_manager::net_init( io_node* node ) const
 
     if ( sock < 0 )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't create I/O node socket : {}.",
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't create I/O node socket : {}",
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
             strerror( errno )
 #endif // WIN_OS
         );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
         return 3;
@@ -76,14 +79,15 @@ int uni_io_manager::net_init( io_node* node ) const
 #endif // WIN_OS        
         )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't setsockopt I/O node socket : {}.",
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't setsockopt I/O node socket : {}",
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
             strerror( errno )
 #endif // WIN_OS
         );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
 #ifdef WIN_OS
@@ -105,14 +109,15 @@ int uni_io_manager::net_init( io_node* node ) const
     
     if ( err != 0 )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't fcntl I/O node socket : {}.",
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't fcntl I/O node socket : {}",
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
             strerror( errno )
 #endif // WIN_OS
         );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
 #ifdef WIN_OS
@@ -143,18 +148,25 @@ int uni_io_manager::net_init( io_node* node ) const
             {
             if ( err < 0 )
                 {
-                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    R"(Network device : s{}->"{}":"{}" can't connect : {}.)",
-                    sock, node->name, node->ip_address, strerror( errno ) );
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"(Network device : s{}->"{}":"{}" can't connect : {})",
+                    sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                    WSA_Last_Err_Decode()
+#else
+                    strerror( errno )
+#endif // WIN_OS
+                );
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
-                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                     R"(Network device : s{}->"{}":"{}" can't connect : timeout ({} ms).)",
                     sock, node->name, node->ip_address,
                     io_node::C_CNT_TIMEOUT_US / 1000 );
-
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             }
@@ -187,9 +199,16 @@ int uni_io_manager::net_init( io_node* node ) const
             {
             if ( node->is_set_err == false )
                 {
-                fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    R"(Network device : s{}->"{}":"{}" error during connect : {}.)",
-                    sock, node->name, node->ip_address, strerror( errno ) );
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"(Network device : s{}->"{}":"{}" error during connect : {})",
+                    sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                    WSA_Last_Err_Decode()
+#else
+                    strerror( errno )
+#endif // WIN_OS
+                );
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
 
@@ -682,9 +701,10 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                             "Read DI:bus coupler returned error. Node {}.)",
                             nd->number );
+                        *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
 
                         if ( G_DEBUG )
@@ -738,9 +758,10 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE, 
+                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                             "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} ).",
                             nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
                         }
                     }
