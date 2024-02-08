@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707381981142,
+  "lastUpdate": 1707390766702,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -20414,6 +20414,38 @@ window.BENCHMARK_DATA = {
             "value": 95.77986918170629,
             "unit": "us/iter",
             "extra": "iterations: 7369\ncpu: 95.21329895508211 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "c736ee0b892cd4414bc6c833b6c91b9a8f830fa1",
+          "message": "Add work with bus couplers in Windows ",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/647/commits/c736ee0b892cd4414bc6c833b6c91b9a8f830fa1"
+        },
+        "date": 1707390765688,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.759402480351827,
+            "unit": "us/iter",
+            "extra": "iterations: 41607\ncpu: 16.758920373975535 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.95049390661109,
+            "unit": "us/iter",
+            "extra": "iterations: 7303\ncpu: 96.26756127618786 us\nthreads: 1"
           }
         ]
       }
