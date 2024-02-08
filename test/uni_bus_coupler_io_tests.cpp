@@ -143,9 +143,19 @@ TEST( uni_io_manager, net_init )
     subhook_free( getsockopt_0_hook );
     }
 
+class test_uni_io_manager : public uni_io_manager
+    {
+    public:
+        int e_communicate( io_node* node, int bytes_to_send,
+            int bytes_to_receive ) override
+            {
+            return 0;
+            }
+    };
+
 TEST( uni_io_manager, read_inputs )
     {
-    uni_io_manager mngr;
+    test_uni_io_manager mngr;
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
 
     // Should not fail - nodes count is 0.
@@ -186,7 +196,7 @@ TEST( uni_io_manager, write_outputs )
         2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 1 )->is_active = false;
     mngr.add_node( 2, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
-        3, "127.0.0.1", "A300", 1, 1, 1, 1, 1, 1 );
+        3, "127.0.0.1", "A300", 1, 1, 2, 4, 1, 1 );
     mngr.init_node_AO( 2, 0, 638, 0 );
     mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );

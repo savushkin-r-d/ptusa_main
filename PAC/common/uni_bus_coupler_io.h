@@ -56,7 +56,8 @@ class uni_io_manager : public io_manager
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive );
+        virtual int e_communicate( io_node* node, int bytes_to_send,
+            int bytes_to_receive );
 
         int read_input_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
