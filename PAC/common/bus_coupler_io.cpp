@@ -1259,32 +1259,24 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
 
     if ( AI_cnt )
         {
-        AI_offsets = new u_int[ AI_cnt ];
-        AI_types = new u_int[ AI_cnt ];
-
-        memset( AI, 0, sizeof( AI ) );
+        AI_offsets = new u_int[ AI_cnt ]{ 0 };
+        AI_types = new u_int[ AI_cnt ]{ 0 };
         }
     if ( AO_cnt )
         {
-        AO_types = new u_int[ AO_cnt ];
-        AO_offsets = new u_int[ AO_cnt ];
-
-        memset( AO, 0, sizeof( AO ) );
-        memset( AO_, 0, sizeof( AO ) );
+        AO_types = new u_int[ AO_cnt ]{ 0 };
+        AO_offsets = new u_int[ AO_cnt ]{ 0 };
         }
 
     if ( DI_cnt )
         {
-        DI = new u_char[ DI_cnt ];
-        memset( DI, 0, DI_cnt );
+        DI = new u_char[ DI_cnt ]{ 0 };
         }
 
     if ( DO_cnt )
         {
-        DO = new u_char[ DO_cnt ];
-        DO_ = new u_char[ DO_cnt ];
-        memset( DO, 0, DO_cnt );
-        memset( DO_, 0, DO_cnt );
+        DO = new u_char[ DO_cnt ]{ 0 };
+        DO_ = new u_char[ DO_cnt ]{ 0 };
         }
     }
 

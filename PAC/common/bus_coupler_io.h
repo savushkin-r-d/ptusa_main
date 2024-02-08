@@ -356,8 +356,8 @@ class io_manager
 
 			// Analog outputs ( AO ).
 			u_int AO_cnt;       			///< Amount of AO.
-			int_2 AO[C_ANALOG_BUF_SIZE];    ///< Current values.
-			int_2 AO_[C_ANALOG_BUF_SIZE];   ///< To write.
+            int_2 AO[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
+            int_2 AO_[ C_ANALOG_BUF_SIZE ] = { 0 };   ///< To write.
 			u_int *AO_offsets;  			///< Offsets in common data.
 			u_int *AO_types;    			///< Channels type.
 			u_int AO_size;
@@ -368,7 +368,7 @@ class io_manager
 
 			// Analog inputs ( AI ).
 			u_int AI_cnt;       			///< Amount of AI.
-			int_2 AI[C_ANALOG_BUF_SIZE];    ///< Current values.
+            int_2 AI[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
 			u_int *AI_offsets;  			///< Offsets in common data.
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
