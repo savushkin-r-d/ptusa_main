@@ -117,7 +117,7 @@ TEST( uni_io_manager, net_init )
     EXPECT_EQ( 7, mngr.net_init( &node ) );
     subhook_remove( getsockopt_1_hook );
     subhook_remove( select_1_hook );
-        
+
     subhook_install( select_1_hook );
     subhook_t getsockopt_0_hook = subhook_new( reinterpret_cast<void*>( getsockopt ),
         reinterpret_cast<void*>( success_getsockopt ), SUBHOOK_64BIT_OFFSET );
@@ -146,33 +146,10 @@ TEST( uni_io_manager, net_init )
 TEST( uni_io_manager, read_inputs )
     {
     uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
 
     // Should not fail - nodes count is 0.
     auto res = mngr.read_inputs();
-    EXPECT_EQ( res, 0 );
-
-    mngr.init( 4 );
-    mngr.add_node( 0,io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
-    mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
-    mngr.get_node( 1 )->is_active = false;
-    mngr.add_node( 2, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
-        3, "127.0.0.1", "A300", 1, 1, 1, 1, 1, 1 );
-    mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
-        4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
-    mngr.get_node( 3 )->is_active = false;
-
-    res = mngr.read_inputs();
-    EXPECT_EQ( res, 0 );
-    }
-
-TEST( uni_io_manager, write_outputs )
-    {
-    uni_io_manager mngr;
-
-    // Should not fail - nodes count is 0.
-    auto res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
 
     mngr.init( 4 );
@@ -186,6 +163,36 @@ TEST( uni_io_manager, write_outputs )
     mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
+
+    res = mngr.read_inputs();
+    EXPECT_EQ( res, 0 );
+
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( uni_io_manager, write_outputs )
+    {
+    uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+
+    // Should not fail - nodes count is 0.
+    auto res = mngr.write_outputs();
+    EXPECT_EQ( res, 0 );
+
+    mngr.init( 4 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
+    mngr.get_node( 1 )->is_active = false;
+    mngr.add_node( 2, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        3, "127.0.0.1", "A300", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 2, 0, 638, 0 );
+    mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
+    mngr.get_node( 3 )->is_active = false;
     res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
+
+    io_manager::replace_instance( prev_mngr );
     }

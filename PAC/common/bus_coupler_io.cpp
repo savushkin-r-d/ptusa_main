@@ -964,6 +964,16 @@ io_manager* io_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+/// @brief Получение единственного экземпляра класса.
+io_manager* io_manager::replace_instance( io_manager* new_inst )
+    {
+    io_manager* prev_inst = instance;
+    instance.replace_without_free( new_inst );
+    return prev_inst;
+    }
+#endif
+//-----------------------------------------------------------------------------
 u_char* io_manager::get_DI_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )

@@ -237,6 +237,11 @@ class io_manager
         /// @brief Получение единственного экземпляра класса.
         static io_manager* get_instance();
 
+#ifdef PTUSA_TEST
+        /// @brief Получение единственного экземпляра класса.
+        static io_manager* replace_instance( io_manager* );
+#endif
+
         /// @brief Получение области данных заданного канала дискретного входа.
         ///
         /// @param node_n - номер узла.
