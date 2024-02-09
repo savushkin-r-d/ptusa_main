@@ -191,7 +191,15 @@ TEST( uni_io_manager, write_outputs )
 
     mngr.init( 4 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 16, 16, 1, 1, 1, 1 );
+        1, "127.0.0.1", "A100", 6*16, 6*16, 6, 6, 1, 1 );
+    // Just for testing add set of modules.
+    mngr.init_node_AO( 0, 0, 1027843, 0 );
+    mngr.init_node_AO( 0, 1, 2688093, 1 );
+    mngr.init_node_AO( 0, 2, 2688527, 2 );
+    mngr.init_node_AO( 0, 3, 2688527, 3 );
+    mngr.init_node_AO( 0, 4, 2688666, 4 );
+    mngr.init_node_AO( 0, 5, 10, 5 );
+
     mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 1 )->is_active = false;

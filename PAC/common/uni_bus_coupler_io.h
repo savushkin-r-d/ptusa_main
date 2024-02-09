@@ -35,7 +35,11 @@
 ///
 class uni_io_manager : public io_manager
     {
+#ifdef PTUSA_TEST
+    public:
+#else
     private:
+#endif // PTUSA_TEST
         enum CONSTANTS
             {
             MAX_MODBUS_REGISTERS_PER_QUERY = 123,
@@ -47,10 +51,6 @@ class uni_io_manager : public io_manager
         u_char buff[ BUFF_SIZE ] = { 0 };
         u_char* resultbuff;
         u_char* writebuff;
-
-#ifdef PTUSA_TEST
-    public:
-#endif // PTUSA_TEST
 
         /// @brief Обмен с узлом I/O.
         ///
