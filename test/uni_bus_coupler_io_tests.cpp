@@ -191,7 +191,7 @@ TEST( uni_io_manager, write_outputs )
 
     mngr.init( 4 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+        1, "127.0.0.1", "A100", 16, 16, 1, 1, 1, 1 );
     mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 1 )->is_active = false;
