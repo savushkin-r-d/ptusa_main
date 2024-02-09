@@ -207,3 +207,13 @@ TEST( uni_io_manager, write_outputs )
 
     io_manager::replace_instance( prev_mngr );
     }
+
+TEST( uni_io_manager, e_communicate )
+    {
+    uni_io_manager mngr;
+    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1000, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+
+    auto res = mngr.e_communicate( &node, 1, 1 );
+    EXPECT_NE( res, 0 );
+    }
