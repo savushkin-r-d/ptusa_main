@@ -21,6 +21,8 @@
 #ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+
+bool G_NO_IO_MODULES = false; // По умолчанию обмен с модулями отключен.
 #endif
 
 int sleep_time_ms = 0;

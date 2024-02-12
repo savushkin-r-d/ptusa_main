@@ -44,8 +44,15 @@
 #include "rfid_reader.h"
 #endif
 
-int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+int G_DEBUG = 0;                //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0;              //Вывод в системный лог (syslog).
+
+// Обмен с модулями ввода/вывода.
+#if defined WIN_OS
+bool G_NO_IO_MODULES = false; // В Windows по умолчанию обмен отключен.
+#else
+bool G_NO_IO_MODULES = true;
+#endif
 
 int running = 1;
 static void stopHandler(int sig)
@@ -173,7 +180,7 @@ int main( int argc, const char *argv[] )
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( sleep_time_ms );
 
-        G_IO_MANAGER()->read_inputs();
+        if ( !G_NO_IO_MODULES ) G_IO_MANAGER()->read_inputs();
         sleep_ms( sleep_time_ms );
 
         G_DEVICE_MANAGER()->evaluate_io();
@@ -183,7 +190,7 @@ int main( int argc, const char *argv[] )
         G_TECH_OBJECT_MNGR()->evaluate();
         sleep_ms( sleep_time_ms );
 
-        G_IO_MANAGER()->write_outputs();
+        if ( !G_NO_IO_MODULES ) G_IO_MANAGER()->write_outputs();
         sleep_ms( sleep_time_ms );
 
         G_CMMCTR->evaluate();

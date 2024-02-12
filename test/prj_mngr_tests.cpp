@@ -5,6 +5,8 @@ extern const char* FILES[ FILE_CNT ];
 
 using namespace ::testing;
 
+extern bool G_NO_IO_MODULES;
+
 TEST( project_manager, lua_load_configuration )
     {
     auto L = lua_open();
@@ -77,4 +79,15 @@ object_manager =
 
 
     G_LUA_MANAGER->free_Lua();    
+    }
+
+TEST( project_manager, proc_main_params )
+    {
+    // Empty list.
+    EXPECT_EQ( 0, G_PROJECT_MANAGER->proc_main_params( 0, nullptr ) );
+
+    const char* argv[] = { "", "no_io_modules" };
+    G_NO_IO_MODULES = false;
+    EXPECT_EQ( 0, G_PROJECT_MANAGER->proc_main_params( 2, argv ) );
+    EXPECT_TRUE( G_NO_IO_MODULES );
     }

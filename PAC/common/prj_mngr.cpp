@@ -26,6 +26,8 @@
 #include "l_mem.h"
 #endif
 
+extern bool G_NO_IO_MODULES;
+
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char *argv[] )
@@ -93,6 +95,16 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         if ( strcmp( argv[ i ], "extra_paths" ) == 0 )
             {
             init_extra_paths( argv[ i + 1 ] );
+            }
+        }
+
+    // no_io_modules  - отключить обмен с модулями ввода/вывода.
+    for ( int i = 1; i < argc; i++ )
+        {
+        if ( strcmp( argv[ i ], "no_io_modules" ) == 0 )
+            {
+            G_NO_IO_MODULES = true;
+            printf( "G_NO_IO_MODULES ON.\n" );
             }
         }
 
