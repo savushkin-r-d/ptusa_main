@@ -15,6 +15,7 @@ $#include "bus_coupler_io.h"
 $#include "PID.h"
 $#include "g_device.h"
 $#include "g_errors.h"
+$#include "statistic_manager.h"
 
 $#include "modbus_client.h"
 
@@ -2028,3 +2029,20 @@ class i_log
 
 i_log* G_SYS_LOG();
 //-----------------------------------------------------------------------------
+/// @brief Класс-менеджер устройств со сбором статистики.
+/// 
+/// Реализует методы для работы с устройствами.
+class statistic_manager
+    {
+    public:
+        /// @brief Добавление нового устройства со сбором статистики 
+        /// (вызывается из Lua).
+        /// @param *dev - указатель на устройство, статистику которого следует
+        /// собирать.
+        /// @param device_resource - ресурс (запас прочности) устройства.
+        void add_new_dev_with_stat( device *dev, int device_resource );
+    };
+//-----------------------------------------------------------------------------
+/// @brief Глобальная точка доступа к менеджеру устройств со статистикой.
+/// @return Единственный экземпляр менеджера устройств статистики.
+statistic_manager* G_STATISTIC_MANAGER();
