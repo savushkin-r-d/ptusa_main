@@ -15,6 +15,7 @@ $#include "bus_coupler_io.h"
 $#include "PID.h"
 $#include "g_device.h"
 $#include "g_errors.h"
+$#include "statistic_manager.h"
 
 $#include "modbus_client.h"
 
@@ -2027,3 +2028,20 @@ class i_log
 
 i_log* G_SYS_LOG();
 //-----------------------------------------------------------------------------
+/// @brief Работа со статистикой.
+///
+/// Реализация сбора статистики устройств.
+class statistic_manager
+    {
+    public:
+        /// @brief Добавление нового устройства со статистикой.
+        ///
+        /// @param dev - устройство,
+        /// @param device_resource - ресурс устройства,
+        void add_dev( device *dev, int device_resource );
+    };
+//-----------------------------------------------------------------------------
+///@brief Получение менеджера статистики устройств.
+///
+///@return Менеджер статистики устройств.
+statistic_manager* G_STATISTIC_MANAGER();
