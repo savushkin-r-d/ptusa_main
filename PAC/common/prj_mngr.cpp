@@ -168,8 +168,10 @@ int project_manager::lua_load_configuration()
         }
 
     //-I/O modules data.
-    lua_manager::get_instance()->void_exec_lua_method( "system",
+    auto res = lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_io", "project_manager::lua_load_configuration()" );
+
+    if ( res ) return 1;
 
     if ( G_DEBUG )
         {
@@ -185,12 +187,17 @@ int project_manager::lua_load_configuration()
         }
 
     //-Devices data.
-    lua_manager::get_instance()->void_exec_lua_method( "system",
+    res = lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_devices", "project_manager::lua_load_configuration()" );
 
+    if ( res ) return 1;
+
     //-Devices properties.
-    lua_manager::get_instance()->void_exec_lua_method( "system",
+    res = lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_properties", "project_manager::lua_load_configuration()" );
+
+    if ( res ) return 1;
+
     if ( G_DEBUG )
         {
         printf( "Oк.\n");
@@ -202,7 +209,7 @@ int project_manager::lua_load_configuration()
         printf( "\n" );
         }
 
-    int res = lua_manager::get_instance()->int_exec_lua_method( "",
+    res = lua_manager::get_instance()->int_exec_lua_method( "",
         "init_tech_objects", 0, "project_manager::lua_load_configuration()" );
     if ( res )
         {
