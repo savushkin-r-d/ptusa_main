@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Mar 13 15:31:45 2024.
+** Generated automatically by tolua++-1.0.92 on Tue Feb 20 15:30:58 2024.
 */
 
 #ifndef __cplusplus
@@ -14687,9 +14687,9 @@ static int tolua_PAC_dev_G_SYS_LOG00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: add_dev of class  statistic_manager */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_statistic_manager_add_dev00
-static int tolua_PAC_dev_statistic_manager_add_dev00(lua_State* tolua_S)
+/* method: add_new_dev_with_stat of class  statistic_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00
+static int tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -14707,16 +14707,16 @@ static int tolua_PAC_dev_statistic_manager_add_dev00(lua_State* tolua_S)
   device* dev = ((device*)  tolua_tousertype(tolua_S,2,0));
   int device_resource = ((int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_dev'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_new_dev_with_stat'", NULL);
 #endif
   {
-   self->add_dev(dev,device_resource);
+   self->add_new_dev_with_stat(dev,device_resource);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'add_dev'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'add_new_dev_with_stat'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15579,7 +15579,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"G_SYS_LOG",tolua_PAC_dev_G_SYS_LOG00);
   tolua_cclass(tolua_S,"statistic_manager","statistic_manager","",NULL);
   tolua_beginmodule(tolua_S,"statistic_manager");
-   tolua_function(tolua_S,"add_dev",tolua_PAC_dev_statistic_manager_add_dev00);
+   tolua_function(tolua_S,"add_new_dev_with_stat",tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_STATISTIC_MANAGER",tolua_PAC_dev_G_STATISTIC_MANAGER00);
  tolua_endmodule(tolua_S);
