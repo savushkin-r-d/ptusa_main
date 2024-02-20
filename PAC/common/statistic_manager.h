@@ -1,47 +1,78 @@
 /// @file statistic_manager.h
-/// @brief Классы, которые реализуют функции сбора статистики устройств
-
+/// @brief Классы, которые реализуют функции сбора статистики устройств.
+/// 
+/// К собираемой статистике относятся следующие параметры:
+/// - Количества изменений состояния устройства, например, количество 
+/// срабатывания цилиндра. 
+/// - Время активной работы (state > 0), например, время работы мотора
+/// - Ресурс устройства (задается в описании устройства в поле stat)
+/// - Износ устройства, отношение количества срабатываний к ресурсу устройства
+/// 
+/// @author Озимок Ярослав Викторович 
 #ifndef STATISTIC_MANAGER_H
 #define STATISTIC_MANAGER_H
 #include "param_ex.h"
 #include "PAC_dev.h"
 
-
+//-----------------------------------------------------------------------------
+/// @brief Класс реализует устройство со сбором статистики.
+/// 
+/// В каждом цикле управляющей программы проверяется изменение состояния
+/// устройства. Реализованы методы для получения текущей статистики.
 class device_with_statistic
 	{
 	public:
-		device_with_statistic();
 		device_with_statistic( device* dev, int device_resource );
 
+		/// @brief Получение текущей статистики изменения состояния устройства.
+		/// @return Количество изменений состояния устройства.
 		int get_cur_device_stat();
+		/// @brief Получение общего времени работы устройства.
+		/// @return Общее время работы устройства.
 		int get_device_working_time();
+		/// @brief Получение текущего износа устройства.
+		/// @return Текущий износ устройства (%).
 		float get_cur_device_wear();
+		/// @brief Проверка изменения состояния устройства.
 		void check_state_changes();
 	private:
-		device *dev;
-		int prev_device_state = 0;
-		int cur_stat;
-		int working_time;
-		int device_resource;
-		saved_params_float par;
+		device *dev;               ///< Отслеживаемое устройство.
+		int prev_device_state = 0; ///< Предыдущее состояние устройства.
+		int cur_stat;              ///< Текущее количество изменений состояния.
+		int working_time;          ///< Общее время работы устройства.
+		int device_resource;       ///< Ресурс устройства.
+		saved_params_float par;    ///< Сохраняемые параметры статистики.
 	};
 
+//-----------------------------------------------------------------------------
+/// @brief Класс-менеджер устройств со сбором статистики.
+/// 
+/// Реализует методы для работы с устройствами.
 class statistic_manager
 	{
 	public:
 		statistic_manager();
 		~statistic_manager();
 		/// @brief Получение единственного экземпляра класса.
+		/// @return Единственный экземпляр менеджера устройств статистики.
 		static statistic_manager *get_instance();
-		void add_dev( device *dev, int device_resource );
+		/// @brief Добавление нового устройства со сбором статистики 
+		/// (вызывается из Lua).
+		/// @param *dev - указатель на устройство, статистику которого следует
+		/// собирать.
+		/// @param device_resource - ресурс (запас прочности) устройства.
+		void add_new_dev_with_stat( device *dev, int device_resource );
+		/// @brief Итерация сбора статистики. 
 		void evaluate();
-		statistic_manager *get_instance();
 
 	private:
 		/// @brief Единственный экземпляр класса.
 		static auto_smart_ptr < statistic_manager > instance;
-		std::vector<device_with_statistic *> devs_with_stat;
+		/// @brief Вектор устройств со сбором статистики
+		std::vector< device_with_statistic* > devs_with_stat;
 	};
-
+//-----------------------------------------------------------------------------
+/// @brief Глобальная точка доступа к менеджеру устройств со статистикой.
+/// @return Единственный экземпляр менеджера устройств статистики.
 statistic_manager* G_STATISTIC_MANAGER();
 #endif //STATISTIC_MANAGER_H
