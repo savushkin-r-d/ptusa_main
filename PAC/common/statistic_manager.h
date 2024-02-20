@@ -23,7 +23,7 @@ class device_with_statistic
 		int cur_stat;
 		int working_time;
 		int device_resource;
-		saved_params_float *par;
+		saved_params_float par;
 	};
 
 class statistic_manager

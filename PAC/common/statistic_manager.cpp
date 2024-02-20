@@ -3,15 +3,16 @@
 auto_smart_ptr < statistic_manager > statistic_manager::instance;
 
 device_with_statistic::device_with_statistic() :
-	par( new saved_params_float( 3 ) ), cur_stat(0), working_time(0), device_resource(0), dev(nullptr)
+	par( saved_params_float( 3 ) ), cur_stat(0), working_time(0), device_resource(0), dev(nullptr)
 {
 
 }
 
 device_with_statistic::device_with_statistic( device * dev, int device_resource )
-	: par( new saved_params_float( 3 ) ), cur_stat( 0 ), working_time( 0 ), device_resource( device_resource ), dev( dev )
+	: par( saved_params_float( 3 ) ), working_time(0), device_resource(device_resource), dev(dev)
 {
 	prev_device_state = dev->get_state();
+	cur_stat = par[ 1 ];
 }
 
 int device_with_statistic::get_cur_device_stat()
@@ -35,6 +36,7 @@ void device_with_statistic::check_state_changes()
 	{
 		prev_device_state = dev->get_state();
 		cur_stat++;
+		par.save(1, cur_stat);
 	}
 	else
 	{
