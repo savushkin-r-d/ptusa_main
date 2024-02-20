@@ -35,6 +35,7 @@ class statistic_manager
 		static statistic_manager *get_instance();
 		void add_dev( device *dev, int device_resource );
 		void evaluate();
+		statistic_manager *get_instance();
 
 	private:
 		/// @brief ≈динственный экземпл€р класса.
@@ -42,5 +43,5 @@ class statistic_manager
 		std::vector<device_with_statistic *> devs_with_stat;
 	};
 
-#define G_STATISTIC_MANAGER statistic_manager::get_instance()
+statistic_manager* G_STATISTIC_MANAGER();
 #endif //STATISTIC_MANAGER_H

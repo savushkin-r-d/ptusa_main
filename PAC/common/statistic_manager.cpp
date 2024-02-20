@@ -69,11 +69,17 @@ void statistic_manager::evaluate()
 	}
 }
 
-statistic_manager *statistic_manager::get_instance()
+statistic_manager* statistic_manager::get_instance()
 {
 	if( instance.is_null() )
 	{
 		instance = new statistic_manager();
 	}
+
 	return instance;
+}
+
+statistic_manager* G_STATISTIC_MANAGER()
+{
+	return statistic_manager::get_instance();
 }
