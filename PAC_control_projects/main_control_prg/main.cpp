@@ -23,6 +23,7 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 #include "version_info.h"
+#include "statistic_manager.h"
 
 #ifdef WIN_OS
 #include <shellapi.h>
@@ -173,6 +174,7 @@ int main( int argc, const char *argv[] )
 #endif // DEBUG_NO_IO_MODULES
 
         G_DEVICE_MANAGER()->evaluate_io();
+        G_STATISTIC_MANAGER()->evaluate();
 
         valve::evaluate();
 
