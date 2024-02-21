@@ -14902,6 +14902,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_WT_VIRT",device::DST_WT_VIRT);
    tolua_constant(tolua_S,"DST_WT_RS232",device::DST_WT_RS232);
    tolua_constant(tolua_S,"DST_WT_ETH",device::DST_WT_ETH);
+   tolua_constant(tolua_S,"DST_WT_PXC_AXL",device::DST_WT_PXC_AXL);
    tolua_constant(tolua_S,"DST_CAM_DO1_DI2",device::DST_CAM_DO1_DI2);
    tolua_constant(tolua_S,"DST_CAM_DO1_DI1",device::DST_CAM_DO1_DI1);
    tolua_constant(tolua_S,"DST_CAM_DO1_DI3",device::DST_CAM_DO1_DI3);

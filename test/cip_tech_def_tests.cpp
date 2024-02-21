@@ -335,6 +335,8 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     cip1.LWL = static_cast<i_DI_device *>(&waterTankLowLevel);
     cip1.LTW = static_cast<i_AI_device *>(&waterTankCurrentLevel);
 
+    cip1.dont_use_water_tank = 0;
+
     waterTankLowLevel.direct_set_state( 0 );
     waterTankCurrentLevel.set_value( 0 );
     cipline_tech_object::parpar[ 0 ][ P_MIN_BULK_FOR_WATER ] = 0;
@@ -346,6 +348,11 @@ TEST( cipline_tech_object, waterTankIsEmpty )
     cipline_tech_object::parpar[ 0 ][ P_MIN_BULK_FOR_WATER ] = 0;
     cipline_tech_object::parpar[ 0 ][ P_MIN_BULK_DELTA ] = 0;
     EXPECT_EQ( false, cip1.waterTankIsEmpty( ));
+    cip1.dont_use_water_tank = 1;
+    EXPECT_EQ( true, cip1.waterTankIsEmpty( ));
+    cip1.dont_use_water_tank = 0;
+
+    waterTankLowLevel.direct_set_state( 0 );
 
     waterTankLowLevel.direct_set_state( 1 );
     waterTankCurrentLevel.set_value( 9 );

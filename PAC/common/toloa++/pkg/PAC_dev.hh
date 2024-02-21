@@ -444,10 +444,11 @@ class device : public i_DO_AO_device
             DST_SB_VIRT, ///< Виртуальная кнопка (без привязки к модулям).
 
             //WT
-            DST_WT = 1,  ///< Весы.
-            DST_WT_VIRT, ///< Виртуальные весы.
-            DST_WT_RS232,///< Весы c RS232 интерфейсом.
-            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
+            DST_WT = 1,     ///< Весы.
+            DST_WT_VIRT,    ///< Виртуальные весы.
+            DST_WT_RS232,   ///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,     ///< Весы c интерфейсом ethernet.
+            DST_WT_PXC_AXL, ///< Весы c подключением к модулю Phoenix Axioline.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
