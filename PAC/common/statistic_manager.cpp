@@ -22,7 +22,7 @@ int device_with_statistic::get_device_working_time()
 //-----------------------------------------------------------------------------
 float device_with_statistic::get_cur_device_wear()
 	{
-	return ( float )( cur_stat / device_resource ) * 100;
+	return ( cur_stat / (float)device_resource ) * 100;
 	}
 //-----------------------------------------------------------------------------
 void device_with_statistic::check_state_changes()
@@ -39,9 +39,18 @@ void device_with_statistic::check_state_changes()
 		}
 	}
 //-----------------------------------------------------------------------------
+int device_with_statistic::save_common_stat( char *buff )
+	{
+	return fmt::format_to_n( buff, MAX_COPY_SIZE,
+		"{}={{STAT_CH={:d}, STAT_RS={:d}, STAT_WR={:f}, STAT_WT={:d}}},",
+		dev->get_name(), cur_stat, device_resource, get_cur_device_wear(),
+		working_time ).size;
+	}
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 statistic_manager::statistic_manager()
 	{
+	G_DEVICE_CMMCTR->add_device( this );
 	}
 //-----------------------------------------------------------------------------
 statistic_manager::~statistic_manager()
@@ -66,6 +75,25 @@ void statistic_manager::evaluate()
 		{
 		dev->check_state_changes();
 		}
+	}
+//-----------------------------------------------------------------------------
+int statistic_manager::save_device( char *buff )
+	{
+	int res = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
+		get_name_in_Lua(), get_name_in_Lua(), get_name_in_Lua() );
+
+	for( auto dev : devs_with_stat )
+		{
+		res += dev->save_common_stat( buff + res );
+		}
+
+	res += sprintf( buff + res, "\t}\n" );
+	return res;
+	}
+//-----------------------------------------------------------------------------
+const char *statistic_manager::get_name_in_Lua() const
+	{
+	return "Statistic_manager";
 	}
 //-----------------------------------------------------------------------------
 statistic_manager* statistic_manager::get_instance()

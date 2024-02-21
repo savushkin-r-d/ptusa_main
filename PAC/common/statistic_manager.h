@@ -13,6 +13,7 @@
 #define STATISTIC_MANAGER_H
 #include "param_ex.h"
 #include "PAC_dev.h"
+#include <fmt/core.h>
 
 //-----------------------------------------------------------------------------
 /// @brief Класс реализует устройство со сбором статистики.
@@ -35,6 +36,10 @@ class device_with_statistic
 		float get_cur_device_wear();
 		/// @brief Проверка изменения состояния устройства.
 		void check_state_changes();
+		/// @brief Запись в буфер текущей статистики устройва.
+		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
+		/// @return >= 0 - количество записанных байт.
+		int save_common_stat( char* buff );
 	private:
 		device *dev;               ///< Отслеживаемое устройство.
 		int prev_device_state = 0; ///< Предыдущее состояние устройства.
@@ -48,7 +53,7 @@ class device_with_statistic
 /// @brief Класс-менеджер устройств со сбором статистики.
 /// 
 /// Реализует методы для работы с устройствами.
-class statistic_manager
+class statistic_manager : public i_Lua_save_device
 	{
 	public:
 		statistic_manager();
@@ -64,6 +69,12 @@ class statistic_manager
 		void add_new_dev_with_stat( device *dev, int device_resource );
 		/// @brief Итерация сбора статистики. 
 		void evaluate();
+		/// @brief Сохранение статистики устройств в буфер.
+		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
+		/// @return >= 0 - количество записанных байт.
+		int save_device( char *buff ) override;
+		/// @brief Отладочная печать объекта в консоль.
+		const char *get_name_in_Lua() const override;
 
 	private:
 		/// @brief Единственный экземпляр класса.
