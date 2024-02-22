@@ -157,13 +157,13 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-if(NOT MINGW)
-    add_executable(main_perfomance_test ${common_src} ${win_src}
-           test/perfomance/main_perfomance_test.cpp           
-           PAC_control_projects/main_control_prg/version.rc)
-endif()
+    if(NOT MINGW)
+        add_executable(main_perfomance_test ${common_src} ${win_src}
+               test/perfomance/main_perfomance_test.cpp           
+               PAC_control_projects/main_control_prg/version.rc)
+    endif()
 
-    set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
@@ -180,6 +180,8 @@ endif()
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
 endif()
+
+add_dependencies(main_test lua)
 
 if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
@@ -326,19 +328,12 @@ endif()
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
-    target_link_libraries(libptusa_main wsock32 ws2_32)
+    target_link_libraries(libptusa_main liblua wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
     if(NOT MINGW)
         target_link_libraries(main_perfomance_test wsock32 ws2_32)
     endif()
     
-
-    if(DEFINED ENV{LUA_DEV})
-        target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
-    else()
-        target_link_libraries(libptusa_main liblua)
-    endif()
-
 elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
 endif()
@@ -377,8 +372,8 @@ enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
-    add_test(T1-PLCnext-Demo lua5.1
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+    add_test(T1-PLCnext-Demo lua
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
@@ -396,4 +391,3 @@ gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
-
