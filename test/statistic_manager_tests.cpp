@@ -33,7 +33,7 @@ TEST( device_with_statistic, save_common_stat )
 	device *dev = new DO_signal( "test_dev" );
 	auto dev_w_st = new device_with_statistic( dev, 10 );
 
-	char buf[ 100 ];
+	char buf[ MAX_COPY_SIZE ];
 
 	int res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
@@ -66,7 +66,7 @@ TEST( statistic_manager, manager_common_test )
 	G_STATISTIC_MANAGER()->add_new_dev_with_stat( dev1, 100 );
 	G_STATISTIC_MANAGER()->add_new_dev_with_stat( dev2, 10 );
 
-	char buf[ 300 ];
+	char buf[ MAX_COPY_SIZE ];
 
 	int res = G_STATISTIC_MANAGER()->save_device( buf );
 	buf[ res ] = '\0';

@@ -79,7 +79,7 @@ void statistic_manager::evaluate()
 //-----------------------------------------------------------------------------
 int statistic_manager::save_device( char *buff )
 	{
-	int res = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
+	int res = snprintf( buff, MAX_COPY_SIZE,"t.%s = t.%s or {}\nt.%s=\n\t{\n",
 		get_name_in_Lua(), get_name_in_Lua(), get_name_in_Lua() );
 
 	for( auto dev : devs_with_stat )
@@ -87,7 +87,7 @@ int statistic_manager::save_device( char *buff )
 		res += dev->save_common_stat( buff + res );
 		}
 
-	res += sprintf( buff + res, "\t}\n" );
+	res += snprintf( buff + res, MAX_COPY_SIZE, "\t}\n" );
 	return res;
 	}
 //-----------------------------------------------------------------------------
