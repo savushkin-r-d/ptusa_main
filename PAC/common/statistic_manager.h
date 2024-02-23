@@ -29,8 +29,11 @@ class device_with_statistic
 		/// @return Количество изменений состояния устройства.
 		int get_cur_device_stat();
 		/// @brief Получение общего времени работы устройства.
-		/// @return Общее время работы устройства.
-		int get_device_working_time();
+		/// @return Общее время работы устройства в секундах.
+		int get_device_working_time_sec();
+		/// @brief Получение общего времени работы устройства.
+		/// @return Общее время работы устройства в часах.
+		int get_device_working_time_h();
 		/// @brief Получение текущего износа устройства.
 		/// @return Текущий износ устройства (%).
 		float get_cur_device_wear();
