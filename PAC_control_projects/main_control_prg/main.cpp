@@ -7,12 +7,14 @@
 /// @c WIN_OS           - компиляция для ОС Windows.
 ///
 
-#include <fmt/core.h>
-
 #include <stdlib.h>
 #include <signal.h>
 #include "fcntl.h"
 #include <codecvt>
+
+#include <fmt/core.h>
+
+#include <cxxopts.hpp>
 
 #include "dtime.h"
 
@@ -86,17 +88,34 @@ int main( int argc, const char *argv[] )
     signal(SIGILL, stopHandler);
     signal(SIGSEGV, stopHandler);
 
-    if ( argc < 2 )
+
+    //-Работа с параметрами командной строки.
+    cxxopts::Options options( argv[ 0 ], "Main control program" );
+
+    options.add_options()
+        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help", "Print help info" );
+
+    options.positional_help( "<script>" );    
+    options.parse_positional( { "script" } );
+    options.show_positional_help();
+    auto result = options.parse( argc, argv );
+
+    if ( result.count( "help" ) || argc < 2 )
         {
-        fmt::print( "Usage: main script.plua\n" );
-        return EXIT_SUCCESS;
+        fmt::print( options.help() );
+        exit( EXIT_SUCCESS );
         }
+
 #ifdef PAC_WAGO_750_860
     log_mngr::lg = new l_log();
 #endif
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
     G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
+    //-Работа с параметрами командной строки.!->
 
     //-Инициализация Lua.
     int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
