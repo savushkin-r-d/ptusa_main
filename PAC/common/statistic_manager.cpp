@@ -3,11 +3,12 @@
 auto_smart_ptr < statistic_manager > statistic_manager::instance;
 //-----------------------------------------------------------------------------
 device_with_statistic::device_with_statistic( device * dev,
-	int device_resource ) : par( saved_params_float( 3 ) ), working_time( 0 ),
+	int device_resource ) : par( saved_params_float( 2 ) ), working_time( 0 ),
 	device_resource( device_resource ), dev( dev )
 	{
 	prev_device_state = dev->get_state();
-	cur_stat = par[ 1 ];
+	cur_stat = par[ device_with_statistic::CUR_STAT_INDEX ];
+	working_time = par[ device_with_statistic::WORKING_TIME_INDEX ];
 	}
 //-----------------------------------------------------------------------------
 int device_with_statistic::get_cur_device_stat()
