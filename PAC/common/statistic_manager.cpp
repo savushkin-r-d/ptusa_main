@@ -16,10 +16,15 @@ int device_with_statistic::get_cur_device_stat()
 	return cur_stat;
 	}
 //-----------------------------------------------------------------------------
-int device_with_statistic::get_device_working_time()
+int device_with_statistic::get_device_working_time_sec()
 	{
 	return working_time;
 	}
+//-----------------------------------------------------------------------------
+int device_with_statistic::get_device_working_time_h()
+{
+	return get_device_working_time_sec() / 3600;
+}
 //-----------------------------------------------------------------------------
 float device_with_statistic::get_cur_device_wear()
 	{
