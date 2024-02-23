@@ -1,4 +1,4 @@
-#include "statistic_manager.h"
+п»ї#include "statistic_manager.h"
 
 auto_smart_ptr < statistic_manager > statistic_manager::instance;
 //-----------------------------------------------------------------------------
@@ -35,16 +35,16 @@ void device_with_statistic::check_state_changes()
 	{
 	if( prev_device_state != dev->get_state() )
 		{
-		if( dev->get_state() < 1 ) // Устройство выключено или в ошибке
+		if( dev->get_state() < 1 ) // РЈСЃС‚СЂРѕР№СЃС‚РІРѕ РІС‹РєР»СЋС‡РµРЅРѕ РёР»Рё РІ РѕС€РёР±РєРµ
 			{
 			prev_device_state = dev->get_state();
 
 			working_time += get_sec() - start_time;
 			par.save( device_with_statistic::WORKING_TIME_INDEX, working_time );
 			}
-		else // Нормальная работа
+		else // РќРѕСЂРјР°Р»СЊРЅР°СЏ СЂР°Р±РѕС‚Р°
 			{
-			if( prev_device_state == 0 ) //Засечь время включения
+			if( prev_device_state == 0 ) //Р—Р°СЃРµС‡СЊ РІСЂРµРјСЏ РІРєР»СЋС‡РµРЅРёСЏ
 				{
 				start_time = get_sec();
 				}
