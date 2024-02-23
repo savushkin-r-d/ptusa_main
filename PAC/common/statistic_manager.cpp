@@ -62,7 +62,7 @@ int device_with_statistic::save_common_stat( char *buff )
 	return fmt::format_to_n( buff, MAX_COPY_SIZE,
 		"{}={{STAT_CH={:d}, STAT_RS={:d}, STAT_WR={:.2f}, STAT_WT={:d}}},",
 		dev->get_name(), cur_stat, device_resource, get_cur_device_wear(),
-		working_time ).size;
+		get_device_working_time_h() ).size;
 	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
