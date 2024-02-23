@@ -7,22 +7,51 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	device* dev = new DO_signal( "test_dev" );
 	auto dev_w_st = new device_with_statistic( dev, 10 );
 
+	/// Начальное состояние
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 0 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 0.0f, 0.01f );
-	EXPECT_EQ( dev_w_st->get_device_working_time(), 0 );
+	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 0 );
 
+	///Включение
 	dev->set_state( 1 );
 	dev_w_st->check_state_changes();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 10.0f, 0.01f );
-	//EXPECT_EQ( dev_w_st->get_device_working_time(), 0 );
+	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 0 );
 
+	sleep_ms( 1100 );
+	///Выключение 
 	dev->set_state( 0 );
+	dev_w_st->check_state_changes();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 10.0f, 0.01f );
-	//EXPECT_EQ( dev_w_st->get_device_working_time(), 0 );
+	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
+	
+	///Включение
+	dev->set_state( 1 );
+	dev_w_st->check_state_changes();
+
+	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 2 );
+	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 20.0f, 0.01f );
+	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
+
+	sleep_ms( 1100 );
+	///Переключение состояния 
+	dev->set_state( 2 );
+	dev_w_st->check_state_changes();
+
+	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 3 );
+	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 30.0f, 0.01f );
+	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
+	dev->set_state( 0 );
+	dev_w_st->check_state_changes();
+
+	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 3 );
+	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 30.0f, 0.01f );
+	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 1 );
+	EXPECT_EQ( dev_w_st->get_device_working_time_h(), 0 );
 
 	delete dev;
 	delete dev_w_st;
@@ -35,6 +64,7 @@ TEST( device_with_statistic, save_common_stat )
 
 	char buf[ MAX_COPY_SIZE ];
 
+	/// Начальное состояние
 	int res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
 	
@@ -42,7 +72,19 @@ TEST( device_with_statistic, save_common_stat )
 	std::string act_str = "test_dev={STAT_CH=0, STAT_RS=10, STAT_WR=0.00, STAT_WT=0},";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
+	///Включение
 	dev->set_state( 1 );
+	dev_w_st->check_state_changes();
+
+	res = dev_w_st->save_common_stat( buf );
+	buf[ res ] = '\0';
+
+	EXPECT_EQ( res, 59 );
+	act_str = "test_dev={STAT_CH=1, STAT_RS=10, STAT_WR=10.00, STAT_WT=0},";
+	EXPECT_STREQ( act_str.c_str(), buf );
+
+	///Выключение
+	dev->set_state( 0 );
 	dev_w_st->check_state_changes();
 
 	res = dev_w_st->save_common_stat( buf );
