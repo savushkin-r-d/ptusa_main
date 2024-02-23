@@ -44,6 +44,7 @@ class device_with_statistic
 	private:
 		device *dev;               ///< Отслеживаемое устройство.
 		int prev_device_state = 0; ///< Предыдущее состояние устройства.
+		int start_time        = 0; ///< Время начала работы (state > 0).
 		int cur_stat;              ///< Текущее количество изменений состояния.
 		int working_time;          ///< Общее время работы устройства.
 		int device_resource;       ///< Ресурс устройства.

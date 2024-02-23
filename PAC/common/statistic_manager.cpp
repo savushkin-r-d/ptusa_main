@@ -28,17 +28,29 @@ float device_with_statistic::get_cur_device_wear()
 //-----------------------------------------------------------------------------
 void device_with_statistic::check_state_changes()
 	{
-	if( prev_device_state != dev->get_state() && prev_device_state == 0 )
+	if( prev_device_state != dev->get_state() )
 		{
-		prev_device_state = dev->get_state();
-		cur_stat++;
-		par.save( 1, cur_stat );
-		}
-	else
-		{
-		prev_device_state = dev->get_state();
+		if( dev->get_state() < 1 ) // Устройство выключено или в ошибке
+			{
+			prev_device_state = dev->get_state();
+
+			working_time += get_sec() - start_time;
+			par.save( device_with_statistic::WORKING_TIME_INDEX, working_time );
+			}
+		else // Нормальная работа
+			{
+			if( prev_device_state == 0 ) //Засечь время включения
+				{
+				start_time = get_sec();
+				}
+			prev_device_state = dev->get_state();
+
+			cur_stat++;
+			par.save( device_with_statistic::CUR_STAT_INDEX, cur_stat );
+			}
 		}
 	}
+
 //-----------------------------------------------------------------------------
 int device_with_statistic::save_common_stat( char *buff )
 	{
