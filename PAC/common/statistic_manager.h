@@ -40,6 +40,7 @@ class device_with_statistic
 		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
 		/// @return >= 0 - количество записанных байт.
 		int save_common_stat( char* buff );
+
 	private:
 		device *dev;               ///< Отслеживаемое устройство.
 		int prev_device_state = 0; ///< Предыдущее состояние устройства.
@@ -47,6 +48,14 @@ class device_with_statistic
 		int working_time;          ///< Общее время работы устройства.
 		int device_resource;       ///< Ресурс устройства.
 		saved_params_float par;    ///< Сохраняемые параметры статистики.
+		enum STAT_INDEXES          ///< Индексы полей статистики в параметрах.
+		{
+			CUR_STAT_INDEX = 1,    ///< Индекс текущего количества изменений.
+			WORKING_TIME_INDEX,    ///< Индекс общего времени работы.
+		};
+
+
+
 	};
 
 //-----------------------------------------------------------------------------
