@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708944798945,
+  "lastUpdate": 1708947726839,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -21482,6 +21482,40 @@ window.BENCHMARK_DATA = {
             "value": 93.59187410642642,
             "unit": "us/iter",
             "extra": "iterations: 7554\ncpu: 93.12307386814933 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Yaroslav Ozimok",
+            "username": "YaroslavOzimok",
+            "email": "102078275+YaroslavOzimok@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "7be8fb13e83af93203ff8c240e97ef345920323c",
+          "message": "Добавлена директива препроцессора #ifdef для теста OPCUa (#653)",
+          "timestamp": "2024-02-26T11:40:09Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/7be8fb13e83af93203ff8c240e97ef345920323c"
+        },
+        "date": 1708947725684,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.701490756716323,
+            "unit": "us/iter",
+            "extra": "iterations: 44627\ncpu: 15.701122638761287 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 95.37925630084013,
+            "unit": "us/iter",
+            "extra": "iterations: 7499\ncpu: 94.84992665688758 us\nthreads: 1"
           }
         ]
       }
