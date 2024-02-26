@@ -213,6 +213,12 @@ SubHook is a simple hooking library for C and C++ that works on Windows, Linux a
 
 Detailed information can be obtained [here](https://github.com/Zeex/subhook).
 
+### cxxopts ###
+
+Cxxopts is a lightweight C++ option parser library, supporting the standard GNU style syntax for options.
+
+Detailed information can be obtained [here](https://github.com/jarro2783/cxxopts).
+
 ### googletest ###
 
 Google Test is a library for unit testing in C++. Google Test is built on the xUnit testing methodology, that is, when individual parts of the program (classes, functions, modules) are tested separately from each other, in isolation. The library itself is developed with the active use of testing, when adding any parts to the official version, in addition to the code of the changes themselves, it is necessary to write a set of tests to confirm their correctness.
