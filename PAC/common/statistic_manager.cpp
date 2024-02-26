@@ -59,10 +59,11 @@ void device_with_statistic::check_state_changes()
 //-----------------------------------------------------------------------------
 int device_with_statistic::save_common_stat( char *buff )
 	{
+	const char *nm = dev->get_name();
 	return fmt::format_to_n( buff, MAX_COPY_SIZE,
-		"{}={{STAT_CH={:d}, STAT_RS={:d}, STAT_WR={:.2f}, STAT_WT={:d}}},",
-		dev->get_name(), cur_stat, device_resource, get_cur_device_wear(),
-		get_device_working_time_h() ).size;
+		"t.{}.STAT_CH = {:d}\nt.{}.STAT_RS = {:d}\nt.{}.STAT_WR = {:.2f}\n" \
+		"t.{}.STAT_WT = {:d}\n", nm, cur_stat, nm, device_resource,
+		nm, get_cur_device_wear(), nm, get_device_working_time_h() ).size;
 	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -97,21 +98,18 @@ void statistic_manager::evaluate()
 //-----------------------------------------------------------------------------
 int statistic_manager::save_device( char *buff )
 	{
-	int res = snprintf( buff, MAX_COPY_SIZE,"t.%s = t.%s or {}\nt.%s=\n\t{\n",
-		get_name_in_Lua(), get_name_in_Lua(), get_name_in_Lua() );
-
+	int res = 0;
 	for( auto dev : devs_with_stat )
 		{
 		res += dev->save_common_stat( buff + res );
 		}
 
-	res += snprintf( buff + res, MAX_COPY_SIZE, "\t}\n" );
 	return res;
 	}
 //-----------------------------------------------------------------------------
 const char *statistic_manager::get_name_in_Lua() const
 	{
-	return "Statistic_manager";
+	return "statistic_manager";
 	}
 //-----------------------------------------------------------------------------
 statistic_manager* statistic_manager::get_instance()
