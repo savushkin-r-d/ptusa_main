@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708935932225,
+  "lastUpdate": 1708938214450,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -21416,6 +21416,40 @@ window.BENCHMARK_DATA = {
             "value": 95.21984253661057,
             "unit": "us/iter",
             "extra": "iterations: 7443\ncpu: 94.75453446191054 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "3cf8776b6561d35ac00d882ab0037d30f3fa7a68",
+          "message": "[config][github-actions] Update codecov action to v4 (#648)",
+          "timestamp": "2024-02-08T13:49:31Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/3cf8776b6561d35ac00d882ab0037d30f3fa7a68"
+        },
+        "date": 1708938213301,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.72613767514821,
+            "unit": "us/iter",
+            "extra": "iterations: 44605\ncpu: 15.725732541194935 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 96.02341797085602,
+            "unit": "us/iter",
+            "extra": "iterations: 7412\ncpu: 95.53725040474903 us\nthreads: 1"
           }
         ]
       }
