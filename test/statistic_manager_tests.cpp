@@ -1,4 +1,4 @@
-#include "statistic_manager_tests.h"
+ï»¿#include "statistic_manager_tests.h"
 
 using namespace ::testing;
 
@@ -7,12 +7,12 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	device* dev = new DO_signal( "test_dev" );
 	auto dev_w_st = new device_with_statistic( dev, 10 );
 
-	/// Íà÷àëüíîå ñîñòîÿíèå
+	/// ĞĞ°Ñ‡Ğ°Ğ»ÑŒĞ½Ğ¾Ğµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 0 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 0.0f, 0.01f );
 	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 0 );
 
-	///Âêëş÷åíèå
+	///Ğ’ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ
 	dev->set_state( 1 );
 	dev_w_st->check_state_changes();
 
@@ -21,7 +21,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 0 );
 
 	sleep_ms( 1100 );
-	///Âûêëş÷åíèå 
+	///Ğ’Ñ‹ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ 
 	dev->set_state( 0 );
 	dev_w_st->check_state_changes();
 
@@ -29,7 +29,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 10.0f, 0.01f );
 	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
 	
-	///Âêëş÷åíèå
+	///Ğ’ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ
 	dev->set_state( 1 );
 	dev_w_st->check_state_changes();
 
@@ -38,7 +38,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
 
 	sleep_ms( 1100 );
-	///Ïåğåêëş÷åíèå ñîñòîÿíèÿ 
+	///ĞŸĞµÑ€ĞµĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ñ 
 	dev->set_state( 2 );
 	dev_w_st->check_state_changes();
 
@@ -64,7 +64,7 @@ TEST( device_with_statistic, save_common_stat )
 
 	char buf[ MAX_COPY_SIZE ];
 
-	/// Íà÷àëüíîå ñîñòîÿíèå
+	/// ĞĞ°Ñ‡Ğ°Ğ»ÑŒĞ½Ğ¾Ğµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ
 	int res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
 	
@@ -73,7 +73,7 @@ TEST( device_with_statistic, save_common_stat )
 		"t.test_dev.STAT_WR = 0.00\nt.test_dev.STAT_WT = 0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
-	///Âêëş÷åíèå
+	///Ğ’ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ
 	dev->set_state( 1 );
 	dev_w_st->check_state_changes();
 
@@ -85,7 +85,7 @@ TEST( device_with_statistic, save_common_stat )
 		"t.test_dev.STAT_WR = 10.00\nt.test_dev.STAT_WT = 0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
-	///Âûêëş÷åíèå
+	///Ğ’Ñ‹ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğµ
 	dev->set_state( 0 );
 	dev_w_st->check_state_changes();
 
