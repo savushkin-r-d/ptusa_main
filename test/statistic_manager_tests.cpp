@@ -57,6 +57,29 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	delete dev_w_st;
 	}
 
+TEST( device_with_statistic, set_cmd )
+	{
+	device *dev = new DO_signal( "test_dev" );
+	auto dev_w_st = new device_with_statistic( dev, 10 );
+
+	EXPECT_EQ( dev_w_st->get_name(), dev->get_name() );
+
+	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 0 );
+	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 0.0f, 0.01f );
+	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 0);
+
+	EXPECT_EQ( dev_w_st->set_cmd( "prop", 0, "prop" ), 0 );
+
+	EXPECT_EQ( dev_w_st->set_cmd( "SC", 0, 1 ), 0 );
+	EXPECT_EQ( dev_w_st->set_cmd( "RS", 0, 2 ), 0 );
+	EXPECT_EQ( dev_w_st->set_cmd( "WT", 0, 1 ), 0 );
+	EXPECT_EQ( dev_w_st->set_cmd( "WR", 0, 1.0f ), 1 );
+
+	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
+	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 50.0f, 0.01f );
+	EXPECT_EQ( dev_w_st->get_device_working_time_sec(), 3600 );
+	}
+
 TEST( device_with_statistic, save_common_stat )
 	{
 	device *dev = new DO_signal( "test_dev" );
