@@ -20,7 +20,7 @@
 /// 
 /// В каждом цикле управляющей программы проверяется изменение состояния
 /// устройства. Реализованы методы для получения текущей статистики.
-class device_with_statistic
+class device_with_statistic : public i_cmd_device
 	{
 	public:
 		device_with_statistic( device* dev, int device_resource );
@@ -46,6 +46,20 @@ class device_with_statistic
 		/// @brief Получение имени устройства, у которого собирается статистика.
 		/// @return Имя устройства.
 		const char *get_name();
+		/// @brief Выполнение числовой команды.
+		/// @param prop [ in ] - имя свойства.
+		/// @param idx [ in ]  - индекс для свойства.
+		/// @param val [ in ]  - значение.
+		/// @return 0 - ок.
+		/// @return 1 - ошибка.
+		int set_cmd( const char *prop, u_int idx, double val ) override;
+		/// @brief Выполнение строковой команды.
+		/// @param prop [ in ] - имя свойства.
+		/// @param idx [ in ]  - индекс для свойства.
+		/// @param val [ in ]  - значение.
+		/// @return 0 - ок.
+		/// @return 1 - Ошибка.
+		int set_cmd( const char *prop, u_int idx, char *val ) override;
 
 	private:
 		device *dev;               ///< Отслеживаемое устройство.
@@ -57,7 +71,7 @@ class device_with_statistic
 		saved_params_float par;    ///< Сохраняемые параметры статистики.
 		enum STAT_INDEXES          ///< Индексы полей статистики в параметрах.
 			{
-			CUR_STAT_INDEX = 1,    ///< Индекс текущего количества изменений.
+			STATE_CHANGE_INDEX = 1,///< Индекс текущего количества изменений.
 			WORKING_TIME_INDEX,    ///< Индекс общего времени работы.
 			};
 	};

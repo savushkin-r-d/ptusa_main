@@ -7,7 +7,7 @@ device_with_statistic::device_with_statistic( device * dev,
 	device_resource( device_resource ), dev( dev )
 	{
 	prev_device_state = dev->get_state();
-	state_change_count = par[ device_with_statistic::CUR_STAT_INDEX ];
+	state_change_count = par[ device_with_statistic::STATE_CHANGE_INDEX ];
 	working_time = par[ device_with_statistic::WORKING_TIME_INDEX ];
 	}
 //-----------------------------------------------------------------------------
@@ -51,7 +51,8 @@ void device_with_statistic::check_state_changes()
 			prev_device_state = dev->get_state();
 
 			state_change_count++;
-			par.save( device_with_statistic::CUR_STAT_INDEX, state_change_count );
+			par.save( device_with_statistic::STATE_CHANGE_INDEX,
+				state_change_count );
 			}
 		}
 	}
@@ -73,6 +74,37 @@ int device_with_statistic::save_common_stat( char *buff)
 const char *device_with_statistic::get_name()
 	{
 	return dev->get_name();
+	}
+//-----------------------------------------------------------------------------
+int device_with_statistic::set_cmd( const char *prop, u_int idx, double val )
+	{
+	std::string cmd = std::string( prop );
+	if( cmd == "SC" )
+		{
+		state_change_count = (int)val;
+		par.save( device_with_statistic::STATE_CHANGE_INDEX,
+			state_change_count );
+		}
+	else if( cmd == "RS" )
+		{
+		device_resource = (int)val;
+		}
+	else if( cmd == "WT" )
+		{
+		working_time = (int)val * 3600;
+		par.save( device_with_statistic::WORKING_TIME_INDEX, working_time );
+		}
+	else
+		{
+		return 1;
+		}
+
+	return 0;
+	}
+//-----------------------------------------------------------------------------
+int device_with_statistic::set_cmd( const char *prop, u_int idx, char *val )
+	{
+	return 0;
 	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
