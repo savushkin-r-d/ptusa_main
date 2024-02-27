@@ -7,13 +7,13 @@ device_with_statistic::device_with_statistic( device * dev,
 	device_resource( device_resource ), dev( dev )
 	{
 	prev_device_state = dev->get_state();
-	cur_stat = par[ device_with_statistic::CUR_STAT_INDEX ];
+	state_change_count = par[ device_with_statistic::CUR_STAT_INDEX ];
 	working_time = par[ device_with_statistic::WORKING_TIME_INDEX ];
 	}
 //-----------------------------------------------------------------------------
 int device_with_statistic::get_cur_device_stat()
 	{
-	return cur_stat;
+	return state_change_count;
 	}
 //-----------------------------------------------------------------------------
 int device_with_statistic::get_device_working_time_sec()
@@ -22,13 +22,13 @@ int device_with_statistic::get_device_working_time_sec()
 	}
 //-----------------------------------------------------------------------------
 int device_with_statistic::get_device_working_time_h()
-{
+	{
 	return get_device_working_time_sec() / 3600;
-}
+	}
 //-----------------------------------------------------------------------------
 float device_with_statistic::get_cur_device_wear()
 	{
-	return ( cur_stat / (float)device_resource ) * 100;
+	return ( state_change_count / (float)device_resource ) * 100;
 	}
 //-----------------------------------------------------------------------------
 void device_with_statistic::check_state_changes()
@@ -50,20 +50,29 @@ void device_with_statistic::check_state_changes()
 				}
 			prev_device_state = dev->get_state();
 
-			cur_stat++;
-			par.save( device_with_statistic::CUR_STAT_INDEX, cur_stat );
+			state_change_count++;
+			par.save( device_with_statistic::CUR_STAT_INDEX, state_change_count );
 			}
 		}
 	}
 
 //-----------------------------------------------------------------------------
-int device_with_statistic::save_common_stat( char *buff )
+int device_with_statistic::save_common_stat( char *buff)
 	{
 	const char *nm = dev->get_name();
 	return fmt::format_to_n( buff, MAX_COPY_SIZE,
-		"t.{}.STAT_CH = {:d}\nt.{}.STAT_RS = {:d}\nt.{}.STAT_WR = {:.2f}\n" \
-		"t.{}.STAT_WT = {:d}\n", nm, cur_stat, nm, device_resource,
+		"t.{}_STAT={{}}\n" \
+		"t.{}_STAT.SC={:d}\n" \
+		"t.{}_STAT.RS={:d}\n" \
+		"t.{}_STAT.WR={:.2f}\n" \
+		"t.{}_STAT.WT={:d}\n",
+		nm, nm, state_change_count, nm, device_resource,
 		nm, get_cur_device_wear(), nm, get_device_working_time_h() ).size;
+	}
+//-----------------------------------------------------------------------------
+const char *device_with_statistic::get_name()
+	{
+	return dev->get_name();
 	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -81,11 +90,12 @@ statistic_manager::~statistic_manager()
 		}
 	}
 //-----------------------------------------------------------------------------
-void statistic_manager::add_new_dev_with_stat( device *dev,
+device_with_statistic* statistic_manager::add_new_dev_with_stat( device *dev,
 	int device_resource )
 	{
 	auto new_dev = new device_with_statistic( dev, device_resource );
 	devs_with_stat.push_back( new_dev );
+	return new_dev;
 	}
 //-----------------------------------------------------------------------------
 void statistic_manager::evaluate()
@@ -103,7 +113,6 @@ int statistic_manager::save_device( char *buff )
 		{
 		res += dev->save_common_stat( buff + res );
 		}
-
 	return res;
 	}
 //-----------------------------------------------------------------------------

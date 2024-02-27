@@ -68,9 +68,11 @@ TEST( device_with_statistic, save_common_stat )
 	int res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
 	
-	EXPECT_EQ( res, 96 );
-	std::string act_str = "t.test_dev.STAT_CH = 0\nt.test_dev.STAT_RS = 10\n" \
-		"t.test_dev.STAT_WR = 0.00\nt.test_dev.STAT_WT = 0\n";
+	EXPECT_EQ( res, 107 );
+	std::string act_str = 
+		"t.test_dev_STAT={}\n"\
+		"t.test_dev_STAT.SC=0\nt.test_dev_STAT.RS=10\n" \
+		"t.test_dev_STAT.WR=0.00\nt.test_dev_STAT.WT=0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
 	///Включение
@@ -80,9 +82,11 @@ TEST( device_with_statistic, save_common_stat )
 	res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
 
-	EXPECT_EQ( res, 97 );
-	act_str = "t.test_dev.STAT_CH = 1\nt.test_dev.STAT_RS = 10\n" \
-		"t.test_dev.STAT_WR = 10.00\nt.test_dev.STAT_WT = 0\n";
+	EXPECT_EQ( res, 108 );
+	act_str =
+		"t.test_dev_STAT={}\n" \
+		"t.test_dev_STAT.SC=1\nt.test_dev_STAT.RS=10\n" \
+		"t.test_dev_STAT.WR=10.00\nt.test_dev_STAT.WT=0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
 	///Выключение
@@ -92,9 +96,11 @@ TEST( device_with_statistic, save_common_stat )
 	res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
 
-	EXPECT_EQ( res, 97 );
-	act_str = "t.test_dev.STAT_CH = 1\nt.test_dev.STAT_RS = 10\n" \
-		"t.test_dev.STAT_WR = 10.00\nt.test_dev.STAT_WT = 0\n";
+	EXPECT_EQ( res, 108 );
+	act_str =
+		"t.test_dev_STAT={}\n" \
+		"t.test_dev_STAT.SC=1\nt.test_dev_STAT.RS=10\n" \
+		"t.test_dev_STAT.WR=10.00\nt.test_dev_STAT.WT=0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
 	delete dev;
@@ -116,13 +122,15 @@ TEST( statistic_manager, manager_common_test )
 	int res = G_STATISTIC_MANAGER()->save_device( buf );
 	buf[ res ] = '\0';
 
-	EXPECT_EQ( res, 216 );
+	EXPECT_EQ( res, 244 );
 
 	std::string act_str =
-		"t.test_DO_dev.STAT_CH = 0\nt.test_DO_dev.STAT_RS = 10\n" \
-		"t.test_DO_dev.STAT_WR = 0.00\nt.test_DO_dev.STAT_WT = 0\n" \
-		"t.test_DI_dev.STAT_CH = 0\nt.test_DI_dev.STAT_RS = 10\n" \
-		"t.test_DI_dev.STAT_WR = 0.00\nt.test_DI_dev.STAT_WT = 0\n";
+		"t.test_DO_dev_STAT={}\n" \
+		"t.test_DO_dev_STAT.SC=0\nt.test_DO_dev_STAT.RS=10\n" \
+		"t.test_DO_dev_STAT.WR=0.00\nt.test_DO_dev_STAT.WT=0\n" \
+		"t.test_DI_dev_STAT={}\n" \
+		"t.test_DI_dev_STAT.SC=0\nt.test_DI_dev_STAT.RS=10\n" \
+		"t.test_DI_dev_STAT.WR=0.00\nt.test_DI_dev_STAT.WT=0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
 	dev1->set_state( 1 );
@@ -131,13 +139,15 @@ TEST( statistic_manager, manager_common_test )
 	res = G_STATISTIC_MANAGER()->save_device( buf );
 	buf[ res ] = '\0';
 
-	EXPECT_EQ( res, 217 );
+	EXPECT_EQ( res, 245 );
 
 	act_str =
-		"t.test_DO_dev.STAT_CH = 1\nt.test_DO_dev.STAT_RS = 10\n" \
-		"t.test_DO_dev.STAT_WR = 10.00\nt.test_DO_dev.STAT_WT = 0\n" \
-		"t.test_DI_dev.STAT_CH = 0\nt.test_DI_dev.STAT_RS = 10\n" \
-		"t.test_DI_dev.STAT_WR = 0.00\nt.test_DI_dev.STAT_WT = 0\n";
+		"t.test_DO_dev_STAT={}\n" \
+		"t.test_DO_dev_STAT.SC=1\nt.test_DO_dev_STAT.RS=10\n" \
+		"t.test_DO_dev_STAT.WR=10.00\nt.test_DO_dev_STAT.WT=0\n" \
+		"t.test_DI_dev_STAT={}\n" \
+		"t.test_DI_dev_STAT.SC=0\nt.test_DI_dev_STAT.RS=10\n" \
+		"t.test_DI_dev_STAT.WR=0.00\nt.test_DI_dev_STAT.WT=0\n";
 	EXPECT_STREQ( act_str.c_str(), buf );
 
 	EXPECT_STREQ( G_STATISTIC_MANAGER()->get_name_in_Lua(), "statistic_manager" );
