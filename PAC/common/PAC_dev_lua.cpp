@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Feb 20 15:30:58 2024.
+** Generated automatically by tolua++-1.0.92 on Mon Feb 26 15:02:51 2024.
 */
 
 #ifndef __cplusplus
@@ -93,6 +93,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
  tolua_usertype(tolua_S,"statistic_manager");
+ tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"profibus_slave");
@@ -107,7 +108,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"PAC_info");
- tolua_usertype(tolua_S,"camera");
+ tolua_usertype(tolua_S,"device_with_statistic");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"io_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
@@ -14657,6 +14658,38 @@ static int tolua_PAC_dev_G_SYS_LOG00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_name of class  device_with_statistic */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_with_statistic_get_name00
+static int tolua_PAC_dev_device_with_statistic_get_name00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device_with_statistic",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device_with_statistic* self = (device_with_statistic*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_name'", NULL);
+#endif
+  {
+   const char* tolua_ret = (const char*)  self->get_name();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_name'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: add_new_dev_with_stat of class  statistic_manager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00
 static int tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00(lua_State* tolua_S)
@@ -14680,10 +14713,11 @@ static int tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00(lua_State* to
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_new_dev_with_stat'", NULL);
 #endif
   {
-   self->add_new_dev_with_stat(dev,device_resource);
+   device_with_statistic* tolua_ret = (device_with_statistic*)  self->add_new_dev_with_stat(dev,device_resource);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"device_with_statistic");
   }
  }
- return 0;
+ return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'add_new_dev_with_stat'.",&tolua_err);
@@ -15546,6 +15580,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"write_log",tolua_PAC_dev_i_log_write_log00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_SYS_LOG",tolua_PAC_dev_G_SYS_LOG00);
+  tolua_cclass(tolua_S,"device_with_statistic","device_with_statistic","",NULL);
+  tolua_beginmodule(tolua_S,"device_with_statistic");
+   tolua_function(tolua_S,"get_name",tolua_PAC_dev_device_with_statistic_get_name00);
+  tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"statistic_manager","statistic_manager","",NULL);
   tolua_beginmodule(tolua_S,"statistic_manager");
    tolua_function(tolua_S,"add_new_dev_with_stat",tolua_PAC_dev_statistic_manager_add_new_dev_with_stat00);
