@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709209448021,
+  "lastUpdate": 1709211845765,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -21814,6 +21814,40 @@ window.BENCHMARK_DATA = {
             "value": 95.11628182057426,
             "unit": "us/iter",
             "extra": "iterations: 7558\ncpu: 93.42599457528446 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm",
+            "email": "dzimitriy@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "752dc31b142a8a059d31fa009b263a842bc7b0f5",
+          "message": "Fix IO-Link concentration sensor (#658)",
+          "timestamp": "2024-02-29T13:01:44Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/752dc31b142a8a059d31fa009b263a842bc7b0f5"
+        },
+        "date": 1709211844548,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.09509187823064,
+            "unit": "us/iter",
+            "extra": "iterations: 43525\ncpu: 16.093954577828836 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 92.69314886437475,
+            "unit": "us/iter",
+            "extra": "iterations: 7705\ncpu: 91.53323270603504 us\nthreads: 1"
           }
         ]
       }
