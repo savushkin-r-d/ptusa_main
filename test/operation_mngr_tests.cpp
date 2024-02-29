@@ -299,6 +299,7 @@ TEST( step, set_tag )
 	EXPECT_EQ( new_tag, st1.get_tag() );
 	}
 
+
 TEST( operation_state, print )
 	{
 	char* res = 0;
@@ -432,6 +433,38 @@ TEST( operation_state, check_devices )
 
 
 	test_params_manager::removeObject();
+	}
+
+TEST( operation_state, to_next_step )
+	{
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	test_op->add_step( "Init", 3, -1 );
+	test_op->add_step( "Process #1", -1, -1 );
+	test_op->add_step( "Process #2", 2, -1 );
+	test_op->add_step( "Process #3", -1, -1 );
+
+	//Корректный переход по шагам должен быть таким: 1 -> 3 -> 2 -> 3.
+	test_op->start();
+	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->evaluate();	
+	test_op->to_next_step();
+	EXPECT_EQ( 3, test_op->active_step() );
+	test_op->evaluate();
+	test_op->to_next_step();
+	EXPECT_EQ( 2, test_op->active_step() );
+	test_op->evaluate();
+	test_op->to_next_step();
+	EXPECT_EQ( 3, test_op->active_step() );
+
+	// Переходим в 4-ый шаг, далее уже перехода не будет - для крайнего
+	// шага #4 следующий шаг не указан, поэтому после вызова to_next_step()
+	// остаёмся в текущем шаге.
+	test_op->to_step( 4 );
+	EXPECT_EQ( 4, test_op->active_step() );
+	test_op->to_next_step();
+	EXPECT_EQ( 4, test_op->active_step() );
 	}
 
 
