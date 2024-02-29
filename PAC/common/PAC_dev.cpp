@@ -6869,6 +6869,7 @@ int concentration_e_iolink::get_state()
 void concentration_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data(0);
+    if ( !data ) return;
 
     const int SIZE = 12;
     std::reverse_copy (data, data + SIZE, (char*) info);
