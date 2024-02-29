@@ -386,6 +386,10 @@ set_tests_properties( run_no_command_line_arguments
   -d, --debug       Enable debugging
   -p, --port arg    Param port \(default: 10000\)
   -h, --help        Print help info
+  -r, --rcrc        Reset params
+  -q, --sys_path    Set sys path
+  -t, --path        Set path
+  -e, --extra_paths Set extra paths
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
