@@ -2180,9 +2180,17 @@ void operation_state::to_next_step()
     {
     if ( active_step_n >= 0 )
         {
-        int current_step = active_step_n + 1;
-        int next_step = current_step + 1;
-        to_step( next_step );
+        if ( next_step_ns[ active_step_n ] == -1 )
+            {
+            int current_step = active_step_n + 1;
+            int next_step = current_step + 1;
+            to_step( next_step );
+            }
+        else
+            {
+            int next_step = next_step_ns[ active_step_n ];
+            to_step( next_step );
+            }
         }
      }
 //-----------------------------------------------------------------------------
