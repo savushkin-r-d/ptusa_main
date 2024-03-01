@@ -8,7 +8,7 @@
 /// - Ресурс устройства (задается в описании устройства в поле stat);
 /// - Износ устройства, отношение количества срабатываний к ресурсу устройства;
 /// 
-/// @author Озимок Ярослав Викторович 
+/// @author Озимок Ярослав Викторович.
 #ifndef STATISTIC_MANAGER_H
 #define STATISTIC_MANAGER_H
 #include "param_ex.h"
@@ -16,11 +16,32 @@
 #include <fmt/core.h>
 
 //-----------------------------------------------------------------------------
-/// @brief Класс реализует устройство со сбором статистики.
+/// @brief Интерфейс объекта со сбором статистики.
+/// 
+/// Объект, реализующая данный интерфейс, собирает собственную статистику,
+/// которая затем передается на сервер в виде тегов.
+class i_statistic_collecting : i_cmd_device
+	{
+	public:
+		/// @brief Запись в буфер текущей статистики объекта.
+		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
+		/// @return >= 0 - количество записанных байт.
+		virtual int save_common_stat( char *buff ) = 0;
+
+		/// @brief Итерация сбора собственной статистики.
+		virtual void evaluate_collecting() = 0;
+
+		/// @brief Получение имени объекта.
+		/// @return Имя объекта.
+		virtual const char *get_name() = 0;
+	};
+
+//-----------------------------------------------------------------------------
+/// @brief Класс реализует устройство (мотор, клапан) со сбором статистики.
 /// 
 /// В каждом цикле управляющей программы проверяется изменение состояния
 /// устройства. Реализованы методы для получения текущей статистики.
-class device_with_statistic : public i_cmd_device
+class device_with_statistic : public i_statistic_collecting
 	{
 	public:
 		device_with_statistic( device* dev, int device_resource );
@@ -28,24 +49,31 @@ class device_with_statistic : public i_cmd_device
 		/// @brief Получение текущей статистики изменения состояния устройства.
 		/// @return Количество изменений состояния устройства.
 		int get_cur_device_stat();
+
 		/// @brief Получение общего времени работы устройства.
 		/// @return Общее время работы устройства в секундах.
 		int get_device_working_time_sec();
+
 		/// @brief Получение общего времени работы устройства.
 		/// @return Общее время работы устройства в часах.
 		int get_device_working_time_h();
+
 		/// @brief Получение текущего износа устройства.
 		/// @return Текущий износ устройства (%).
 		float get_cur_device_wear();
+
 		/// @brief Проверка изменения состояния устройства.
-		void check_state_changes();
+		void evaluate_collecting() override;
+
 		/// @brief Запись в буфер текущей статистики устройва.
 		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
 		/// @return >= 0 - количество записанных байт.
-		int save_common_stat( char* buff );
+		int save_common_stat( char* buff ) override;
+
 		/// @brief Получение имени устройства, у которого собирается статистика.
 		/// @return Имя устройства.
-		const char *get_name();
+		const char *get_name() override;
+
 		/// @brief Выполнение числовой команды.
 		/// @param prop [ in ] - имя свойства.
 		/// @param idx [ in ]  - индекс для свойства.
@@ -53,6 +81,7 @@ class device_with_statistic : public i_cmd_device
 		/// @return 0 - ок.
 		/// @return 1 - ошибка.
 		int set_cmd( const char *prop, u_int idx, double val ) override;
+
 		/// @brief Выполнение строковой команды.
 		/// @param prop [ in ] - имя свойства.
 		/// @param idx [ in ]  - индекс для свойства.
@@ -85,9 +114,11 @@ class statistic_manager : public i_Lua_save_device
 	public:
 		statistic_manager();
 		~statistic_manager();
+
 		/// @brief Получение единственного экземпляра класса.
 		/// @return Единственный экземпляр менеджера устройств статистики.
 		static statistic_manager *get_instance();
+
 		/// @brief Добавление нового устройства со сбором статистики 
 		/// (вызывается из Lua).
 		/// @param *dev - указатель на устройство, статистику которого следует
@@ -95,12 +126,15 @@ class statistic_manager : public i_Lua_save_device
 		/// @param device_resource - ресурс (запас прочности) устройства.
 		/// @return Указатель на добавленное устройство со статистикой.
 		device_with_statistic* add_new_dev_with_stat( device *dev, int device_resource );
+
 		/// @brief Итерация сбора статистики. 
 		void evaluate();
+
 		/// @brief Сохранение статистики устройств в буфер.
 		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
 		/// @return >= 0 - количество записанных байт.
 		int save_device( char *buff ) override;
+
 		/// @brief Отладочная печать объекта в консоль.
 		const char *get_name_in_Lua() const override;
 
@@ -108,7 +142,7 @@ class statistic_manager : public i_Lua_save_device
 		/// @brief Единственный экземпляр класса.
 		static auto_smart_ptr < statistic_manager > instance;
 		/// @brief Вектор устройств со сбором статистики
-		std::vector< device_with_statistic* > devs_with_stat;
+		std::vector< i_statistic_collecting* > objs_with_stat;
 	};
 //-----------------------------------------------------------------------------
 /// @brief Глобальная точка доступа к менеджеру устройств со статистикой.

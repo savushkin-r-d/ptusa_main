@@ -14,7 +14,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 
 	///Включение
 	dev->set_state( 1 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 10.0f, 0.01f );
@@ -23,7 +23,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	sleep_ms( 1100 );
 	///Выключение 
 	dev->set_state( 0 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 10.0f, 0.01f );
@@ -31,7 +31,7 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	
 	///Включение
 	dev->set_state( 1 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 2 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 20.0f, 0.01f );
@@ -40,13 +40,13 @@ TEST( device_with_statistic, all_get_statistics_methods_test )
 	sleep_ms( 1100 );
 	///Переключение состояния 
 	dev->set_state( 2 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 3 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 30.0f, 0.01f );
 	EXPECT_GT( dev_w_st->get_device_working_time_sec(), 0 );
 	dev->set_state( 0 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 3 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 30.0f, 0.01f );
@@ -100,7 +100,7 @@ TEST( device_with_statistic, save_common_stat )
 
 	///Включение
 	dev->set_state( 1 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';
@@ -114,7 +114,7 @@ TEST( device_with_statistic, save_common_stat )
 
 	///Выключение
 	dev->set_state( 0 );
-	dev_w_st->check_state_changes();
+	dev_w_st->evaluate_collecting();
 
 	res = dev_w_st->save_common_stat( buf );
 	buf[ res ] = '\0';

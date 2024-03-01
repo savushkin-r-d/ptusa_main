@@ -31,7 +31,7 @@ float device_with_statistic::get_cur_device_wear()
 	return ( state_change_count / (float)device_resource ) * 100;
 	}
 //-----------------------------------------------------------------------------
-void device_with_statistic::check_state_changes()
+void device_with_statistic::evaluate_collecting()
 	{
 	if( prev_device_state != dev->get_state() )
 		{
@@ -115,7 +115,7 @@ statistic_manager::statistic_manager()
 //-----------------------------------------------------------------------------
 statistic_manager::~statistic_manager()
 	{
-	for( auto dev : devs_with_stat )
+	for( auto dev : objs_with_stat )
 		{
 		delete dev;
 		dev = nullptr;
@@ -126,22 +126,22 @@ device_with_statistic* statistic_manager::add_new_dev_with_stat( device *dev,
 	int device_resource )
 	{
 	auto new_dev = new device_with_statistic( dev, device_resource );
-	devs_with_stat.push_back( new_dev );
+	objs_with_stat.push_back( new_dev );
 	return new_dev;
 	}
 //-----------------------------------------------------------------------------
 void statistic_manager::evaluate()
 	{
-	for( auto dev : devs_with_stat )
+	for( auto dev : objs_with_stat )
 		{
-		dev->check_state_changes();
+		dev->evaluate_collecting();
 		}
 	}
 //-----------------------------------------------------------------------------
 int statistic_manager::save_device( char *buff )
 	{
 	int res = 0;
-	for( auto dev : devs_with_stat )
+	for( auto dev : objs_with_stat )
 		{
 		res += dev->save_common_stat( buff + res );
 		}
