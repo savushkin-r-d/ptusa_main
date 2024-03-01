@@ -40,9 +40,9 @@ int project_manager::proc_main_params(int argc, const char* argv[])
         ("p,port", "Param port", cxxopts::value<int>()->default_value("10000"))
         ("h,help", "Print help info")
         ("r,rcrc", "Reset params")
-        ("q,sys_path", "Set sys path", cxxopts::value<std::string>())
-        ("t,path", "Set path", cxxopts::value<std::string>())
-        ("e,extra_paths", "Set extra paths", cxxopts::value<std::string>());
+        ("q,sys_path", "Set sys path", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/sys/"))
+        ("t,path", "Set path", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/"))
+        ("e,extra_paths", "Set extra paths", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/user_sys"));
 
     options.positional_help("<script>");
     options.parse_positional({ "script" });

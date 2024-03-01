@@ -382,14 +382,14 @@ set_tests_properties( run_no_command_line_arguments
     PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg  The script file to execute \(default: main\.plua\)
-  -d, --debug       Enable debugging
-  -p, --port arg    Param port \(default: 10000\)
-  -h, --help        Print help info
-  -r, --rcrc        Reset params
-  -q, --sys_path    Set sys path
-  -t, --path        Set path
-  -e, --extra_paths Set extra paths
+  -s, --script arg      The script file to execute \(default: main\.plua\)
+  -d, --debug           Enable debugging
+  -p, --port arg        Param port \(default: 10000\)
+  -h, --help            Print help info
+  -r, --rcrc            Reset params
+  -q, --sys_path arg    Set sys path \(default: \"/demo_projects/T1-PLCnext-Demo/sys/"\)
+  -t, --path arg        Set path \(default: \"/demo_projects/T1-PLCnext-Demo/"\)
+  -e, --extra_paths arg Set extra paths \(default: \"/demo_projects/T1-PLCnext-Demo/user_sys/"\)
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
