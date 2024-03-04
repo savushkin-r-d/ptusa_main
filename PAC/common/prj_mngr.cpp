@@ -28,54 +28,74 @@
 #include "l_mem.h"
 #endif
 
-auto_smart_ptr<project_manager> project_manager::instance;
-
+auto_smart_ptr < project_manager > project_manager::instance;
+//-----------------------------------------------------------------------------
 int project_manager::proc_main_params(int argc, const char* argv[])
 {
-    cxxopts::Options options(argv[0], "Main control program");
-
-    options.add_options()
-        ("s,script", "The script file to execute", cxxopts::value<std::string>()->default_value("main.plua"))
-        ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
-        ("p,port", "Param port", cxxopts::value<int>()->default_value("10000"))
-        ("h,help", "Print help info")
-        ("r,rcrc", "Reset params")
-        ("q,sys_path", "Set sys path", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/sys/"))
-        ("t,path", "Set path", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/"))
-        ("e,extra_paths", "Set extra paths", cxxopts::value<std::string>()->default_value("/demo_projects/T1-PLCnext-Demo/user_sys"));
-
-    options.positional_help("<script>");
-    options.parse_positional({ "script" });
-    options.show_positional_help();
-    auto result = options.parse(argc, argv);
-
-    if (result.count("help") || argc < 2)
+    for (int i = 1; i < argc; i++)
     {
-        fmt::print(options.help());
-        exit(EXIT_SUCCESS);
-    }
-
-    if (result.count("rcrc"))
-    {
-        if (G_DEBUG) {
-            std::cout << "Resetting params (command line parameter \"rcrc\")." << std::endl;
+        if (strcmp(argv[i], "debug") == 0)
+        {
+            G_DEBUG = 1;
+            printf("DEBUG ON.\n");
         }
-        params_manager::get_instance()->reset_params_size();
     }
 
-    if (result.count("sys_path"))
+    for (int i = 1; i < argc; i++)
     {
-        init_sys_path(result["sys_path"].as<std::string>().c_str());
+        if (strcmp(argv[i], "rcrc") == 0)
+        {
+            if (G_DEBUG)
+            {
+                printf("Resetting params (command line parameter \"rcrc\").\n");
+            }
+            params_manager::get_instance()->reset_params_size();
+        }
     }
 
-    if (result.count("path"))
+    // port 10001
+    for (int i = 1; i < argc - 1; i++)
     {
-        init_path(result["path"].as<std::string>().c_str());
+        if (strcmp(argv[i], "port") == 0)
+        {
+            int p = atoi(argv[i + 1]);
+
+            if (p > 0)
+            {
+                tcp_communicator::set_port(p, p + 502);
+
+                sprintf(G_LOG->msg,
+                    "New tcp_communicator ports: %d [modbus %d].", p, p + 502);
+                G_LOG->write_log(i_log::P_NOTICE);
+            }
+        }
     }
 
-    if (result.count("extra_paths"))
+    // sys_path  "C:/system_scripts/"
+    for (int i = 1; i < argc - 1; i++)
     {
-        init_extra_paths(result["extra_paths"].as<std::string>().c_str());
+        if (strcmp(argv[i], "sys_path") == 0)
+        {
+            init_sys_path(argv[i + 1]);
+        }
+    }
+
+    // path  "C:/project folder/"
+    for (int i = 1; i < argc - 1; i++)
+    {
+        if (strcmp(argv[i], "path") == 0)
+        {
+            init_path(argv[i + 1]);
+        }
+    }
+
+    // extra path  "C:/project folder/user_sys;C:/project folder/user_sys_new/"
+    for (int i = 1; i < argc - 1; i++)
+    {
+        if (strcmp(argv[i], "extra_paths") == 0)
+        {
+            init_extra_paths(argv[i + 1]);
+        }
     }
 
     return 0;
