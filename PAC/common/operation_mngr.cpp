@@ -212,9 +212,9 @@ int operation::check_steps_params( char* err_dev_name, int str_len )
     return states[ RUN ]->check_steps_params( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
-int operation::check_on_run_state(char* reason) const
+int operation::check_on_run_state(char* reason, int max_len ) const
     {
-    return states[ RUN ]->check_on( reason );
+    return states[ RUN ]->check_on( reason, max_len );
     }
 //-----------------------------------------------------------------------------
 u_long operation::evaluation_time()
@@ -843,7 +843,7 @@ void delay_off_action::evaluate()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int required_DI_action::check( char* reason ) const
+int required_DI_action::check( char* reason, int max_len ) const
     {
     *reason = 0;
     if ( is_empty() )
@@ -857,8 +857,9 @@ int required_DI_action::check( char* reason ) const
         if ( !d->is_active() )
             {
             auto f_str = "нет сигнала \'{:.25} ({:.50})\'";
-            auto out = fmt::format_to( reason, f_str, d->get_name(), d->get_description() );
-            *out = 0;
+            auto out = fmt::format_to_n( reason, max_len - 1, f_str,
+                d->get_name(), d->get_description() );
+            *out.out = '\0';
             return 1;
             }
         }
@@ -924,18 +925,18 @@ step::~step()
         }
     }
 //-----------------------------------------------------------------------------
-int step::check( char* reason ) const
-    {
-    auto res = actions[ A_DI_DO ]->check( reason );
+int step::check( char* reason, int max_len ) const
+    {    
+    auto res = actions[ A_DI_DO ]->check( reason, max_len );
     if ( res ) return res;
-    res = actions[ A_AI_AO ]->check( reason );
+    res = actions[ A_AI_AO ]->check( reason, max_len );
     if ( res ) return res;
-    res = actions[ A_INVERTED_DI_DO ]->check( reason );
+    res = actions[ A_INVERTED_DI_DO ]->check( reason, max_len );
     if ( res ) return res;
 
     if ( is_mode )
         {
-        return actions[ A_REQUIRED_FB ]->check( reason );
+        return actions[ A_REQUIRED_FB ]->check( reason, max_len );
         }
 
     return 0;
@@ -1045,7 +1046,7 @@ DI_DO_action::DI_DO_action( std::string name ) :action( name )
     {
     }
 //-----------------------------------------------------------------------------
-int DI_DO_action::check( char* reason ) const
+int DI_DO_action::check( char* reason, int max_len ) const
     {
     reason[ 0 ] = 0;
     if ( is_empty() )
@@ -1070,9 +1071,9 @@ int DI_DO_action::check( char* reason ) const
             {
             auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                 R"(не является входным сигналом (DI, SB, GS, LS, FS))";
-            auto out = fmt::format_to( reason, format_str, name.c_str(),
+            auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
-            *out = 0;
+            *out.out = 0;
             return 1;
             }
         }
@@ -1164,7 +1165,7 @@ AI_AO_action::AI_AO_action() :action( "Группы AI->AO's" )
     {
     }
 //-----------------------------------------------------------------------------
-int AI_AO_action::check( char* reason ) const
+int AI_AO_action::check( char* reason, int max_len ) const
     {
     reason[ 0 ] = 0;
     if ( is_empty() )
@@ -1190,9 +1191,9 @@ int AI_AO_action::check( char* reason ) const
             {
             auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                 R"(не является входным сигналом (АI, PT, LT, FQT, QT, TE))";
-            auto out = fmt::format_to( reason, format_str, name.c_str(),
+            auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                 do_device->get_name(), do_device->get_description() );
-            *out = 0;
+            *out.out = '\0';
             return 1;
             }
         }
@@ -1927,15 +1928,15 @@ step* operation_state::add_step( const char* name, int next_step_n,
     return steps[ steps.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-int operation_state::check_on( char* reason ) const
+int operation_state::check_on( char* reason, int max_len ) const
     {
     for ( size_t idx = 0; idx < steps.size(); idx++ )
         {
-        int res = steps[ idx ]->check( reason );
+        int res = steps[ idx ]->check( reason, max_len );
         if ( res ) return res;
         }
 
-    return mode_step->check( reason );
+    return mode_step->check( reason, max_len );
     }
 //-----------------------------------------------------------------------------
 void operation_state::init( u_int start_step /*= 1 */ )
@@ -2383,7 +2384,7 @@ int operation_state::on_extra_step( int step_idx )
         active_steps.push_back( step_idx );
 
         char err_str[ 250 ];
-        if ( steps[ step_idx - 1 ]->check( err_str ) == 0 )
+        if ( steps[ step_idx - 1 ]->check( err_str, sizeof( err_str ) ) == 0 )
             {
             steps[ step_idx - 1 ]->init();
             steps[ step_idx - 1 ]->evaluate();

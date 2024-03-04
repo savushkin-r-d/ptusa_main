@@ -38,7 +38,7 @@ TEST( action, check )
 	action* a1 = new action( "test_action", 0 );
 	const auto MAX_SIZE = 20;
 	std::string buff( MAX_SIZE, '\0' );
-	auto res = a1->check( &buff[ 0 ] );
+	auto res = a1->check( &buff[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", buff.c_str() );
 	delete a1;
@@ -1138,16 +1138,16 @@ TEST( AI_AO_action, check )
 	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];	
 	char msg[ 1024 ];
 
-	EXPECT_EQ( 0, action->check( msg ) );
+	EXPECT_EQ( 0, action->check( msg, MAX_STR_SIZE ) );
 
 	action->add_dev( &test_AO );
 	action->add_dev( &test_AI );
-	EXPECT_NE( 0, action->check( msg ) );
+	EXPECT_NE( 0, action->check( msg, MAX_STR_SIZE ) );
 
 	action->clear_dev();
 	action->add_dev( &test_AI );
 	action->add_dev( &test_AO );
-	EXPECT_EQ( 0, action->check( msg ) );
+	EXPECT_EQ( 0, action->check( msg, MAX_STR_SIZE ) );
 
 	test_params_manager::removeObject();
 	}
@@ -1271,12 +1271,12 @@ TEST( required_DI_action, check )
 	action.add_dev( &test_DI );
 
 	std::string msg( MAX_STR_SIZE, '\0');
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	EXPECT_STREQ( "нет сигнала 'test_DI1 (Test DI)'", msg.c_str() );
 
 	test_DI.on();
-	res = action.check( &msg[ 0 ] );
+	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 	}
@@ -1310,7 +1310,7 @@ TEST( DI_DO_action, check )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	EXPECT_STREQ( "в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
 		" не является входным сигналом (DI, SB, GS, LS, FS)", msg.c_str() );
@@ -1318,7 +1318,7 @@ TEST( DI_DO_action, check )
 	action.clear_dev();
 	action.add_dev( &test_DI );
 	action.add_dev( &test_DO );
-	res = action.check( &msg[ 0 ] );
+	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 	}
@@ -1336,7 +1336,7 @@ TEST( DI_DO_action, evaluate )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 
@@ -1390,7 +1390,7 @@ TEST( inverted_DI_DO_action, evaluate )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 
