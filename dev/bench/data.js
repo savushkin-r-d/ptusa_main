@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709545046307,
+  "lastUpdate": 1709560241024,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22250,6 +22250,38 @@ window.BENCHMARK_DATA = {
             "value": 93.328757765597,
             "unit": "us/iter",
             "extra": "iterations: 7662\ncpu: 92.20686909423127 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "998df6a42ad5b290e10848fcde590370e455153c",
+          "message": "Fix message buffer overflow error",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/661/commits/998df6a42ad5b290e10848fcde590370e455153c"
+        },
+        "date": 1709560239913,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.732634726369877,
+            "unit": "us/iter",
+            "extra": "iterations: 44531\ncpu: 15.732478610406234 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 92.90039573522154,
+            "unit": "us/iter",
+            "extra": "iterations: 7644\ncpu: 91.68669675562532 us\nthreads: 1"
           }
         ]
       }
