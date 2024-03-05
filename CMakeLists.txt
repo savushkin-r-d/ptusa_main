@@ -382,10 +382,10 @@ set_tests_properties( run_no_command_line_arguments
     PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg      The script file to execute (default: main.plua)
-  -d, --debug           Enable debugging
-  -p, --port arg        Param port (default: 10000)
-  -h, --help            Print help info
+  -s, --script arg  The script file to execute (default: main.plua)
+  -d, --debug       Enable debugging
+  -p, --port arg    Param port (default: 10000)
+  -h, --help        Print help info
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
