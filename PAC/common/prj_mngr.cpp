@@ -28,71 +28,71 @@
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
-int project_manager::proc_main_params(int argc, const char* argv[])
+int project_manager::proc_main_params( int argc, const char* argv[] )
     {
-    for (int i = 1; i < argc; i++)
+    for ( int i = 1; i < argc; i++ )
         {
-        if (strcmp(argv[i], "debug") == 0)
+        if ( strcmp( argv[ i ], "debug" ) == 0 )
             {
             G_DEBUG = 1;
-            printf("DEBUG ON.\n");
+            printf( "DEBUG ON.\n" );
             }
         }
 
-    for (int i = 1; i < argc; i++)
+    for ( int i = 1; i < argc; i++ )
         {
-        if (strcmp(argv[i], "rcrc") == 0)
+        if ( strcmp( argv[ i ], "rcrc" ) == 0)
             {
-            if (G_DEBUG)
+            if ( G_DEBUG )
                 {
-                printf("Resetting params (command line parameter \"rcrc\").\n");
+                printf( "Resetting params (command line parameter \"rcrc\").\n" );
                 }
             params_manager::get_instance()->reset_params_size();
             }
         }
 
     // port 10001
-    for (int i = 1; i < argc - 1; i++)
+    for ( int i = 1; i < argc - 1; i++ )
         {
-        if (strcmp(argv[i], "port") == 0)
+        if ( strcmp( argv[ i ], "port" ) == 0 )
             {
-            int p = atoi(argv[i + 1]);
+            int p = atoi( argv[ i + 1 ] );
 
-            if (p > 0)
+            if ( p > 0 )
                 {
-                tcp_communicator::set_port(p, p + 502);
+                tcp_communicator::set_port( p, p + 502 );
 
-                sprintf(G_LOG->msg,
-                    "New tcp_communicator ports: %d [modbus %d].", p, p + 502);
-                G_LOG->write_log(i_log::P_NOTICE);
+                sprintf( G_LOG->msg,
+                    "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
+                G_LOG->write_log( i_log::P_NOTICE );
                 }
             }
         }
 
     // sys_path  "C:/system_scripts/"
-    for (int i = 1; i < argc - 1; i++)
+    for ( int i = 1; i < argc - 1; i++ )
         {
-        if (strcmp(argv[i], "sys_path") == 0)
+        if ( strcmp( argv[ i ], "sys_path" ) == 0 )
             {
-            init_sys_path(argv[i + 1]);
+            init_sys_path( argv[ i + 1 ] );
             }
         }
 
     // path  "C:/project folder/"
-    for (int i = 1; i < argc - 1; i++)
+    for ( int i = 1; i < argc - 1; i++ )
         {
-        if (strcmp(argv[i], "path") == 0)
+        if ( strcmp ( argv[ i ], "path" ) == 0 )
             {
-            init_path(argv[i + 1]);
+            init_path( argv[ i + 1 ] );
             }
         }
 
     // extra path  "C:/project folder/user_sys;C:/project folder/user_sys_new/"
-    for (int i = 1; i < argc - 1; i++)
+    for ( int i = 1; i < argc - 1; i++ )
         {
-        if (strcmp(argv[i], "extra_paths") == 0)
+        if ( strcmp( argv[ i ], "extra_paths" ) == 0 )
             {
-            init_extra_paths(argv[i + 1]);
+            init_extra_paths( argv[ i + 1 ] );
             }
         }
 
@@ -101,7 +101,7 @@ int project_manager::proc_main_params(int argc, const char* argv[])
 //-----------------------------------------------------------------------------
 project_manager* project_manager::get_instance()
     {
-    if (instance.is_null())
+    if ( instance.is_null() )
         {
         instance = new project_manager();
 
@@ -119,16 +119,16 @@ project_manager* project_manager::get_instance()
 //-----------------------------------------------------------------------------
 project_manager::~project_manager()
     {
-    if (cfg_file)
+    if ( cfg_file )
         {
         delete cfg_file;
         cfg_file = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
-int project_manager::init_path(const char* path)
+int project_manager::init_path( const char* path )
     {
-    if (path)
+    if ( path )
         {
         this->path = path;
         }
@@ -136,9 +136,9 @@ int project_manager::init_path(const char* path)
     return 0;
     }
 //-----------------------------------------------------------------------------
-int project_manager::init_sys_path(const char* sys_path)
+int project_manager::init_sys_path( const char* sys_path )
     {
-    if (sys_path)
+    if ( sys_path )
         {
         this->sys_path = sys_path;
         }
@@ -146,9 +146,9 @@ int project_manager::init_sys_path(const char* sys_path)
     return 0;
     }
 //-----------------------------------------------------------------------------
-int project_manager::init_extra_paths(const char* paths)
+int project_manager::init_extra_paths( const char* paths )
     {
-    if (paths)
+    if ( paths )
         {
         this->extra_paths = paths;
         }
@@ -162,117 +162,117 @@ int project_manager::init_extra_paths(const char* paths)
 //3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
-        printf("\nProject manager - processing configuration...\n");
+        printf( "\nProject manager - processing configuration...\n" );
         }
 
     //-I/O modules data.
-    auto res = lua_manager::get_instance()->void_exec_lua_method("system",
-        "create_io", "project_manager::lua_load_configuration()");
+    auto res = lua_manager::get_instance()->void_exec_lua_method( "system",
+        "create_io", "project_manager::lua_load_configuration()" );
 
-    if (res) return 1;
+    if ( res ) return 1;
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
-        if (G_USE_LOG)
+        if ( G_USE_LOG )
             {
             io_manager::get_instance()->print_log();
             }
         else
             {   
             io_manager::get_instance()->print();
-            printf("\n");
+            printf( "\n" );
             }
         }
 
     //-Devices data.
-    res = lua_manager::get_instance()->void_exec_lua_method("system",
-        "create_devices", "project_manager::lua_load_configuration()");
+    res = lua_manager::get_instance()->void_exec_lua_method( "system",
+        "create_devices", "project_manager::lua_load_configuration()" );
 
-    if (res) return 1;
+    if ( res ) return 1;
 
     //-Devices properties.
-    res = lua_manager::get_instance()->void_exec_lua_method("system",
-        "init_devices_properties", "project_manager::lua_load_configuration()");
+    res = lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_devices_properties", "project_manager::lua_load_configuration()" );
 
-    if (res) return 1;
+    if ( res ) return 1;
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
-        printf("Oк.\n");
+        printf( "Oк.\n" );
         }
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
         G_DEVICE_MANAGER()->print();
-        printf("\n");
+        printf( "\n" );
         }
 
-    res = lua_manager::get_instance()->int_exec_lua_method("",
-        "init_tech_objects", 0, "project_manager::lua_load_configuration()");
-    if (res)
+    res = lua_manager::get_instance()->int_exec_lua_method( "",
+        "init_tech_objects", 0, "project_manager::lua_load_configuration()" );
+    if ( res )
         {
-        printf("Fatal error!\n");
+        printf( "Fatal error!\n" );
         return 1;
         }
 
-    res = lua_manager::get_instance()->int_exec_lua_method("object_manager",
-        "get_objects_count", 0, "project_manager::lua_load_configuration()");
-    if (res < 0)
+    res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
+        "get_objects_count", 0, "project_manager::lua_load_configuration()" );
+    if ( res < 0 )
         {
-        printf("Fatal error!\n");
+        printf( "Fatal error!\n" );
         return 1;
         }
 
     int objects_count = res;
-    for (int i = 1; i <= objects_count; i++)
+    for ( int i = 1; i <= objects_count; i++ )
         {
-        void* res_object = lua_manager::get_instance()->user_object_exec_lua_method(
+        void* res_object = lua_manager::get_instance()->user_object_exec_lua_method( 
             "object_manager", "get_object", i,
-            "project_manager::lua_load_configuration()");
+            "project_manager::lua_load_configuration()" );
 
-        if (0 == res_object)
+        if ( 0 == res_object )
             {
-            printf("Fatal error!\n");
+            printf( "Fatal error!\n" );
             return 1;
             }
 
-        G_TECH_OBJECT_MNGR()->add_tech_object((tech_object*)res_object);
+        G_TECH_OBJECT_MNGR()->add_tech_object( ( tech_object * ) res_object );
         }
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
         G_TECH_OBJECT_MNGR()->print();
-        printf("\n");
+        printf( "\n" );
         }
 
     //-Добавление технологических объектов проекта.
-    for (u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++)
+    for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
-        G_DEVICE_CMMCTR->add_device(G_TECH_OBJECTS(i));
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS(i) );
         }
     //-Добавление системных тегов контроллера.
-    G_DEVICE_CMMCTR->add_device(PAC_info::get_instance());
+    G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
-    G_DEVICE_CMMCTR->add_device(siren_lights_manager::get_instance());
+    G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
-        printf("Получение конфигурации Profibus DP slave...\n");
+        printf( "Получение конфигурации Profibus DP slave...\n" );
         }
 
-    lua_manager::get_instance()->void_exec_lua_method("system",
-        "init_profibus", "project_manager::lua_load_configuration()");
-    if (G_DEBUG)
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_profibus", "project_manager::lua_load_configuration()" );
+    if ( G_DEBUG )
         {
-        printf("Oк.\n");
+        printf( "Oк.\n" );
         }
 
-    if (G_DEBUG)
+    if ( G_DEBUG )
         {
-        printf("Project manager - processing configuration completed.\n");
-        printf("\n");
+        printf( "Project manager - processing configuration completed.\n" );
+        printf( "\n" );
         }
 
     return 0;

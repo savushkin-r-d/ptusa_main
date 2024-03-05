@@ -89,23 +89,23 @@ int main( int argc, const char *argv[] )
     signal(SIGSEGV, stopHandler);
 
     //-Работа с параметрами командной строки. 
-    cxxopts::Options options(argv[0], "Main control program");
+    cxxopts::Options options( argv[0], "Main control program" );
 
     options.add_options()
-        ("s,script", "The script file to execute", cxxopts::value<std::string>()->default_value("main.plua"))
-        ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
-        ("p,port", "Param port", cxxopts::value<int>()->default_value("10000"))
-        ("h,help", "Print help info");
+        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug",  "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port",   "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help",   "Print help info" );
 
-    options.positional_help("<script>");
+    options.positional_help( "<script>" );
     options.parse_positional({ "script" });
     options.show_positional_help();
-    auto result = options.parse(argc, argv);
+    auto result = options.parse( argc, argv );
 
-    if (result.count("help") || argc < 2)
+    if ( result.count( "help" ) || argc < 2)
         {
-        fmt::print(options.help());
-        exit(EXIT_SUCCESS);
+        fmt::print( options.help() );
+        exit( EXIT_SUCCESS );
         }
 
 #ifdef PAC_WAGO_750_860
