@@ -1073,7 +1073,7 @@ int DI_DO_action::check( char* reason, int max_len ) const
                 R"(не является входным сигналом (DI, SB, GS, LS, FS))";
             auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
-            *out.out = 0;
+            *out.out = '\0';
             return 1;
             }
         }
