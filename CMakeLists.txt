@@ -386,6 +386,7 @@ set_tests_properties( run_no_command_line_arguments
   -d, --debug       Enable debugging
   -p, --port arg    Param port \(default: 10000\)
   -h, --help        Print help info
+  -r, --rcrc        Resetting params \(command line parameter \"rcrc\"\)
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)

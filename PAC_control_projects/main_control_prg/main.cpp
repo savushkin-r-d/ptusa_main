@@ -95,7 +95,8 @@ int main( int argc, const char *argv[] )
         ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
         ( "d,debug",  "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
         ( "p,port",   "Param port", cxxopts::value<int>()->default_value( "10000" ) )
-        ( "h,help",   "Print help info" );
+        ( "h,help",   "Print help info" )
+        ( "r,rcrc",   "Resetting params (command line parameter \"rcrc\")");
 
     options.positional_help( "<script>" );
     options.parse_positional({ "script" });
