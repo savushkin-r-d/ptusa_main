@@ -28,7 +28,7 @@
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
-int project_manager::proc_main_params( int argc, const char* argv[] )
+int project_manager::proc_main_params( int argc, const char *argv[] )
     {
     for ( int i = 1; i < argc; i++ )
         {
@@ -41,7 +41,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     for ( int i = 1; i < argc; i++ )
         {
-        if ( strcmp( argv[ i ], "rcrc" ) == 0)
+        if ( strcmp( argv[ i ], "rcrc" ) == 0 )
             {
             if ( G_DEBUG )
                 {
@@ -81,7 +81,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     // path  "C:/project folder/"
     for ( int i = 1; i < argc - 1; i++ )
         {
-        if ( strcmp ( argv[ i ], "path" ) == 0 )
+        if ( strcmp( argv[ i ], "path" ) == 0 )
             {
             init_path( argv[ i + 1 ] );
             }
@@ -180,7 +180,7 @@ int project_manager::lua_load_configuration()
             io_manager::get_instance()->print_log();
             }
         else
-            {   
+            {
             io_manager::get_instance()->print();
             printf( "\n" );
             }
@@ -228,7 +228,7 @@ int project_manager::lua_load_configuration()
     int objects_count = res;
     for ( int i = 1; i <= objects_count; i++ )
         {
-        void* res_object = lua_manager::get_instance()->user_object_exec_lua_method( 
+        void * res_object = lua_manager::get_instance()->user_object_exec_lua_method(
             "object_manager", "get_object", i,
             "project_manager::lua_load_configuration()" );
 
@@ -250,7 +250,7 @@ int project_manager::lua_load_configuration()
     //-Добавление технологических объектов проекта.
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS(i) );
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );
         }
     //-Добавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );

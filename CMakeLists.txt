@@ -382,9 +382,9 @@ set_tests_properties( run_no_command_line_arguments
     PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg  The script file to execute (default: main.plua)
+  -s, --script arg  The script file to execute \(default: main\.plua\)
   -d, --debug       Enable debugging
-  -p, --port arg    Param port (default: 10000)
+  -p, --port arg    Param port \(default: 10000\)
   -h, --help        Print help info
 ]] )
 

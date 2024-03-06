@@ -88,7 +88,7 @@ int main( int argc, const char *argv[] )
     signal(SIGILL, stopHandler);
     signal(SIGSEGV, stopHandler);
 
-    //-Работа с параметрами командной строки. 
+    //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[0], "Main control program" );
 
     options.add_options()
@@ -102,7 +102,7 @@ int main( int argc, const char *argv[] )
     options.show_positional_help();
     auto result = options.parse( argc, argv );
 
-    if ( result.count( "help" ) || argc < 2)
+    if ( result.count( "help" ) || argc < 2 )
         {
         fmt::print( options.help() );
         exit( EXIT_SUCCESS );
