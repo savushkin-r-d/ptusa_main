@@ -92,11 +92,12 @@ int main( int argc, const char *argv[] )
     cxxopts::Options options( argv[0], "Main control program" );
 
     options.add_options()
-        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
-        ( "d,debug",  "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
-        ( "p,port",   "Param port", cxxopts::value<int>()->default_value( "10000" ) )
-        ( "h,help",   "Print help info" )
-        ( "r,rcrc",   "Resetting params (command line parameter \"rcrc\")");
+        ( "s,script",   "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug",    "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port",     "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help",     "Print help info" )
+        ( "r,rcrc",     "Resetting params (command line parameter \"rcrc\")")
+        ( "y,sys_path", "Sys path", cxxopts::value<std::string>());
 
     options.positional_help( "<script>" );
     options.parse_positional({ "script" });
