@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710141171207,
+  "lastUpdate": 1710142212405,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22442,6 +22442,38 @@ window.BENCHMARK_DATA = {
             "value": 94.29858709852664,
             "unit": "us/iter",
             "extra": "iterations: 7348\ncpu: 93.13876891671202 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "d788e70dce76050dac0252f3ff40ef501aa2ef2b",
+          "message": "Add cxxopts - a parser library",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/654/commits/d788e70dce76050dac0252f3ff40ef501aa2ef2b"
+        },
+        "date": 1710142211269,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.512694722867376,
+            "unit": "us/iter",
+            "extra": "iterations: 45195\ncpu: 15.511631131762362 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 93.51573348103733,
+            "unit": "us/iter",
+            "extra": "iterations: 7673\ncpu: 92.06117620226767 us\nthreads: 1"
           }
         ]
       }
