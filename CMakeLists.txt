@@ -388,6 +388,7 @@ set_tests_properties( run_no_command_line_arguments
   -h, --help          Print help info
   -r, --rcrc          Resetting params \(command line parameter \"rcrc\"\)
   -y, --sys_path arg  Sys path
+  -a, --path arg      Path
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
