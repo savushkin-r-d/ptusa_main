@@ -14,8 +14,6 @@
 
 #include <fmt/core.h> 
 
-#include <cxxopts.hpp> 
-
 #include "dtime.h"
 
 #include "prj_mngr.h"
@@ -87,30 +85,6 @@ int main( int argc, const char *argv[] )
     signal(SIGFPE, stopHandler);
     signal(SIGILL, stopHandler);
     signal(SIGSEGV, stopHandler);
-
-    //-Работа с параметрами командной строки.
-    cxxopts::Options options( argv[0], "Main control program" );
-
-    options.add_options()
-        ( "s,script",      "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
-        ( "d,debug",       "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
-        ( "p,port",        "Param port", cxxopts::value<int>()->default_value( "10000" ) )
-        ( "h,help",        "Print help info" )
-        ( "r,rcrc",        "Resetting params (command line parameter \"rcrc\")" )
-        ( "y,sys_path",    "Sys path", cxxopts::value<std::string>() )
-        ( "a,path",        "Path", cxxopts::value<std::string>() )
-        ( "e,extra_paths", "Extra paths", cxxopts::value<std::string>() );
-
-    options.positional_help( "<script>" );
-    options.parse_positional({ "script" });
-    options.show_positional_help();
-    auto result = options.parse( argc, argv );
-
-    if ( result.count( "help" ) || argc < 2 )
-        {
-        fmt::print( options.help() );
-        exit( EXIT_SUCCESS );
-        }
 
 #ifdef PAC_WAGO_750_860
     log_mngr::lg = new l_log();
