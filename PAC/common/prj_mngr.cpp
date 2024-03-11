@@ -33,37 +33,34 @@ auto_smart_ptr < project_manager > project_manager::instance;
 int project_manager::proc_main_params( int argc, const char *argv[] )
     {
     //-Работа с параметрами командной строки.
-    cxxopts::Options options(argv[0], "Main control program");
+    cxxopts::Options options( argv[0], "Main control program" );
 
     options.add_options()
-        ("s,script", "The script file to execute", cxxopts::value<std::string>()->default_value("main.plua"))
-        ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
-        ("p,port", "Param port", cxxopts::value<int>()->default_value("10000"))
-        ("h,help", "Print help info")
-        ("r,rcrc", "Resetting params (command line parameter \"rcrc\")")
-        ("y,sys_path", "Sys path", cxxopts::value<std::string>())
-        ("a,path", "Path", cxxopts::value<std::string>())
-        ("e,extra_paths", "Extra paths", cxxopts::value<std::string>());
+        ( "s,script",      "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug",       "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port",        "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help",        "Print help info" )
+        ( "r,rcrc",        "Resetting params (command line parameter \"rcrc\")" )
+        ( "y,sys_path",    "Sys path", cxxopts::value<std::string>() )
+        ( "a,path",        "Path", cxxopts::value<std::string>() )
+        ( "e,extra_paths", "Extra paths", cxxopts::value<std::string>() );
 
-    options.positional_help("<script>");
+    options.positional_help( "<script>" );
     options.parse_positional({ "script" });
     options.show_positional_help();
-    auto result = options.parse(argc, argv);
+    auto result = options.parse( argc, argv );
 
-    if (result.count("help") || argc < 2)
+    if ( result.count("help") || argc < 2 )
     {
-        fmt::print(options.help());
-        exit(EXIT_SUCCESS);
+        fmt::print( options.help() );
+        exit( EXIT_SUCCESS );
     }
 
-    for ( int i = 1; i < argc; i++ )
-        {
-        if ( strcmp( argv[ i ], "debug" ) == 0 )
-            {
-            G_DEBUG = 1;
-            printf( "DEBUG ON.\n" );
-            }
-        }
+    if ( result["debug"].as<bool>() )
+    {
+        G_DEBUG = 1;
+        printf( "DEBUG ON.\n" );
+    }
 
     for ( int i = 1; i < argc; i++ )
         {
