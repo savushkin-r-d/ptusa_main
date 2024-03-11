@@ -382,13 +382,14 @@ set_tests_properties( run_no_command_line_arguments
     PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg    The script file to execute \(default: main\.plua\)
-  -d, --debug         Enable debugging
-  -p, --port arg      Param port \(default: 10000\)
-  -h, --help          Print help info
-  -r, --rcrc          Resetting params \(command line parameter \"rcrc\"\)
-  -y, --sys_path arg  Sys path
-  -a, --path arg      Path
+  -s, --script arg      The script file to execute \(default: main\.plua\)
+  -d, --debug           Enable debugging
+  -p, --port arg        Param port \(default: 10000\)
+  -h, --help            Print help info
+  -r, --rcrc            Resetting params \(command line parameter \"rcrc\"\)
+  -y, --sys_path arg    Sys path
+  -a, --path arg        Path
+  -e, --extra_paths arg Extra paths
 ]] )
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
