@@ -212,7 +212,8 @@ int operation::check_steps_params( char* err_dev_name, int str_len )
     return states[ RUN ]->check_steps_params( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
-int operation::check_on_run_state(char* reason, int max_len ) const
+int operation::check_on_run_state( char* reason, int max_len ) const
+
     {
     return states[ RUN ]->check_on( reason, max_len );
     }
@@ -926,7 +927,8 @@ step::~step()
     }
 //-----------------------------------------------------------------------------
 int step::check( char* reason, int max_len ) const
-    {    
+    {
+
     auto res = actions[ A_DI_DO ]->check( reason, max_len );
     if ( res ) return res;
     res = actions[ A_AI_AO ]->check( reason, max_len );

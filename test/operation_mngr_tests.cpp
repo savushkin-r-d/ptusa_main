@@ -1319,7 +1319,7 @@ TEST( DI_DO_action, check )
 	res = action.check( &msg[ 0 ], SHORT_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	EXPECT_STREQ( EXPECTED_STR.substr( 0, SHORT_STR_SIZE - 1 ).c_str(),
-		msg.c_str());
+		msg.c_str() );
 
 	action.clear_dev();
 	action.add_dev( &test_DI );
