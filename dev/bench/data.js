@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710248592045,
+  "lastUpdate": 1710249102915,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22670,6 +22670,42 @@ window.BENCHMARK_DATA = {
             "value": 93.10242984293106,
             "unit": "us/iter",
             "extra": "iterations: 7640\ncpu: 91.94627539267015 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aac7f49a32b69a519225cc06c18b4da7f5f40228",
+          "message": "Fix message buffer overflow error (#661)\n\n* Fix message buffer overflow error\n\n* Fix the null character\n\n* Improve tests\n\n* [review] Fix codestyle\n\nCo-authored-by: AlexandrBehunkov <asutp10@pda.savushkin.by>\n\n---------\n\nCo-authored-by: AlexandrBehunkov <asutp10@pda.savushkin.by>",
+          "timestamp": "2024-03-12T13:01:01Z",
+          "tree_id": "c3e69ae4fae0e5f669d8f1e4e59ac4bf8a07f20f",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/aac7f49a32b69a519225cc06c18b4da7f5f40228"
+        },
+        "date": 1710249101658,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.203786517115223,
+            "unit": "us/iter",
+            "extra": "iterations: 42973\ncpu: 16.20337556139902 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 93.01013914174345,
+            "unit": "us/iter",
+            "extra": "iterations: 7690\ncpu: 91.83304486345904 us\nthreads: 1"
           }
         ]
       }
