@@ -395,10 +395,10 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tNCAR2='%s',\n", ncar2);
     answer_size += sprintf(buff + answer_size, "\tNCAR3='%s',\n", ncar3);
     answer_size += sprintf(buff + answer_size, "\tNCAR4='%s',\n", ncar4);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH1='%d',\n", switch1);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH2='%d',\n", switch2);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH3='%d',\n", switch3);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH4='%d',\n", switch4);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH1=%d,\n", switch1);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH2=%d,\n", switch2);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH3=%d,\n", switch3);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH4=%d,\n", switch4);
 
     //Время простоя.
     char up_time_str [ 50 ];
@@ -2710,7 +2710,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
     if (dev_upr_circulation)
         {
         if ((steps_circulation.count(step_to_do) && circ_temp_reached) ||
-            ((steps_additional_rinse.count(step_to_do) || steps_v2_supply.count(step_to_do)) && (!wasflip)))
+            (steps_additional_rinse.count(step_to_do) && (!wasflip)))
             {
             dev_upr_circulation->on();
             }
@@ -5882,7 +5882,7 @@ int cipline_tech_object::init_object_devices()
         device* dev;
         if (dev_no > 0)
             {
-            sprintf(devname, "LINE%dAO%d", nmr, dev_no);
+            sprintf(devname, "LINE%dAO%d", nmr, dev_no);  
             dev = (device*)AO(devname);
             if (dev->get_serial_n() > 0)
                 {
