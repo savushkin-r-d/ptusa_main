@@ -683,6 +683,8 @@ class cipline_tech_object: public tech_object
 
         ///Флаг завершения флипования на операциях циркуляции/промывки.
         bool wasflip{};
+        //Флаг исполььзования сигнала "циркуляция на подаче объема V2
+        bool use_circulation_on_v2_supply;
 
         //Переменные для циркуляции
         char circ_tank_s; //Циркулировать ли через танк со щелочью

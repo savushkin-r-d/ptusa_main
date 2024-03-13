@@ -138,6 +138,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     disable_tank_heating = 0;
     default_programlist = 0x13FB;
     use_internal_medium_recipes = false;
+    use_circulation_on_v2_supply = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
@@ -2709,8 +2710,15 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_circulation)
         {
-        if ((steps_circulation.count(step_to_do) && circ_temp_reached) ||
-            (steps_additional_rinse.count(step_to_do) && (!wasflip)))
+        if  (   (steps_circulation.count(step_to_do) && circ_temp_reached) ||
+                (
+                    (
+                        steps_additional_rinse.count(step_to_do) ||
+                        (use_circulation_on_v2_supply && steps_v2_supply.count(step_to_do))
+                    )
+                    && (!wasflip)
+                )
+            )
             {
             dev_upr_circulation->on();
             }

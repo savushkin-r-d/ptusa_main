@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Jan 24 16:42:38 2024.
+** Generated automatically by tolua++-1.0.92 on Wed Mar 13 15:31:45 2024.
 */
 
 #ifndef __cplusplus
@@ -9981,6 +9981,36 @@ static int tolua_set_cipline_tech_object_disable_final_rinsing(lua_State* tolua_
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: use_circulation_on_v2_supply of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_use_circulation_on_v2_supply
+static int tolua_get_cipline_tech_object_use_circulation_on_v2_supply(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'use_circulation_on_v2_supply'",NULL);
+#endif
+  tolua_pushboolean(tolua_S,(bool)self->use_circulation_on_v2_supply);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: use_circulation_on_v2_supply of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_use_circulation_on_v2_supply
+static int tolua_set_cipline_tech_object_use_circulation_on_v2_supply(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'use_circulation_on_v2_supply'",NULL);
+  if (!tolua_isboolean(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->use_circulation_on_v2_supply = ((bool)  tolua_toboolean(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: V00 of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V00_ptr
 static int tolua_get_cipline_tech_object_V00_ptr(lua_State* tolua_S)
@@ -15315,6 +15345,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"no_acid_wash_max",tolua_get_cipline_tech_object_no_acid_wash_max,tolua_set_cipline_tech_object_no_acid_wash_max);
    tolua_variable(tolua_S,"use_internal_medium_recipes",tolua_get_cipline_tech_object_use_internal_medium_recipes,tolua_set_cipline_tech_object_use_internal_medium_recipes);
    tolua_variable(tolua_S,"disable_final_rinsing",tolua_get_cipline_tech_object_disable_final_rinsing,tolua_set_cipline_tech_object_disable_final_rinsing);
+   tolua_variable(tolua_S,"use_circulation_on_v2_supply",tolua_get_cipline_tech_object_use_circulation_on_v2_supply,tolua_set_cipline_tech_object_use_circulation_on_v2_supply);
    tolua_variable(tolua_S,"V00",tolua_get_cipline_tech_object_V00_ptr,tolua_set_cipline_tech_object_V00_ptr);
    tolua_variable(tolua_S,"V01",tolua_get_cipline_tech_object_V01_ptr,tolua_set_cipline_tech_object_V01_ptr);
    tolua_variable(tolua_S,"V02",tolua_get_cipline_tech_object_V02_ptr,tolua_set_cipline_tech_object_V02_ptr);
