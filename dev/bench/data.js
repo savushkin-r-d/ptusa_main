@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710407682676,
+  "lastUpdate": 1710408190496,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22868,6 +22868,42 @@ window.BENCHMARK_DATA = {
             "value": 94.81418774253717,
             "unit": "us/iter",
             "extra": "iterations: 7473\ncpu: 93.30061367589991 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "artem.rudnitsky@gmail.com",
+            "name": "Artem Rudnitsky",
+            "username": "rartem"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "02150e1eaccb03adc652adc00198568324d14ca7",
+          "message": "[cip] Change circulation signal logic (#664)\n\n* [fix] switch is numeric\n\n* circulation signal on v2 is optional(off by default)\n\n* Update PAC/common/cip_tech_def.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update PAC/common/cip_tech_def.h\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update PAC/common/cip_tech_def.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2024-03-14T09:12:28Z",
+          "tree_id": "3df09985cc50e3cb7b9af23782eaf2e642cb044b",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/02150e1eaccb03adc652adc00198568324d14ca7"
+        },
+        "date": 1710408189236,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.880895696605235,
+            "unit": "us/iter",
+            "extra": "iterations: 44035\ncpu: 15.88059282389009 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 93.62467736419786,
+            "unit": "us/iter",
+            "extra": "iterations: 7603\ncpu: 92.49519426542152 us\nthreads: 1"
           }
         ]
       }
