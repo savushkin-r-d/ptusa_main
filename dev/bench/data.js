@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710407126777,
+  "lastUpdate": 1710407682676,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22834,6 +22834,40 @@ window.BENCHMARK_DATA = {
             "value": 92.74112169381067,
             "unit": "us/iter",
             "extra": "iterations: 7675\ncpu: 91.55894319218241 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Artem Rudnitsky",
+            "username": "rartem",
+            "email": "artem.rudnitsky@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "02150e1eaccb03adc652adc00198568324d14ca7",
+          "message": "[cip] Change circulation signal logic (#664)\n\n* [fix] switch is numeric\n\n* circulation signal on v2 is optional(off by default)\n\n* Update PAC/common/cip_tech_def.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update PAC/common/cip_tech_def.h\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update PAC/common/cip_tech_def.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2024-03-14T09:12:28Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/02150e1eaccb03adc652adc00198568324d14ca7"
+        },
+        "date": 1710407680856,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.86684653745879,
+            "unit": "us/iter",
+            "extra": "iterations: 44115\ncpu: 15.866272696361781 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.81418774253717,
+            "unit": "us/iter",
+            "extra": "iterations: 7473\ncpu: 93.30061367589991 us\nthreads: 1"
           }
         ]
       }
