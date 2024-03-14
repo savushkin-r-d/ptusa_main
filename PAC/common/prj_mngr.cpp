@@ -62,17 +62,14 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         printf( "DEBUG ON.\n" );
     }
 
-    for ( int i = 1; i < argc; i++ )
+    if ( result.count( "rcrc" ) )
+    {
+        if ( G_DEBUG )
         {
-        if ( strcmp( argv[ i ], "rcrc" ) == 0 )
-            {
-            if ( G_DEBUG )
-                {
-                printf( "Resetting params (command line parameter \"rcrc\").\n" );
-                }
-            params_manager::get_instance()->reset_params_size();
-            }
+            printf( "Resetting params (command line parameter \"rcrc\").\n" );
         }
+        params_manager::get_instance()->reset_params_size();
+    }
 
     // port 10001
     for ( int i = 1; i < argc - 1; i++ )
