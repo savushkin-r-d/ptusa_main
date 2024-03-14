@@ -5890,7 +5890,7 @@ int cipline_tech_object::init_object_devices()
         device* dev;
         if (dev_no > 0)
             {
-            sprintf(devname, "LINE%dAO%d", nmr, dev_no);  
+            sprintf(devname, "LINE%dAO%d", nmr, dev_no);
             dev = (device*)AO(devname);
             if (dev->get_serial_n() > 0)
                 {
