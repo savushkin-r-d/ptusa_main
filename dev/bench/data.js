@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710400839739,
+  "lastUpdate": 1710407126777,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -22802,6 +22802,38 @@ window.BENCHMARK_DATA = {
             "value": 88.20109049832095,
             "unit": "us/iter",
             "extra": "iterations: 7746\ncpu: 87.13205770720373 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "committer": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "id": "f901cacdc35c6b64945de9baab3d8c43fcc4e8bf",
+          "message": "[cip] Change circulation signal logic",
+          "timestamp": "2021-12-15T13:17:00Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/664/commits/f901cacdc35c6b64945de9baab3d8c43fcc4e8bf"
+        },
+        "date": 1710407125300,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.766759198913908,
+            "unit": "us/iter",
+            "extra": "iterations: 44190\ncpu: 15.766561846571626 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 92.74112169381067,
+            "unit": "us/iter",
+            "extra": "iterations: 7675\ncpu: 91.55894319218241 us\nthreads: 1"
           }
         ]
       }
