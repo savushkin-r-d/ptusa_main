@@ -41,6 +41,20 @@ class tcp_communicator_win : public tcp_communicator
             /// @brief Итерация обмена данными с сервером.
             int evaluate();
 
+            /// @brief Получение данных с таймаутом.
+            ///
+            /// @param s        - сокет.
+            /// @param buf      - буфер для записи полученных данных.
+            /// @param len      - количество считываемых байт.
+            /// @param timeout  - время ожидания, сек.
+            /// @param usec     - время ожидания, мк сек.
+            ///
+            /// @return -1   - ошибка работы с сокетом.
+            /// @return -2   - ошибка таймаута.
+            /// @return >= 0 - размер реально считанных данных.
+            static int  recvtimeout( u_int s, u_char* buf, int len,
+                int timeout, int usec );
+
     private:
             sockaddr_in ssin; 	        ///< Адрес клиента.
             int         sin_len;    	///< Длина адреса.
@@ -71,20 +85,6 @@ class tcp_communicator_win : public tcp_communicator
 
             /// @brief Закрытие сети.
             void net_terminate();
-
-            /// @brief Получение данных с таймаутом.
-            ///
-            /// @param s        - сокет.
-            /// @param buf      - буфер для записи полученных данных.
-            /// @param len      - количество считываемых байт.
-            /// @param timeout  - время ожидания, сек.
-            /// @param usec     - время ожидания, мк сек.
-            ///
-            /// @return -1   - ошибка работы с сокетом.
-            /// @return -2   - ошибка таймаута.
-            /// @return >= 0 - размер реально считанных данных.
-            int  recvtimeout( u_int s, u_char *buf, int len,
-                int timeout, int usec );
     };
     
 #endif //TCP_CMCTR_LINUX

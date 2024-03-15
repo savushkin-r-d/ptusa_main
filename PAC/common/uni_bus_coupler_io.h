@@ -13,22 +13,33 @@
 #ifndef WAGO_L_H
 #define WAGO_L_H
 
+#ifdef WIN_OS
+#include <winsock2.h>
+#include "w_tcp_cmctr.h"
+
+#else
 #include <sys/socket.h>
 #include <unistd.h>
 #include <errno.h>
+#include "l_tcp_cmctr.h"
+#endif // WIN_OS
 
 #include "bus_coupler_io.h"
 
 #include "dtime.h"
 #include "PAC_err.h"
-#include "l_tcp_cmctr.h"
+
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода для OC Linux.
 ///
 ///
-class io_manager_linux : public io_manager
+class uni_io_manager : public io_manager
     {
-    protected:
+#ifdef PTUSA_TEST
+    public:
+#else
+    private:
+#endif // PTUSA_TEST
         enum CONSTANTS
             {
             MAX_MODBUS_REGISTERS_PER_QUERY = 123,
@@ -37,17 +48,9 @@ class io_manager_linux : public io_manager
             PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
             };
 
-        u_char buff[ BUFF_SIZE ];
+        u_char buff[ BUFF_SIZE ] = { 0 };
         u_char* resultbuff;
         u_char* writebuff;
-
-        /// @brief Инициализация соединения с узлом I/O.
-        ///
-        /// @param node - узел I/O, с которым осуществляется соединение.
-        ///
-        /// @return -   0 - ок.
-        /// @return - < 0 - ошибка.
-        int net_init( io_node *node );
 
         /// @brief Обмен с узлом I/O.
         ///
@@ -57,23 +60,34 @@ class io_manager_linux : public io_manager
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int e_communicate( io_node *node, int bytes_to_send, int bytes_to_receive );
+        virtual int e_communicate( io_node* node, int bytes_to_send,
+            int bytes_to_receive );
 
-        int read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
-        int write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
-
-        int read_inputs();
-        int write_outputs();
+        int read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
+        int write_holding_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
 
     public:
-        io_manager_linux();
+        int read_inputs() override;
+        int write_outputs() override;
 
-        virtual ~io_manager_linux();
+        uni_io_manager();
 
-		/// @brief Отключение от узла.
-		///
-		/// @param node - узел, от которого отключаемся.
-		void disconnect(io_node *node) override;
+        ~uni_io_manager() override = default;
+
+        /// @brief Инициализация соединения с узлом I/O.
+        ///
+        /// @param node - узел I/O, с которым осуществляется соединение.
+        ///
+        /// @return -   0 - ок.
+        /// @return - < 0 - ошибка.
+        int net_init( io_node* node ) const;
+
+        /// @brief Отключение от узла.
+        ///
+        /// @param node - узел, от которого отключаемся.
+        void disconnect( io_node* node ) override;
     };
 //-----------------------------------------------------------------------------
 #endif // WAGO_L_H

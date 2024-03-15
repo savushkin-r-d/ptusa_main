@@ -24,9 +24,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-add_compile_definitions(PAC_PC)
 if(NOT ARP_DEVICE)
-    add_compile_definitions(DEBUG_NO_IO_MODULES)
+    add_compile_definitions(PAC_PC)
 endif()
 
 if(LINUX)
@@ -179,6 +178,12 @@ endif()
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
+endif()
+
+target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
+if(NOT MINGW)
+    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
 endif()
 
 if(ARP_DEVICE OR MINGW)
