@@ -15,8 +15,6 @@
 #ifndef WAGO_750_H
 #define WAGO_750_H
 
-#include "l_bus_coupler_io.h"
-
 extern "C" {
 #include <dal/adi_application_interface.h>
 }

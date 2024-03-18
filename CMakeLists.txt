@@ -24,9 +24,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-add_compile_definitions(PAC_PC)
 if(NOT ARP_DEVICE)
-    add_compile_definitions(DEBUG_NO_IO_MODULES)
+    add_compile_definitions(PAC_PC)
 endif()
 
 if(LINUX)
@@ -157,11 +156,11 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-if(NOT MINGW)
-    add_executable(main_perfomance_test ${common_src} ${win_src}
-           test/perfomance/main_perfomance_test.cpp           
-           PAC_control_projects/main_control_prg/version.rc)
-endif()
+    if(NOT MINGW)
+        add_executable(main_perfomance_test ${common_src} ${win_src}
+               test/perfomance/main_perfomance_test.cpp
+               PAC_control_projects/main_control_prg/version.rc)
+    endif()
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -179,6 +178,19 @@ endif()
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
+
+    target_compile_definitions(${PROJECT_NAME} PUBLIC WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(libptusa_main PUBLIC WIN32_LEAN_AND_MEAN)
+    target_compile_definitions(main_test PUBLIC WIN32_LEAN_AND_MEAN)
+    if(NOT MINGW)
+        target_compile_definitions(main_perfomance_test PUBLIC WIN32_LEAN_AND_MEAN)
+    endif()
+endif()
+
+target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
+if(NOT MINGW)
+    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
 endif()
 
 if(ARP_DEVICE OR MINGW)

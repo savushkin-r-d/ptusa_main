@@ -37,7 +37,7 @@ unsigned long get_delta_millisec( unsigned long time1 )
     return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
-void sleep_ms( u_int ms )
+void sleep_ms( unsigned int ms )
     {
     Sleep( ms );
     }

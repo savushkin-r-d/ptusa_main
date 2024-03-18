@@ -29,7 +29,6 @@
 #include <time.h>
 #include <conio.h>
 
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 void SetColor( WORD color );

@@ -14,9 +14,24 @@
 #ifndef IO_H
 #define IO_H
 
+#if defined LINUX_OS
+#include <sys/socket.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include "l_tcp_cmctr.h"
+#endif
+
+#if defined WIN_OS
+#include <ws2tcpip.h>
+#include "WSA_err_decode.h"
+#endif
+
 #include "smart_ptr.h"
 
 #include "dtime.h"
+
+#include <fmt/core.h>
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода.
 ///
@@ -219,6 +234,13 @@ class io_device
 class io_manager
     {
     public:
+        enum class CONSTANTS : uint32_t
+            {
+            MAX_MODBUS_REGISTERS_PER_QUERY = 123,
+            BUFF_SIZE = 262,
+            PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
+            PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
+            };
         virtual ~io_manager();
 
         void print() const;
@@ -227,12 +249,12 @@ class io_manager
         /// @brief Чтение модулей ввода.
         ///
         /// @return - 0 - Ок.
-        virtual int read_inputs() = 0;
+        virtual int read_inputs();
 
         /// @brief Чтение модулей вывода.
         ///
         /// @return - 0 - Ок.
-        virtual int write_outputs() = 0;
+        virtual int write_outputs();
 
         /// @brief Получение единственного экземпляра класса.
         static io_manager* get_instance();
@@ -386,10 +408,28 @@ class io_manager
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
+        u_char buff[ static_cast <uint32_t> ( CONSTANTS::BUFF_SIZE ) ];
+        u_char* resultbuff;
+        u_char* writebuff;
+
     public:
         io_node * get_node( int node_n );
 
 		u_int get_nodes_count();
+
+        void read_DI(io_node* nd);
+        void read_AI(io_node* nd);
+
+        void read_phoenix_inputs(io_node* nd);
+
+        bool is_phoenix_input_reading_required(const io_node* nd) const;
+        unsigned int calculate_registers_count(const io_node* nd) const;
+        
+        void process_analog_inputs(io_node* nd, unsigned int& analog_dest, int& index_source,
+                                 unsigned int start_register, unsigned int registers_count) const;
+        void process_digital_inputs(io_node* nd, unsigned int& bit_dest, int& index_source,
+                                  unsigned int start_register, unsigned int registers_count) const;
+        void handle_ai_error(const io_node* nd, unsigned int registers_count) const;
 
         /// @brief Установка числа модулей.
         ///
@@ -415,10 +455,28 @@ class io_manager
         void init_node_AI( u_int node_index, u_int AI_index,
             u_int type, u_int offset );
 
-		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
 
+        /// @brief Инициализация соединения с узлом I/O.
+        ///
+        /// @param node - узел I/O, с которым осуществляется соединение.
+        ///
+        /// @return -   0 - ок.
+        /// @return - < 0 - ошибка.
+        int net_init( io_node* node ) const;
 
+        /// @brief Отключение от узла.
+        ///
+        /// @param node - узел, от которого отключаемся.
+        void disconnect( io_node* node ) const;
+
+        int e_communicate( io_node* node, int bytes_to_send,
+            int bytes_to_receive );
+
+        int write_holding_registers( io_node* node,
+            unsigned int address, unsigned int quantity, unsigned char station = 0 );
+
+        int read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 );
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();
