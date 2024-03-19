@@ -28,12 +28,14 @@ int sleep_time_ms = 0;
 int lua_init( lua_State* L )
     {
     int top = lua_gettop( L );
-
-    int argc = 0;
-    const char **argv = ( top == 0 ? new const char*[ 1 ] : new const char*[ top ] );
+    int p_size = ( top < 2 ? 2 : top );
+        
+    const char **argv = new const char* [ p_size ];
     const char *empty_par = "";
 
+    int argc = 0;
     argv[ 0 ] = empty_par;
+    argv[ 1 ] = empty_par;
 
     for ( int i = 1; i <= top; i++ )
         {
@@ -82,13 +84,10 @@ int lua_init( lua_State* L )
         return 1;
         }
 
-    if ( top )
+    for ( int i = 0; i < p_size; i++ )
         {
-        for ( int i = 0; i < top; i++ )
-            {
-            delete[] argv[ i ];
-            argv[ i ] = 0;
-            }
+        delete[] argv[ i ];
+        argv[ i ] = 0;
         }
     delete [] argv;
     argv = 0;

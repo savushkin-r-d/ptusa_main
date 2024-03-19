@@ -100,7 +100,7 @@ int main( int argc, const char *argv[] )
         }
 
     //-Инициализация Lua.
-    res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
+    res = G_LUA_MANAGER->init( nullptr, argv_utf8[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
         G_PROJECT_MANAGER->extra_paths.c_str() );
 

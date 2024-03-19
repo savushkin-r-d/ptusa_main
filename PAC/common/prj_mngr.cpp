@@ -84,18 +84,18 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "sys_path" ) )
         {
-        auto& sys_path = result[ "sys_path" ].as<std::string>();
-        init_sys_path( sys_path.c_str() );
+        auto& sys_path_str = result[ "sys_path" ].as<std::string>();
+        init_sys_path( sys_path_str.c_str() );
         }
     if ( result.count( "path" ) )
         {
-        auto& path = result[ "path" ].as<std::string>();
-        init_path( path.c_str() );
+        auto& path_str = result[ "path" ].as<std::string>();
+        init_path( path_str.c_str() );
         }
     if ( result.count( "extra_paths" ) )
         {
-        auto& extra_paths = result[ "extra_paths" ].as<std::string>();
-        init_extra_paths( extra_paths.c_str() );
+        auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
+        init_extra_paths( extra_paths_str.c_str() );
         }
 
     return 0;
