@@ -101,7 +101,7 @@ TEST( project_manager, proc_main_params )
     const char* argv[] = { argv0, argv1 };
         
     testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv ), argv );
+    res = G_PROJECT_MANAGER->proc_main_params( 2, argv );
     ASSERT_EQ( 1, res );
 
     auto help = R"(Main control program
@@ -124,7 +124,7 @@ Usage:
     const char* argv_debug[] = { "ptusa_main.exe", "--debug", "--rcrc",
         "main.plua" };
     testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv_debug ), argv_debug);
+    res = G_PROJECT_MANAGER->proc_main_params( 4, argv_debug);
     ASSERT_EQ( 0, res );
     auto debug = R"(DEBUG ON.
 Resetting params (command line parameter "rcrc").
@@ -135,7 +135,7 @@ Resetting params (command line parameter "rcrc").
     const char* argv_path[] = { "ptusa_main.exe", 
         "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/"
         "main.plua" };
-    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv_path ), argv_path );
+    res = G_PROJECT_MANAGER->proc_main_params( 7, argv_path );
     ASSERT_EQ( 0, res );
 
 
