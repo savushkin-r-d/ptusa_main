@@ -84,12 +84,24 @@ TEST( project_manager, proc_main_params )
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
 
+
+    auto res = G_PROJECT_MANAGER->proc_main_params( 1, nullptr );
+    ASSERT_EQ( 2, res );
+
+    const char* empty_first_param[] = { "" };
+    res = G_PROJECT_MANAGER->proc_main_params( 0, empty_first_param );
+    ASSERT_EQ( 2, res );
+
+    const char* null_first_param[] = { nullptr };
+    res = G_PROJECT_MANAGER->proc_main_params( 1, null_first_param );
+    ASSERT_EQ( 2, res );
+
     char argv0[] = "ptusa_main.exe";
     char argv1[] = "--help";
     const char* argv[] = { argv0, argv1 };
         
     testing::internal::CaptureStdout();
-    auto res = G_PROJECT_MANAGER->proc_main_params( 1, argv );
+    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv ), argv );
     ASSERT_EQ( 1, res );
 
     auto help = R"(Main control program
@@ -108,6 +120,24 @@ Usage:
 
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, help );
+
+    const char* argv_debug[] = { "ptusa_main.exe", "--debug", "--rcrc",
+        "main.plua" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv_debug ), argv_debug);
+    ASSERT_EQ( 0, res );
+    auto debug = R"(DEBUG ON.
+Resetting params (command line parameter "rcrc").
+)";
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    const char* argv_path[] = { "ptusa_main.exe", 
+        "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/"
+        "main.plua" };
+    res = G_PROJECT_MANAGER->proc_main_params( std::size( argv_path ), argv_path );
+    ASSERT_EQ( 0, res );
+
 
     G_LUA_MANAGER->free_Lua();
     }

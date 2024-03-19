@@ -32,6 +32,8 @@ auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char* argv[] )
     {
+    if ( !argc || !argv || !argv[ 0 ] ) return 2;
+
     //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
