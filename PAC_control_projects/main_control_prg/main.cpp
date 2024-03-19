@@ -93,7 +93,7 @@ int main( int argc, const char *argv[] )
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 
     //-Работа с параметрами командной строки.
-    int res = G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
+    int res = G_PROJECT_MANAGER->proc_main_params( argc, argv_utf8 );
     if ( res )
         {
         exit( EXIT_SUCCESS );
