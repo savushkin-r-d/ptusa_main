@@ -30,84 +30,73 @@
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
-int project_manager::proc_main_params( int argc, const char *argv[] )
+int project_manager::proc_main_params( int argc, const char* argv[] )
     {
     //-Работа с параметрами командной строки.
-    cxxopts::Options options( argv[0], "Main control program" );
+    cxxopts::Options options( argv[ 0 ], "Main control program" );
 
     options.add_options()
-        ( "s,script",      "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
-        ( "d,debug",       "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
-        ( "p,port",        "Param port", cxxopts::value<int>()->default_value( "10000" ) )
-        ( "h,help",        "Print help info" )
-        ( "r,rcrc",        "Resetting params (command line parameter \"rcrc\")" )
-        ( "y,sys_path",    "Sys path", cxxopts::value<std::string>() )
-        ( "a,path",        "Path", cxxopts::value<std::string>() )
-        ( "e,extra_paths", "Extra paths", cxxopts::value<std::string>() );
+        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help", "Print help info" )
+        ( "r,rcrc", "Reset params" )
+        ( "sys_path", "Sys path", cxxopts::value<std::string>() )
+        ( "path", "Path", cxxopts::value<std::string>() )
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() );
 
     options.positional_help( "<script>" );
-    options.parse_positional({ "script" });
+    options.parse_positional( { "script" } );
     options.show_positional_help();
+    options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
     auto result = options.parse( argc, argv );
 
-    if ( result.count("help") || argc < 2 )
-    {
+    if ( result.count( "help" ) || argc < 2 )
+        {
         fmt::print( options.help() );
-        exit( EXIT_SUCCESS );
-    }
+        return 1;
+        }
 
-    if ( result["debug"].as<bool>() )
-    {
+    if ( result[ "debug" ].as<bool>() )
+        {
         G_DEBUG = 1;
-        printf( "DEBUG ON.\n" );
-    }
+        fmt::print( "DEBUG ON.\n" );
+        }
 
     if ( result.count( "rcrc" ) )
-    {
+        {
         if ( G_DEBUG )
-        {
-            printf( "Resetting params (command line parameter \"rcrc\").\n" );
-        }
+            {
+            fmt::print( "Resetting params (command line parameter \"rcrc\").\n" );
+            }
         params_manager::get_instance()->reset_params_size();
-    }
+        }
 
-    // port 10001
     if ( result.count( "port" ) )
-    {
-        int p = result["port"].as<int>();
-        if ( p > 0 )
         {
+        int p = result[ "port" ].as<int>();
+        if ( p > 0 ) 
+            {
             tcp_communicator::set_port( p, p + 502 );
             sprintf( G_LOG->msg, "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
             G_LOG->write_log( i_log::P_NOTICE );
-        }
-    }
-
-    // sys_path  "C:/system_scripts/"
-    for ( int i = 1; i < argc - 1; i++ )
-        {
-        if ( strcmp( argv[ i ], "sys_path" ) == 0 )
-            {
-            init_sys_path( argv[ i + 1 ] );
             }
         }
 
-    // path  "C:/project folder/"
-    for ( int i = 1; i < argc - 1; i++ )
+    if ( result.count( "sys_path" ) )
         {
-        if ( strcmp( argv[ i ], "path" ) == 0 )
-            {
-            init_path( argv[ i + 1 ] );
-            }
+        auto& sys_path = result[ "sys_path" ].as<std::string>();
+        init_sys_path( sys_path.c_str() );
         }
-
-    // extra path  "C:/project folder/user_sys;C:/project folder/user_sys_new/"
-    for ( int i = 1; i < argc - 1; i++ )
+    if ( result.count( "path" ) )
         {
-        if ( strcmp( argv[ i ], "extra_paths" ) == 0 )
-            {
-            init_extra_paths( argv[ i + 1 ] );
-            }
+        auto& path = result[ "path" ].as<std::string>();
+        init_path( path.c_str() );
+        }
+    if ( result.count( "extra_paths" ) )
+        {
+        auto& extra_paths = result[ "extra_paths" ].as<std::string>();
+        init_extra_paths( extra_paths.c_str() );
         }
 
     return 0;

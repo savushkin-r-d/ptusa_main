@@ -91,11 +91,16 @@ int main( int argc, const char *argv[] )
 #endif
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
-    G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
-    //-Работа с параметрами командной строки.!->
+
+    //-Работа с параметрами командной строки.
+    int res = G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
+    if ( res )
+        {
+        exit( EXIT_SUCCESS );
+        }
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
+    res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
         G_PROJECT_MANAGER->extra_paths.c_str() );
 

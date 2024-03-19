@@ -57,10 +57,16 @@ int lua_init( lua_State* L )
         }
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
-    G_PROJECT_MANAGER->proc_main_params( argc, argv );
+    int res = G_PROJECT_MANAGER->proc_main_params( argc, argv );
+    if ( res )
+        {
+        lua_pushnumber( L, EXIT_FAILURE );
+        return 1;
+        }
+
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( L, argv[ 0 ],
+    res = G_LUA_MANAGER->init( L, argv[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
         G_PROJECT_MANAGER->extra_paths.c_str() );
 

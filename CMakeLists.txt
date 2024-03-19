@@ -386,11 +386,16 @@ set_tests_properties( run_no_command_line_arguments
   -d, --debug            Enable debugging
   -p, --port arg         Param port \(default: 10000\)
   -h, --help             Print help info
-  -r, --rcrc             Resetting params \(command line parameter \"rcrc\"\)
-  -y, --sys_path arg     Sys path
-  -a, --path arg         Path
-  -e, --extra_paths arg  Extra paths
+  -r, --rcrc             Reset params
+      --sys_path arg     Sys path
+      --path arg         Path
+      --extra_paths arg  Extra paths
 ]] )
+
+  set_property(
+    TARGET libptusa_main
+    PROPERTY VS_DEBUGGER_COMMAND
+    "lua.exe")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(T1-PLCnext-Demo lua5.1

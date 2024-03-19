@@ -76,5 +76,38 @@ object_manager =
     ASSERT_EQ( 0, res );
 
 
-    G_LUA_MANAGER->free_Lua();    
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( project_manager, proc_main_params )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    char argv0[] = "ptusa_main.exe";
+    char argv1[] = "--help";
+    const char* argv[] = { argv0, argv1 };
+        
+    testing::internal::CaptureStdout();
+    auto res = G_PROJECT_MANAGER->proc_main_params( 1, argv );
+    ASSERT_EQ( 1, res );
+
+    auto help = R"(Main control program
+Usage:
+  ptusa_main.exe [OPTION...] <script>
+
+  -s, --script arg       The script file to execute (default: main.plua)
+  -d, --debug            Enable debugging
+  -p, --port arg         Param port (default: 10000)
+  -h, --help             Print help info
+  -r, --rcrc             Reset params
+      --sys_path arg     Sys path
+      --path arg         Path
+      --extra_paths arg  Extra paths
+)";
+
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, help );
+
+    G_LUA_MANAGER->free_Lua();
     }
