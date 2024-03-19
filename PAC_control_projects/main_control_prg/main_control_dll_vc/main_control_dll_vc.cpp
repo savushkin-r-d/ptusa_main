@@ -30,8 +30,8 @@ int lua_init( lua_State* L )
     int top = lua_gettop( L );
     int p_size = ( top < 2 ? 2 : top );
         
-    const char **argv = new const char* [ p_size ];
-    const char *empty_par = "";
+    auto argv = new const char* [ p_size ];
+    auto empty_par = "";
 
     int argc = 0;
     argv[ 0 ] = empty_par;
