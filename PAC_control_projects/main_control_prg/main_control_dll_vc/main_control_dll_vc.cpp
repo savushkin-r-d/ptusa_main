@@ -28,15 +28,10 @@ int sleep_time_ms = 0;
 int lua_init( lua_State* L )
     {
     int top = lua_gettop( L );
-    int p_size = ( top < 2 ? 2 : top );
-        
-    auto argv = new const char* [ p_size ];
-    auto empty_par = "";
-
+    int p_size = !top ? 1 : top;
+    auto argv = new const char* [ p_size ] { nullptr };
+    
     int argc = 0;
-    argv[ 0 ] = empty_par;
-    argv[ 1 ] = empty_par;
-
     for ( int i = 1; i <= top; i++ )
         {
         int t = lua_type( L, 1 );
@@ -60,15 +55,23 @@ int lua_init( lua_State* L )
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
     int res = G_PROJECT_MANAGER->proc_main_params( argc, argv );
+
+    for ( int i = 0; i < p_size; i++ )
+        {
+        delete[] argv[ i ];
+        argv[ i ] = nullptr;
+        }
+    delete[] argv;
+    argv = nullptr;
+
     if ( res )
         {
         lua_pushnumber( L, EXIT_FAILURE );
         return 1;
         }
 
-
     //-Инициализация Lua.
-    res = G_LUA_MANAGER->init( L, argv[ 1 ],
+    res = G_LUA_MANAGER->init( L, G_PROJECT_MANAGER->main_script.c_str(),
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
         G_PROJECT_MANAGER->extra_paths.c_str() );
 
@@ -83,14 +86,6 @@ int lua_init( lua_State* L )
         lua_pushnumber( L, EXIT_FAILURE );
         return 1;
         }
-
-    for ( int i = 0; i < p_size; i++ )
-        {
-        delete[] argv[ i ];
-        argv[ i ] = 0;
-        }
-    delete [] argv;
-    argv = 0;
 
     lua_pushnumber( L, 0 );
     return 1;

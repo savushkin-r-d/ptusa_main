@@ -48,6 +48,9 @@ TEST( dll, lua_init )
     {
     auto L = lua_open();
 
+    auto res = lua_init( L );
+    EXPECT_EQ( 1, res );
+
     char argv0[] = "ptusa_main.exe";
     char argv1[] = "main.plua";
     char argv2[] = "--sys_path";
@@ -62,6 +65,6 @@ TEST( dll, lua_init )
     lua_pushlstring( L, argv4, sizeof( argv4 ) );
     lua_pushlstring( L, argv5, sizeof( argv5 ) );    
 
-    auto res = lua_init( L );
+    res = lua_init( L );
     EXPECT_EQ( 1, res );
     }

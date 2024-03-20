@@ -132,7 +132,7 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    const char* argv_path[] = { "ptusa_main.exe", 
+    const char* argv_path[] = { "ptusa_main.exe", "--port", "20000",
         "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/"
         "main.plua" };
     res = G_PROJECT_MANAGER->proc_main_params( 7, argv_path );

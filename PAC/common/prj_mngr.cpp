@@ -99,6 +99,10 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
         init_extra_paths( extra_paths_str.c_str() );
         }
+    if ( result.count( "script" ) )
+        {
+        main_script = result[ "script" ].as<std::string>();
+        }
 
     return 0;
     }
