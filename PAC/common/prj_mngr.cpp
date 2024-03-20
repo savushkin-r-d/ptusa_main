@@ -45,7 +45,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "r,rcrc", "Reset params" )
         ( "sys_path", "Sys path", cxxopts::value<std::string>() )
         ( "path", "Path", cxxopts::value<std::string>() )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() );
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
+        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
