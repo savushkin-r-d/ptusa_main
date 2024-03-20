@@ -1,3 +1,5 @@
+#include <array>
+
 #include "prj_mngr_tests.h"
 #include "lua_manager.h"
 
@@ -121,10 +123,10 @@ Usage:
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, help );
 
-    const char* argv_debug[] = { "ptusa_main.exe", "--debug", "--rcrc",
-        "main.plua" };
+    std::array<const char*, 4> argv_ex = { "ptusa_main.exe", "--debug",
+        "--rcrc", "main.plua" };
     testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( 4, argv_debug);
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
     auto debug = R"(DEBUG ON.
 Resetting params (command line parameter "rcrc").
@@ -132,10 +134,11 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    const char* argv_path[] = { "ptusa_main.exe", "--port", "20000",
+    std::array<const char*, 9> argv_path{ "ptusa_main.exe", "--port", "20000",
         "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/"
         "main.plua" };
-    res = G_PROJECT_MANAGER->proc_main_params( 7, argv_path );
+
+    res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
 
 
