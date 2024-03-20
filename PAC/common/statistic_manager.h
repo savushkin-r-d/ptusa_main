@@ -20,7 +20,7 @@
 /// 
 /// Объект, реализующая данный интерфейс, собирает собственную статистику,
 /// которая затем передается на сервер в виде тегов.
-class i_statistic_collecting : i_cmd_device
+class i_statistic_collecting : public i_cmd_device
 	{
 	public:
 		/// @brief Запись в буфер текущей статистики объекта.
@@ -48,11 +48,11 @@ class device_with_statistic : public i_statistic_collecting
 
 		/// @brief Получение текущей статистики изменения состояния устройства.
 		/// @return Количество изменений состояния устройства.
-		int get_cur_device_stat();
+		int get_cur_device_stat() const;
 
 		/// @brief Получение общего времени работы устройства.
 		/// @return Общее время работы устройства в секундах.
-		int get_device_working_time_sec();
+		int get_device_working_time_sec() const;
 
 		/// @brief Получение общего времени работы устройства.
 		/// @return Общее время работы устройства в часах.
@@ -60,7 +60,7 @@ class device_with_statistic : public i_statistic_collecting
 
 		/// @brief Получение текущего износа устройства.
 		/// @return Текущий износ устройства (%).
-		float get_cur_device_wear();
+		float get_cur_device_wear() const;
 
 		/// @brief Проверка изменения состояния устройства.
 		void evaluate_collecting() override;
@@ -91,17 +91,19 @@ class device_with_statistic : public i_statistic_collecting
 		int set_cmd( const char *prop, u_int idx, char *val ) override;
 
 	private:
-		device *dev;               ///< Отслеживаемое устройство.
-		int prev_device_state = 0; ///< Предыдущее состояние устройства.
-		int start_time        = 0; ///< Время начала работы (state > 0).
-		int state_change_count;    ///< Текущее количество изменений состояния.
-		int working_time;          ///< Общее время работы устройства.
-		int device_resource;       ///< Ресурс устройства.
-		saved_params_float par;    ///< Сохраняемые параметры статистики.
-		enum STAT_INDEXES          ///< Индексы полей статистики в параметрах.
+		device *dev;                  ///< Отслеживаемое устройство.
+		int prev_device_state;        ///< Предыдущее состояние устройства.
+		unsigned long start_time = 0; ///< Время начала работы (state > 0).
+		int state_change_count;       ///< Текущее количество изменений состояния.
+		unsigned long working_time;   ///< Общее время работы устройства.
+		int device_resource;          ///< Ресурс устройства.
+		saved_params_float par = saved_params_float( STAT_INDEXES_COUNT );
+								      ///< Сохраняемые параметры статистики.
+		enum STAT_INDEXES             ///< Индексы полей статистики в параметрах.
 			{
-			STATE_CHANGE_INDEX = 1,///< Индекс текущего количества изменений.
-			WORKING_TIME_INDEX,    ///< Индекс общего времени работы.
+			STATE_CHANGE_INDEX = 1,   ///< Индекс текущего количества изменений.
+			WORKING_TIME_INDEX,       ///< Индекс общего времени работы.
+			STAT_INDEXES_COUNT = 2,   ///< Количество парметров статистики.
 			};
 	};
 
@@ -128,7 +130,7 @@ class statistic_manager : public i_Lua_save_device
 		device_with_statistic* add_new_dev_with_stat( device *dev, int device_resource );
 
 		/// @brief Итерация сбора статистики. 
-		void evaluate();
+		void evaluate() const;
 
 		/// @brief Сохранение статистики устройств в буфер.
 		/// @param buff [ out ] - адрес буфера, куда будут записываться данные.
