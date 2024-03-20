@@ -3,8 +3,8 @@
 auto_smart_ptr < statistic_manager > statistic_manager::instance;
 //-----------------------------------------------------------------------------
 device_with_statistic::device_with_statistic( device *dev,
-	int device_resource ) : dev( dev ), device_resource( device_resource ),
-	prev_device_state( dev->get_state() )
+	int device_resource ) : dev( dev ), prev_device_state( dev->get_state() ),
+	device_resource( device_resource )
 	{
 	state_change_count =
 		static_cast<int>( par[ device_with_statistic::STATE_CHANGE_INDEX ] );
@@ -22,7 +22,7 @@ int device_with_statistic::get_device_working_time_sec() const
 	return (int)working_time;
 	}
 //-----------------------------------------------------------------------------
-int device_with_statistic::get_device_working_time_h() 
+int device_with_statistic::get_device_working_time_h() const
 	{
 	return get_device_working_time_sec() / 3600;
 	}
