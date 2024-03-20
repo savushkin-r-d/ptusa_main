@@ -2,33 +2,34 @@
 
 auto_smart_ptr < statistic_manager > statistic_manager::instance;
 //-----------------------------------------------------------------------------
-device_with_statistic::device_with_statistic( device * dev,
-	int device_resource ) : par( saved_params_float( 2 ) ), working_time( 0 ),
-	device_resource( device_resource ), dev( dev )
+device_with_statistic::device_with_statistic( device *dev,
+	int device_resource ) : dev( dev ), device_resource( device_resource ),
+	prev_device_state( dev->get_state() )
 	{
-	prev_device_state = dev->get_state();
-	state_change_count = par[ device_with_statistic::STATE_CHANGE_INDEX ];
-	working_time = par[ device_with_statistic::WORKING_TIME_INDEX ];
+	state_change_count =
+		static_cast<int>( par[ device_with_statistic::STATE_CHANGE_INDEX ] );
+	working_time = static_cast<unsigned long>
+		( par[ device_with_statistic::WORKING_TIME_INDEX ] );
 	}
 //-----------------------------------------------------------------------------
-int device_with_statistic::get_cur_device_stat()
+int device_with_statistic::get_cur_device_stat() const
 	{
 	return state_change_count;
 	}
 //-----------------------------------------------------------------------------
-int device_with_statistic::get_device_working_time_sec()
+int device_with_statistic::get_device_working_time_sec() const
 	{
-	return working_time;
+	return (int)working_time;
 	}
 //-----------------------------------------------------------------------------
-int device_with_statistic::get_device_working_time_h()
+int device_with_statistic::get_device_working_time_h() 
 	{
 	return get_device_working_time_sec() / 3600;
 	}
 //-----------------------------------------------------------------------------
-float device_with_statistic::get_cur_device_wear()
+float device_with_statistic::get_cur_device_wear() const
 	{
-	return ( state_change_count / (float)device_resource ) * 100;
+	return ( (float)state_change_count / (float)device_resource ) * 100;
 	}
 //-----------------------------------------------------------------------------
 void device_with_statistic::evaluate_collecting()
@@ -40,7 +41,7 @@ void device_with_statistic::evaluate_collecting()
 			prev_device_state = dev->get_state();
 
 			working_time += get_sec() - start_time;
-			par.save( device_with_statistic::WORKING_TIME_INDEX, working_time );
+			par.save( device_with_statistic::WORKING_TIME_INDEX, (float)working_time );
 			}
 		else // Нормальная работа
 			{
@@ -52,16 +53,15 @@ void device_with_statistic::evaluate_collecting()
 
 			state_change_count++;
 			par.save( device_with_statistic::STATE_CHANGE_INDEX,
-				state_change_count );
+				(float)state_change_count );
 			}
 		}
 	}
-
 //-----------------------------------------------------------------------------
 int device_with_statistic::save_common_stat( char *buff)
 	{
 	const char *nm = dev->get_name();
-	return fmt::format_to_n( buff, MAX_COPY_SIZE,
+	return (int)fmt::format_to_n( buff, MAX_COPY_SIZE,
 		"t.{}_STAT={{}}\n" \
 		"t.{}_STAT.SC={:d}\n" \
 		"t.{}_STAT.RS={:d}\n" \
@@ -78,12 +78,12 @@ const char *device_with_statistic::get_name()
 //-----------------------------------------------------------------------------
 int device_with_statistic::set_cmd( const char *prop, u_int idx, double val )
 	{
-	std::string cmd = std::string( prop );
+	auto cmd = std::string( prop );
 	if( cmd == "SC" )
 		{
 		state_change_count = (int)val;
 		par.save( device_with_statistic::STATE_CHANGE_INDEX,
-			state_change_count );
+			(float)state_change_count );
 		}
 	else if( cmd == "RS" )
 		{
@@ -92,7 +92,7 @@ int device_with_statistic::set_cmd( const char *prop, u_int idx, double val )
 	else if( cmd == "WT" )
 		{
 		working_time = (int)val * 3600;
-		par.save( device_with_statistic::WORKING_TIME_INDEX, working_time );
+		par.save( device_with_statistic::WORKING_TIME_INDEX, (float)working_time );
 		}
 	else
 		{
@@ -130,7 +130,7 @@ device_with_statistic* statistic_manager::add_new_dev_with_stat( device *dev,
 	return new_dev;
 	}
 //-----------------------------------------------------------------------------
-void statistic_manager::evaluate()
+void statistic_manager::evaluate() const
 	{
 	for( auto dev : objs_with_stat )
 		{
