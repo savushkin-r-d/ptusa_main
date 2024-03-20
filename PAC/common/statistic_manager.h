@@ -34,8 +34,9 @@ class i_statistic_collecting : public i_cmd_device
 		/// @brief Получение имени объекта.
 		/// @return Имя объекта.
 		virtual const char *get_name() = 0;
-	};
 
+		virtual ~i_statistic_collecting() = default;
+	};
 //-----------------------------------------------------------------------------
 /// @brief Класс реализует устройство (мотор, клапан) со сбором статистики.
 /// 
@@ -56,7 +57,7 @@ class device_with_statistic : public i_statistic_collecting
 
 		/// @brief Получение общего времени работы устройства.
 		/// @return Общее время работы устройства в часах.
-		int get_device_working_time_h();
+		int get_device_working_time_h() const;
 
 		/// @brief Получение текущего износа устройства.
 		/// @return Текущий износ устройства (%).
@@ -102,11 +103,10 @@ class device_with_statistic : public i_statistic_collecting
 		enum STAT_INDEXES             ///< Индексы полей статистики в параметрах.
 			{
 			STATE_CHANGE_INDEX = 1,   ///< Индекс текущего количества изменений.
-			WORKING_TIME_INDEX,       ///< Индекс общего времени работы.
+			WORKING_TIME_INDEX = 2,   ///< Индекс общего времени работы.
 			STAT_INDEXES_COUNT = 2,   ///< Количество парметров статистики.
 			};
 	};
-
 //-----------------------------------------------------------------------------
 /// @brief Класс-менеджер устройств со сбором статистики.
 /// 
