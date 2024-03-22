@@ -104,6 +104,10 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         {
         main_script = result[ "script" ].as<std::string>();
         }
+    if ( result.count( "sleep_time_ms" ) )
+    {
+        sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
+    }
 
     return 0;
     }
