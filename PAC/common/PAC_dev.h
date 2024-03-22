@@ -26,6 +26,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -1776,8 +1777,8 @@ class valve_AS : public valve
             char state = get_state_data( data );
 
             int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( state & C_OPEN_S2 ) > 0 ? 1 : 0;
-            int u = ( state & C_OPEN_S3 ) > 0 ? 1 : 0;
+            int l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+            int u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
             if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
             if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
@@ -1795,8 +1796,8 @@ class valve_AS : public valve
             char AO_state = get_state_data( AO_data );
 
             int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( AO_state & C_OPEN_S2 ) > 0 ? 1 : 0;
-            int u = ( AO_state & C_OPEN_S3 ) > 0 ? 1 : 0;
+            int l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+            int u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
             char AI_state = get_state_data( AI_data );
@@ -1821,6 +1822,33 @@ class valve_AS : public valve
 
             return false;
 #endif // DEBUG_NO_IO_MODULES
+            }
+
+        /// @brief поменять местами подключение седел клапана.
+        bool reverse_seat_connection = false;
+
+        int get_lower_seat_offset( ) const
+            {
+            if ( reverse_seat_connection )
+                {
+                return C_OPEN_S3;
+                }
+            else
+                {
+                return C_OPEN_S2;
+                }
+            }
+
+        int get_upper_seat_offset( ) const
+            {
+            if ( reverse_seat_connection )
+                {
+                return C_OPEN_S2;
+                }
+            else
+                {
+                return C_OPEN_S3;
+                }
             }
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -1893,8 +1921,8 @@ class valve_AS : public valve
                 offset = 4;
                 }
             *write_state |= C_OPEN_S1 << offset;
-            *write_state &= ~( C_OPEN_S3 << offset );
-            *write_state &= ~( C_OPEN_S2 << offset );
+            *write_state &= ~( get_upper_seat_offset() << offset );
+            *write_state &= ~( get_lower_seat_offset() << offset );
 
             //            if ( strcmp( get_name(), "H1V1" ) == 0 )
             //                {
@@ -1935,12 +1963,12 @@ class valve_AS : public valve
                     char* write_state = get_data_with_offset( data );
                     char read_state = get_state_data( data );
 
-                    int u = ( read_state & C_OPEN_S3 ) > 0 ? 1 : 0;
+                    int u = ( read_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
                     if ( 0 == u )
                         {
                         start_switch_time = get_millisec();
                         }
-                    *write_state |= C_OPEN_S3 << offset;
+                    *write_state |= get_upper_seat_offset() << offset;
 
                     break;
                     }
@@ -1953,12 +1981,12 @@ class valve_AS : public valve
                     char* write_state = get_data_with_offset( data );
                     char read_state = get_state_data( data );
 
-                    int l = ( read_state & C_OPEN_S2 ) > 0 ? 1 : 0;
+                    int l = ( read_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
                     if ( 0 == l )
                         {
                         start_switch_time = get_millisec();
                         }
-                    *write_state |= C_OPEN_S2 << offset;
+                    *write_state |= get_lower_seat_offset() << offset;
 
                     break;
                     }
@@ -1986,8 +2014,11 @@ class valve_AS : public valve
             MAILBOX_OFFSET = 8
             };
 
+        static std::unordered_set<std::string> V70_ARTICLES;
+
     private:
         u_int AS_number;    ///< AS-номер устройства.
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
