@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1710924263272,
+  "lastUpdate": 1711114308524,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -23360,6 +23360,38 @@ window.BENCHMARK_DATA = {
             "value": 94.56023774573968,
             "unit": "us/iter",
             "extra": "iterations: 7630\ncpu: 93.15804456094367 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "committer": {
+            "name": "rartem",
+            "username": "rartem"
+          },
+          "id": "198132e96a8c6c7e2bd8c61e90318c5b0c317f3d",
+          "message": "Added reverse seat connection logic swith for new AS-i mixproof valves",
+          "timestamp": "2021-12-15T13:17:00Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/667/commits/198132e96a8c6c7e2bd8c61e90318c5b0c317f3d"
+        },
+        "date": 1711114306328,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.991464083218547,
+            "unit": "us/iter",
+            "extra": "iterations: 43740\ncpu: 15.990961225422955 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 91.95149871233353,
+            "unit": "us/iter",
+            "extra": "iterations: 7766\ncpu: 90.64230775173834 us\nthreads: 1"
           }
         ]
       }
