@@ -217,7 +217,7 @@ TEST( device_manager, add_io_device )
     name = std::string( "V91" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
-        "AL.9615-4000-11" );
+        "AL.9615-4002-12" );
     EXPECT_NE( nullptr, res );
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );

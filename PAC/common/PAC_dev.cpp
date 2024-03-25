@@ -7392,7 +7392,7 @@ valve_AS::valve_AS( const char *dev_name, DEVICE_SUB_TYPE sub_type ):
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-std::unordered_set<std::string> valve_AS::V70_ARTICLES = {"AL.9615-4000-11", "AL.9615-4002-12"};
+std::unordered_set<std::string> valve_AS::V70_ARTICLES = {"AL.9615-4002-12"};
 
 valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
     valve_AS( dev_name, DST_V_AS_MIXPROOF )
