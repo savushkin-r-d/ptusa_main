@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711351630720,
+  "lastUpdate": 1711352113027,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -23522,6 +23522,42 @@ window.BENCHMARK_DATA = {
             "value": 94.18079634641275,
             "unit": "us/iter",
             "extra": "iterations: 7390\ncpu: 93.09169729364005 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "artem.rudnitsky@gmail.com",
+            "name": "Artem Rudnitsky",
+            "username": "rartem"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "90f34d7640400e4903acc5b6c9b901c758533c45",
+          "message": "Add reverse seat connection logic switch for new AS-i mixproof valves (#667)\n\n* Added reverse seat logic switch for AS-i mixproof valves\n\n* Updated articles\n\n* Update PAC/common/PAC_dev.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update test/PAC_dev_tests.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2024-03-25T07:24:52Z",
+          "tree_id": "dd135b069be4618903b2249fe8c3674e32fae059",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/90f34d7640400e4903acc5b6c9b901c758533c45"
+        },
+        "date": 1711352111747,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 15.45955067627246,
+            "unit": "us/iter",
+            "extra": "iterations: 45248\ncpu: 15.458909321958982 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 94.73955986196141,
+            "unit": "us/iter",
+            "extra": "iterations: 7534\ncpu: 93.27547929386779 us\nthreads: 1"
           }
         ]
       }
