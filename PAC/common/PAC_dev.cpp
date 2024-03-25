@@ -1505,7 +1505,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_V_AS_MIXPROOF:
                     new_device      = new valve_AS_mix_proof( dev_name );
                     new_io_device = ( valve_AS_mix_proof* ) new_device;
-                    if (valve_AS_mix_proof::V70_ARTICLES.count(article) > 0)
+                    if (valve_AS::V70_ARTICLES.count(article) > 0)
                         {
                         ((valve_AS_mix_proof*)new_io_device)->reverse_seat_connection = true;
                         }
