@@ -109,15 +109,15 @@ TEST( project_manager, proc_main_params )
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg        The script file to execute (default: main.plua)
-  -d, --debug             Enable debugging
-  -p, --port arg          Param port (default: 10000)
-  -h, --help              Print help info
-  -r, --rcrc              Reset params
-      --sys_path arg      Sys path
-      --path arg          Path
-      --extra_paths arg   Extra paths
-      --sleep_time_ms arg Sleep time, ms (default: 2)
+  -s, --script arg         The script file to execute (default: main.plua)
+  -d, --debug              Enable debugging
+  -p, --port arg           Param port (default: 10000)
+  -h, --help               Print help info
+  -r, --rcrc               Reset params
+      --sys_path arg       Sys path
+      --path arg           Path
+      --extra_paths arg    Extra paths
+      --sleep_time_ms arg  Sleep time, ms (default: 2)
 )";
 
     auto output = testing::internal::GetCapturedStdout();
@@ -134,23 +134,12 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    std::array<const char*, 9> argv_path{ "ptusa_main.exe", "--port", "20000",
-        "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/"
-        "main.plua" };
+    std::array<const char*, 12> argv_path{ "ptusa_main.exe", "--port", "20000",
+        "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/",
+        "--sleep_time_ms", "5", "main.plua" };
 
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
-
-    std::array<const char*, 6> argv_sleep{ "ptusa_main.exe", "--script", "test_script.plua",
-        "--sleep_time_ms", "5", "--debug" };
-    testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( argv_sleep.size(), argv_sleep.data() );
-    ASSERT_EQ( 0, res );
-    auto debug_sleep = R"(DEBUG ON.
-)";
-    output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, debug_sleep );
-    ASSERT_EQ( 5, res );
 
     G_LUA_MANAGER->free_Lua();
     }

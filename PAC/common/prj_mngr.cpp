@@ -78,7 +78,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     if ( result.count( "port" ) )
         {
         int p = result[ "port" ].as<int>();
-        if ( p > 0 ) 
+        if ( p > 0 )
             {
             tcp_communicator::set_port( p, p + 502 );
             G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
@@ -100,14 +100,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
         init_extra_paths( extra_paths_str.c_str() );
         }
-    if ( result.count( "script" ) )
-        {
-        main_script = result[ "script" ].as<std::string>();
-        }
-    if ( result.count( "sleep_time_ms" ) )
-    {
-        sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
-    }
+    main_script = result[ "script" ].as<std::string>();
+    sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
 
     return 0;
     }
