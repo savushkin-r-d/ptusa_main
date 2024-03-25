@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711352113027,
+  "lastUpdate": 1711357430765,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -23558,6 +23558,40 @@ window.BENCHMARK_DATA = {
             "value": 94.73955986196141,
             "unit": "us/iter",
             "extra": "iterations: 7534\ncpu: 93.27547929386779 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Artem Rudnitsky",
+            "username": "rartem",
+            "email": "artem.rudnitsky@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "90f34d7640400e4903acc5b6c9b901c758533c45",
+          "message": "Add reverse seat connection logic switch for new AS-i mixproof valves (#667)\n\n* Added reverse seat logic switch for AS-i mixproof valves\n\n* Updated articles\n\n* Update PAC/common/PAC_dev.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n* Update test/PAC_dev_tests.cpp\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>\n\n---------\n\nCo-authored-by: Dzmitry Ivaniuk <dzimitriy@gmail.com>",
+          "timestamp": "2024-03-25T07:24:52Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/90f34d7640400e4903acc5b6c9b901c758533c45"
+        },
+        "date": 1711357429180,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 16.144512452454407,
+            "unit": "us/iter",
+            "extra": "iterations: 44168\ncpu: 16.14372482340156 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 93.21555935227228,
+            "unit": "us/iter",
+            "extra": "iterations: 7287\ncpu: 92.02088198161113 us\nthreads: 1"
           }
         ]
       }
