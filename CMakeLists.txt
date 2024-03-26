@@ -259,7 +259,7 @@ endif ()
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cxxopts/include>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cxxopts/cxxopts/include>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
