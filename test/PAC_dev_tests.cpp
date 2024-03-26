@@ -213,6 +213,30 @@ TEST( device_manager, add_io_device )
     Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
+    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval new V70 mixproof
+    name = std::string( "V91" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
+        "AL.9615-4002-12" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, true);
+
+    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval old mixproof
+    name = std::string( "V92" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false);
+
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -1947,3 +1971,19 @@ TEST( par_device, set_par_name )
     dev.save_device( buff );
     EXPECT_STREQ( "TEST_NAME=0, ", buff );
     } 
+
+TEST ( valve_AS, get_lower_seat_offset)
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+    EXPECT_EQ( valve.C_OPEN_S2, valve.get_lower_seat_offset() );
+    valve.reverse_seat_connection = true;
+    EXPECT_EQ( valve.C_OPEN_S3, valve.get_lower_seat_offset() );
+    }
+
+TEST ( valve_AS, get_upper_seat_offset)
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+    EXPECT_EQ( valve.C_OPEN_S3, valve.get_upper_seat_offset() );
+    valve.reverse_seat_connection = true;
+    EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
+    }

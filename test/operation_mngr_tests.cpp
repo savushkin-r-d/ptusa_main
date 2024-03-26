@@ -36,9 +36,8 @@ TEST( action, print )
 TEST( action, check )
 	{
 	action* a1 = new action( "test_action", 0 );
-	const auto MAX_SIZE = 20;
-	std::string buff( MAX_SIZE, '\0' );
-	auto res = a1->check( &buff[ 0 ] );
+	std::string buff( MAX_STR_SIZE, '\0' );
+	auto res = a1->check( &buff[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", buff.c_str() );
 	delete a1;
@@ -47,8 +46,7 @@ TEST( action, check )
 TEST( action, set_bool_property )
 	{
 	action a1( "test_action", 0 );
-	const auto MAX_SIZE = 20;
-	std::string buff( MAX_SIZE, '\0' );
+	std::string buff( MAX_STR_SIZE, '\0' );
 	auto res = a1.set_bool_property( &buff[ 0 ], false );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", buff.c_str() );
@@ -299,6 +297,7 @@ TEST( step, set_tag )
 	EXPECT_EQ( new_tag, st1.get_tag() );
 	}
 
+
 TEST( operation_state, print )
 	{
 	char* res = 0;
@@ -432,6 +431,38 @@ TEST( operation_state, check_devices )
 
 
 	test_params_manager::removeObject();
+	}
+
+TEST( operation_state, to_next_step )
+	{
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	test_op->add_step( "Init", 3, -1 );
+	test_op->add_step( "Process #1", -1, -1 );
+	test_op->add_step( "Process #2", 2, -1 );
+	test_op->add_step( "Process #3", -1, -1 );
+
+	//Корректный переход по шагам должен быть таким: 1 -> 3 -> 2 -> 3.
+	test_op->start();
+	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->evaluate();	
+	test_op->to_next_step();
+	EXPECT_EQ( 3, test_op->active_step() );
+	test_op->evaluate();
+	test_op->to_next_step();
+	EXPECT_EQ( 2, test_op->active_step() );
+	test_op->evaluate();
+	test_op->to_next_step();
+	EXPECT_EQ( 3, test_op->active_step() );
+
+	// Переходим в 4-ый шаг, далее уже перехода не будет - для крайнего
+	// шага #4 следующий шаг не указан, поэтому после вызова to_next_step()
+	// остаёмся в текущем шаге.
+	test_op->to_step( 4 );
+	EXPECT_EQ( 4, test_op->active_step() );
+	test_op->to_next_step();
+	EXPECT_EQ( 4, test_op->active_step() );
 	}
 
 
@@ -1103,18 +1134,18 @@ TEST( AI_AO_action, check )
 	auto step = ( *operation_state )[ 1 ];
 
 	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];	
-	char msg[ 1024 ];
+	std::string buff( MAX_STR_SIZE, '\0' );
 
-	EXPECT_EQ( 0, action->check( msg ) );
+	EXPECT_EQ( 0, action->check( &buff[ 0 ], MAX_STR_SIZE ) );
 
 	action->add_dev( &test_AO );
 	action->add_dev( &test_AI );
-	EXPECT_NE( 0, action->check( msg ) );
+	EXPECT_NE( 0, action->check( &buff[ 0 ], MAX_STR_SIZE ) );
 
 	action->clear_dev();
 	action->add_dev( &test_AI );
 	action->add_dev( &test_AO );
-	EXPECT_EQ( 0, action->check( msg ) );
+	EXPECT_EQ( 0, action->check( &buff[ 0 ], MAX_STR_SIZE ) );
 
 	test_params_manager::removeObject();
 	}
@@ -1238,12 +1269,12 @@ TEST( required_DI_action, check )
 	action.add_dev( &test_DI );
 
 	std::string msg( MAX_STR_SIZE, '\0');
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	EXPECT_STREQ( "нет сигнала 'test_DI1 (Test DI)'", msg.c_str() );
 
 	test_DI.on();
-	res = action.check( &msg[ 0 ] );
+	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 	}
@@ -1277,15 +1308,23 @@ TEST( DI_DO_action, check )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
-	EXPECT_STREQ( "в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
-		" не является входным сигналом (DI, SB, GS, LS, FS)", msg.c_str() );
+	const std::string EXPECTED_STR = 
+		"в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
+		" не является входным сигналом (DI, SB, GS, LS, FS)";
+	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
+
+	const int SHORT_STR_SIZE = 50;
+	res = action.check( &msg[ 0 ], SHORT_STR_SIZE );
+	EXPECT_EQ( 1, res );
+	EXPECT_STREQ( EXPECTED_STR.substr( 0, SHORT_STR_SIZE - 1 ).c_str(),
+		msg.c_str() );
 
 	action.clear_dev();
 	action.add_dev( &test_DI );
 	action.add_dev( &test_DO );
-	res = action.check( &msg[ 0 ] );
+	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 	}
@@ -1303,7 +1342,7 @@ TEST( DI_DO_action, evaluate )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 
@@ -1357,7 +1396,7 @@ TEST( inverted_DI_DO_action, evaluate )
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ] );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 

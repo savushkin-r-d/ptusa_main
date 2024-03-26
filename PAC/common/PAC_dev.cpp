@@ -1505,6 +1505,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_V_AS_MIXPROOF:
                     new_device      = new valve_AS_mix_proof( dev_name );
                     new_io_device = ( valve_AS_mix_proof* ) new_device;
+                    if (valve_AS::V70_ARTICLES.count(article) > 0)
+                        {
+                        ((valve_AS_mix_proof*)new_io_device)->reverse_seat_connection = true;
+                        }
                     break;
 
                 case device::DST_V_BOTTOM_MIXPROOF:
@@ -6869,6 +6873,7 @@ int concentration_e_iolink::get_state()
 void concentration_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data(0);
+    if ( !data ) return;
 
     const int SIZE = 12;
     std::reverse_copy (data, data + SIZE, (char*) info);
@@ -7387,10 +7392,13 @@ valve_AS::valve_AS( const char *dev_name, DEVICE_SUB_TYPE sub_type ):
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+std::unordered_set<std::string> valve_AS::V70_ARTICLES = {"AL.9615-4002-12"};
+
 valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
     valve_AS( dev_name, DST_V_AS_MIXPROOF )
     {
     }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
