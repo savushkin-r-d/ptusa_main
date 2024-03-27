@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711455952078,
+  "lastUpdate": 1711528390288,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -23688,6 +23688,42 @@ window.BENCHMARK_DATA = {
             "value": 113.27305448127372,
             "unit": "us/iter",
             "extra": "iterations: 6516\ncpu: 111.35779604051568 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dzimitriy@gmail.com",
+            "name": "Dzmitry Ivaniuk",
+            "username": "idzm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "af8254382ea44db855296e89bc9ff203a137d377",
+          "message": "Add cxxopts - a parser library (#654)\n\nCo-authored-by: Vasili Samuilik <Vasiliysamuilik@gmail.com>",
+          "timestamp": "2024-03-27T11:31:13+03:00",
+          "tree_id": "a8c9957d5364274c9d1561c2d2f95a54d68bc8f2",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/commit/af8254382ea44db855296e89bc9ff203a137d377"
+        },
+        "date": 1711528388432,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.239678907560428,
+            "unit": "us/iter",
+            "extra": "iterations: 29219\ncpu: 23.239153701358706 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 101.71816695303372,
+            "unit": "us/iter",
+            "extra": "iterations: 6984\ncpu: 100.67746993127149 us\nthreads: 1"
           }
         ]
       }
