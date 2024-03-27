@@ -71,6 +71,8 @@ if(USE_OPCUA)
     add_compile_definitions(OPCUA)
 endif()
 
+add_subdirectory(cxxopts EXCLUDE_FROM_ALL)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -256,7 +258,8 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cxxopts/cxxopts/include>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
@@ -375,6 +378,25 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
+set_tests_properties( run_no_command_line_arguments 
+    PROPERTIES PASS_REGULAR_EXPRESSION 
+[[
+(.*)
+  -s, --script arg         The script file to execute \(default: main\.plua\)
+  -d, --debug              Enable debugging
+  -p, --port arg           Param port \(default: 10000\)
+  -h, --help               Print help info
+  -r, --rcrc               Reset params
+      --sys_path arg       Sys path
+      --path arg           Path
+      --extra_paths arg    Extra paths
+      --sleep_time_ms arg  Sleep time, ms \(default: 2\)
+]] )
+
+  set_property(
+    TARGET libptusa_main
+    PROPERTY VS_DEBUGGER_COMMAND
+    "lua.exe")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(T1-PLCnext-Demo lua5.1
@@ -396,4 +418,3 @@ gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
-
