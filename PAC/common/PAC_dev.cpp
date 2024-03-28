@@ -2699,55 +2699,54 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
+    bool is_pump_working = false;
     if ( !motors.empty() )
         {
-        char is_pump_working = 0;
-
         for ( u_int i = 0; i < motors.size(); i++ )
             {
             if ( motors[ i ]->get_state() == 1 )
                 {
-                is_pump_working = 1;
-                if ( 0 == start_pump_working_time )
-                    {
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    }
+                is_pump_working = true;
                 }
             }
+        }
 
-        auto min_flow = get_min_flow();
-        if ( 0 == is_pump_working ||        // Насос не работает или 
-            get_flow() <= min_flow )        //расход ниже минимального. 
+    auto min_flow = get_min_flow();
+
+    // Насос не работает (при его наличии) или расход ниже минимального.
+    if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
+        {
+        start_pump_working_time = 0;
+        }
+    // Насос работает (при его наличии) или расход выше минимального.
+    else
+        {
+        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
             {
-            start_pump_working_time = 0;
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
             }
-        else                            // Насос работает. 
+        else    // Работа. 
             {
-            if ( state == STATES::S_PAUSE )
+            auto dt = get_pump_dt();
+            if ( get_delta_millisec( start_pump_working_time ) < dt )
+                {
+                return static_cast<int>( state );
+                }
+
+            // Проверяем счетчик на ошибку - он должен изменить свои показания.
+            if ( get_abs_quantity() == counter_prev_value )
+                {
+                state = STATES::S_ERROR;
+                }
+            else
                 {
                 start_pump_working_time = get_millisec();
-                }
-            else                        // Работа. 
-                {
-                auto dt = get_pump_dt();
-                if ( get_delta_millisec( start_pump_working_time ) > dt )
-                    {
-                    // Проверяем счетчик на ошибку - он должен изменить свои показания. 
-                    if ( get_abs_quantity() == counter_prev_value )
-                        {
-                        state = STATES::S_ERROR;
-                        }
-                    else
-                        {
-                        start_pump_working_time = get_millisec();
-                        counter_prev_value = get_abs_quantity();
-                        state = STATES::S_WORK;
-                        }
-                    }
+                counter_prev_value = get_abs_quantity();
+                state = STATES::S_WORK;
                 }
             }
-        }// if ( motors.size() > 0 
+        }
 
     return static_cast<int>( state );
     };
@@ -2870,6 +2869,7 @@ void base_counter::start()
         {
         state = STATES::S_WORK;
         last_read_value = get_raw_value();
+        start_pump_working_time = 0;
         }
     else if ( STATES::S_ERROR == state )
         {
