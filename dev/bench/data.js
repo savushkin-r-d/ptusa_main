@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711528390288,
+  "lastUpdate": 1711613553086,
   "repoUrl": "https://github.com/savushkin-r-d/ptusa_main",
   "entries": {
     "C++ Benchmark": [
@@ -23724,6 +23724,38 @@ window.BENCHMARK_DATA = {
             "value": 101.71816695303372,
             "unit": "us/iter",
             "extra": "iterations: 6984\ncpu: 100.67746993127149 us\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "committer": {
+            "name": "idzm",
+            "username": "idzm"
+          },
+          "id": "b5ebaec676dcc72b83b33c680e08e1b3ba984267",
+          "message": "Add flow control",
+          "timestamp": "2021-11-22T10:59:42Z",
+          "url": "https://github.com/savushkin-r-d/ptusa_main/pull/671/commits/b5ebaec676dcc72b83b33c680e08e1b3ba984267"
+        },
+        "date": 1711613551697,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "write_devices_service/\"no compression\"",
+            "value": 23.105734759924708,
+            "unit": "us/iter",
+            "extra": "iterations: 30282\ncpu: 23.10363034145697 us\nthreads: 1"
+          },
+          {
+            "name": "write_devices_service/\"with compression\"",
+            "value": 108.06043785181943,
+            "unit": "us/iter",
+            "extra": "iterations: 6573\ncpu: 106.96190932603076 us\nthreads: 1"
           }
         ]
       }
