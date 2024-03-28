@@ -2729,19 +2729,21 @@ int base_counter::get_state()
         else    // Работа. 
             {
             auto dt = get_pump_dt();
-            if ( get_delta_millisec( start_pump_working_time ) >= dt )
+            if ( get_delta_millisec( start_pump_working_time ) < dt )
                 {
-                // Проверяем счетчик на ошибку - он должен изменить свои показания.
-                if ( get_abs_quantity() == counter_prev_value )
-                    {
-                    state = STATES::S_ERROR;
-                    }
-                else
-                    {
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    state = STATES::S_WORK;
-                    }
+                return static_cast<int>( state );
+                }
+
+            // Проверяем счетчик на ошибку - он должен изменить свои показания.
+            if ( get_abs_quantity() == counter_prev_value )
+                {
+                state = STATES::S_ERROR;
+                }
+            else
+                {
+                start_pump_working_time = get_millisec();
+                counter_prev_value = get_abs_quantity();
+                state = STATES::S_WORK;
                 }
             }
         }
