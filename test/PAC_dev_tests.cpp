@@ -1007,6 +1007,11 @@ TEST( counter_f, get_state )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
+    //Не прошло заданное время.
+    fqt1.set_cmd( "P_DT", 0, 1000 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    //Прошло заданное время.
+    fqt1.set_cmd( "P_DT", 0, 0 );
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     //В состоянии паузы ошибки не должно быть.

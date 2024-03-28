@@ -2713,12 +2713,13 @@ int base_counter::get_state()
 
     auto min_flow = get_min_flow();
 
-    // Насос не работает (при его наличии) или расход ниже минимального. 
+    // Насос не работает (при его наличии) или расход ниже минимального.
     if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
         {
         start_pump_working_time = 0;
         }
-    else        // Насос работает (при его наличии) или расход выше минимального. 
+    // Насос работает (при его наличии) или расход выше минимального.
+    else
         {
         if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
             {
@@ -2730,7 +2731,7 @@ int base_counter::get_state()
             auto dt = get_pump_dt();
             if ( get_delta_millisec( start_pump_working_time ) >= dt )
                 {
-                // Проверяем счетчик на ошибку - он должен изменить свои показания. 
+                // Проверяем счетчик на ошибку - он должен изменить свои показания.
                 if ( get_abs_quantity() == counter_prev_value )
                     {
                     state = STATES::S_ERROR;
