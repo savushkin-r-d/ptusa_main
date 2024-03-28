@@ -1000,10 +1000,13 @@ TEST( counter_f, get_state )
     counter_f fqt1( "FQT1" );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Устанавливаем расход - ошибка должна появиться, даже при отсутствии мотора.
+    //Малый расход - но счетчик меняет показания - нет ошибки.
     fqt1.set_cmd( "F", 0, 1 );
-    fqt1.get_state();
-    sleep_ms( 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     //В состоянии паузы ошибки не должно быть.
@@ -1022,25 +1025,22 @@ TEST( counter_f, get_state )
     fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Устанавливаем расход - ошибка должна появиться.
     fqt1.set_cmd( "F", 0, 1 );
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     fqt1.start();
     //Расход стал ниже минимального - ошибка не должна появиться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
     fqt1.get_state();
-    fqt1.set_cmd( "ABS_V", 0, 100 );
+    fqt1.set_cmd( "ABS_V", 0, 200 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.pause();

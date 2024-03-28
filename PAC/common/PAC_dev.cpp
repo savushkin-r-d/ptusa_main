@@ -2710,29 +2710,25 @@ int base_counter::get_state()
                 }
             }
         }
+
     auto min_flow = get_min_flow();
-    if ( ( is_pump_working || get_flow() > min_flow ) &&
-        0 == start_pump_working_time )
-        {
-        start_pump_working_time = get_millisec();
-        counter_prev_value = get_abs_quantity();
-        }
 
     // Насос не работает (при его наличии) или расход ниже минимального. 
     if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
         {
         start_pump_working_time = 0;
         }
-    else                            // Насос работает. 
+    else        // Насос работает (при его наличии) или расход выше минимального. 
         {
-        if ( state == STATES::S_PAUSE )
+        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
             {
             start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
             }
-        else                        // Работа. 
+        else    // Работа. 
             {
             auto dt = get_pump_dt();
-            if ( get_delta_millisec( start_pump_working_time ) > dt )
+            if ( get_delta_millisec( start_pump_working_time ) >= dt )
                 {
                 // Проверяем счетчик на ошибку - он должен изменить свои показания. 
                 if ( get_abs_quantity() == counter_prev_value )
