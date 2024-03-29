@@ -8,17 +8,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: DoozyX/clang-format-lint-action@v0.17
+    - - uses: DoozyX/clang-format-lint-action@v0.16.2
       with:
         source: '.'
-        exclude: './third_party ./external'
-        extensions: 'h,cpp'
-        clangFormatVersion: 17
-        style: google
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Automatically formatted code with clang-format"
-        git push
+        exclude: './lib'
+        extensions: 'h,cpp,c'
+        clangFormatVersion: 16
+        inplace: True
+    - uses: EndBug/add-and-commit@v9
+      with:
+        author_name: Clang Robot
+        author_email: robot@example.com
+        message: 'Committing clang-format changes'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
