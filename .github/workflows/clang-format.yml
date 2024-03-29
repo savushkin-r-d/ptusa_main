@@ -15,3 +15,10 @@ jobs:
         extensions: 'h,cpp'
         clangFormatVersion: 17
         style: google
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Automatically formatted code with clang-format"
+        git push
