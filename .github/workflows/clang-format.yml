@@ -1,4 +1,4 @@
-name: test-clang-format
+name: Clang format
 
 on: [push]
 
@@ -14,4 +14,4 @@ jobs:
         exclude: './third_party ./external'
         extensions: 'h,cpp'
         clangFormatVersion: 17
-        style: chromium
+        style: google
