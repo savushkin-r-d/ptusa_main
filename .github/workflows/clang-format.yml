@@ -8,6 +8,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Set Python UTF-8 encoding
+      run: export PYTHONIOENCODING=utf-8
+
     - uses: DoozyX/clang-format-lint-action@v0.16.2
       with:
         source: '.'
@@ -15,6 +19,9 @@ jobs:
         extensions: 'h,cpp,c'
         clangFormatVersion: 16
         inplace: True
+      env:
+        PYTHONIOENCODING: utf-8
+
     - uses: EndBug/add-and-commit@v9
       with:
         author_name: Clang Robot
