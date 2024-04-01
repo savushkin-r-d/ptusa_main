@@ -12,12 +12,13 @@ jobs:
     - name: Set Python UTF-8 encoding
       run: export PYTHONIOENCODING=utf-8
 
-    - uses: DoozyX/clang-format-lint-action@v0.16.2
+    - uses: DoozyX/clang-format-lint-action@v0.17
       with:
         source: '.'
-        exclude: './lib'
-        extensions: 'h,cpp,c'
-        clangFormatVersion: 16
+        exclude: './third_party ./external'
+        extensions: 'h,cpp'
+        clangFormatVersion: 17
+        style: google
         inplace: True
       env:
         PYTHONIOENCODING: utf-8
