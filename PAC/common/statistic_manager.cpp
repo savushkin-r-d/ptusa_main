@@ -41,7 +41,8 @@ void device_with_statistic::evaluate_collecting()
 			prev_device_state = dev->get_state();
 
 			working_time += get_sec() - start_time;
-			par.save( device_with_statistic::WORKING_TIME_INDEX, (float)working_time );
+			par.save( device_with_statistic::WORKING_TIME_INDEX,
+				(float)working_time );
 			}
 		else // Нормальная работа
 			{
@@ -92,7 +93,8 @@ int device_with_statistic::set_cmd( const char *prop, u_int idx, double val )
 	else if( cmd == "WT" )
 		{
 		working_time = (int)val * 3600;
-		par.save( device_with_statistic::WORKING_TIME_INDEX, (float)working_time );
+		par.save( device_with_statistic::WORKING_TIME_INDEX,
+			(float)working_time );
 		}
 	else
 		{
@@ -113,26 +115,18 @@ statistic_manager::statistic_manager()
 	G_DEVICE_CMMCTR->add_device( this );
 	}
 //-----------------------------------------------------------------------------
-statistic_manager::~statistic_manager()
-	{
-	for( auto dev : objs_with_stat )
-		{
-		delete dev;
-		dev = nullptr;
-		}
-	}
-//-----------------------------------------------------------------------------
 device_with_statistic* statistic_manager::add_new_dev_with_stat( device *dev,
 	int device_resource )
 	{
-	auto new_dev = new device_with_statistic( dev, device_resource );
-	objs_with_stat.push_back( new_dev );
-	return new_dev;
+	objs_with_stat.emplace_back( std::unique_ptr< i_statistic_collecting > {
+		new device_with_statistic( dev, device_resource ) } );
+	return static_cast< device_with_statistic* >
+		( objs_with_stat[ objs_with_stat.size() - 1 ].get() );
 	}
 //-----------------------------------------------------------------------------
 void statistic_manager::evaluate() const
 	{
-	for( auto dev : objs_with_stat )
+	for( auto &dev : objs_with_stat )
 		{
 		dev->evaluate_collecting();
 		}
@@ -141,7 +135,7 @@ void statistic_manager::evaluate() const
 int statistic_manager::save_device( char *buff )
 	{
 	int res = 0;
-	for( auto dev : objs_with_stat )
+	for( auto &dev : objs_with_stat )
 		{
 		res += dev->save_common_stat( buff + res );
 		}
