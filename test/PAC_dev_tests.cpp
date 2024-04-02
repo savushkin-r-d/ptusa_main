@@ -213,6 +213,30 @@ TEST( device_manager, add_io_device )
     Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
+    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval new V70 mixproof
+    name = std::string( "V91" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
+        "AL.9615-4002-12" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, true);
+
+    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval old mixproof
+    name = std::string( "V92" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
+        "Test" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    Vx = V( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false);
+
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -976,32 +1000,52 @@ TEST( counter_f, get_state )
     counter_f fqt1( "FQT1" );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
+    //Малый расход - но счетчик меняет показания - нет ошибки.
+    fqt1.set_cmd( "F", 0, 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
+    //Не прошло заданное время.
+    fqt1.set_cmd( "P_DT", 0, 1000 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    //Прошло заданное время.
+    fqt1.set_cmd( "P_DT", 0, 0 );
+    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+
+    //В состоянии паузы ошибки не должно быть.
+    fqt1.pause();
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+    fqt1.start();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+
+    //Далее проверяем на ошибки при наличии привязанного мотора.
     motor m1( "M1", device::DST_M_FREQ );
     fqt1.set_property( "M", &m1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Расход ниже минимального - ошибка не должна появиться.
+    fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Устанавливаем расход - ошибка должна появиться.
     fqt1.set_cmd( "F", 0, 1 );
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     fqt1.start();
     //Расход стал ниже минимального - ошибка не должна появиться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
     fqt1.get_state();
-    sleep_ms( 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
     fqt1.get_state();
-    fqt1.set_cmd( "ABS_V", 0, 100 );
+    fqt1.set_cmd( "ABS_V", 0, 200 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.pause();
@@ -1947,3 +1991,19 @@ TEST( par_device, set_par_name )
     dev.save_device( buff );
     EXPECT_STREQ( "TEST_NAME=0, ", buff );
     } 
+
+TEST ( valve_AS, get_lower_seat_offset)
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+    EXPECT_EQ( valve.C_OPEN_S2, valve.get_lower_seat_offset() );
+    valve.reverse_seat_connection = true;
+    EXPECT_EQ( valve.C_OPEN_S3, valve.get_lower_seat_offset() );
+    }
+
+TEST ( valve_AS, get_upper_seat_offset)
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+    EXPECT_EQ( valve.C_OPEN_S3, valve.get_upper_seat_offset() );
+    valve.reverse_seat_connection = true;
+    EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
+    }

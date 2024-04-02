@@ -559,6 +559,47 @@ TEST( cipline_tech_object, _FromObject )
     ClearCipDevices( );
     G_LUA_MANAGER->free_Lua( );
     }
+
+
+TEST( cipline_tech_object, _DoStep )
+    {
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device circ_signal( "LINE1DO101", device::DT_DO, device::DST_DO_VIRT );
+    virtual_device can_continue_operation_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_upr_circulation = &circ_signal;
+    cip1.dev_os_can_continue = &can_continue_operation_signal;
+
+    //test circulation signal
+    EXPECT_EQ( 0, cip1.dev_upr_circulation->get_state( ));
+    cip1.curstep = 8;
+    cip1._DoStep( 8);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    cip1.curstep = 7;
+    cip1._DoStep(7);
+    EXPECT_EQ( 0, cip1.dev_upr_circulation->get_state( ));
+    cip1.use_circulation_on_v2_supply = true;
+    cip1.curstep = 7;
+    cip1._DoStep(7);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    can_continue_operation_signal.set_state( 1 );
+    EXPECT_EQ( false, cip1.wasflip);
+    cip1.curstep = 8;
+    cip1._DoStep(8);
+    EXPECT_EQ( true, cip1.wasflip);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    cip1.curstep = 8;
+    cip1._DoStep(8);
+    EXPECT_EQ( 0, cip1.dev_upr_circulation->get_state( ));
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
     
 
 

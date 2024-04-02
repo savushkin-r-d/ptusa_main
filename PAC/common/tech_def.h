@@ -110,7 +110,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        int check_on_mode( u_int mode, char* reason );
+        int check_on_mode( u_int mode, char* reason, int max_len );
 
         /// @brief Проверка возможности выключения режима.
         ///

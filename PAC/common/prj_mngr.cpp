@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <cxxopts.hpp>
+
 #include "prj_mngr.h"
 #include "bus_coupler_io.h"
 #include "PAC_dev.h"
@@ -30,73 +32,78 @@ extern bool G_NO_IO_MODULES;
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
-int project_manager::proc_main_params( int argc, const char *argv[] )
+int project_manager::proc_main_params( int argc, const char* argv[] )
     {
-    for ( int i = 1; i < argc; i++ )
+    if ( !argc || !argv || !argv[ 0 ] ) return 2;
+
+    //-Работа с параметрами командной строки.
+    cxxopts::Options options( argv[ 0 ], "Main control program" );
+
+    options.add_options()
+        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "h,help", "Print help info" )
+        ( "r,rcrc", "Reset params" )
+        ( "sys_path", "Sys path", cxxopts::value<std::string>() )
+        ( "path", "Path", cxxopts::value<std::string>() )
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
+        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<int>()->default_value( "2" ) );
+
+    options.positional_help( "<script>" );
+    options.parse_positional( { "script" } );
+    options.show_positional_help();
+    options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
+    auto result = options.parse( argc, argv );
+
+    if ( result.count( "help" ) || argc < 2 )
         {
-        if ( strcmp( argv[ i ], "debug" ) == 0 )
+        fmt::print( options.help() );
+        return 1;
+        }
+
+    if ( result[ "debug" ].as<bool>() )
+        {
+        G_DEBUG = 1;
+        fmt::print( "DEBUG ON.\n" );
+        }
+
+    if ( result.count( "rcrc" ) )
+        {
+        if ( G_DEBUG )
             {
-            G_DEBUG = 1;
-            printf( "DEBUG ON.\n" );
+            fmt::print( "Resetting params (command line parameter \"rcrc\").\n" );
+            }
+        params_manager::get_instance()->reset_params_size();
+        }
+
+    if ( result.count( "port" ) )
+        {
+        int p = result[ "port" ].as<int>();
+        if ( p > 0 )
+            {
+            tcp_communicator::set_port( p, p + 502 );
+            G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
             }
         }
 
-    for ( int i = 1; i < argc; i++ )
+    if ( result.count( "sys_path" ) )
         {
-        if ( strcmp( argv[ i ], "rcrc" ) == 0 )
-            {
-            if ( G_DEBUG )
-                {
-                printf( "Resetting params (command line parameter \"rcrc\").\n" );
-                }
-            params_manager::get_instance()->reset_params_size();
-            }
+        auto& sys_path_str = result[ "sys_path" ].as<std::string>();
+        init_sys_path( sys_path_str.c_str() );
         }
-
-    // port 10001
-    for ( int i = 1; i < argc - 1; i++ )
+    if ( result.count( "path" ) )
         {
-        if ( strcmp( argv[ i ], "port" ) == 0 )
-            {
-            int p = atoi( argv[ i + 1 ] );
-
-            if ( p > 0 )
-                {
-                tcp_communicator::set_port( p, p + 502 );
-
-                sprintf( G_LOG->msg,
-                    "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
-                G_LOG->write_log( i_log::P_NOTICE );
-                }
-            }
+        auto& path_str = result[ "path" ].as<std::string>();
+        init_path( path_str.c_str() );
         }
-
-    // sys_path  "C:/system_scripts/"
-    for ( int i = 1; i < argc - 1; i++ )
+    if ( result.count( "extra_paths" ) )
         {
-        if ( strcmp( argv[ i ], "sys_path" ) == 0 )
-            {
-            init_sys_path( argv[ i + 1 ] );
-            }
+        auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
+        init_extra_paths( extra_paths_str.c_str() );
         }
-
-    // path  "C:/project folder/"
-    for ( int i = 1; i < argc - 1; i++ )
-        {
-        if ( strcmp( argv[ i ], "path" ) == 0 )
-            {
-            init_path( argv[ i + 1 ] );
-            }
-        }
-
-    // extra path  "C:/project folder/user_sys;C:/project folder/user_sys_new/"
-    for ( int i = 1; i < argc - 1; i++ )
-        {
-        if ( strcmp( argv[ i ], "extra_paths" ) == 0 )
-            {
-            init_extra_paths( argv[ i + 1 ] );
-            }
-        }
+    main_script = result[ "script" ].as<std::string>();
+    sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
 
     // no_io_modules  - отключить обмен с модулями ввода/вывода.
     for ( int i = 1; i < argc; i++ )
@@ -212,7 +219,7 @@ int project_manager::lua_load_configuration()
 
     if ( G_DEBUG )
         {
-        printf( "Oк.\n");
+        printf( "Oк.\n" );
         }
 
     if ( G_DEBUG )
@@ -271,14 +278,14 @@ int project_manager::lua_load_configuration()
 
     if ( G_DEBUG )
         {
-        printf( "Получение конфигурации Profibus DP slave...\n");
+        printf( "Получение конфигурации Profibus DP slave...\n" );
         }
 
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_profibus", "project_manager::lua_load_configuration()" );
     if ( G_DEBUG )
         {
-        printf( "Oк.\n");
+        printf( "Oк.\n" );
         }
 
     if ( G_DEBUG )

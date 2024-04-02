@@ -1505,6 +1505,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_V_AS_MIXPROOF:
                     new_device      = new valve_AS_mix_proof( dev_name );
                     new_io_device = ( valve_AS_mix_proof* ) new_device;
+                    if (valve_AS::V70_ARTICLES.count(article) > 0)
+                        {
+                        ((valve_AS_mix_proof*)new_io_device)->reverse_seat_connection = true;
+                        }
                     break;
 
                 case device::DST_V_BOTTOM_MIXPROOF:
@@ -2695,55 +2699,54 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
+    bool is_pump_working = false;
     if ( !motors.empty() )
         {
-        char is_pump_working = 0;
-
         for ( u_int i = 0; i < motors.size(); i++ )
             {
             if ( motors[ i ]->get_state() == 1 )
                 {
-                is_pump_working = 1;
-                if ( 0 == start_pump_working_time )
-                    {
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    }
+                is_pump_working = true;
                 }
             }
+        }
 
-        auto min_flow = get_min_flow();
-        if ( 0 == is_pump_working ||        // Насос не работает или 
-            get_flow() <= min_flow )        //расход ниже минимального. 
+    auto min_flow = get_min_flow();
+
+    // Насос не работает (при его наличии) или расход ниже минимального.
+    if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
+        {
+        start_pump_working_time = 0;
+        }
+    // Насос работает (при его наличии) или расход выше минимального.
+    else
+        {
+        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
             {
-            start_pump_working_time = 0;
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
             }
-        else                            // Насос работает. 
+        else    // Работа. 
             {
-            if ( state == STATES::S_PAUSE )
+            auto dt = get_pump_dt();
+            if ( get_delta_millisec( start_pump_working_time ) < dt )
+                {
+                return static_cast<int>( state );
+                }
+
+            // Проверяем счетчик на ошибку - он должен изменить свои показания.
+            if ( get_abs_quantity() == counter_prev_value )
+                {
+                state = STATES::S_ERROR;
+                }
+            else
                 {
                 start_pump_working_time = get_millisec();
-                }
-            else                        // Работа. 
-                {
-                auto dt = get_pump_dt();
-                if ( get_delta_millisec( start_pump_working_time ) > dt )
-                    {
-                    // Проверяем счетчик на ошибку - он должен изменить свои показания. 
-                    if ( get_abs_quantity() == counter_prev_value )
-                        {
-                        state = STATES::S_ERROR;
-                        }
-                    else
-                        {
-                        start_pump_working_time = get_millisec();
-                        counter_prev_value = get_abs_quantity();
-                        state = STATES::S_WORK;
-                        }
-                    }
+                counter_prev_value = get_abs_quantity();
+                state = STATES::S_WORK;
                 }
             }
-        }// if ( motors.size() > 0 
+        }
 
     return static_cast<int>( state );
     };
@@ -2866,6 +2869,7 @@ void base_counter::start()
         {
         state = STATES::S_WORK;
         last_read_value = get_raw_value();
+        start_pump_working_time = 0;
         }
     else if ( STATES::S_ERROR == state )
         {
@@ -6869,6 +6873,7 @@ int concentration_e_iolink::get_state()
 void concentration_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data(0);
+    if ( !data ) return;
 
     const int SIZE = 12;
     std::reverse_copy (data, data + SIZE, (char*) info);
@@ -7387,10 +7392,13 @@ valve_AS::valve_AS( const char *dev_name, DEVICE_SUB_TYPE sub_type ):
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+std::unordered_set<std::string> valve_AS::V70_ARTICLES = {"AL.9615-4002-12"};
+
 valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
     valve_AS( dev_name, DST_V_AS_MIXPROOF )
     {
     }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
