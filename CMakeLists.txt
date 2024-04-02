@@ -387,15 +387,17 @@ set_tests_properties( run_no_command_line_arguments
     PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg         The script file to execute \(default: main\.plua\)
-  -d, --debug              Enable debugging
-  -p, --port arg           Param port \(default: 10000\)
-  -h, --help               Print help info
-  -r, --rcrc               Reset params
-      --sys_path arg       Sys path
-      --path arg           Path
-      --extra_paths arg    Extra paths
-      --sleep_time_ms arg  Sleep time, ms \(default: 2\)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes
+      --read_only_io_nodes  Read only from I\\O nodes
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 
   set_property(

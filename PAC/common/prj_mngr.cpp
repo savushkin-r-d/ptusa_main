@@ -28,7 +28,8 @@
 #include "l_mem.h"
 #endif
 
-extern bool G_NO_IO_MODULES;
+extern bool G_NO_IO_NODES;
+extern bool G_READ_ONLY_IO_NODES;
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
@@ -42,6 +43,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.add_options()
         ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
         ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
         ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
@@ -105,14 +108,17 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
 
-    // no_io_modules  - отключить обмен с модулями ввода/вывода.
-    for ( int i = 1; i < argc; i++ )
+    // Отключить обмен с модулями ввода/вывода.
+    if ( result[ "no_io_nodes" ].as<bool>() )
         {
-        if ( strcmp( argv[ i ], "no_io_modules" ) == 0 )
-            {
-            G_NO_IO_MODULES = true;
-            printf( "G_NO_IO_MODULES ON.\n" );
-            }
+        G_NO_IO_NODES = true;
+        fmt::print( "G_NO_IO_NODES ON.\n" );
+        }
+
+    if ( result[ "read_only_io_nodes" ].as<bool>() )
+        {
+        G_READ_ONLY_IO_NODES = true;
+        fmt::print( "G_READ_ONLY_IO_NODES ON.\n" );
         }
 
     return 0;

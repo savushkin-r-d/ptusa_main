@@ -22,7 +22,8 @@
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
-bool G_NO_IO_MODULES = false; // По умолчанию обмен с модулями отключен.
+bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_READ_ONLY_IO_NODES = false;
 #endif
 
 int sleep_time_ms = 0;

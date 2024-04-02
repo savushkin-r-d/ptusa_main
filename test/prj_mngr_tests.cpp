@@ -7,8 +7,6 @@ extern const char* FILES[ FILE_CNT ];
 
 using namespace ::testing;
 
-extern bool G_NO_IO_MODULES;
-
 TEST( project_manager, lua_load_configuration )
     {
     auto L = lua_open();
@@ -111,15 +109,17 @@ TEST( project_manager, proc_main_params )
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg         The script file to execute (default: main.plua)
-  -d, --debug              Enable debugging
-  -p, --port arg           Param port (default: 10000)
-  -h, --help               Print help info
-  -r, --rcrc               Reset params
-      --sys_path arg       Sys path
-      --path arg           Path
-      --extra_paths arg    Extra paths
-      --sleep_time_ms arg  Sleep time, ms (default: 2)
+  -s, --script arg          The script file to execute (default: main.plua)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\O nodes
+      --read_only_io_nodes  Read only from I\O nodes
+  -p, --port arg            Param port (default: 10000)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 
     auto output = testing::internal::GetCapturedStdout();
@@ -144,15 +144,4 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
     G_LUA_MANAGER->free_Lua();
-    }
-
-TEST( project_manager, proc_main_params )
-    {
-    // Empty list.
-    EXPECT_EQ( 0, G_PROJECT_MANAGER->proc_main_params( 0, nullptr ) );
-
-    const char* argv[] = { "", "no_io_modules" };
-    G_NO_IO_MODULES = false;
-    EXPECT_EQ( 0, G_PROJECT_MANAGER->proc_main_params( 2, argv ) );
-    EXPECT_TRUE( G_NO_IO_MODULES );
     }
