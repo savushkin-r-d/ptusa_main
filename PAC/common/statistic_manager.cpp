@@ -126,7 +126,7 @@ device_with_statistic* statistic_manager::add_new_dev_with_stat( device *dev,
 //-----------------------------------------------------------------------------
 void statistic_manager::evaluate() const
 	{
-	for( auto &dev : objs_with_stat )
+	for( const auto &dev : objs_with_stat )
 		{
 		dev->evaluate_collecting();
 		}
@@ -135,7 +135,7 @@ void statistic_manager::evaluate() const
 int statistic_manager::save_device( char *buff )
 	{
 	int res = 0;
-	for( auto &dev : objs_with_stat )
+	for( const auto &dev : objs_with_stat )
 		{
 		res += dev->save_common_stat( buff + res );
 		}
