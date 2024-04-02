@@ -136,9 +136,9 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    std::array<const char*, 12> argv_path{ "ptusa_main.exe", "--port", "20000",
+    std::array<const char*, 14> argv_path{ "ptusa_main.exe", "--port", "20000",
         "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/",
-        "--sleep_time_ms", "5", "main.plua" };
+        "--sleep_time_ms", "5", "--no_io_nodes", "--read_only_io_nodes", "main.plua" };
 
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
