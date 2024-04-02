@@ -14,6 +14,7 @@
 #include "param_ex.h"
 #include "PAC_dev.h"
 #include <fmt/core.h>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс объекта со сбором статистики.
@@ -115,7 +116,6 @@ class statistic_manager : public i_Lua_save_device
 	{
 	public:
 		statistic_manager();
-		~statistic_manager();
 
 		/// @brief Получение единственного экземпляра класса.
 		/// @return Единственный экземпляр менеджера устройств статистики.
@@ -144,7 +144,7 @@ class statistic_manager : public i_Lua_save_device
 		/// @brief Единственный экземпляр класса.
 		static auto_smart_ptr < statistic_manager > instance;
 		/// @brief Вектор устройств со сбором статистики
-		std::vector< i_statistic_collecting* > objs_with_stat;
+		std::vector< std::unique_ptr< i_statistic_collecting > > objs_with_stat;
 	};
 //-----------------------------------------------------------------------------
 /// @brief Глобальная точка доступа к менеджеру устройств со статистикой.
