@@ -1785,6 +1785,7 @@ class cipline_tech_object: public tech_object
         int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
         bool use_internal_medium_recipes; //Вкл./выкл. использование рецептов для моющих средств.
         bool disable_final_rinsing; //Не ополаскивать после дезинфекции
+        bool use_circulation_on_v2_supply; //Вкл./выкл. подачу сигнала "циркуляция" при подаче объема V2
 
         i_DO_device* V00;
         i_DO_device* V01;
