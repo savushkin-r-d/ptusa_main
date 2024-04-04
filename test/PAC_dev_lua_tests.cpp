@@ -182,23 +182,23 @@ TEST( toLuapp, tolua_PAC_dev_dev_with_stat )
     lua_State *L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "G_DEVICE_MANAGER():add_io_device( 4, 1, \'TE1\', \'Test device\', \'\' )" ) );
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "TE1 = G_DEVICE_MANAGER():get_device( 4, \'TE1\')" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "TE1" );
     auto TE1 = static_cast< device * >( tolua_touserdata( L, -1, 0 ) );
     EXPECT_NE( nullptr, TE1 );
     lua_remove( L, -1 );
 
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "TE1_st = G_STATISTIC_MANAGER():add_new_dev_with_stat( TE1, 10 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "TE1_st" );
     auto TE1_st = static_cast<device_with_statistic *>( tolua_touserdata( L, -1, 0 ) );
     EXPECT_NE( nullptr, TE1_st );
     lua_remove( L, -1 );
 
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "dev_name = TE1_st:get_name()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "dev_name" );
     auto dev_name = tolua_tostring( L, -1, 0 );
@@ -206,7 +206,7 @@ TEST( toLuapp, tolua_PAC_dev_dev_with_stat )
     lua_remove( L, -1 );
 
     //Верный параметр
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "dev_set_cmd_res = TE1_st:set_cmd(\"RS\", 0, 100)" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "dev_set_cmd_res" );
     auto dev_set_cmd_res = tolua_tonumber( L, -1, 0 );
@@ -214,7 +214,7 @@ TEST( toLuapp, tolua_PAC_dev_dev_with_stat )
     lua_remove( L, -1 );
 
     //Неверный параметр
-    ASSERT_EQ( 0, luaL_dostring( L,
+    EXPECT_EQ( 0, luaL_dostring( L,
         "dev_set_cmd_res = TE1_st:set_cmd(\"ER\", 0, 100)" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "dev_set_cmd_res" );
     dev_set_cmd_res = tolua_tonumber( L, -1, 0 );
