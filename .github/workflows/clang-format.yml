@@ -19,7 +19,7 @@ jobs:
         extensions: 'h,cpp'
         clangFormatVersion: 17
         style: google
-        inplace: True
+        inplace: False
       env:
         PYTHONIOENCODING: utf-8
 
