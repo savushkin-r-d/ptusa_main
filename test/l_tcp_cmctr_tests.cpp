@@ -50,6 +50,7 @@ TEST( tcp_communicator_linux, evaluate )
     cl.AsyncRecive();
     subhook_remove( fail_recv );
     subhook_free( fail_recv );
+    fail_recvtimeout(0, nullptr, 0, 0, 0, nullptr, nullptr, nullptr, 0);
 
     }
 
