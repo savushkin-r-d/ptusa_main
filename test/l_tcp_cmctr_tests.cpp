@@ -1,6 +1,17 @@
 #include "l_tcp_cmctr_tests.h"
+#include "dtime.h"
 
 using namespace ::testing;
+
+
+#ifndef WIN_OS // For linux to deal with __stdcall.
+#define __stdcall
+#endif
+
+int __stdcall fail_recvtimeout( int, unsigned char*, int, long, long, const char *, const char *, stat_time*, char )
+{
+    return -1;
+}
 
 #ifdef LINUX_OS
 
@@ -23,16 +34,21 @@ TEST( tcp_communicator_linux, evaluate )
     cl.AsyncRecive();
     cl.async_timeout = 0;
     cl.AsyncRecive();
-    auto ptr = cl.buff;
-    cl.buff = nullptr;
-    cl.AsyncRecive();
-    cl.buff = ptr;
     cl.checkConnection();
 
     sleep( 0 );
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+
+    subhook_t fail_recv = subhook_new( reinterpret_cast<void *>( recvtimeout ),
+        reinterpret_cast<void *>( fail_recvtimeout ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( fail_recv );
+    cl.AsyncRecive();
+    cl.AsyncRecive();
+    subhook_remove( fail_recv );
+    subhook_free( fail_recv );
+
     }
 
 TEST( tcp_communicator_linux, checkBuff )
