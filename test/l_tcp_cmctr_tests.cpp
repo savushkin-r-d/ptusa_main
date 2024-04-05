@@ -44,7 +44,9 @@ TEST( tcp_communicator_linux, evaluate )
     subhook_t fail_recv = subhook_new( reinterpret_cast<void *>( tcp_communicator_linux::recvtimeout ),
         reinterpret_cast<void *>( fail_recvtimeout ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fail_recv );
+    cl.async_timeout = 200;
     cl.AsyncRecive();
+    cl.async_timeout = 0;
     cl.AsyncRecive();
     subhook_remove( fail_recv );
     subhook_free( fail_recv );
