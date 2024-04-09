@@ -22,7 +22,15 @@ TEST( errors_manager, evaluate )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, dev->get_state() );
 
-    //Should get error
+    //Should get an error.
     G_ERRORS_MANAGER->evaluate();
     EXPECT_EQ( 1, G_ERRORS_MANAGER->get_errors_id() );
+
+    //Should get a new error id due to set_cmd().
+    G_ERRORS_MANAGER->set_cmd( base_error::C_CMD_ACCEPT, 7, 0, 1 );
+    EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );
+
+    //Should not get errors.
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );    
     }
