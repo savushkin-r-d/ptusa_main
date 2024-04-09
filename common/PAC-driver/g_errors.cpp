@@ -450,11 +450,7 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
 //-----------------------------------------------------------------------------
 errors_manager::~errors_manager()
     {
-    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
-        {
-        delete s_errors_vector.at( i );
-        s_errors_vector.at( i ) = 0;
-        }
+    clear();
     }
 //-----------------------------------------------------------------------------
 errors_manager* errors_manager::get_instance()
@@ -467,6 +463,20 @@ errors_manager* errors_manager::get_instance()
         }
 
     return instance;
+    }
+//-----------------------------------------------------------------------------
+int errors_manager::clear()
+    {
+    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
+        {
+        delete s_errors_vector.at( i );
+        s_errors_vector.at( i ) = nullptr;
+        }
+
+    s_errors_vector.clear();
+    errors_id = 0;
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
