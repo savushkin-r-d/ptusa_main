@@ -17,6 +17,10 @@ TEST( errors_manager, evaluate )
     auto dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
+    //One devices, but no errors.
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 0, G_ERRORS_MANAGER->get_errors_id() );
+
     //Generate error.
     dev->set_cmd( "F", 0, 1 );    
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
@@ -25,12 +29,29 @@ TEST( errors_manager, evaluate )
     //Should get an error.
     G_ERRORS_MANAGER->evaluate();
     EXPECT_EQ( 1, G_ERRORS_MANAGER->get_errors_id() );
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 1, G_ERRORS_MANAGER->get_errors_id() );
 
-    //Should get a new error id due to set_cmd().
+    //Should get a new error id due to set_cmd() with C_CMD_ACCEPT.
     G_ERRORS_MANAGER->set_cmd( base_error::C_CMD_ACCEPT, 7, 0, 1 );
     EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );
 
     //Should not get errors.
     G_ERRORS_MANAGER->evaluate();
     EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );    
+
+    //Should get a new error id due to set_cmd() with C_CMD_SUPPRESS.
+    G_ERRORS_MANAGER->set_cmd( base_error::C_CMD_SUPPRESS, 7, 0, 1 );
+    EXPECT_EQ( 3, G_ERRORS_MANAGER->get_errors_id() );
+
+    //Should not get errors.
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 3, G_ERRORS_MANAGER->get_errors_id() );
+
+    //Remove error.
+    dev->set_cmd( "ABS_V", 0, 100 );
+    dev->set_cmd( "P_DT", 0, 1000 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
     }
