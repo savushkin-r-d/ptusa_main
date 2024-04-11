@@ -11,6 +11,8 @@
 #include "operation_mngr.h"
 #include "g_errors.h"
 
+#include <fmt/chrono.h>
+
 const std::array <const char* const, operation::STATES_MAX> operation::state_str;
 const std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
 //-----------------------------------------------------------------------------
@@ -477,7 +479,7 @@ step* operation::add_step( const char* step_name, int next_step_n /*= -1 */,
     int step_duration_par_n /*= -1 */,
     int step_max_duration_par_ns /*= -1 */, state_idx s_idx /*= RUN */)
     {
-    if ( current_state >= 0 && current_state < STATES_MAX )
+    if ( s_idx >= IDLE && s_idx < STATES_MAX )
         {
         return states[ s_idx ]->add_step( step_name, next_step_n,
             step_duration_par_n, step_max_duration_par_ns );
@@ -983,6 +985,11 @@ void step::finalize()
 u_int_4 step::get_eval_time() const
     {
     return get_delta_millisec( start_time ) + dx_time;
+    }
+//-----------------------------------------------------------------------------
+u_int_4 step::get_latest_eval_time() const
+    {
+    return get_delta_millisec( start_time );
     }
 //-----------------------------------------------------------------------------
 void step::set_start_time( u_int_4 start_time )
@@ -1933,6 +1940,7 @@ step* operation_state::add_step( const char* name, int next_step_n /*= -1 */,
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
+
     step_max_duration_par_ns.push_back( step_max_duration_par_n );
 
     return steps[ steps.size() - 1 ];
@@ -2028,7 +2036,7 @@ void operation_state::evaluate()
     int par_n = step_max_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
-        active_step_max_time = u_int( owner->get_step_param( par_n ) * 1000L );
+        active_step_max_time = u_int( owner->get_step_param( par_n ) );
         }
 
     //Время шага
@@ -2281,15 +2289,18 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 int operation_state::check_max_step_time( char* err_dev_name, int str_len )
     {
-    if ( step_max_duration_par_ns.empty() || !active_step_max_time ) return 0;
+    if ( step_max_duration_par_ns.empty() ||    // Не заданы параметры максимального времени.
+        !active_step_max_time )                 // Максимальное время - нулевое значение.        
+        return 0;
 
     if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() )
         {
-        if ( steps[ active_step_n ]->get_eval_time() >=
-            static_cast<u_int_4>( active_step_max_time ) )
+        if ( steps[ active_step_n ]->get_latest_eval_time() >=
+            1000UL * static_cast<u_int_4>( active_step_max_time ) )
             {
-            snprintf( err_dev_name, str_len,
-                "превышено максимальное время шага" );
+            auto t = std::chrono::seconds{ active_step_max_time };
+            fmt::format_to_n( err_dev_name, str_len,
+                "превышено максимальное время шага ({:%T})", t );
             return 1;
             }
         }

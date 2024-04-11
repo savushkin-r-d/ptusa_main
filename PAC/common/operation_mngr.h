@@ -497,6 +497,9 @@ class step
         /// Получение времени выполнения шага.
         u_int_4 get_eval_time() const;
 
+        /// Получение времени выполнения шага со времени последней паузы/запуска.
+        u_int_4 get_latest_eval_time() const;
+
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
 
