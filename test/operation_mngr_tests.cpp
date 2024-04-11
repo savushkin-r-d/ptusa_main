@@ -466,6 +466,50 @@ TEST( operation_state, to_next_step )
 	}
 
 
+TEST( operation, add_step )
+	{
+	tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	
+	// Добавляем шаг для несуществующего состояния операции - должно корректно
+	// отработать.
+	auto res = test_op->add_step( "Init", -1, -1, -1, operation::STATES_MAX );
+	EXPECT_NE( res, nullptr );
+	}
+
+TEST( operation, check_max_step_time )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
+	const auto MAX_TIME_IDX = 1;
+	test_tank.par_float[ MAX_TIME_IDX ] = 1;
+    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	auto res = test_op->add_step( "Init", -1, -1, MAX_TIME_IDX );
+	EXPECT_NE( res, nullptr );
+	test_op->start();
+	test_tank.evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	sleep_ms( 1001 );
+	test_tank.evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+	// После запуска опять в паузу из-за превышения времени.
+	test_op->start();
+	test_tank.evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	sleep_ms( 1001 );
+	test_tank.evaluate();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+
+
+	G_LUA_MANAGER->free_Lua();
+	}
+
 TEST( operation, operator_at )
 	{
 	char* res = 0;
