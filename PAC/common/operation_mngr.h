@@ -560,8 +560,8 @@ class operation_state
 
         ~operation_state();
 
-        step* add_step( const char* name, int next_step_n,
-            u_int step_duration_par_n );
+        step* add_step( const char* name, int next_step_n = -1,
+            int step_duration_par_n = -1, int step_max_duration_par_n = -1 );
 
         /// @brief Получение операции через операцию индексирования.
         ///
@@ -614,6 +614,8 @@ class operation_state
 
         int check_steps_params( char* err_dev_name, int str_len );
 
+        int check_max_step_time( char* err_dev_name, int str_len );
+
         /// @brief Проверка на отсутствие устройств.
         ///
         /// @return true  Есть устройства, над которыми что-то делается.
@@ -630,10 +632,14 @@ class operation_state
 
         int active_step_n;           ///< Активный шаг.
         int active_step_time;        ///< Время активного шага.
+        int active_step_max_time;    ///< Максимальное время активного шага.
         int active_step_next_step_n; ///< Следующий шаг.
 
         /// @brief Номера параметров времен шагов.
         std::vector< int > step_duration_par_ns;
+
+        /// @brief Номера параметров максимального времени шагов.
+        std::vector< int > step_max_duration_par_ns;
 
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
@@ -708,6 +714,8 @@ class operation
         void finalize();
 
         int check_steps_params( char* err_dev_name, int str_len );
+
+        int check_max_step_time( char* err_dev_name, int str_len );        
 
         u_int active_step() const;
         int get_run_step() const;
@@ -841,8 +849,9 @@ class operation
                 }
             }
 
-        step* add_step( const char* step_name, int next_step_n,
-            unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
+        step* add_step( const char* step_name, int next_step_n = -1,
+            int step_duration_par_n = -1, int step_max_duration_par_ns = -1, 
+            state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
 #pragma endregion

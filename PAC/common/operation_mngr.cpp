@@ -212,6 +212,11 @@ int operation::check_steps_params( char* err_dev_name, int str_len )
     return states[ RUN ]->check_steps_params( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
+int operation::check_max_step_time( char* err_dev_name, int str_len )
+    {
+    return states[ RUN ]->check_max_step_time( err_dev_name, str_len );
+    }
+//-----------------------------------------------------------------------------
 int operation::check_on_run_state( char* reason, int max_len ) const
 
     {
@@ -468,16 +473,18 @@ void operation::turn_off_active_step()
         }
     }
 //-----------------------------------------------------------------------------
-step* operation::add_step( const char* step_name, int next_step_n,
-                          unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
+step* operation::add_step( const char* step_name, int next_step_n /*= -1 */,
+    int step_duration_par_n /*= -1 */,
+    int step_max_duration_par_ns /*= -1 */, state_idx s_idx /*= RUN */)
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
         return states[ s_idx ]->add_step( step_name, next_step_n,
-            step_duration_par_n );
+            step_duration_par_n, step_max_duration_par_ns );
         }
 
-    return stub.add_step( step_name, next_step_n, step_duration_par_n );
+    return stub.add_step( step_name, next_step_n, step_duration_par_n,
+        step_max_duration_par_ns );
     }
 //-----------------------------------------------------------------------------
 int operation::on_extra_step( int step_idx )
@@ -1914,8 +1921,8 @@ operation_state::~operation_state()
         }
     }
 //-----------------------------------------------------------------------------
-step* operation_state::add_step( const char* name, int next_step_n,
-    u_int step_duration_par_n )
+step* operation_state::add_step( const char* name, int next_step_n /*= -1 */,
+    int step_duration_par_n /*= -1 */, int step_max_duration_par_n /*= -1 */ )
     {
     steps.push_back( new step( name, this ) );
     step* new_step = steps[ steps.size() - 1 ];
@@ -1926,6 +1933,7 @@ step* operation_state::add_step( const char* name, int next_step_n,
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
+    step_max_duration_par_ns.push_back( step_max_duration_par_n );
 
     return steps[ steps.size() - 1 ];
     }
@@ -2015,8 +2023,16 @@ void operation_state::evaluate()
 
     if ( active_step_n < 0 ) return;
 
+    //Максимальное время шага
+    active_step_max_time = 0;
+    int par_n = step_max_duration_par_ns[ active_step_n ];
+    if ( par_n > 0 )
+        {
+        active_step_max_time = u_int( owner->get_step_param( par_n ) * 1000L );
+        }
+
     //Время шага
-    int par_n = step_duration_par_ns[ active_step_n ];
+    par_n = step_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
@@ -2256,6 +2272,24 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
 
         if ( res )
             {
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation_state::check_max_step_time( char* err_dev_name, int str_len )
+    {
+    if ( step_max_duration_par_ns.empty() || !active_step_max_time ) return 0;
+
+    if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() )
+        {
+        if ( steps[ active_step_n ]->get_eval_time() >=
+            static_cast<u_int_4>( active_step_max_time ) )
+            {
+            snprintf( err_dev_name, str_len,
+                "превышено максимальное время шага" );
             return 1;
             }
         }

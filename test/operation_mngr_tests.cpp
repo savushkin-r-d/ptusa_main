@@ -412,7 +412,7 @@ TEST( operation_state, check_devices )
 	auto test_op = ( *operation_mngr )[ 1 ];
 	test_op->add_step( "Тестовый шаг", -1, -1 );
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
-	auto additional_step_in_run = operation_run_state->add_step( "Step_#2", -1, -1 );
+	auto additional_step_in_run = operation_run_state->add_step( "Step_#2" );
 	auto a1 = reinterpret_cast<on_action*>(
 		( *additional_step_in_run )[ step::ACTIONS::A_ON ] );
 
@@ -684,9 +684,9 @@ TEST( operation, evaluate )
 	test_op->add_step( "Process #1", 3, -1 );
 	test_op->add_step( "Process #2", 2, -1 );
 	
-	test_op->add_step( "Safe stop #1", 2, -1, operation::PAUSE );
-	test_op->add_step( "Safe stop #2", 3, -1, operation::PAUSE );
-	test_op->add_step( "Idle", -1, -1, operation::PAUSE );
+	test_op->add_step( "Safe stop #1", 2, -1, -1, operation::PAUSE );
+	test_op->add_step( "Safe stop #2", 3, -1, -1, operation::PAUSE );
+	test_op->add_step( "Idle", -1, -1, -1, operation::PAUSE );
 	
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->evaluate();
