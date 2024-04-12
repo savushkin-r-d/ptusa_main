@@ -982,12 +982,12 @@ void step::finalize()
     active = false;
     }
 //-----------------------------------------------------------------------------
-u_int_4 step::get_eval_time() const
+u_long step::get_eval_time() const
     {
     return get_delta_millisec( start_time ) + dx_time;
     }
 //-----------------------------------------------------------------------------
-u_int_4 step::get_latest_eval_time() const
+u_long step::get_latest_eval_time() const
     {
     return get_delta_millisec( start_time );
     }
@@ -1928,10 +1928,10 @@ operation_state::~operation_state()
         }
     }
 //-----------------------------------------------------------------------------
-step* operation_state::add_step( const char* name, int next_step_n /*= -1 */,
+step* operation_state::add_step( const char* step_name, int next_step_n /*= -1 */,
     int step_duration_par_n /*= -1 */, int step_max_duration_par_n /*= -1 */ )
     {
-    steps.push_back( new step( name, this ) );
+    steps.push_back( new step( step_name, this ) );
     step* new_step = steps[ steps.size() - 1 ];
     ( *new_step )[ step::A_WASH ]->set_params( owner->get_params() );
     ( *new_step )[ step::A_DELAY_ON ]->set_params( owner->get_params() );
@@ -2293,16 +2293,14 @@ int operation_state::check_max_step_time( char* err_dev_name, int str_len )
         !active_step_max_time )                 // Максимальное время - нулевое значение.        
         return 0;
 
-    if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() )
+    if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() &&
+        steps[ active_step_n ]->get_latest_eval_time() >=
+        1000UL * static_cast<u_int_4>( active_step_max_time ) )
         {
-        if ( steps[ active_step_n ]->get_latest_eval_time() >=
-            1000UL * static_cast<u_int_4>( active_step_max_time ) )
-            {
-            auto t = std::chrono::seconds{ active_step_max_time };
-            fmt::format_to_n( err_dev_name, str_len,
-                "превышено максимальное время шага ({:%T})", t );
-            return 1;
-            }
+        auto t = std::chrono::seconds{ active_step_max_time };
+        fmt::format_to_n( err_dev_name, str_len,
+            "превышено максимальное время шага ({:%T})", t );
+        return 1;
         }
 
     return 0;

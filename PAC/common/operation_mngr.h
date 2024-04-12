@@ -495,10 +495,10 @@ class step
         void finalize();
 
         /// Получение времени выполнения шага.
-        u_int_4 get_eval_time() const;
+        u_long get_eval_time() const;
 
         /// Получение времени выполнения шага со времени последней паузы/запуска.
-        u_int_4 get_latest_eval_time() const;
+        u_long get_latest_eval_time() const;
 
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
@@ -563,7 +563,7 @@ class operation_state
 
         ~operation_state();
 
-        step* add_step( const char* name, int next_step_n = -1,
+        step* add_step( const char* step_name, int next_step_n = -1,
             int step_duration_par_n = -1, int step_max_duration_par_n = -1 );
 
         /// @brief Получение операции через операцию индексирования.
