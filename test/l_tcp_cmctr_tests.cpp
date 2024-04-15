@@ -48,7 +48,6 @@ TEST( tcp_communicator_linux, evaluate )
 
     subhook_t fail_recv = subhook_new( reinterpret_cast<void *>( tcp_communicator_linux::recvtimeout ),
         reinterpret_cast<void *>( fail_recvtimeout ), SUBHOOK_64BIT_OFFSET );
-    subhook_install( fail_recv );
     subhook_t checkb_true = subhook_new( reinterpret_cast<void *>( tcp_communicator_linux::checkBuff ),
         reinterpret_cast<void *>( checkbuff_true ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fail_recv );
