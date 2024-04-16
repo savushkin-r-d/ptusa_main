@@ -2303,7 +2303,7 @@ int operation_state::check_max_step_time( char* err_dev_name, int str_len )
         return 1;
         }
 
-    for each ( auto a_step_n in active_steps )
+    for ( auto a_step_n : active_steps )
         {
         int par_n = step_max_duration_par_ns[ a_step_n - 1 ];
         if ( par_n > 0 )
