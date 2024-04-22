@@ -508,8 +508,8 @@ TEST( operation, check_max_step_time )
 
 	// После запуска опять в паузу из-за превышения времени второго шага,
 	// который является вспомогательным (выполняется параллельно).
-	test_tank.par_float[ MAX_TIME_IDX ] = 0;		//0 сек для первого шага.
-	test_tank.par_float[ MAX_TIME_IDX + 1 ] = 1;	//1 сек для второго шага.
+    test_tank.par_float[ MAX_TIME_IDX ] = 0;        //0 сек для первого шага.
+    test_tank.par_float[ MAX_TIME_IDX + 1 ] = 1;    //1 сек для второго шага.
 	res = test_op->add_step( "Eval #1", -1, -1, MAX_TIME_IDX + 1 );
 	test_op->start();
 	test_op->on_extra_step( 2 );

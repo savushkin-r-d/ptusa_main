@@ -853,7 +853,7 @@ class operation
             }
 
         step* add_step( const char* step_name, int next_step_n = -1,
-            int step_duration_par_n = -1, int step_max_duration_par_ns = -1, 
+            int step_duration_par_n = -1, int step_max_duration_par_n = -1, 
             state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
