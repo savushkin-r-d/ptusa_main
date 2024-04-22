@@ -2725,8 +2725,18 @@ int base_counter::get_state()
             {
             start_pump_working_time = get_millisec();
             counter_prev_value = get_abs_quantity();
+            return static_cast<int>( state );
             }
-        else    // Работа. 
+
+        // Работа. 
+        // Проверяем счетчик на ошибку - он должен изменить свои показания.
+        if ( get_abs_quantity() != counter_prev_value )
+            {
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
+            state = STATES::S_WORK;
+            }
+        else
             {
             auto dt = get_pump_dt();
             if ( get_delta_millisec( start_pump_working_time ) < dt )
@@ -2734,17 +2744,7 @@ int base_counter::get_state()
                 return static_cast<int>( state );
                 }
 
-            // Проверяем счетчик на ошибку - он должен изменить свои показания.
-            if ( get_abs_quantity() == counter_prev_value )
-                {
-                state = STATES::S_ERROR;
-                }
-            else
-                {
-                start_pump_working_time = get_millisec();
-                counter_prev_value = get_abs_quantity();
-                state = STATES::S_WORK;
-                }
+            state = STATES::S_ERROR;
             }
         }
 
@@ -2871,7 +2871,7 @@ void base_counter::start()
         last_read_value = get_raw_value();
         start_pump_working_time = 0;
         }
-    else if ( STATES::S_ERROR == state )
+    else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
         {
         start_pump_working_time = 0;
         state = STATES::S_WORK;

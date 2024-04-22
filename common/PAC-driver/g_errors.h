@@ -375,6 +375,14 @@ class errors_manager
         /// @brief Получение единственного экземпляра класса.
         static errors_manager* get_instance();
 
+        /// @brief Очистка всех связанных устройств.
+        int clear();
+
+        u_int_2 get_errors_id() const
+            {
+            return errors_id;
+            }
+
     private:
         u_int_2 errors_id; // Cостояние ошибок.
 
