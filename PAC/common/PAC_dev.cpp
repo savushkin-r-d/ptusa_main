@@ -2871,7 +2871,7 @@ void base_counter::start()
         last_read_value = get_raw_value();
         start_pump_working_time = 0;
         }
-    else if ( STATES::S_ERROR == state )
+    else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
         {
         start_pump_working_time = 0;
         state = STATES::S_WORK;
