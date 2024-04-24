@@ -20,7 +20,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     lua_remove( L, -1 );
 
     EXPECT_EQ( 0,
-        luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1 )" ) );
+        luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1, -1 )" ) );
     
     // int enable_step_by_signal::set_bool_property( const char* name, bool value )
     EXPECT_EQ( 0,

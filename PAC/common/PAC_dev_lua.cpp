@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Mar 13 15:31:45 2024.
+** Generated automatically by tolua++-1.0.92 on Thu Apr 11 10:36:22 2024.
 */
 
 #ifndef __cplusplus
@@ -5664,8 +5664,9 @@ static int tolua_PAC_dev_operation_add_step00(lua_State* tolua_S)
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,6,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -5674,13 +5675,14 @@ static int tolua_PAC_dev_operation_add_step00(lua_State* tolua_S)
   operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
   int next_step_n = ((int)  tolua_tonumber(tolua_S,3,0));
-  unsigned int step_duration_par_n = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
-  operation::state_idx s_idx = ((operation::state_idx) (int)  tolua_tonumber(tolua_S,5,operation::RUN));
+  int step_duration_par_n = ((int)  tolua_tonumber(tolua_S,4,0));
+  int step_max_duration_par_n = ((int)  tolua_tonumber(tolua_S,5,0));
+  operation::state_idx s_idx = ((operation::state_idx) (int)  tolua_tonumber(tolua_S,6,operation::RUN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_step'", NULL);
 #endif
   {
-   step* tolua_ret = (step*)  self->add_step(name,next_step_n,step_duration_par_n,s_idx);
+   step* tolua_ret = (step*)  self->add_step(name,next_step_n,step_duration_par_n,step_max_duration_par_n,s_idx);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"step");
   }
  }
