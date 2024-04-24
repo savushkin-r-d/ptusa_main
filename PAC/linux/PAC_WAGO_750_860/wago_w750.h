@@ -18,23 +18,21 @@
 
 #include "l_wago.h"
 
-extern "C"
-    {
-    #include "kbusapi.h"
-    }
+extern "C" {
+#include "kbusapi.h"
+}
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago для PAC WAGO 750-860.
 ///
 ///
-class wago_manager_w750 : public wago_manager_linux
-    {
-     public:
-        wago_manager_w750();
+class wago_manager_w750 : public wago_manager_linux {
+ public:
+  wago_manager_w750();
 
-        virtual ~wago_manager_w750();
+  virtual ~wago_manager_w750();
 
-        int read_inputs();
-        int write_outputs();
-    };
+  int read_inputs();
+  int write_outputs();
+};
 //-----------------------------------------------------------------------------
-#endif // WAGO_750_H
+#endif  // WAGO_750_H

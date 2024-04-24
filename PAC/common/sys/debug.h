@@ -22,14 +22,16 @@
 
 #if defined LINUX_OS && !defined PAC_WAGO_750_860
 #undef debug_break
-#define debug_break asm ( "int" "3" )
-#endif // defined LINUX_OS && !defined PAC_WAGO_750_860
+#define debug_break \
+  asm("int"         \
+      "3")
+#endif  // defined LINUX_OS && !defined PAC_WAGO_750_860
 
 #if defined WIN_OS
 #undef debug_break
 #define debug_break _asm { int 3 }
-#endif // defined WIN_OS
+#endif  // defined WIN_OS
 
-#endif // DEBUG_IDE
+#endif  // DEBUG_IDE
 //-----------------------------------------------------------------------------
-#endif // DEBUG_H
+#endif  // DEBUG_H

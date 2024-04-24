@@ -15,6 +15,7 @@
 #define TCP_CMCTR_H
 
 #include <stdio.h>
+
 #include <map>
 
 #include "smart_ptr.h"
@@ -23,125 +24,121 @@ class tcp_client;
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
-class tcp_communicator
-    {
-    // Friendly класс предназначен только для тестирования
-    // и не должен использоваться в других целях
+class tcp_communicator {
+  // Friendly класс предназначен только для тестирования
+  // и не должен использоваться в других целях
 #ifdef PTUSA_TEST
-    friend class test_tcp_communicator;
+  friend class test_tcp_communicator;
 #endif
-    public:
-        /// @brief Определение функции сервиса.
-        typedef long int srv_proc( long int, u_char *, u_char * );
-        typedef srv_proc *srv_ptr;
+ public:
+  /// @brief Определение функции сервиса.
+  typedef long int srv_proc(long int, u_char*, u_char*);
+  typedef srv_proc* srv_ptr;
 
-        /// @brief Получение единственного экземпляра класса для работы с
-        /// коммуникатором.
-        ///
-        /// @return - указатель на единственный объект класса @ref
-        /// tcp_communicator.
-        static tcp_communicator* get_instance();
+  /// @brief Получение единственного экземпляра класса для работы с
+  /// коммуникатором.
+  ///
+  /// @return - указатель на единственный объект класса @ref
+  /// tcp_communicator.
+  static tcp_communicator* get_instance();
 
 #ifdef PTUSA_TEST
-        static bool is_init;
-#endif //PTUSA_TEST
+  static bool is_init;
+#endif  // PTUSA_TEST
 
-        static void init_instance( const char *name_rus, const char *name_eng );
+  static void init_instance(const char* name_rus, const char* name_eng);
 
-        /// @brief Итерация обмена данными с сервером.
-        virtual int evaluate() = 0;
+  /// @brief Итерация обмена данными с сервером.
+  virtual int evaluate() = 0;
 
-        /// @brief Добавление пользовательской функции по обмену данными -
-        /// сервиса.
-        ///
-        /// @param srv_id - номер, за которым будет закреплен сервис.
-        /// @param fk     - указатель на объект выделенного блока памяти.
-        virtual srv_ptr reg_service( u_char srv_id, srv_ptr fk );
+  /// @brief Добавление пользовательской функции по обмену данными -
+  /// сервиса.
+  ///
+  /// @param srv_id - номер, за которым будет закреплен сервис.
+  /// @param fk     - указатель на объект выделенного блока памяти.
+  virtual srv_ptr reg_service(u_char srv_id, srv_ptr fk);
 
-        /// @brief Получение сетевого имени PAC.
-        ///
-        /// @return - сетевое имя PAC на русском языке.
-        char* get_host_name_rus();
+  /// @brief Получение сетевого имени PAC.
+  ///
+  /// @return - сетевое имя PAC на русском языке.
+  char* get_host_name_rus();
 
-        /// @brief Получение сетевого имени PAC.
-        ///
-        /// @return - сетевое имя PAC на английском языке.
-        char* get_host_name_eng();
+  /// @brief Получение сетевого имени PAC.
+  ///
+  /// @return - сетевое имя PAC на английском языке.
+  char* get_host_name_eng();
 
-        virtual int add_async_client(tcp_client* client);
-        virtual int remove_async_client(tcp_client* client);
+  virtual int add_async_client(tcp_client* client);
+  virtual int remove_async_client(tcp_client* client);
 
-        virtual ~tcp_communicator();
-        
-        static void set_port( int new_port, int new_port_modbus )
-            {
-            port = new_port;
-            port_modbus = new_port_modbus;
-            }
+  virtual ~tcp_communicator();
 
-        enum CONSTANTS
-            {
-            BUFSIZE     = 500 * 1024,      ///< Размер буфера.
+  static void set_port(int new_port, int new_port_modbus) {
+    port = new_port;
+    port_modbus = new_port_modbus;
+  }
+
+  enum CONSTANTS {
+    BUFSIZE = 500 * 1024,  ///< Размер буфера.
 
 #ifdef LINUX_OS
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // LINUX_OS
+    MAX_SOCKETS = 32,  ///< Максимальное количество сокетов.
+#endif                 // LINUX_OS
 #ifdef WIN_OS
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // WIN_OS
-            QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
+    MAX_SOCKETS = 32,  ///< Максимальное количество сокетов.
+#endif                 // WIN_OS
+    QLEN = MAX_SOCKETS - 1,  ///< Максимальное количество соединений.
 
-            TC_MAX_HOST_NAME      = 70,
-            TC_MAX_SERVICE_NUMBER = 16,
-            };
+    TC_MAX_HOST_NAME = 70,
+    TC_MAX_SERVICE_NUMBER = 16,
+  };
 
-    protected:
-        static int port;                  ///< Порт.
-        static int port_modbus;
+ protected:
+  static int port;  ///< Порт.
+  static int port_modbus;
 
-        tcp_communicator();
+  tcp_communicator();
 
-        //ERRORS DEFINITION
-        enum ERRORS
-            {
-            ERR_RETRIVE       = 1,
-            ERR_WRONG_SERVICE = 3,
-            ERR_TRANSMIT      = 4,
-            ERR_WRONG_CMD     = 5,
-            };
+  // ERRORS DEFINITION
+  enum ERRORS {
+    ERR_RETRIVE = 1,
+    ERR_WRONG_SERVICE = 3,
+    ERR_TRANSMIT = 4,
+    ERR_WRONG_CMD = 5,
+  };
 
-        //COMMANDS DEFINITION
-        enum COMMANDS
-            {
-            FRAME_SINGLE = 1,
-            AKN_ERR      = 7,
-            AKN_DATA     = 8,
-            AKN_OK       = 12,
-            };
+  // COMMANDS DEFINITION
+  enum COMMANDS {
+    FRAME_SINGLE = 1,
+    AKN_ERR = 7,
+    AKN_DATA = 8,
+    AKN_OK = 12,
+  };
 
-        static auto_smart_ptr < tcp_communicator > instance;///< Экземпляр класса.
+  static auto_smart_ptr<tcp_communicator> instance;  ///< Экземпляр класса.
 
-        srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< Массив сервисов.
+  srv_ptr services[TC_MAX_SERVICE_NUMBER];  ///< Массив сервисов.
 
-        char host_name_rus[ TC_MAX_HOST_NAME + 1] = { 0 }; ///< Сетевое имя PAC.
-        char host_name_eng[ TC_MAX_HOST_NAME + 1] = { 0 }; ///< Сетевое eng имя PAC.
+  char host_name_rus[TC_MAX_HOST_NAME + 1] = {0};  ///< Сетевое имя PAC.
+  char host_name_eng[TC_MAX_HOST_NAME + 1] = {0};  ///< Сетевое eng имя PAC.
 
-        int max_cycles;         ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
-        int glob_cmctr_ok;      ///< Флаг активности обмена с сервером.
+  int max_cycles;  ///< Максимальное количество циклов обработки состояний
+                   ///< сокетов за 1 проход.
+  int glob_cmctr_ok;  ///< Флаг активности обмена с сервером.
 
-        u_int   in_buffer_count;        ///< Количество данных в буфере.
-        u_char  buf[ BUFSIZE ] = { 0 }; ///< Буфер.
+  u_int in_buffer_count;  ///< Количество данных в буфере.
+  u_char buf[BUFSIZE] = {0};  ///< Буфер.
 
-        u_char pidx;            ///< Номер ответа.
-        int    net_id;          ///< Номер PAC.
+  u_char pidx;  ///< Номер ответа.
+  int net_id;   ///< Номер PAC.
 
-        std::map<int, tcp_client*> *clients;
+  std::map<int, tcp_client*>* clients;
 
-        void _ErrorAkn( u_char error );
-        void _AknData( u_long len );
-        void _AknOK();
-    };
+  void _ErrorAkn(u_char error);
+  void _AknData(u_long len);
+  void _AknOK();
+};
 //-----------------------------------------------------------------------------
 #define G_CMMCTR tcp_communicator::get_instance()
 
-#endif //TCP_CMCTR_H
+#endif  // TCP_CMCTR_H

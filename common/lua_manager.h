@@ -1,145 +1,132 @@
 #include "smart_ptr.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-#include    "lua.h"
-#include    "lauxlib.h"
-#include    "lualib.h"
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
 
-#ifdef  __cplusplus
-    };
+#ifdef __cplusplus
+};
 #endif
 
-#include    "tolua++.h"
+#include "tolua++.h"
 //-----------------------------------------------------------------------------
-TOLUA_API int tolua_PAC_dev_open ( lua_State* tolua_S );
+TOLUA_API int tolua_PAC_dev_open(lua_State* tolua_S);
 
 TOLUA_API int tolua_IOT_dev_open(lua_State* tolua_S);
 
 #ifdef RFID
-TOLUA_API int tolua_rfid_reader_open( lua_State* tolua_S );
+TOLUA_API int tolua_rfid_reader_open(lua_State* tolua_S);
 #endif
 
 //-----------------------------------------------------------------------------
 const int SYS_FILE_CNT = 3;
-const int FILE_CNT     = 8;
+const int FILE_CNT = 8;
 //-----------------------------------------------------------------------------
-const int FILES_VERSION[ FILE_CNT ] =
-    {
-    2, //"sys.io.lua",
-    2, //"sys.devices.lua",
-    8, //"sys.objects.plua",
+const int FILES_VERSION[FILE_CNT] = {
+    2,  //"sys.io.lua",
+    2,  //"sys.devices.lua",
+    8,  //"sys.objects.plua",
 
-    1, //"main.io.plua",
-    1, //"main.objects.plua",
-    1, //"main.modbus_srv.lua",
-    1, //"main.profibus.lua",
-    1, //"main.restrictions.lua"
-    };
+    1,  //"main.io.plua",
+    1,  //"main.objects.plua",
+    1,  //"main.modbus_srv.lua",
+    1,  //"main.profibus.lua",
+    1,  //"main.restrictions.lua"
+};
 //-----------------------------------------------------------------------------
 int check_file(const char* file_name, char* err_str);
 //-----------------------------------------------------------------------------
-class lua_manager
-    {
-    public:
-        static void no_print_stack_traceback()
-            {
-            is_print_stack_traceback = false;
-            }
+class lua_manager {
+ public:
+  static void no_print_stack_traceback() { is_print_stack_traceback = false; }
 
-        static void use_print_stack_traceback()
-            {
-            is_print_stack_traceback = true;
-            }
+  static void use_print_stack_traceback() { is_print_stack_traceback = true; }
 
-        static lua_manager* get_instance();
+  static lua_manager* get_instance();
 
-        int init( lua_State* L, const char* script_name, const char* dir = "",
-            const char* sys_dir = "", const char* extra_dirs = "" );
+  int init(lua_State* L, const char* script_name, const char* dir = "",
+           const char* sys_dir = "", const char* extra_dirs = "");
 
-        ~lua_manager();
+  ~lua_manager();
 
-        bool is_exist_lua_function( const char* object_name,
-            const char* function_name ) const;
+  bool is_exist_lua_function(const char* object_name,
+                             const char* function_name) const;
 
-        int void_exec_lua_method( const char *object_name,
-            const char *function_name, const char *c_function_name ) const;
+  int void_exec_lua_method(const char* object_name, const char* function_name,
+                           const char* c_function_name) const;
 
-        const char* char_no_param_exec_lua_method( const char *object_name,
-            const char *function_name, const char *c_function_name ) const;
+  const char* char_no_param_exec_lua_method(const char* object_name,
+                                            const char* function_name,
+                                            const char* c_function_name) const;
 
-        const char* char_exec_lua_method( const char *object_name,
-            const char *function_name, int param, const char *c_function_name ) const;
+  const char* char_exec_lua_method(const char* object_name,
+                                   const char* function_name, int param,
+                                   const char* c_function_name) const;
 
-        int int_exec_lua_method( const char *object_name,
-            const char *function_name, int param,
-            const char *c_function_name ) const;
+  int int_exec_lua_method(const char* object_name, const char* function_name,
+                          int param, const char* c_function_name) const;
 
-        int int_2_exec_lua_method( const char* object_name,
-            const char* function_name, int param1, int param2,
-            const char* c_function_name ) const;
+  int int_2_exec_lua_method(const char* object_name, const char* function_name,
+                            int param1, int param2,
+                            const char* c_function_name) const;
 
-        int int_no_param_exec_lua_method( const char *object_name,
-            const char *function_name, const char *c_function_name ) const;
+  int int_no_param_exec_lua_method(const char* object_name,
+                                   const char* function_name,
+                                   const char* c_function_name) const;
 
-        void* user_object_exec_lua_method( const char *object_name,
-            const char *function_name, int param,
-            const char *c_function_name ) const;
+  void* user_object_exec_lua_method(const char* object_name,
+                                    const char* function_name, int param,
+                                    const char* c_function_name) const;
 
-        int exec_Lua_str( const char *Lua_str, const char *error_str,
-            bool is_print_error_msg = true ) const;
+  int exec_Lua_str(const char* Lua_str, const char* error_str,
+                   bool is_print_error_msg = true) const;
 
-        lua_State * get_Lua() const;
+  lua_State* get_Lua() const;
 
-        int reload_script( int script_n, const char* script_function_name,
-            char *res_str, int max_res_str_length );
+  int reload_script(int script_n, const char* script_function_name,
+                    char* res_str, int max_res_str_length);
 
 #ifdef PTUSA_TEST
-        void set_Lua( lua_State* l)
-            {
-            L = l;
-            }
+  void set_Lua(lua_State* l) { L = l; }
 
-        void free_Lua()
-            {
-            if ( L )
-                {
-                lua_close( L );
-                L = nullptr;
-                };
-            }
+  void free_Lua() {
+    if (L) {
+      lua_close(L);
+      L = nullptr;
+    };
+  }
 #endif
 
-    private:
-        lua_manager() : L( 0 ), err_func( 0 ), is_free_lua( 0 )
-            {
-            }
+ private:
+  lua_manager() : L(0), err_func(0), is_free_lua(0) {}
 
-        static int error_trace( lua_State * L );
+  static int error_trace(lua_State* L);
 
-        static auto_smart_ptr< lua_manager > instance;
+  static auto_smart_ptr<lua_manager> instance;
 
-        int exec_lua_method( const char *object_name,
-            const char *function_name, int param, int is_use_param = 1,
-            int is_use_lua_return_value = 1 ) const;
+  int exec_lua_method(const char* object_name, const char* function_name,
+                      int param, int is_use_param = 1,
+                      int is_use_lua_return_value = 1) const;
 
-        int exec_lua_method_var( const char* object_name, const char* function_name,
-            int is_use_lua_return_value = 0, int cnt = 0, ... ) const;
+  int exec_lua_method_var(const char* object_name, const char* function_name,
+                          int is_use_lua_return_value = 0, int cnt = 0,
+                          ...) const;
 
-        static bool is_print_stack_traceback;
+  static bool is_print_stack_traceback;
 
-        int err_func;
-        lua_State * L;
+  int err_func;
+  lua_State* L;
 
-        int is_free_lua;
+  int is_free_lua;
 
-        enum CONSTANTS
-            {
-            MAX_ERRORS = 50,
-            };
-    };
+  enum CONSTANTS {
+    MAX_ERRORS = 50,
+  };
+};
 //-----------------------------------------------------------------------------
 #define G_LUA_MANAGER lua_manager::get_instance()
 //-----------------------------------------------------------------------------

@@ -1,25 +1,16 @@
+#include "bus_coupler_io_PC.h"
+
 #include <unistd.h>
 
-#include "bus_coupler_io_PC.h"
 #include "PAC_err.h"
 
 //-----------------------------------------------------------------------------
-io_manager_PC::io_manager_PC()
-    {
-    }
+io_manager_PC::io_manager_PC() {}
 //-----------------------------------------------------------------------------
-io_manager_PC::~io_manager_PC()
-    {
-    }
+io_manager_PC::~io_manager_PC() {}
 //-----------------------------------------------------------------------------
-int io_manager_PC::read_inputs()
-    {
-    return 0;
-    }
+int io_manager_PC::read_inputs() { return 0; }
 //-----------------------------------------------------------------------------
-int io_manager_PC::write_outputs()
-    {
-    return 0;
-    }
+int io_manager_PC::write_outputs() { return 0; }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
