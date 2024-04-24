@@ -487,7 +487,7 @@ TEST( operation, check_max_step_time )
 	tech_object test_tank( "Танк1", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
 	const auto MAX_TIME_IDX = 1;
 	test_tank.par_float[ MAX_TIME_IDX ] = 1;
-    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
 	auto res = test_op->add_step( "Init", -1, -1, MAX_TIME_IDX );
 	EXPECT_NE( res, nullptr );
@@ -508,8 +508,8 @@ TEST( operation, check_max_step_time )
 
 	// После запуска опять в паузу из-за превышения времени второго шага,
 	// который является вспомогательным (выполняется параллельно).
-    test_tank.par_float[ MAX_TIME_IDX ] = 0;        //0 сек для первого шага.
-    test_tank.par_float[ MAX_TIME_IDX + 1 ] = 1;    //1 сек для второго шага.
+	test_tank.par_float[ MAX_TIME_IDX ] = 0;        //0 сек для первого шага.
+	test_tank.par_float[ MAX_TIME_IDX + 1 ] = 1;    //1 сек для второго шага.
 	res = test_op->add_step( "Eval #1", -1, -1, MAX_TIME_IDX + 1 );
 	test_op->start();
 	test_op->on_extra_step( 2 );
