@@ -15,7 +15,7 @@ jobs:
     - uses: DoozyX/clang-format-lint-action@v0.17
       with:
         source: '.'
-        exclude: './third_party ./external'
+        exclude: './third_party ./external ./common/RFID/API'
         extensions: 'h,cpp'
         clangFormatVersion: 17
         style: google
