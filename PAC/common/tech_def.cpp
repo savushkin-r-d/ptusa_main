@@ -353,7 +353,6 @@ int tech_object::evaluate()
             //Проверка операции на корректные параметры шагов.
             char res_str[ ERR_STR_SIZE ] = "";
 
-            int len = strlen( res_str );
             int res = op->check_steps_params( res_str, ERR_STR_SIZE );
             if ( res )
                 {
@@ -361,8 +360,17 @@ int tech_object::evaluate()
                 op->pause();
                 lua_on_pause( idx );
                 }
-            }
 
+            //Проверка на превышение максимльного времени шага.
+            res_str[ 0 ] = '\0';
+            res = op->check_max_step_time( res_str, ERR_STR_SIZE );
+            if ( res )
+                {
+                set_err_msg( res_str, idx, 0, ERR_TO_FAIL_STATE );
+                op->pause();
+                lua_on_pause( idx );
+                }
+            }
         }
     return 0;
     }
