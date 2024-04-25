@@ -24,7 +24,7 @@
 
 ///@class TRecipeManager mcaRec.h
 ///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти
-///контроллера для МСА
+/// контроллера для МСА
 class TRecipeManager {
  public:
   enum RecipeValues {
@@ -63,7 +63,7 @@ class TRecipeManager {
     RV_TM_DEZSR,  // время дезинфекции дезинфицирующим средством
     RV_TM_DEZSR_INJECT,  // время внесения дезинфицирующего средства при
                          // дезинфекции
-    RV_N_RET,  // номер возвратного насоса
+    RV_N_RET,            // номер возвратного насоса
     RV_N_UPR,  // номер сигнала включения возвратного насоса
     RV_OS,     // обратная связь
     RV_OBJ_EMPTY,     // сигнал "объект опорожнен"
@@ -145,7 +145,7 @@ class TRecipeManager {
     RV_SIGNAL_CIPEND2,       // Сигнал "Мойка окончена 2"
     RV_SIGNAL_CAN_CONTINUE,  // Сигнал можно продолжать мойку для операций
                              // циркуляции и промывки
-    RV_SIGNAL_WATER,  // Сигнал "вода в трубе"
+    RV_SIGNAL_WATER,         // Сигнал "вода в трубе"
     RV_SIGNAL_PRERINSE,  // Сигнал "предварительное ополаскивание"
     RV_SIGNAL_INTERMEDIATE_RINSE,  // Сигнал "промежуточная промывка"
     RV_SIGNAL_POSTRINSE,  // Сигнал "окончательная промывка"

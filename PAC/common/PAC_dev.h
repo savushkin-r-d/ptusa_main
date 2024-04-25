@@ -3954,7 +3954,7 @@ class counter_iolink : public base_counter {
   struct in_data {
     float totalizer;  // Quantity meter which continuously totals the
                       // volumetric flow since the last reset.
-    int16_t flow;  // Current flow.
+    int16_t flow;     // Current flow.
 
     uint16_t out2 : 1;         // Status depends on [OU2].
     uint16_t out1 : 1;         // Status depends on [OU1].

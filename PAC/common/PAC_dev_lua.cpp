@@ -27,7 +27,7 @@ TOLUA_API int tolua_PAC_dev_open(lua_State* tolua_S);
 #ifdef WIN_OS
 #pragma warning(disable : 4800)  // Warning C4800: 'int' : forcing value to bool
                                  // 'true' or 'false' (performance warning)
-#pragma warning(disable : 6011)   // dereferencing NULL pointer <name>.
+#pragma warning(disable : 6011)  // dereferencing NULL pointer <name>.
 #pragma warning(disable : 26812)  // Prefer 'enum class' over 'enum'.
 #endif                            // WIN_OS
 

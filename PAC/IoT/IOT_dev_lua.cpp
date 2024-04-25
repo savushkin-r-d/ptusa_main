@@ -18,7 +18,7 @@ TOLUA_API int tolua_IOT_dev_open(lua_State* tolua_S);
 #ifdef WIN_OS
 #pragma warning(disable : 4800)  // Warning C4800: 'int' : forcing value to bool
                                  // 'true' or 'false' (performance warning)
-#endif  // WIN_OS
+#endif                           // WIN_OS
 
 /* function to register type */
 static void tolua_reg_types(lua_State* tolua_S) {

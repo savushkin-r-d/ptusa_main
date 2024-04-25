@@ -14,10 +14,10 @@
 #include "w_console.h"
 
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #define closesocket close
 #define INVALID_SOCKET (-1)

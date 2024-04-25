@@ -27,7 +27,7 @@
 ///@brief Минимальная задержка переключения при сортировке растворов
 #define SORT_SWITCH_DELAY 3000
 ///@brief Минимальное время соблюдения условий для включения запорного клапана
-///пара
+/// пара
 #define STEAM_VALVE_MIN_DELAY 1200L
 ///@brief Количество параметров станции
 #define STATION_PAR_COUNT 50
@@ -389,7 +389,7 @@ enum workParameters {
   P_SIGNAL_CIPEND2,       // Сигнал "Мойка окончена 2"
   P_SIGNAL_CAN_CONTINUE,  // Сигнал можно продолжать мойку для операций
                           // циркуляции и промывки
-  P_SIGNAL_WATER,  // Сигнал вода в трубе
+  P_SIGNAL_WATER,         // Сигнал вода в трубе
   P_SIGNAL_PRERINSE,  // Сигнал "предварительное ополаскивание"
   P_SIGNAL_INTERMEDIATE_RINSE,  // Сигнал "промежуточная промывка"
   P_SIGNAL_POSTRINSE,  // Сигнал "окончательная промывка"
@@ -689,7 +689,7 @@ class cipline_tech_object : public tech_object {
   char dont_use_water_tank;
   int ret_overrride;  // флаг принудительного включения/выключения возвратного
                       // насооса
-  int return_ok;         // есть расход на возврате
+  int return_ok;      // есть расход на возврате
   int concentration_ok;  // есть концентрация на возврате
   int enable_ret_pump;  // используется для того, чтобы определить, нужно ли
                         // отключать возвратный насос
@@ -871,7 +871,7 @@ class cipline_tech_object : public tech_object {
   device* dev_ai_pump_feedback;  // Уровень для контроля подающего насоса
   device* dev_upr_sanitizer_pump;  // Управление насосом подачи дезинфицирующего
                                    // средства
-  device* dev_upr_circulation;  // Сигнал "Циркуляция"
+  device* dev_upr_circulation;     // Сигнал "Циркуляция"
   device*
       dev_os_pump_can_run;  // Сигнал, запрещающий включение подающего насоса.
   device* dev_ls_ret_pump;  // Сигнал уровня перед возвратным насосом
@@ -946,7 +946,7 @@ class cipline_tech_object : public tech_object {
   int _DoseRR(int what);
   ///-----------------------------------------------
   ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков
-  ///вызываются стандартные функции.
+  /// вызываются стандартные функции.
   int DoStep(int step_to_do);        // cip_DoStep(step)
   int GoToStep(int cur, int param);  // cip_GoToStep(currentstep,param)
   int InitStep(int step_to_init,

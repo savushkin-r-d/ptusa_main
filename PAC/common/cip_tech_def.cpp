@@ -2322,8 +2322,8 @@ int cipline_tech_object::_InitStep(int step_to_init, int not_first_call) {
       return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step_to_init,
                            not_first_call);
       //	case 158: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1,
-      //step, f); 	case 159: return SCInitPumping(SHCH, TANK_S, NEUTRO, -1, step,
-      //f);
+      // step, f); 	case 159: return SCInitPumping(SHCH, TANK_S, NEUTRO, -1,
+      // step, f);
     case 160:
       return SCInitPumping(SHCH, WATER, TANK_S, -1, step_to_init,
                            not_first_call);
@@ -2340,8 +2340,8 @@ int cipline_tech_object::_InitStep(int step_to_init, int not_first_call) {
       return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step_to_init,
                            not_first_call);
       //	case 165: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1,
-      //step, f); 	case 166: return SCInitPumping(KISL, TANK_K, NEUTRO, -1, step,
-      //f);
+      // step, f); 	case 166: return SCInitPumping(KISL, TANK_K, NEUTRO, -1,
+      // step, f);
     case 167:
       return SCInitPumping(KISL, WATER, TANK_K_MG, -1, step_to_init,
                            not_first_call);
@@ -2355,8 +2355,8 @@ int cipline_tech_object::_InitStep(int step_to_init, int not_first_call) {
       return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step_to_init,
                            not_first_call);
       //	case 171: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1,
-      //step, f); 	case 172: return SCInitPumping(SHCH, TANK_W, NEUTRO, -1, step,
-      //f);
+      // step, f); 	case 172: return SCInitPumping(SHCH, TANK_W, NEUTRO, -1,
+      // step, f);
     case 173:
       return SCInitPumping(SHCH, WATER, TANK_W, -1, step_to_init,
                            not_first_call);
