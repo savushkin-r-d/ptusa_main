@@ -7,12 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
 
-    - name: Run Clang-Format
     - uses: DoozyX/clang-format-lint-action@v0.17
       with:
         source: '.'
@@ -22,7 +20,6 @@ jobs:
         style: google
         inplace: True
 
-    - name: Commit changes
-      uses: EndBug/add-and-commit@v9
+    - uses: EndBug/add-and-commit@v9
       with:
         default_author: github_actions
