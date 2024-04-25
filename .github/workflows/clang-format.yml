@@ -7,15 +7,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Run Clang-Format
     - uses: DoozyX/clang-format-lint-action@v0.17
       with:
         source: '.'
-        exclude: './third_party ./external ./common/RFID/API ./PAC/common/prj_mngr'
+        exclude: './third_party ./external ./common/RFID/API'
         extensions: 'h,cpp'
         clangFormatVersion: 17
         style: google
         inplace: True
-    - uses: EndBug/add-and-commit@v9
+
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v9
       with:
         default_author: github_actions
