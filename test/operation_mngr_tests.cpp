@@ -489,7 +489,7 @@ TEST( operation, check_max_step_time )
 	test_tank.par_float[ MAX_TIME_IDX ] = 1;
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
-	auto res = test_op->add_step( "Init", -1, -1, MAX_TIME_IDX );
+	auto res = test_op->add_step( "Тестовый первый шаг", -1, -1, MAX_TIME_IDX );
 	EXPECT_NE( res, nullptr );
 	test_op->start();
 	test_tank.evaluate();
@@ -503,6 +503,13 @@ TEST( operation, check_max_step_time )
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 	sleep_ms( 1001 );
+    //Проверка на превышение максимльного времени шага.
+    const unsigned int ERR_STR_SIZE = 80;
+    char err_str[ ERR_STR_SIZE ] = {};
+    test_op->check_max_step_time( err_str, ERR_STR_SIZE );
+    const auto RES_STR = "превышено макс. t (00:00:01) шага 1 'Тестовый пе...'";
+    EXPECT_STREQ( RES_STR, err_str );
+
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
@@ -516,6 +523,9 @@ TEST( operation, check_max_step_time )
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 	sleep_ms( 1001 );
+    test_op->check_max_step_time( err_str, ERR_STR_SIZE );
+    const auto RES_STR_EX = "превышено макс. t (00:00:01) шага 2 'Eval #1'";
+    EXPECT_STREQ( RES_STR_EX, err_str );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 

@@ -58,7 +58,7 @@ class action
         /// @brief Проверка действия.
         ///
         /// @param [out] reason Пояснение, почему нельзя выполнить действие.
-        virtual int check( char* reason, int max_len ) const
+        virtual int check( char* reason, unsigned int max_len ) const
             {
             reason[ 0 ] = 0;
             return 0;
@@ -294,7 +294,7 @@ class DI_DO_action: public action
     public:
         explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
 
-        int check( char* reason, int max_len ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void evaluate() override;
 
@@ -324,7 +324,7 @@ class AI_AO_action : public action
     public:
         AI_AO_action();
 
-        int check( char* reason, int max_len ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void evaluate() override;
 
@@ -341,7 +341,7 @@ class required_DI_action: public action
             {
             }
 
-        int check( char* reason, int max_len ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void finalize() override;
     };
@@ -486,7 +486,7 @@ class step
         ///
         /// @return > 0 - нельзя выполнить.
         /// @return   0 - ок.
-        int check( char* reason, int max_len ) const;
+        int check( char* reason, unsigned int max_len ) const;
 
         void init();
 
@@ -575,7 +575,7 @@ class operation_state
         /// mode::step_stub.
         step* operator[] ( int idx );
 
-        int check_on( char* reason, int max_len ) const;
+        int check_on( char* reason, unsigned int max_len ) const;
 
         void init( u_int start_step = 1 );
 
@@ -613,11 +613,11 @@ class operation_state
 
         const char* get_name() const;
 
-        int check_devices( char* err_dev_name, int str_len );
+        int check_devices( char* err_dev_name, unsigned int str_len );
 
-        int check_steps_params( char* err_dev_name, int str_len );
+        int check_steps_params( char* err_dev_name, unsigned int str_len );
 
-        int check_max_step_time( char* err_dev_name, int str_len );
+        int check_max_step_time( char* err_dev_name, unsigned int str_len );
 
         /// @brief Проверка на отсутствие устройств.
         ///
@@ -706,9 +706,9 @@ class operation
 #ifndef __GNUC__
 #pragma region Совместимость со старой версией.
 #endif
-        int check_devices_on_run_state( char* err_dev_name, int str_len );
+        int check_devices_on_run_state( char* err_dev_name, unsigned int str_len );
 
-        int check_on_run_state( char* reason, int max_len ) const;
+        int check_on_run_state( char* reason, unsigned int max_len ) const;
 
         u_long evaluation_time();
 
@@ -716,9 +716,9 @@ class operation
 
         void finalize();
 
-        int check_steps_params( char* err_dev_name, int str_len );
+        int check_steps_params( char* err_dev_name, unsigned int str_len );
 
-        int check_max_step_time( char* err_dev_name, int str_len );        
+        int check_max_step_time( char* err_dev_name, unsigned int str_len );
 
         u_int active_step() const;
         int get_run_step() const;
