@@ -1,11 +1,11 @@
 /// @file mos7_led.h
 /// @brief Работа со светодиодным индикатором в ОС MINIOS7.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
@@ -18,20 +18,13 @@
 
 //-----------------------------------------------------------------------------
 /// @brief Работа с диодными индикаторами.
-class led_mos7 : public led
-    {
-    public:
-        void on( LEDS_NAMES led, COLOUR led_color )
-            {
-            }
+class led_mos7 : public led {
+ public:
+  void on(LEDS_NAMES led, COLOUR led_color) {}
 
-        void off( LEDS_NAMES led )
-            {
-            }
+  void off(LEDS_NAMES led) {}
 
-        void blink( LEDS_NAMES led, COLOUR led_color )
-            {
-            }
-    };
+  void blink(LEDS_NAMES led, COLOUR led_color) {}
+};
 //-----------------------------------------------------------------------------
-#endif // LED_MINIOS7_H
+#endif  // LED_MINIOS7_H
