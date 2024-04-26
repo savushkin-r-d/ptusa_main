@@ -204,23 +204,22 @@ void operation::to_run_state( int new_run_step )
     states[ RUN ]->evaluate();
     }
 //-----------------------------------------------------------------------------
-int operation::check_devices_on_run_state(char* err_dev_name, int str_len)
+int operation::check_devices_on_run_state(char* err_dev_name, unsigned int str_len)
     {
     return states[ RUN ]->check_devices( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
-int operation::check_steps_params( char* err_dev_name, int str_len )
+int operation::check_steps_params( char* err_dev_name, unsigned int str_len )
     {
     return states[ RUN ]->check_steps_params( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
-int operation::check_max_step_time( char* err_dev_name, int str_len )
+int operation::check_max_step_time( char* err_dev_name, unsigned int str_len )
     {
     return states[ RUN ]->check_max_step_time( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
-int operation::check_on_run_state( char* reason, int max_len ) const
-
+int operation::check_on_run_state( char* reason, unsigned int max_len ) const
     {
     return states[ RUN ]->check_on( reason, max_len );
     }
@@ -853,7 +852,7 @@ void delay_off_action::evaluate()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int required_DI_action::check( char* reason, int max_len ) const
+int required_DI_action::check( char* reason, unsigned int max_len ) const
     {
     *reason = 0;
     if ( is_empty() )
@@ -935,7 +934,7 @@ step::~step()
         }
     }
 //-----------------------------------------------------------------------------
-int step::check( char* reason, int max_len ) const
+int step::check( char* reason, unsigned int max_len ) const
     {
 
     auto res = actions[ A_DI_DO ]->check( reason, max_len );
@@ -1062,7 +1061,7 @@ DI_DO_action::DI_DO_action( std::string name ) :action( name )
     {
     }
 //-----------------------------------------------------------------------------
-int DI_DO_action::check( char* reason, int max_len ) const
+int DI_DO_action::check( char* reason, unsigned int max_len ) const
     {
     reason[ 0 ] = 0;
     if ( is_empty() )
@@ -1181,7 +1180,7 @@ AI_AO_action::AI_AO_action() :action( "Группы AI->AO's" )
     {
     }
 //-----------------------------------------------------------------------------
-int AI_AO_action::check( char* reason, int max_len ) const
+int AI_AO_action::check( char* reason, unsigned int max_len ) const
     {
     reason[ 0 ] = 0;
     if ( is_empty() )
@@ -1946,7 +1945,7 @@ step* operation_state::add_step( const char* step_name, int next_step_n /*= -1 *
     return steps[ steps.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-int operation_state::check_on( char* reason, int max_len ) const
+int operation_state::check_on( char* reason, unsigned int max_len ) const
     {
     for ( size_t idx = 0; idx < steps.size(); idx++ )
         {
@@ -2260,7 +2259,7 @@ void operation_state::print( const char* prefix /*= "" */ ) const
         }
     }
 //----------------------------------------------------------------------------
-int operation_state::check_devices( char* err_dev_name, int str_len )
+int operation_state::check_devices( char* err_dev_name, unsigned int str_len )
     {
     int res = mode_step->check_devices( err_dev_name, str_len );
 
@@ -2287,19 +2286,37 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int operation_state::check_max_step_time( char* err_dev_name, int str_len )
+int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_len )
     {
     if ( step_max_duration_par_ns.empty() ) // Не заданы параметры максимального времени.
         return 0;
+
+    auto make_str = [&]( unsigned int step_n, int step_max_time )
+        {
+        // Резерв для записи сокращения вида "...'" в конце строки при
+        // превышения ограничения длины.
+        const unsigned int OFFSET = 4;
+
+        auto t = std::chrono::seconds{ step_max_time };
+        auto res = fmt::format_to_n( err_dev_name, str_len - 1 - OFFSET,
+            "превышено макс. t ({:%T}) шага {} \'{}\'", t, step_n + 1,
+            steps[ step_n ]->get_name() );
+        *res.out = '\0';
+        if ( res.size > str_len )
+            {
+            *( res.out + 3 ) = '\'';
+            *( res.out + 2 ) = '.';
+            *( res.out + 1 ) = '.';
+            *( res.out ) = '.';
+            }
+        };
 
     if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() &&
         active_step_max_time && // Максимальное время - ненулевое значение.
         steps[ active_step_n ]->get_latest_eval_time() >=
         1000UL * static_cast<u_int_4>( active_step_max_time ) )
         {
-        auto t = std::chrono::seconds{ active_step_max_time };
-        fmt::format_to_n( err_dev_name, str_len,
-            "превышено максимальное время основного шага ({:%T})", t );
+        make_str( active_step_n, active_step_max_time );
         return 1;
         }
 
@@ -2310,14 +2327,13 @@ int operation_state::check_max_step_time( char* err_dev_name, int str_len )
             {
             auto extra_active_step_max_time =
                 static_cast<unsigned int> ( owner->get_step_param( par_n ) );
+
             if ( extra_active_step_max_time &&
                 steps[ a_step_n - 1 ]->get_latest_eval_time() >=
                 1000UL * extra_active_step_max_time )
                 {
-                auto t = std::chrono::seconds{ extra_active_step_max_time };
-                fmt::format_to_n( err_dev_name, str_len,
-                    "превышено максимальное время дополнительного шага ({:%T})", t );
-                    return 1;
+                make_str( extra_active_step_max_time, a_step_n - 1 );
+                return 1;
                 }
             }
         }
@@ -2325,7 +2341,7 @@ int operation_state::check_max_step_time( char* err_dev_name, int str_len )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int operation_state::check_steps_params( char* err_dev_name, int str_len )
+int operation_state::check_steps_params( char* err_dev_name, unsigned int str_len )
     {
     if ( !step_duration_par_ns.empty() )
         {
