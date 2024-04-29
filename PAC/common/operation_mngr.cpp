@@ -2193,9 +2193,8 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         }
 
     if ( G_DEBUG )
-        {
-        fmt::print( 
-            R"({}"{}" operation {} "{}" to_step() -> {}, step time {} ms, next step {})",
+        {        
+        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, step time {} ms, next step {})",
             owner->owner->get_prefix(), owner->owner->get_name(),
             n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
 
