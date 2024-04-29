@@ -998,7 +998,7 @@ void step::set_start_time( u_int_4 start_time )
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
     {
-    printf( "%s\"%s\" \n", prefix, name.c_str() );
+    printf( "%s\"%s\"\n", prefix, name.c_str() );
     std::string new_prefix = prefix;
     new_prefix += "  ";
 
@@ -2194,10 +2194,23 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     if ( G_DEBUG )
         {
-        printf( "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms, "
-            "next step %d.\n",
+        fmt::print( "{}\"{}\" operation {} \"{}\" to_step() -> {}, "
+            "step time {} ms, next step {}",
             owner->owner->get_prefix(), owner->owner->get_name(),
             n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
+
+        active_step_max_time = 0;
+        auto par_n = step_max_duration_par_ns[ active_step_n ];
+        if ( par_n > 0 )
+            {
+            active_step_max_time = u_int( owner->get_step_param( par_n ) );
+            if ( active_step_max_time )
+                {
+                fmt::print( ", max step time {} ms", active_step_max_time );
+                }
+            }
+        fmt::println( "" );
+
         steps[ active_step_n ]->print( owner->owner->get_prefix() );
         }
     }
