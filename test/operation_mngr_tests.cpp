@@ -501,7 +501,7 @@ R"("Шаг операции"
     test_op->to_step( 2 );
     output = testing::internal::GetCapturedStdout();
     auto STR_STEP2 =
-R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, max step time 1 ms
+R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, max step time 1 s
 "Process #1"
  { }
 )";

@@ -2206,7 +2206,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
             active_step_max_time = u_int( owner->get_step_param( max_t_par_n ) );
             if ( active_step_max_time )
                 {
-                fmt::print( ", max step time {} ms", active_step_max_time );
+                fmt::print( ", max step time {} s", active_step_max_time );
                 }
             }
         fmt::println( "" );
