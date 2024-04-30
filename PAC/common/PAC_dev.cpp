@@ -2962,6 +2962,10 @@ const char* base_counter::get_error_description()
 
         case STATES::S_HI_ERR:
             return "канал потока (верхний предел, rtn)";
+
+        default:
+            // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
+            break;
         }
 
     return "нет ошибок";
