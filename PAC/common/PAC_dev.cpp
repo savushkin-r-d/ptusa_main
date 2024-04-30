@@ -2929,19 +2929,22 @@ int base_counter::save_device_ex( char* buff )
         buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
     }
 //-----------------------------------------------------------------------------
-const char* base_counter::get_error_description() const
+const char* base_counter::get_error_description()
     {
     if ( static_cast<int>( state ) < 0 )
         {
         switch ( state )
             {
             case STATES::S_ERROR:
+                prev_error_state = STATES::S_ERROR;
                 return "счет импульсов";
 
             case STATES::S_LOW_ERR:
+                prev_error_state = STATES::S_LOW_ERR;
                 return "канал потока (нижний предел)";
 
             case STATES::S_HI_ERR:
+                prev_error_state = STATES::S_HI_ERR;
                 return "канал потока (верхний предел)";
 
             default:
@@ -2949,7 +2952,19 @@ const char* base_counter::get_error_description() const
             }
         }
 
-    return "";
+    switch ( prev_error_state )
+        {
+        case STATES::S_ERROR:
+            return "счет импульсов (rtn)";
+
+        case STATES::S_LOW_ERR:
+            return "канал потока (нижний предел, rtn)";
+
+        case STATES::S_HI_ERR:
+            return "канал потока (верхний предел, rtn)";
+        }
+
+    return "нет ошибок";
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3002,7 +3017,7 @@ counter_f::counter_f( const char *dev_name ) :
 int counter_f::get_state()
     {
     if ( get_flow() == -1. )
-        {
+        {        
         return (int) STATES::S_LOW_ERR;
         }
     if ( get_flow() == -2. )
