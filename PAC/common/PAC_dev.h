@@ -642,7 +642,7 @@ class device : public i_DO_AO_device, public par_device
             return description;
             }
 
-        virtual const char* get_error_description() const
+        virtual const char* get_error_description()
             {
             return "обратная связь";
             }
@@ -4332,7 +4332,7 @@ class base_counter: public i_counter, public device, public io_device
 
         int save_device_ex( char* buff );
 
-        const char* get_error_description() const override;
+        const char* get_error_description() override;
 
     protected:
         float get_abs_value() const
@@ -4346,6 +4346,7 @@ class base_counter: public i_counter, public device, public io_device
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
         STATES state = STATES::S_WORK;
+        STATES prev_error_state = STATES::S_WORK;
 
         u_int_4 start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;
