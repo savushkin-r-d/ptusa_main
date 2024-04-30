@@ -1043,7 +1043,7 @@ TEST( counter_f, get_state )
     fqt1.start();
     //Расход стал ниже минимального - ошибка не должна появиться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
-    EXPECT_STREQ( "счет импульсов", fqt1.get_error_description() );
+    EXPECT_STREQ( "счет импульсов (rtn)", fqt1.get_error_description() );
     fqt1.get_state();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
