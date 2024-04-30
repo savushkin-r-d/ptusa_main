@@ -3017,7 +3017,7 @@ counter_f::counter_f( const char *dev_name ) :
 int counter_f::get_state()
     {
     if ( get_flow() == -1. )
-        {        
+        {
         return (int) STATES::S_LOW_ERR;
         }
     if ( get_flow() == -2. )
