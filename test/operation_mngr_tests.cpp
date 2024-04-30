@@ -329,7 +329,7 @@ TEST( operation_state, print )
     operation_state->print();
     auto output = testing::internal::GetCapturedStdout();
     std::string str = "RUN\n"
-        "    1     \"Тестовый шаг\" \n"
+        "    1     \"Тестовый шаг\"\n"
         " { }\n";
     EXPECT_EQ( str, output );
 
@@ -342,10 +342,10 @@ TEST( operation_state, print )
     operation_state->print();
     output = testing::internal::GetCapturedStdout();
     str = "RUN\n"
-        "    0     \"Шаг операции\" \n"
+        "    0     \"Шаг операции\"\n"
         "      Включать: { {test_DO} } \n"
         " { }\n"
-        "    1     \"Тестовый шаг\" \n"
+        "    1     \"Тестовый шаг\"\n"
         " { }\n";
     EXPECT_EQ( str, output );
 
@@ -465,6 +465,53 @@ TEST( operation_state, to_next_step )
 	EXPECT_EQ( 4, test_op->active_step() );
 	}
 
+
+TEST( operation_state, to_step )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+
+    tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
+    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+    const auto MAX_TIME_IDX = 1;
+    test_tank.par_float[ MAX_TIME_IDX ] = 1;
+    test_op->add_step( "Init" );
+    test_op->add_step( "Process #1", -1, -1, MAX_TIME_IDX );
+
+    G_DEBUG = 1;
+    //Корректный переход к заданному шагу.
+    testing::internal::CaptureStdout();
+    auto STR_STEP1 =
+R"("Шаг операции"
+ { }
+"Танк1" operation 1 "RUN" to_step() -> 1, step time 0 ms, next step -1
+"Init"
+ { }
+)";
+
+    test_op->start();
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( STR_STEP1, output );
+    EXPECT_EQ( 1, test_op->active_step() );
+    test_op->evaluate();
+    testing::internal::CaptureStdout();
+    test_op->to_step( 2 );
+    output = testing::internal::GetCapturedStdout();
+    auto STR_STEP2 =
+R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, max step time 1 s
+"Process #1"
+ { }
+)";
+    EXPECT_EQ( STR_STEP2, output );
+    EXPECT_EQ( 2, test_op->active_step() );        
+    G_DEBUG = 0;
+
+
+    G_LUA_MANAGER->free_Lua();
+    }
 
 TEST( operation, add_step )
 	{
