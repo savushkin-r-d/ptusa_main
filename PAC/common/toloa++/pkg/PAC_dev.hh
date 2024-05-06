@@ -1145,7 +1145,8 @@ class operation
 
     public:
         step* add_step( const char* name, int next_step_n,
-            unsigned int step_duration_par_n, state_idx s_idx = RUN );
+            int step_duration_par_n, int step_max_duration_par_n,
+            state_idx s_idx = RUN );
 
     public:
 
