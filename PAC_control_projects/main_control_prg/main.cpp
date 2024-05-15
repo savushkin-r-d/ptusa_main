@@ -49,9 +49,9 @@ int G_USE_LOG = 0;              //Вывод в системный лог (syslo
 
 // Обмен с модулями ввода/вывода.
 #if defined WIN_OS
-bool G_NO_IO_NODES = false; // В Windows по умолчанию обмен отключен.
+bool G_NO_IO_NODES = true;  // В Windows по умолчанию обмен отключен.
 #else
-bool G_NO_IO_NODES = true;
+bool G_NO_IO_NODES = false; // В Linux по умолчанию обмен включен.
 #endif
 
 bool G_READ_ONLY_IO_NODES = false;
@@ -186,7 +186,7 @@ int main( int argc, const char *argv[] )
         G_TECH_OBJECT_MNGR()->evaluate();
         sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
-        if ( !G_NO_IO_NODES || 
+        if ( !G_NO_IO_NODES &&
             !G_READ_ONLY_IO_NODES ) G_IO_MANAGER()->write_outputs();
         sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
