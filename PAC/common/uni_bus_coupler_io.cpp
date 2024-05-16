@@ -286,14 +286,17 @@ int uni_io_manager::write_outputs()
                         {
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
-                    }// if ( e_communicate( nd, bytes_cnt + 13, 12 ) > 0 )
-                else
-                    {
-                    if ( G_DEBUG )
-                        {
-                        //printf("\nWrite DO: returned error...\n");
-                        }
                     }
+
+                // Закомментированный фрагмент - используется для отладки.
+                //else
+                //    {
+                //    if ( G_DEBUG )
+                //        {
+                //        printf("\nWrite DO: returned error...\n");
+                //        }
+                //    }
+
                 }// if ( nd->DO_cnt > 0 )
 
             if ( nd->AO_cnt > 0 )
@@ -340,14 +343,17 @@ int uni_io_manager::write_outputs()
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         }
-                    }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
-                else
-                    {
-                    if ( G_DEBUG )
-                        {
-                        //printf("\nWrite AO: returned error...\n");
-                        }
                     }
+
+                // Закомментированный фрагмент - используется для отладки.
+                //else
+                //    {
+                //    if ( G_DEBUG )
+                //        {
+                //        printf("\nWrite AO: returned error...\n");
+                //        }
+                //    }
+
                 }// if ( nd->AO_cnt > 0 )
 
             }// if ( nd->type == io_node::T_750_341 || ...
