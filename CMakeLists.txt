@@ -51,7 +51,7 @@ set(BUILD_SHARED_LIBS ON)
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/deps/lua)
 
 add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
