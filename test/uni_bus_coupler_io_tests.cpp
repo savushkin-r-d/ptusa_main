@@ -149,8 +149,17 @@ class test_uni_io_manager : public uni_io_manager
         int e_communicate( io_node* node, int bytes_to_send,
             int bytes_to_receive ) override
             {
-            return 0;
+            return res;
             }
+
+        void set_error_result()
+            {
+            // Set error result.
+            res = 1;
+            }
+
+    private:
+        int res = 0;
     };
 
 TEST( uni_io_manager, read_inputs )
@@ -212,6 +221,11 @@ TEST( uni_io_manager, write_outputs )
     mngr.get_node( 3 )->is_active = false;
     res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
+
+    mngr.set_error_result();
+    //Should fail - e_communicate() returns 1.
+    res = mngr.write_outputs();
+    EXPECT_EQ( res, 1 );
 
     io_manager::replace_instance( prev_mngr );
     }

@@ -238,6 +238,8 @@ int uni_io_manager::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
 
+    int res = 0;
+
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -484,6 +486,7 @@ int uni_io_manager::write_outputs()
                             {
                             G_LOG->error("Write AO: returned error");
                             nd->flag_error_write_message = true;
+                            res = 1;
                             }
                         }
 
@@ -503,7 +506,7 @@ int uni_io_manager::write_outputs()
             }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
