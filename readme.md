@@ -6,7 +6,7 @@
 
 [![Downloads](https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](https://github.com/savushkin-r-d/ptusa_main/releases/)
 
-Russian readme is [here](russian_readme/readme.md).
+Russian readme is [here](docs/russian_readme/readme.md).
 
 Program **``ptusa_main``** directly controls technological process.
 
@@ -22,13 +22,13 @@ Program **``ptusa_main``** directly controls technological process.
 
 General system architecture of the automated process control system (**APCS**) is shown below:
 
-<p align="center"><img src="readme_images/system_architecture_en.png"></p>
+<p align="center"><img src="docs/readme_images/system_architecture_en.png"></p>
 
 ## Common description ##
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-+ The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language,  made with [Mermaid](https://mermaid.js.org/)):
++ The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language, made with [Mermaid](https://mermaid.js.org/)):
 
 <p align="center"><img src="docs/drakon_diagram/images/control_program_en.svg"></p>
 
@@ -92,27 +92,23 @@ flowchart TD
 
 + When operation is turned on (off) happens next:
 
-<p align="center"><img src="readme_images/tech_object__set_mode_en.png"></p>
+<p align="center"><img src="docs/readme_images/tech_object__set_mode_en.png"></p>
 
 + During the execution of command happens next:
 
-<p align="center"><img src="readme_images/tech_object__exec_cmd_en.png"></p>
+<p align="center"><img src="docs/readme_images/tech_object__exec_cmd_en.png"></p>
 
 ## How to build the project ##
 
 You could clone repository by next command:
 `git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
 
-or, if you are clonned without initializing and updating submodules, try next:
+or, if you are cloned without initializing and updating submodules, try next:
 `git submodules update --init --recursive`
 
 ### win ###
 
 Requirements:
-
-+ Microsoft Visual Studio Community 2019
-
-You should open (in Visual Studio) root directory. This you get a CMake based project.
 
 + Qt Creator
 
@@ -173,7 +169,7 @@ To run demo project you should use this command line:
 + After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
-    bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
+    bin\install\windows-default\Release\ptusa_main.exe --path demo_projects/T1-PLCnext-Demo/ --sys_path demo_projects/T1-PLCnext-Demo/sys/ --debug demo_projects/T1-PLCnext-Demo/main.plua
 ```
 
 + Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
