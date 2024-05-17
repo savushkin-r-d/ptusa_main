@@ -22,7 +22,7 @@
 
 + Общая схема работы программы контроллера (в [Drakon](https://drakonhub.com) diagram language)
 
-<p align="center"><img src="../drakon_diagram/images/control_program.svg"></p>
+<p align="center"><img src="../drakon_diagram/images/control_program.svg" alt="Control program"></p>
 
 + Выполнение технологического процесса:
 
@@ -50,7 +50,7 @@ flowchart TD
 
 ```
 
-<p align="center"><img src="../drakon_diagram/images/operation.svg"></p>
+<p align="center"><img src="../drakon_diagram/images/operation.svg" alt="Operation"></p>
 
 ``` mermaid
 %%{ init: {'theme': 'neutral'} }%%
@@ -162,7 +162,11 @@ plcncli.exe install sdk -d C:\CLI\sdks\AXCF2152\2022_0 \ -p pxc-glibc-x86_64-min
 + После сборки и развертывания *`windows-default`* конфигурации cmake:
 
 ```cmd
-    bin\install\windows-default\Release\ptusa_main.exe --path demo_projects/T1-PLCnext-Demo/ --sys_path demo_projects/T1-PLCnext-Demo/sys/ --debug demo_projects/T1-PLCnext-Demo/main.plua
+    bin\install\windows-default\Release\ptusa_main.exe ^
+    --path demo_projects/T1-PLCnext-Demo/ ^
+    --sys_path demo_projects/T1-PLCnext-Demo/sys/ ^
+    --debug ^
+    demo_projects/T1-PLCnext-Demo/main.plua
 ```
 
 + Запуск проекта в Microsoft Visual Studio Community 2022: `Выбрать элемент запуска -> ptusa_main.exe`.

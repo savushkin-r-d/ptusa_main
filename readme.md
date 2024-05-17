@@ -169,7 +169,11 @@ To run demo project you should use this command line:
 + After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
-    bin\install\windows-default\Release\ptusa_main.exe --path demo_projects/T1-PLCnext-Demo/ --sys_path demo_projects/T1-PLCnext-Demo/sys/ --debug demo_projects/T1-PLCnext-Demo/main.plua
+    bin\install\windows-default\Release\ptusa_main.exe ^
+    --path demo_projects/T1-PLCnext-Demo/ ^
+    --sys_path demo_projects/T1-PLCnext-Demo/sys/ ^
+    --debug ^
+    demo_projects/T1-PLCnext-Demo/main.plua
 ```
 
 + Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
