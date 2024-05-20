@@ -159,7 +159,11 @@ Resetting params (command line parameter "rcrc").
     std::tm tm = *std::localtime( &_tm );
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+#if defined WIN_OS
     debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
+#else
+    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+#endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
@@ -171,11 +175,13 @@ Resetting params (command line parameter "rcrc").
     _tm = std::time( nullptr );
     tm = *std::localtime( &_tm );
     tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );    
 #if defined WIN_OS
+    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
-#endif // defined WIN_OS 
+#else
+    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+#endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
@@ -189,8 +195,13 @@ Resetting params (command line parameter "rcrc").
     tm = *std::localtime( &_tm );
     tmp.str( "" );
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+#if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
+#else
+    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
+#endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
@@ -204,7 +215,11 @@ Resetting params (command line parameter "rcrc").
     tm = *std::localtime( &_tm );
     tmp.str( "" );
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+#if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+#else
+    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+#endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
