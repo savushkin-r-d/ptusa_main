@@ -129,8 +129,10 @@ int uni_io_manager::net_init( io_node* node ) const
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    connect( sock, reinterpret_cast<sockaddr*>( &socket_remote_server ),
-        sizeof( socket_remote_server ) );
+    sockaddr s_address;
+    static_assert( sizeof( sockaddr ) == sizeof( sockaddr_in ) );
+    std::memcpy( &s_address, &socket_remote_server, sizeof( socket_remote_server ) );
+    connect( sock, &s_address, sizeof( socket_remote_server ) );
 
     fd_set rdevents;
     struct timeval tv;
@@ -259,14 +261,14 @@ int uni_io_manager::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast <unsigned char>( 7u + bytes_cnt );
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x0F;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
                 buff[ 10 ] = (unsigned char)nd->DO_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DO_cnt & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast <unsigned char>( bytes_cnt );
 
                 for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                     {
@@ -275,7 +277,7 @@ int uni_io_manager::write_outputs()
                         {
                         if ( idx < nd->DO_cnt )
                             {
-                            b = b | ( nd->DO_[ idx ] & 1 ) << k;
+                            b = b | static_cast <unsigned char>( ( nd->DO_[ idx ] & 1 ) << k );
                             idx++;
                             }
                         }
@@ -310,14 +312,14 @@ int uni_io_manager::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast <unsigned char>( 7u + bytes_cnt );
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x10;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 10 ] = static_cast <unsigned char>( bytes_cnt / 2 >> 8 );
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast <unsigned char>( bytes_cnt );
 
                 for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
@@ -398,7 +400,7 @@ int uni_io_manager::write_outputs()
                         u_char b = 0;
                         for (u_int k = 0; k < 8; k++)
                             {
-                            b = b | (nd->DO_[bit_src] & 1) << k;
+                            b = b | static_cast <unsigned char>( (nd->DO_[bit_src] & 1) << k );
                             bit_src++;
                             }
                         writebuff[j] = b;
@@ -445,12 +447,7 @@ int uni_io_manager::write_outputs()
 
                             case 2688527:       //AXL F AO4 1H
                             case 2702072:       //AXL F AI2 AO2 1H
-                            case 1088123:       //AXL SE AO4 I 4-20,
-                                writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
-                                writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
-                                l += 2;
-                                break;
-
+                            case 1088123:       //AXL SE AO4 I 4-20
                             case 2688666:       //AXL F RS UNI XC
                                 writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
                                 writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
@@ -631,14 +628,14 @@ int uni_io_manager::write_holding_registers(io_node* node, unsigned int address,
     buff[2] = 0;
     buff[3] = 0;
     buff[4] = 0;
-    buff[5] = 7 + bytes_cnt;
+    buff[5] = static_cast <unsigned char>( 7 + bytes_cnt );
     buff[6] = station;
     buff[7] = 0x10;
     buff[8] = (u_int_2)address >> 8;
     buff[9] = (u_int_2)address & 0xFF;
     buff[10] = (u_int_2)quantity >> 8;
     buff[11] = (u_int_2)quantity & 0xFF;
-    buff[12] = bytes_cnt;
+    buff[12] = static_cast <unsigned char>( bytes_cnt );
     if (e_communicate(node, bytes_cnt + 13, 12) == 0)
         {
         if (buff[7] == 0x10)

@@ -56,7 +56,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "sys_path", "Sys path", cxxopts::value<std::string>() )
         ( "path", "Path", cxxopts::value<std::string>() )
         ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
-        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<int>()->default_value( "2" ) );
+        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
@@ -111,7 +111,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         init_extra_paths( extra_paths_str.c_str() );
         }
     main_script = result[ "script" ].as<std::string>();
-    sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
+    sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )
