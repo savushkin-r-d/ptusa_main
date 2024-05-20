@@ -26,8 +26,6 @@ bool G_NO_IO_NODES = true; // По умолчанию обмен с модуля
 bool G_READ_ONLY_IO_NODES = false;
 #endif
 
-int sleep_time_ms = 0;
-
 int lua_init( lua_State* L )
     {
     int top = lua_gettop( L );

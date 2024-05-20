@@ -383,8 +383,26 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
-set_tests_properties( run_no_command_line_arguments 
-    PROPERTIES PASS_REGULAR_EXPRESSION 
+if (WIN32)
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
+[[
+(.*)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
+      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+]] )
+else()
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
@@ -399,6 +417,7 @@ set_tests_properties( run_no_command_line_arguments
       --extra_paths arg     Extra paths
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
+endif()
 
   set_property(
     TARGET libptusa_main

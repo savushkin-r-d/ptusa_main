@@ -43,8 +43,13 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.add_options()
         ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
         ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+#if defined WIN_OS
+        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+#else
         ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
         ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+#endif // defined WIN_OS        
         ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
@@ -108,17 +113,32 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
 
-    // Отключить обмен с модулями ввода/вывода.
+    // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )
         {
         G_NO_IO_NODES = true;
-        fmt::print( "G_NO_IO_NODES ON.\n" );
         }
-
+    else
+        {
+        G_NO_IO_NODES = false;
+        }
+    // Только чтение/запись+чтение данных с модулей ввода/вывода.
     if ( result[ "read_only_io_nodes" ].as<bool>() )
         {
         G_READ_ONLY_IO_NODES = true;
-        fmt::print( "G_READ_ONLY_IO_NODES ON.\n" );
+        }
+    else
+        {
+        G_READ_ONLY_IO_NODES = false;
+        }
+
+    if ( G_NO_IO_NODES )
+        G_LOG->warning( "Bus couplers are disabled." );
+    else
+        {
+        G_LOG->warning( "Bus couplers are enabled." );
+        if ( G_READ_ONLY_IO_NODES )
+            G_LOG->warning( "Bus couplers are read only." );           
         }
 
     return 0;
