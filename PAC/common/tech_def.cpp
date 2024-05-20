@@ -314,11 +314,11 @@ int tech_object::get_operation_state( u_int operation )
     return ( *operations_manager )[ operation ]->get_state();
     }
 //-----------------------------------------------------------------------------
-int tech_object::check_on_mode( u_int operation, char* reason )
+int tech_object::check_on_mode( u_int operation, char* reason, int max_len )
     {
     if ( operation > operations_count || 0 == operation ) return 0;
 
-    return (*operations_manager)[ operation ]->check_on_run_state( reason );
+    return (*operations_manager)[ operation ]->check_on_run_state( reason, max_len );
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
@@ -533,7 +533,7 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
         lua_pop( L, 1 );
         }
 
-    if ( int res = tech_object::check_on_mode( mode, err_msg ) )
+    if ( int res = tech_object::check_on_mode( mode, err_msg, sizeof( err_msg ) ) )
         {
         if ( show_error ) set_err_msg( err_msg, mode );
 

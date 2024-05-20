@@ -443,10 +443,11 @@ class device : public i_DO_AO_device
             DST_SB_VIRT, ///< Виртуальная кнопка (без привязки к модулям).
 
             //WT
-            DST_WT = 1,  ///< Весы.
-            DST_WT_VIRT, ///< Виртуальные весы.
-            DST_WT_RS232,///< Весы c RS232 интерфейсом.
-            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
+            DST_WT = 1,     ///< Весы.
+            DST_WT_VIRT,    ///< Виртуальные весы.
+            DST_WT_RS232,   ///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,     ///< Весы c интерфейсом ethernet.
+            DST_WT_PXC_AXL, ///< Весы c подключением к модулю Phoenix Axioline.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -1783,6 +1784,7 @@ class cipline_tech_object: public tech_object
         int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
         bool use_internal_medium_recipes; //Вкл./выкл. использование рецептов для моющих средств.
         bool disable_final_rinsing; //Не ополаскивать после дезинфекции
+        bool use_circulation_on_v2_supply; //Вкл./выкл. подачу сигнала "циркуляция" при подаче объема V2
 
         i_DO_device* V00;
         i_DO_device* V01;

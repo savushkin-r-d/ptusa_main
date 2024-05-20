@@ -26,6 +26,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -598,10 +599,11 @@ class device : public i_DO_AO_device, public par_device
             DST_SB_VIRT, ///< Виртуальная кнопка (без привязки к модулям).
 
             //WT
-            DST_WT = 1,  ///< Весы.
-            DST_WT_VIRT, ///< Виртуальные весы.
-            DST_WT_RS232,///< Весы c RS232 интерфейсом.
-            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
+            DST_WT = 1,     ///< Весы.
+            DST_WT_VIRT,    ///< Виртуальные весы.
+            DST_WT_RS232,   ///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,     ///< Весы c интерфейсом ethernet.
+            DST_WT_PXC_AXL, ///< Весы c подключением к модулю Phoenix Axioline.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -1775,8 +1777,8 @@ class valve_AS : public valve
             char state = get_state_data( data );
 
             int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( state & C_OPEN_S2 ) > 0 ? 1 : 0;
-            int u = ( state & C_OPEN_S3 ) > 0 ? 1 : 0;
+            int l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+            int u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
             if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
             if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
@@ -1794,8 +1796,8 @@ class valve_AS : public valve
             char AO_state = get_state_data( AO_data );
 
             int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( AO_state & C_OPEN_S2 ) > 0 ? 1 : 0;
-            int u = ( AO_state & C_OPEN_S3 ) > 0 ? 1 : 0;
+            int l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+            int u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
             char AI_state = get_state_data( AI_data );
@@ -1820,6 +1822,33 @@ class valve_AS : public valve
 
             return false;
 #endif // DEBUG_NO_IO_MODULES
+            }
+
+        /// @brief поменять местами подключение седел клапана.
+        bool reverse_seat_connection = false;
+
+        int get_lower_seat_offset( ) const
+            {
+            if ( reverse_seat_connection )
+                {
+                return C_OPEN_S3;
+                }
+            else
+                {
+                return C_OPEN_S2;
+                }
+            }
+
+        int get_upper_seat_offset( ) const
+            {
+            if ( reverse_seat_connection )
+                {
+                return C_OPEN_S2;
+                }
+            else
+                {
+                return C_OPEN_S3;
+                }
             }
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -1892,8 +1921,8 @@ class valve_AS : public valve
                 offset = 4;
                 }
             *write_state |= C_OPEN_S1 << offset;
-            *write_state &= ~( C_OPEN_S3 << offset );
-            *write_state &= ~( C_OPEN_S2 << offset );
+            *write_state &= ~( get_upper_seat_offset() << offset );
+            *write_state &= ~( get_lower_seat_offset() << offset );
 
             //            if ( strcmp( get_name(), "H1V1" ) == 0 )
             //                {
@@ -1934,12 +1963,12 @@ class valve_AS : public valve
                     char* write_state = get_data_with_offset( data );
                     char read_state = get_state_data( data );
 
-                    int u = ( read_state & C_OPEN_S3 ) > 0 ? 1 : 0;
+                    int u = ( read_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
                     if ( 0 == u )
                         {
                         start_switch_time = get_millisec();
                         }
-                    *write_state |= C_OPEN_S3 << offset;
+                    *write_state |= get_upper_seat_offset() << offset;
 
                     break;
                     }
@@ -1952,12 +1981,12 @@ class valve_AS : public valve
                     char* write_state = get_data_with_offset( data );
                     char read_state = get_state_data( data );
 
-                    int l = ( read_state & C_OPEN_S2 ) > 0 ? 1 : 0;
+                    int l = ( read_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
                     if ( 0 == l )
                         {
                         start_switch_time = get_millisec();
                         }
-                    *write_state |= C_OPEN_S2 << offset;
+                    *write_state |= get_lower_seat_offset() << offset;
 
                     break;
                     }
@@ -1985,8 +2014,11 @@ class valve_AS : public valve
             MAILBOX_OFFSET = 8
             };
 
+        static std::unordered_set<std::string> V70_ARTICLES;
+
     private:
         u_int AS_number;    ///< AS-номер устройства.
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -3361,6 +3393,80 @@ class wages_eth : public analog_io_device, public i_wages
             P_CZ,           ///< Сдвиг нуля.
             LAST_PARAM_IDX,
         };
+    };
+//-----------------------------------------------------------------------------
+class wages_pxc_axl : public analog_io_device, public i_wages
+    {
+    public:
+        explicit wages_pxc_axl( const char* dev_name );
+
+        void evaluate_io() override;
+
+        void tare() override;
+        void reset_tare();
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_set_value( float new_value ) override;
+
+        enum class ERR_VALUES : unsigned int
+            {
+            ERR_OVERRANGE = 0x80000001, // Measuring range exceeded (overrange).
+            ERR_WIRE_BREAK = 0x80000002,            // Wire break.
+            ERR_SHORT_CIRCUIT = 0x80000003,         // Short-circuit.
+            ERR_INVALID_VALUE = 0x80000004,         // Measured value is invalid.
+            ERR_FAULTY_SUPPLY_VOLTAGE = 0x80000020, // Faulty supply voltage.
+            ERR_FAULTY_DEVICE = 0x80000040,         // Device faulty.
+            ERR_UNDERRANGE = 0x80000080 // Below measuring range (underrange).
+            };
+
+        enum class ERR_STATES
+            {
+            ERR_OVERRANGE = -1,     // Measuring range exceeded (overrange).
+            ERR_WIRE_BREAK = -2,            // Wire break.
+            ERR_SHORT_CIRCUIT = -3,         // Short-circuit.
+            ERR_INVALID_VALUE = -4,         // Measured value is invalid.
+            ERR_FAULTY_SUPPLY_VOLTAGE = -5, // Faulty supply voltage.
+            ERR_FAULTY_DEVICE = -6,         // Device faulty.
+            ERR_UNDERRANGE = -7     // Below measuring range (underrange).
+            };
+
+        enum class IO_CMDS
+            {
+            TARE_BIT_IDX       = 12 - 8,
+            RESET_TARE_BIT_IDX = 13 - 8,
+
+            S_TARE = 1,
+            };
+
+        enum class CMDS
+            {
+            TARE = 1,
+            RESET_TARE = 2,
+            };
+
+        enum class CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            C_TARE_TIME = 5000, ///< Время ожидания установления тары.
+
+            P_DT = 1,       ///< Пороговый фильтр времени.
+            P_CZ,           ///< Сдвиг нуля.
+            P_K,            ///< Коэффициент пропорциональности.
+            LAST_PARAM_IDX,
+            };
+    
+    private:
+        float w = .0f;
+        int st = 0;
+
+        unsigned long tare_time = 0;
+        unsigned long reset_tare_time = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса

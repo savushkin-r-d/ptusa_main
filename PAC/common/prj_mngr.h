@@ -55,10 +55,12 @@ class project_manager
         /// @brief Установка путей к пользовательским файлам Lua.
         int init_extra_paths( const char* paths );
 
+        std::string main_script = "";//Скрипт Lua.
         std::string sys_path = "";   //Путь к системным скриптам Lua.
         std::string path = "";       //Путь к описывающим проект скриптам Lua.
         std::string extra_paths = "";//Дополнительный путь к user-скриптам Lua.
 
+        long int sleep_time_ms = 0;
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
 

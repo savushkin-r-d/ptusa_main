@@ -117,7 +117,7 @@ You should open (in Visual Studio) root directory. This you get a CMake based pr
 
 + Qt Creator
 
-You could open file CMakeList.txt cloned repository in Qt.
+You could open file CMakeLists.txt cloned repository in Qt.
 
 Or clone repository in Qt:
     New -> Import Project -> Git Clone
@@ -212,6 +212,12 @@ Detailed information can be obtained [here](https://www.zlib.net).
 SubHook is a simple hooking library for C and C++ that works on Windows, Linux and macOS. It supports x86 only (32-bit and 64-bit).
 
 Detailed information can be obtained [here](https://github.com/Zeex/subhook).
+
+### cxxopts ###
+
+Cxxopts is a lightweight C++ option parser library, supporting the standard GNU style syntax for options.
+
+Detailed information can be obtained [here](https://github.com/jarro2783/cxxopts).
 
 ### googletest ###
 
