@@ -328,6 +328,9 @@ jobs:
         name: C++ Benchmark
         tool: 'googlecpp'
         output-file-path: ./build/benchmark_result.json
+        gh-repository: github.com/savushkin-r-d/benchmark-ptusa-main
+        gh-pages-branch: main
+        benchmark-data-dir-path: docs/dev/bench
         github-token: ${{ secrets.GITHUB_TOKEN }}
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
