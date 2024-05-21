@@ -44,33 +44,33 @@ endif(MSVC)
 configure_file( version_info.in version_info.h @ONLY)
 
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 set(BUILD_SHARED_LIBS ON)
 
-add_subdirectory(lua EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/deps/lua)
 
-add_subdirectory(toluapp EXCLUDE_FROM_ALL)
+add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
-add_subdirectory(zlib EXCLUDE_FROM_ALL)
+add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
-add_subdirectory(googletest EXCLUDE_FROM_ALL)
+add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
 
 set(SUBHOOK_TESTS OFF)
-add_subdirectory(subhook EXCLUDE_FROM_ALL)
+add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
 if(NOT MINGW)
-    add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+    add_subdirectory(deps/benchmark EXCLUDE_FROM_ALL)
 endif()
 
 if(USE_OPCUA)
-    add_subdirectory(open62541 open62541 EXCLUDE_FROM_ALL)
+    add_subdirectory(deps/open62541 EXCLUDE_FROM_ALL)
     add_compile_definitions(OPCUA)
 endif()
 
-add_subdirectory(cxxopts EXCLUDE_FROM_ALL)
+add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -247,24 +247,24 @@ endif()
 
 endif ()
         if (USE_OPCUA)
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/plugins/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/arch>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/deps>
-            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/open62541/open62541/src_generated>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/plugins/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/arch>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/deps>
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/open62541/open62541/src_generated>
         endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/toluapp/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/include>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/lua>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cxxopts/cxxopts/include>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/cxxopts/cxxopts/include>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
@@ -273,11 +273,11 @@ if(ARP_DEVICE)
 endif()
 
 set(TEST_INCLUDES
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googletest/googletest>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
 
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googlemock/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googlemock/googlemock>)
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
