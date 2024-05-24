@@ -263,7 +263,7 @@ void operation::evaluate()
                     break;
 
                 case state_idx::STARTING:
-                    unit->set_mode( operation_num, state_idx::RUN );
+                    process_new_state_from_starting( next_state );
                     break;
 
                 case state_idx::PAUSING:
@@ -351,17 +351,26 @@ int operation::process_new_state_from_run( int next_state )
     auto unit = owner->owner;
     switch ( static_cast<state_idx>( next_state ) )
         {
-        case state_idx::IDLE:
-            //Из выполнения по сигналам операция может быть
-            //отключена (перейти в состояние простоя).
-            unit->set_mode( operation_num, state_idx::IDLE );
+        case state_idx::STOP:
+            // Из выполнения по сигналам операция может быть
+            // отключена (перейти в состояние Остановка (или Простой, если
+            // описание состояния Остановка пустое)).
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+            if ( !states[ state_idx::STOPPING ]->is_empty() ||
+                !states[ state_idx::STOP ]->is_empty() )
+                {
+                unit->set_mode( operation_num, state_idx::STOP );
+                }
+            else
+                {
+                unit->set_mode( operation_num, state_idx::IDLE );
+                }
             break;
 
         case state_idx::PAUSE:
-            //Из выполнения по сигналам операция может быть
-            //поставлена на паузу.
+            // Из выполнения по сигналам операция может быть
+            // поставлена на паузу.
             unit->set_mode( operation_num, state_idx::PAUSE );
             unit->set_err_msg( "пауза по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
@@ -374,6 +383,42 @@ int operation::process_new_state_from_run( int next_state )
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+int operation::process_new_state_from_starting( int next_state )
+    {
+    auto unit = owner->owner;
+    switch ( static_cast<state_idx>( next_state ) )
+        {
+        case state_idx::STOP:
+            // По сигналам операция может быть
+            // отключена (перейти в состояние Остановка (или Простой, если
+            // описание состояния Остановка пустое)).
+            unit->set_err_msg( "автоотключение по запросу",
+                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+            if ( !states[ state_idx::STOPPING ]->is_empty() ||
+                !states[ state_idx::STOP ]->is_empty() )
+                {
+                unit->set_mode( operation_num, state_idx::STOP );
+                }
+            else
+                {
+                unit->set_mode( operation_num, state_idx::IDLE );
+                }
+            break;
+
+        case state_idx::RUN:
+            // Из запуска по сигналам операция может перейти в выполнение.
+            unit->set_mode( operation_num, state_idx::RUN );
+            break;
+
+        default:
+            //Остальные варианты игнорируем.
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void operation::finalize()
     {

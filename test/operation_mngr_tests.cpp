@@ -884,11 +884,12 @@ TEST( operation, evaluate )
 	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	if_action_in_idle->add_dev( &test_DI_one );
+    if_action_in_idle->set_int_property( "next_state_n", 0, operation::RUN );
 	
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
-	if_action_in_run->set_int_property( "next_step_n", 0, 0 );
+	if_action_in_run->set_int_property( "next_state_n", 0, operation::STOP );
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
 	test_op->evaluate();
@@ -999,6 +1000,7 @@ TEST( operation, evaluate )
 	auto if_action_in_starting = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_starting )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_starting->add_dev( &test_DI_one );
+    if_action_in_starting->set_int_property( "next_state_n", 0, operation::RUN );
 	test_DI_one.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
