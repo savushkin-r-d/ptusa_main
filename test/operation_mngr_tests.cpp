@@ -1023,6 +1023,7 @@ TEST( operation, evaluate )
 	//При наличии перехода по условию, переходим к "Pause".
 	auto if_action_in_pausing = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_pausing )[ step::ACTIONS::A_JUMP_IF ] );
+    if_action_in_pausing->set_int_property( "next_state_n", 0, operation::PAUSE );
 	if_action_in_pausing->add_dev( &test_DI_one );
 	test_DI_one.on();
 	test_op->evaluate();
@@ -1047,6 +1048,7 @@ TEST( operation, evaluate )
 	//При наличии перехода по условию, переходим к "Run".
 	auto if_action_in_unpausing = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_unpausing )[ step::ACTIONS::A_JUMP_IF ] );
+    if_action_in_unpausing->set_int_property( "next_state_n", 0, operation::RUN );
 	if_action_in_unpausing->add_dev( &test_DI_one );
 	test_DI_one.on();
 	test_op->evaluate();
@@ -1068,6 +1070,7 @@ TEST( operation, evaluate )
 	//При наличии перехода по условию, переходим к "Stop".
 	auto if_action_in_stopping = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_stopping )[ step::ACTIONS::A_JUMP_IF ] );
+    if_action_in_stopping->set_int_property( "next_state_n", 0, operation::STOP );
 	if_action_in_stopping->add_dev( &test_DI_one );
 	test_DI_one.on();
 	test_op->evaluate();
@@ -1702,17 +1705,9 @@ TEST( jump_if_action, is_goto_next_step )
 
 	int next_step = 0;
 	auto is_goto_next_step = action->is_jump( next_step );
-	EXPECT_EQ( false, is_goto_next_step );			//Empty if_action_in_idle.
+	EXPECT_EQ( false, is_goto_next_step );  //Empty next state.
 	EXPECT_EQ( -1, next_step );
 
-	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
-		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_one, 0, 0 );
-	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
-		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_two, 0, 1 );
-	valve_DO1 test_valve( "V3" );
-	action->add_dev( &test_valve, 1, 0 );
 	const int SET_NEXT_STEP = 2;
 	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
 	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
@@ -1720,6 +1715,18 @@ TEST( jump_if_action, is_goto_next_step )
 	EXPECT_EQ( -1, action->get_int_property( "no_exist", 0 ) );
 	next_step = action->get_int_property( "next_step_n", 0 );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    is_goto_next_step = action->is_jump( next_step );
+    //Empty device list - unconditional jump.
+    EXPECT_EQ( true, is_goto_next_step );
+
+    DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    action->add_dev( &test_DI_one, 0, 0 );
+    DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    action->add_dev( &test_DI_two, 0, 1 );
+    valve_DO1 test_valve( "V3" );
+    action->add_dev( &test_valve, 1, 0 );
 
 	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
 	//перехода.

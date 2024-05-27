@@ -1787,7 +1787,7 @@ jump_if_action::jump_if_action( const char* name ) :
 bool jump_if_action::is_jump( int& next )
     {
     next = -1;
-    if ( is_empty() )
+    if ( next_n.empty() )
         {
         return false;
         }
