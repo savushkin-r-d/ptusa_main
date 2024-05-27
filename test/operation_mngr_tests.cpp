@@ -779,6 +779,7 @@ TEST( operation, evaluate )
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+    const auto TEST_OP_NUMBER = 1;
 
 	//Корректный переход от выполнения к паузе и опять к выполнению для методов
 	//операции когда в паузе нет шагов.
@@ -900,16 +901,17 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 
-	//Сигнал не активен, операция должна отключиться.
+	//Сигнал не активен, операция должна перейти в STOP.
 	test_DI_one.off();
 	test_op->evaluate();
-	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	auto main_jump_if_action = reinterpret_cast<jump_if_action*>
+	auto main_required_DI_action = reinterpret_cast<required_DI_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_REQUIRED_FB ] );
-	main_jump_if_action->add_dev( &test_DI_two );
+    main_required_DI_action->add_dev( &test_DI_two );
 
 	//Сигнал активен, но операция не должна включиться, так как нет требуемого
 	//сигнала.
@@ -951,7 +953,8 @@ TEST( operation, evaluate )
 	//Сигнал не активен, операция должна отключиться.
 	test_DI_one.off();
 	test_op->evaluate();
-	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
 	//Сигнал активен, но операция не должна включиться, так как нет требуемого
 	//сигнала.
@@ -981,7 +984,7 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
-	test_op->finalize();
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
 	DO1 test_DO_one( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -1007,7 +1010,7 @@ TEST( operation, evaluate )
 
 	on_action_in_starting->clear_dev();
 	if_action_in_starting->clear_dev();
-	test_op->finalize();
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
 
     //При наличии описания состояния "Pausing" переходим к нему.
@@ -1031,7 +1034,7 @@ TEST( operation, evaluate )
 
 	on_action_in_pausing->clear_dev();
 	if_action_in_pausing->clear_dev();
-	test_op->finalize();
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
 
 	//При наличии описания состояния "Unpausing" переходим к нему.
@@ -1079,8 +1082,7 @@ TEST( operation, evaluate )
 	on_action_in_unpausing->clear_dev();
 	if_action_in_unpausing->clear_dev();
 
-	test_op->finalize();
-
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
 
     G_LUA_MANAGER->free_Lua();
     test_params_manager::removeObject();
