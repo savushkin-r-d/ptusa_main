@@ -70,64 +70,56 @@ int tech_dev_error::save_as_Lua_str( char *str )
 void tech_dev_error::evaluate( bool &is_new_state )
     {
     // Проверка текущего состояния устройства.
-    switch ( simple_device->get_state() )
+    if ( simple_device->get_state() < 0 )    // Есть ошибка.
         {
-        case -1:        // Есть ошибка.
-        case -2:
-        case -3:
-        case -12:
-        case -13:
+        switch ( error_state )
+            {
+            case AS_ACCEPT:
+                break;
 
-            switch ( error_state )
-                {
-                case AS_ACCEPT:
-                    break;
+            case AS_ALARM:
+                is_any_no_ack_error = true;
+                break;
 
-                case AS_ALARM:
-                    is_any_no_ack_error = true;
-                    break;
+            case AS_NORMAL:
+            case AS_RETURN:
+                error_state = AS_ALARM;
+                is_new_state = true;
 
-                case AS_NORMAL:
-                case AS_RETURN:
-                    error_state = AS_ALARM;
-                    is_new_state = true;
+                is_new_error = true; //Появилась новая ошибка.
 
-                    is_new_error = true; //Появилась новая ошибка.
+                is_any_no_ack_error = true;
+                break;
+            }
+        is_any_error = true;
 
-                    is_any_no_ack_error = true;
-                    break;
-                }
-            is_any_error = true;
+        if ( err_par[ P_PARAM_N ] & P_IS_SUPPRESS )
+            {
+            is_any_error = false;
+            is_new_error = false;
+            is_any_no_ack_error = false;
+            }
+        }
+    else // Нет ошибки - все остальные состояния.
+        {
+        switch ( error_state )
+            {
+            case AS_NORMAL:
+                break;
 
-            if ( err_par[ P_PARAM_N ] & P_IS_SUPPRESS )
-                {
-                is_any_error = false;
-                is_new_error = false;
-                is_any_no_ack_error = false;
-                }
+            case AS_RETURN:
+                break;
 
-            break;
+            case AS_ACCEPT:
+                error_state = AS_NORMAL;
+                is_new_state = true;
+                break;
 
-        default:         // Нет ошибки - все остальные состояния.
-            switch ( error_state )
-                {
-                case AS_NORMAL:
-                    break;
-
-                case AS_RETURN:
-                    break;
-
-                case AS_ACCEPT:
-                    error_state = AS_NORMAL;
-                    is_new_state = true;
-                    break;
-
-                case AS_ALARM:
-                    error_state = AS_RETURN;
-                    is_new_state = true;
-                    break;
-                }
-            break;
+            case AS_ALARM:
+                error_state = AS_RETURN;
+                is_new_state = true;
+                break;
+            }
         }
     // Проверка текущего состояния устройства.-!>
     }
@@ -458,11 +450,7 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
 //-----------------------------------------------------------------------------
 errors_manager::~errors_manager()
     {
-    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
-        {
-        delete s_errors_vector.at( i );
-        s_errors_vector.at( i ) = 0;
-        }
+    clear();
     }
 //-----------------------------------------------------------------------------
 errors_manager* errors_manager::get_instance()
@@ -475,6 +463,20 @@ errors_manager* errors_manager::get_instance()
         }
 
     return instance;
+    }
+//-----------------------------------------------------------------------------
+int errors_manager::clear()
+    {
+    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
+        {
+        delete s_errors_vector.at( i );
+        s_errors_vector.at( i ) = nullptr;
+        }
+
+    s_errors_vector.clear();
+    errors_id = 0;
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
