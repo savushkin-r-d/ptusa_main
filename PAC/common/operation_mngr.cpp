@@ -353,19 +353,10 @@ int operation::process_new_state_from_run( int next_state )
         {
         case state_idx::STOP:
             // Из выполнения по сигналам операция может быть
-            // отключена (перейти в состояние Остановка (или Простой, если
-            // описание состояния Остановка пустое)).
+            // отключена (перейти в состояние Остановка.
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
-            if ( !states[ state_idx::STOPPING ]->is_empty() ||
-                !states[ state_idx::STOP ]->is_empty() )
-                {
-                unit->set_mode( operation_num, state_idx::STOP );
-                }
-            else
-                {
-                unit->set_mode( operation_num, state_idx::IDLE );
-                }
+            unit->set_mode( operation_num, state_idx::STOP );
             break;
 
         case state_idx::PAUSE:
@@ -391,19 +382,10 @@ int operation::process_new_state_from_starting( int next_state )
         {
         case state_idx::STOP:
             // По сигналам операция может быть
-            // отключена (перейти в состояние Остановка (или Простой, если
-            // описание состояния Остановка пустое)).
+            // отключена (перейти в состояние Остановка.
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
-            if ( !states[ state_idx::STOPPING ]->is_empty() ||
-                !states[ state_idx::STOP ]->is_empty() )
-                {
-                unit->set_mode( operation_num, state_idx::STOP );
-                }
-            else
-                {
-                unit->set_mode( operation_num, state_idx::IDLE );
-                }
+            unit->set_mode( operation_num, state_idx::STOP );
             break;
 
         case state_idx::RUN:
