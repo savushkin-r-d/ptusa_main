@@ -352,8 +352,7 @@ int operation::process_new_state_from_run( int next_state )
     switch ( static_cast<state_idx>( next_state ) )
         {
         case state_idx::STOP:
-            // Из выполнения по сигналам операция может быть
-            // отключена (перейти в состояние Остановка.
+            // Из выполнения по сигналам операция может быть остановлена.
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
             unit->set_mode( operation_num, state_idx::STOP );
@@ -381,8 +380,7 @@ int operation::process_new_state_from_starting( int next_state )
     switch ( static_cast<state_idx>( next_state ) )
         {
         case state_idx::STOP:
-            // По сигналам операция может быть
-            // отключена (перейти в состояние Остановка.
+            // По сигналам операция может быть остановлена.
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
             unit->set_mode( operation_num, state_idx::STOP );

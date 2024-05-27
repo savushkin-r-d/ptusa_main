@@ -999,14 +999,29 @@ TEST( operation, evaluate )
 	test_op->start();
 	EXPECT_EQ( operation::STARTING, test_op->get_state() );
 
-	//При наличии перехода по условию, переходим к "Run".
+	//При отсуствии описания следующего состояние, остаемся в текущем.
 	auto if_action_in_starting = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_starting )[ step::ACTIONS::A_JUMP_IF ] );
-	if_action_in_starting->add_dev( &test_DI_one );
-    if_action_in_starting->set_int_property( "next_state_n", 0, operation::RUN );
+	if_action_in_starting->add_dev( &test_DI_one );    
 	test_DI_one.on();
 	test_op->evaluate();
-	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	EXPECT_EQ( operation::STARTING, test_op->get_state() );
+    //При наличии некорректного описания следующего состояние (PAUSE),
+    //остаемся в текущем.
+    if_action_in_starting->set_int_property( "next_state_n", 0, operation::PAUSE );
+    test_op->evaluate();
+    EXPECT_EQ( operation::STARTING, test_op->get_state() );
+    //При наличии описания следующего состояние (STOP), переходим к нему.
+    if_action_in_starting->set_int_property( "next_state_n", 0, operation::STOP );
+    test_op->evaluate();
+    EXPECT_EQ( operation::STOP, test_op->get_state() );
+
+    test_tank.set_mode( TEST_OP_NUMBER, operation::IDLE );
+    test_op->start();
+    //При наличии описания следующего состояние (RUN), переходим к нему.
+    if_action_in_starting->set_int_property( "next_state_n", 0, operation::RUN );
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
 
 	on_action_in_starting->clear_dev();
 	if_action_in_starting->clear_dev();
