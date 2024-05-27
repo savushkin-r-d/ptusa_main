@@ -79,28 +79,25 @@ const char *device_with_statistic::get_name()
 //-----------------------------------------------------------------------------
 int device_with_statistic::set_cmd( const char *prop, u_int idx, double val )
 	{
-	auto cmd = std::string( prop );
-	if( cmd == "SC" )
+	switch( prop[ 0 ] )
 		{
-		state_change_count = (int)val;
-		par.save( device_with_statistic::STATE_CHANGE_INDEX,
-			(float)state_change_count );
+		case 'S':
+			state_change_count = (int)val;
+			par.save( device_with_statistic::STATE_CHANGE_INDEX,
+				(float)state_change_count );
+		break;
+		case 'R':
+			device_resource = (int)val;
+		break;
+		case 'W':
+			working_time = (int)val * 3600;
+			par.save( device_with_statistic::WORKING_TIME_INDEX,
+				(float)working_time );
+		break;
+		default:
+			return 1;
+		break;
 		}
-	else if( cmd == "RS" )
-		{
-		device_resource = (int)val;
-		}
-	else if( cmd == "WT" )
-		{
-		working_time = (int)val * 3600;
-		par.save( device_with_statistic::WORKING_TIME_INDEX,
-			(float)working_time );
-		}
-	else
-		{
-		return 1;
-		}
-
 	return 0;
 	}
 //-----------------------------------------------------------------------------
