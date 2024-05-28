@@ -428,6 +428,7 @@ class device : public i_DO_AO_device, public par_device
             DT_CAM,      ///< Камера.
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
+            DT_G,        ///< Блок питания.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -621,6 +622,10 @@ class device : public i_DO_AO_device, public par_device
             //DT_REGULATOR
             DST_REGULATOR_PID = 1,
             DST_REGULATOR_THLD,
+
+            //DT_G
+            DST_G_IOL_4 = 1,    ///< 4 канала.
+            DST_G_IOL_8,        ///< 8 каналов.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -4900,6 +4905,16 @@ class threshold_regulator :public device, public i_Lua_save_device
         device* actuator = nullptr;
     };
 //-----------------------------------------------------------------------------
+/// @brief Блок питания.
+class power_unit : public analog_io_device
+    {
+    public:
+        power_unit( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ):
+            analog_io_device( dev_name, device::DT_G, sub_type, 0 )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
@@ -5006,6 +5021,9 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение сигнального датчика температуры по имени.
         i_DI_device* get_TS( const char* dev_name );
+
+        /// @brief Получение блока питания температуры по имени.
+        i_DO_AO_device* get_G( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
@@ -5398,6 +5416,13 @@ i_DI_device* PDS( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DI_device* TS( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение блока питания по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DO_AO_device* get_G( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
