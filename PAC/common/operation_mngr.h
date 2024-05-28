@@ -893,7 +893,13 @@ class operation
         int process_auto_switch_on();
 
         int process_new_state_from_run( int next_state );
-        int process_new_state_from_starting( int next_state );
+
+        /// @brief Обработка перехода по умолчанию - переход к остановке
+        /// или к следующему состоянию.
+        /// 
+        /// @param next_state - новое состояние.
+        /// @param def_state - новое состояние по умолчанию.
+        int default_process_new_state( state_idx next_state, state_idx def_state );
 
         state_idx current_state = IDLE;
 

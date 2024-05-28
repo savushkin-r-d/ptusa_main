@@ -250,6 +250,7 @@ void operation::evaluate()
         if ( res )
             {
             auto unit = owner->owner;
+            auto n_state = static_cast<state_idx>( next_state );
             switch ( current_state )
                 {
                 case state_idx::IDLE:
@@ -263,15 +264,15 @@ void operation::evaluate()
                     break;
 
                 case state_idx::STARTING:
-                    process_new_state_from_starting( next_state );
+                    default_process_new_state( n_state, state_idx::RUN );
                     break;
 
                 case state_idx::PAUSING:
-                    unit->set_mode( operation_num, state_idx::PAUSE );
+                    default_process_new_state( n_state, state_idx::PAUSE );
                     break;
 
                 case state_idx::UNPAUSING:
-                    unit->set_mode( operation_num, state_idx::RUN );
+                    default_process_new_state( n_state, state_idx::RUN );
                     break;
 
                 case state_idx::STOPPING:
@@ -374,26 +375,20 @@ int operation::process_new_state_from_run( int next_state )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int operation::process_new_state_from_starting( int next_state )
+int operation::default_process_new_state( state_idx next_state, state_idx def_state )
     {
     auto unit = owner->owner;
-    switch ( static_cast<state_idx>( next_state ) )
+    if ( next_state == state_idx::STOP )
         {
-        case state_idx::STOP:
-            // По сигналам операция может быть остановлена.
-            unit->set_err_msg( "автоотключение по запросу",
-                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
-            unit->set_mode( operation_num, state_idx::STOP );
-            break;
-
-        case state_idx::RUN:
-            // Из запуска по сигналам операция может перейти в выполнение.
-            unit->set_mode( operation_num, state_idx::RUN );
-            break;
-
-        default:
-            //Остальные варианты игнорируем.
-            break;
+        // По сигналам операция может быть остановлена.
+        unit->set_err_msg( "автоотключение по запросу",
+            operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+        unit->set_mode( operation_num, state_idx::STOP );
+        }
+    else if ( next_state == def_state )
+        {
+        // По сигналам операция может перейти в последующее состояние.
+        unit->set_mode( operation_num, def_state );
         }
 
     return 0;
