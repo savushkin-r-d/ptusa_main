@@ -73,7 +73,7 @@ TEST( device_with_statistic, set_cmd )
 	EXPECT_EQ( dev_w_st->set_cmd( "SC", 0, 1 ), 0 );
 	EXPECT_EQ( dev_w_st->set_cmd( "RS", 0, 2 ), 0 );
 	EXPECT_EQ( dev_w_st->set_cmd( "WT", 0, 1 ), 0 );
-	EXPECT_EQ( dev_w_st->set_cmd( "WR", 0, 1.0f ), 1 );
+	EXPECT_EQ( dev_w_st->set_cmd( "ERROR", 0, 1.0f ), 1 );
 
 	EXPECT_EQ( dev_w_st->get_cur_device_stat(), 1 );
 	EXPECT_NEAR( dev_w_st->get_cur_device_wear(), 50.0f, 0.01f );
