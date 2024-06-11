@@ -437,6 +437,8 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
+
+	set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
