@@ -7,6 +7,8 @@
 
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_READ_ONLY_IO_NODES = false;
 
 lua_State* L = nullptr;
 u_char in_data_devices[] = { device_communicator::CMD_GET_DEVICES };
