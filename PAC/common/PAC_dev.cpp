@@ -4125,10 +4125,9 @@ int valve_iolink_mix_proof::set_cmd( const char *prop, u_int idx, double val )
     {
     if (G_DEBUG)
         {
-        sprintf( G_LOG->msg,
+        G_LOG->debug(
             "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
-        G_LOG->write_log(i_log::P_DEBUG);
         }
 
     switch ( prop[ 0 ] )
@@ -4336,10 +4335,9 @@ int valve_iolink_shut_off_sorio::set_cmd( const char* prop, u_int idx, double va
     {
     if ( G_DEBUG )
         {
-        sprintf( G_LOG->msg,
+        G_LOG->debug(
             "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
         }
 
     switch ( prop[ 0 ] )
@@ -4526,10 +4524,9 @@ int valve_iolink_shut_off_thinktop::set_cmd( const char* prop, u_int idx, double
     {
     if (G_DEBUG)
         {
-        sprintf( G_LOG->msg,
+        G_LOG->debug(
             "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
         }
 
     switch (prop[ 0 ])
@@ -4982,10 +4979,9 @@ inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val
     {
     if ( G_DEBUG )
         {
-        sprintf( G_LOG->msg,
+        G_LOG->debug(
             "%s\t analog_valve_iolink::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
         }
 
     switch ( prop[ 0 ] )
@@ -6137,12 +6133,13 @@ int motor::save_device_ex( char *buff )
         if ( sub_type == device::M_REV_2_ERROR ||
             sub_type == device::DST_M_REV_FREQ_2_ERROR )
             {
-            res = sprintf( buff, "R=%d, ERR=%d, ",
-                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) );
+            res = fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ERRT={}, ",
+                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) ).size;
             }
         else
             {
-            res = sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
+            res = fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ",
+                get_DO( DO_INDEX_REVERSE ) ).size;
             }
         }
 #endif //DEBUG_NO_IO_MODULES
