@@ -3200,8 +3200,8 @@ class concentration_e_ok : public concentration_e
 #ifdef DEBUG_NO_IO_MODULES
             res = sprintf( buff, "OK=1, " );
 #else
-            res = fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
-                get_DI( DI_INDEX ) ).size;
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
+                get_DI( DI_INDEX ) ).size );
 #endif //DEBUG_NO_IO_MODULES
             return res;
             }

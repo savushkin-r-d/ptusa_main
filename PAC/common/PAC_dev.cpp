@@ -6133,13 +6133,13 @@ int motor::save_device_ex( char *buff )
         if ( sub_type == device::M_REV_2_ERROR ||
             sub_type == device::DST_M_REV_FREQ_2_ERROR )
             {
-            res = fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ERRT={}, ",
-                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) ).size;
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ERRT={}, ",
+                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) ).size );
             }
         else
             {
-            res = fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ",
-                get_DO( DO_INDEX_REVERSE ) ).size;
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ",
+                get_DO( DO_INDEX_REVERSE ) ).size );
             }
         }
 #endif //DEBUG_NO_IO_MODULES
