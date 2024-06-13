@@ -1,26 +1,58 @@
 #include <errno.h>
 
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #include "log.h"
 
+#include <fmt/core.h>
 
+#ifdef WIN_OS
+const char* WSA_Last_Err_Decode();
+#else
 extern int errno;
+#endif // WIN_OS
+
 //-----------------------------------------------------------------------------
-int io_manager_linux::net_init( io_node* node )
+int uni_io_manager::net_init( io_node* node ) const
     {
+    if ( node == nullptr )
+        {
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Не задан узел." );
+        *res.out = '\0';
+        return 1;
+        }
+
+#ifdef WIN_OS
+    WSAData tmp_WSA_data;
+    if ( WSAStartup( 0x202, &tmp_WSA_data ) )
+        {
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Ошибка инициализации сетевой библиотеки: {}",
+            WSA_Last_Err_Decode() );
+        *res.out = '\0';
+        return 2;
+        }
+#endif // WIN_OS
+
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
     int err;
-    int sock = err = socket( AF_INET, type, protocol ); // Cоздание сокета.
+    int sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
 
     if ( sock < 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't create I/O node socket : %s.",
-            strerror( errno ) );
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't create I/O node socket : {}",
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
-        return -4;
+        return 3;
         }
 
     // Адресация мастер-сокета.
@@ -31,35 +63,76 @@ int io_manager_linux::net_init( io_node* node )
     socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
     socket_remote_server.sin_port = htons( PORT );
 
+#ifdef WIN_OS
+    unsigned long timeout = io_node::C_CNT_TIMEOUT_US;
+    int vlen = sizeof( timeout );
+#else
     const int C_ON = 1;
+#endif // WIN_OS
 
-    if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
+    if (
+#ifdef WIN_OS
+        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR,
+            reinterpret_cast<char*>( &timeout ), vlen)
+#else
+        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
+#endif // WIN_OS        
+        )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't setsockopt I/O node socket : %s.",
-            strerror( errno ) );
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't setsockopt I/O node socket : {}",
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
-        return -5;
+#endif // WIN_OS
+
+        return 4;
         }
 
     // Переводим в неблокирующий режим.
+#ifdef WIN_OS
+    u_long mode = 1;
+    err = ioctlsocket( sock, FIONBIO, &mode );
+#else
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
+#endif // WIN_OS    
+    
     if ( err != 0 )
         {
-        sprintf( G_LOG->msg,
-            "Network communication : can't fcntl I/O node socket : %s.",
-            strerror( errno ) );
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "Network communication : can't fcntl I/O node socket : {}",
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_CRIT );
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
-        return -5;
+#endif // WIN_OS
+        return 5;
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    err = connect( sock, ( struct sockaddr* ) & socket_remote_server,
-        sizeof( socket_remote_server ) );
+    sockaddr s_address;
+    static_assert( sizeof( sockaddr ) == sizeof( sockaddr_in ) );
+    std::memcpy( &s_address, &socket_remote_server, sizeof( socket_remote_server ) );
+    connect( sock, &s_address, sizeof( socket_remote_server ) );
 
     fd_set rdevents;
     struct timeval tv;
@@ -69,7 +142,7 @@ int io_manager_linux::net_init( io_node* node )
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
-    err = select( sock + 1, 0, &rdevents, 0, &tv );
+    err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
 
     if ( err <= 0 )
         {
@@ -77,53 +150,82 @@ int io_manager_linux::net_init( io_node* node )
             {
             if ( err < 0 )
                 {
-                sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : %s.",
-                    sock, node->name, node->ip_address, strerror( errno ) );
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"(Network device : s{}->"{}":"{}" can't connect : {})",
+                    sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                    WSA_Last_Err_Decode()
+#else
+                    strerror( errno )
+#endif // WIN_OS
+                );
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
-                sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " can't connect : timeout (%d ms).",
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"(Network device : s{}->"{}":"{}" can't connect : timeout ({} ms).)",
                     sock, node->name, node->ip_address,
                     io_node::C_CNT_TIMEOUT_US / 1000 );
-
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             }
 
+#ifdef WIN_OS
+        closesocket( sock );
+#else
         close( sock );
-        return -5;
+#endif // WIN_OS
+        return 6;
         }
 
     if ( FD_ISSET( sock, &rdevents ) )
         {
+        int error = 0;
+#ifdef WIN_OS
+        int err_len;
+#else
         socklen_t err_len;
-        int error;
-
+#endif // WIN_OS
         err_len = sizeof( error );
-        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
+
+        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
+#ifdef WIN_OS
+            reinterpret_cast<char*>( &error ),
+#else
+            &error,
+#endif // WIN_OS            
+            &err_len ) < 0 || error != 0 )
             {
             if ( node->is_set_err == false )
                 {
-                sprintf( G_LOG->msg,
-                    "Network device : s%d->\"%s\":\"%s\""
-                    " error during connect : %s.",
-                    sock, node->name, node->ip_address, strerror( errno ) );
+                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                    R"(Network device : s{}->"{}":"{}" error during connect : {})",
+                    sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                    WSA_Last_Err_Decode()
+#else
+                    strerror( errno )
+#endif // WIN_OS
+                );
+                *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
 
+#ifdef WIN_OS
+            closesocket( sock );
+#else
             close( sock );
-            return -6;
+#endif // WIN_OS
+            return 7;
             }
         }
 
     if ( G_DEBUG )
         {
-        printf( "io_manager_linux:net_init() : socket %d is successfully"
+        printf( "uni_io_manager:net_init() : socket %d is successfully"
             " connected to \"%s\":\"%s\":%d\n",
             sock, node->name, node->ip_address, PORT );
         }
@@ -134,9 +236,11 @@ int io_manager_linux::net_init( io_node* node )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int io_manager_linux::write_outputs()
+int uni_io_manager::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
+
+    int res = 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
@@ -157,14 +261,14 @@ int io_manager_linux::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast <unsigned char>( 7u + bytes_cnt );
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x0F;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = (unsigned char)nd->DO_cnt >> 8;
+                buff[ 10 ] = (unsigned char)nd->DO_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DO_cnt & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast <unsigned char>( bytes_cnt );
 
                 for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                     {
@@ -173,7 +277,7 @@ int io_manager_linux::write_outputs()
                         {
                         if ( idx < nd->DO_cnt )
                             {
-                            b = b | ( nd->DO_[ idx ] & 1 ) << k;
+                            b = b | static_cast <unsigned char>( ( nd->DO_[ idx ] & 1 ) << k );
                             idx++;
                             }
                         }
@@ -186,14 +290,17 @@ int io_manager_linux::write_outputs()
                         {
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
-                    }// if ( e_communicate( nd, bytes_cnt + 13, 12 ) > 0 )
-                else
-                    {
-                    if ( G_DEBUG )
-                        {
-                        //printf("\nWrite DO: returned error...\n");
-                        }
                     }
+
+                // Закомментированный фрагмент - используется для отладки.
+                //else
+                //    {
+                //    if ( G_DEBUG )
+                //        {
+                //        printf("\nWrite DO: returned error...\n");
+                //        }
+                //    }
+
                 }// if ( nd->DO_cnt > 0 )
 
             if ( nd->AO_cnt > 0 )
@@ -205,14 +312,14 @@ int io_manager_linux::write_outputs()
                 buff[ 2 ] = 0;
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 5 ] = static_cast <unsigned char>( 7u + bytes_cnt );
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x10;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 10 ] = static_cast <unsigned char>( bytes_cnt / 2 >> 8 );
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
-                buff[ 12 ] = bytes_cnt;
+                buff[ 12 ] = static_cast <unsigned char>( bytes_cnt );
 
                 for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
@@ -240,14 +347,17 @@ int io_manager_linux::write_outputs()
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         }
-                    }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
-                else
-                    {
-                    if ( G_DEBUG )
-                        {
-                        //printf("\nWrite AO: returned error...\n");
-                        }
                     }
+
+                // Закомментированный фрагмент - используется для отладки.
+                //else
+                //    {
+                //    if ( G_DEBUG )
+                //        {
+                //        printf("\nWrite AO: returned error...\n");
+                //        }
+                //    }
+
                 }// if ( nd->AO_cnt > 0 )
 
             }// if ( nd->type == io_node::T_750_341 || ...
@@ -290,7 +400,7 @@ int io_manager_linux::write_outputs()
                         u_char b = 0;
                         for (u_int k = 0; k < 8; k++)
                             {
-                            b = b | (nd->DO_[bit_src] & 1) << k;
+                            b = b | static_cast <unsigned char>( (nd->DO_[bit_src] & 1) << k );
                             bit_src++;
                             }
                         writebuff[j] = b;
@@ -337,12 +447,7 @@ int io_manager_linux::write_outputs()
 
                             case 2688527:       //AXL F AO4 1H
                             case 2702072:       //AXL F AI2 AO2 1H
-                            case 1088123:       //AXL SE AO4 I 4-20,
-                                writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
-                                writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
-                                l += 2;
-                                break;
-
+                            case 1088123:       //AXL SE AO4 I 4-20
                             case 2688666:       //AXL F RS UNI XC
                                 writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
                                 writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
@@ -378,6 +483,7 @@ int io_manager_linux::write_outputs()
                             {
                             G_LOG->error("Write AO: returned error");
                             nd->flag_error_write_message = true;
+                            res = 1;
                             }
                         }
 
@@ -397,10 +503,10 @@ int io_manager_linux::write_outputs()
             }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
-int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
+int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
     // Проверка связи с узлом I/O.
@@ -450,9 +556,13 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     node->delay_time = io_node::C_INITIAL_RECONNECT_DELAY;
 
     // Посылка данных.
+#ifdef WIN_OS
+    int res = send( node->sock, reinterpret_cast<char*>( buff ), bytes_to_send, 0 );
+#else
     int res = tcp_communicator_linux::sendall( node->sock, buff,
         bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat );
+#endif // WIN_OS
 
     if ( res < 0 )
         {
@@ -461,9 +571,14 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
         }
 
     // Получение данных.
+#ifdef WIN_OS
+    tcp_communicator_win::recvtimeout( node->sock, buff,bytes_to_receive, 0,
+        io_node::C_RCV_TIMEOUT_US );
+#else
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
         bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->recv_stat );
+#endif // WIN_OS
 
     if ( res <= 0 ) /* read error */
         {
@@ -475,7 +590,7 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     return 0;
     }
 
-int io_manager_linux::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
+int uni_io_manager::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
     {
     buff[0] = 's';
     buff[1] = 's';
@@ -505,7 +620,7 @@ int io_manager_linux::read_input_registers(io_node* node, unsigned int address, 
     return -1;
     }
 
-int io_manager_linux::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
+int uni_io_manager::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
     {
     unsigned int bytes_cnt = quantity * 2;
     buff[0] = 's';
@@ -513,14 +628,14 @@ int io_manager_linux::write_holding_registers(io_node* node, unsigned int addres
     buff[2] = 0;
     buff[3] = 0;
     buff[4] = 0;
-    buff[5] = 7 + bytes_cnt;
+    buff[5] = static_cast <unsigned char>( 7 + bytes_cnt );
     buff[6] = station;
     buff[7] = 0x10;
     buff[8] = (u_int_2)address >> 8;
     buff[9] = (u_int_2)address & 0xFF;
     buff[10] = (u_int_2)quantity >> 8;
     buff[11] = (u_int_2)quantity & 0xFF;
-    buff[12] = bytes_cnt;
+    buff[12] = static_cast <unsigned char>( bytes_cnt );
     if (e_communicate(node, bytes_cnt + 13, 12) == 0)
         {
         if (buff[7] == 0x10)
@@ -536,7 +651,7 @@ int io_manager_linux::write_holding_registers(io_node* node, unsigned int addres
     }
 
 //-----------------------------------------------------------------------------
-int io_manager_linux::read_inputs()
+int uni_io_manager::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
@@ -559,11 +674,11 @@ int io_manager_linux::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x02;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
-                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 8;
+                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 7 >> 1;
                 buff[ 11 ] = (unsigned char)nd->DI_cnt & 0xFF;
 
                 u_int bytes_cnt = nd->DI_cnt / 8 + ( nd->DI_cnt % 8 > 0 ? 1 : 0 );
@@ -592,8 +707,10 @@ int io_manager_linux::read_inputs()
                         }
                     else
                         {
-                        sprintf( G_LOG->msg, "Read DI:bus coupler returned error. Node %d)",
+                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                            "Read DI:bus coupler returned error. Node {}.)",
                             nd->number );
+                        *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
 
                         if ( G_DEBUG )
@@ -612,7 +729,7 @@ int io_manager_linux::read_inputs()
                 buff[ 3 ] = 0;
                 buff[ 4 ] = 0;
                 buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
+                buff[ 6 ] = 0;
                 buff[ 7 ] = 0x04;
                 buff[ 8 ] = 0;
                 buff[ 9 ] = 0;
@@ -647,8 +764,10 @@ int io_manager_linux::read_inputs()
                         }
                     else
                         {
-                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} ).",
                             nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
                         }
                     }
@@ -683,14 +802,15 @@ int io_manager_linux::read_inputs()
                     registers_count = nd->AI_cnt;
                     }
 
-                int res, k, index_source = 0, analog_dest = 0, bit_dest = 0;
+                unsigned int analog_dest = 0;
+                unsigned int bit_dest = 0;
 
                 do
                     {
 #ifdef DEBUG_BK_MIN
                     G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    res = read_input_registers(nd, start_read_address + start_register, registers_count);
+                    int res = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
                     printf("\n\r");
@@ -705,7 +825,7 @@ int io_manager_linux::read_inputs()
                         {
                         if (res)
                             {
-                            for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
+                            for (int index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
                                 switch (nd->AI_types[analog_dest])
                                     {
@@ -725,9 +845,9 @@ int io_manager_linux::read_inputs()
 #endif // DEBUG_BK
                                 }
 
-                            for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
+                            for (int index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
                                 {
-                                for (k = 0; k < 8; k++)
+                                for (int k = 0; k < 8; k++)
                                     {
                                     nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
 #ifdef DEBUG_BK
@@ -765,23 +885,32 @@ int io_manager_linux::read_inputs()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void io_manager_linux::disconnect( io_node* node )
+void uni_io_manager::disconnect( io_node* node )
     {
     if ( node->sock )
         {
-        shutdown( node->sock, SHUT_RDWR );
+        shutdown( node->sock,
+#ifdef WIN_OS
+            SD_BOTH
+#else
+            SHUT_RDWR
+#endif // WIN_OS
+        );
+
+#ifdef WIN_OS
+        closesocket( node->sock );
+#else
         close( node->sock );
+#endif // WIN_OS
+        
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
-io_manager_linux::io_manager_linux()
+uni_io_manager::uni_io_manager()
     {
-    writebuff = &buff[13];
-    }
-//-----------------------------------------------------------------------------
-io_manager_linux::~io_manager_linux()
-    {
+    writebuff = &buff[ 13 ];
+    resultbuff = &buff[ 9 ];
     }
 //-----------------------------------------------------------------------------

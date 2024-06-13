@@ -28,6 +28,9 @@
 #include "l_mem.h"
 #endif
 
+extern bool G_NO_IO_NODES;
+extern bool G_READ_ONLY_IO_NODES;
+
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char* argv[] )
@@ -40,13 +43,20 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.add_options()
         ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
         ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+#if defined WIN_OS
+        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+#else
+        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+#endif // defined WIN_OS        
         ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
         ( "sys_path", "Sys path", cxxopts::value<std::string>() )
         ( "path", "Path", cxxopts::value<std::string>() )
         ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
-        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<int>()->default_value( "2" ) );
+        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
@@ -101,7 +111,35 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         init_extra_paths( extra_paths_str.c_str() );
         }
     main_script = result[ "script" ].as<std::string>();
-    sleep_time_ms = result[ "sleep_time_ms" ].as<int>();
+    sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
+
+    // Отключить/включить обмен с модулями ввода/вывода.
+    if ( result[ "no_io_nodes" ].as<bool>() )
+        {
+        G_NO_IO_NODES = true;
+        }
+    else
+        {
+        G_NO_IO_NODES = false;
+        }
+    // Только чтение/запись+чтение данных с модулей ввода/вывода.
+    if ( result[ "read_only_io_nodes" ].as<bool>() )
+        {
+        G_READ_ONLY_IO_NODES = true;
+        }
+    else
+        {
+        G_READ_ONLY_IO_NODES = false;
+        }
+
+    if ( G_NO_IO_NODES )
+        G_LOG->warning( "Bus couplers are disabled." );
+    else
+        {
+        G_LOG->warning( "Bus couplers are enabled." );
+        if ( G_READ_ONLY_IO_NODES )
+            G_LOG->warning( "Bus couplers are read only." );           
+        }
 
     return 0;
     }
