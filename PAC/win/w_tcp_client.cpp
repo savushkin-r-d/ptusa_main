@@ -1,5 +1,7 @@
 #include "w_tcp_client.h"
 
+const char* WSA_Last_Err_Decode();
+
 int win_tcp_client::Communicate( unsigned int bytestosend )
     {
     int res;
@@ -236,7 +238,8 @@ int win_tcp_client::AsyncConnect()
 			{
 				if (G_DEBUG)
 				{
-					printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());
+					printf("tcp_client_%d: Ошибка создания сокета : %s.\n", id,
+                        WSA_Last_Err_Decode());
 				}
 
 				return 0;
