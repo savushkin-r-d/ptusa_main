@@ -154,7 +154,7 @@ int main( int argc, const char *argv[] )
     //Инициализация дополнительных устройств
     IOT_INIT();
 
-    G_LOG->info( "Starting main loop! Sleep time is %li ms.",
+    G_LOG->info( "Starting main loop! Sleep time is %u ms.",
         G_PROJECT_MANAGER->sleep_time_ms );
 
     while ( running )
