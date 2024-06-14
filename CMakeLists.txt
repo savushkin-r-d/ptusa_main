@@ -24,10 +24,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-if(NOT ARP_DEVICE)
-    add_compile_definitions(PAC_PC)
-endif()
-
 if(LINUX)
     add_compile_definitions(LINUX_OS)
 elseif(WIN32)
@@ -137,6 +133,7 @@ if(LINUX)
 
         file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
@@ -186,6 +183,15 @@ target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
 if(NOT MINGW)
     target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+endif()
+
+if(ARP_DEVICE)
+	target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
+	target_compile_definitions(ptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(libptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)	
+else()
+	add_compile_definitions(PAC_PC)
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -241,6 +247,7 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
+	    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
