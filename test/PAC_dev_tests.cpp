@@ -379,6 +379,16 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto W2 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W2 ) );
+
+    //device::DT_G, DST_G_IOL_4
+    name = std::string( "G1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_G, device::DST_G_IOL_4, name.c_str(), "Test power unit", "G" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto G1 = get_G( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( G1 ) );
     }
 
 TEST( device_manager, clear_io_devices )
