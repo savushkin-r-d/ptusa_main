@@ -10,19 +10,14 @@ execute_process(COMMAND
 execute_process(
     COMMAND ${CMAKE_COMMAND} --preset windows-VS2022-default
         -D CMAKE_SKIP_INSTALL_ALL_DEPENDENCY=true -D CMAKE_RULE_MESSAGES=OFF
-        -D CMAKE_BUILD_PARALLEL_LEVEL=8
     COMMAND ${CMAKE_COMMAND} --preset build-windows-AXCF2152-2022-LTS-Release
         -D CMAKE_SKIP_INSTALL_ALL_DEPENDENCY=true -D CMAKE_RULE_MESSAGES=OFF
-        -D CMAKE_BUILD_PARALLEL_LEVEL=8
     COMMAND ${CMAKE_COMMAND} --preset build-windows-AXCF1152-2022-LTS-Release
         -D CMAKE_SKIP_INSTALL_ALL_DEPENDENCY=true -D CMAKE_RULE_MESSAGES=OFF
-        -D CMAKE_BUILD_PARALLEL_LEVEL=8
     RESULT_VARIABLE res
-    COMMAND_ECHO STDOUT)
-
-if(NOT ${res} EQUAL 0)
-    message(FATAL_ERROR "Error during configure!")
-endif()
+    COMMAND_ECHO STDOUT
+    COMMAND_ERROR_IS_FATAL ANY
+    ENCODING UTF8)
 
 execute_process(COMMAND
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Start build")
@@ -30,17 +25,15 @@ execute_process(COMMAND
 # Build.
 execute_process(
     COMMAND ${CMAKE_COMMAND} --build --preset build-windows-VS2022-release
-        --target libptusa_main ptusa_main PtusaPLCnextEngineer
+        --target libptusa_main ptusa_main --parallel 8
     COMMAND ${CMAKE_COMMAND} --build --preset build-windows-AXCF2152-2022-LTS-Release
-        --target libptusa_main ptusa_main PtusaPLCnextEngineer
+        --target libptusa_main ptusa_main PtusaPLCnextEngineer --parallel 8
     COMMAND ${CMAKE_COMMAND} --build --preset build-windows-AXCF1152-2022-LTS-Release
-        --target libptusa_main ptusa_main PtusaPLCnextEngineer
+        --target libptusa_main ptusa_main PtusaPLCnextEngineer --parallel 8
     RESULT_VARIABLE res
-    COMMAND_ECHO STDOUT)
-
-if(NOT ${res} EQUAL 0)
-    message(FATAL_ERROR "Error during build!")
-endif()
+    COMMAND_ECHO STDOUT
+    COMMAND_ERROR_IS_FATAL ANY
+    ENCODING UTF8)
 
 execute_process(COMMAND
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Start install")
@@ -54,8 +47,6 @@ execute_process(
     COMMAND ${CMAKE_COMMAND} --build --preset build-windows-AXCF1152-2022-LTS-Release
         --target install
     RESULT_VARIABLE res
-    COMMAND_ECHO STDOUT)
-
-if(NOT ${res} EQUAL 0)
-    message(FATAL_ERROR "Error during install!")
-endif()
+    COMMAND_ECHO STDOUT
+    COMMAND_ERROR_IS_FATAL ANY
+    ENCODING UTF8)
