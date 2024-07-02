@@ -443,15 +443,15 @@ void ParamsRecipeAdapter::loadParams( int techObject, unsigned int recNo )
     if ( recStorage == nullptr || techObj == nullptr ) return;
     if (( int ) recNo > recStorage->getCount( ) || recNo == 0 ) return;
     auto recSize = recStorage->getParamsCount( );
-    auto parSize = techObj->rt_par_float.get_count( );
+    auto parSize = techObj->par_float.get_count( );
     for ( auto map: mParamsMap )
         {
-        if (( int ) map.startRecPar + ( int ) map.quantity > recSize ||
+        if (( int ) map.startRecPar + ( int ) map.quantity > recSize + 1 ||
             map.startObjPar + map.quantity > ( int ) parSize )
             return;
         for ( int i = 0; i < ( int ) map.quantity; i++ )
             {
-            techObj->rt_par_float[ map.startObjPar + i ] = recStorage->getRecPar( recNo, map.startRecPar + i );
+            techObj->par_float[ map.startObjPar + i ] = recStorage->getRecPar( recNo, map.startRecPar + i );
             }
         }
     techObj->lastLoadedRecipeNmr = ( int ) recNo;
