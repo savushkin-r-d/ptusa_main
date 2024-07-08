@@ -23,6 +23,8 @@
 int G_DEBUG = 1; //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 1; //Вывод в системный лог (syslog).
 
+bool G_NO_IO_MODULES = false; // По умолчанию обмен с модулями включен.
+
 namespace PtusaPLCnextEngineer
     {
 
@@ -90,10 +92,12 @@ namespace PtusaPLCnextEngineer
             lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, LUA_GC_SIZE );
             sleep_ms( sleep_time_ms );
 
-#ifndef DEBUG_NO_WAGO_MODULES
-            G_IO_MANAGER()->read_inputs();
-            sleep_ms( sleep_time_ms );
-#endif // DEBUG_NO_WAGO_MODULES
+            if ( !G_NO_IO_MODULES )
+                {
+                G_IO_MANAGER()->read_inputs();
+                sleep_ms( sleep_time_ms );
+                }
+
 
             G_DEVICE_MANAGER()->evaluate_io();
             valve::evaluate();
@@ -103,10 +107,12 @@ namespace PtusaPLCnextEngineer
 
             sleep_ms( sleep_time_ms );
 
-#ifndef DEBUG_NO_WAGO_MODULES
+        if ( !G_NO_IO_MODULES )
+            {
             G_IO_MANAGER()->write_outputs();
             sleep_ms( sleep_time_ms );
-#endif // ifndef
+            }
+
 
             G_CMMCTR->evaluate();
 #ifdef OPCUA

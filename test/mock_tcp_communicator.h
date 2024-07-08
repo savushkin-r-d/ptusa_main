@@ -15,12 +15,13 @@ class test_tcp_communicator
     public:
     static void replaceEntity(mock_tcp_communicator* p)
     {
-        tcp_communicator::is_init = 1;
+        tcp_communicator::is_init = true;
         tcp_communicator::instance = p;
     }
 
     static void removeObject()
     {
         tcp_communicator::instance = NULL;
+        tcp_communicator::is_init = false;
     }
 };

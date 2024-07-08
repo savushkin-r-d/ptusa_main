@@ -250,6 +250,7 @@ void operation::evaluate()
         if ( res )
             {
             auto unit = owner->owner;
+            auto n_state = static_cast<state_idx>( next_state );
             switch ( current_state )
                 {
                 case state_idx::IDLE:
@@ -263,15 +264,15 @@ void operation::evaluate()
                     break;
 
                 case state_idx::STARTING:
-                    unit->set_mode( operation_num, state_idx::RUN );
+                    default_process_new_state( n_state, state_idx::RUN );
                     break;
 
                 case state_idx::PAUSING:
-                    unit->set_mode( operation_num, state_idx::PAUSE );
+                    default_process_new_state( n_state, state_idx::PAUSE );
                     break;
 
                 case state_idx::UNPAUSING:
-                    unit->set_mode( operation_num, state_idx::RUN );
+                    default_process_new_state( n_state, state_idx::RUN );
                     break;
 
                 case state_idx::STOPPING:
@@ -351,17 +352,16 @@ int operation::process_new_state_from_run( int next_state )
     auto unit = owner->owner;
     switch ( static_cast<state_idx>( next_state ) )
         {
-        case state_idx::IDLE:
-            //Из выполнения по сигналам операция может быть
-            //отключена (перейти в состояние простоя).
-            unit->set_mode( operation_num, state_idx::IDLE );
+        case state_idx::STOP:
+            // Из выполнения по сигналам операция может быть остановлена.
             unit->set_err_msg( "автоотключение по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+            unit->set_mode( operation_num, state_idx::STOP );
             break;
 
         case state_idx::PAUSE:
-            //Из выполнения по сигналам операция может быть
-            //поставлена на паузу.
+            // Из выполнения по сигналам операция может быть
+            // поставлена на паузу.
             unit->set_mode( operation_num, state_idx::PAUSE );
             unit->set_err_msg( "пауза по запросу",
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
@@ -374,6 +374,26 @@ int operation::process_new_state_from_run( int next_state )
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+int operation::default_process_new_state( state_idx next_state, state_idx def_state )
+    {
+    auto unit = owner->owner;
+    if ( next_state == state_idx::STOP )
+        {
+        // По сигналам операция может быть остановлена.
+        unit->set_err_msg( "автоотключение по запросу",
+            operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+        unit->set_mode( operation_num, state_idx::STOP );
+        }
+    else if ( next_state == def_state )
+        {
+        // По сигналам операция может перейти в последующее состояние.
+        unit->set_mode( operation_num, def_state );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void operation::finalize()
     {
@@ -1742,7 +1762,7 @@ jump_if_action::jump_if_action( const char* name ) :
 bool jump_if_action::is_jump( int& next )
     {
     next = -1;
-    if ( is_empty() )
+    if ( next_n.empty() )
         {
         return false;
         }

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2024.03.28.0)
+project(ptusa_main VERSION 2024.06.11.0)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -23,11 +23,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 ################# create targets ######################################################
-
-add_compile_definitions(PAC_PC)
-if(NOT ARP_DEVICE)
-    add_compile_definitions(DEBUG_NO_IO_MODULES)
-endif()
 
 if(LINUX)
     add_compile_definitions(LINUX_OS)
@@ -138,6 +133,7 @@ if(LINUX)
 
         file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
@@ -181,6 +177,21 @@ endif()
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
+endif()
+
+target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
+if(NOT MINGW)
+    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+endif()
+
+if(ARP_DEVICE)
+	target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
+	target_compile_definitions(ptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(libptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)	
+else()
+	add_compile_definitions(PAC_PC)
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -236,6 +247,7 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
+	    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
@@ -378,20 +390,41 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
-set_tests_properties( run_no_command_line_arguments 
-    PROPERTIES PASS_REGULAR_EXPRESSION 
+if (WIN32)
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
-  -s, --script arg         The script file to execute \(default: main\.plua\)
-  -d, --debug              Enable debugging
-  -p, --port arg           Param port \(default: 10000\)
-  -h, --help               Print help info
-  -r, --rcrc               Reset params
-      --sys_path arg       Sys path
-      --path arg           Path
-      --extra_paths arg    Extra paths
-      --sleep_time_ms arg  Sleep time, ms \(default: 2\)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
+      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
+else()
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
+[[
+(.*)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes
+      --read_only_io_nodes  Read only from I\\O nodes
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+]] )
+endif()
 
   set_property(
     TARGET libptusa_main
@@ -411,6 +444,8 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
+
+	set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
