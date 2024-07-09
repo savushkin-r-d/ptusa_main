@@ -14,36 +14,34 @@
 #ifndef MEM_PLCNEXT_H
 #define MEM_PLCNEXT_H
 
-#include "base_mem.h"
-
 #include <cstdint>
+
+#include "base_mem.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ (Static Memory).
 ///
 /// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
-class eeprom_PLCnext: public NV_memory
-    {
-    friend class NV_memory_manager;
+class eeprom_PLCnext : public NV_memory {
+  friend class NV_memory_manager;
 
-    public:
-        virtual ~eeprom_PLCnext();
+ public:
+  virtual ~eeprom_PLCnext();
 
-        void init( void * NV_ram_data )
-            {
-            this->NV_ram_data = ( std::uint8_t * ) NV_ram_data;
-            }
+  void init(void *NV_ram_data) {
+    this->NV_ram_data = (std::uint8_t *)NV_ram_data;
+  }
 
-    private:
-        eeprom_PLCnext( int total_size, int available_start_pos,
-            int available_end_pos );
+ private:
+  eeprom_PLCnext(int total_size, int available_start_pos,
+                 int available_end_pos);
 
-        /// @brief Метод интерфейса @ref i_memory.
-        int read( void *buff, u_int count, u_int start_pos );
+  /// @brief Метод интерфейса @ref i_memory.
+  int read(void *buff, u_int count, u_int start_pos);
 
-        /// @brief Метод интерфейса @ref i_memory.
-        int write( void *buff, u_int count, u_int start_pos );
+  /// @brief Метод интерфейса @ref i_memory.
+  int write(void *buff, u_int count, u_int start_pos);
 
-        std::uint8_t * NV_ram_data; 	// Pointer to begin of NVRAM
-    };
+  std::uint8_t *NV_ram_data;  // Pointer to begin of NVRAM
+};
 //-----------------------------------------------------------------------------
-#endif // MEM_PLCNEXT_H
+#endif  // MEM_PLCNEXT_H

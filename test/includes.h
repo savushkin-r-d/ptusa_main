@@ -1,7 +1,8 @@
 #pragma once
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <iostream>
-#include <subhook.h>
-#include <vector>
+#include <gtest/gtest.h>
 #include <limits.h>
+#include <subhook.h>
+
+#include <iostream>
+#include <vector>

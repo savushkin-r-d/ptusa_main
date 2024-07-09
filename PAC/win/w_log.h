@@ -1,12 +1,11 @@
 #ifndef w_log_h__
 #define w_log_h__
 
-#include "log.h"
-
-#include <iostream>
 #include <iomanip>
-#include "ctime"
+#include <iostream>
 
+#include "ctime"
+#include "log.h"
 #include "w_console.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с журналом.
@@ -14,75 +13,68 @@
 /// Базовый интерфейсный класс для журнала.
 /// Содержит основные методы работы - запиь в лог, т.д.
 ///
-class w_log: public i_log
-	{
-	public:
+class w_log : public i_log {
+ public:
+  virtual ~w_log() {}
 
-		virtual ~w_log()
-			{
-			}
+#pragma warning(push)
+#pragma warning(disable : 4996)  // warning C4996: 'localtime': This function or
+                                 // variable may be unsafe.
+  void virtual write_log(PRIORITIES priority) {
+    std::time_t _tm = std::time(nullptr);
+    std::tm tm = *std::localtime(&_tm);
 
-#pragma warning( push )
-#pragma warning( disable: 4996 ) //warning C4996: 'localtime': This function or variable may be unsafe.
-		void virtual write_log(PRIORITIES priority)
-			{
-            std::time_t _tm = std::time( nullptr );
-            std::tm tm = *std::localtime( &_tm );
+    std::cout << std::put_time(&tm, "%Y-%m-%d %H.%M.%S ");
 
-            std::cout << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+    switch (priority) {
+      case i_log::P_ALERT:
+        SetColor(RED_I);
+        std::cout << "ALERT  (1) -> ";
+        break;
 
-            switch ( priority )
-                {
-                case i_log::P_ALERT:
-                    SetColor( RED_I );
-                    std::cout << "ALERT  (1) -> ";
-                    break;
+      case i_log::P_CRIT:
+        SetColor(RED_I);
+        std::cout << "CRITIC (2) -> ";
+        break;
 
-                case i_log::P_CRIT:
-                    SetColor( RED_I );
-                    std::cout << "CRITIC (2) -> ";
-                    break;
+      case i_log::P_ERR:
+        SetColor(RED);
+        std::cout << "ERROR  (3) -> ";
+        break;
 
-                case i_log::P_ERR:
-                    SetColor( RED );
-                    std::cout << "ERROR  (3) -> ";
-                    break;
+      case i_log::P_WARNING:
+        SetColor(YELLOW);
+        std::cout << "WARNING(4) -> ";
+        break;
 
-                case i_log::P_WARNING:
-                    SetColor( YELLOW );
-                    std::cout << "WARNING(4) -> ";
-                    break;
+      case i_log::P_NOTICE:
+        SetColor(GREEN);
+        std::cout << "NOTICE (5) -> ";
+        break;
 
-                case i_log::P_NOTICE:
-                    SetColor( GREEN );
-                    std::cout << "NOTICE (5) -> ";
-                    break;
+      case i_log::P_INFO:
+        SetColor(GREEN);
+        std::cout << "INFO   (6) -> ";
+        break;
 
-                case i_log::P_INFO:
-                    SetColor( GREEN );
-                    std::cout << "INFO   (6) -> ";
-                    break;
+      case i_log::P_DEBUG:
+        SetColor(GRAY);
+        std::cout << "DEBUG  (7) -> ";
+        break;
 
-                case i_log::P_DEBUG:
-                    SetColor( GRAY );
-                    std::cout << "DEBUG  (7) -> ";
-                    break;
+      default:
+        std::cout << "       (" << priority << ") -> ";
+        break;
+    }
 
-                default:
-                    std::cout << "       (" << priority << ") -> ";
-                    break;
-                }
+    std::cout << msg << std::endl;
+    SetColor(RESET);
 
-            std::cout << msg << std::endl;
-            SetColor( RESET );
+    fflush(stdout);
+  }
+#pragma warning(pop)
 
-            fflush( stdout );
-			}
-#pragma warning( pop )
+  w_log() {}
+};
 
-		w_log()
-			{
-			}
-	};
-
-#endif // w_log_h__
+#endif  // w_log_h__
