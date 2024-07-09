@@ -3,6 +3,7 @@
 
 #include "smart_ptr.h"
 #include "g_device.h"
+#include "tech_def.h"
 
 #include <iostream>
 #include <fstream>
@@ -28,6 +29,7 @@ class ParamsRecipeStorage
         int mRecipeCount;
         int mRecipeParamsCount;
         int mId;
+        int mActiveRecipe;
     public:
         ParamsRecipeStorage( int id, int recipeCount, int recipeParamsCount);
         int getId() const;
@@ -35,11 +37,33 @@ class ParamsRecipeStorage
         int getParamsCount() const;
         bool isChanged;
         void setRecPar(int recNo, int parNo, float newValue);
-        float getRecPar(int recNo, int parNo);
+        float getRecPar( uInt recNo, uInt parNo);
         void serialize(const std::string& filename);
         void deserialize(const std::string& filename);
+        int getActiveRecipe() const;
+        int setActiveRecipe(int recipe);
+        ParamsRecipe& getActiveRecipeRef();
         std::vector<ParamsRecipe> recipes;
 
+    };
+
+struct ParamsRecipeMapRecord
+    {
+        uInt startRecPar;
+        uInt startObjPar;
+        uInt quantity;
+        ParamsRecipeMapRecord(uInt startRecPar, uInt startObjPar, uInt quantity);
+    };
+
+class ParamsRecipeAdapter
+    {
+    private:
+        std::vector<ParamsRecipeMapRecord> paramsMap;
+        ParamsRecipeStorage* recStorage;
+    public:
+        explicit ParamsRecipeAdapter( ParamsRecipeStorage *recStorage );
+        void addMap(uInt startRecPar, uInt startObjPar, uInt quantity);
+        void loadParams(ParamsRecipeStorage* recStorage, tech_object* techObject, uInt recNo);
     };
 
 class ParamsRecipeManager: public i_Lua_save_device
@@ -47,13 +71,17 @@ class ParamsRecipeManager: public i_Lua_save_device
     public:
         void evaluate();
         ParamsRecipeStorage* createRecipes(int size, int quantity);
+        ParamsRecipeAdapter* createAdapter( ParamsRecipeStorage* recStorage );
+        ~ParamsRecipeManager();
         static ParamsRecipeManager* getInstance();
 
         int save_device( char *buff ) override;
+        int parseDriverCmd( char *buff);
 
         const char *get_name_in_Lua( ) const override;
 
-        std::vector<ParamsRecipeStorage> recPacks;
+        std::vector<ParamsRecipeStorage*> recPacks;
+        std::vector<ParamsRecipeAdapter*> recAdapters;
 
         ParamsRecipeManager(ParamsRecipeManager &outer) = delete;
         void operator=(const ParamsRecipeManager &) = delete;

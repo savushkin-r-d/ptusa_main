@@ -22,6 +22,8 @@ $#include "modbus_serv.h"
 
 $#include "profibus_slave.h"
 
+$#include "params_recipe_manager.h"
+
 $#ifdef WIN_OS
 $#pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
 $#pragma warning(disable: 6011)  //dereferencing NULL pointer <name>.
@@ -2029,4 +2031,20 @@ class i_log
     };
 
 i_log* G_SYS_LOG();
+//-----------------------------------------------------------------------------
+class ParamsRecipeStorage
+    {
+        int getId() const;
+        int getCount() const;
+        int getParamsCount() const;
+        void setRecPar(int recNo, int parNo, float newValue);
+        float getRecPar(int recNo, int parNo);
+    };
+
+class ParamsRecipeManager
+    {
+        ParamsRecipeStorage* createRecipes(int size, int quantity);
+    };
+
+ParamsRecipeManager* G_PARAMS_RECIPE_MANAGER();
 //-----------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 #include "params_recipe_manager.h"
 
 #include <utility>
+#include <regex>
+#include <iostream>
 
 #include "PAC_err.h"
 
@@ -22,8 +24,52 @@ ParamsRecipeManager *ParamsRecipeManager::getInstance( )
 
 int ParamsRecipeManager::save_device( char *buff )
     {
-    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{\n" ).size;
-    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
+    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
+    for ( auto rm: recPacks )
+        {
+        //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
+        auto activeRecipe = rm->getActiveRecipeRef( );
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNMR={},", rm->getActiveRecipe()).size;
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", activeRecipe.name).size;
+
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
+        for (auto par : activeRecipe.params )
+            {
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
+            }
+
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}},").size;
+        /*for (auto rec: rm->recipes)
+            {
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t{{").size;
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", rec.name).size;
+
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
+            for (auto par : rec.params)
+                {
+                size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
+                }
+
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}\n\t\t\t}},").size;
+            }*/
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
+        }
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "t.REСLOADER = \n\t{{" ).size;
+    for ( auto rm: recPacks )
+        {
+        //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
+
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
+        }
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
     buff[ size ] = '\0';
 
     return size;
@@ -36,8 +82,9 @@ const char *ParamsRecipeManager::get_name_in_Lua( ) const
 
 ParamsRecipeStorage *ParamsRecipeManager::createRecipes( int size, int quantity )
     {
-    recPacks.emplace_back(sId, size, quantity);
-    return &recPacks[sId++];
+    auto recStorage = new ParamsRecipeStorage(sId++, size, quantity);
+    recPacks.push_back(recStorage);
+    return recStorage;
     }
 
 ParamsRecipeManager::ParamsRecipeManager( )
@@ -46,6 +93,48 @@ ParamsRecipeManager::ParamsRecipeManager( )
     lastSaveTimer = get_millisec();
     }
 
+ParamsRecipeManager::~ParamsRecipeManager( )
+    {
+    for (auto rs : recPacks)
+        {
+        delete rs;
+        }
+        recPacks.clear();
+    for (auto rs : recAdapters)
+        {
+        delete rs;
+        }
+        recAdapters.clear();
+    }
+
+int ParamsRecipeManager::parseDriverCmd( char *buff )
+    {
+
+    std::string cmd = buff;
+    std::cout << cmd << "\n";
+    std::regex rmCommand(R"lit(__RECMAN\[(\d+)\]\[(\d+)\]:set_cmd\( "(\w+)", (\d+), ([\w\."]+) \))lit");
+    std::smatch rmMatch;
+    if (std::regex_match(cmd, rmMatch, rmCommand))
+        {
+        printf("Is match\n");
+        std::cout << rmMatch[1].str() << ' ' << rmMatch[2].str() << ' ' << rmMatch[3].str() << ' ' << rmMatch[4].str() << ' ' << rmMatch[5].str() << '\n';
+        auto recMgrIdx = std::stoi(rmMatch[1].str());
+        auto recIdx = std::stoi(rmMatch[2].str());
+        auto varName = rmMatch[3].str();
+        auto idx = std::stoi( rmMatch[4].str());
+        auto val = rmMatch[5].str();
+
+        return 1;
+        }
+    return 0;
+    }
+
+ParamsRecipeAdapter *ParamsRecipeManager::createAdapter( ParamsRecipeStorage* recStorage )
+    {
+        auto adapter = new ParamsRecipeAdapter( recStorage );
+        recAdapters.push_back(adapter);
+        return adapter;
+    }
 
 ParamsRecipe::ParamsRecipe( std::string name, std::vector<float> params )
     {
@@ -65,11 +154,11 @@ ParamsRecipeStorage::ParamsRecipeStorage( int id, int recipeCount, int recipePar
     this->mRecipeCount = recipeCount;
     this->mRecipeParamsCount = recipeParamsCount;
     this->isChanged = false;
+    this->mActiveRecipe = 0;
     for (int i = 0; i < recipeCount; i++ )
         {
         std::vector<float> params( recipeParamsCount, 0);
-        ParamsRecipe  recipe("none", params);
-        recipes.push_back( recipe);
+        recipes.emplace_back( "none", params );
         }
     }
 
@@ -100,7 +189,7 @@ void ParamsRecipeStorage::setRecPar( int recNo, int parNo, float newValue )
         }
     }
 
-float ParamsRecipeStorage::getRecPar( int recNo, int parNo )
+float ParamsRecipeStorage::getRecPar( uInt recNo, uInt parNo )
     {
     if (recNo < mRecipeCount && parNo < mRecipeParamsCount)
         {
@@ -174,4 +263,65 @@ void ParamsRecipeStorage::deserialize( const std::string &filename )
     else {
         G_LOG->debug("Failed to open %s for deserialization.\n", filename.c_str());
         }
+    }
+
+int ParamsRecipeStorage::getActiveRecipe( ) const
+    {
+        return mActiveRecipe;
+    }
+
+int ParamsRecipeStorage::setActiveRecipe( int recipe )
+    {
+     if (recipe < mRecipeCount)
+        {
+        if (mActiveRecipe!= recipe)
+            {
+            mActiveRecipe = recipe;
+            return recipe;
+            }
+        }
+        return -1;
+    }
+
+ParamsRecipe &ParamsRecipeStorage::getActiveRecipeRef( )
+    {
+     if (mActiveRecipe < mRecipeCount)
+        {
+        return recipes[mActiveRecipe];
+        }
+        return recipes[0];
+    }
+
+void ParamsRecipeAdapter::addMap( uInt startRecPar, uInt startObjPar, uInt quantity )
+    {
+    paramsMap.emplace_back(startRecPar, startObjPar, quantity);
+    }
+
+void ParamsRecipeAdapter::loadParams( ParamsRecipeStorage *recStorage, tech_object *techObject, uInt recNo )
+    {
+    if (recStorage == nullptr || techObject == nullptr) return;
+    if (recNo >= recStorage->getCount()) return;
+    auto recSize = recStorage->getParamsCount();
+    auto parSize = techObject->par_float.get_count();
+    for (auto map : paramsMap)
+        {
+        if (map.startRecPar + map.quantity > recSize || map.startObjPar + map.quantity > parSize) return;
+        for (int i = 0; i < map.quantity; i++)
+            {
+            techObject->par_float[map.startObjPar + i] = recStorage->getRecPar(recNo, map.startRecPar + i);
+            }
+        }
+    }
+
+ParamsRecipeAdapter::ParamsRecipeAdapter( ParamsRecipeStorage *recStorage )
+    {
+    this->recStorage = recStorage;
+    }
+
+ParamsRecipeMapRecord::ParamsRecipeMapRecord( uInt startRecPar, uInt startObjPar, uInt quantity )
+    : startRecPar( startRecPar ),
+      startObjPar( startObjPar ),
+      quantity( quantity )
+    {
+
     }
