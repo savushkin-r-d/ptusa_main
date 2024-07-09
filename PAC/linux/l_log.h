@@ -41,8 +41,8 @@ class l_log : public i_log {
     std::time_t _tm = std::time(0);
     std::tm tm = *std::localtime(&_tm);
 
-        printf( "%04d-%02d-%02d %02d.%02d.%02d ",
-            1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec );
+    printf("%04d-%02d-%02d %02d.%02d.%02d ", 1900 + tm.tm_year, 1 + tm.tm_mon,
+           tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
     switch (priority) {
       case i_log::P_ALERT:

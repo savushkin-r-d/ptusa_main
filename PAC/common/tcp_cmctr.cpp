@@ -75,26 +75,25 @@ char* tcp_communicator::get_host_name_eng() { return host_name_eng; }
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator() { delete clients; }
 //------------------------------------------------------------------------------
-bool tcp_communicator::checkBuff( int s )
-    {
-    // Настраиваем  file descriptor set.
-    fd_set fds;
-    FD_ZERO( &fds );
-    FD_SET( s, &fds );
+bool tcp_communicator::checkBuff(int s) {
+  // Настраиваем  file descriptor set.
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(s, &fds);
 
-    // Настраиваем время на таймаут.
-    timeval rec_tv;
-    rec_tv.tv_sec = 0;
-    rec_tv.tv_usec = 0;
+  // Настраиваем время на таймаут.
+  timeval rec_tv;
+  rec_tv.tv_sec = 0;
+  rec_tv.tv_usec = 0;
 
-    // Ждем таймаута или полученных данных.
-    int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
+  // Ждем таймаута или полученных данных.
+  int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
 
-    return n >= 1;
-    }
+  return n >= 1;
+}
 //------------------------------------------------------------------------------
-void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
-    {
+void tcp_communicator::init_instance(const char* name_rus,
+                                     const char* name_eng) {
 #ifdef PTUSA_TEST
   if (!is_init) {
     is_init = true;

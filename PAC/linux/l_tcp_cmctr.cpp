@@ -661,10 +661,9 @@ int tcp_communicator_linux::recvtimeout(int s, u_char *buf, int len,
   return res;
 }
 //------------------------------------------------------------------------------
-int tcp_communicator_linux::do_echo ( int idx )
-    {
-    socket_state &sock_state = sst[ idx ];
-    FD_CLR( sock_state.socket, &rfds );
+int tcp_communicator_linux::do_echo(int idx) {
+  socket_state &sock_state = sst[idx];
+  FD_CLR(sock_state.socket, &rfds);
 
   static const char *const SERVER = "easyserver";
   static const char *const MODBUS_DEV = "modbus device";

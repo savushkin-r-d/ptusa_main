@@ -217,15 +217,16 @@ int tech_object::set_mode(u_int operation_n, int newm) {
     idx -= 4;
     white_spaces[idx] = 0;
 
-        SetColor( GREEN );
-        auto current_op_state = ( *operations_manager )[ operation_n ]->get_state();
-        const auto str = current_op_state < operation::state_idx::STATES_MAX ?
-            operation::en_state_str.at( current_op_state ) : "?";
+    SetColor(GREEN);
+    auto current_op_state = (*operations_manager)[operation_n]->get_state();
+    const auto str = current_op_state < operation::state_idx::STATES_MAX
+                         ? operation::en_state_str.at(current_op_state)
+                         : "?";
 
-        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
-            white_spaces, name, number, operation_n, str, res);        
+    printf("%sEND \"%s %d\" set operation №%2u --> %s, res = %d", white_spaces,
+           name, number, operation_n, str, res);
 
-        SetColor( RESET );
+    SetColor(RESET);
 
     switch (res) {
       case 1:
@@ -277,53 +278,51 @@ int tech_object::get_operation_state(u_int operation) {
 int tech_object::check_on_mode(u_int operation, char* reason, int max_len) {
   if (operation > operations_count || 0 == operation) return 0;
 
-        const unsigned int ERR_STR_SIZE = 80;
+  const unsigned int ERR_STR_SIZE = 80;
 
-    const int ERR_STR_SIZE = 80;
+  const int ERR_STR_SIZE = 80;
 
-            const int OFFSET = strlen( res_str );
-            int res = op->check_devices_on_run_state( res_str + OFFSET,
-                ERR_STR_SIZE - OFFSET );
-            if ( res && is_check_mode( idx ) == 1 )
-                {
-                set_err_msg( res_str, idx, 0, ERR_TO_FAIL_STATE );
-                op->pause();
-                lua_on_pause( idx );
-                }
-        	}
-
-      int len = strlen(res_str);
-      int res =
-          op->check_devices_on_run_state(res_str + len, ERR_STR_SIZE - len);
-      if (res && is_check_mode(idx) == 1) {
-        set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
-        op->pause();
-        lua_on_pause(idx);
-      }
-    }
-
-    if (op->get_state() == operation::RUN) {
-      // Проверка операции на корректные параметры шагов.
-      char res_str[ERR_STR_SIZE] = "";
-
-      int res = op->check_steps_params(res_str, ERR_STR_SIZE);
-      if (res) {
-        set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
-        op->pause();
-        lua_on_pause(idx);
-      }
-
-      // Проверка на превышение максимльного времени шага.
-      res_str[0] = '\0';
-      res = op->check_max_step_time(res_str, ERR_STR_SIZE);
-      if (res) {
-        set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
-        op->pause();
-        lua_on_pause(idx);
-      }
-    }
+  const int OFFSET = strlen(res_str);
+  int res =
+      op->check_devices_on_run_state(res_str + OFFSET, ERR_STR_SIZE - OFFSET);
+  if (res && is_check_mode(idx) == 1) {
+    set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
+    op->pause();
+    lua_on_pause(idx);
   }
-  return 0;
+}
+
+int len = strlen(res_str);
+int res = op->check_devices_on_run_state(res_str + len, ERR_STR_SIZE - len);
+if (res && is_check_mode(idx) == 1) {
+  set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
+  op->pause();
+  lua_on_pause(idx);
+}
+}
+
+if (op->get_state() == operation::RUN) {
+  // Проверка операции на корректные параметры шагов.
+  char res_str[ERR_STR_SIZE] = "";
+
+  int res = op->check_steps_params(res_str, ERR_STR_SIZE);
+  if (res) {
+    set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
+    op->pause();
+    lua_on_pause(idx);
+  }
+
+  // Проверка на превышение максимльного времени шага.
+  res_str[0] = '\0';
+  res = op->check_max_step_time(res_str, ERR_STR_SIZE);
+  if (res) {
+    set_err_msg(res_str, idx, 0, ERR_TO_FAIL_STATE);
+    op->pause();
+    lua_on_pause(idx);
+  }
+}
+}
+return 0;
 }
 //-----------------------------------------------------------------------------
 int tech_object::check_off_mode(u_int mode) { return 0; }

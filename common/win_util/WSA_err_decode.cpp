@@ -122,12 +122,12 @@ const char* WSA_Err_Decode(int err_code) {
   }
   return "Unknown error";
 }
-=======
-        return "Limit on the number of tasks supported by the Windows Sockets "
-            "implementation has been reached.";
-        }
-    return "Unknown error.";
-    }
+== == ==
+    = return "Limit on the number of tasks supported by the Windows Sockets "
+             "implementation has been reached.";
+}
+return "Unknown error.";
+}
 >>>>>>> master
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

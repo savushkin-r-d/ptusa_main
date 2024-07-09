@@ -4,11 +4,10 @@
 int G_DEBUG = 1;  // Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  // Вывод в системный лог (syslog).
 
-bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_NO_IO_NODES = true;  // По умолчанию обмен с модулями отключен.
 bool G_READ_ONLY_IO_NODES = false;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
 #if defined WIN_OS
   setlocale(LC_ALL, "ru_RU.UTF-8");
   setlocale(LC_NUMERIC, "C");

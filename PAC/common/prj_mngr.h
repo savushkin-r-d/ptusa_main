@@ -58,9 +58,10 @@ class project_manager {
   std::string path = "";  // Путь к описывающим проект скриптам Lua.
   std::string extra_paths = "";  // Дополнительный путь к user-скриптам Lua.
 
-        unsigned int sleep_time_ms = 0;
-    protected:
-        file *cfg_file;     ///< Конфигурационный файл.
+  unsigned int sleep_time_ms = 0;
+
+ protected:
+  file* cfg_file;  ///< Конфигурационный файл.
 
  protected:
   file* cfg_file;  ///< Конфигурационный файл.

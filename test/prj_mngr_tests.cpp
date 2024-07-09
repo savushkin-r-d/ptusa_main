@@ -102,9 +102,9 @@ TEST(project_manager, proc_main_params) {
   res = G_PROJECT_MANAGER->proc_main_params(2, argv);
   ASSERT_EQ(1, res);
 
-    auto help = 
+  auto help =
 #if defined WIN_OS
-        R"(Main control program
+      R"(Main control program
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
@@ -121,7 +121,7 @@ Usage:
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 #else
-        R"(Main control program
+      R"(Main control program
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
@@ -137,94 +137,110 @@ Usage:
       --extra_paths arg     Extra paths
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
-#endif // defined WIN_OS
+#endif  // defined WIN_OS
 
-    auto output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, help );
+  auto output = testing::internal::GetCapturedStdout();
+  EXPECT_EQ(output, help);
 
-    // Отключаем работу с модулями ввода/вывода, сбрасываем параметры,
-    // запускаем в отладочном режиме.
-    std::array<const char*, 4> argv_ex = { "ptusa_main.exe", "--debug",
-        "--rcrc", "main.plua" };
-    testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
-    ASSERT_EQ( 0, res );
-    std::string debug = R"(DEBUG ON.
+  // Отключаем работу с модулями ввода/вывода, сбрасываем параметры,
+  // запускаем в отладочном режиме.
+  std::array<const char*, 4> argv_ex = {"ptusa_main.exe", "--debug", "--rcrc",
+                                        "main.plua"};
+  testing::internal::CaptureStdout();
+  res = G_PROJECT_MANAGER->proc_main_params(argv_ex.size(), argv_ex.data());
+  ASSERT_EQ(0, res);
+  std::string debug = R"(DEBUG ON.
 Resetting params (command line parameter "rcrc").
 )";
-    std::time_t _tm = std::time( nullptr );
-    std::tm tm = *std::localtime( &_tm );
-    std::stringstream tmp;
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+  std::time_t _tm = std::time(nullptr);
+  std::tm tm = *std::localtime(&_tm);
+  std::stringstream tmp;
+  tmp << std::put_time(&tm, "%Y-%m-%d %H.%M.%S ");
 #if defined WIN_OS
-    debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
+  debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
 #else
-    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+  debug +=
+      tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, debug );
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_EQ(output, debug);
 
-    // Включаем работу с модулями ввода/вывода.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false", ""};
-    testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
-    ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );    
+  // Включаем работу с модулями ввода/вывода.
+  argv_ex = {"ptusa_main.exe", "main.plua", "--no_io_nodes=false", ""};
+  testing::internal::CaptureStdout();
+  res = G_PROJECT_MANAGER->proc_main_params(argv_ex.size(), argv_ex.data());
+  ASSERT_EQ(0, res);
+  _tm = std::time(nullptr);
+  tm = *std::localtime(&_tm);
+  tmp.str("");
+  tmp << std::put_time(&tm, "%Y-%m-%d %H.%M.%S ");
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
-    debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
+  debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+  debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+  debug =
+      tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, debug );
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_EQ(output, debug);
 
-    // Включаем работу с модулями ввода/вывода, включаем только чтение.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false",
-        "--read_only_io_nodes" };
-    testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
-    ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+  // Включаем работу с модулями ввода/вывода, включаем только чтение.
+  argv_ex = {"ptusa_main.exe", "main.plua", "--no_io_nodes=false",
+             "--read_only_io_nodes"};
+  testing::internal::CaptureStdout();
+  res = G_PROJECT_MANAGER->proc_main_params(argv_ex.size(), argv_ex.data());
+  ASSERT_EQ(0, res);
+  _tm = std::time(nullptr);
+  tm = *std::localtime(&_tm);
+  tmp.str("");
+  tmp << std::put_time(&tm, "%Y-%m-%d %H.%M.%S ");
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
-    debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
+  debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+  debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
-    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
+  debug =
+      tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+  debug +=
+      tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, debug );
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_EQ(output, debug);
 
-    // Включаем работу с модулями ввода/вывода, отключаем только чтение.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false",
-        "--read_only_io_nodes=false" };
-    testing::internal::CaptureStdout();
-    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
-    ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+  // Включаем работу с модулями ввода/вывода, отключаем только чтение.
+  argv_ex = {"ptusa_main.exe", "main.plua", "--no_io_nodes=false",
+             "--read_only_io_nodes=false"};
+  testing::internal::CaptureStdout();
+  res = G_PROJECT_MANAGER->proc_main_params(argv_ex.size(), argv_ex.data());
+  ASSERT_EQ(0, res);
+  _tm = std::time(nullptr);
+  tm = *std::localtime(&_tm);
+  tmp.str("");
+  tmp << std::put_time(&tm, "%Y-%m-%d %H.%M.%S ");
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+  debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+  debug =
+      tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ( output, debug );
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_EQ(output, debug);
 
-    std::array<const char*, 14> argv_path{ "ptusa_main.exe", "--port", "20000",
-        "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/",
-        "--sleep_time_ms", "5", "--no_io_nodes", "--read_only_io_nodes", "main.plua" };
-    res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
-    ASSERT_EQ( 0, res );
+  std::array<const char*, 14> argv_path{"ptusa_main.exe",
+                                        "--port",
+                                        "20000",
+                                        "--sys_path",
+                                        "./sys/",
+                                        "--path",
+                                        "./",
+                                        "--extra_paths",
+                                        "./dairy_sys/",
+                                        "--sleep_time_ms",
+                                        "5",
+                                        "--no_io_nodes",
+                                        "--read_only_io_nodes",
+                                        "main.plua"};
+  res = G_PROJECT_MANAGER->proc_main_params(argv_path.size(), argv_path.data());
+  ASSERT_EQ(0, res);
 
   G_LUA_MANAGER->free_Lua();
 }

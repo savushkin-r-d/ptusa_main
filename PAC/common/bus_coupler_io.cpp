@@ -825,12 +825,12 @@ void io_manager::init(int nodes_count) {
 io_manager* io_manager::get_instance() {
   if (instance.is_null()) {
 #ifdef WIN_OS
-        instance = new uni_io_manager();
-#endif // WIN_OS
+    instance = new uni_io_manager();
+#endif  // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-        instance = new uni_io_manager();
-#endif // defined LINUX_OS && defined PAC_PC
+    instance = new uni_io_manager();
+#endif  // defined LINUX_OS && defined PAC_PC
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
     instance = new io_manager_w750();
@@ -841,32 +841,28 @@ io_manager* io_manager::get_instance() {
 #endif  // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-        instance = new uni_io_manager();
-#endif // defined LINUX_OS && defined PAC_PC
-        }
+    instance = new uni_io_manager();
+#endif  // defined LINUX_OS && defined PAC_PC
+  }
 
   return instance;
 }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
 /// @brief Получение единственного экземпляра класса.
-io_manager* io_manager::replace_instance( io_manager* new_inst )
-    {
-    io_manager* prev_inst = instance;
-    instance.replace_without_free( new_inst );
-    return prev_inst;
-    }
+io_manager* io_manager::replace_instance(io_manager* new_inst) {
+  io_manager* prev_inst = instance;
+  instance.replace_without_free(new_inst);
+  return prev_inst;
+}
 #endif
 //-----------------------------------------------------------------------------
-u_char* io_manager::get_DI_read_data( u_int node_n, u_int offset )
-    {
-    if ( node_n < nodes_count && nodes )
-        {
-        if ( nodes[ node_n ] && offset < nodes[ node_n ]->DI_cnt )
-            {
-            return &nodes[ node_n ]->DI[ offset ];
-            }
-        }
+u_char* io_manager::get_DI_read_data(u_int node_n, u_int offset) {
+  if (node_n < nodes_count && nodes) {
+    if (nodes[node_n] && offset < nodes[node_n]->DI_cnt) {
+      return &nodes[node_n]->DI[offset];
+    }
+  }
 
   if (G_DEBUG) {
     printf("io_manager::get_DI_data() - error!\n");
@@ -1083,28 +1079,24 @@ io_manager::io_node::io_node(int type, int number, const char* str_ip_address,
     memset(this->name, 0, sizeof(this->name));
   }
 
-    if ( AI_cnt )
-        {
-        AI_offsets = new u_int[ AI_cnt ]{ 0 };
-        AI_types = new u_int[ AI_cnt ]{ 0 };
-        }
-    if ( AO_cnt )
-        {
-        AO_types = new u_int[ AO_cnt ]{ 0 };
-        AO_offsets = new u_int[ AO_cnt ]{ 0 };
-        }
+  if (AI_cnt) {
+    AI_offsets = new u_int[AI_cnt]{0};
+    AI_types = new u_int[AI_cnt]{0};
+  }
+  if (AO_cnt) {
+    AO_types = new u_int[AO_cnt]{0};
+    AO_offsets = new u_int[AO_cnt]{0};
+  }
 
-    if ( DI_cnt )
-        {
-        DI = new u_char[ DI_cnt ]{ 0 };
-        }
+  if (DI_cnt) {
+    DI = new u_char[DI_cnt]{0};
+  }
 
-    if ( DO_cnt )
-        {
-        DO = new u_char[ DO_cnt ]{ 0 };
-        DO_ = new u_char[ DO_cnt ]{ 0 };
-        }
-    }
+  if (DO_cnt) {
+    DO = new u_char[DO_cnt]{0};
+    DO_ = new u_char[DO_cnt]{0};
+  }
+}
 
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print() {

@@ -21,10 +21,9 @@
 int G_DEBUG = 1;  // Вывод дополнительной отладочной информации.
 int G_USE_LOG = 1;  // Вывод в системный лог (syslog).
 
-bool G_NO_IO_MODULES = false; // По умолчанию обмен с модулями включен.
+bool G_NO_IO_MODULES = false;  // По умолчанию обмен с модулями включен.
 
-namespace PtusaPLCnextEngineer
-    {
+namespace PtusaPLCnextEngineer {
 
 void PtusaMainPrg::Execute() {
   static long int sleep_time_ms = 2;
@@ -84,29 +83,25 @@ void PtusaMainPrg::Execute() {
     lua_gc(G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, LUA_GC_SIZE);
     sleep_ms(sleep_time_ms);
 
-            if ( !G_NO_IO_MODULES )
-                {
-                G_IO_MANAGER()->read_inputs();
-                sleep_ms( sleep_time_ms );
-                }
+    if (!G_NO_IO_MODULES) {
+      G_IO_MANAGER()->read_inputs();
+      sleep_ms(sleep_time_ms);
+    }
 
-
-            G_DEVICE_MANAGER()->evaluate_io();
-            valve::evaluate();
-            valve_bottom_mix_proof::evaluate();
+    G_DEVICE_MANAGER()->evaluate_io();
+    valve::evaluate();
+    valve_bottom_mix_proof::evaluate();
 
     G_TECH_OBJECT_MNGR()->evaluate();
 
     sleep_ms(sleep_time_ms);
 
-        if ( !G_NO_IO_MODULES )
-            {
-            G_IO_MANAGER()->write_outputs();
-            sleep_ms( sleep_time_ms );
-            }
+    if (!G_NO_IO_MODULES) {
+      G_IO_MANAGER()->write_outputs();
+      sleep_ms(sleep_time_ms);
+    }
 
-
-            G_CMMCTR->evaluate();
+    G_CMMCTR->evaluate();
 #ifdef OPCUA
     if (G_PAC_INFO()->par[PAC_info::P_IS_OPC_UA_SERVER_ACTIVE] == 1) {
       G_OPCUA_SERVER.evaluate();

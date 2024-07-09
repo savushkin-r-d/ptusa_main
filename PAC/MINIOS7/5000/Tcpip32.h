@@ -554,9 +554,10 @@ int ussHostGroupLeave(Iid iid, int netno);
 #define SIG_RC(conno) (conno + conno + EVBASE)          /* read connection */
 #define SIG_CC(conno) (conno + conno + 1 + EVBASE)      /* control connection */
 #define SIG_RN(netno) (2 * netno + 2 * NCONNS + EVBASE) /* read network */
-#define SIG_WN(netno) (2 * netno + 2 * NCONNS + 1 + EVBASE) /* write network \
-                                                             */
-#define SIG_ARP (2 * (NCONNS + NNETS) + EVBASE)             /* ARP */
+#define SIG_WN(netno)                                                \
+  (2 * netno + 2 * NCONNS + 1 + EVBASE)             /* write network \
+                                                     */
+#define SIG_ARP (2 * (NCONNS + NNETS) + EVBASE)     /* ARP */
 #define SIG_GEN (2 * (NCONNS + NNETS) + 1 + EVBASE) /* general purpose */
 
 void NetTask(int netno);
