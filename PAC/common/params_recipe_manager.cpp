@@ -454,6 +454,7 @@ void ParamsRecipeAdapter::loadParams( int techObject, unsigned int recNo )
             techObj->par_float[ map.startObjPar + i ] = recStorage->getRecPar( recNo, map.startRecPar + i );
             }
         }
+    techObj->par_float.save_all();
     techObj->lastLoadedRecipeNmr = ( int ) recNo;
     techObj->lastLoadedRecipeName = recStorage->recipes[ recNo - 1 ].name;
     isLoaded = true;
