@@ -100,6 +100,7 @@ ParamsRecipeManager::ParamsRecipeManager( )
     {
     mLastAdapterSaveTimer = get_millisec( );
     mLastRecipeSaveTimer = get_millisec( );
+    mLastTechObjectSaveTimer = get_millisec();
     loadTechObjects();
     }
 
@@ -130,7 +131,7 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
         auto varName = rmMatch[ 2 ].str( );
         auto idx = std::stoi( rmMatch[ 3 ].str( ));
         auto strval = rmMatch[ 5 ].str( );
-        auto floatval = rmMatch[ 6 ].str( ).length( ) > 0 ? std::stof( rmMatch[ 6 ].str( )) : 0;
+        auto floatval = (!rmMatch[ 6 ].str( ).empty()) ? std::stof( rmMatch[ 6 ].str( )) : 0;
 
         if ( recMgrIdx - 1 < ( int ) recAdapters.size( ))
             {

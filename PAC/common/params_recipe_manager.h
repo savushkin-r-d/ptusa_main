@@ -103,8 +103,8 @@ class ParamsRecipeManager: public i_Lua_save_device
         std::vector<ParamsRecipeStorage*> recPacks;
         std::vector<ParamsRecipeAdapter*> recAdapters;
 
-        void saveTechObjects();
-        void loadTechObjects();
+        static void saveTechObjects();
+        static void loadTechObjects();
 
         ParamsRecipeManager(ParamsRecipeManager &outer) = delete;
         void operator=(const ParamsRecipeManager &) = delete;
