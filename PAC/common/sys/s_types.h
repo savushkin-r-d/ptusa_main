@@ -22,17 +22,17 @@
 
 #ifdef WIN_OS
 #include "w_types.h"
-#endif // WIN_OS
+#endif  // WIN_OS
 
 #ifdef LINUX_OS
 #include "l_types.h"
-#endif // LINUX_OS
+#endif  // LINUX_OS
 
 //-----------------------------------------------------------------------------
-typedef unsigned char     u_char;
-typedef unsigned int      u_int;
+typedef unsigned char u_char;
+typedef unsigned int u_int;
 typedef unsigned long int u_long;
 
 extern int G_DEBUG;
 
-#endif // TYPES_H
+#endif  // TYPES_H

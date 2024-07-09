@@ -1,17 +1,17 @@
-#if !defined WIN_OS && \
-    !( defined LINUX_OS && defined PAC_PC ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
-	!( defined LINUX_OS && defined PAC_PLCNEXT )
+#if !defined WIN_OS && !(defined LINUX_OS && defined PAC_PC) && \
+    !(defined LINUX_OS && defined PAC_WAGO_750_860) &&          \
+    !(defined LINUX_OS && defined PAC_WAGO_PFC200) &&           \
+    !(defined LINUX_OS && defined PAC_PLCNEXT)
 #error You must define OS!
-#endif 
+#endif
 
 #include "led.h"
+
 #include "smart_ptr.h"
 
 #ifdef WIN_OS
 #include "w_led.h"
-#endif // WIN_OS
+#endif  // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
 #include "led_PC.h"
@@ -29,33 +29,31 @@
 #include "led_PC.h"
 #endif
 
-led* get_led()
-    {
-    // Статический экземпляр класса для вызова методов.
-    static auto_smart_ptr < led > led_instance;
+led* get_led() {
+  // Статический экземпляр класса для вызова методов.
+  static auto_smart_ptr<led> led_instance;
 
-    if ( led_instance.is_null() )
-        {
+  if (led_instance.is_null()) {
 #ifdef WIN_OS
-        led_instance = new led_PC();
-#endif // WIN_OS
+    led_instance = new led_PC();
+#endif  // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-        led_instance = new led_PC();
+    led_instance = new led_PC();
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
-        led_instance = new led_W750();
+    led_instance = new led_W750();
 #endif
-        
+
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        led_instance = new led_PFC200();
-#endif // defined LINUX_OS && defined PAC_WAGO_750_860
+    led_instance = new led_PFC200();
+#endif  // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-        led_instance = new led_PC();
+    led_instance = new led_PC();
 #endif
-        }
+  }
 
-    return led_instance;
-    }
+  return led_instance;
+}

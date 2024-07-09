@@ -21,7 +21,7 @@
 
 #ifdef WIN_OS
 #include <locale.h>
-#endif //WIN_OS
+#endif  // WIN_OS
 
 #include <math.h>
 #include <string.h>
@@ -34,570 +34,475 @@
 #pragma option -w-inl
 #pragma option -w-ccc
 #pragma option -w-rch
-#endif // __BORLANDC__
+#endif  // __BORLANDC__
 
 class saved_params_u_int_4;
 //-----------------------------------------------------------------------------
-class i_params_owner
-    {
-    public:
-        virtual const char* get_full_name() const = 0;
-    };
+class i_params_owner {
+ public:
+  virtual const char* get_full_name() const = 0;
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами.
 ///
 /// Служит для создания объектов для работы с параметрами. Проверяется
 /// корректность данных путем подсчета контрольной суммы.
-class params_manager
-    {
-    // Friendly класс предназначен только для тестирования
-    // и не должен использоваться в других целях
+class params_manager {
+  // Friendly класс предназначен только для тестирования
+  // и не должен использоваться в других целях
 #ifdef PTUSA_TEST
-    friend class test_params_manager;	
+  friend class test_params_manager;
 #endif
-    public:
-        enum CONSTANTS
-            {
-            C_TOTAL_PARAMS_SIZE = 1024 * 30, ///< Общий размер памяти параметров.
+ public:
+  enum CONSTANTS {
+    C_TOTAL_PARAMS_SIZE = 1024 * 30,  ///< Общий размер памяти параметров.
 
-            C_SYS_MEM_SIZE    = 10,          ///< Память для хранения CRC и т.д.
+    C_SYS_MEM_SIZE = 10,  ///< Память для хранения CRC и т.д.
 
-            C_CRC_OFFSET      = 0,
-            C_LAST_IDX_OFFSET = 4
-            };
+    C_CRC_OFFSET = 0,
+    C_LAST_IDX_OFFSET = 4
+  };
 
-        /// @brief Возвращает единственный экземпляр класса для работы с
-        /// параметрами.
-        ///
-        /// @return - указатель на единственный объект класса @ref
-        /// params_manager.
-        static params_manager* get_instance();
+  /// @brief Возвращает единственный экземпляр класса для работы с
+  /// параметрами.
+  ///
+  /// @return - указатель на единственный объект класса @ref
+  /// params_manager.
+  static params_manager* get_instance();
 
-        /// @brief Инициализация значений параметров.
-        ///
-        /// Считывание параметров из EEPROM в массив параметров, проверка
-        /// контрольной суммы. Контрольная сумма зависит от
-        /// параметра @ref C_TOTAL_PARAMS_SIZE.
-        ///
-        /// @param project_id - номер проекта. Для привязки параметров к
-        /// конкретной управляющей программе.
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы.
-        virtual int init( unsigned int project_id );
+  /// @brief Инициализация значений параметров.
+  ///
+  /// Считывание параметров из EEPROM в массив параметров, проверка
+  /// контрольной суммы. Контрольная сумма зависит от
+  /// параметра @ref C_TOTAL_PARAMS_SIZE.
+  ///
+  /// @param project_id - номер проекта. Для привязки параметров к
+  /// конкретной управляющей программе.
+  ///
+  /// @return 0 - ОК.
+  /// @return 1 - Ошибка контрольной суммы.
+  virtual int init(unsigned int project_id);
 
-        /// @brief Окончательная инициализация значений параметров.
-        ///
-        /// Если при считывании параметров из EEPROM произошла ошибка (метод
-        /// @ref init), параметры задаются значениями по умолчанию
-        /// путем вызова заданных функций.
-        ///
-        /// @param auto_init_params - вызывать ли функцию init_params классов
-        /// tank и comb.
-        /// @param auto_init_work_params - вызывать ли функцию init_work_params
-        /// классов tank и comb.
-        /// @param custom_init_params_function - пользовательская функция
-        /// инициализации параметров.
-        virtual void final_init( int auto_init_params = 1,
-            int auto_init_work_params = 1,
-            void ( *custom_init_params_function )() = 0 );
+  /// @brief Окончательная инициализация значений параметров.
+  ///
+  /// Если при считывании параметров из EEPROM произошла ошибка (метод
+  /// @ref init), параметры задаются значениями по умолчанию
+  /// путем вызова заданных функций.
+  ///
+  /// @param auto_init_params - вызывать ли функцию init_params классов
+  /// tank и comb.
+  /// @param auto_init_work_params - вызывать ли функцию init_work_params
+  /// классов tank и comb.
+  /// @param custom_init_params_function - пользовательская функция
+  /// инициализации параметров.
+  virtual void final_init(int auto_init_params = 1,
+                          int auto_init_work_params = 1,
+                          void (*custom_init_params_function)() = 0);
 
-        /// @brief Запись параметров в EEPROM.
-        ///
-        /// Запись параметров из массива параметров в EEPROM.
-        ///
-        /// @param start_pos - номер индекса, с которого начать запись
-        /// параметров (для записи только одного параметра).
-        /// @param count - количество записываемых байт.
-        void save( int start_pos = 0, int count = 0 );
+  /// @brief Запись параметров в EEPROM.
+  ///
+  /// Запись параметров из массива параметров в EEPROM.
+  ///
+  /// @param start_pos - номер индекса, с которого начать запись
+  /// параметров (для записи только одного параметра).
+  /// @param count - количество записываемых байт.
+  void save(int start_pos = 0, int count = 0);
 
-        /// @brief Получение указателя на блок данных параметров.
-        ///
-        /// @param size      - размер блока данных в байтах.
-        /// @param [out] start_pos - стартовый индекс в глобальном массиве
-        /// параметров. Необходим для дальнейшей записи параметров в память.
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы.
-        virtual char* get_params_data( int size, int &start_pos );
+  /// @brief Получение указателя на блок данных параметров.
+  ///
+  /// @param size      - размер блока данных в байтах.
+  /// @param [out] start_pos - стартовый индекс в глобальном массиве
+  /// параметров. Необходим для дальнейшей записи параметров в память.
+  ///
+  /// @return 0 - ОК.
+  /// @return 1 - Ошибка контрольной суммы.
+  virtual char* get_params_data(int size, int& start_pos);
 
-        virtual ~params_manager();
+  virtual ~params_manager();
 
-        enum PARAMS
-            {
-            P_COUNT = 1,
+  enum PARAMS {
+    P_COUNT = 1,
 
-            P_IS_RESET_PARAMS = 1,
-            };
+    P_IS_RESET_PARAMS = 1,
+  };
 
-        saved_params_u_int_4 *par;
+  saved_params_u_int_4* par;
 
-        int save_params_as_Lua_str( char* str );
+  int save_params_as_Lua_str(char* str);
 
-        int restore_params_from_server_backup( char *backup_str );
+  int restore_params_from_server_backup(char* backup_str);
 
-        // Высчитывание контрольной суммы.
-        u_int_2 solve_CRC();
+  // Высчитывание контрольной суммы.
+  u_int_2 solve_CRC();
 
-        void reset_params_size();
+  void reset_params_size();
 
-	protected:
-        static char is_init;
+ protected:
+  static char is_init;
 
-        /// @brief Закрытый конструктор.
-        ///
-        /// Для вызова методов используется статический метод @ref get_instance.
-        params_manager();
-	
-	private:
-        void reset_to_default( void( *custom_init_params_function )( ),
-            int auto_init_params, int auto_init_work_params );
+  /// @brief Закрытый конструктор.
+  ///
+  /// Для вызова методов используется статический метод @ref get_instance.
+  params_manager();
 
-        /// Статический экземпляр класса для вызова методов.
-        static auto_smart_ptr< params_manager > instance;
+ private:
+  void reset_to_default(void (*custom_init_params_function)(),
+                        int auto_init_params, int auto_init_work_params);
 
-        /// Рабочий массив параметров.
-        char params[ C_TOTAL_PARAMS_SIZE ];
+  /// Статический экземпляр класса для вызова методов.
+  static auto_smart_ptr<params_manager> instance;
 
-        /// Номер последнего выделенного параметра. Используется при создании
-        /// экземпляра класса @ref parameters.
-        u_int last_idx;
+  /// Рабочий массив параметров.
+  char params[C_TOTAL_PARAMS_SIZE];
 
-        u_int project_id;   ///< Номер проекта (для уникальности параметров).
+  /// Номер последнего выделенного параметра. Используется при создании
+  /// экземпляра класса @ref parameters.
+  u_int last_idx;
 
-        memory_range *params_mem; ///< Память параметров.
-        memory_range *CRC_mem;    ///< Память контрольной суммы.
-    };
+  u_int project_id;  ///< Номер проекта (для уникальности параметров).
+
+  memory_range* params_mem;  ///< Память параметров.
+  memory_range* CRC_mem;  ///< Память контрольной суммы.
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.
 ///
 /// Служит для создания конкретных типов параметров. Реализованы операции
 /// доступа через индекс ( [] ).
 
-template < class type, bool is_float > class parameters
-    {
-    private:
-        char name[ 20 ];
-        i_params_owner* owner;
+template <class type, bool is_float>
+class parameters {
+ private:
+  char name[20];
+  i_params_owner* owner;
 
-    public:
-        /// @brief Получение элемента через операцию индексирования.
-        ///
-        /// @param index - индекс элемента.
-        ///
-        /// @return - значение элемента с заданным индексом. Если индекс
-        /// выходит за диапазон, возвращается значение заглушки - поля @ref
-        /// stub ( значение 0 ).
-        type& operator[] ( unsigned int index )
-            {
-            if ( index <= count && index > 0 )
-                {
-                return values[ index - 1 ];
-                }
+ public:
+  /// @brief Получение элемента через операцию индексирования.
+  ///
+  /// @param index - индекс элемента.
+  ///
+  /// @return - значение элемента с заданным индексом. Если индекс
+  /// выходит за диапазон, возвращается значение заглушки - поля @ref
+  /// stub ( значение 0 ).
+  type& operator[](unsigned int index) {
+    if (index <= count && index > 0) {
+      return values[index - 1];
+    }
 
-            print_msg_out_of_range( index, "access" );
-            return stub;
-            }
+    print_msg_out_of_range(index, "access");
+    return stub;
+  }
 
-        /// @brief Получение элемента через операцию индексирования.
-        ///
-        /// @param index - индекс элемента.
-        ///
-        /// @return - значение элемента с заданным индексом. Если индекс
-        /// выходит за диапазон, возвращается значение заглушки - поля @ref
-        /// stub ( значение 0 ).
-        const type& operator[] ( unsigned int index ) const
-            {
-            if ( index <= count && index > 0 )
-                {
-                return values[ index - 1 ];
-                }
+  /// @brief Получение элемента через операцию индексирования.
+  ///
+  /// @param index - индекс элемента.
+  ///
+  /// @return - значение элемента с заданным индексом. Если индекс
+  /// выходит за диапазон, возвращается значение заглушки - поля @ref
+  /// stub ( значение 0 ).
+  const type& operator[](unsigned int index) const {
+    if (index <= count && index > 0) {
+      return values[index - 1];
+    }
 
-            print_msg_out_of_range( index, "access" );
-            return stub;
-            }
-        /// @brief Получение элемента через индекс.
-        ///
-        /// @param idx - индекс элемента.
-        ///
-        /// @return - значение элемента с заданным индексом. Если индекс
-        /// выходит за диапазон, возвращается значение заглушки - поля @ref
-        /// stub ( значение 0 ).
-        type get_val( int idx )
-            {
-            return this->operator []( idx );
-            }
+    print_msg_out_of_range(index, "access");
+    return stub;
+  }
+  /// @brief Получение элемента через индекс.
+  ///
+  /// @param idx - индекс элемента.
+  ///
+  /// @return - значение элемента с заданным индексом. Если индекс
+  /// выходит за диапазон, возвращается значение заглушки - поля @ref
+  /// stub ( значение 0 ).
+  type get_val(int idx) { return this->operator[](idx); }
 
-        /// @brief Установка всех параметров в нулевое значение.
-        virtual void reset_to_0()
-            {
-            for ( u_int i = 1; i <= count; i++ )
-                {
-                values[ i - 1 ] = 0;
-                }
-            }
+  /// @brief Установка всех параметров в нулевое значение.
+  virtual void reset_to_0() {
+    for (u_int i = 1; i <= count; i++) {
+      values[i - 1] = 0;
+    }
+  }
 
-        /// @brief Получение количества параметров.
-        ///
-        /// @return - количество параметров.
-        u_int get_count() const
-            {
-            return count;
-            }
+  /// @brief Получение количества параметров.
+  ///
+  /// @return - количество параметров.
+  u_int get_count() const { return count; }
 
-        parameters( int count, const char* name, i_params_owner* owner ) :
-            parameters( count, name, 0, owner )
-            {
-            }
+  parameters(int count, const char* name, i_params_owner* owner)
+      : parameters(count, name, 0, owner) {}
 
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        /// @param name  - имя объекта.
-        /// @param value - указатель на буфер для хранения значений параметров.
-        parameters( int count, const char *name, type *value = 0,
-            i_params_owner* owner = 0 ): count( count ),
-            values( value ), owner( owner )
-            {
-            stub = 0;
-            this->name[ 0 ] = 0;
-            strcpy( this->name, name );
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  /// @param name  - имя объекта.
+  /// @param value - указатель на буфер для хранения значений параметров.
+  parameters(int count, const char* name, type* value = 0,
+             i_params_owner* owner = 0)
+      : count(count), values(value), owner(owner) {
+    stub = 0;
+    this->name[0] = 0;
+    strcpy(this->name, name);
 
 #ifdef DEBUG_IDE
-            if ( 0 == count )
-                {
-                printf( "\"%s\" parameters(...) - error: count = 0!\n",
-                    owner ? owner->get_full_name() : "?" );
-                }
-#endif // DEBUG_IDE
+    if (0 == count) {
+      printf("\"%s\" parameters(...) - error: count = 0!\n",
+             owner ? owner->get_full_name() : "?");
+    }
+#endif  // DEBUG_IDE
 
-            is_delete = 0;
-            if ( count > 0 && 0 == values )
-                {
-                is_delete = 1;
-                values = new type[ count ];
-                memset( values, 0, count * sizeof( type ) );
-                }
-            }
+    is_delete = 0;
+    if (count > 0 && 0 == values) {
+      is_delete = 1;
+      values = new type[count];
+      memset(values, 0, count * sizeof(type));
+    }
+  }
 
-        virtual ~parameters()
-            {
-            if ( 1 == is_delete && count && values )
-                {
-                delete [] values;
-                values = nullptr;
-                count = 0;
-                }
-            }
+  virtual ~parameters() {
+    if (1 == is_delete && count && values) {
+      delete[] values;
+      values = nullptr;
+      count = 0;
+    }
+  }
 
-        virtual void print() const
-            {
-            printf( "\"%s\"\t - ", name );
-            for ( u_int i = 1; i <= count; i++ )
-                {
-                printf( "[%u]=", i );
-                if ( is_float )
-                	{
-                    printf( "%.2f,", ( float ) values[ i - 1 ] );
-                	}
-                else
-                    {
-                    printf( "%d,", ( int ) values[ i - 1 ] );
-                    }
-                }
-            printf( "\n" );
-            }
+  virtual void print() const {
+    printf("\"%s\"\t - ", name);
+    for (u_int i = 1; i <= count; i++) {
+      printf("[%u]=", i);
+      if (is_float) {
+        printf("%.2f,", (float)values[i - 1]);
+      } else {
+        printf("%d,", (int)values[i - 1]);
+      }
+    }
+    printf("\n");
+  }
 
-        int save_device_ex( char *buff, const char *prefix, const char *new_name )
-            {
-            int res = sprintf( buff, "%s%s=\n", prefix, new_name );
-            res += save_dev( buff + res, prefix );
+  int save_device_ex(char* buff, const char* prefix, const char* new_name) {
+    int res = sprintf(buff, "%s%s=\n", prefix, new_name);
+    res += save_dev(buff + res, prefix);
 
-            return res;
-            }
+    return res;
+  }
 
-        int save_device( char *buff, const char *prefix )
-            {
-            int res = sprintf( buff, "%s%s=\n", prefix, name );
-            res += save_dev( buff + res, prefix );
+  int save_device(char* buff, const char* prefix) {
+    int res = sprintf(buff, "%s%s=\n", prefix, name);
+    res += save_dev(buff + res, prefix);
 
-            return res;
-            }
+    return res;
+  }
 
-        const char* get_name()
-            {
-            return name;
-            }
+  const char* get_name() { return name; }
 
-    protected:
-        char is_delete; ///< Признак удаления буфера при удалении объекта.
+ protected:
+  char is_delete;  ///< Признак удаления буфера при удалении объекта.
 
-        /// @brief Получение указателя на буфер для хранения значений
-        /// параметров.
-        ///
-        /// @return - указатель на буфер для хранения значений параметров.
-        type* get_values()
-            {
-            return values;
-            }
+  /// @brief Получение указателя на буфер для хранения значений
+  /// параметров.
+  ///
+  /// @return - указатель на буфер для хранения значений параметров.
+  type* get_values() { return values; }
 
-        /// Заглушка для обращения через индекс с выходом за диапазон.
-        type         stub;
+  /// Заглушка для обращения через индекс с выходом за диапазон.
+  type stub;
 
-        unsigned int count;     ///< Количество элементов.
-        type         *values;   ///< Указатель на массив значений элементов.
+  unsigned int count;  ///< Количество элементов.
+  type* values;  ///< Указатель на массив значений элементов.
 
-        void print_msg_out_of_range( unsigned int index, const char* action ) const
-            {
-            if ( G_DEBUG )
-                {
-                if ( 0 == index )
-                    {
-                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
-                        "index = %u",
-                        owner ? owner->get_full_name() : "?",
-                        name, action, index );
-                    }
-                else
-                    {
-                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
-                        "index > size (%u > %u)",
-                        owner ? owner->get_full_name() : "?",
-                        name, action, index, count );
-                    }
-                }
-            }
+  void print_msg_out_of_range(unsigned int index, const char* action) const {
+    if (G_DEBUG) {
+      if (0 == index) {
+        G_LOG->warning(
+            "\"%s\" \"%s\" parameters %s error: "
+            "index = %u",
+            owner ? owner->get_full_name() : "?", name, action, index);
+      } else {
+        G_LOG->warning(
+            "\"%s\" \"%s\" parameters %s error: "
+            "index > size (%u > %u)",
+            owner ? owner->get_full_name() : "?", name, action, index, count);
+      }
+    }
+  }
 
-    private:
-        int save_dev( char *buff, const char *prefix )
-            {
-            int answer_size = sprintf( buff, "%s\t{\n%s\t",
-                prefix, prefix );
+ private:
+  int save_dev(char* buff, const char* prefix) {
+    int answer_size = sprintf(buff, "%s\t{\n%s\t", prefix, prefix);
 
-            for ( u_int i = 1; i <= count; i++ )
-                {
-                if ( is_float )
-                    {
-                    float val  = ( float ) get_val( i );
-                    if ( 0. == val )
-                        {
-                        answer_size += sprintf( buff + answer_size, "0, " );
-                        }
-                    else
-                        {
-                        double tmp;
-                        if ( modf( val, &tmp ) == 0 )
-                            {
-                            answer_size += sprintf( buff + answer_size, "%d, ",
-                                ( int ) val );
-                            }
-                        else
-                            {
-                            answer_size += sprintf( buff + answer_size, "%.2f, ",
-                                val );
-                            }
-                        }
-                    }
-                else
-                    {
-                    answer_size += sprintf( buff + answer_size, "%u, ",
-                        ( u_int ) get_val( i ) );
-                    }
-                }
+    for (u_int i = 1; i <= count; i++) {
+      if (is_float) {
+        float val = (float)get_val(i);
+        if (0. == val) {
+          answer_size += sprintf(buff + answer_size, "0, ");
+        } else {
+          double tmp;
+          if (modf(val, &tmp) == 0) {
+            answer_size += sprintf(buff + answer_size, "%d, ", (int)val);
+          } else {
+            answer_size += sprintf(buff + answer_size, "%.2f, ", val);
+          }
+        }
+      } else {
+        answer_size += sprintf(buff + answer_size, "%u, ", (u_int)get_val(i));
+      }
+    }
 
-            answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );
-            return answer_size;
-            }
-    };
+    answer_size += sprintf(buff + answer_size, "\n%s\t},\n", prefix);
+    return answer_size;
+  }
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа float.
 ///
 /// Данные параметры передаются на сервер через соответствующие теги.
-class run_time_params_float: public parameters < float, true >
-    {
-    public:
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        run_time_params_float( int count, i_params_owner* owner = 0 ):parameters < float, true >( count, "RT_PAR_F", owner )
-            {
-            }
+class run_time_params_float : public parameters<float, true> {
+ public:
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  run_time_params_float(int count, i_params_owner* owner = 0)
+      : parameters<float, true>(count, "RT_PAR_F", owner) {}
 
-    protected:
-
-        float get_val( int idx )
-            {
-            return parameters< float, true >::get_val( idx );
-            }
-    };
+ protected:
+  float get_val(int idx) { return parameters<float, true>::get_val(idx); }
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа @ref u_int_4.
 ///
 /// Данные параметры передаются на сервер через соответствующие теги.
-class run_time_params_u_int_4: public parameters < u_int_4, false >
-    {
-    public:
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        /// @param name  - имя параметров.
-        run_time_params_u_int_4( int count,
-            const char *name = "RT_PAR_UI", i_params_owner* owner = 0 ) :
-            parameters < u_int_4, false >( count, name, owner )
-            {
-            }
+class run_time_params_u_int_4 : public parameters<u_int_4, false> {
+ public:
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  /// @param name  - имя параметров.
+  run_time_params_u_int_4(int count, const char* name = "RT_PAR_UI",
+                          i_params_owner* owner = 0)
+      : parameters<u_int_4, false>(count, name, owner) {}
 
-        virtual ~run_time_params_u_int_4()
-            {
-            }
+  virtual ~run_time_params_u_int_4() {}
 
-    protected:
-        u_int_4 get_val( int idx )
-            {
-            return parameters< u_int_4, false >::get_val( idx );
-            }
-    };
+ protected:
+  u_int_4 get_val(int idx) { return parameters<u_int_4, false>::get_val(idx); }
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами.
 ///
 /// Данные параметры передаются на сервер через соответствующие теги. При
 /// перезагрузке PAC их значения сохраняются.
-template < class type, bool is_float > class saved_params:
-public parameters < type, is_float >
-    {
-    public:
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        /// @param name  - имя объекта.
-        saved_params( int count, const char *name, i_params_owner* owner = 0 ) : parameters < type, is_float >(
+template <class type, bool is_float>
+class saved_params : public parameters<type, is_float> {
+ public:
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  /// @param name  - имя объекта.
+  saved_params(int count, const char* name, i_params_owner* owner = 0)
+      : parameters<type, is_float>(
             count, name,
-            ( type* ) params_manager::get_instance()->get_params_data(
-            count * sizeof( type ), start_pos ), owner )
-            {
-            }
+            (type*)params_manager::get_instance()->get_params_data(
+                count * sizeof(type), start_pos),
+            owner) {}
 
-        virtual ~saved_params()
-            {
-            }
+  virtual ~saved_params() {}
 
-        /// @brief Сохранение значения параметра в энергонезависимой памяти.
-        ///
-        /// Операция доступа через индекс сохраняет значение параметра только
-        /// в буфере, так что для сохранения его в энергонезависимой памяти надо
-        /// использовать данный метод.
-        type save( u_int idx, type value )
-            {
-            if ( idx > 0 && idx <= parameters< type, is_float >::get_count() )
-                {
-                idx--;
-                parameters< type, is_float >::get_values()[ idx ] = value;
+  /// @brief Сохранение значения параметра в энергонезависимой памяти.
+  ///
+  /// Операция доступа через индекс сохраняет значение параметра только
+  /// в буфере, так что для сохранения его в энергонезависимой памяти надо
+  /// использовать данный метод.
+  type save(u_int idx, type value) {
+    if (idx > 0 && idx <= parameters<type, is_float>::get_count()) {
+      idx--;
+      parameters<type, is_float>::get_values()[idx] = value;
 
-                params_manager::get_instance()->save(
-                    start_pos + idx * sizeof( type ), sizeof( type ) );
-                }
-            else
-                {
-                parameters< type, is_float >::print_msg_out_of_range( idx, "save" );
-                }
+      params_manager::get_instance()->save(start_pos + idx * sizeof(type),
+                                           sizeof(type));
+    } else {
+      parameters<type, is_float>::print_msg_out_of_range(idx, "save");
+    }
 
-            return value;
-            }
+    return value;
+  }
 
-        /// @brief Сохранение значения всех параметров в энергонезависимой памяти.
-        ///
-        /// Операция доступа через индекс сохраняет значение параметра только
-        /// в буфере, так что для сохранения его в энергонезависимой памяти надо
-        /// использовать данный метод.
-        int save_all()
-            {
-            params_manager::get_instance()->save( start_pos,
-                parameters< type, is_float >::get_count() * sizeof( type ) );
+  /// @brief Сохранение значения всех параметров в энергонезависимой памяти.
+  ///
+  /// Операция доступа через индекс сохраняет значение параметра только
+  /// в буфере, так что для сохранения его в энергонезависимой памяти надо
+  /// использовать данный метод.
+  int save_all() {
+    params_manager::get_instance()->save(
+        start_pos, parameters<type, is_float>::get_count() * sizeof(type));
 
-            return 0;
-            }
+    return 0;
+  }
 
-        /// @brief Установка всех параметров в нулевое значение и сохранение
-        /// в энергонезависимой памяти.
-        void reset_to_0()
-            {
-        	u_int size = parameters< type, is_float >::get_count();
-            for ( u_int i = 0; i < size; i++ )
-                {
-                parameters< type, is_float >::get_values()[ i ] = 0;
-                }
+  /// @brief Установка всех параметров в нулевое значение и сохранение
+  /// в энергонезависимой памяти.
+  void reset_to_0() {
+    u_int size = parameters<type, is_float>::get_count();
+    for (u_int i = 0; i < size; i++) {
+      parameters<type, is_float>::get_values()[i] = 0;
+    }
 
-            params_manager::get_instance()->save(
-                start_pos, sizeof( type ) * parameters< type, is_float >::get_count() );
-            }
+    params_manager::get_instance()->save(
+        start_pos, sizeof(type) * parameters<type, is_float>::get_count());
+  }
 
-    private:
-        /// Индекс начала значений в общем массиве, для сохранения значения
-        /// параметра в энергонезависимой памяти (@ref save).
-        int start_pos;
-    };
+ private:
+  /// Индекс начала значений в общем массиве, для сохранения значения
+  /// параметра в энергонезависимой памяти (@ref save).
+  int start_pos;
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа @ref u_int_4.
-class saved_params_u_int_4: public saved_params < u_int_4, false >
-    {
-    public:
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        saved_params_u_int_4( int count, i_params_owner* owner = 0 ) :
-          saved_params < u_int_4, false >( count, "S_PAR_UI", owner )
-              {
-              }
+class saved_params_u_int_4 : public saved_params<u_int_4, false> {
+ public:
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  saved_params_u_int_4(int count, i_params_owner* owner = 0)
+      : saved_params<u_int_4, false>(count, "S_PAR_UI", owner) {}
 
-          virtual ~saved_params_u_int_4()
-              {
-              }
+  virtual ~saved_params_u_int_4() {}
 
-    protected:
-        u_int_4 get_val( int idx )
-            {
-            return saved_params< u_int_4, false >::get_val( idx );
-            }
-    };
+ protected:
+  u_int_4 get_val(int idx) {
+    return saved_params<u_int_4, false>::get_val(idx);
+  }
+};
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа float.
-class saved_params_float: public saved_params < float, true >
-    {
-    public:
-        /// @brief Конструктор.
-        ///
-        /// @param count - количество параметров.
-        saved_params_float( int count, i_params_owner* owner = 0 ):
-          saved_params < float, true >( count, "S_PAR_F", owner )
-              {
-              }
+class saved_params_float : public saved_params<float, true> {
+ public:
+  /// @brief Конструктор.
+  ///
+  /// @param count - количество параметров.
+  saved_params_float(int count, i_params_owner* owner = 0)
+      : saved_params<float, true>(count, "S_PAR_F", owner) {}
 
-          virtual ~saved_params_float()
-              {
-              }
+  virtual ~saved_params_float() {}
 
-    protected:
-        float get_val( int idx )
-            {
-            return saved_params< float, true >::get_val( idx );
-            }
-    };
+ protected:
+  float get_val(int idx) { return saved_params<float, true>::get_val(idx); }
+};
 //-----------------------------------------------------------------------------
 /// @brief Класс для тестирования классов работы с параметрами.
-class params_test
-    {
-    public:
-        /// @brief Тестирование классов работы с параметрами.
-        ///
-        /// @return 0 - Ок.
-        /// @return 1 - Ошибка.
-        static int make_test();
-    };
+class params_test {
+ public:
+  /// @brief Тестирование классов работы с параметрами.
+  ///
+  /// @return 0 - Ок.
+  /// @return 1 - Ошибка.
+  static int make_test();
+};
 //-----------------------------------------------------------------------------
 #ifdef __BORLANDC__
 #pragma option -w.inl
 #pragma option -w.ccc
 #pragma option -w.rch
-#endif // __BORLANDC__
+#endif  // __BORLANDC__
 
-#endif // PARAMS_EX_H
+#endif  // PARAMS_EX_H

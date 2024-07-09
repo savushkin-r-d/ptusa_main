@@ -18,9 +18,9 @@
 #error You must define OS!
 #endif
 
-#include "s_types.h"
-
 #include <time.h>
+
+#include "s_types.h"
 
 const long MSEC_IN_SEC = 1000;
 const int SEC_IN_MIN = 60;
@@ -44,12 +44,12 @@ u_long get_millisec();
 ///
 /// @param time1     - начальное время.
 /// @return Разность времени в миллисекундах.
-u_long get_delta_millisec( u_long time1 );
+u_long get_delta_millisec(u_long time1);
 //-----------------------------------------------------------------------------
 /// @brief Ожидание заданное время.
 ///
 /// @param ms - время ожидания, мс.
-void sleep_ms( u_int ms );
+void sleep_ms(u_int ms);
 //-----------------------------------------------------------------------------
 /// @brief Получение текущей информации о времени.
 ///
@@ -57,34 +57,34 @@ void sleep_ms( u_int ms );
 extern struct tm get_time();
 //-----------------------------------------------------------------------------
 #ifdef WIN_OS
-#pragma warning(disable : 4996) // localtime to localtime_s
-#endif // WIN
+#pragma warning(disable : 4996)  // localtime to localtime_s
+#endif                           // WIN
 
-struct stat_time
-    {
-    u_long all_time;
-    u_long cycles_cnt;
+struct stat_time {
+  u_long all_time;
+  u_long cycles_cnt;
 
-    u_int  max_iteration_cycle_time;
-    u_int  min_iteration_cycle_time;
+  u_int max_iteration_cycle_time;
+  u_int min_iteration_cycle_time;
 
-    int print_cycle_last_h;
+  int print_cycle_last_h;
 
-    stat_time() : all_time( 0 ), cycles_cnt( 1 ), max_iteration_cycle_time( 0 ),
-	    min_iteration_cycle_time( 10000 )
-	{
-        time_t t_ = time( 0 );
-        struct tm *timeInfo_ = localtime( &t_ );
+  stat_time()
+      : all_time(0),
+        cycles_cnt(1),
+        max_iteration_cycle_time(0),
+        min_iteration_cycle_time(10000) {
+    time_t t_ = time(0);
+    struct tm *timeInfo_ = localtime(&t_);
 
-        print_cycle_last_h = timeInfo_->tm_hour;
-	}
+    print_cycle_last_h = timeInfo_->tm_hour;
+  }
 
-    void clear()
-	{
-	all_time = 0;
-	cycles_cnt = 1;
-	max_iteration_cycle_time = 0;
-	min_iteration_cycle_time = 10000;
-	}
-    };
-#endif // DTIME_H
+  void clear() {
+    all_time = 0;
+    cycles_cnt = 1;
+    max_iteration_cycle_time = 0;
+    min_iteration_cycle_time = 10000;
+  }
+};
+#endif  // DTIME_H
