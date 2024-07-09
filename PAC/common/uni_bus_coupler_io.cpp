@@ -190,7 +190,7 @@ int uni_io_manager::net_init(io_node* node) const {
 #ifdef WIN_OS
                    reinterpret_cast<char*>(&error),
 #else
-                     &error,
+                   &error,
 #endif  // WIN_OS
                    &err_len) < 0 ||
         error != 0) {
@@ -875,7 +875,7 @@ int uni_io_manager::read_inputs() {
 #ifdef WIN_OS
                      SD_BOTH
 #else
-                      SHUT_RDWR
+                     SHUT_RDWR
 #endif  // WIN_OS
             );
 
