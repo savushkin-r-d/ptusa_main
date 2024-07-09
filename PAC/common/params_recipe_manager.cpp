@@ -27,7 +27,6 @@ int ParamsRecipeManager::save_device( char *buff )
     int size = ( int ) fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
     for ( auto rm: recAdapters )
         {
-        //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{" ).size;
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0," ).size;
         auto activeRecipe = rm->getRecStorage( )->getActiveRecipeRef( );
@@ -50,35 +49,12 @@ int ParamsRecipeManager::save_device( char *buff )
             }
 
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}," ).size;
-        /*for (auto rec: rm->recipes)
-            {
-            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t{{").size;
-            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tNAME='{}',", rec.name).size;
 
-            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t").size;
-            for (auto par : rec.params)
-                {
-                size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{},", par).size;
-                }
-
-            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\t}}\n\t\t\t}},").size;
-            }*/
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}}," ).size;
         }
 
     size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
 
-//    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "t.RECLOADER =\n\t{{" ).size;
-//    for ( auto rm: recAdapters )
-//        {
-//        //size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t[{}] =", rm->getId( )).size;
-//        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t{{").size;
-//        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tCMD=0,").size;
-//
-//        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t}},").size;
-//        }
-//
-//    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}}\n" ).size;
     buff[ size ] = '\0';
 
     return size;
