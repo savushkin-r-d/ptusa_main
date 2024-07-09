@@ -557,6 +557,10 @@ int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float v
     if ( varName == "CMD" )
         {
         auto command = ( int ) value;
+        if ( command == 789)
+            {
+            mRecStorage->deserialize();
+            }
         if ( command > 1000 )
             {
             auto objNmr = command / 1000;
