@@ -11,6 +11,8 @@
 #include "operation_mngr.h"
 #include "g_errors.h"
 
+#include <fmt/chrono.h>
+
 constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
 constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
 //-----------------------------------------------------------------------------
