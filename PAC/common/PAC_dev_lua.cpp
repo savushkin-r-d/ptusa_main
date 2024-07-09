@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Dec  1 14:35:59 2023.
+** Generated automatically by tolua++-1.0.92 on Tue Jul  9 10:50:42 2024.
 */
 
 #ifndef __cplusplus
@@ -14932,6 +14932,39 @@ static int tolua_PAC_dev_ParamsRecipeAdapter_loadParams00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: setUseSeparateRecipeList of class  ParamsRecipeAdapter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00
+static int tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeAdapter",0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeAdapter* self = (ParamsRecipeAdapter*)  tolua_tousertype(tolua_S,1,0);
+  bool state = ((bool)  tolua_toboolean(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'setUseSeparateRecipeList'", NULL);
+#endif
+  {
+   self->setUseSeparateRecipeList(state);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'setUseSeparateRecipeList'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: evaluate of class  ParamsRecipeManager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_evaluate00
 static int tolua_PAC_dev_ParamsRecipeManager_evaluate00(lua_State* tolua_S)
@@ -15900,6 +15933,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"ParamsRecipeAdapter");
    tolua_function(tolua_S,"addMap",tolua_PAC_dev_ParamsRecipeAdapter_addMap00);
    tolua_function(tolua_S,"loadParams",tolua_PAC_dev_ParamsRecipeAdapter_loadParams00);
+   tolua_function(tolua_S,"setUseSeparateRecipeList",tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ParamsRecipeManager","ParamsRecipeManager","",NULL);
   tolua_beginmodule(tolua_S,"ParamsRecipeManager");

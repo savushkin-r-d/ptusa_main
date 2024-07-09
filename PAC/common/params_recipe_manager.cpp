@@ -38,6 +38,11 @@ int ParamsRecipeManager::save_device( char *buff )
 
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST='{}',", rm->recipeList ).size;
 
+        for (unsigned int recListIdx = 0; recListIdx < rm->recipeLists.size(); recListIdx++)
+            {
+            size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tLIST{}='{}',",recListIdx + 1, rm->recipeLists[recListIdx] ).size;
+            }
+
         size += ( int ) fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t\t\tPAR=\n\t\t\t{{\n\t\t\t" ).size;
         for ( auto par: activeRecipe.params )
             {
@@ -116,20 +121,16 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
     {
 
     std::string cmd = buff;
-    std::cout << cmd << "\n";
+    G_LOG->debug(cmd.c_str());
     std::regex rmCommand( R"lit(__RECMAN\[(\d+)\]:set_cmd\( "(\w+)", (\d+), ((?:"(.*)")|([\d\.]+)) \))lit" );
     std::smatch rmMatch;
     if ( std::regex_match( cmd, rmMatch, rmCommand ))
         {
-        printf( "Is match\n" );
-
         auto recMgrIdx = std::stoi( rmMatch[ 1 ].str( ));
         auto varName = rmMatch[ 2 ].str( );
         auto idx = std::stoi( rmMatch[ 3 ].str( ));
         auto strval = rmMatch[ 5 ].str( );
         auto floatval = rmMatch[ 6 ].str( ).length( ) > 0 ? std::stof( rmMatch[ 6 ].str( )) : 0;
-        std::cout << recMgrIdx << ' ' << varName << ' ' << idx << " str=" << strval << " float=" << floatval
-                  << std::endl;
 
         if ( recMgrIdx - 1 < ( int ) recAdapters.size( ))
             {
@@ -464,7 +465,10 @@ ParamsRecipeAdapter::ParamsRecipeAdapter( int id, ParamsRecipeStorage *recStorag
     {
     this->mId = id;
     this->mRecStorage = recStorage;
-    mActiveRecipes.assign( recStorage->getCount( ), 1 );
+    auto recipesCount = recStorage->getCount();
+    mActiveRecipes.assign( recipesCount, 1 );
+    auto recipeListsCount = recipesCount / 10 + ((recipesCount % 10 > 0) ? 1 : 0);
+    recipeLists.assign(recipeListsCount, "");
     deserialize( );
     refreshRecipeList( );
     }
@@ -597,13 +601,35 @@ int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float v
 void ParamsRecipeAdapter::refreshRecipeList( )
     {
     recipeList.clear( );
+    for (auto recList: recipeLists)
+        {
+        recList.clear( );
+        }
     for ( int i = 0; i < mRecStorage->getCount( ); i++ )
         {
         if ( mActiveRecipes[ i ] )
             {
-            recipeList.append( fmt::format( "{}##{}||", i + 1, mRecStorage->recipes[ i ].name ));
+            auto recString = fmt::format( "{}##{}||", i + 1, mRecStorage->recipes[ i ].name);
+            if ( !useSeparateRecipeList )
+                {
+                recipeList.append( recString );
+                }
+            else
+                {
+                auto recListIndex = ( unsigned int ) i / 10;
+                if ( recListIndex < recipeLists.size( ))
+                    {
+                    recipeLists[ recListIndex ].append( recString );
+                    }
+                }
             }
         }
+    }
+
+void ParamsRecipeAdapter::setUseSeparateRecipeList( bool state )
+    {
+    useSeparateRecipeList = state;
+    refreshRecipeList();
     }
 
 

@@ -80,6 +80,9 @@ class ParamsRecipeAdapter
         bool recipeListChanged = false;
         void refreshRecipeList();
         std::string recipeList;
+        std::vector<std::string> recipeLists;
+        bool useSeparateRecipeList = false;
+        void setUseSeparateRecipeList(bool state);
         int set_cmd(const std::string& varName, int index, float value, const std::string& strValue);
     };
 
