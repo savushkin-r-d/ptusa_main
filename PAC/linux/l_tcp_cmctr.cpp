@@ -661,28 +661,10 @@ int tcp_communicator_linux::recvtimeout(int s, u_char *buf, int len,
   return res;
 }
 //------------------------------------------------------------------------------
-bool tcp_communicator_linux::checkBuff(int s) {
-  errno = 0;
-
-  // Настраиваем  file descriptor set.
-  fd_set fds;
-  FD_ZERO(&fds);
-  FD_SET(s, &fds);
-
-  // Настраиваем время на таймаут.
-  timeval rec_tv;
-  rec_tv.tv_sec = 0;
-  rec_tv.tv_usec = 0;
-
-  // Ждем таймаута или полученных данных.
-  int n = select(s + 1, &fds, nullptr, nullptr, &rec_tv);
-
-  return n >= 1;
-}
-//------------------------------------------------------------------------------
-int tcp_communicator_linux::do_echo(int idx) {
-  socket_state &sock_state = sst[idx];
-  FD_CLR(sock_state.socket, &rfds);
+int tcp_communicator_linux::do_echo ( int idx )
+    {
+    socket_state &sock_state = sst[ idx ];
+    FD_CLR( sock_state.socket, &rfds );
 
   static const char *const SERVER = "easyserver";
   static const char *const MODBUS_DEV = "modbus device";

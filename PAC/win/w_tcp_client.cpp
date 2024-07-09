@@ -1,17 +1,24 @@
 #include "w_tcp_client.h"
 
-int win_tcp_client::Communicate(unsigned int bytestosend) {
-  int res;
-  if (!is_initialized) {
-    if (!InitLib()) {
-      return 0;
-    }
-  }
-  if (!connectedstate) {
-    if (!Connect()) {
-      return 0;
-    }
-  }
+const char* WSA_Last_Err_Decode();
+
+int win_tcp_client::Communicate( unsigned int bytestosend )
+    {
+    int res;
+    if(!is_initialized)
+        {
+        if (!InitLib())
+            {
+            return 0;
+            }
+        }
+    if (!connectedstate)
+        {
+        if (!Connect())
+            {
+            return 0;
+            }
+        }
 
   if (send(socket_number, buff, bytestosend, 0) == SOCKET_ERROR) {
     if (G_DEBUG) {
@@ -187,9 +194,14 @@ int win_tcp_client::Connect() {
     }
   }
 
-  connectedstate = 1;
-  return 1;
-}
+			socket_number = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+			if (socket_number == INVALID_SOCKET)
+			{
+				if (G_DEBUG)
+				{
+					printf("tcp_client_%d: Ошибка создания сокета : %s.\n", id,
+                        WSA_Last_Err_Decode());
+				}
 
 int win_tcp_client::AsyncConnect() {
   int res;

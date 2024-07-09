@@ -217,18 +217,15 @@ int tech_object::set_mode(u_int operation_n, int newm) {
     idx -= 4;
     white_spaces[idx] = 0;
 
-    SetColor(GREEN);
-    printf("%sEND \"%s %d\" set operation №%2u --> %s, res = %d", white_spaces,
-           name, number, operation_n,
-           newm == 0
-               ? "OFF"
-               : (newm == 1
-                      ? "ON"
-                      : (newm == 2 ? "PAUSE"
-                                   : (newm == 3 ? "STOP"
-                                                : (newm == 4 ? "WAIT" : "?")))),
-           res);
-    SetColor(RESET);
+        SetColor( GREEN );
+        auto current_op_state = ( *operations_manager )[ operation_n ]->get_state();
+        const auto str = current_op_state < operation::state_idx::STATES_MAX ?
+            operation::en_state_str.at( current_op_state ) : "?";
+
+        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
+            white_spaces, name, number, operation_n, str, res);        
+
+        SetColor( RESET );
 
     switch (res) {
       case 1:
@@ -280,21 +277,20 @@ int tech_object::get_operation_state(u_int operation) {
 int tech_object::check_on_mode(u_int operation, char* reason, int max_len) {
   if (operation > operations_count || 0 == operation) return 0;
 
-  return (*operations_manager)[operation]->check_on_run_state(reason, max_len);
-}
-//-----------------------------------------------------------------------------
-int tech_object::evaluate() {
-  for (u_int i = 0; i < operations_count; i++) {
-    int idx = i + 1;
-    auto op = (*operations_manager)[idx];
-    op->evaluate();
+        const unsigned int ERR_STR_SIZE = 80;
 
     const int ERR_STR_SIZE = 80;
 
-    if (G_PAC_INFO()->par[PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR] == 0 &&
-        op->get_state() == operation::RUN) {
-      // Проверка режима на проверку ОС устройств.
-      char res_str[ERR_STR_SIZE] = "авария устройств ";
+            const int OFFSET = strlen( res_str );
+            int res = op->check_devices_on_run_state( res_str + OFFSET,
+                ERR_STR_SIZE - OFFSET );
+            if ( res && is_check_mode( idx ) == 1 )
+                {
+                set_err_msg( res_str, idx, 0, ERR_TO_FAIL_STATE );
+                op->pause();
+                lua_on_pause( idx );
+                }
+        	}
 
       int len = strlen(res_str);
       int res =

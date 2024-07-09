@@ -6,16 +6,21 @@
 #include "log.h"
 #include "lua_manager.h"
 
-int G_DEBUG = 0;  // Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  // Вывод в системный лог (syslog).
+int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_READ_ONLY_IO_NODES = false;
 
 lua_State* L = nullptr;
-u_char in_data_devices[] = {device_communicator::CMD_GET_DEVICES};
-u_char out_data[5048] = {0};
+u_char in_data_devices[] = { device_communicator::CMD_GET_DEVICES };
+u_char out_data[ 5 * 1024 ] = { 0 };
 
-static void DoSetup(const benchmark::State& state) {
-  static bool is_init = false;
-  if (!is_init) {
+static void DoSetup( const benchmark::State& state )
+    {
+    static bool is_init = false;
+    if ( !is_init )
+        {
+        is_init = true;
 #ifdef WIN_OS
     setlocale(LC_ALL, "ru_RU.UTF-8");
     setlocale(LC_NUMERIC, "C");
@@ -24,14 +29,8 @@ static void DoSetup(const benchmark::State& state) {
     lua_gc(L, LUA_GCSTOP, 0);
     luaL_openlibs(L);  // Open standard libraries.
 
-    G_LUA_MANAGER->init(L, "main.plua", "", "./sys/");
-
-    device_communicator::switch_off_compression();
-    auto res = G_DEVICE_CMMCTR->write_devices_states_service(1, in_data_devices,
-                                                             out_data);
-    if (G_DEBUG) {
-      printf("\n");
-      printf("Saved devices uncompressed buffer size:\t%ld\n", res);
+        G_LUA_MANAGER->init( L, "main.plua", "", "./sys/" );
+        }
     }
     device_communicator::switch_on_compression();
     res = G_DEVICE_CMMCTR->write_devices_states_service(1, in_data_devices,

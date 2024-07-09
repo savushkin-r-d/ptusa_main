@@ -93,9 +93,11 @@ class tcp_communicator {
     TC_MAX_SERVICE_NUMBER = 16,
   };
 
- protected:
-  static int port;  ///< Порт.
-  static int port_modbus;
+        static bool checkBuff( int s );
+
+    protected:
+        static int port;                  ///< Порт.
+        static int port_modbus;
 
   tcp_communicator();
 

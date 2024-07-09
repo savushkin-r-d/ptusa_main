@@ -18,16 +18,34 @@
 #endif
 
 #ifndef PTUSA_TEST
-int G_DEBUG = 0;  // Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  // Вывод в системный лог (syslog).
+int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+
+bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_READ_ONLY_IO_NODES = false;
 #endif
 
-int sleep_time_ms = 0;
-
-int lua_init(lua_State* L) {
-  int top = lua_gettop(L);
-  int p_size = !top ? 1 : top;
-  auto argv = new const char* [p_size] { nullptr };
+int lua_init( lua_State* L )
+    {
+    int top = lua_gettop( L );
+    int p_size = !top ? 1 : top;
+    auto argv = new const char* [ p_size ] { nullptr };
+    
+    int argc = 0;
+    for ( int i = 1; i <= top; i++ )
+        {
+        int t = lua_type( L, 1 );
+        switch ( t )
+            {
+            case LUA_TSTRING:   //Strings
+                {
+                const char* str = lua_tostring( L, 1 );
+                char* tmp_str = new char[ strlen( str ) + 1 ];
+                strcpy( tmp_str, str );
+                argv[ argc ] = tmp_str;
+                argc++;
+                break;
+                }
 
   int argc = 0;
   for (int i = 1; i <= top; i++) {

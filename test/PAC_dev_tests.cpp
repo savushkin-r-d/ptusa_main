@@ -1097,11 +1097,11 @@ TEST(counter, set_cmd) {
   EXPECT_EQ((int)i_counter::STATES::S_PAUSE, fqt1.get_state());
 }
 
-TEST(counter, get_pump_dt) {
-  counter fqt1("FQT1");
-  auto res = fqt1.get_pump_dt();
-  EXPECT_EQ(0, res);
-}
+TEST( counter_f, get_error_description )
+    {
+    counter fqt1( "FQT1" );
+    auto res = fqt1.get_error_description();        //Нет ошибок.
+    EXPECT_STREQ( "нет ошибок", res );
 
 TEST(counter, get_min_flow) {
   counter fqt1("FQT1");
@@ -1109,23 +1109,27 @@ TEST(counter, get_min_flow) {
   EXPECT_EQ(.0f, res);
 }
 
-TEST(counter, get_max_raw_value) {
-  counter fqt1("FQT1");
-  auto res = fqt1.get_max_raw_value();
-  EXPECT_EQ(USHRT_MAX, res);
-}
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_ERROR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "счет импульсов", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "счет импульсов (rtn)", res );
 
-TEST(virtual_counter, get_pump_dt) {
-  virtual_counter fqt1("FQT1");
-  auto res = fqt1.get_pump_dt();
-  EXPECT_EQ(0, res);
-}
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (нижний предел)", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (нижний предел, rtn)", res );
 
-TEST(virtual_counter, get_min_flow) {
-  virtual_counter fqt1("FQT1");
-  auto res = fqt1.get_min_flow();
-  EXPECT_EQ(.0f, res);
-}
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (верхний предел)", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (верхний предел, rtn)", res );
+    }
 
 TEST(virtual_counter, set_cmd) {
   virtual_counter fqt1("FQT1");

@@ -177,23 +177,25 @@ void operation::to_run_state(int new_run_step) {
   states[RUN]->evaluate();
 }
 //-----------------------------------------------------------------------------
-int operation::check_devices_on_run_state(char* err_dev_name, int str_len) {
-  return states[RUN]->check_devices(err_dev_name, str_len);
-}
+int operation::check_devices_on_run_state(char* err_dev_name, unsigned int str_len)
+    {
+    return states[ RUN ]->check_devices( err_dev_name, str_len );
+    }
 //-----------------------------------------------------------------------------
-int operation::check_steps_params(char* err_dev_name, int str_len) {
-  return states[RUN]->check_steps_params(err_dev_name, str_len);
-}
+int operation::check_steps_params( char* err_dev_name, unsigned int str_len )
+    {
+    return states[ RUN ]->check_steps_params( err_dev_name, str_len );
+    }
 //-----------------------------------------------------------------------------
-int operation::check_max_step_time(char* err_dev_name, int str_len) {
-  return states[RUN]->check_max_step_time(err_dev_name, str_len);
-}
+int operation::check_max_step_time( char* err_dev_name, unsigned int str_len )
+    {
+    return states[ RUN ]->check_max_step_time( err_dev_name, str_len );
+    }
 //-----------------------------------------------------------------------------
-int operation::check_on_run_state(char* reason, int max_len) const
-
-{
-  return states[RUN]->check_on(reason, max_len);
-}
+int operation::check_on_run_state( char* reason, unsigned int max_len ) const
+    {
+    return states[ RUN ]->check_on( reason, max_len );
+    }
 //-----------------------------------------------------------------------------
 u_long operation::evaluation_time() {
   if (current_state >= 0 && current_state < STATES_MAX) {
@@ -211,32 +213,35 @@ void operation::evaluate() {
   if (current_state >= 0 && current_state < STATES_MAX) {
     states[current_state]->evaluate();
 
-    int next_state = 0;
-    auto res = states[current_state]->is_goto_next_state(next_state);
-    if (res) {
-      auto unit = owner->owner;
-      switch (current_state) {
-        case state_idx::IDLE:
-          // Из простоя по сигналам операция может быть включена
-          //(перейти в состояние выполнения).
-          process_auto_switch_on();
-          break;
+        int next_state = 0;
+        auto res = states[ current_state ]->is_goto_next_state( next_state );
+        if ( res )
+            {
+            auto unit = owner->owner;
+            auto n_state = static_cast<state_idx>( next_state );
+            switch ( current_state )
+                {
+                case state_idx::IDLE:
+                    //Из простоя по сигналам операция может быть включена 
+                    //(перейти в состояние выполнения).
+                    process_auto_switch_on();
+                    break;
 
         case state_idx::RUN:
           process_new_state_from_run(next_state);
           break;
 
-        case state_idx::STARTING:
-          unit->set_mode(operation_num, state_idx::RUN);
-          break;
+                case state_idx::STARTING:
+                    default_process_new_state( n_state, state_idx::RUN );
+                    break;
 
-        case state_idx::PAUSING:
-          unit->set_mode(operation_num, state_idx::PAUSE);
-          break;
+                case state_idx::PAUSING:
+                    default_process_new_state( n_state, state_idx::PAUSE );
+                    break;
 
-        case state_idx::UNPAUSING:
-          unit->set_mode(operation_num, state_idx::RUN);
-          break;
+                case state_idx::UNPAUSING:
+                    default_process_new_state( n_state, state_idx::RUN );
+                    break;
 
         case state_idx::STOPPING:
           unit->set_mode(operation_num, state_idx::STOP);
@@ -299,24 +304,25 @@ int operation::process_auto_switch_on() {
   return 1;
 }
 //-----------------------------------------------------------------------------
-int operation::process_new_state_from_run(int next_state) {
-  auto unit = owner->owner;
-  switch (static_cast<state_idx>(next_state)) {
-    case state_idx::IDLE:
-      // Из выполнения по сигналам операция может быть
-      // отключена (перейти в состояние простоя).
-      unit->set_mode(operation_num, state_idx::IDLE);
-      unit->set_err_msg("автоотключение по запросу", operation_num, 0,
-                        tech_object::ERR_MSG_TYPES::ERR_DURING_WORK);
-      break;
+int operation::process_new_state_from_run( int next_state )
+    {
+    auto unit = owner->owner;
+    switch ( static_cast<state_idx>( next_state ) )
+        {
+        case state_idx::STOP:
+            // Из выполнения по сигналам операция может быть остановлена.
+            unit->set_err_msg( "автоотключение по запросу",
+                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+            unit->set_mode( operation_num, state_idx::STOP );
+            break;
 
-    case state_idx::PAUSE:
-      // Из выполнения по сигналам операция может быть
-      // поставлена на паузу.
-      unit->set_mode(operation_num, state_idx::PAUSE);
-      unit->set_err_msg("пауза по запросу", operation_num, 0,
-                        tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE);
-      break;
+        case state_idx::PAUSE:
+            // Из выполнения по сигналам операция может быть
+            // поставлена на паузу.
+            unit->set_mode( operation_num, state_idx::PAUSE );
+            unit->set_err_msg( "пауза по запросу",
+                operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
+            break;
 
     default:
       // Остальные варианты игнорируем.
@@ -326,12 +332,39 @@ int operation::process_new_state_from_run(int next_state) {
   return 0;
 }
 //-----------------------------------------------------------------------------
-void operation::finalize() {
-  // Для состояния OFF ничего не делаем, поэтому current_state > 0.
-  if (current_state > 0 && current_state < STATES_MAX) {
-    states[current_state]->finalize();
-    for (int idx = IDLE; idx < STATES_MAX; idx++) {
-      states[idx]->reset_eval_time();
+int operation::default_process_new_state( state_idx next_state, state_idx def_state )
+    {
+    auto unit = owner->owner;
+    if ( next_state == state_idx::STOP )
+        {
+        // По сигналам операция может быть остановлена.
+        unit->set_err_msg( "автоотключение по запросу",
+            operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+        unit->set_mode( operation_num, state_idx::STOP );
+        }
+    else if ( next_state == def_state )
+        {
+        // По сигналам операция может перейти в последующее состояние.
+        unit->set_mode( operation_num, def_state );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void operation::finalize()
+    {
+    //Для состояния OFF ничего не делаем, поэтому current_state > 0.
+    if ( current_state > 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->finalize();
+        for ( int idx = IDLE; idx < STATES_MAX; idx++ )
+            {
+            states[ idx ]->reset_eval_time();
+            }
+
+        current_state = IDLE;
+        }
     }
 
     current_state = IDLE;
@@ -697,9 +730,27 @@ void delay_off_action::evaluate() {
 }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int required_DI_action::check(char* reason, int max_len) const {
-  *reason = 0;
-  if (is_empty()) {
+int required_DI_action::check( char* reason, unsigned int max_len ) const
+    {
+    *reason = 0;
+    if ( is_empty() )
+        {
+        return 0;
+        }
+
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    for ( auto d : devs )
+        {
+        if ( !d->is_active() )
+            {
+            auto f_str = "нет сигнала \'{:.25} ({:.50})\'";
+            auto out = fmt::format_to_n( reason, max_len - 1, f_str,
+                d->get_name(), d->get_description() );
+            *out.out = '\0';
+            return 1;
+            }
+        }
+
     return 0;
   }
 
@@ -766,13 +817,8 @@ step::~step() {
   }
 }
 //-----------------------------------------------------------------------------
-int step::check(char* reason, int max_len) const {
-  auto res = actions[A_DI_DO]->check(reason, max_len);
-  if (res) return res;
-  res = actions[A_AI_AO]->check(reason, max_len);
-  if (res) return res;
-  res = actions[A_INVERTED_DI_DO]->check(reason, max_len);
-  if (res) return res;
+int step::check( char* reason, unsigned int max_len ) const
+    {
 
   if (is_mode) {
     return actions[A_REQUIRED_FB]->check(reason, max_len);
@@ -814,10 +860,11 @@ u_long step::get_latest_eval_time() const {
 //-----------------------------------------------------------------------------
 void step::set_start_time(u_int_4 start_time) { this->start_time = start_time; }
 //-----------------------------------------------------------------------------
-void step::print(const char* prefix /*= "" */) const {
-  printf("%s\"%s\" \n", prefix, name.c_str());
-  std::string new_prefix = prefix;
-  new_prefix += "  ";
+void step::print( const char* prefix /*= "" */ ) const
+    {
+    printf( "%s\"%s\"\n", prefix, name.c_str() );
+    std::string new_prefix = prefix;
+    new_prefix += "  ";
 
   for (u_int i = 0; i < actions.size(); i++) {
     actions[i]->print(new_prefix.c_str());
@@ -863,11 +910,13 @@ void step::set_dx_time(u_int_4 dx_time) { this->dx_time = dx_time; }
 //-----------------------------------------------------------------------------
 DI_DO_action::DI_DO_action(std::string name) : action(name) {}
 //-----------------------------------------------------------------------------
-int DI_DO_action::check(char* reason, int max_len) const {
-  reason[0] = 0;
-  if (is_empty()) {
-    return 0;
-  }
+int DI_DO_action::check( char* reason, unsigned int max_len ) const
+    {
+    reason[ 0 ] = 0;
+    if ( is_empty() )
+        {
+        return 0;
+        }
 
   auto& devs = devices[MAIN_GROUP];
   for (u_int i = 0; i < devs.size(); i++) {
@@ -956,11 +1005,13 @@ void inverted_DI_DO_action::evaluate_DO(std::vector<device*> devices) {
 //-----------------------------------------------------------------------------
 AI_AO_action::AI_AO_action() : action("Группы AI->AO's") {}
 //-----------------------------------------------------------------------------
-int AI_AO_action::check(char* reason, int max_len) const {
-  reason[0] = 0;
-  if (is_empty()) {
-    return 0;
-  }
+int AI_AO_action::check( char* reason, unsigned int max_len ) const
+    {
+    reason[ 0 ] = 0;
+    if ( is_empty() )
+        {
+        return 0;
+        }
 
   auto& devs = devices[MAIN_GROUP];
   for (u_int i = 0; i < devs.size(); i++) {
@@ -1420,11 +1471,13 @@ void wash_action::finalize() {
 //-----------------------------------------------------------------------------
 jump_if_action::jump_if_action(const char* name) : action(name, G_GROUPS_CNT) {}
 //-----------------------------------------------------------------------------
-bool jump_if_action::is_jump(int& next) {
-  next = -1;
-  if (is_empty()) {
-    return false;
-  }
+bool jump_if_action::is_jump( int& next )
+    {
+    next = -1;
+    if ( next_n.empty() )
+        {
+        return false;
+        }
 
   for (size_t idx = 0; idx < devices.size(); idx++) {
     if (idx < next_n.size()) next = next_n[idx];
@@ -1592,11 +1645,13 @@ step* operation_state::add_step(const char* step_name,
   return steps[steps.size() - 1];
 }
 //-----------------------------------------------------------------------------
-int operation_state::check_on(char* reason, int max_len) const {
-  for (size_t idx = 0; idx < steps.size(); idx++) {
-    int res = steps[idx]->check(reason, max_len);
-    if (res) return res;
-  }
+int operation_state::check_on( char* reason, unsigned int max_len ) const
+    {
+    for ( size_t idx = 0; idx < steps.size(); idx++ )
+        {
+        int res = steps[ idx ]->check( reason, max_len );
+        if ( res ) return res;
+        }
 
   return mode_step->check(reason, max_len);
 }
@@ -1787,36 +1842,38 @@ void operation_state::to_step(u_int new_step, u_long cooperative_time) {
   active_step_n = new_step - 1;
   active_step_next_step_n = next_step_ns[active_step_n];
 
-  // Время шага
-  int par_n = step_duration_par_ns[active_step_n];
-  if (par_n > 0) {
-    active_step_time = u_int(owner->get_step_param(par_n) * 1000L);
-  }
+    //Время шага
+    auto par_n = step_duration_par_ns[ active_step_n ];
+    if ( par_n > 0 )
+        {
+        active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
+        }
 
   if (active_step_time > 0 || par_n <= 0) {
     steps[active_step_n]->init();
     steps[active_step_n]->evaluate();
   }
 
-  if (G_DEBUG) {
-    printf(
-        "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms, "
-        "next step %d.\n",
-        owner->owner->get_prefix(), owner->owner->get_name(), n, name.c_str(),
-        new_step, active_step_time, active_step_next_step_n);
-    steps[active_step_n]->print(owner->owner->get_prefix());
-  }
-}
-//-----------------------------------------------------------------------------
-void operation_state::to_next_step() {
-  if (active_step_n >= 0) {
-    if (next_step_ns[active_step_n] == -1) {
-      int current_step = active_step_n + 1;
-      int next_step = current_step + 1;
-      to_step(next_step);
-    } else {
-      int next_step = next_step_ns[active_step_n];
-      to_step(next_step);
+    if ( G_DEBUG )
+        {        
+        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, step time {} ms, next step {})",
+            owner->owner->get_prefix(), owner->owner->get_name(),
+            n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
+
+        active_step_max_time = 0;
+        auto max_t_par_n = step_max_duration_par_ns[ active_step_n ];
+        if ( max_t_par_n > 0 )
+            {
+            active_step_max_time = u_int( owner->get_step_param( max_t_par_n ) );
+            if ( active_step_max_time )
+                {
+                fmt::print( ", max step time {} s", active_step_max_time );
+                }
+            }
+        fmt::println( "" );
+
+        steps[ active_step_n ]->print( owner->owner->get_prefix() );
+        }
     }
   }
 }
@@ -1853,8 +1910,9 @@ void operation_state::print(const char* prefix /*= "" */) const {
   }
 }
 //----------------------------------------------------------------------------
-int operation_state::check_devices(char* err_dev_name, int str_len) {
-  int res = mode_step->check_devices(err_dev_name, str_len);
+int operation_state::check_devices( char* err_dev_name, unsigned int str_len )
+    {
+    int res = mode_step->check_devices( err_dev_name, str_len );
 
   if (res) {
     return 1;
@@ -1875,37 +1933,83 @@ int operation_state::check_devices(char* err_dev_name, int str_len) {
   return 0;
 }
 //-----------------------------------------------------------------------------
-int operation_state::check_max_step_time(char* err_dev_name, int str_len) {
-  if (step_max_duration_par_ns
-          .empty())  // Не заданы параметры максимального времени.
-    return 0;
+int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_len )
+    {
+    if ( step_max_duration_par_ns.empty() ) // Не заданы параметры максимального времени.
+        return 0;
 
-  if (active_step_n >= 0 && (unsigned int)active_step_n < steps.size() &&
-      active_step_max_time &&  // Максимальное время - ненулевое значение.
-      steps[active_step_n]->get_latest_eval_time() >=
-          1000UL * static_cast<u_int_4>(active_step_max_time)) {
-    auto t = std::chrono::seconds{active_step_max_time};
-    fmt::format_to_n(err_dev_name, str_len,
-                     "превышено максимальное время основного шага ({:%T})", t);
-    return 1;
-  }
+    auto make_str = [&]( unsigned int step_n, int step_max_time )
+        {
+        // Резерв для записи сокращения вида "...'" в конце строки при
+        // превышения ограничения длины.
+        const unsigned int OFFSET = 4;
 
-  for (auto a_step_n : active_steps) {
-    int par_n = step_max_duration_par_ns[a_step_n - 1];
-    if (par_n > 0) {
-      auto extra_active_step_max_time =
-          static_cast<unsigned int>(owner->get_step_param(par_n));
-      if (extra_active_step_max_time &&
-          steps[a_step_n - 1]->get_latest_eval_time() >=
-              1000UL * extra_active_step_max_time) {
-        auto t = std::chrono::seconds{extra_active_step_max_time};
-        fmt::format_to_n(
-            err_dev_name, str_len,
-            "превышено максимальное время дополнительного шага ({:%T})", t);
+        auto t = std::chrono::seconds{ step_max_time };
+        auto res = fmt::format_to_n( err_dev_name, str_len - 1 - OFFSET,
+            "превышено макс. t ({:%T}) шага {} \'{}\'", t, step_n + 1,
+            steps[ step_n ]->get_name() );
+        *res.out = '\0';
+        if ( res.size > str_len )
+            {
+            *( res.out + 3 ) = '\'';
+            *( res.out + 2 ) = '.';
+            *( res.out + 1 ) = '.';
+            *( res.out ) = '.';
+            }
+        };
+
+    if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() &&
+        active_step_max_time && // Максимальное время - ненулевое значение.
+        steps[ active_step_n ]->get_latest_eval_time() >=
+        1000UL * static_cast<u_int_4>( active_step_max_time ) )
+        {
+        make_str( active_step_n, active_step_max_time );
         return 1;
-      }
+        }
+
+    for ( auto a_step_n : active_steps )
+        {
+        int par_n = step_max_duration_par_ns[ a_step_n - 1 ];
+        if ( par_n > 0 )
+            {
+            auto extra_active_step_max_time =
+                static_cast<unsigned int> ( owner->get_step_param( par_n ) );
+
+            if ( extra_active_step_max_time &&
+                steps[ a_step_n - 1 ]->get_latest_eval_time() >=
+                1000UL * extra_active_step_max_time )
+                {
+                make_str( extra_active_step_max_time, a_step_n - 1 );
+                return 1;
+                }
+            }
+        }
+
+    return 0;
     }
-  }
+//-----------------------------------------------------------------------------
+int operation_state::check_steps_params( char* err_dev_name, unsigned int str_len )
+    {
+    if ( !step_duration_par_ns.empty() )
+        {
+        auto iter = step_duration_par_ns.begin();
+        auto all_params_is_empty = true;
+        while ( iter != step_duration_par_ns.end() )
+            {
+            if ( *iter <= 0 || owner->get_step_param( *iter ) > 0 )
+                {
+                all_params_is_empty = false;
+                break;
+                }
+            iter++;
+            }
+        if ( all_params_is_empty )
+            {
+            snprintf( err_dev_name, str_len,
+                "все длительности шагов имеют значение 0" );
+            return 1;
+            }
+        }
 
   return 0;
 }

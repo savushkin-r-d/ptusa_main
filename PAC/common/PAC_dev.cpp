@@ -2462,20 +2462,46 @@ int base_counter::save_device_ex(char* buff) {
       .size;
 }
 //-----------------------------------------------------------------------------
-const char* base_counter::get_error_description() const {
-  if (static_cast<int>(state) < 0) {
-    switch (state) {
-      case STATES::S_ERROR:
-        return "счет импульсов";
+const char* base_counter::get_error_description()
+    {
+    if ( static_cast<int>( state ) < 0 )
+        {
+        switch ( state )
+            {
+            case STATES::S_ERROR:
+                prev_error_state = STATES::S_ERROR;
+                return "счет импульсов";
 
-      case STATES::S_LOW_ERR:
-        return "канал потока (нижний предел)";
+            case STATES::S_LOW_ERR:
+                prev_error_state = STATES::S_LOW_ERR;
+                return "канал потока (нижний предел)";
 
-      case STATES::S_HI_ERR:
-        return "канал потока (верхний предел)";
+            case STATES::S_HI_ERR:
+                prev_error_state = STATES::S_HI_ERR;
+                return "канал потока (верхний предел)";
 
-      default:
-        return device::get_error_description();
+            default:
+                return device::get_error_description();
+            }
+        }
+
+    switch ( prev_error_state )
+        {
+        case STATES::S_ERROR:
+            return "счет импульсов (rtn)";
+
+        case STATES::S_LOW_ERR:
+            return "канал потока (нижний предел, rtn)";
+
+        case STATES::S_HI_ERR:
+            return "канал потока (верхний предел, rtn)";
+
+        default:
+            // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
+            break;
+        }
+
+    return "нет ошибок";
     }
   }
 
@@ -3427,14 +3453,14 @@ void valve_iolink_mix_proof::direct_off() {
   out_info->sv3 = false;
 }
 //-----------------------------------------------------------------------------
-int valve_iolink_mix_proof::set_cmd(const char* prop, u_int idx, double val) {
-  if (G_DEBUG) {
-    sprintf(G_LOG->msg,
-            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val "
-            "= %f",
+int valve_iolink_mix_proof::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
-    G_LOG->write_log(i_log::P_DEBUG);
-  }
+        }
 
   switch (prop[0]) {
     case 'B':  // BLINK
@@ -3622,10 +3648,12 @@ int valve_iolink_shut_off_sorio::set_cmd(const char* prop, u_int idx,
   switch (prop[0]) {
     case 'B':  // BLINK
     {
-      val > 0 ? out_info->wink = true : out_info->wink = false;
-      blink = out_info->wink;
-      break;
-    }
+    if ( G_DEBUG )
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
 
     default:
       valve::set_cmd(prop, idx, val);
@@ -3788,10 +3816,12 @@ int valve_iolink_shut_off_thinktop::set_cmd(const char* prop, u_int idx,
   switch (prop[0]) {
     case 'B':  // BLINK
     {
-      val > 0 ? out_info->wink = true : out_info->wink = false;
-      blink = out_info->wink;
-      break;
-    }
+    if (G_DEBUG)
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
 
     default:
       valve::set_cmd(prop, idx, val);
@@ -4173,10 +4203,12 @@ inline int analog_valve_iolink::set_cmd(const char* prop, u_int idx,
   switch (prop[0]) {
     case 'B':  // BLINK
     {
-      val > 0 ? out_info->wink = true : out_info->wink = false;
-      blink = out_info->wink;
-      break;
-    }
+    if ( G_DEBUG )
+        {
+        G_LOG->debug(
+            "%s\t analog_valve_iolink::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
 
     default:
       AO1::set_cmd(prop, idx, val);
@@ -5080,17 +5112,26 @@ int motor::save_device_ex(char* buff) {
 #ifdef DEBUG_NO_IO_MODULES
   res = sprintf(buff, "R=0, ");
 #else
-  auto sub_type = get_sub_type();
-  if (sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-      sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
-      sub_type == device::M_REV_2_ERROR ||
-      sub_type == device::DST_M_REV_FREQ_2_ERROR) {
-    if (sub_type == device::M_REV_2_ERROR ||
-        sub_type == device::DST_M_REV_FREQ_2_ERROR) {
-      res = sprintf(buff, "R=%d, ERR=%d, ", get_DO(DO_INDEX_REVERSE),
-                    get_DI(DI_INDEX_ERROR));
-    } else {
-      res = sprintf(buff, "R=%d,", get_DO(DO_INDEX_REVERSE));
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        if ( sub_type == device::M_REV_2_ERROR ||
+            sub_type == device::DST_M_REV_FREQ_2_ERROR )
+            {
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ERRT={}, ",
+                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) ).size );
+            }
+        else
+            {
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ",
+                get_DO( DO_INDEX_REVERSE ) ).size );
+            }
+        }
+#endif //DEBUG_NO_IO_MODULES
+    return res;
     }
   }
 #endif  // DEBUG_NO_IO_MODULES

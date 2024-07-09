@@ -232,13 +232,18 @@ class io_manager {
   /// @brief Получение единственного экземпляра класса.
   static io_manager* get_instance();
 
-  /// @brief Получение области данных заданного канала дискретного входа.
-  ///
-  /// @param node_n - номер узла.
-  /// @param offset - смещение в пределах узла.
-  ///
-  /// @return - указатель на данные канала.
-  u_char* get_DI_read_data(u_int node_n, u_int offset);
+#ifdef PTUSA_TEST
+        /// @brief Получение единственного экземпляра класса.
+        static io_manager* replace_instance( io_manager* );
+#endif
+
+        /// @brief Получение области данных заданного канала дискретного входа.
+        ///
+        /// @param node_n - номер узла.
+        /// @param offset - смещение в пределах узла.
+        ///
+        /// @return - указатель на данные канала.
+        u_char* get_DI_read_data( u_int node_n, u_int offset );
 
   /// @brief Получение области чтения данных заданного канала
   /// дискретного выхода.
@@ -346,24 +351,24 @@ class io_manager {
     u_char* DO;    ///< Current values.
     u_char* DO_;   ///< To write.
 
-    // Analog outputs ( AO ).
-    u_int AO_cnt;                  ///< Amount of AO.
-    int_2 AO[C_ANALOG_BUF_SIZE];   ///< Current values.
-    int_2 AO_[C_ANALOG_BUF_SIZE];  ///< To write.
-    u_int* AO_offsets;             ///< Offsets in common data.
-    u_int* AO_types;               ///< Channels type.
-    u_int AO_size;
+			// Analog outputs ( AO ).
+			u_int AO_cnt;       			///< Amount of AO.
+            int_2 AO[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
+            int_2 AO_[ C_ANALOG_BUF_SIZE ] = { 0 };   ///< To write.
+			u_int *AO_offsets;  			///< Offsets in common data.
+			u_int *AO_types;    			///< Channels type.
+			u_int AO_size;
 
     // Digital inputs ( DI ).
     u_int DI_cnt;  ///< Amount of DI.
     u_char* DI;    ///< Current values.
 
-    // Analog inputs ( AI ).
-    u_int AI_cnt;                 ///< Amount of AI.
-    int_2 AI[C_ANALOG_BUF_SIZE];  ///< Current values.
-    u_int* AI_offsets;            ///< Offsets in common data.
-    u_int* AI_types;              ///< Channels type.
-    u_int AI_size;
+			// Analog inputs ( AI ).
+			u_int AI_cnt;       			///< Amount of AI.
+            int_2 AI[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
+			u_int *AI_offsets;  			///< Offsets in common data.
+			u_int *AI_types;    			///< Channels type.
+			u_int AI_size;
 
     u_long last_init_time;  ///< Время последней попытки подключиться, мсек.
     u_long delay_time;  ///< Время ожидания до попытки подключиться, мсек.
@@ -371,10 +376,12 @@ class io_manager {
     stat_time recv_stat;  ///< Статистика работы с сокетом.
     stat_time send_stat;  ///< Статистика работы с сокетом.
 
-    bool flag_error_write_message =
-        false;  ///< Флаг для вывода сообщений об ошибке связи.
-  };
-  //---------------------------------------------------------------------
+            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке связи.
+
+            private:
+                io_node( const io_node& io_node_copy ); // Not implemented.
+            };
+		//---------------------------------------------------------------------
 
  protected:
   io_manager();
