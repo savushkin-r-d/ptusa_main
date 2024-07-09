@@ -24,156 +24,141 @@
 #ifndef DRIVER
 
 #include <stdlib.h>
+
 #include <vector>
 
 #include "smart_ptr.h"
-
 #include "tcp_cmctr.h"
 
 extern "C" {
 #include "zlib.h"
-    };
+};
 
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
-class i_Lua_save_device
-    {
-    public:
-        /// @brief Сохранение самого устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_device( char *buff ) = 0;
+class i_Lua_save_device {
+ public:
+  /// @brief Сохранение самого устройства в буфер.
+  ///
+  /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
+  ///
+  /// @return >= 0 - количество записанных байт.
+  virtual int save_device(char *buff) = 0;
 
-        /// @brief Отладочная печать объекта в консоль.
-        virtual const char* get_name_in_Lua() const = 0;
-    };
+  /// @brief Отладочная печать объекта в консоль.
+  virtual const char *get_name_in_Lua() const = 0;
+};
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий получать команды от сервера.
-class i_cmd_device
-    {
-    public:
-        /// @brief Выполнение числовой команды.
-        ///
-        /// @param prop [ in ] - имя свойства.
-        /// @param idx [ in ]  - индекс для свойства.
-        /// @param val [ in ]  - значение.
-        ///
-        /// @return 0 - ок.
-        /// @return 1 - ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, double val ) = 0;
+class i_cmd_device {
+ public:
+  /// @brief Выполнение числовой команды.
+  ///
+  /// @param prop [ in ] - имя свойства.
+  /// @param idx [ in ]  - индекс для свойства.
+  /// @param val [ in ]  - значение.
+  ///
+  /// @return 0 - ок.
+  /// @return 1 - ошибка.
+  virtual int set_cmd(const char *prop, u_int idx, double val) = 0;
 
-        /// @brief Выполнение строковой команды.
-        ///
-        /// @param prop [ in ] - имя свойства.
-        /// @param idx [ in ]  - индекс для свойства.
-        /// @param val [ in ]  - значение.
-        ///
-        /// @return 0 - ок.
-        /// @return 1 - Ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, char *val ) = 0;
-    };
+  /// @brief Выполнение строковой команды.
+  ///
+  /// @param prop [ in ] - имя свойства.
+  /// @param idx [ in ]  - индекс для свойства.
+  /// @param val [ in ]  - значение.
+  ///
+  /// @return 0 - ок.
+  /// @return 1 - Ошибка.
+  virtual int set_cmd(const char *prop, u_int idx, char *val) = 0;
+};
 
-#endif // DRIVER
+#endif  // DRIVER
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
-class device_communicator
-    {
-    public:
-        enum CMD
-            {
-            CMD_GET_INFO_ON_CONNECT = 10, ///< Запрос инф. о PAC перед дальнейшей работой.
+class device_communicator {
+ public:
+  enum CMD {
+    CMD_GET_INFO_ON_CONNECT =
+        10,  ///< Запрос инф. о PAC перед дальнейшей работой.
 
-            CMD_GET_DEVICES = 100,   ///< Запрос инф. об устройствах PAC.
-            CMD_GET_DEVICES_STATES,  ///< Запрос инф. о состоянии устройств PAC.
-            CMD_EXEC_DEVICE_COMMAND, ///< Выполнение команды для устройства.
+    CMD_GET_DEVICES = 100,  ///< Запрос инф. об устройствах PAC.
+    CMD_GET_DEVICES_STATES,  ///< Запрос инф. о состоянии устройств PAC.
+    CMD_EXEC_DEVICE_COMMAND,  ///< Выполнение команды для устройства.
 
-            CMD_GET_PAC_ERRORS,      ///< Запрос инф. об ошибках PAC.
-            CMD_SET_PAC_ERROR_CMD,   ///< Выполнение команды для ошибки.
+    CMD_GET_PAC_ERRORS,  ///< Запрос инф. об ошибках PAC.
+    CMD_SET_PAC_ERROR_CMD,  ///< Выполнение команды для ошибки.
 
-            // Резервное копирование параметров.
-            ///@brief Получение параметров устройств.
-            ///
-            /// Они используются для создания резервной копии на стороне сервера.
-            CMD_GET_PARAMS,
+    // Резервное копирование параметров.
+    ///@brief Получение параметров устройств.
+    ///
+    /// Они используются для создания резервной копии на стороне сервера.
+    CMD_GET_PARAMS,
 
-            ///@brief Восстановление параметров устройств из скрипта Lua.
-            CMD_RESTORE_PARAMS,
-            ///@brief Получение контрольной суммы параметров.
-            ///
-            /// Эта сумма используется для отслеживания изменения параметров PAC
-            /// и их записи в этом случае в резервную копию.
-            CMD_GET_PARAMS_CRC,
-            // Резервное копирование параметров. -!>
+    ///@brief Восстановление параметров устройств из скрипта Lua.
+    CMD_RESTORE_PARAMS,
+    ///@brief Получение контрольной суммы параметров.
+    ///
+    /// Эта сумма используется для отслеживания изменения параметров PAC
+    /// и их записи в этом случае в резервную копию.
+    CMD_GET_PARAMS_CRC,
+    // Резервное копирование параметров. -!>
 
-            CMD_RM_GET_DEVICES = 200,   ///< Запрос устройств PAC от PAC-мастера.
-            CMD_RM_GET_DEVICES_STATES,  ///< Запрос состояния устройств PAC от PAC-мастера.
-            };
+    CMD_RM_GET_DEVICES = 200,  ///< Запрос устройств PAC от PAC-мастера.
+    CMD_RM_GET_DEVICES_STATES,  ///< Запрос состояния устройств PAC от
+                                ///< PAC-мастера.
+  };
 
 #ifndef DRIVER
-    private:
-        /// Единственный экземпляр класса.
-        static auto_smart_ptr < device_communicator > instance;
-        static char buff[ tcp_communicator::BUFSIZE ];
+ private:
+  /// Единственный экземпляр класса.
+  static auto_smart_ptr<device_communicator> instance;
+  static char buff[tcp_communicator::BUFSIZE];
 
-        static bool use_compression;
+  static bool use_compression;
 
-    public:
-        static void switch_on_compression()
-            {
-            use_compression = true;
-            }
+ public:
+  static void switch_on_compression() { use_compression = true; }
 
-        static void switch_off_compression()
-            {
-            use_compression = false;
-            }
+  static void switch_off_compression() { use_compression = false; }
 
-        /// @brief Получение единственного экземпляра класса.
-        static device_communicator* get_instance()
-            {
-            if ( instance.is_null() )
-                {
-                instance = new device_communicator();
-                }
+  /// @brief Получение единственного экземпляра класса.
+  static device_communicator *get_instance() {
+    if (instance.is_null()) {
+      instance = new device_communicator();
+    }
 
-            return instance;
-            }
+    return instance;
+  }
 
-        enum CONSTANTS
-            {
-            C_SERVICE_N = 1, ///< Номер сервиса коммуникатора.
-            };
+  enum CONSTANTS {
+    C_SERVICE_N = 1,  ///< Номер сервиса коммуникатора.
+  };
 
-        /// @brief Устройства, информация о них и их состоянии передается на
-        /// сервер (PC).
-        static std::vector< i_Lua_save_device* > dev;
+  /// @brief Устройства, информация о них и их состоянии передается на
+  /// сервер (PC).
+  static std::vector<i_Lua_save_device *> dev;
 
-    public:
-        device_communicator()
-            {
-            }
+ public:
+  device_communicator() {}
 
-        ~device_communicator()
-            {
-            }
+  ~device_communicator() {}
 
-        /// @brief Вывод на консоль устройств группы.
-        void print() const;
+  /// @brief Вывод на консоль устройств группы.
+  void print() const;
 
-        /// @brief Добавление устройства.
-        int add_device( i_Lua_save_device *dev );
+  /// @brief Добавление устройства.
+  int add_device(i_Lua_save_device *dev);
 
-        /// @brief Сервис для работы с device_communicator.
-        static long write_devices_states_service( long len, u_char *data,
-            u_char *outdata );
-#endif // !DRIVER
-    };
+  /// @brief Сервис для работы с device_communicator.
+  static long write_devices_states_service(long len, u_char *data,
+                                           u_char *outdata);
+#endif  // !DRIVER
+};
 //-----------------------------------------------------------------------------
 #ifndef DRIVER
 #define G_DEVICE_CMMCTR device_communicator::get_instance()
-#endif // !DRIVER
+#endif  // !DRIVER
 
-#endif // DEVICES_H
+#endif  // DEVICES_H

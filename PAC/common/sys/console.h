@@ -18,34 +18,34 @@
 #error You must define OS!
 #endif
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "s_types.h"
 //-----------------------------------------------------------------------------
 /// @brief Печать в консоль.
 #ifdef WIN_OS
 #include "w_console.h"
-#endif // WIN_OS
+#endif  // WIN_OS
 
 #ifdef LINUX_OS
 #include "l_console.h"
-#endif // LINUX_OS
+#endif  // LINUX_OS
 //-----------------------------------------------------------------------------
 /// @brief Проверка нажатия клавиши.
 ///
 /// @return 0 - нет нажатий клавиш.
 /// @return 1 - нажата клавиша.
-int  kb_hit();
+int kb_hit();
 //-----------------------------------------------------------------------------
 /// @brief Считывание нажатого символа с консоли.
 ///
 /// @return - символ нажатой клавиши.
-int  get_char();
+int get_char();
 //-----------------------------------------------------------------------------
 /// @brief Вывод числа в консоль в двоичном виде.
 ///
 /// @param c - выводимое число.
-void print_binary( unsigned int c );
+void print_binary(unsigned int c);
 //-----------------------------------------------------------------------------
-#endif // CONSOLE_H
+#endif  // CONSOLE_H

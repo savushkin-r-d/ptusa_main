@@ -16,38 +16,24 @@
 //-----------------------------------------------------------------------------
 /// @brief Работа с диодными индикаторами. Представляет абстракцию от
 /// физической реализации таковых.
-class led
-    {
-    public:
-        enum COLOUR
-            {
-            C_GREEN = 1,
-            C_YELLOW,
-            C_RED
-            };
+class led {
+ public:
+  enum COLOUR { C_GREEN = 1, C_YELLOW, C_RED };
 
-        enum LEDS_NAMES
-            {
-            L_ALL = 1,
-            L_STATUS,
-            L_SERVICE,
-            L_USER
-            };
+  enum LEDS_NAMES { L_ALL = 1, L_STATUS, L_SERVICE, L_USER };
 
-        /// @brief Включение диодного индикатора.
-        ///
-        /// @param led       - диод.
-        /// @param led_color - цвет.
-        virtual void on( LEDS_NAMES led, COLOUR led_color ) = 0;
+  /// @brief Включение диодного индикатора.
+  ///
+  /// @param led       - диод.
+  /// @param led_color - цвет.
+  virtual void on(LEDS_NAMES led, COLOUR led_color) = 0;
 
-        /// @brief Выключение диодного индикатора.
-        virtual void off( LEDS_NAMES led ) = 0;
+  /// @brief Выключение диодного индикатора.
+  virtual void off(LEDS_NAMES led) = 0;
 
-        virtual ~led()
-            {
-            }
-    };
+  virtual ~led() {}
+};
 //-----------------------------------------------------------------------------
 led* get_led();
 //-----------------------------------------------------------------------------
-#endif // LED_H
+#endif  // LED_H

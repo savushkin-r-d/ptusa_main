@@ -24,32 +24,30 @@ extern "C" {
 /// @brief Работа с модулями ввода/вывода Wago для PAC WAGO 750-860.
 ///
 ///
-class io_manager_PFC200 : public io_manager_linux
-    {
-     public:
+class io_manager_PFC200 : public io_manager_linux {
+ public:
+  io_manager_PFC200();
 
-        io_manager_PFC200();
+  virtual ~io_manager_PFC200();
 
-        virtual ~io_manager_PFC200();
+  int read_inputs();
 
-        int read_inputs();
+  int write_outputs();
 
-        int write_outputs();
+ private:
+  // vars for ADI-interface
+  tDeviceInfo devList[10];   /// The list of devices given by the ADI.
+  size_t nr_devices_found;   /// Number of devices found.
+  size_t nr_kbus_found;      /// Position of the kbus in the list.
+  tDeviceId kbus_device_id;  /// Device ID from the ADI.
+  uint32_t task_id;          /// Task Id.
 
-    private:
-        // vars for ADI-interface
-        tDeviceInfo devList[ 10 ]; /// The list of devices given by the ADI.
-        size_t nr_devices_found;   /// Number of devices found.
-        size_t nr_kbus_found;      /// Position of the kbus in the list.
-        tDeviceId kbus_device_id;  /// Device ID from the ADI.
-        uint32_t task_id;          /// Task Id.
+  // process data
+  uint8_t pd_in[4096];   /// Kbus input process data.
+  uint8_t pd_out[4096];  /// Kbus output process data.
 
-        // process data
-        uint8_t pd_in[ 4096 ];     /// Kbus input process data.
-        uint8_t pd_out[ 4096 ];    /// Kbus output process data.
-
-        ///< Pointer to the application interface.
-        tApplicationDeviceInterface * adi;
-    };
+  ///< Pointer to the application interface.
+  tApplicationDeviceInterface* adi;
+};
 //-----------------------------------------------------------------------------
-#endif // WAGO_750_H
+#endif  // WAGO_750_H
