@@ -389,6 +389,10 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto G1 = get_G( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( G1 ) );
+    //Добавляем устройство с несуществующим подтипом.
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_G, device::DST_G_IOL_8 + 1, name.c_str(), "Test power unit", "G" );
+    EXPECT_EQ( nullptr, res );
     }
 
 TEST( device_manager, clear_io_devices )
