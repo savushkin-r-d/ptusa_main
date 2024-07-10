@@ -4912,7 +4912,134 @@ class power_unit : public analog_io_device
         power_unit( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ):
             analog_io_device( dev_name, device::DT_G, sub_type, 0 )
             {
+            memset( &p_data_out, 0, sizeof( p_data_out ) );
+            memset( &p_data_in, 0, sizeof( p_data_in ) );
             }
+
+        float get_value() override
+            {
+            return .0f;
+            }
+
+        void direct_set_value( float val ) override
+            {
+            }
+
+        void evaluate_io() override
+            {
+            char* data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+
+            if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+            std::copy( data, data + sizeof( p_data_in ),
+                reinterpret_cast<char*>( &p_data_in ));
+
+#ifdef DEBUG_IOLINK_POWER_UNIT
+            char* tmp = (char*)data;
+            sprintf( G_LOG->msg,
+                "%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",
+                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+                tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+                tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ], 
+                tmp[ 12 ], tmp[ 13 ], tmp[ 14 ], tmp[ 15 ],
+                tmp[ 16 ], tmp[ 17 ] );
+            G_LOG->write_log( i_log::P_WARNING );
+
+            sprintf( G_LOG->msg,
+                "nominal_current_ch1 %u, load_current_ch1 %u, st_ch1 %x\n",
+                p_data_in.nominal_current_ch1,
+                p_data_in.load_current_ch1, p_data_in.status_ch1 );
+            G_LOG->write_log( i_log::P_WARNING );
+#endif
+
+            v = .1f * p_data_in.out_voltage;            
+            }
+
+    private:
+        float v = .0f;  // Output voltage.
+
+        enum CONSTANTS
+            {
+            C_AI_INDEX = 0,
+            };
+
+        struct process_data_in
+            {
+            bool reserved3 : 3;
+            bool DC_not_OK : 1;
+            bool out_power_90 : 1;
+            bool : 1;
+
+            uint16_t out_voltage : 10;            
+            uint16_t : 6;
+            uint16_t sum_currents : 10;
+
+            uint16_t status_ch1 : 2;
+            uint16_t status_ch2 : 2;
+            uint16_t status_ch3 : 2;
+            uint16_t status_ch4 : 2;
+            uint16_t status_ch5 : 2;
+            uint16_t status_ch6 : 2;
+            uint16_t status_ch7 : 2;
+            uint16_t status_ch8 : 2;
+
+            uint16_t : 2;
+            uint16_t nominal_current_ch1 : 3;
+            uint16_t nominal_current_ch2 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch3 : 3;
+            uint16_t nominal_current_ch4 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch5 : 3;
+            uint16_t nominal_current_ch6 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch7 : 3;
+            uint16_t nominal_current_ch8 : 3;
+
+            uint16_t load_current_ch1 : 8;
+            uint16_t load_current_ch2 : 8;
+            uint16_t load_current_ch3 : 8;
+            uint16_t load_current_ch4 : 8;
+            uint16_t load_current_ch5 : 8;
+            uint16_t load_current_ch6 : 8;
+            uint16_t load_current_ch7 : 8;
+            uint16_t load_current_ch8 : 8;
+            };
+
+        struct process_data_out
+            {
+            bool valid_flag : 1;
+            uint16_t : 6;
+            bool channel_status_after_reset : 1;
+
+            uint16_t : 2;
+            uint16_t nominal_current_ch1 : 3;
+            uint16_t nominal_current_ch2 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch3 : 3;
+            uint16_t nominal_current_ch4 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch5 : 3;
+            uint16_t nominal_current_ch6 : 3;
+            uint16_t : 2;
+            uint16_t nominal_current_ch7 : 3;
+            uint16_t nominal_current_ch8 : 3;
+
+            uint16_t : 7;
+            bool prioritization : 1;
+
+            bool switch_ch1 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch4 : 1;
+            bool switch_ch5 : 1;
+            bool switch_ch6 : 1;
+            bool switch_ch7 : 1;
+            bool switch_ch8 : 1;
+            };
+
+        process_data_in p_data_in;
+        process_data_out p_data_out;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
