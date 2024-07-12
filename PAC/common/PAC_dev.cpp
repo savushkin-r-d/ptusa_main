@@ -2743,16 +2743,21 @@ int power_unit::get_state()
 //-----------------------------------------------------------------------------
 void power_unit::direct_set_value( float val )
     {
+    // Здесь нет возможности управлять состоянием - управляем через отдельные 
+    // каналы.
     }
 //-----------------------------------------------------------------------------
 void power_unit::evaluate_io()
     {
-    char* data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+    auto data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
-    std::copy( data, data + sizeof( p_data_in ), reinterpret_cast<char*>( &p_data_in ) );
-    v = .1f * ( ( p_data_in.sum_currents_2 << 8 ) + p_data_in.sum_currents );
+    std::copy( data, data + sizeof( p_data_in ),
+        reinterpret_cast<char*>( &p_data_in ) );
+    v = .1f *
+        static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
+        p_data_in.sum_currents ) );
     st = p_data_in.DC_not_OK;
 
 #ifdef DEBUG_IOLINK_POWER_UNIT
@@ -2805,7 +2810,7 @@ int power_unit::save_device_ex( char* buff )
         +p_data_in.nominal_current_ch3, +p_data_in.nominal_current_ch4,
         +p_data_in.nominal_current_ch5, +p_data_in.nominal_current_ch6,
         +p_data_in.nominal_current_ch7, +p_data_in.nominal_current_ch8 );
-    int size = res.size;
+    auto size = static_cast<int>( res.size );
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "LOAD_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
@@ -2828,7 +2833,8 @@ int power_unit::save_device_ex( char* buff )
     size += res.size;
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "VOLTAGE={:.1f}, ",
-        .1f * ( ( p_data_in.out_voltage_2 << 8 ) + p_data_in.out_voltage ) );
+        .1f * static_cast<float>( ( ( p_data_in.out_voltage_2 << 8 ) +
+        p_data_in.out_voltage ) ) );
     size += res.size;
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
