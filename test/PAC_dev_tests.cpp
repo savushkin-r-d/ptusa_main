@@ -2030,3 +2030,46 @@ TEST ( valve_AS, get_upper_seat_offset)
     valve.reverse_seat_connection = true;
     EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
     }
+
+
+TEST( power_unit, evaluate_io )
+    {
+    power_unit G1( "G1" );
+    G1.init( 0, 0, 1, 1 );
+    G1.AO_channels.int_write_values[ 0 ] = new int_2[ 7 ]{ 0 };
+    G1.AI_channels.int_read_values[ 0 ] = new int_2[ 18 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( G1.AI_channels.int_read_values[ 0 ] );
+
+
+    EXPECT_EQ( 0, G1.get_value() ); //Default value.
+
+    const int BUFF_SIZE = 1000;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={0,0,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0},\n",
+        str_buff );
+
+    // DC_not_OK, OUT_POWER_90, VOLTAGE = 25.7
+    G1.AI_channels.int_read_values[ 0 ][ 0 ] = 0b100011001;
+    // SUM_CURRENTS = 0.1
+    G1.AI_channels.int_read_values[ 0 ][ 1 ] = 0b100000000;
+    // Status, channel 1
+    G1.AI_channels.int_read_values[ 0 ][ 2 ] = 0b01000000;
+    // Nominal current, channel 1
+    G1.AI_channels.int_read_values[ 0 ][ 3 ] = 0b00001000;
+    // G1.AI_channels.int_read_values[ 0 ][ 4 ];
+    // Load current, channel 1
+    G1.AI_channels.int_read_values[ 0 ][ 5 ] = 0b00001000;
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0.10, NOMINAL_CURRENT_CH={1,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,0,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.1, VOLTAGE=25.7, OUT_POWER_90=1},\n",
+        str_buff );
+    }

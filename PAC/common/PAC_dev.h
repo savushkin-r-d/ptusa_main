@@ -4909,134 +4909,108 @@ class threshold_regulator :public device, public i_Lua_save_device
 class power_unit : public analog_io_device
     {
     public:
-        power_unit( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ):
-            analog_io_device( dev_name, device::DT_G, sub_type, 0 )
-            {
-            memset( &p_data_out, 0, sizeof( p_data_out ) );
-            memset( &p_data_in, 0, sizeof( p_data_in ) );
-            }
+        power_unit( const char* dev_name, 
+            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_G_IOL_4 );
 
-        float get_value() override
-            {
-            return .0f;
-            }
+        float get_value() override;
+        int get_state() override;
 
-        void direct_set_value( float val ) override
-            {
-            }
+        void direct_set_value( float val ) override;
 
-        void evaluate_io() override
-            {
-            char* data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+        void evaluate_io() override;
 
-            if ( !data ) return; // Return, if data is nullptr (in debug mode).
-
-            std::copy( data, data + sizeof( p_data_in ),
-                reinterpret_cast<char*>( &p_data_in ));
-
-#ifdef DEBUG_IOLINK_POWER_UNIT
-            char* tmp = (char*)data;
-            sprintf( G_LOG->msg,
-                "%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",
-                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
-                tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
-                tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ], 
-                tmp[ 12 ], tmp[ 13 ], tmp[ 14 ], tmp[ 15 ],
-                tmp[ 16 ], tmp[ 17 ] );
-            G_LOG->write_log( i_log::P_WARNING );
-
-            sprintf( G_LOG->msg,
-                "nominal_current_ch1 %u, load_current_ch1 %u, st_ch1 %x\n",
-                p_data_in.nominal_current_ch1,
-                p_data_in.load_current_ch1, p_data_in.status_ch1 );
-            G_LOG->write_log( i_log::P_WARNING );
-#endif
-
-            v = .1f * p_data_in.out_voltage;            
-            }
+        int save_device_ex( char* buff ) override;
 
     private:
-        float v = .0f;  // Output voltage.
+        float v = .0f;  // Sum of output currents.
+        int st = 0;     // DC status.
 
         enum CONSTANTS
             {
             C_AI_INDEX = 0,
             };
 
+#pragma pack(push, 1)
         struct process_data_in
             {
-            bool reserved3 : 3;
-            bool DC_not_OK : 1;
-            bool out_power_90 : 1;
-            bool : 1;
+            uint8_t out_voltage_2 : 2;          // Byte 0.
+            bool                  : 1;
+            bool out_power_90     : 1;
+            bool DC_not_OK        : 1;
+            uint8_t               : 0;
 
-            uint16_t out_voltage : 10;            
-            uint16_t : 6;
-            uint16_t sum_currents : 10;
+            uint8_t out_voltage;                // Byte 1.
 
-            uint16_t status_ch1 : 2;
-            uint16_t status_ch2 : 2;
-            uint16_t status_ch3 : 2;
-            uint16_t status_ch4 : 2;
-            uint16_t status_ch5 : 2;
-            uint16_t status_ch6 : 2;
-            uint16_t status_ch7 : 2;
-            uint16_t status_ch8 : 2;
+            uint8_t sum_currents_2 : 2;         // Byte 2.
+            uint8_t                : 0;
+            uint8_t sum_currents   : 8;         // Byte 3.
 
-            uint16_t : 2;
-            uint16_t nominal_current_ch1 : 3;
-            uint16_t nominal_current_ch2 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch3 : 3;
-            uint16_t nominal_current_ch4 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch5 : 3;
-            uint16_t nominal_current_ch6 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch7 : 3;
-            uint16_t nominal_current_ch8 : 3;
+            int8_t status_ch4 : 2;              // Byte 4.
+            int8_t status_ch3 : 2;
+            int8_t status_ch2 : 2;
+            int8_t status_ch1 : 2;
+            int8_t status_ch8 : 2;              // Byte 5.
+            int8_t status_ch7 : 2;     
+            int8_t status_ch6 : 2;
+            int8_t status_ch5 : 2;
 
-            uint16_t load_current_ch1 : 8;
-            uint16_t load_current_ch2 : 8;
-            uint16_t load_current_ch3 : 8;
-            uint16_t load_current_ch4 : 8;
-            uint16_t load_current_ch5 : 8;
-            uint16_t load_current_ch6 : 8;
-            uint16_t load_current_ch7 : 8;
-            uint16_t load_current_ch8 : 8;
+            uint8_t nominal_current_ch2 : 3;    // Byte 6.
+            uint8_t nominal_current_ch1 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch4 : 3;    // Byte 7.
+            uint8_t nominal_current_ch3 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch6 : 3;    // Byte 8.
+            uint8_t nominal_current_ch5 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch8 : 3;    // Byte 9.
+            uint8_t nominal_current_ch7 : 3;
+            uint8_t                     : 2;    
+
+            uint8_t load_current_ch1 : 8;       // Byte 10.
+            uint8_t load_current_ch2 : 8;       // Byte 11.
+            uint8_t load_current_ch3 : 8;       // Byte 12.
+            uint8_t load_current_ch4 : 8;       // Byte 13.
+            uint8_t load_current_ch5 : 8;       // Byte 14.
+            uint8_t load_current_ch6 : 8;       // Byte 15.
+            uint8_t load_current_ch7 : 8;       // Byte 16.
+            uint8_t load_current_ch8 : 8;       // Byte 17.
             };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
         struct process_data_out
             {
-            bool valid_flag : 1;
-            uint16_t : 6;
-            bool channel_status_after_reset : 1;
+            bool channel_status_after_reset : 1;    // Byte 0.
+            uint8_t                         : 0;
+            bool valid_flag                 : 1;
 
-            uint16_t : 2;
-            uint16_t nominal_current_ch1 : 3;
-            uint16_t nominal_current_ch2 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch3 : 3;
-            uint16_t nominal_current_ch4 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch5 : 3;
-            uint16_t nominal_current_ch6 : 3;
-            uint16_t : 2;
-            uint16_t nominal_current_ch7 : 3;
-            uint16_t nominal_current_ch8 : 3;
+            uint8_t nominal_current_ch2 : 3;        // Byte 1.
+            uint8_t nominal_current_ch1 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch4 : 3;        // Byte 2.
+            uint8_t nominal_current_ch3 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch6 : 3;        // Byte 3.
+            uint8_t nominal_current_ch5 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch8 : 3;        // Byte 4.
+            uint8_t nominal_current_ch7 : 3;
+            uint8_t                     : 0;
 
-            uint16_t : 7;
-            bool prioritization : 1;
+            bool prioritization : 1;                // Byte 5.
+            uint8_t             : 0;
 
-            bool switch_ch1 : 1;
-            bool switch_ch2 : 1;
-            bool switch_ch3 : 1;
-            bool switch_ch4 : 1;
-            bool switch_ch5 : 1;
-            bool switch_ch6 : 1;
+            bool switch_ch8 : 1;                    // Byte 6.
             bool switch_ch7 : 1;
-            bool switch_ch8 : 1;
+            bool switch_ch6 : 1;
+            bool switch_ch5 : 1;
+            bool switch_ch4 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch1 : 1;
             };
+#pragma pack(pop)
 
         process_data_in p_data_in;
         process_data_out p_data_out;

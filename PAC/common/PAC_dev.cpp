@@ -2718,6 +2718,127 @@ int threshold_regulator::save_device( char* buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+power_unit::power_unit( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type  ) :
+    analog_io_device( dev_name, device::DT_G, sub_type, 0 )
+    {
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
+    memset( &p_data_out, 0, sizeof( p_data_out ) );
+
+    static_assert( sizeof( p_data_in ) == 18,
+        "Struct process_data_in must be the 18 bytes size." );
+    static_assert( sizeof( p_data_out ) == 7,
+        "Struct process_data_in must be the 7 bytes size." );
+    }
+//-----------------------------------------------------------------------------
+float power_unit::get_value()
+    {
+    return v;
+    }
+//-----------------------------------------------------------------------------
+int power_unit::get_state()
+    {
+    return st;
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_set_value( float val )
+    {
+    }
+//-----------------------------------------------------------------------------
+void power_unit::evaluate_io()
+    {
+    char* data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + sizeof( p_data_in ), reinterpret_cast<char*>( &p_data_in ) );
+    v = .1f * ( ( p_data_in.sum_currents_2 << 8 ) + p_data_in.sum_currents );
+    st = p_data_in.DC_not_OK;
+
+#ifdef DEBUG_IOLINK_POWER_UNIT
+    auto res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+        "{:b} {:b} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x}",
+        data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ],
+        data[ 4 ], data[ 5 ], data[ 6 ], data[ 7 ],
+        data[ 8 ], data[ 9 ], data[ 10 ], data[ 11 ],
+        data[ 12 ], data[ 13 ], data[ 14 ], data[ 15 ],
+        data[ 16 ], data[ 17 ] );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+
+    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+        "voltage = {}, out_voltage_2 = {}, DC_not_OK = {}",
+        p_data_in.out_voltage, +p_data_in.out_voltage_2, +p_data_in.DC_not_OK );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+        "out voltage {}",
+        .1f * ( ( p_data_in.out_voltage_2 << 8 ) + p_data_in.out_voltage ) );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_INFO );
+
+    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+        "nominal_current_ch1 = {}, load_current_ch1 = {}, st_ch1 = {}",
+        +p_data_in.nominal_current_ch1,
+        +p_data_in.load_current_ch1, +p_data_in.status_ch1 );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+        "nominal_current_ch4 = {}, load_current_ch4 = {}, st_ch4 = {}\n",
+        +p_data_in.nominal_current_ch4,
+        +p_data_in.load_current_ch4, +p_data_in.status_ch4 );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+
+
+    char buff[ 500 ] = { 0 };
+    save_device( buff, "" );
+    fmt::println( "{}", buff );
+#endif    
+    }
+//-----------------------------------------------------------------------------
+int power_unit::save_device_ex( char* buff )
+    {
+    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "NOMINAL_CURRENT_CH={{{},{},{},{},{},{},{},{}}}, ",
+        +p_data_in.nominal_current_ch1, +p_data_in.nominal_current_ch2,
+        +p_data_in.nominal_current_ch3, +p_data_in.nominal_current_ch4,
+        +p_data_in.nominal_current_ch5, +p_data_in.nominal_current_ch6,
+        +p_data_in.nominal_current_ch7, +p_data_in.nominal_current_ch8 );
+    int size = res.size;
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "LOAD_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
+        .1f * p_data_in.load_current_ch1, .1f * p_data_in.load_current_ch2,
+        .1f * p_data_in.load_current_ch3, .1f * p_data_in.load_current_ch4,
+        .1f * p_data_in.load_current_ch5, .1f * p_data_in.load_current_ch6,
+        .1f * p_data_in.load_current_ch7, .1f * p_data_in.load_current_ch8 );
+    size += res.size;
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "ST_CH={{{},{},{},{},{},{},{},{}}}, ",
+        +p_data_in.status_ch1, +p_data_in.status_ch2,
+        +p_data_in.status_ch3, +p_data_in.status_ch4,
+        +p_data_in.status_ch5, +p_data_in.status_ch6,
+        +p_data_in.status_ch7, +p_data_in.status_ch8 );
+    size += res.size;    
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "SUM_CURRENTS={:.1f}, ", v );
+    size += res.size;
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "VOLTAGE={:.1f}, ",
+        .1f * ( ( p_data_in.out_voltage_2 << 8 ) + p_data_in.out_voltage ) );
+    size += res.size;
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
+    size += res.size;    
+
+    *res.out = 0;
+    return size;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int extra_par_cnt ) :
     device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
