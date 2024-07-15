@@ -20,7 +20,7 @@ valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
 valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
 circuit_breaker::F_data_out circuit_breaker::stub_out_info;
 
-power_unit::process_data_out power_unit::stub_p_data_out = { 0 };
+power_unit::process_data_out power_unit::stub_p_data_out = {};
 unsigned int power_unit::WAIT_DATA_TIME = 300;
 unsigned int power_unit::WAIT_CMD_TIME = 1000;
 
@@ -2821,7 +2821,7 @@ void power_unit::evaluate_io()
             // записи выходных данных.
             if ( get_delta_millisec( cmd_time ) > WAIT_DATA_TIME )
                 {
-                p_data_out->valid_flag = 1;
+                p_data_out->valid_flag = true;
                 }
             if ( get_delta_millisec( cmd_time ) > WAIT_CMD_TIME )
                 {
@@ -2838,7 +2838,7 @@ void power_unit::evaluate_io()
 //-----------------------------------------------------------------------------
 void power_unit::sync_pdout()
     {
-    p_data_out->valid_flag = 0;
+    p_data_out->valid_flag = false;
     p_data_out->switch_ch1 = p_data_in.status_ch1;
     p_data_out->switch_ch2 = p_data_in.status_ch2;
     p_data_out->switch_ch3 = p_data_in.status_ch3;
@@ -2967,8 +2967,7 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "ST" ) == 0 )
         {
-        int new_val = (int)val;
-
+        auto new_val = static_cast<int>( val );
         if ( new_val )
             {
             on();
@@ -2980,6 +2979,7 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
 
         return 0;
         }
+    auto new_st = static_cast<bool>( val );
 #ifdef DEBUG_NO_IO_MODULES
     auto status = static_cast<int8_t>( val );
 #endif
@@ -2988,52 +2988,56 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
         switch ( idx )
             {
             case 1:
-                p_data_out->switch_ch1 = val;
+                p_data_out->switch_ch1 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch1 = status;
 #endif
                 break;
             case 2:
-                p_data_out->switch_ch2 = val;
+                p_data_out->switch_ch2 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch2 = status;
 #endif
                 break;
             case 3:
-                p_data_out->switch_ch3 = val;
+                p_data_out->switch_ch3 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch3 = status;
 #endif
                 break;
             case 4:
-                p_data_out->switch_ch4 = val;
+                p_data_out->switch_ch4 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch4 = status;
 #endif
                 break;
             case 5:
-                p_data_out->switch_ch5 = val;
+                p_data_out->switch_ch5 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch5 = status;
 #endif
                 break;
             case 6:
-                p_data_out->switch_ch6 = val;
+                p_data_out->switch_ch6 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch6 = status;
 #endif
                 break;
             case 7:
-                p_data_out->switch_ch7 = val;
+                p_data_out->switch_ch7 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch7 = status;
 #endif
                 break;
             case 8:
-                p_data_out->switch_ch8 = val;
+                p_data_out->switch_ch8 = new_st;
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.status_ch8 = status;
 #endif
+                break;
+
+            default:
+                // Do nothing.
                 break;
             }
         is_processing_cmd = true;
@@ -3099,6 +3103,10 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
 #ifdef DEBUG_NO_IO_MODULES
                 p_data_in.nominal_current_ch8 = nom_curr;
 #endif
+                break;
+
+            default:
+                // Do nothing.
                 break;
             }
         is_processing_cmd = true;

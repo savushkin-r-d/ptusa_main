@@ -4941,8 +4941,6 @@ class power_unit : public analog_io_device
         /// Синхронизация выходной области на основе данных из входной области.
         void sync_pdout();
 
-        bool is_read_OK = false;
-
         float v = .0f;  // Sum of output currents.
         int st = 0;     // Status - хотя бы один из каналов активен.
         int err = 0;    // DC status.

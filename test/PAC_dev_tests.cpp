@@ -2038,8 +2038,6 @@ TEST( power_unit, evaluate_io )
     G1.init( 0, 0, 1, 1 );
     G1.AO_channels.int_write_values[ 0 ] = new int_2[ 7 ]{ 0 };
     G1.AI_channels.int_read_values[ 0 ] = new int_2[ 18 ]{ 0 };
-    auto buff = reinterpret_cast<char*>( G1.AI_channels.int_read_values[ 0 ] );
-
 
     EXPECT_EQ( 0, G1.get_value() ); //Default value.
 
@@ -2229,6 +2227,16 @@ TEST( power_unit, set_cmd )
         "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
     G1.set_cmd( "ST_CH", 8, 1 );    // Channel 8.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,1,1}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+
+    G1.set_cmd( "ST_CH", 9, 1 );    // Channel 9 - incorrect.
     G1.evaluate_io();
     G1.save_device( str_buff, "" );
     EXPECT_STREQ(
