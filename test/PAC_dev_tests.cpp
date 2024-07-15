@@ -2072,6 +2072,30 @@ TEST( power_unit, evaluate_io )
         "ST_CH={1,0,0,0,0,0,0,0}, "
         "SUM_CURRENTS=0.1, VOLTAGE=25.7, OUT_POWER_90=1, ERR=1},\n",
         str_buff );
+
+    std::memset( G1.AI_channels.int_read_values[ 0 ], 0, 18 );
+    std::memset( G1.AO_channels.int_write_values[ 0 ], 0, 7 );
+
+    G1.on();
+    G1.evaluate_io();
+    // Управляющий бит еще не должен быть включен (все каналы устанавливаются
+    // в 1).
+    EXPECT_EQ( 255, G1.AO_channels.int_write_values[ 0 ][ 3 ] );
+
+    G1.set_cmd_time( get_millisec() - G1.WAIT_DATA_TIME - 10 );
+    G1.evaluate_io();
+    // Управляющий бит уже должен быть включен (устанавливается управляющий
+    // бит в 1).
+    EXPECT_EQ( 255, G1.AO_channels.int_write_values[ 0 ][ 3 ] );
+    EXPECT_EQ( 128, G1.AO_channels.int_write_values[ 0 ][ 0 ] );
+
+    G1.set_cmd_time( get_millisec() - G1.WAIT_CMD_TIME - 10 );
+    G1.evaluate_io();
+    // Управляющий бит уже должен быть отключен (сбрасывается управляющий бит
+    // в 0, а также, так как нет записи в реальное устройство, сбрасываются
+    // все каналы в 0).
+    EXPECT_EQ( 0, G1.AO_channels.int_write_values[ 0 ][ 3 ] );
+    EXPECT_EQ( 0, G1.AO_channels.int_write_values[ 0 ][ 0 ] );
     }
 
 TEST( power_unit, get_type_name )
@@ -2114,12 +2138,32 @@ TEST( power_unit, on )
         str_buff );
     }
 
-TEST( set_cmd, on )
+TEST( power_unit, set_cmd )
     {
     const int BUFF_SIZE = 1000;
     char str_buff[ BUFF_SIZE ] = { 0 };
     power_unit G1( "G1" );
     G1.off();
+
+    G1.set_cmd( "ST", 0, 1 );       // On().
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,1,1}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+
+    G1.set_cmd( "ST", 0, 0 );       // Off().
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={0,0,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
 
     G1.set_cmd( "ST_CH", 1, 1 );    // Channel 1.
     G1.evaluate_io();

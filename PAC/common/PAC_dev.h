@@ -4927,7 +4927,20 @@ class power_unit : public analog_io_device
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
+#ifdef PTUSA_TEST
+        void set_cmd_time( unsigned long t )
+            {
+            cmd_time = t;
+            }
+
+        static unsigned int WAIT_DATA_TIME; // Ожидание записи данных, мс.
+        static unsigned int WAIT_CMD_TIME;  // Ожидание записи команды, мс.
+#endif
+
     private:
+        /// Синхронизация выходной области на основе данных из входной области.
+        void sync_pdout();
+
         bool is_read_OK = false;
 
         float v = .0f;  // Sum of output currents.
@@ -5024,8 +5037,10 @@ class power_unit : public analog_io_device
             };
 #pragma pack(pop)
 
+#ifndef PTUSA_TEST
         static unsigned int WAIT_DATA_TIME; // Ожидание записи данных, мс.
         static unsigned int WAIT_CMD_TIME;  // Ожидание записи команды, мс.
+#endif
 
         process_data_in p_data_in;
 

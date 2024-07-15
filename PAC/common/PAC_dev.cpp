@@ -2826,29 +2826,35 @@ void power_unit::evaluate_io()
             if ( get_delta_millisec( cmd_time ) > WAIT_CMD_TIME )
                 {
                 is_processing_cmd = false;
+                sync_pdout();
                 }
             }
         else
             {
-            p_data_out->valid_flag = 0;
-            p_data_out->switch_ch1 = p_data_in.status_ch1;
-            p_data_out->switch_ch2 = p_data_in.status_ch2;
-            p_data_out->switch_ch3 = p_data_in.status_ch3;
-            p_data_out->switch_ch4 = p_data_in.status_ch4;
-            p_data_out->switch_ch5 = p_data_in.status_ch5;
-            p_data_out->switch_ch6 = p_data_in.status_ch6;
-            p_data_out->switch_ch7 = p_data_in.status_ch7;
-            p_data_out->switch_ch8 = p_data_in.status_ch8;
-            p_data_out->nominal_current_ch1 = p_data_in.nominal_current_ch1;
-            p_data_out->nominal_current_ch2 = p_data_in.nominal_current_ch2;
-            p_data_out->nominal_current_ch3 = p_data_in.nominal_current_ch3;
-            p_data_out->nominal_current_ch4 = p_data_in.nominal_current_ch4;
-            p_data_out->nominal_current_ch5 = p_data_in.nominal_current_ch5;
-            p_data_out->nominal_current_ch6 = p_data_in.nominal_current_ch6;
-            p_data_out->nominal_current_ch7 = p_data_in.nominal_current_ch7;
-            p_data_out->nominal_current_ch8 = p_data_in.nominal_current_ch8;
+            sync_pdout();
             }
         }
+    }
+//-----------------------------------------------------------------------------
+void power_unit::sync_pdout()
+    {
+    p_data_out->valid_flag = 0;
+    p_data_out->switch_ch1 = p_data_in.status_ch1;
+    p_data_out->switch_ch2 = p_data_in.status_ch2;
+    p_data_out->switch_ch3 = p_data_in.status_ch3;
+    p_data_out->switch_ch4 = p_data_in.status_ch4;
+    p_data_out->switch_ch5 = p_data_in.status_ch5;
+    p_data_out->switch_ch6 = p_data_in.status_ch6;
+    p_data_out->switch_ch7 = p_data_in.status_ch7;
+    p_data_out->switch_ch8 = p_data_in.status_ch8;
+    p_data_out->nominal_current_ch1 = p_data_in.nominal_current_ch1;
+    p_data_out->nominal_current_ch2 = p_data_in.nominal_current_ch2;
+    p_data_out->nominal_current_ch3 = p_data_in.nominal_current_ch3;
+    p_data_out->nominal_current_ch4 = p_data_in.nominal_current_ch4;
+    p_data_out->nominal_current_ch5 = p_data_in.nominal_current_ch5;
+    p_data_out->nominal_current_ch6 = p_data_in.nominal_current_ch6;
+    p_data_out->nominal_current_ch7 = p_data_in.nominal_current_ch7;
+    p_data_out->nominal_current_ch8 = p_data_in.nominal_current_ch8;
     }
 //-----------------------------------------------------------------------------
 int power_unit::save_device_ex( char* buff )
