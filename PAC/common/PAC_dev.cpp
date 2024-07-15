@@ -2765,7 +2765,7 @@ void power_unit::evaluate_io()
     st = p_data_in.DC_not_OK;
 
 #ifdef DEBUG_IOLINK_POWER_UNIT
-    auto res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+    auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
         "{:b} {:b} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x}",
         data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ],
         data[ 4 ], data[ 5 ], data[ 6 ], data[ 7 ],
@@ -2775,24 +2775,24 @@ void power_unit::evaluate_io()
     *res.out = 0;
     G_LOG->write_log( i_log::P_WARNING );
 
-    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
         "voltage = {}, out_voltage_2 = {}, DC_not_OK = {}",
         p_data_in.out_voltage, +p_data_in.out_voltage_2, +p_data_in.DC_not_OK );
     *res.out = 0;
     G_LOG->write_log( i_log::P_WARNING );
-    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
         "out voltage {}",
         .1f * ( ( p_data_in.out_voltage_2 << 8 ) + p_data_in.out_voltage ) );
     *res.out = 0;
     G_LOG->write_log( i_log::P_INFO );
 
-    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
         "nominal_current_ch1 = {}, load_current_ch1 = {}, st_ch1 = {}",
         +p_data_in.nominal_current_ch1,
         +p_data_in.load_current_ch1, +p_data_in.status_ch1 );
     *res.out = 0;
     G_LOG->write_log( i_log::P_WARNING );
-    res = fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE,
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
         "nominal_current_ch4 = {}, load_current_ch4 = {}, st_ch4 = {}\n",
         +p_data_in.nominal_current_ch4,
         +p_data_in.load_current_ch4, +p_data_in.status_ch4 );
@@ -2945,8 +2945,8 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        sprintf( G_LOG->msg,
-            "%s\t power_unit::set_cmd() - prop = %s, idx = %d, val = %f",
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "{}\t power_unit::set_cmd() - prop = {}, idx = {}, val = {}",
             get_name(), prop, idx, val );
         G_LOG->write_log( i_log::P_DEBUG );
         }
