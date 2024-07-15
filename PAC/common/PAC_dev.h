@@ -4931,7 +4931,8 @@ class power_unit : public analog_io_device
         bool is_read_OK = false;
 
         float v = .0f;  // Sum of output currents.
-        int st = 0;     // DC status.
+        int st = 0;     // Status - хотя бы один из каналов активен.
+        int err = 0;    // DC status.
 
         enum CONSTANTS
             {

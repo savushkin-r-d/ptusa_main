@@ -2762,7 +2762,11 @@ void power_unit::evaluate_io()
     v = .1f *
         static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
         p_data_in.sum_currents ) );
-    st = p_data_in.DC_not_OK;
+    err = p_data_in.DC_not_OK;
+    st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
+        p_data_in.status_ch3 || p_data_in.status_ch4 ||
+        p_data_in.status_ch5 || p_data_in.status_ch6 ||
+        p_data_in.status_ch7 || p_data_in.status_ch8;
 
 #ifdef DEBUG_IOLINK_POWER_UNIT
     auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -2884,6 +2888,8 @@ int power_unit::save_device_ex( char* buff )
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
     size += res.size;    
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE, "ERR={}, ", err );
+    size += res.size;
 
     *res.out = 0;
     return size;
@@ -2909,6 +2915,7 @@ void power_unit::direct_on()
     p_data_in.status_ch6 = true;
     p_data_in.status_ch7 = true;
     p_data_in.status_ch8 = true;
+    st = 1;
 #endif
 
     is_processing_cmd = true;
@@ -2935,6 +2942,7 @@ void power_unit::direct_off()
     p_data_in.status_ch6 = false;
     p_data_in.status_ch7 = false;
     p_data_in.status_ch8 = false;
+    st = 0;
 #endif
 
     is_processing_cmd = true;
@@ -3024,6 +3032,12 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
             }
         is_processing_cmd = true;
         cmd_time = get_millisec();
+#ifdef DEBUG_NO_IO_MODULES
+        st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
+            p_data_in.status_ch3 || p_data_in.status_ch4 ||
+            p_data_in.status_ch5 || p_data_in.status_ch6 ||
+            p_data_in.status_ch7 || p_data_in.status_ch8;
+#endif
         return 0;
         }
 

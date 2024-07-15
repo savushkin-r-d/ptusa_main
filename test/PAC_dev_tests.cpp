@@ -2050,10 +2050,10 @@ TEST( power_unit, evaluate_io )
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
         "ST_CH={0,0,0,0,0,0,0,0}, "
-        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0},\n",
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
 
-    // DC_not_OK, OUT_POWER_90, VOLTAGE = 25.7
+    // ST = DC_not_OK, OUT_POWER_90, VOLTAGE = 25.7
     G1.AI_channels.int_read_values[ 0 ][ 0 ] = 0b100011001;
     // SUM_CURRENTS = 0.1
     G1.AI_channels.int_read_values[ 0 ][ 1 ] = 0b100000000;
@@ -2070,6 +2070,127 @@ TEST( power_unit, evaluate_io )
         "G1={M=0, ST=1, V=0.10, NOMINAL_CURRENT_CH={1,0,0,0,0,0,0,0}, "
         "LOAD_CURRENT_CH={0.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
         "ST_CH={1,0,0,0,0,0,0,0}, "
-        "SUM_CURRENTS=0.1, VOLTAGE=25.7, OUT_POWER_90=1},\n",
+        "SUM_CURRENTS=0.1, VOLTAGE=25.7, OUT_POWER_90=1, ERR=1},\n",
+        str_buff );
+    }
+
+TEST( power_unit, get_type_name )
+    {
+    power_unit G1( "G1" );
+    auto res = G1.get_type_name();
+    EXPECT_STREQ( "Блок питания", res );
+    }
+
+TEST( power_unit, set_value )
+    {
+    power_unit G1( "G1" );
+    // Функция set_value() ничего не делает - состояние не должно измениться.
+    G1.set_value( 0.f );
+    EXPECT_EQ( 0, G1.get_state() );
+    }
+
+TEST( power_unit, on )
+    {    
+    const int BUFF_SIZE = 1000;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    power_unit G1( "G1" );
+    G1.off();
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={0,0,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.on();
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,1,1}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    }
+
+TEST( set_cmd, on )
+    {
+    const int BUFF_SIZE = 1000;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    power_unit G1( "G1" );
+    G1.off();
+
+    G1.set_cmd( "ST_CH", 1, 1 );    // Channel 1.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,0,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 2, 1 );    // Channel 2.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,0,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 3, 1 );    // Channel 3.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,0,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 4, 1 );    // Channel 4.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,0,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 5, 1 );    // Channel 5.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,0,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 6, 1 );    // Channel 6.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,0,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 7, 1 );    // Channel 7.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,1,0}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
+        str_buff );
+    G1.set_cmd( "ST_CH", 8, 1 );    // Channel 8.
+    G1.evaluate_io();
+    G1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={0,0,0,0,0,0,0,0}, "
+        "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
+        "ST_CH={1,1,1,1,1,1,1,1}, "
+        "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
     }
