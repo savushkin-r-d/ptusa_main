@@ -19,6 +19,11 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
 valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
 circuit_breaker::F_data_out circuit_breaker::stub_out_info;
+
+power_unit::process_data_out power_unit::stub_p_data_out = { 0 };
+unsigned int power_unit::WAIT_DATA_TIME = 300;
+unsigned int power_unit::WAIT_CMD_TIME = 1000;
+
 analog_valve_iolink::out_data analog_valve_iolink::stub_out_info;
 signal_column_iolink::out_data signal_column_iolink::stub_out_info;
 
@@ -2722,12 +2727,11 @@ power_unit::power_unit( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type  ) :
     analog_io_device( dev_name, device::DT_G, sub_type, 0 )
     {
-    memset( &p_data_in, 0, sizeof( p_data_in ) );
-    memset( &p_data_out, 0, sizeof( p_data_out ) );
+    memset( &p_data_in, 0, sizeof( p_data_in ) );    
 
-    static_assert( sizeof( p_data_in ) == 18,
+    static_assert( sizeof( process_data_in ) == 18,
         "Struct process_data_in must be the 18 bytes size." );
-    static_assert( sizeof( p_data_out ) == 7,
+    static_assert( sizeof( process_data_out ) == 7,
         "Struct process_data_in must be the 7 bytes size." );
     }
 //-----------------------------------------------------------------------------
@@ -2749,7 +2753,7 @@ void power_unit::direct_set_value( float val )
 //-----------------------------------------------------------------------------
 void power_unit::evaluate_io()
     {
-    auto data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+    auto data = reinterpret_cast<char*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
@@ -2799,7 +2803,48 @@ void power_unit::evaluate_io()
     char buff[ 500 ] = { 0 };
     save_device( buff, "" );
     fmt::println( "{}", buff );
-#endif    
+#endif
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+
+    if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
+        {
+        if ( is_processing_cmd )
+            {
+            // Устанавливаем управляющий бит через некоторое время после
+            // записи выходных данных.
+            if ( get_delta_millisec( cmd_time ) > WAIT_DATA_TIME )
+                {
+                p_data_out->valid_flag = 1;
+                }
+            if ( get_delta_millisec( cmd_time ) > WAIT_CMD_TIME )
+                {
+                is_processing_cmd = false;
+                }
+            }
+        else
+            {
+            p_data_out->valid_flag = 0;
+            p_data_out->switch_ch1 = p_data_in.status_ch1;
+            p_data_out->switch_ch2 = p_data_in.status_ch2;
+            p_data_out->switch_ch3 = p_data_in.status_ch3;
+            p_data_out->switch_ch4 = p_data_in.status_ch4;
+            p_data_out->switch_ch5 = p_data_in.status_ch5;
+            p_data_out->switch_ch6 = p_data_in.status_ch6;
+            p_data_out->switch_ch7 = p_data_in.status_ch7;
+            p_data_out->switch_ch8 = p_data_in.status_ch8;
+            p_data_out->nominal_current_ch1 = p_data_in.nominal_current_ch1;
+            p_data_out->nominal_current_ch2 = p_data_in.nominal_current_ch2;
+            p_data_out->nominal_current_ch3 = p_data_in.nominal_current_ch3;
+            p_data_out->nominal_current_ch4 = p_data_in.nominal_current_ch4;
+            p_data_out->nominal_current_ch5 = p_data_in.nominal_current_ch5;
+            p_data_out->nominal_current_ch6 = p_data_in.nominal_current_ch6;
+            p_data_out->nominal_current_ch7 = p_data_in.nominal_current_ch7;
+            p_data_out->nominal_current_ch8 = p_data_in.nominal_current_ch8;
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 int power_unit::save_device_ex( char* buff )
@@ -2842,6 +2887,206 @@ int power_unit::save_device_ex( char* buff )
 
     *res.out = 0;
     return size;
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_on()
+    {
+    p_data_out->switch_ch1 = true;
+    p_data_out->switch_ch2 = true;
+    p_data_out->switch_ch3 = true;
+    p_data_out->switch_ch4 = true;
+    p_data_out->switch_ch5 = true;
+    p_data_out->switch_ch6 = true;
+    p_data_out->switch_ch7 = true;
+    p_data_out->switch_ch8 = true;
+
+#ifdef DEBUG_NO_IO_MODULES
+    p_data_in.status_ch1 = true;
+    p_data_in.status_ch2 = true;
+    p_data_in.status_ch3 = true;
+    p_data_in.status_ch4 = true;
+    p_data_in.status_ch5 = true;
+    p_data_in.status_ch6 = true;
+    p_data_in.status_ch7 = true;
+    p_data_in.status_ch8 = true;
+#endif
+
+    is_processing_cmd = true;
+    cmd_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_off()
+    {
+    p_data_out->switch_ch1 = false;
+    p_data_out->switch_ch2 = false;
+    p_data_out->switch_ch3 = false;
+    p_data_out->switch_ch4 = false;
+    p_data_out->switch_ch5 = false;
+    p_data_out->switch_ch6 = false;
+    p_data_out->switch_ch7 = false;
+    p_data_out->switch_ch8 = false;
+
+#ifdef DEBUG_NO_IO_MODULES
+    p_data_in.status_ch1 = false;
+    p_data_in.status_ch2 = false;
+    p_data_in.status_ch3 = false;
+    p_data_in.status_ch4 = false;
+    p_data_in.status_ch5 = false;
+    p_data_in.status_ch6 = false;
+    p_data_in.status_ch7 = false;
+    p_data_in.status_ch8 = false;
+#endif
+
+    is_processing_cmd = true;
+    cmd_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+int power_unit::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        sprintf( G_LOG->msg,
+            "%s\t power_unit::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        int new_val = (int)val;
+
+        if ( new_val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+
+        return 0;
+        }
+#ifdef DEBUG_NO_IO_MODULES
+    auto status = static_cast<int8_t>( val );
+#endif
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->switch_ch1 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch1 = status;
+#endif
+                break;
+            case 2:
+                p_data_out->switch_ch2 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch2 = status;
+#endif
+                break;
+            case 3:
+                p_data_out->switch_ch3 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch3 = status;
+#endif
+                break;
+            case 4:
+                p_data_out->switch_ch4 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch4 = status;
+#endif
+                break;
+            case 5:
+                p_data_out->switch_ch5 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch5 = status;
+#endif
+                break;
+            case 6:
+                p_data_out->switch_ch6 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch6 = status;
+#endif
+                break;
+            case 7:
+                p_data_out->switch_ch7 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch7 = status;
+#endif
+                break;
+            case 8:
+                p_data_out->switch_ch8 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch8 = status;
+#endif
+                break;
+            }
+        is_processing_cmd = true;
+        cmd_time = get_millisec();
+        return 0;
+        }
+
+    auto nom_curr = static_cast<int8_t>( val );
+    if ( strcmp( prop, "NOMINAL_CURRENT_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->nominal_current_ch1 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch1 = nom_curr;
+#endif
+                break;
+            case 2:
+                p_data_out->nominal_current_ch2 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch2 = nom_curr;
+#endif
+                break;
+            case 3:
+                p_data_out->nominal_current_ch3 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch3 = nom_curr;
+#endif
+                break;
+            case 4:
+                p_data_out->nominal_current_ch4 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch4 = nom_curr;
+#endif
+                break;
+            case 5:
+                p_data_out->nominal_current_ch5 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch5 = nom_curr;
+#endif
+                break;
+            case 6:
+                p_data_out->nominal_current_ch6 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch6 = nom_curr;
+#endif
+                break;
+            case 7:
+                p_data_out->nominal_current_ch7 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch7 = nom_curr;
+#endif
+                break;
+            case 8:
+                p_data_out->nominal_current_ch8 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch8 = nom_curr;
+#endif
+                break;
+            }
+        is_processing_cmd = true;
+        cmd_time = get_millisec();
+        return 0;
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

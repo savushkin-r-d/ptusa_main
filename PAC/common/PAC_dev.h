@@ -4913,6 +4913,9 @@ class power_unit : public analog_io_device
         power_unit( const char* dev_name, 
             device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_G_IOL_4 );
 
+        void direct_on() override;
+        void direct_off() override;
+
         float get_value() override;
         int get_state() override;
 
@@ -4922,14 +4925,21 @@ class power_unit : public analog_io_device
 
         int save_device_ex( char* buff ) override;
 
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
     private:
+        bool is_read_OK = false;
+
         float v = .0f;  // Sum of output currents.
         int st = 0;     // DC status.
 
         enum CONSTANTS
             {
-            C_AI_INDEX = 0,
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
             };
+        
+        bool is_processing_cmd = false;
+        unsigned long cmd_time = 0;
 
 #pragma pack(push, 1)
         struct process_data_in
@@ -4983,7 +4993,7 @@ class power_unit : public analog_io_device
         struct process_data_out
             {
             bool channel_status_after_reset : 1;    // Byte 0.
-            uint8_t                         : 0;
+            uint8_t                         : 6;
             bool valid_flag                 : 1;
 
             uint8_t nominal_current_ch2 : 3;        // Byte 1.
@@ -5013,8 +5023,13 @@ class power_unit : public analog_io_device
             };
 #pragma pack(pop)
 
+        static unsigned int WAIT_DATA_TIME; // Ожидание записи данных, мс.
+        static unsigned int WAIT_CMD_TIME;  // Ожидание записи команды, мс.
+
         process_data_in p_data_in;
-        process_data_out p_data_out;
+
+        static process_data_out stub_p_data_out;
+        process_data_out* p_data_out = &stub_p_data_out;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
