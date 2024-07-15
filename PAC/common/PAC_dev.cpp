@@ -2730,9 +2730,9 @@ power_unit::power_unit( const char* dev_name,
     memset( &p_data_in, 0, sizeof( p_data_in ) );    
 
     static_assert( sizeof( process_data_in ) == 18,
-        "Struct process_data_in must be the 18 bytes size." );
+        "Struct `process_data_in` must be the 18 bytes size." );
     static_assert( sizeof( process_data_out ) == 7,
-        "Struct process_data_in must be the 7 bytes size." );
+        "Struct `process_data_out` must be the 7 bytes size." );
     }
 //-----------------------------------------------------------------------------
 float power_unit::get_value()
