@@ -170,6 +170,8 @@ TEST( tech_object, save )
 t.TANK0=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		
@@ -227,6 +229,8 @@ t.TANK0=
 t.TANK1=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		0, 
@@ -295,6 +299,8 @@ t.TANK1=
 t.TANK1=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		1, 

@@ -381,6 +381,12 @@ int cipline_tech_object::save_device( char *buff )
     //Имя рецепта для редактирования
     answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
 
+    //Номер последнего загруженного рецепта
+    answer_size += sprintf( buff + answer_size, "\tLASTRECNMR=%d,\n", lastLoadedRecipeNmr );
+
+    //Имя последнего загруженного рецепта
+    answer_size += sprintf( buff + answer_size, "\tLASTRECNAME='%s',\n", lastLoadedRecipeName.c_str() );
+
     //Выбранная программа мойки
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
