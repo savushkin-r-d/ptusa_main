@@ -4907,8 +4907,8 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
         return true;
         }
 
-    if (out_info->sv1 == false && in_info->de_en && in_info->st) return true;
-    if (out_info->sv1 == true && in_info->main && in_info->st) return true;
+    if (!out_info->sv1 && in_info->de_en && in_info->st) return true;
+    if (out_info->sv1 && in_info->main && in_info->st) return true;
 
     return false;
     }
@@ -4920,12 +4920,12 @@ float valve_iolink_shut_off_thinktop::get_value()
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_off_fb_value()
     {
-    return out_info->sv1 == false && in_info->main && in_info->st;
+    return !out_info->sv1 && in_info->de_en && in_info->st;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_on_fb_value()
     {
-    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    return out_info->sv1 && in_info->main && in_info->st;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::direct_on()
