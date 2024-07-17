@@ -428,6 +428,7 @@ class device : public i_DO_AO_device, public par_device
             DT_CAM,      ///< Камера.
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
+            DT_G,        ///< Блок питания.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -621,6 +622,10 @@ class device : public i_DO_AO_device, public par_device
             //DT_REGULATOR
             DST_REGULATOR_PID = 1,
             DST_REGULATOR_THLD,
+
+            //DT_G
+            DST_G_IOL_4 = 1,    ///< 4 канала.
+            DST_G_IOL_8,        ///< 8 каналов.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -4901,6 +4906,146 @@ class threshold_regulator :public device, public i_Lua_save_device
         device* actuator = nullptr;
     };
 //-----------------------------------------------------------------------------
+/// @brief Блок питания.
+class power_unit : public analog_io_device
+    {
+    public:
+        power_unit( const char* dev_name, 
+            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_G_IOL_4 );
+
+        void direct_on() override;
+        void direct_off() override;
+
+        float get_value() override;
+        int get_state() override;
+
+        void direct_set_value( float val ) override;
+
+        void evaluate_io() override;
+
+        int save_device_ex( char* buff ) override;
+
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
+#ifdef PTUSA_TEST
+        void set_cmd_time( unsigned long t )
+            {
+            cmd_time = t;
+            }
+
+        static unsigned int WAIT_DATA_TIME; // Ожидание записи данных, мс.
+        static unsigned int WAIT_CMD_TIME;  // Ожидание записи команды, мс.
+#endif
+
+    private:
+        /// Синхронизация выходной области на основе данных из входной области.
+        void sync_pdout();
+
+        float v = .0f;  // Sum of output currents.
+        int st = 0;     // Status - хотя бы один из каналов активен.
+        int err = 0;    // DC status.
+
+        enum CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+            };
+        
+        bool is_processing_cmd = false;
+        unsigned long cmd_time = 0;
+
+#pragma pack(push, 1)
+        struct process_data_in
+            {
+            uint8_t out_voltage_2 : 2;          // Byte 0.
+            bool                  : 1;
+            bool out_power_90     : 1;
+            bool DC_not_OK        : 1;
+            uint8_t               : 0;
+
+            uint8_t out_voltage;                // Byte 1.
+
+            uint8_t sum_currents_2 : 2;         // Byte 2.
+            uint8_t                : 0;
+            uint8_t sum_currents   : 8;         // Byte 3.
+
+            int8_t status_ch4 : 2;              // Byte 4.
+            int8_t status_ch3 : 2;
+            int8_t status_ch2 : 2;
+            int8_t status_ch1 : 2;
+            int8_t status_ch8 : 2;              // Byte 5.
+            int8_t status_ch7 : 2;     
+            int8_t status_ch6 : 2;
+            int8_t status_ch5 : 2;
+
+            uint8_t nominal_current_ch2 : 3;    // Byte 6.
+            uint8_t nominal_current_ch1 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch4 : 3;    // Byte 7.
+            uint8_t nominal_current_ch3 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch6 : 3;    // Byte 8.
+            uint8_t nominal_current_ch5 : 3;
+            uint8_t                     : 2;
+            uint8_t nominal_current_ch8 : 3;    // Byte 9.
+            uint8_t nominal_current_ch7 : 3;
+            uint8_t                     : 2;    
+
+            uint8_t load_current_ch1 : 8;       // Byte 10.
+            uint8_t load_current_ch2 : 8;       // Byte 11.
+            uint8_t load_current_ch3 : 8;       // Byte 12.
+            uint8_t load_current_ch4 : 8;       // Byte 13.
+            uint8_t load_current_ch5 : 8;       // Byte 14.
+            uint8_t load_current_ch6 : 8;       // Byte 15.
+            uint8_t load_current_ch7 : 8;       // Byte 16.
+            uint8_t load_current_ch8 : 8;       // Byte 17.
+            };
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+        struct process_data_out
+            {
+            bool channel_status_after_reset : 1;    // Byte 0.
+            uint8_t                         : 6;
+            bool valid_flag                 : 1;
+
+            uint8_t nominal_current_ch2 : 3;        // Byte 1.
+            uint8_t nominal_current_ch1 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch4 : 3;        // Byte 2.
+            uint8_t nominal_current_ch3 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch6 : 3;        // Byte 3.
+            uint8_t nominal_current_ch5 : 3;
+            uint8_t                     : 0;
+            uint8_t nominal_current_ch8 : 3;        // Byte 4.
+            uint8_t nominal_current_ch7 : 3;
+            uint8_t                     : 0;
+
+            bool prioritization : 1;                // Byte 5.
+            uint8_t             : 0;
+
+            bool switch_ch8 : 1;                    // Byte 6.
+            bool switch_ch7 : 1;
+            bool switch_ch6 : 1;
+            bool switch_ch5 : 1;
+            bool switch_ch4 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch1 : 1;
+            };
+#pragma pack(pop)
+
+#ifndef PTUSA_TEST
+        static unsigned int WAIT_DATA_TIME; // Ожидание записи данных, мс.
+        static unsigned int WAIT_CMD_TIME;  // Ожидание записи команды, мс.
+#endif
+
+        process_data_in p_data_in;
+
+        static process_data_out stub_p_data_out;
+        process_data_out* p_data_out = &stub_p_data_out;
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
@@ -5007,6 +5152,9 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение сигнального датчика температуры по имени.
         i_DI_device* get_TS( const char* dev_name );
+
+        /// @brief Получение блока питания температуры по имени.
+        i_DO_AO_device* get_G( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
@@ -5399,6 +5547,13 @@ i_DI_device* PDS( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DI_device* TS( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение блока питания по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DO_AO_device* get_G( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

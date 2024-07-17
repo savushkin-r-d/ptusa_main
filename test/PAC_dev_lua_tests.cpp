@@ -177,6 +177,26 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_G00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_G, device.DST_G_IOL_4, \'G1\', \'Test power module\', \'\' )" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = G()" ) );   //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "G1 = G( \'G1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "G1" );
+    auto G1 = static_cast<i_wages*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, G1 );
+
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+
 TEST( toLuapp, tolua_PAC_dev_dev_with_stat )
     {
     lua_State *L = lua_open();
@@ -219,7 +239,4 @@ TEST( toLuapp, tolua_PAC_dev_dev_with_stat )
     lua_getfield( L, LUA_GLOBALSINDEX, "dev_set_cmd_res" );
     dev_set_cmd_res = tolua_tonumber( L, -1, 0 );
     EXPECT_EQ( 1, dev_set_cmd_res );
-    lua_remove( L, -1 );
-
-    lua_close( L );
-    }
+}
