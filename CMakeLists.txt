@@ -31,7 +31,7 @@ elseif(WIN32)
     add_compile_definitions(SIMPLE_LOG)
 endif()
 
-add_compile_definitions(TEST_SPEED)
+add_compile_definitions(TEST_SPEED MODBUS)
 
 if(MSVC)
     add_compile_options("/utf-8")
