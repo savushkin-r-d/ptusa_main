@@ -5,6 +5,7 @@ using namespace ::testing;
 TEST( tcp_communicator, evaluate )
     {
     G_CMMCTR->init_instance( "Тест", "Test" );
+    G_CMMCTR->set_port( 30000, 30001 );
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
 #ifdef LINUX_OS
@@ -17,14 +18,23 @@ TEST( tcp_communicator, evaluate )
     EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_DISCONNECTED,
         cl.get_connected_state() );
 
+    sleep_ms( 1 );
     cl.reconnectTimeout = 0;
-    cl.checkConnection();
-    EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
+    cl.checkConnection();    
+    ASSERT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
         cl.get_connected_state() );    
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     //Должен быть получен ответ на подключение.
+    sleep_ms( 10 );
     auto size = cl.AsyncRecive();
+    auto cnt = 0;
+    while ( size <= 0 && cnt < 1000 )
+        {
+        sleep_ms( 1 );
+        size = cl.AsyncRecive();
+        cnt++;
+        }
     ASSERT_GT( size, 0 );
     cl.buff[ size ] = '\0';
     EXPECT_STREQ( cl.buff, "PAC accept");
@@ -40,15 +50,17 @@ TEST( tcp_communicator, evaluate )
     modbus_cl.InitLib();
 #endif
 
-    EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_DISCONNECTED,
+    ASSERT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_DISCONNECTED,
         modbus_cl.get_connected_state() );
 
     modbus_cl.reconnectTimeout = 0;
+    sleep_ms( 1 );
     modbus_cl.checkConnection();
     EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
         modbus_cl.get_connected_state() );
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+    sleep_ms( 1 );
     //Для модбас клиента ответа на подключение не будет.
     size = modbus_cl.AsyncRecive();
     ASSERT_EQ( size, 0 );
