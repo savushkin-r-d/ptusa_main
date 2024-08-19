@@ -4,8 +4,8 @@ using namespace ::testing;
 
 TEST( tcp_communicator, evaluate )
     {
-    G_CMMCTR->init_instance( "Тест", "Test" );
     G_CMMCTR->set_port( 30000, 30001 );
+    G_CMMCTR->init_instance( "Тест", "Test" );    
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
 #ifdef LINUX_OS
@@ -17,18 +17,22 @@ TEST( tcp_communicator, evaluate )
 
     EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_DISCONNECTED,
         cl.get_connected_state() );
-
-    sleep_ms( 1 );
     cl.reconnectTimeout = 0;
-    cl.checkConnection();    
+    auto cnt = 0;
+    auto r = cl.AsyncConnect();
+    while ( r != tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED && cnt < 1000 )
+        {
+        sleep_ms( 1 );
+        r = cl.AsyncConnect();
+        cnt++;
+        }
     ASSERT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
         cl.get_connected_state() );    
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     //Должен быть получен ответ на подключение.
-    sleep_ms( 10 );
     auto size = cl.AsyncRecive();
-    auto cnt = 0;
+    cnt = 0;
     while ( size <= 0 && cnt < 1000 )
         {
         sleep_ms( 1 );
@@ -52,10 +56,15 @@ TEST( tcp_communicator, evaluate )
 
     ASSERT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_DISCONNECTED,
         modbus_cl.get_connected_state() );
-
     modbus_cl.reconnectTimeout = 0;
-    sleep_ms( 1 );
-    modbus_cl.checkConnection();
+    cnt = 0;
+    r = modbus_cl.AsyncConnect();;
+    while ( r != tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED && cnt < 1000 )
+        {
+        sleep_ms( 1 );
+        r = modbus_cl.AsyncConnect();
+        cnt++;
+        }
     EXPECT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
         modbus_cl.get_connected_state() );
 
