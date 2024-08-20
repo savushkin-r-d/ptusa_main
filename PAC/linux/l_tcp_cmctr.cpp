@@ -67,7 +67,7 @@ int tcp_communicator_linux::net_init()
     if ( G_DEBUG )
         {
         printf( "tcp_communicator_linux:net_init() - master socket created. "
-            "Has number %d\n\r", master_socket );
+            "Has number %d:%d.\n", master_socket, port );
         }
 
     if ( master_socket < 0 )
@@ -159,9 +159,6 @@ int tcp_communicator_linux::net_init()
             0 );
         }
 
-    int val = 1;
-    setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
-
     master_socket_state.active      = 1; // мастер-сокет всегда активный.
     master_socket_state.is_listener = 1; // сокет является слушателем.
     master_socket_state.evaluated   = 0;
@@ -174,8 +171,8 @@ int tcp_communicator_linux::net_init()
     if ( G_DEBUG )
         {
         printf( "tcp_communicator_linux:net_init() - modbus socket created. "
-            "Has number %d\n\r",
-            modbus_socket );
+            "Has number %d:%d.\n",
+            modbus_socket, port_modbus );
         }
 
     if ( modbus_socket < 0 )
@@ -351,7 +348,8 @@ int tcp_communicator_linux::evaluate()
             continue;
             }
 
-        for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
+        auto size = sst.size();
+        for ( u_int i = 0; i < size; i++ )  /* scan all possible sockets */
             {
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
@@ -807,12 +805,6 @@ int tcp_communicator_linux::do_echo ( int idx )
         err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000L,
             inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
         }
-
-
-
-
-
-
 
     if ( err <= 0 )               /* read error */
         {

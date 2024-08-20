@@ -1288,9 +1288,6 @@ open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     next_phase( PHASES::P_OPEN_UPPER ),
     active_group_n( 0 ),
     wait_time( 60000 ),
-    wait_seat_time( 0 ),
-    wash_time_upper( 1000 ),
-    wash_time_lower( 1000 ),
     start_cycle_time( 0 ),
     is_mode( is_mode ),
     owner( owner )
@@ -1301,6 +1298,11 @@ open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
 void open_seat_action::set_wait_time( int wait_time )
     {
     this->wait_time = wait_time;
+    }
+
+int open_seat_action::get_wait_time()
+    {
+    return wait_time;
     }
 #endif
 //----------------------------------------------------------------------------
@@ -1316,30 +1318,28 @@ void open_seat_action::init()
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
-    size_t groups_cnt    =  wash_upper_seat_devices.size() +
+    auto groups_cnt =  wash_upper_seat_devices.size() +
         wash_lower_seat_devices.size();
 
     saved_params_u_int_4 &par = PAC_info::get_instance()->par;
-
-    wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
-    wait_time /= (u_int_4)groups_cnt;
-
-    // Для шага: для одной группы - середина продолжительности шага,
-    // для двух групп - треть и т.д.
-    if ( !is_mode )
+    if ( is_mode )     
         {
-        u_int_4 wait_time = owner->get_active_step_set_time() / ( (u_int_4)groups_cnt + 1 );
-        if ( wait_time > 0 )
-            {
-            this->wait_time = wait_time;
-            }
+        // Для операции - значение параметра.
+        wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+        }
+    else
+        {
+        // Для шага - время шага.
+        wait_time = owner->get_active_step_set_time();
         }
 
-    wash_time_upper = par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
-    wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
-
-    wait_time -= ( wash_time_upper > wash_time_lower ?
-        wash_time_upper: wash_time_lower ) / 2;
+    // Для одной группы - середина продолжительности, для двух групп - треть и
+    // т.д.
+    auto wash_time_upper = G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
+    auto wash_time_lower = G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
+    auto max_flip_time = wash_time_upper > wash_time_lower ?
+        wash_time_upper : wash_time_lower;
+    wait_time = ( wait_time - max_flip_time * groups_cnt ) / ( groups_cnt + 1 );
 
     active_group_n = 0;
     }
@@ -1347,6 +1347,9 @@ void open_seat_action::init()
 void open_seat_action::evaluate()
     {
     if ( wash_lower_seat_devices.empty() && wash_upper_seat_devices.empty() ) return;
+
+    auto wash_time_upper = G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
+    auto wash_time_lower = G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
 
     switch ( phase )
         {

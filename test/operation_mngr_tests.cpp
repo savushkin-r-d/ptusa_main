@@ -122,29 +122,35 @@ TEST( open_seat_action, evaluate )
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
 
-	saved_params_u_int_4& par = PAC_info::get_instance()->par;
-	const int FLIP_INTERVAL_MS = 5;
-	const int FLIP_DURATION_MS = 2;
-	par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
-	par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
-
-	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
 	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
+    const auto STEP_TIME_IDX = 1;
+    test_tank.par_float[ STEP_TIME_IDX ] = 10;
 	auto operation = operation_mngr[ 0 ][ 1 ];
-	operation->add_step( "Тестовый шаг", -1, -1 );
-	auto operation_state = operation[ 0 ][ 1 ];
-	auto step = operation_state[ 0 ][ 1 ];
+    auto step = operation->add_step( "Тестовый шаг", -1, STEP_TIME_IDX );
 
 	auto action = step[ 0 ][ step::ACTIONS::A_UPPER_SEATS_ON ];
 	action->add_dev( &test_DO1, 0, valve::V_UPPER_SEAT );
 	action->add_dev( &test_DO2, 0, valve::V_LOWER_SEAT );
 	action->print();
 
+    // Сброс параметров к значению по умолчанию.
+    G_PAC_INFO()->reset_params();
+    operation->start( 1 );
 	action->init();
+    auto w_time = reinterpret_cast<open_seat_action*>( action )->get_wait_time();
+    // Время интервалов должно быть равно 2000 мс (для двух групп и времени 
+    // шага 10 с (10'000 мс)).
+    EXPECT_EQ( w_time, 2000 );
+
+    const int FLIP_INTERVAL_MS = 5;
+    const int FLIP_DURATION_MS = 2;
+    G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
+    G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
 	reinterpret_cast<open_seat_action*>( action )->set_wait_time( FLIP_INTERVAL_MS );
 
 	action->evaluate();  // Wait
