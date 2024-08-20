@@ -1300,7 +1300,7 @@ void open_seat_action::set_wait_time( int wait_time )
     this->wait_time = wait_time;
     }
 
-int open_seat_action::get_wait_time()
+int open_seat_action::get_wait_time() const
     {
     return wait_time;
     }
