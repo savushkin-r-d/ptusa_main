@@ -78,3 +78,8 @@ TEST( PAC_info, get_up_time_str )
     {
     EXPECT_STREQ( "0 дн. 0:0:0", G_PAC_INFO()->get_up_time_str() );
     }
+
+TEST( PAC_info, is_emulator )
+    {
+    EXPECT_TRUE( G_PAC_INFO()->is_emulator() );
+    }

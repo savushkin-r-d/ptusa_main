@@ -94,6 +94,22 @@ tcp_communicator::~tcp_communicator()
     delete clients;
     }
 //------------------------------------------------------------------------------
+void tcp_communicator::set_port( int new_port, int new_port_modbus )
+    {
+    port = new_port;
+    port_modbus = new_port_modbus;
+    }
+//------------------------------------------------------------------------------
+int tcp_communicator::get_port()
+    {
+    return port;
+    }
+//------------------------------------------------------------------------------
+int tcp_communicator::get_modbus_port()
+    {
+    return port_modbus;
+    }
+//------------------------------------------------------------------------------
 bool tcp_communicator::checkBuff( int s )
     {
     // Настраиваем  file descriptor set.
@@ -147,5 +163,4 @@ int tcp_communicator::remove_async_client( tcp_client* client )
         }
     return 0;
     }
-
 //------------------------------------------------------------------------------
