@@ -9,7 +9,7 @@ TEST( tcp_communicator, evaluate )
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
 #ifdef LINUX_OS
-    linux_tcp_client cl( "127.0.0.1", G_CMMCTR->get_port(), 1, 1);
+    linux_tcp_client cl( "127.0.0.1", G_CMMCTR->get_port(), 1, 1 );
 #else
     win_tcp_client cl( "127.0.0.1", G_CMMCTR->get_port(), 1, 1 );
     cl.InitLib();
@@ -41,7 +41,7 @@ TEST( tcp_communicator, evaluate )
         }
     ASSERT_GT( size, 0 );
     cl.buff[ size ] = '\0';
-    EXPECT_STREQ( cl.buff, "PAC accept");
+    EXPECT_STREQ( cl.buff, "PAC accept" );
 
     cl.Disconnect();
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
