@@ -460,7 +460,20 @@ TEST( analog_io_device, set_cmd )
     obj.set_cmd( "NOT_EXIST", 0, 1 );       //Несуществующее поле.
 
     obj.save_device( buff, "" );
-    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );    
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
+    // Проверка включения ручного режима.
+    obj.set_cmd( "M", 0, 1 );
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=1, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+    // Проверка отключения ручного режима.
+    obj.set_cmd( "M", 0, 0 );
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+    // Проверка включения ручного режима - только на 1 должен включиться.
+    obj.set_cmd( "M", 0, 100 );
+    obj.save_device( buff, "" );
+    EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
     }
 
 
