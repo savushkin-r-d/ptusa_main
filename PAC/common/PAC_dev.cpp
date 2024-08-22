@@ -318,7 +318,10 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             break;
 
         case 'M':
-            is_manual_mode = val == 0. ? false : true;
+            if ( val == 0. )
+                is_manual_mode = false;
+            else if ( val == 1. )
+                is_manual_mode = true;
             break;
 
         case 'P': //Параметры.
