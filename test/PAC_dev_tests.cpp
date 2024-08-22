@@ -1036,9 +1036,11 @@ TEST( counter_f, get_state )
     //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
     //Не прошло заданное время.
     fqt1.set_cmd( "P_DT", 0, 1000 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     //Прошло заданное время.
     fqt1.set_cmd( "P_DT", 0, 0 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     //В состоянии паузы ошибки не должно быть.
@@ -1056,22 +1058,23 @@ TEST( counter_f, get_state )
     //Расход ниже минимального - ошибка не должна появиться.
     fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
-    fqt1.get_state();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Устанавливаем расход - ошибка должна появиться.
     fqt1.set_cmd( "F", 0, 1 );
-    fqt1.get_state();
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     fqt1.start();
     //Расход стал ниже минимального - ошибка не должна появиться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
-    fqt1.get_state();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
-    fqt1.get_state();
+    fqt1.evaluate_io();
     fqt1.set_cmd( "ABS_V", 0, 200 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
@@ -1360,30 +1363,30 @@ TEST( counter_iolink, get_quantity )
     fqt1.pause();
     fqt1.set_raw_value( 30 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
 
     fqt1.on();
     fqt1.set_raw_value( 40 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
 
 
     fqt1.set_state( 0 );        //Off.
-    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
 
     fqt1.set_state( 2 );        //Pause.
     fqt1.set_raw_value( 50 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_abs_quantity() );
 
     fqt1.set_state( 1 );        //Start
     fqt1.set_raw_value( 60 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_abs_quantity() );
 
 

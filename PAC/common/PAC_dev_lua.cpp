@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Jul 11 12:00:41 2024.
+** Generated automatically by tolua++-1.0.92 on Thu Aug 22 11:36:25 2024.
 */
 
 #ifndef __cplusplus
@@ -14758,6 +14758,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_counter","i_counter","",NULL);
   tolua_beginmodule(tolua_S,"i_counter");
+   tolua_constant(tolua_S,"MAIN",i_counter::MAIN);
+   tolua_constant(tolua_S,"DAY",i_counter::DAY);
+   tolua_constant(tolua_S,"PREV_DAY",i_counter::PREV_DAY);
+   tolua_constant(tolua_S,"USER1",i_counter::USER1);
+   tolua_constant(tolua_S,"USER2",i_counter::USER2);
    tolua_function(tolua_S,"pause",tolua_PAC_dev_i_counter_pause00);
    tolua_function(tolua_S,"start",tolua_PAC_dev_i_counter_start00);
    tolua_function(tolua_S,"reset",tolua_PAC_dev_i_counter_reset00);

@@ -162,6 +162,15 @@ class i_DO_AO_device: public i_DO_device, public i_AO_device
 class i_counter
     {
     public:
+        enum COUNTERS
+            {
+            MAIN,
+            DAY,
+            PREV_DAY,
+            USER1,
+            USER2
+            };
+
         /// @brief Приостановка работы счетчика.
         void pause();
 

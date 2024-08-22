@@ -2396,10 +2396,10 @@ int device_manager::init_rt_params()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void i_counter::restart()
+void i_counter::restart( COUNTERS type )
     {
-    reset();
-    start();
+    reset( type );
+    start( type );
     }
 //-----------------------------------------------------------------------------
 i_counter::~i_counter()
@@ -2555,19 +2555,19 @@ void dev_stub::print() const
     printf( "virtual device" );
     }
 //-----------------------------------------------------------------------------
-void dev_stub::pause()
+void dev_stub::pause( COUNTERS type )
     {
     }
 //-----------------------------------------------------------------------------
-void dev_stub::start()
+void dev_stub::start( COUNTERS type )
     {
     }
 //-----------------------------------------------------------------------------
-void dev_stub::reset()
+void dev_stub::reset( COUNTERS type )
     {
     }
 //-----------------------------------------------------------------------------
-u_int dev_stub::get_quantity()
+u_int dev_stub::get_quantity( COUNTERS type )
     {
     return 0;
     }
@@ -3130,55 +3130,6 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
-    bool is_pump_working = false;
-    if ( !motors.empty() )
-        {
-        for ( u_int i = 0; i < motors.size(); i++ )
-            {
-            if ( motors[ i ]->get_state() == 1 )
-                {
-                is_pump_working = true;
-                }
-            }
-        }
-
-    auto min_flow = get_min_flow();
-
-    // Насос не работает (при его наличии) или расход ниже минимального.
-    if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
-        {
-        start_pump_working_time = 0;
-        }
-    // Насос работает (при его наличии) или расход выше минимального.
-    else
-        {
-        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
-            {
-            start_pump_working_time = get_millisec();
-            counter_prev_value = get_abs_quantity();
-            return static_cast<int>( state );
-            }
-
-        // Работа. 
-        // Проверяем счетчик на ошибку - он должен изменить свои показания.
-        if ( get_abs_quantity() != counter_prev_value )
-            {
-            start_pump_working_time = get_millisec();
-            counter_prev_value = get_abs_quantity();
-            state = STATES::S_WORK;
-            }
-        else
-            {
-            auto dt = get_pump_dt();
-            if ( get_delta_millisec( start_pump_working_time ) < dt )
-                {
-                return static_cast<int>( state );
-                }
-
-            state = STATES::S_ERROR;
-            }
-        }
-
     return static_cast<int>( state );
     };
 //-----------------------------------------------------------------------------
@@ -3227,11 +3178,11 @@ void base_counter::set_abs_value( float new_value )
     abs_value = new_value;
     };
 //-----------------------------------------------------------------------------
-void base_counter::calculate_quantity( float& value, float& last_read_value,
+float base_counter::calculate_delta( float& last_read_value,
     bool& is_first_read )
     {
     float current = get_raw_value();
-
+    float delta = .0f;
     if ( is_first_read )
         {
         if ( current != 0 )
@@ -3242,7 +3193,6 @@ void base_counter::calculate_quantity( float& value, float& last_read_value,
         }
     else
         {
-        float delta;
         if ( current < last_read_value )
             {
             delta = get_max_raw_value() - last_read_value + current;
@@ -3257,11 +3207,9 @@ void base_counter::calculate_quantity( float& value, float& last_read_value,
             }
 
         last_read_value = current;
-        if ( delta > 0 )
-            {
-            value += delta;
-            }
         }
+
+    return delta;
     }
 //-----------------------------------------------------------------------------
 float base_counter::get_value()
@@ -3269,9 +3217,28 @@ float base_counter::get_value()
     return value;
     }
 //-----------------------------------------------------------------------------
-u_int base_counter::get_quantity()
+u_int base_counter::get_quantity( COUNTERS type )
     {
-    return static_cast<u_int>( value );
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            return static_cast<u_int>( value );
+
+        case i_counter::DAY:
+            return static_cast<u_int>( current_day_value );
+
+        case i_counter::PREV_DAY:
+            return static_cast<u_int>( prev_day_value );
+
+        case i_counter::USER1:
+            return static_cast<u_int>( user_value1 );
+
+        case i_counter::USER2:
+            return static_cast<u_int>( user_value2 );
+
+        default:
+            return static_cast<u_int>( value );
+        }    
     }
 //-----------------------------------------------------------------------------
 u_int base_counter::get_abs_quantity()
@@ -3287,29 +3254,65 @@ void base_counter::set_property( const char* field, device* dev )
         }
     }
 //-----------------------------------------------------------------------------
-void base_counter::pause()
+void base_counter::pause( COUNTERS type )
     {
-    get_quantity(); // Пересчитываем значение счетчика.
+    evaluate_io(); // Пересчитываем значение счетчика.
 
-    state = STATES::S_PAUSE;
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            state = STATES::S_PAUSE;
+            break;
+        case i_counter::DAY:
+            current_day_state = STATES::S_PAUSE;
+            break;
+        case i_counter::PREV_DAY:
+            break;
+        case i_counter::USER1:
+            user_state1 = STATES::S_PAUSE;
+            break;
+        case i_counter::USER2:
+            user_state2 = STATES::S_PAUSE;
+            break;
+        default:
+            break;
+        }    
     }
 //-----------------------------------------------------------------------------
-void base_counter::start()
+void base_counter::start( COUNTERS type )
     {
-    if ( STATES::S_PAUSE == state )
+    evaluate_io(); // Пересчитываем значение счетчика.
+
+    switch ( type )
         {
-        state = STATES::S_WORK;
-        last_read_value = get_raw_value();
-        start_pump_working_time = 0;
-        }
-    else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
-        {
-        start_pump_working_time = 0;
-        state = STATES::S_WORK;
+        case i_counter::MAIN:
+            if ( STATES::S_PAUSE == state )
+                {
+                state = STATES::S_WORK;
+                }
+            else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
+                {
+                start_pump_working_time = 0;
+                state = STATES::S_WORK;
+                }
+            break;
+        case i_counter::DAY:
+            current_day_state = STATES::S_WORK;
+            break;
+        case i_counter::PREV_DAY:
+            break;
+        case i_counter::USER1:
+            user_state1 = STATES::S_WORK;
+            break;
+        case i_counter::USER2:
+            user_state2 = STATES::S_WORK;
+            break;
+        default:
+            break;
         }
     }
 //-----------------------------------------------------------------------------
-void base_counter::reset()
+void base_counter::reset( COUNTERS type )
     {
     value = .0f;
     }
@@ -3319,19 +3322,72 @@ void base_counter::abs_reset()
     abs_value = .0f;
     }
 //-----------------------------------------------------------------------------
-void base_counter::restart()
-    {
-    reset();
-    start();
-    }
-//-----------------------------------------------------------------------------
 void base_counter::evaluate_io()
     {
-    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
+    bool is_pump_working = false;
+    if ( !motors.empty() )
         {
-        calculate_quantity( value, last_read_value, is_first_read );
+        for ( u_int i = 0; i < motors.size(); i++ )
+            {
+            if ( motors[ i ]->get_state() == 1 )
+                {
+                is_pump_working = true;
+                }
+            }
         }
-    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
+
+    auto min_flow = get_min_flow();
+
+    // Насос не работает (при его наличии) или расход ниже минимального.
+    if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
+        {
+        start_pump_working_time = 0;
+        }
+    // Насос работает (при его наличии) или расход выше минимального.
+    else
+        {
+        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
+            {
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
+            }
+        // Работа. 
+        // Проверяем счетчик на ошибку - он должен изменить свои показания.
+        else if ( get_abs_quantity() != counter_prev_value )
+            {
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
+            state = STATES::S_WORK;
+            }
+        else
+            {
+            auto dt = get_pump_dt();
+            if ( get_delta_millisec( start_pump_working_time ) >= dt )
+                {
+                state = STATES::S_ERROR;
+                }
+            }
+        }
+
+    float delta = calculate_delta( last_read_value, is_first_read );
+    if ( delta > 0 )
+        {
+        abs_value += delta;
+        value += delta;
+
+        if ( STATES::S_WORK == current_day_state )
+            {
+            current_day_value += delta;
+            }
+        if ( STATES::S_WORK == user_state1 )
+            {
+            user_value1 += delta;
+            }
+        if ( STATES::S_WORK == user_state2 )
+            {
+            user_value2 += delta;
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const
@@ -3357,7 +3413,12 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 int base_counter::save_device_ex( char* buff )
     {
     return fmt::format_to_n(
-        buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
+        buff, MAX_COPY_SIZE, "ABS_V={}, DAY_V={}, PREV_DAY={}, USER_V1={}, USER_V2={}, ",
+        get_abs_quantity(),
+        get_quantity( i_counter::COUNTERS::DAY ),
+        get_quantity( i_counter::COUNTERS::PREV_DAY ),
+        get_quantity( i_counter::COUNTERS::USER1 ),
+        get_quantity( i_counter::COUNTERS::USER2 ) ).size;
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
@@ -3623,7 +3684,7 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     };
 //-----------------------------------------------------------------------------
-u_int counter_iolink::get_quantity()
+u_int counter_iolink::get_quantity( COUNTERS type )
     {
     return static_cast<u_int>( get_value() );
     }
@@ -8101,12 +8162,12 @@ void virtual_counter::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::pause()
+void virtual_counter::pause( COUNTERS type )
     {
     state = STATES::S_PAUSE;
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::start()
+void virtual_counter::start( COUNTERS type )
     {
     if ( STATES::S_PAUSE == state )
         {
@@ -8114,12 +8175,12 @@ void virtual_counter::start()
         }
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::reset()
+void virtual_counter::reset( COUNTERS type )
     {
     value = 0;
     }
 //-----------------------------------------------------------------------------
-u_int virtual_counter::get_quantity()
+u_int virtual_counter::get_quantity( COUNTERS type )
     {
     return value;
     }
