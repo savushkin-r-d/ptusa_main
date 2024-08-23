@@ -203,6 +203,8 @@ class i_counter
             S_HI_ERR = -13,
             };
 
+        virtual int get_scaling_factor() const;
+
     protected:
         /// @brief Получение времени ожидания работы насоса.
         virtual u_long get_pump_dt() const = 0;
@@ -4466,11 +4468,9 @@ class counter_iolink : public base_counter
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) override;
-
-        u_int get_abs_quantity() override;
-
         float get_value() override;
+
+        int get_scaling_factor() const override;
 
         static const int mL_in_L = 1000;
 

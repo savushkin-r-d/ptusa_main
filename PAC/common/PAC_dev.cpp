@@ -2406,6 +2406,11 @@ i_counter::~i_counter()
     {
     }
 //-----------------------------------------------------------------------------
+int i_counter::get_scaling_factor() const
+    {
+    return 1;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool i_DI_device::is_active()
     {
@@ -3222,28 +3227,28 @@ u_int base_counter::get_quantity( COUNTERS type )
     switch ( type )
         {
         case i_counter::MAIN:
-            return static_cast<u_int>( value );
+            return static_cast<u_int>( get_scaling_factor() * value );
 
         case i_counter::DAY:
-            return static_cast<u_int>( current_day_value );
+            return static_cast<u_int>( get_scaling_factor() * current_day_value );
 
         case i_counter::PREV_DAY:
-            return static_cast<u_int>( prev_day_value );
+            return static_cast<u_int>( get_scaling_factor() * prev_day_value );
 
         case i_counter::USER1:
-            return static_cast<u_int>( user_value1 );
+            return static_cast<u_int>( get_scaling_factor() * user_value1 );
 
         case i_counter::USER2:
-            return static_cast<u_int>( user_value2 );
+            return static_cast<u_int>( get_scaling_factor() * user_value2 );
 
         default:
-            return static_cast<u_int>( value );
+            return static_cast<u_int>( get_scaling_factor() * value );
         }    
     }
 //-----------------------------------------------------------------------------
 u_int base_counter::get_abs_quantity()
     {
-    return static_cast<u_int>( abs_value );
+    return static_cast<u_int>( get_scaling_factor() * abs_value );
     }
 //-----------------------------------------------------------------------------
 void base_counter::set_property( const char* field, device* dev )
@@ -3684,19 +3689,14 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     };
 //-----------------------------------------------------------------------------
-u_int counter_iolink::get_quantity( COUNTERS type )
-    {
-    return static_cast<u_int>( get_value() );
-    }
-//-----------------------------------------------------------------------------
-u_int counter_iolink::get_abs_quantity()
-    {
-    return static_cast<u_int>( mL_in_L * get_abs_value() );
-    }
-//-----------------------------------------------------------------------------
 float counter_iolink::get_value()
     {
     return base_counter::get_value() * mL_in_L;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::get_scaling_factor() const
+    {
+    return mL_in_L;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
