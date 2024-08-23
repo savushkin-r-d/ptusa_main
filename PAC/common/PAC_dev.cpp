@@ -3184,16 +3184,16 @@ void base_counter::set_abs_value( float new_value )
     };
 //-----------------------------------------------------------------------------
 float base_counter::calculate_delta( float& l_read_value,
-    bool& is_first_read ) const
+    bool& first_read ) const
     {
     float current = get_raw_value();
     float delta = .0f;
-    if ( is_first_read )
+    if ( first_read )
         {
         if ( current != 0 )
             {
             l_read_value = current;
-            is_first_read = false;
+            first_read = false;
             }
         }
     else
