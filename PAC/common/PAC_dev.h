@@ -203,7 +203,7 @@ class i_counter
             S_HI_ERR = -13,
             };
 
-        virtual int get_scaling_factor() const;
+        virtual float get_scaling_factor() const;
 
     protected:
         /// @brief Получение времени ожидания работы насоса.
@@ -3596,7 +3596,7 @@ class virtual_counter : public device, public i_counter
 
         void reset( COUNTERS type = COUNTERS::MAIN ) override;
 
-        u_int get_quantity( COUNTERS type = COUNTERS::MAIN );
+        u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) final;
 
         float get_flow();
 
@@ -4352,7 +4352,7 @@ class base_counter: public i_counter, public device, public io_device
             }
 
     private:
-        float calculate_delta( float& last_read_value, bool& is_first_read );
+        float calculate_delta( float& l_read_value, bool& is_first_read ) const;
 
         void set_abs_value( float new_value );
 
@@ -4362,7 +4362,6 @@ class base_counter: public i_counter, public device, public io_device
         STATES prev_error_state = STATES::S_WORK;
 
         STATES current_day_state = STATES::S_WORK;
-        STATES prev_date_state = STATES::S_WORK;
         STATES user_state1 = STATES::S_WORK;
         STATES user_state2 = STATES::S_WORK;
 
@@ -4381,6 +4380,8 @@ class base_counter: public i_counter, public device, public io_device
         float prev_day_value = .0f;
         float user_value1 = .0f;
         float user_value2 = .0f;
+                
+        int c_day = get_time().tm_yday; // Текущий день.
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
@@ -4470,7 +4471,7 @@ class counter_iolink : public base_counter
 
         float get_value() override;
 
-        int get_scaling_factor() const override;
+        float get_scaling_factor() const override;
 
         static const int mL_in_L = 1000;
 

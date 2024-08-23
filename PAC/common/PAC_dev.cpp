@@ -2406,9 +2406,9 @@ i_counter::~i_counter()
     {
     }
 //-----------------------------------------------------------------------------
-int i_counter::get_scaling_factor() const
+float i_counter::get_scaling_factor() const
     {
-    return 1;
+    return 1.f;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3183,8 +3183,8 @@ void base_counter::set_abs_value( float new_value )
     abs_value = new_value;
     };
 //-----------------------------------------------------------------------------
-float base_counter::calculate_delta( float& last_read_value,
-    bool& is_first_read )
+float base_counter::calculate_delta( float& l_read_value,
+    bool& is_first_read ) const
     {
     float current = get_raw_value();
     float delta = .0f;
@@ -3192,15 +3192,15 @@ float base_counter::calculate_delta( float& last_read_value,
         {
         if ( current != 0 )
             {
-            last_read_value = current;
+            l_read_value = current;
             is_first_read = false;
             }
         }
     else
         {
-        if ( current < last_read_value )
+        if ( current < l_read_value )
             {
-            delta = get_max_raw_value() - last_read_value + current;
+            delta = get_max_raw_value() - l_read_value + current;
             if ( delta > MAX_OVERFLOW && current < delta )
                 {
                 delta = current;
@@ -3208,13 +3208,13 @@ float base_counter::calculate_delta( float& last_read_value,
             }
         else
             {
-            delta = current - last_read_value;
+            delta = current - l_read_value;
             }
 
-        last_read_value = current;
+        l_read_value = current;
         }
 
-    return delta;
+    return delta > 0 ? delta : 0;
     }
 //-----------------------------------------------------------------------------
 float base_counter::get_value()
@@ -3319,7 +3319,32 @@ void base_counter::start( COUNTERS type )
 //-----------------------------------------------------------------------------
 void base_counter::reset( COUNTERS type )
     {
-    value = .0f;
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            value = .0f;
+            break;
+
+        case i_counter::DAY:
+            current_day_value = .0f;
+            break;
+
+        case i_counter::PREV_DAY:
+            prev_day_value = .0f;
+            break;
+
+        case i_counter::USER1:
+            user_value1 = .0f;
+            break;
+
+        case i_counter::USER2:
+            user_value2 = .0f;
+            break;
+
+        default:
+            value = .0f;
+            break;
+        }    
     }
 //-----------------------------------------------------------------------------
 void base_counter::abs_reset()
@@ -3374,24 +3399,28 @@ void base_counter::evaluate_io()
             }
         }
 
-    float delta = calculate_delta( last_read_value, is_first_read );
-    if ( delta > 0 )
-        {
-        abs_value += delta;
-        value += delta;
+    auto delta = calculate_delta( last_read_value, is_first_read );
+    abs_value += delta;
+    value += delta;
 
-        if ( STATES::S_WORK == current_day_state )
-            {
-            current_day_value += delta;
-            }
-        if ( STATES::S_WORK == user_state1 )
-            {
-            user_value1 += delta;
-            }
-        if ( STATES::S_WORK == user_state2 )
-            {
-            user_value2 += delta;
-            }
+    if ( STATES::S_WORK == current_day_state )
+        {
+        current_day_value += delta;
+        }
+    if ( STATES::S_WORK == user_state1 )
+        {
+        user_value1 += delta;
+        }
+    if ( STATES::S_WORK == user_state2 )
+        {
+        user_value2 += delta;
+        }
+
+    if ( c_day != get_time().tm_yday ) // Наступил новый день.
+        {
+        prev_day_value = current_day_value;
+        c_day = get_time().tm_yday;
+        reset( COUNTERS::DAY );
         }
     }
 //-----------------------------------------------------------------------------
@@ -3694,9 +3723,9 @@ float counter_iolink::get_value()
     return base_counter::get_value() * mL_in_L;
     }
 //-----------------------------------------------------------------------------
-int counter_iolink::get_scaling_factor() const
+float counter_iolink::get_scaling_factor() const
     {
-    return mL_in_L;
+    return static_cast<float>( mL_in_L );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
