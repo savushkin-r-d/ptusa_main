@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2024.06.11.0)
+project(ptusa_main VERSION 2024.07.16.0)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -31,7 +31,7 @@ elseif(WIN32)
     add_compile_definitions(SIMPLE_LOG)
 endif()
 
-add_compile_definitions(TEST_SPEED)
+add_compile_definitions(TEST_SPEED MODBUS)
 
 if(MSVC)
     add_compile_options("/utf-8")

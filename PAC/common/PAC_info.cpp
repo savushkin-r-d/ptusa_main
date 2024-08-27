@@ -11,6 +11,8 @@
 #include "OPCUAServer.h"
 #endif
 
+extern bool G_NO_IO_NODES;
+
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр класса.
 
 const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
@@ -370,7 +372,10 @@ bool PAC_info::is_emulator()
 #ifdef DEBUG_NO_IO_MODULES
     return true;
 #else
-    return false;
+    if ( G_NO_IO_NODES )
+        return true;
+    else
+        return false;
 #endif
     }
 //-----------------------------------------------------------------------------
