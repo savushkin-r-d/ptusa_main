@@ -3240,9 +3240,6 @@ u_int base_counter::get_quantity( COUNTERS type )
 
         case i_counter::USER2:
             return static_cast<u_int>( get_scaling_factor() * user_value2 );
-
-        default:
-            return static_cast<u_int>( get_scaling_factor() * value );
         }    
     }
 //-----------------------------------------------------------------------------
