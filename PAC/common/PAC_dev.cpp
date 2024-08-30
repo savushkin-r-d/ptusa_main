@@ -3267,6 +3267,9 @@ void base_counter::pause( COUNTERS type )
         {
         case i_counter::MAIN:
             state = STATES::S_PAUSE;
+            current_day_state = STATES::S_PAUSE;
+            user_state1 = STATES::S_PAUSE;
+            user_state2 = STATES::S_PAUSE;
             break;
         case i_counter::DAY:
             current_day_state = STATES::S_PAUSE;
@@ -3401,8 +3404,11 @@ void base_counter::evaluate_io()
 
     auto delta = calculate_delta( last_read_value, is_first_read );
     abs_value += delta;
-    value += delta;
 
+    if ( STATES::S_WORK == state )
+        {
+        value += delta;
+        }
     if ( STATES::S_WORK == current_day_state )
         {
         current_day_value += delta;
