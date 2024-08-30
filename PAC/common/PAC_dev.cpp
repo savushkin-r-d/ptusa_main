@@ -3279,8 +3279,6 @@ void base_counter::pause( COUNTERS type )
         case i_counter::USER2:
             user_state2 = STATES::S_PAUSE;
             break;
-        default:
-            break;
         }    
     }
 //-----------------------------------------------------------------------------
@@ -3312,8 +3310,6 @@ void base_counter::start( COUNTERS type )
         case i_counter::USER2:
             user_state2 = STATES::S_WORK;
             break;
-        default:
-            break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -3339,10 +3335,6 @@ void base_counter::reset( COUNTERS type )
 
         case i_counter::USER2:
             user_value2 = .0f;
-            break;
-
-        default:
-            value = .0f;
             break;
         }    
     }
