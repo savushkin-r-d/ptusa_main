@@ -4362,8 +4362,8 @@ class base_counter: public i_counter, public device, public io_device
         STATES prev_error_state = STATES::S_WORK;
 
         STATES current_day_state = STATES::S_WORK;
-        STATES user_state1 = STATES::S_WORK;
-        STATES user_state2 = STATES::S_WORK;
+        STATES user_state1 = STATES::S_PAUSE;
+        STATES user_state2 = STATES::S_PAUSE;
 
         u_int_4 start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;

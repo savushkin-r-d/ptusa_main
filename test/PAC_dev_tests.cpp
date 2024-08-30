@@ -1367,25 +1367,15 @@ TEST( counter_iolink, get_quantity )
         
     const auto RAW_VALUE_1 = START_RAW_VALUE + 10;
     fqt1.set_raw_value( RAW_VALUE_1 );
-    fqt1.evaluate_io();    
+    fqt1.evaluate_io();
     const auto NEW_VALUE_1 = counter_iolink::mL_in_L * START_RAW_VALUE;
     // Second read - should be 10'000.
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity() );
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_abs_quantity() );
-
-
-    fqt1.off();
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity() );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
-    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_abs_quantity() );
 
     fqt1.pause();
@@ -1398,16 +1388,20 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
-    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( NEW_VALUE_2, fqt1.get_abs_quantity() );
 
-    fqt1.on();
+    fqt1.start( i_counter::MAIN );
+    fqt1.start( i_counter::USER1 );
+    fqt1.start( i_counter::USER2 );
     const auto NEW_VALUE_3 = counter_iolink::mL_in_L * RAW_VALUE_2;
     const auto RAW_VALUE_3 = START_RAW_VALUE + 30;
     fqt1.set_raw_value( RAW_VALUE_3 );
     fqt1.evaluate_io();
     EXPECT_EQ( NEW_VALUE_2, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( NEW_VALUE_3, fqt1.get_abs_quantity() );
 
 
