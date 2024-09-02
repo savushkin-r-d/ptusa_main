@@ -147,13 +147,13 @@ long device_communicator::write_devices_states_service(
             printf( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
             int res;
-            if ( strstr((char*) (data + 1), "__RECMAN") != nullptr)
+            if ( strstr(reinterpret_cast<char*>(data + 1), "__RECMAN") != nullptr)
                 {
-                res = G_PARAMS_RECIPE_MANAGER()->getInstance()->parseDriverCmd(( char * ) data + 1);
+                res = G_PARAMS_RECIPE_MANAGER()->getInstance()->parseDriverCmd(reinterpret_cast<char*>(data) + 1);
                 }
-                else
+            else
                 {
-                res = lua_manager::get_instance( )->exec_Lua_str(( char * ) data + 1,
+                res = lua_manager::get_instance( )->exec_Lua_str(reinterpret_cast<char*>(data) + 1,
                                                                      "CMD_EXEC_DEVICE_COMMAND " );
                 }
 
