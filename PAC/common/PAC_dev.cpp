@@ -8468,3 +8468,8 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 #ifdef WIN_OS
 #pragma warning(pop)
 #endif // WIN_OS
+
+valve_iolink_gea::valve_iolink_gea( const char *dev_name ) : valve( true, true, dev_name, DT_V, V_IOLINK_GEA )
+    {
+    valves_gea.push_back( this );
+    }

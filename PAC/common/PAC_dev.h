@@ -2382,6 +2382,22 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
             };
     };
 //-----------------------------------------------------------------------------
+/// @brief Клапан IO-Link GEA
+class valve_iolink_gea : public valve_iolink_mix_proof, public valve {
+public:
+    valve_iolink_gea( const char *dev_name );
+
+    ~valve_iolink_gea();
+
+    void open_upper_seat() override;
+
+    void open_lower_seat() override;
+
+private:
+    static std::vector< valve_iolink_gea * > valves_gea;
+
+    };
+//-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
 class valve_iolink_shut_off_thinktop : public valve
     {
