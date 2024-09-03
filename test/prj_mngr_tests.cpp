@@ -1,4 +1,5 @@
 #include <array>
+#include <iomanip>
 
 #include "prj_mngr_tests.h"
 #include "lua_manager.h"
