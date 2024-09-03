@@ -21,7 +21,8 @@ TEST( OPCUA_server, evaluate )
     auto res = G_OPCUA_SERVER.start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res  );
     res = G_OPCUA_SERVER.start();
-    EXPECT_EQ( UA_STATUSCODE_GOOD, res );   //Correct start() even call again.
+    // Bad start() when call again.
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
 
     G_OPCUA_SERVER.evaluate();
     
