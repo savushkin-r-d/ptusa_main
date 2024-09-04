@@ -13,8 +13,8 @@
 
 #include <fmt/chrono.h>
 
-const std::array <const char* const, operation::STATES_MAX> operation::state_str;
-const std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
+constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
+constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
     name( name ),
