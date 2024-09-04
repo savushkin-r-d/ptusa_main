@@ -459,6 +459,7 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_VTUG_DO1_FB_ON,  ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (включенное состояние).
 
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
+            V_IOLINK_GEA,            ///< Клапан, такой же как mixproof
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
           
@@ -2383,18 +2384,12 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link GEA
-class valve_iolink_gea : public valve_iolink_mix_proof, public valve {
+class valve_iolink_gea :public i_mix_proof, public valve {
 public:
     valve_iolink_gea( const char *dev_name );
 
-    ~valve_iolink_gea();
-
-    void open_upper_seat() override;
-
-    void open_lower_seat() override;
-
 private:
-    static std::vector< valve_iolink_gea * > valves_gea;
+    std::vector< valve_iolink_gea * > valves_gea;
 
     };
 //-----------------------------------------------------------------------------
