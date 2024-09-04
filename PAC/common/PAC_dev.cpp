@@ -7264,6 +7264,19 @@ float concentration_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int concentration_e_ok::save_device_ex( char* buff )
+    {
+    int res = 0;
+#ifdef DEBUG_NO_IO_MODULES
+    res = sprintf( buff, "OK=1, " );
+#else
+    res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
+        get_DI( DI_INDEX ) ).size );
+#endif //DEBUG_NO_IO_MODULES
+    return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     analog_io_device( dev_name,
     DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 ),

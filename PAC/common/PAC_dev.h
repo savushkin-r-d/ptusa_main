@@ -3199,17 +3199,7 @@ class concentration_e_ok : public concentration_e
 #endif
             }
 
-        int save_device_ex( char *buff )
-            {
-            int res = 0;
-#ifdef DEBUG_NO_IO_MODULES
-            res = sprintf( buff, "OK=1, " );
-#else
-            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
-                get_DI( DI_INDEX ) ).size );
-#endif //DEBUG_NO_IO_MODULES
-            return res;
-            }
+        int save_device_ex( char* buff );
 
     private:
         enum CONSTANTS
