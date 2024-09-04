@@ -2332,9 +2332,8 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
         // превышения ограничения длины.
         const unsigned int OFFSET = 4;
 
-        auto t = std::chrono::seconds{ step_max_time };
         auto res = fmt::format_to_n( err_dev_name, str_len - 1 - OFFSET,
-            "превышено макс. t ({:%T}) шага {} \'{}\'", t, step_n + 1,
+            "превышено макс. t ({} с) шага {} \'{}\'", step_max_time, step_n + 1,
             steps[ step_n ]->get_name() );
         *res.out = '\0';
         if ( res.size > str_len )
