@@ -326,6 +326,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         /// @param idx - последовательный номер, >= 1.
         void set_serial_idx( u_int idx );
 
+        std::string lastLoadedRecipeName = "Не выбран";
+        int lastLoadedRecipeNmr = 0;
+
     protected:
         u_int serial_idx;           ///< Последовательный индекс объекта (с 1).
 

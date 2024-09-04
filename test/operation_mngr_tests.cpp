@@ -560,7 +560,7 @@ TEST( operation, check_max_step_time )
     const unsigned int ERR_STR_SIZE = 80;
     char err_str[ ERR_STR_SIZE ] = {};
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
-    const auto RES_STR = "превышено макс. t (00:00:01) шага 1 'Тестовый пе...'";
+    const auto RES_STR = "превышено макс. t (1 с) шага 1 'Тестовый перв...'";
     EXPECT_STREQ( RES_STR, err_str );
 
 	test_tank.evaluate();
@@ -577,7 +577,7 @@ TEST( operation, check_max_step_time )
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 	sleep_ms( 1001 );
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
-    const auto RES_STR_EX = "превышено макс. t (00:00:01) шага 2 'Eval #1'";
+    const auto RES_STR_EX = "превышено макс. t (1 с) шага 2 'Eval #1'";
     EXPECT_STREQ( RES_STR_EX, err_str );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );

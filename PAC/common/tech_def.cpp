@@ -812,6 +812,10 @@ int tech_object::save_device( char *buff )
 
     //Состояние и команда.
     res += sprintf( buff + res, "\tCMD=%lu,\n", ( u_long ) cmd );
+    //Номер последнего загруженного рецепта.
+    res += sprintf( buff + res, "\tLASTRECNMR=%d,\n", lastLoadedRecipeNmr );
+    //Имя последнего загруженного рецепта.
+    res += sprintf( buff + res, "\tLASTRECNAME='%s',\n", lastLoadedRecipeName.c_str() );
     res += sprintf( buff + res, "\tST=\n\t\t{\n\t\t" );
 
     for ( u_int i = 0; i < state.size(); i++ )

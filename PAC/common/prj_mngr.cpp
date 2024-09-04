@@ -11,6 +11,7 @@
 #include "bus_coupler_io.h"
 #include "PAC_dev.h"
 #include "param_ex.h"
+#include "params_recipe_manager.h"
 
 #include "lua_manager.h"
 
@@ -301,6 +302,8 @@ int project_manager::lua_load_configuration()
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
     G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
+
+    G_DEVICE_CMMCTR->add_device( ParamsRecipeManager::getInstance());
 
     if ( G_DEBUG )
         {
