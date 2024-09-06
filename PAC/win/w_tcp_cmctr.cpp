@@ -332,8 +332,7 @@ int tcp_communicator_win::evaluate()
             return -1;           
             }
 
-        auto size = sst.size();
-        for ( u_int i = 0; i < size; i++ )  /* scan all possible sockets */
+        for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
             {
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
@@ -414,6 +413,7 @@ int tcp_communicator_win::evaluate()
                     memcpy( &slave_socket_state.sin, &ssin, sin_len );
 
                     sst.push_back( slave_socket_state );
+                    FD_SET( sst.back().socket, &rfds );
                     }
                 else         /* slave socket */
                     {
