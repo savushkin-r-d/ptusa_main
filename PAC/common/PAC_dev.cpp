@@ -228,12 +228,42 @@ void device::print() const
     printf( "%s\t", name );
     }
 //-----------------------------------------------------------------------------
+void device::direct_off()
+    {
+    state = 0;
+    }
+//-----------------------------------------------------------------------------
+void device::direct_on()
+    {
+    state = 1;
+    }
+//-----------------------------------------------------------------------------
+void device::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+//-----------------------------------------------------------------------------
+void device::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+//-----------------------------------------------------------------------------
 void device::off()
     {
     if ( !get_manual_mode() )
         {
         direct_off();
         }
+    }
+//-----------------------------------------------------------------------------
+int device::get_state()
+    {
+    return state;
+    }
+//-----------------------------------------------------------------------------
+float device::get_value()
+    {
+    return value;
     }
 //-----------------------------------------------------------------------------
 void device::set_string_property( const char* field, const char* value )
@@ -3639,59 +3669,16 @@ float counter_iolink::get_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float digital_io_device::get_value()
-    {
-    return ( float ) get_state();
-    }
-//-----------------------------------------------------------------------------
-void digital_io_device::direct_set_value( float new_value )
-    {
-    direct_set_state( ( int ) new_value );
-    }
-//-----------------------------------------------------------------------------
-void digital_io_device::direct_set_state( int new_state )
-    {
-#ifdef DEBUG_NO_IO_MODULES
-    state = new_state;
-#else
-    if ( new_state )
-        {
-        direct_on();
-        }
-    else direct_off();
-#endif //DEBUG_NO_IO_MODULES
-    }
-//-----------------------------------------------------------------------------
 void digital_io_device::print() const
     {
     device::print();
     //io_device::print();
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
-int digital_io_device::get_state()
-    {
-    return state;
-    }
-//-----------------------------------------------------------------------------
-void digital_io_device::direct_on()
-    {
-    state = 1;
-    }
-//-----------------------------------------------------------------------------
-void digital_io_device::direct_off()
-    {
-    state = 0;
-    }
-#endif // DEBUG_NO_IO_MODULES
-//-----------------------------------------------------------------------------
 digital_io_device::digital_io_device( const char *dev_name, device::DEVICE_TYPE type,
                                          device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
     device( dev_name, type, sub_type, par_cnt ),
     io_device( dev_name )
-#ifdef DEBUG_NO_IO_MODULES
-    , state( 0 )
-#endif // DEBUG_NO_IO_MODULES
     {
     }
 //-----------------------------------------------------------------------------
@@ -3792,9 +3779,8 @@ int valve::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 int valve::get_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return digital_io_device::get_state();
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        return digital_io_device::get_state();
 
     switch ( get_valve_state() )
         {
@@ -3978,19 +3964,14 @@ int valve::get_state()
         }
 
     return VX_UNKNOWN;
-
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
 int valve::set_cmd( const char *prop, u_int idx, double val )
     {
-    printf( "valve::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        prop, idx, val );
-
-    switch ( prop[ 0 ] )
+    if ( G_PAC_INFO()->is_emulator() )
         {
-        case 'F':
+        if ( prop[ 0 ] == 'F' )
+            {
             if ( strcmp( prop, "FB_ON_ST" ) == 0 )
                 {
                 on_fb = val != .0;
@@ -3999,15 +3980,12 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
                 {
                 off_fb = val != .0;
                 }
-            break;
-
-        default:
-            device::set_cmd( prop, idx, val );
+            return 0;
+            }
         }
 
-    return 0;
+    return device::set_cmd( prop, idx, val );
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 void valve::evaluate()
     {
@@ -5434,17 +5412,20 @@ inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val
 #endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 void DI1::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
     }
 //-----------------------------------------------------------------------------
 void DI1::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
     }
 //-----------------------------------------------------------------------------
 int DI1::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
+
     u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
 
     if ( dt > 0 )
@@ -5466,32 +5447,6 @@ int DI1::get_state()
 
     return current_state;
     }
-//-----------------------------------------------------------------------------
-#else
-int DI1::get_state()
-    {
-    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
-
-    if ( dt > 0 )
-        {
-        if ( current_state != digital_io_device::get_state() )
-            {
-            if ( get_delta_millisec( time ) > dt  )
-                {
-                current_state = digital_io_device::get_state();
-                time = get_millisec();
-                }
-            }
-        else
-            {
-            time = get_millisec();
-            }
-        }
-    else current_state = digital_io_device::get_state();
-
-    return current_state;
-    }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iol_terminal_DO1_DI2::valve_iol_terminal_DO1_DI2( const char* dev_name ) :
@@ -7370,31 +7325,12 @@ float analog_input::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void analog_io_device::direct_set_state( int new_state )
-    {
-    direct_set_value( ( float ) new_state );
-    }
-//-----------------------------------------------------------------------------
-int analog_io_device::get_state()
-    {
-    return ( int ) get_value();
-    }
-//-----------------------------------------------------------------------------
 void analog_io_device::print() const
     {
     device::print();
     //io_device::print();
     }
 //-----------------------------------------------------------------------------
-void analog_io_device::direct_on()
-    {
-    }
-//-----------------------------------------------------------------------------
-void analog_io_device::direct_off()
-    {
-    direct_set_value( 0 );
-    }
-
 int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
@@ -7436,19 +7372,12 @@ int analog_io_device::save_device_ex( char* buff )
     return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
-
 float analog_io_device::get_value()
     {
     if ( is_emulation() ) return get_emulator().get_value();
-    else return value;
+    
+    return device::get_value();
     }
-//-----------------------------------------------------------------------------
-void analog_io_device::direct_set_value( float new_value )
-    {
-    value = new_value;
-    }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int timer::save( char *buff )
@@ -7874,6 +7803,11 @@ valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
 //---------------------------------------------------------------------------
 void valve_AS_DO1_DI2::direct_set_state(int new_state)
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return valve_AS::direct_set_state( new_state );        
+        }
+
     switch ( new_state )
         {
         case (int) VALVE_STATE::V_UPPER_SEAT:

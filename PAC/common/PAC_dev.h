@@ -660,10 +660,26 @@ class device : public i_DO_AO_device, public par_device
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void direct_off() = 0;
+        virtual void direct_off();
+
+        virtual void direct_on();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_set_value( float new_value );
 
         /// @brief Выключение устройства с учетом ручного режима.
-        void off();
+        virtual void off();
+
+        /// @brief Получение состояния устройства.
+        ///
+        /// @return состояние устройства в виде целого числа.
+        virtual int get_state();
+
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
+        virtual float get_value();
 
         /// @brief Вывод объекта в консоль.
         ///
@@ -768,6 +784,9 @@ class device : public i_DO_AO_device, public par_device
 
         bool emulation = false;
         analog_emulator emulator;
+    
+        int state = 0;      ///< Состояние устройства.
+        float value = .0f;  ///< Значение устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -782,26 +801,7 @@ class digital_io_device : public device,
 
         virtual ~digital_io_device();
 
-        float   get_value();
-        void    direct_set_value( float new_value );
-        void    direct_set_state( int new_state );
-
-#ifdef DEBUG_NO_IO_MODULES
-        /// @brief Получение состояния объекта.
-        ///
-        /// @return - состояние объекта.
-        int  get_state();
-
-        void direct_on();
-        void direct_off();
-#endif // DEBUG_NO_IO_MODULES
-
         virtual void print() const;
-
-#ifdef DEBUG_NO_IO_MODULES
-    private:
-        int state;  ///< Состояние устройства.
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.
@@ -819,29 +819,12 @@ class analog_io_device : public device, public io_device
             {
             }
 
-        void  direct_set_state( int new_state );
-        int   get_state();
-
-        virtual void  print() const;
-        void  direct_on();
-        void  direct_off();
+        void print() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
         int save_device_ex( char* buff ) override;
 
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
-        void  direct_set_value( float new_value );
-
-#else  // DEBUG_NO_IO_MODULES
-        float get_value() = 0;
-
-#endif // DEBUG_NO_IO_MODULES
-
-#ifdef DEBUG_NO_IO_MODULES
-    private:
-        float value = .0f;    ///< Состояние устройства.
-#endif // DEBUG_NO_IO_MODULES
+        float get_value() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -980,9 +963,7 @@ class valve: public digital_io_device
         /// связи, ручного режима, ...).
         int get_state() override;
 
-#ifdef DEBUG_NO_IO_MODULES
-        int set_cmd( const char *prop, u_int idx, double val );
-#endif // DEBUG_NO_IO_MODULES
+        int set_cmd( const char *prop, u_int idx, double val ) override;
 
         ///Состояние клапана без учета обратной связи.
         enum VALVE_STATE
@@ -1010,13 +991,9 @@ class valve: public digital_io_device
 
         /// @brief Получение состояния клапана без учета обратной связи.
         virtual VALVE_STATE get_valve_state()
-#ifdef DEBUG_NO_IO_MODULES
             {
             return (VALVE_STATE)digital_io_device::get_state();
             }
-#else
-            = 0;
-#endif // DEBUG_NO_IO_MODULES
 
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state()
@@ -1718,7 +1695,7 @@ class valve_AS : public valve
         /// @brief Получение данных состояния устройства.
         char get_state_data( char* data )
             {
-            if ( data == 0 )
+            if ( data == nullptr )
                 {
                 return 0;
                 }
@@ -1940,6 +1917,11 @@ class valve_AS : public valve
 
         void direct_set_state( int new_state )
             {
+            if ( G_PAC_INFO()->is_emulator() )
+                {
+                return valve::direct_set_state( new_state );
+                }
+
             int offset = 0;
             //Для первого 31-го устройства четный номер - старшие четыре
             //бита (1), для остальных устройств нечетный номер - старшие четыре
@@ -3774,29 +3756,20 @@ class DI1 : public digital_io_device
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val = 0 ):
         digital_io_device( dev_name, type, sub_type,
             ADDITIONAL_PARAMS_COUNT + par_cnt ),
-            current_state( current_state_init_val ),
-            time( 0 )
+            current_state( current_state_init_val )
             {
             set_par_name( P_DT,  0, "P_DT" );
             }
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
+        void direct_on() override;
 
-        int get_state();
-#else
-        /// @brief Получение состояния объекта.
-        ///
-        /// @return - состояние объекта.
-        int  get_state();
-#endif // DEBUG_NO_IO_MODULES
+        void direct_off() override;
 
+        int get_state() override;
 
     private:
         int current_state;
-        u_int_4 time;
+        u_int_4 time = 0;
 
         enum CONSTANTS
             {
