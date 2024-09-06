@@ -433,7 +433,6 @@ int tcp_communicator_linux::evaluate()
                         }
 
                     sst.push_back(slave_socket_state);
-                    FD_SET( sst.back().socket, &rfds );
                     }
                 else         /* slave socket */
                     {

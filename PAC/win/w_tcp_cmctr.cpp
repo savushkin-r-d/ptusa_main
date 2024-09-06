@@ -413,7 +413,6 @@ int tcp_communicator_win::evaluate()
                     memcpy( &slave_socket_state.sin, &ssin, sin_len );
 
                     sst.push_back( slave_socket_state );
-                    FD_SET( sst.back().socket, &rfds );
                     }
                 else         /* slave socket */
                     {
