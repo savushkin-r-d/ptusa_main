@@ -928,6 +928,16 @@ TEST( valve_DO2, get_fb_state )
     EXPECT_EQ( true, V2.get_fb_state() );
     }
 
+
+TEST( valve_AS_DO1_DI2, direct_set_state )
+    {
+    valve_AS_DO1_DI2 v1( "V1" );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_state() );
+    v1.direct_set_state( 1 );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON,v1.get_state() );
+    }
+
+
 TEST( level_s, is_active )
     {
     level_s LS1( "LS1", device::DST_LS_MAX );    
