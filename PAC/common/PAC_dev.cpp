@@ -231,6 +231,7 @@ void device::print() const
 void device::direct_off()
     {
     state = 0;
+    value = 0;
     }
 //-----------------------------------------------------------------------------
 void device::direct_on()
@@ -5419,7 +5420,7 @@ void DI1::direct_on()
 //-----------------------------------------------------------------------------
 void DI1::direct_off()
     {
-    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
+    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
 int DI1::get_state()
