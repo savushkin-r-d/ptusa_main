@@ -267,13 +267,13 @@ float device::get_value()
     return value;
     }
 //-----------------------------------------------------------------------------
-void device::set_string_property( const char* field, const char* value )
+void device::set_string_property( const char* field, const char* new_value )
     {
     if ( G_DEBUG )
         {
         G_LOG->debug( "%s\t device::set_string_property() - "
             "field = %s, val = \"%s\"",
-            name, field, value );
+            name, field, new_value );
         }
     }
 //-----------------------------------------------------------------------------
@@ -3818,8 +3818,6 @@ int valve::get_state()
                 {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
-                    //start_switch_time = get_millisec();
-
                     if ( get_manual_mode() )
                         {
                         return VX_ON_FB_OFF_MANUAL;
@@ -3835,8 +3833,6 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            //start_switch_time = get_millisec();
-
                             return VX_ON_FB_OK_MANUAL;
                             }
                         else
@@ -3855,8 +3851,6 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            //start_switch_time = get_millisec();
-
                             return VX_ON_FB_OK;
                             }
                         else
@@ -3891,8 +3885,6 @@ int valve::get_state()
                 {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
-                    //start_switch_time = get_millisec();
-
                     if ( get_manual_mode() )
                         {
                         return VX_OFF_FB_OFF_MANUAL;
@@ -3908,8 +3900,6 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            //start_switch_time = get_millisec();
-
                             return VX_OFF_FB_OK_MANUAL;
                             }
                         else
@@ -3928,8 +3918,6 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            //start_switch_time = get_millisec();
-
                             return VX_OFF_FB_OK;
                             }
                         else
@@ -7223,12 +7211,17 @@ float concentration_e::get_min_val()
 int concentration_e_ok::save_device_ex( char* buff )
     {
     int res = 0;
-#ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "OK=1, " );
-#else
-    res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
-        get_DI( DI_INDEX ) ).size );
-#endif //DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE,
+            "OK={1}, " ).size );
+        }
+    else
+        {
+        res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "OK={}, ",
+            get_DI( DI_INDEX ) ).size );
+        }
+
     return res;
     }
 //-----------------------------------------------------------------------------

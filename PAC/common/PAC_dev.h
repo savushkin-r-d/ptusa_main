@@ -368,7 +368,7 @@ class device : public i_DO_AO_device, public par_device
         /// @param prop - свойство объекта.
         /// @param idx  - индекс свойства.
         /// @param val  - значение.
-        virtual int set_cmd( const char *prop, u_int idx, double val );
+        int set_cmd( const char *prop, u_int idx, double val ) override;
 
         /// @brief Выполнение команды.
         ///
@@ -377,7 +377,7 @@ class device : public i_DO_AO_device, public par_device
         /// @param prop - свойство объекта.
         /// @param idx  - индекс свойства.
         /// @param val  - значение.
-        virtual int set_cmd( const char *prop, u_int idx, char *val );
+        int set_cmd( const char *prop, u_int idx, char *val ) override;
 
         /// @brief Сохранение устройства в виде скрипта Lua.
         ///
@@ -662,24 +662,24 @@ class device : public i_DO_AO_device, public par_device
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void direct_off();
 
-        virtual void direct_on();
+        void direct_on() override;
 
-        virtual void direct_set_state( int new_state );
+        void direct_set_state( int new_state ) override;
 
-        virtual void direct_set_value( float new_value );
+        void direct_set_value( float new_value ) override;
 
         /// @brief Выключение устройства с учетом ручного режима.
-        virtual void off();
+        void off() override;
 
         /// @brief Получение состояния устройства.
         ///
         /// @return состояние устройства в виде целого числа.
-        virtual int get_state();
+        int get_state() override;
 
         /// @brief Получение текущего состояния устройства.
         ///
         /// @return - текущее состояние устройства в виде дробного числа.
-        virtual float get_value();
+        float get_value() override;
 
         /// @brief Вывод объекта в консоль.
         ///
@@ -726,7 +726,7 @@ class device : public i_DO_AO_device, public par_device
         /// строки.
         ///
         /// Для использования в Lua.
-        virtual void set_string_property( const char* field, const char* value );
+        virtual void set_string_property( const char* field, const char* new_value );
 
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
         ///
@@ -3181,7 +3181,7 @@ class concentration_e_ok : public concentration_e
 #endif
             }
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) override;
 
     private:
         enum CONSTANTS
