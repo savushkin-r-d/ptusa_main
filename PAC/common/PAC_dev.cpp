@@ -484,24 +484,26 @@ device::~device()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
 int DO1::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
+
     return get_DO( DO_INDEX );
     }
 //-----------------------------------------------------------------------------
 void DO1::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_on();
+
     set_DO( DO_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
 void DO1::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
+
     set_DO( DO_INDEX, 0 );
     }
-
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
@@ -544,65 +546,65 @@ void signal_column::direct_on()
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_red()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( red_lamp_channel, DO_state::OFF, RED_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( red_lamp_channel, DO_state::OFF, RED_LAMP );
+
     red.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_yellow()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( yellow_lamp_channel, DO_state::OFF, YELLOW_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( yellow_lamp_channel, DO_state::OFF, YELLOW_LAMP );
+
     yellow.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_green()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( green_lamp_channel, DO_state::OFF, GREEN_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( green_lamp_channel, DO_state::OFF, GREEN_LAMP );
+
     green.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_blue()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
+
     blue.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+
     red.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_yellow()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( yellow_lamp_channel, DO_state::ON, YELLOW_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( yellow_lamp_channel, DO_state::ON, YELLOW_LAMP );
+
     yellow.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_green()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
+
     green.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_blue()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
+
     blue.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
@@ -614,9 +616,9 @@ void signal_column::normal_blink_red()
         }
     else
         {
-#ifndef DEBUG_NO_IO_MODULES
-        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+        if ( !G_PAC_INFO()->is_emulator() )
+            process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+
         red.step = STEP::on;
         }
     }
@@ -644,9 +646,9 @@ void signal_column::slow_blink_red()
         }
     else
         {
-#ifndef DEBUG_NO_IO_MODULES
-        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
-#endif // DEBUG_NO_IO_MODULES
+        if ( !G_PAC_INFO()->is_emulator() )
+            process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+
         red.step = STEP::on;
         }
     }
@@ -669,17 +671,15 @@ void signal_column::slow_blink_blue()
 void signal_column::turn_on_siren()
     {
     siren_step = STEP::blink_on;
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( siren_channel, DO_state::ON, SIREN );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( siren_channel, DO_state::ON, SIREN );
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_siren()
     {
     siren_step = STEP::off;
-#ifndef DEBUG_NO_IO_MODULES
-    process_DO( siren_channel, DO_state::OFF, SIREN );
-#endif // DEBUG_NO_IO_MODULES
+    if ( !G_PAC_INFO()->is_emulator() )
+        process_DO( siren_channel, DO_state::OFF, SIREN );
     }
 //-----------------------------------------------------------------------------
 void signal_column::set_rt_par( u_int idx, float value )
@@ -972,9 +972,7 @@ signal_column_discrete::signal_column_discrete( const char* dev_name,
 //-----------------------------------------------------------------------------
 void signal_column_discrete::process_DO( u_int n, DO_state state, const char* name )
     {
-#ifndef DEBUG_NO_IO_MODULES
     set_DO( n - 1, static_cast<char>( state ) );
-#endif
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1023,7 +1021,6 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
 //-----------------------------------------------------------------------------
 void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name )
     {
-#ifndef DEBUG_NO_IO_MODULES
     bool ch_state = state == DO_state::ON;
     switch ( n )
         {
@@ -1053,15 +1050,12 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
                 "unknown \'%s\'.", get_name(), name );
             break;
         }
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void signal_column_iolink::evaluate_io()
     {
-#ifndef DEBUG_NO_IO_MODULES
     signal_column::evaluate_io();
     out_info = (out_data*)get_AO_write_data( 0 );
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1070,51 +1064,41 @@ camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     device( dev_name, DT_CAM, sub_type, params_count ),
     io_device( dev_name ),
     is_cam_ready( is_ready ),
-    result( 0 ),
-    state( 0 )
+    result( 0 )
     {
     }
 
 void camera::direct_set_state( int new_state )
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( new_state );
+        }
+
     if ( new_state ) direct_on(); else direct_off();
     }
 
 void camera::direct_off()
     {
-#ifndef DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_off();
+
     set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 0 );
-#endif
-    state = 0;
     }
 
 void camera::direct_on()
     {
-#ifndef DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
+
     set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 1 );
-#endif
-    state = 1;
-    }
-
-void camera::direct_set_value( float new_value )
-    {
-    }
-
-int camera::get_state()
-    {
-    return state;
-    }
-
-float camera::get_value()
-    {
-    return static_cast<float>( state );
     }
 
 int camera::get_result( int n )
     {
-#ifndef DEBUG_NO_IO_MODULES
-    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
-#endif
+    if ( !G_PAC_INFO()->is_emulator() )
+        {
+        result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
+        }
+
     return result;
     }
 
@@ -1168,27 +1152,28 @@ camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
 
 void camera_DI2::evaluate_io()
     {
-#ifndef DEBUG_NO_IO_MODULES
-    int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
-    int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
+    if ( !G_PAC_INFO()->is_emulator() )
+        {
+        int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
+        int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
 
-    if ( 1 == i )
-        {
-        start_switch_time = get_millisec();
-        state = o;
-        }
-    else if ( get_delta_millisec( start_switch_time ) <
-        get_par( static_cast<u_int>( PARAMS::P_READY_TIME ), 0 ) )
-        {
-        state = o;
-        }
-    else
-        {
-        state = -1;
-        }
+        if ( 1 == i )
+            {
+            start_switch_time = get_millisec();
+            camera::direct_set_state( o );
+            }
+        else if ( get_delta_millisec( start_switch_time ) <
+            get_par( static_cast<u_int>( PARAMS::P_READY_TIME ), 0 ) )
+            {
+            camera::direct_set_state( o );
+            }
+        else
+            {
+            camera::direct_set_state( -1 );
+            }
 
-    is_cam_ready = i > 0;
-#endif
+        is_cam_ready = i > 0;
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1201,9 +1186,11 @@ camera_DI3::camera_DI3( const char* dev_name ) :
 void camera_DI3::evaluate_io()
     {
     camera_DI2::evaluate_io();
-#ifndef DEBUG_NO_IO_MODULES
-    result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
-#endif
+
+    if ( !G_PAC_INFO()->is_emulator() )
+        {
+        result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
+        }
     }
 
 int camera_DI3::get_result( int n )
@@ -2946,17 +2933,18 @@ void power_unit::direct_on()
     p_data_out->switch_ch7 = true;
     p_data_out->switch_ch8 = true;
 
-#ifdef DEBUG_NO_IO_MODULES
-    p_data_in.status_ch1 = true;
-    p_data_in.status_ch2 = true;
-    p_data_in.status_ch3 = true;
-    p_data_in.status_ch4 = true;
-    p_data_in.status_ch5 = true;
-    p_data_in.status_ch6 = true;
-    p_data_in.status_ch7 = true;
-    p_data_in.status_ch8 = true;
-    st = 1;
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        p_data_in.status_ch1 = true;
+        p_data_in.status_ch2 = true;
+        p_data_in.status_ch3 = true;
+        p_data_in.status_ch4 = true;
+        p_data_in.status_ch5 = true;
+        p_data_in.status_ch6 = true;
+        p_data_in.status_ch7 = true;
+        p_data_in.status_ch8 = true;
+        st = 1;
+        }
 
     is_processing_cmd = true;
     cmd_time = get_millisec();
@@ -2973,17 +2961,18 @@ void power_unit::direct_off()
     p_data_out->switch_ch7 = false;
     p_data_out->switch_ch8 = false;
 
-#ifdef DEBUG_NO_IO_MODULES
-    p_data_in.status_ch1 = false;
-    p_data_in.status_ch2 = false;
-    p_data_in.status_ch3 = false;
-    p_data_in.status_ch4 = false;
-    p_data_in.status_ch5 = false;
-    p_data_in.status_ch6 = false;
-    p_data_in.status_ch7 = false;
-    p_data_in.status_ch8 = false;
-    st = 0;
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        p_data_in.status_ch1 = false;
+        p_data_in.status_ch2 = false;
+        p_data_in.status_ch3 = false;
+        p_data_in.status_ch4 = false;
+        p_data_in.status_ch5 = false;
+        p_data_in.status_ch6 = false;
+        p_data_in.status_ch7 = false;
+        p_data_in.status_ch8 = false;
+        st = 0;
+        }
 
     is_processing_cmd = true;
     cmd_time = get_millisec();
@@ -3014,60 +3003,43 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
         return 0;
         }
     auto new_st = static_cast<bool>( val );
-#ifdef DEBUG_NO_IO_MODULES
-    auto status = static_cast<int8_t>( val );
-#endif
+    auto status = static_cast<int8_t>( val );    
+
     if ( strcmp( prop, "ST_CH" ) == 0 )
         {
         switch ( idx )
             {
             case 1:
                 p_data_out->switch_ch1 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch1 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch1 = status;
                 break;
             case 2:
                 p_data_out->switch_ch2 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch2 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch2 = status;
                 break;
             case 3:
                 p_data_out->switch_ch3 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch3 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch3 = status;
                 break;
             case 4:
                 p_data_out->switch_ch4 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch4 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch4 = status;
                 break;
             case 5:
                 p_data_out->switch_ch5 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch5 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch5 = status;
                 break;
             case 6:
                 p_data_out->switch_ch6 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch6 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch6 = status;
                 break;
             case 7:
                 p_data_out->switch_ch7 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch7 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch7 = status;
                 break;
             case 8:
                 p_data_out->switch_ch8 = new_st;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.status_ch8 = status;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) p_data_in.status_ch8 = status;
                 break;
 
             default:
@@ -3076,12 +3048,12 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
             }
         is_processing_cmd = true;
         cmd_time = get_millisec();
-#ifdef DEBUG_NO_IO_MODULES
-        st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
-            p_data_in.status_ch3 || p_data_in.status_ch4 ||
-            p_data_in.status_ch5 || p_data_in.status_ch6 ||
-            p_data_in.status_ch7 || p_data_in.status_ch8;
-#endif
+        if ( G_PAC_INFO()->is_emulator() )
+            st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
+                p_data_in.status_ch3 || p_data_in.status_ch4 ||
+                p_data_in.status_ch5 || p_data_in.status_ch6 ||
+                p_data_in.status_ch7 || p_data_in.status_ch8;
+
         return 0;
         }
 
@@ -3092,51 +3064,59 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
             {
             case 1:
                 p_data_out->nominal_current_ch1 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch1 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch1 = nom_curr;
+                    }
                 break;
             case 2:
                 p_data_out->nominal_current_ch2 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch2 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch2 = nom_curr;
+                    }
                 break;
             case 3:
                 p_data_out->nominal_current_ch3 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch3 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch3 = nom_curr;
+                    }
                 break;
             case 4:
                 p_data_out->nominal_current_ch4 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch4 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch4 = nom_curr;
+                    }
                 break;
             case 5:
                 p_data_out->nominal_current_ch5 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch5 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch5 = nom_curr;
+                    }
                 break;
             case 6:
                 p_data_out->nominal_current_ch6 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch6 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch6 = nom_curr;
+                    }
                 break;
             case 7:
                 p_data_out->nominal_current_ch7 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch7 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch7 = nom_curr;
+                    }
                 break;
             case 8:
                 p_data_out->nominal_current_ch8 = nom_curr;
-#ifdef DEBUG_NO_IO_MODULES
-                p_data_in.nominal_current_ch8 = nom_curr;
-#endif
+                if ( G_PAC_INFO()->is_emulator() )
+                    {
+                    p_data_in.nominal_current_ch8 = nom_curr;
+                    }
                 break;
 
             default:
@@ -3157,6 +3137,7 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
     io_device( dev_name )
     {
+    device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
@@ -3183,11 +3164,12 @@ int base_counter::get_state()
     // Насос работает (при его наличии) или расход выше минимального.
     else
         {
-        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
+        if ( device::get_state() == static_cast<int>( STATES::S_PAUSE ) ||
+            0 == start_pump_working_time )
             {
             start_pump_working_time = get_millisec();
             counter_prev_value = get_abs_quantity();
-            return static_cast<int>( state );
+            return device::get_state();
             }
 
         // Работа. 
@@ -3196,21 +3178,21 @@ int base_counter::get_state()
             {
             start_pump_working_time = get_millisec();
             counter_prev_value = get_abs_quantity();
-            state = STATES::S_WORK;
+            device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
             }
         else
             {
             auto dt = get_pump_dt();
             if ( get_delta_millisec( start_pump_working_time ) < dt )
                 {
-                return static_cast<int>( state );
+                return device::get_state();
                 }
 
-            state = STATES::S_ERROR;
+            device::direct_set_state( static_cast<int>( STATES::S_ERROR ) );
             }
         }
 
-    return static_cast<int>( state );
+    return device::get_state();
     };
 //-----------------------------------------------------------------------------
 void base_counter::direct_on()
@@ -3224,13 +3206,11 @@ void base_counter::direct_off()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    if ( new_state < 0 )
+    if ( G_PAC_INFO()->is_emulator() )
         {
-        state = static_cast<STATES>( new_state );
+        device::direct_set_state( new_state );
         return;
         }
-#endif
     
     switch ( new_state )
         {
@@ -3322,21 +3302,21 @@ void base_counter::pause()
     {
     get_quantity(); // Пересчитываем значение счетчика.
 
-    state = STATES::S_PAUSE;
+    device::direct_set_state( static_cast<int>( STATES::S_PAUSE ) );
     }
 //-----------------------------------------------------------------------------
 void base_counter::start()
     {
-    if ( STATES::S_PAUSE == state )
+    if ( static_cast<int>( STATES::S_PAUSE ) == device::get_state() )
         {
-        state = STATES::S_WORK;
+        device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         last_read_value = get_raw_value();
         start_pump_working_time = 0;
         }
-    else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
+    else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
         start_pump_working_time = 0;
-        state = STATES::S_WORK;
+        device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     }
 //-----------------------------------------------------------------------------
@@ -3393,19 +3373,19 @@ int base_counter::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
     {
-    if ( static_cast<int>( state ) < 0 )
+    if ( device::get_state() < 0 )
         {
-        switch ( state )
+        switch ( device::get_state() )
             {
-            case STATES::S_ERROR:
+            case static_cast<int>( STATES::S_ERROR ):
                 prev_error_state = STATES::S_ERROR;
                 return "счет импульсов";
 
-            case STATES::S_LOW_ERR:
+            case static_cast<int>( STATES::S_LOW_ERR ):
                 prev_error_state = STATES::S_LOW_ERR;
                 return "канал потока (нижний предел)";
 
-            case STATES::S_HI_ERR:
+            case static_cast<int>( STATES::S_HI_ERR ):
                 prev_error_state = STATES::S_HI_ERR;
                 return "канал потока (верхний предел)";
 
@@ -3442,11 +3422,12 @@ counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 float counter::get_raw_value() const
     {
-#ifndef DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return 0;
+        }
+
     return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
-#else
-    return 0;
-#endif
     }
 //-----------------------------------------------------------------------------
 float counter::get_max_raw_value() const
@@ -3496,12 +3477,16 @@ int counter_f::get_state()
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
-    return get_par( P_CZ, 0 ) +
-#ifdef DEBUG_NO_IO_MODULES
-        flow_value;
-#else
-        get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
-#endif // NO_WAGO_MODULES
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return get_par( P_CZ, 0 ) + flow_value;
+        }
+    else
+        {
+        return get_par( P_CZ, 0 ) +
+            get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ),
+            get_par( P_MAX_FLOW, 0 ) );
+        }
     }
 //-----------------------------------------------------------------------------
 int counter_f::save_device_ex( char *buff )
@@ -3590,10 +3575,14 @@ float counter_iolink::get_temperature() const
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
     {
-    IOLINKSTATE res = get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::AI_INDEX ) );
-    if ( res != io_device::IOLINKSTATE::OK )
+    if ( !G_PAC_INFO()->is_emulator() )
         {
-        return -static_cast<int>( res );
+        IOLINKSTATE res = get_AI_IOLINK_state( 
+            static_cast<u_int>( CONSTANTS::AI_INDEX ) );
+        if ( res != io_device::IOLINKSTATE::OK )
+            {
+            return -static_cast<int>( res );
+            }
         }
 
     return base_counter::get_state();
@@ -3688,10 +3677,26 @@ digital_io_device::~digital_io_device()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+valve_DO2::valve_DO2( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO2 )
+    {
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение состояния клапана без учета обратной связи.
+valve::VALVE_STATE valve_DO2::get_valve_state()
+    {
+    return (VALVE_STATE)get_state();
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение состояния обратной связи.
+bool valve_DO2::get_fb_state()
+    {
+    return true;
+    }
+//-----------------------------------------------------------------------------
 int valve_DO2::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
+
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
     if ( b1 == b2 ) return -1;
@@ -3700,17 +3705,19 @@ int valve_DO2::get_state()
 //-----------------------------------------------------------------------------
 void valve_DO2::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
 void valve_DO2::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
     }
-
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
@@ -4330,9 +4337,10 @@ void valve_iolink_mix_proof::open_lower_seat()
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return valve::get_valve_state();
+        }
 
     if ( in_info->de_en ) return V_OFF;
     if ( in_info->main ) return V_ON;
@@ -4340,7 +4348,6 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
     if ( in_info->lsp ) return V_LOWER_SEAT;
 
     return V_OFF;
-#endif // DEBUG_NO_IO_MODULES
     }
 
 //-----------------------------------------------------------------------------
@@ -4594,15 +4601,15 @@ valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name )
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return valve::get_valve_state();
+        }
 
     if ( in_info.de_en ) return V_OFF;
     if ( in_info.main ) return V_ON;
 
     return V_OFF;
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_sorio::evaluate_io()
@@ -4671,12 +4678,17 @@ float valve_iolink_shut_off_sorio::get_value()
     return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
 void valve_iolink_shut_off_sorio::direct_set_value( float new_value )
     {
-    in_info.pos = (int16_t)( new_value * 10 );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        in_info.pos = (int16_t)( new_value * 10 );
+        }
+    else
+        {
+        // Do nothing.
+        }
     }
-#endif
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_shut_off_sorio::get_fb_state()
@@ -4784,15 +4796,15 @@ valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return (VALVE_STATE)digital_io_device::get_state();
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return valve::get_valve_state();
+        }
 
     if (in_info->de_en) return V_OFF;
     if (in_info->main) return V_ON;
 
     return V_OFF;
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::evaluate_io()
@@ -5537,34 +5549,52 @@ int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value()
 AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) : analog_io_device( dev_name, type, sub_type,
         par_cnt + ADDITIONAL_PARAM_COUNT )
-#ifdef DEBUG_NO_IO_MODULES
-        ,st( 1 )
-#endif
     {
+    device::set_state( 1 );
     set_par_name( P_ZERO_ADJUST_COEFF, 0, "P_CZ" );
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
-
-float AI1::get_value()
+int AI1::get_state()
     {
-    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + analog_io_device::get_value();
-    }
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::get_state();
+        }
 
-#endif // DEBUG_NO_IO_MODULES
+    if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
+        {
+        return -2;
+        }
+    if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
+        {
+        return -3;
+        }
+    return 1;
+     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+int AI1::get_params_count() const
+    {
+    return ADDITIONAL_PARAM_COUNT;
+    }
+//-----------------------------------------------------------------------------
 float AI1::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return analog_io_device::get_value();
+        }
+
     return get_par( P_ZERO_ADJUST_COEFF, 0 ) +
         get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
 void AI1::direct_set_value( float new_value )
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_value( new_value );
+        }
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_analog::temperature_e_analog( const char* dev_name ) :
@@ -5579,9 +5609,11 @@ temperature_e_analog::temperature_e_analog( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 float temperature_e_analog::get_value()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return analog_io_device::get_value();
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return analog_io_device::get_value();
+        }
+
     float v = get_AI( C_AI_INDEX, 0, 0 );
     if ( v < 0 )
         {
@@ -5594,7 +5626,6 @@ float temperature_e_analog::get_value()
         v = get_AI( C_AI_INDEX, min, max );
         return get_par( P_ZERO_ADJUST_COEFF ) + v;
         }
-#endif
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES

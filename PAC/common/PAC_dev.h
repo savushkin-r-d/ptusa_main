@@ -839,18 +839,15 @@ class DO1 : public digital_io_device
             {
             }
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        int  get_state();
-        void direct_on();
-        void direct_off();
+        int  get_state() override;
+        void direct_on() override;
+        void direct_off() override;
 
     private:
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class valve_DO2_DI2_bistable;
@@ -2453,9 +2450,7 @@ class valve_iolink_shut_off_sorio : public valve
 
         float get_value() final;
 
-#ifdef DEBUG_NO_IO_MODULES
         void direct_set_value( float new_value ) final;
-#endif
 
 #ifndef DEBUG_NO_IO_MODULES
         bool get_fb_state();
@@ -2663,39 +2658,13 @@ class AI1 : public analog_io_device
         AI1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
+        int get_state();
 
-        void direct_set_state( int new_state )
-            {
-            st = new_state;
-            }
-#endif // DEBUG_NO_IO_MODULES
+        virtual int get_params_count() const;
 
-#ifndef DEBUG_NO_IO_MODULES
-        int get_state()
-            {
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
-                {
-                return -2;
-                }
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
-                {
-                return -3;
-                }
-            return 1;
-            }
-#else
-        int get_state()
-            {
-            return st;
-            }
-#endif
+        float get_value() override;
 
-        virtual int get_params_count() const
-            {
-            return ADDITIONAL_PARAM_COUNT;
-            }
+        void  direct_set_value( float new_value ) override;
 
     protected:
         enum CONSTANTS
@@ -2718,18 +2687,6 @@ class AI1 : public analog_io_device
             {
             return 0;
             }
-
-#ifdef DEBUG_NO_IO_MODULES
-    private:
-        int st = 0;
-#endif
-
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        float get_value();
-        void  direct_set_value( float new_value );
-
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Температура.
@@ -3824,30 +3781,17 @@ class valve_DO1 : public valve
 class valve_DO2 : public valve
     {
     public:
-        explicit valve_DO2( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO2 )
-            {
-            }
+        explicit valve_DO2( const char* dev_name );
+
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state() override
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            return ( VALVE_STATE ) get_state();
-#endif // DEBUG_NO_IO_MODULES
-            }
+        VALVE_STATE get_valve_state() override;
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override
-            {
-            return true;
-            }
+        bool get_fb_state() override;
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        int  get_state();
-        void direct_on();
-        void direct_off();
+        int  get_state() override;
+        void direct_on() override;
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -3855,7 +3799,6 @@ class valve_DO2 : public valve
             DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
             DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
             };
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class i_motor : public device
@@ -4314,7 +4257,6 @@ class base_counter: public i_counter, public device, public io_device
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
-        STATES state = STATES::S_WORK;
         STATES prev_error_state = STATES::S_WORK;
 
         u_int_4 start_pump_working_time = 0;
@@ -4702,12 +4644,6 @@ class camera : public i_camera, public device, public io_device
 
         void direct_on();
 
-        void direct_set_value( float new_value );
-
-        int get_state();
-
-        float get_value();
-
         int save_device_ex( char* buff );
 
         int set_cmd( const char* prop, u_int idx, double val );
@@ -4722,7 +4658,6 @@ class camera : public i_camera, public device, public io_device
     protected:
         bool is_cam_ready;
         int result;
-        int state;
 
         enum class CONSTANTS
             {
