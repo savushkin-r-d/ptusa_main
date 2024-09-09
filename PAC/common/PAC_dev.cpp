@@ -3837,7 +3837,8 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > 
+                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
                                 {
                                 return VX_ON_FB_ERR_MANUAL;
                                 }
@@ -3855,7 +3856,8 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) >
+                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
                                 {
                                 return VX_ON_FB_ERR;
                                 }
@@ -3904,7 +3906,8 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > 
+                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
                                 {
                                 return VX_OFF_FB_ERR_MANUAL;
                                 }
@@ -3922,7 +3925,8 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > 
+                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
                                 {
                                 return VX_OFF_FB_ERR;
                                 }
@@ -3957,20 +3961,17 @@ int valve::get_state()
 //-----------------------------------------------------------------------------
 int valve::set_cmd( const char *prop, u_int idx, double val )
     {
-    if ( G_PAC_INFO()->is_emulator() )
+    if ( G_PAC_INFO()->is_emulator() && prop[ 0 ] == 'F' )
         {
-        if ( prop[ 0 ] == 'F' )
+        if ( strcmp( prop, "FB_ON_ST" ) == 0 )
             {
-            if ( strcmp( prop, "FB_ON_ST" ) == 0 )
-                {
-                on_fb = val != .0;
-                }
-            else
-                {
-                off_fb = val != .0;
-                }
-            return 0;
+            on_fb = val != .0;
             }
+        else
+            {
+            off_fb = val != .0;
+            }
+        return 0;
         }
 
     return device::set_cmd( prop, idx, val );
