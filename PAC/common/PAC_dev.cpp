@@ -2466,47 +2466,9 @@ void i_AO_device::set_value( float new_value )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void virtual_valve::direct_off()
-    {
-    state = 0;
-    value = 0;
-    }
-
-void virtual_valve::direct_set_value( float new_value )
-    {
-    value = new_value;
-    }
-
-float virtual_valve::get_value()
-    {
-    return value;
-    }
-
-void virtual_valve::direct_set_state( int new_state )
-    {
-    state = new_state;
-    }
-
-void virtual_valve::direct_on()
-    {
-    state = 1;
-    }
-
-int virtual_valve::get_state()
-    {
-    return state;
-    }
-
 virtual_valve::virtual_valve( const char* dev_name ) :
-    valve( dev_name, DT_V, DST_V_VIRT ),
-    value( 0 ),
-    state( 0 )
+    valve( dev_name, DT_V, DST_V_VIRT )
     {
-    }
-
-valve::VALVE_STATE virtual_valve::get_valve_state()
-    {
-    return (valve::VALVE_STATE)state;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4068,9 +4030,10 @@ valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
     {
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 void valve_DO1_DI1_off::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
@@ -4081,6 +4044,8 @@ void valve_DO1_DI1_off::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_off::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
@@ -4088,12 +4053,58 @@ void valve_DO1_DI1_off::direct_off()
         set_DO( DO_INDEX, 0 );
         }
     }
-#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO1_DI1_off::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
+
+    int o = get_DO( DO_INDEX );
+    return (VALVE_STATE)o;
+    }
+//-----------------------------------------------------------------------------
+bool valve_DO1_DI1_off::get_fb_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+
+    int o = get_DO( DO_INDEX );
+    int i = get_DI( DI_INDEX );
+
+    if ( o != i )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI1_off::get_off_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
+
+    return get_DI( DI_INDEX );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI1_off::get_on_fb_value()
+    {
+    return false;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
+valve_DO1_DI1_on::valve_DO1_DI1_on( const char* dev_name ) : valve( true, false,
+    dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
+    {
+    }
+
 void valve_DO1_DI1_on::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
@@ -4104,6 +4115,8 @@ void valve_DO1_DI1_on::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_on::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
@@ -4111,14 +4124,58 @@ void valve_DO1_DI1_on::direct_off()
         set_DO( DO_INDEX, 0 );
         }
     }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO1_DI1_on::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
-#endif // DEBUG_NO_IO_MODULES
+    int o = get_DO( DO_INDEX );
+    return (VALVE_STATE)o;
+    }
+//-----------------------------------------------------------------------------
+bool valve_DO1_DI1_on::get_fb_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+
+    int o = get_DO( DO_INDEX );
+    int i = get_DI( DI_INDEX );
+
+    if ( o == i )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI1_on::get_on_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
+
+    return get_DI( DI_INDEX );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI1_on::get_off_fb_value()
+    {
+    return false;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+valve_DO1_DI2::valve_DO1_DI2( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
+    {
+    }
+//-----------------------------------------------------------------------------
 void valve_DO1_DI2::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
@@ -4129,6 +4186,8 @@ void valve_DO1_DI2::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO1_DI2::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
@@ -4136,14 +4195,61 @@ void valve_DO1_DI2::direct_off()
         set_DO( DO_INDEX, 0 );
         }
     }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO1_DI2::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
-#endif // DEBUG_NO_IO_MODULES
+    int o = get_DO( DO_INDEX );
+    return (VALVE_STATE)o;
+    }
+//-----------------------------------------------------------------------------
+bool valve_DO1_DI2::get_fb_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+
+    int o = get_DO( DO_INDEX );
+    int i1 = get_DI( DI_INDEX_1 );
+    int i0 = get_DI( DI_INDEX_2 );
+
+    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+        ( o == 1 && i1 == 1 && i0 == 0 ) )
+        {
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI2::get_off_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
+
+    return get_DI( DI_INDEX_2 );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO1_DI2::get_on_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
+
+    return get_DI( DI_INDEX_1 );
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+valve_DO2_DI2::valve_DO2_DI2( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, DST_V_DO2_DI2 )
+    {
+    }
+//-----------------------------------------------------------------------------
 void valve_DO2_DI2::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
         {
@@ -4155,6 +4261,8 @@ void valve_DO2_DI2::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO2_DI2::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
         {
@@ -4163,8 +4271,221 @@ void valve_DO2_DI2::direct_off()
         set_DO( DO_INDEX_2, 1 );
         }
     }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO2_DI2::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
-#endif // DEBUG_NO_IO_MODULES
+    int o1 = get_DO( DO_INDEX_2 );
+    return (VALVE_STATE)o1;
+    }
+//-----------------------------------------------------------------------------
+bool valve_DO2_DI2::get_fb_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+
+    int o0 = get_DO( DO_INDEX_1 );
+    int o1 = get_DO( DO_INDEX_2 );
+    int i0 = get_DI( DI_INDEX_1 );
+    int i1 = get_DI( DI_INDEX_2 );
+
+    if ( o1 == i1 && o0 == i0 )
+        {
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_DO2_DI2::get_off_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
+
+    return get_DI( DI_INDEX_1 );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO2_DI2::get_on_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
+
+    return get_DI( DI_INDEX_2 );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_DO2_DI2_bistable::valve_DO2_DI2_bistable( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE ),
+    is_stoped( false ),
+    is_opening( false ),
+    is_closing( false )
+    {
+    v_bistable.push_back( this );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO2_DI2_bistable::evaluate()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return 0;
+
+    int o = get_DI( DI_INDEX_OPEN );
+    int c = get_DI( DI_INDEX_CLOSE );
+
+    unsigned int t = (unsigned int)get_par( valve::P_ON_TIME, 0 );
+    if ( get_DO( DO_INDEX_OPEN ) == 1 )
+        {
+        if ( o == 1 ||
+            get_delta_millisec( start_switch_time ) > t )
+            {
+            set_DO( DO_INDEX_OPEN, 0 );
+            }
+        }
+    if ( get_DO( DO_INDEX_CLOSE ) == 1 )
+        {
+        if ( c == 1 ||
+            get_delta_millisec( start_switch_time ) > t )
+            {
+            set_DO( DO_INDEX_CLOSE, 0 );
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2_DI2_bistable::direct_on()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
+    int o = get_DI( DI_INDEX_OPEN );
+
+    if ( 0 == o && get_DO( DO_INDEX_OPEN ) == 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_OPEN, 1 );
+        set_DO( DO_INDEX_CLOSE, 0 );
+
+        is_opening = true;
+        is_closing = false;
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2_DI2_bistable::direct_off()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
+    int c = get_DI( DI_INDEX_CLOSE );
+    if ( 0 == c && get_DO( DO_INDEX_CLOSE ) == 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_OPEN, 0 );
+        set_DO( DO_INDEX_CLOSE, 1 );
+
+        is_opening = false;
+        is_closing = true;
+        }
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO2_DI2_bistable::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
+
+    int o = get_DI( DI_INDEX_OPEN );
+    int c = get_DI( DI_INDEX_CLOSE );
+
+    int o_do = get_DO( DO_INDEX_OPEN );
+    int c_do = get_DO( DO_INDEX_CLOSE );
+
+    if ( o == 1 ) return V_ON;
+    if ( c == 1 ) return V_OFF;
+
+    if ( o_do == 1 ) return V_ON;
+    if ( c_do == 1 ) return V_OFF;
+
+    if ( is_stoped ) return V_STOP;
+
+    return V_OFF;
+    }
+//-----------------------------------------------------------------------------
+bool valve_DO2_DI2_bistable::get_fb_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+
+    if ( is_stoped ) return true;
+
+    int i0 = get_DI( DI_INDEX_OPEN );
+    int i1 = get_DI( DI_INDEX_CLOSE );
+    unsigned int t = (unsigned int)get_par( valve::P_ON_TIME, 0 );
+    unsigned int dt = get_delta_millisec( start_switch_time );
+
+    if ( i0 == 1 && i1 == 1 )
+        {
+        return false;
+        }
+    //Заклинило в закрытом положении.
+    if ( is_opening && dt > t && i1 == 1 ) return false;
+
+    //Заклинило в открытом положении.
+    if ( is_closing && dt > t && i0 == 1 ) return false;
+
+    if ( i0 == 1 || i1 == 1 ) return true;
+
+    if ( dt < t ) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_DO2_DI2_bistable::get_off_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
+
+    return get_DI( DI_INDEX_CLOSE );
+    }
+//-----------------------------------------------------------------------------
+int valve_DO2_DI2_bistable::get_on_fb_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
+
+    return get_DI( DI_INDEX_OPEN );
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2_DI2_bistable::direct_set_state( int new_state )
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_set_state( new_state );
+
+    int i0 = get_DI( DI_INDEX_OPEN );
+    int i1 = get_DI( DI_INDEX_CLOSE );
+    switch ( new_state )
+        {
+        case V_STOP:
+            is_opening = false;
+            is_closing = false;
+
+            //Если клапан полностью открыт\закрыт ничего не делаем.
+            if ( i0 == 1 || i1 == 1 )
+                {
+                return;
+                }
+
+            is_stoped = true;
+            if ( get_DO( DO_INDEX_OPEN ) == 1 )
+                {
+                set_DO( DO_INDEX_OPEN, 0 );
+                }
+
+            if ( get_DO( DO_INDEX_CLOSE ) == 1 )
+                {
+                set_DO( DO_INDEX_CLOSE, 0 );
+                }
+            break;
+
+        default:
+            is_stoped = false;
+            valve::direct_set_state( new_state );
+            break;
+        }
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_upper_seat()
@@ -4363,6 +4684,8 @@ void valve_iolink_mix_proof::evaluate_io()
     char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     char* buff = (char*)in_info;
+
+    if ( !data ) return;
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
@@ -4619,6 +4942,8 @@ void valve_iolink_shut_off_sorio::evaluate_io()
     auto data = (char*)get_AI_data( 0 );
     auto buff = (char*)&in_info;
 
+    if ( !data ) return;
+
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
     //Reverse byte order to get correct int16.
@@ -4819,6 +5144,8 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
     char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     char* buff = (char*)in_info;
+
+    if ( !data ) return;
 
     const int SIZE = 4;
     std::copy( data, data + SIZE, buff );
@@ -5300,6 +5627,8 @@ void analog_valve_iolink::evaluate_io()
 
     char* data = (char*)get_AI_data( AO_INDEX );
     char* buff = (char*)in_info;
+
+    if ( !data ) return;
 
     const int SIZE = 10;
     std::copy( data, data + SIZE, buff );
@@ -5910,6 +6239,9 @@ void wages_pxc_axl::evaluate_io()
     {
     auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
     auto data = reinterpret_cast<char*>( get_AI_data( idx ) );
+
+    if ( !data ) return;
+
     //Reverse byte order to get correct int32.
     std::swap( data[ 0 ], data[ 2 ] );
     std::swap( data[ 1 ], data[ 3 ] );
@@ -6591,6 +6923,8 @@ void level_s_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( C_AI_INDEX );
 
+    if ( !data ) return;
+
     switch ( n_article )
         {
         case ARTICLE::IFM_LMT100:   //IFM.LMT100
@@ -6805,6 +7139,9 @@ void level_e_iolink::set_article( const char* new_article )
 void level_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( C_AI_INDEX );
+
+    if ( !data ) return;
+
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
     }
 
@@ -6907,6 +7244,8 @@ void pressure_e_iolink::read_article( const char* article,
 void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
     float& v, int& st )
     {
+    if ( !data ) return;
+
     switch ( n_article )
         {
         case ARTICLE::IFM_PI2715:
@@ -7171,6 +7510,8 @@ int circuit_breaker::get_state()
 void circuit_breaker::evaluate_io()
     {
     out_info = ( F_data_out* ) get_AO_write_data( 0 );
+
+    if ( !out_info ) return;
 
     if ( get_AI_IOLINK_state(C_AI_INDEX) == io_device::IOLINKSTATE::OK )
         {

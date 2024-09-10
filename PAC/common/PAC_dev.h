@@ -389,6 +389,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Расчет состояния на основе текущих данных от I/O.
         virtual void evaluate_io()
             {
+            //Do nothing by default.
             }
 
         enum CONSTANTS
@@ -1061,25 +1062,8 @@ class virtual_valve: public valve
     {
     public:
         virtual_valve( const char* dev_name );
-
-        VALVE_STATE get_valve_state();
-
-        virtual void direct_off();
-
-        virtual void direct_set_value( float new_value );
-
-        virtual float get_value();
-
-        virtual void direct_set_state( int new_state );
-
-        virtual void direct_on();
-
-        virtual int get_state();
-
-    private:
-        float value;
-        int state;
     };
+//-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
 class valve_DO1_DI1_off : public valve
@@ -1087,6 +1071,10 @@ class valve_DO1_DI1_off : public valve
     public:
         valve_DO1_DI1_off( const char *dev_name );
 
+        void direct_on();
+
+        void direct_off();
+
     private:
         enum CONSTANTS
             {
@@ -1094,61 +1082,15 @@ class valve_DO1_DI1_off : public valve
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-
-#endif // DEBUG_NO_IO_MODULES
-
         // Интерфейс valve для реализации получения расширенного состояния с
         // учетом всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            int o = get_DO( DO_INDEX );
+        VALVE_STATE get_valve_state();
 
-            return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state() override;
 
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return valve::get_fb_state();
-#else
-            int o = get_DO( DO_INDEX );
-            int i = get_DI( DI_INDEX );
+        int get_off_fb_value() override;
 
-            if ( o != i )
-                {
-                start_switch_time = get_millisec();
-                return true;
-                }
-
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX );
-            }
-
-        int get_on_fb_value()
-            {
-            return false;
-            }
-#endif // DEBUG_NO_IO_MODULES
+        int get_on_fb_value() final;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -1156,10 +1098,11 @@ class valve_DO1_DI1_off : public valve
 class valve_DO1_DI1_on : public valve
     {
     public:
-        valve_DO1_DI1_on( const char *dev_name ): valve( true, false,
-            dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
-            {
-            }
+        valve_DO1_DI1_on( const char* dev_name );
+
+        void direct_on() override;
+
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -1168,56 +1111,15 @@ class valve_DO1_DI1_on : public valve
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-#endif // DEBUG_NO_IO_MODULES
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            int o = get_DO( DO_INDEX );
+        VALVE_STATE get_valve_state();
 
-            return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state();
 
-        bool get_fb_state()
-            {
-            int o = get_DO( DO_INDEX );
-            int i = get_DI( DI_INDEX );
+        int get_on_fb_value();
 
-            if ( o == i )
-                {
-                start_switch_time = get_millisec();
-                return true;
-                }
-
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX );
-            }
-
-        int get_off_fb_value()
-            {
-            return false;
-            }
-#endif // DEBUG_NO_IO_MODULES
+        int get_off_fb_value();
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и двумя обратными связями.
@@ -1225,10 +1127,11 @@ class valve_DO1_DI1_on : public valve
 class valve_DO1_DI2 : public valve
     {
     public:
-        valve_DO1_DI2( const char *dev_name ):
-            valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
-            {
-            }
+        valve_DO1_DI2( const char* dev_name );
+
+        void direct_on() override;
+
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -1239,61 +1142,15 @@ class valve_DO1_DI2 : public valve
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-#endif // DEBUG_NO_IO_MODULES
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            int o = get_DO( DO_INDEX );
+        VALVE_STATE get_valve_state() override;
 
-            return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state() override;
 
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return valve::get_fb_state();
-#else
-            int o = get_DO( DO_INDEX );
-            int i1 = get_DI( DI_INDEX_1 );
-            int i0 = get_DI( DI_INDEX_2 );
+        int get_off_fb_value() override;
 
-            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-                ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {
-                return true;
-                }
-
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX_2 );
-            }
-
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX_1 );
-            }
-#endif // DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями.
@@ -1301,10 +1158,11 @@ class valve_DO1_DI2 : public valve
 class valve_DO2_DI2 : public valve
     {
     public:
-        valve_DO2_DI2( const char *dev_name ):
-            valve( true, true, dev_name, DT_V, DST_V_DO2_DI2 )
-            {
-            }
+        valve_DO2_DI2( const char* dev_name );
+
+        void direct_on() override;
+
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -1316,63 +1174,15 @@ class valve_DO2_DI2 : public valve
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-
-#endif // DEBUG_NO_IO_MODULES
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            int o1 = get_DO( DO_INDEX_2 );
+        VALVE_STATE get_valve_state() override;
 
-            return ( VALVE_STATE ) o1;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state() override;
 
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
-            int o0 = get_DO( DO_INDEX_1 );
-            int o1 = get_DO( DO_INDEX_2 );
-            int i0 = get_DI( DI_INDEX_1 );
-            int i1 = get_DI( DI_INDEX_2 );
+        int get_off_fb_value() override;
 
-            if ( o1 == i1 && o0 == i0 )
-                {
-                return true;
-                }
-
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX_1 );
-            }
-
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX_2 );
-            }
-#endif // DEBUG_NO_IO_MODULES
-
+        int get_on_fb_value() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями
@@ -1381,40 +1191,13 @@ class valve_DO2_DI2 : public valve
 class valve_DO2_DI2_bistable : public valve
     {
     public:
-        valve_DO2_DI2_bistable( const char *dev_name ) :
-            valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE ),
-            is_stoped( false ),
-            is_opening( false ),
-            is_closing( false )
-            {
-            v_bistable.push_back( this );
-            }
+        valve_DO2_DI2_bistable( const char* dev_name );
 
-        int evaluate()
-            {
-            int o = get_DI( DI_INDEX_OPEN );
-            int c = get_DI( DI_INDEX_CLOSE );
+        int evaluate();
 
-            unsigned int t = (unsigned int) get_par( valve::P_ON_TIME, 0 );
-            if ( get_DO( DO_INDEX_OPEN ) == 1 )
-                {
-                if ( o == 1 ||
-                    get_delta_millisec( start_switch_time ) > t )
-                    {
-                    set_DO( DO_INDEX_OPEN, 0 );
-                    }
-                }
-            if ( get_DO( DO_INDEX_CLOSE ) == 1 )
-                {
-                if ( c == 1 ||
-                    get_delta_millisec( start_switch_time ) > t )
-                    {
-                    set_DO( DO_INDEX_CLOSE, 0 );
-                    }
-                }
+        void direct_on() override;
 
-            return 0;
-            }
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -1426,147 +1209,18 @@ class valve_DO2_DI2_bistable : public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on()
-            {
-            int o = get_DI( DI_INDEX_OPEN );
-
-            if ( 0 == o && get_DO( DO_INDEX_OPEN ) == 0 )
-                {
-                start_switch_time = get_millisec();
-                set_DO( DO_INDEX_OPEN, 1 );
-                set_DO( DO_INDEX_CLOSE, 0 );
-
-                is_opening = true;
-                is_closing = false;
-                }
-            }
-
-        void direct_off()
-            {
-            int c = get_DI( DI_INDEX_CLOSE );
-            if ( 0 == c && get_DO( DO_INDEX_CLOSE ) == 0 )
-                {
-                start_switch_time = get_millisec();
-                set_DO( DO_INDEX_OPEN, 0 );
-                set_DO( DO_INDEX_CLOSE, 1 );
-
-                is_opening = false;
-                is_closing = true;
-                }
-            }
-
-#endif // DEBUG_NO_IO_MODULES
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return (VALVE_STATE)digital_io_device::get_state();
-#else
-            int o = get_DI( DI_INDEX_OPEN );
-            int c = get_DI( DI_INDEX_CLOSE );
+        VALVE_STATE get_valve_state() override;
 
-            int o_do = get_DO( DO_INDEX_OPEN );
-            int c_do = get_DO( DO_INDEX_CLOSE );
+        bool get_fb_state() override;
 
-            if ( o == 1 ) return V_ON;
-            if ( c == 1 ) return V_OFF;
+        int get_off_fb_value() override;
 
-            if ( o_do == 1 ) return V_ON;
-            if ( c_do == 1 ) return V_OFF;
+        int get_on_fb_value() override;
 
-            if ( is_stoped ) return V_STOP;
+        void direct_set_state( int new_state ) override;
 
-            return V_OFF;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
-            if ( is_stoped ) return true;
-
-            int i0 = get_DI( DI_INDEX_OPEN );
-            int i1 = get_DI( DI_INDEX_CLOSE );
-            unsigned int t = (unsigned int) get_par( valve::P_ON_TIME, 0 );
-            unsigned int dt = get_delta_millisec( start_switch_time );
-
-            if ( i0 == 1 && i1 == 1 )
-                {
-                return false;
-                }
-            //Заклинило в закрытом положении.
-            if ( is_opening && dt > t && i1 == 1 ) return false;
-
-            //Заклинило в открытом положении.
-            if ( is_closing && dt > t && i0 == 1 ) return false;
-
-            if ( i0 == 1 || i1 == 1 ) return true;
-
-            if ( dt < t ) return true;
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX_CLOSE );
-            }
-
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX_OPEN );
-            }
-#endif // DEBUG_NO_IO_MODULES
-
-        void direct_set_state( int new_state )
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            valve::direct_set_state( new_state );
-#else
-            int i0 = get_DI( DI_INDEX_OPEN );
-            int i1 = get_DI( DI_INDEX_CLOSE );
-            switch ( new_state )
-                {
-                case V_STOP:
-                    is_opening = false;
-                    is_closing = false;
-
-                    //Если клапан полностью открыт\закрыт ничего не делаем.
-                    if ( i0 == 1 || i1 == 1 )
-                        {
-                        return;
-                        }
-
-                    is_stoped = true;
-                    if ( get_DO( DO_INDEX_OPEN ) == 1 )
-                        {
-                        set_DO( DO_INDEX_OPEN, 0 );
-                        }
-
-                    if ( get_DO( DO_INDEX_CLOSE ) == 1 )
-                        {
-                        set_DO( DO_INDEX_CLOSE, 0 );
-                        }
-                    break;
-
-                default:
-                    is_stoped = false;
-                    valve::direct_set_state( new_state );
-                    break;
-                }
-#endif //DEBUG_NO_IO_MODULES
-            }
-
-    private:
         bool is_stoped;
         bool is_opening;
         bool is_closing;
