@@ -1230,16 +1230,19 @@ class valve_DO2_DI2_bistable : public valve
 class valve_mix_proof : public i_mix_proof,  public valve
     {
     public:
-        valve_mix_proof( const char *dev_name
-            ): valve( true, true, dev_name, DT_V, DST_V_MIXPROOF )
-            {
-            }
+        valve_mix_proof( const char* dev_name );
 
         /// @brief Открыть верхнее седло.
-        void open_upper_seat();
+        void open_upper_seat() override;
 
         /// @brief Открыть нижнее седло.
-        void open_lower_seat();
+        void open_lower_seat() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        void direct_off() override;
 
     private:
         enum CONSTANTS
@@ -1252,69 +1255,15 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-        void direct_set_state( int new_state );
-
-        void direct_on();
-        void direct_off();
-#endif // DEBUG_NO_IO_MODULES
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            int o = get_DO( DO_INDEX );
+        VALVE_STATE get_valve_state() override;
 
-            if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return V_UPPER_SEAT;
-            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
+        bool get_fb_state() override;
 
-            return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        int get_off_fb_value() override;
 
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
-            int o = get_DO( DO_INDEX );
-            int i0 = get_DI( DI_INDEX_CLOSE );
-            int i1 = get_DI( DI_INDEX_OPEN );
-
-            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-                ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {
-                return true;
-                }
-
-            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
-            if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return true;
-
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX_CLOSE );
-            }
-
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX_OPEN );
-            }
-#endif // DEBUG_NO_IO_MODULES
-
+        int get_on_fb_value() override;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1324,318 +1273,35 @@ class valve_AS : public valve
     public:
         valve_AS( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
-        void print() const
-            {
-            printf( "%s [%u]\t", get_name(), AS_number );
-            }
+        void print() const override;
 
-        void set_rt_par( u_int idx, float value )
-            {
-            switch ( idx )
-                {
-                case 1:
-                    AS_number = ( u_int ) value;
-                    break;
-
-                default:
-                    valve::set_rt_par( idx, value );
-                    break;
-                }
-            }
+        void set_rt_par( u_int idx, float value );
 
         /// @brief Получение данных состояния устройства.
-        char get_state_data( char* data )
-            {
-            if ( data == nullptr )
-                {
-                return 0;
-                }
+        char get_state_data( char* data );
 
-            char state = 0;
-            u_int offset = 0;
+        char* get_data_with_offset( char* data );
 
-            if ( AS_number < 32 )		 //Eсли номер < 32).
-                {
-                offset = MAILBOX_OFFSET + AS_number / 2;
-                state = data[ offset ];
-                if ( AS_number % 2 == 0 )//Четный номер - старшие четыре бита.
-                    {
-                    state >>= 4;
-                    }
-                }
-            else
-                {
-                u_int new_n = AS_number - 32;
-                offset = MAILBOX_OFFSET + ( 32 / 2 ) + new_n / 2 + new_n % 2;
-                state = data[ offset ];
-                if ( AS_number % 2 == 1 )//Нечетный номер - старшие четыре бита.
-                    {
-                    state >>= 4;
-                    }
-                }
+        VALVE_STATE get_valve_state() override;
 
-            return state;
-            }
-
-        char* get_data_with_offset( char* data )
-            {
-            if ( data == 0 )
-                {
-                return 0;
-                }
-
-            char* state;
-            u_int offset = 0;
-
-            if ( AS_number < 32 )		 //Eсли номер < 32).
-                {
-                offset = MAILBOX_OFFSET + AS_number / 2;
-                }
-            else
-                {
-                u_int new_n = AS_number - 32;
-                offset = MAILBOX_OFFSET + ( 32 / 2 ) + new_n / 2 + new_n % 2;
-                }
-
-            state = data + offset;
-            return state;
-            }
-
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            char* data = ( char* ) get_AO_read_data( AO_INDEX );
-            char state = get_state_data( data );
-
-            int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-            int u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
-
-            if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
-            if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
-
-            return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
-            char* AO_data = ( char* ) get_AO_read_data( AO_INDEX );
-            char AO_state = get_state_data( AO_data );
-
-            int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            int l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-            int u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
-
-            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = get_state_data( AI_data );
-
-            int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-            int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
-
-            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-                ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {
-                return true;
-                }
-
-            if ( o == 0 && l == 1 ) return true;
-            if ( o == 0 && u == 1 ) return true;
-
-            if ( get_delta_millisec( start_switch_time ) <
-                get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state();
 
         /// @brief поменять местами подключение седел клапана.
         bool reverse_seat_connection = false;
 
-        int get_lower_seat_offset( ) const
-            {
-            if ( reverse_seat_connection )
-                {
-                return C_OPEN_S3;
-                }
-            else
-                {
-                return C_OPEN_S2;
-                }
-            }
+        int get_lower_seat_offset() const;
 
-        int get_upper_seat_offset( ) const
-            {
-            if ( reverse_seat_connection )
-                {
-                return C_OPEN_S2;
-                }
-            else
-                {
-                return C_OPEN_S3;
-                }
-            }
+        int get_upper_seat_offset() const;
 
-#ifndef DEBUG_NO_IO_MODULES
-        int get_off_fb_value()
-            {
-            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = get_state_data( AI_data );
+        int get_off_fb_value() override;
 
-            int i0 = AI_state & S_CLOSED;
+        int get_on_fb_value() override;
 
-            return i0 > 0 ? 1 : 0;
-            }
+        void direct_off() override;
 
-        int get_on_fb_value()
-            {
-            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = get_state_data( AI_data );
+        void direct_on() override;
 
-            int i1 = AI_state & S_OPENED;
-
-            return i1 > 0 ? 1 : 0;
-            }
-
-        void direct_off()
-            {
-            char* data = ( char* ) get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-
-            if ( 1 == o )
-                {
-                start_switch_time = get_millisec();
-                }
-
-            int offset = 0;
-            //Для первого 31-го устройства четный номер - старшие четыре
-            //бита (1), для остальных устройств нечетный номер - старшие четыре
-            //бита (2).
-            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
-                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
-                {
-                offset = 4;
-                }
-
-            //Сбрасываем в ноль все четыре нужные бита.
-            *write_state &= 0xF0 >> offset;
-            }
-
-        void direct_on()
-            {
-            char* data = ( char* ) get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-            if ( 0 == o )
-                {
-                start_switch_time = get_millisec();
-                }
-
-            int offset = 0;
-            //Для первого 31-го устройства четный номер - старшие четыре
-            //бита (1), для остальных устройств нечетный номер - старшие четыре
-            //бита (2).
-            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
-                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
-                {
-                offset = 4;
-                }
-            *write_state |= C_OPEN_S1 << offset;
-            *write_state &= ~( get_upper_seat_offset() << offset );
-            *write_state &= ~( get_lower_seat_offset() << offset );
-
-            //            if ( strcmp( get_name(), "H1V1" ) == 0 )
-            //                {
-            //                printf( "AO_INDEX = %d\n", AO_INDEX );
-            //                printf( "AS_number = %d\n", AS_number);
-            //
-            //                printf( "*write_state = %d\n", ( int ) *write_state );
-            //                }
-            }
-
-        void direct_set_state( int new_state )
-            {
-            if ( G_PAC_INFO()->is_emulator() )
-                {
-                return valve::direct_set_state( new_state );
-                }
-
-            int offset = 0;
-            //Для первого 31-го устройства четный номер - старшие четыре
-            //бита (1), для остальных устройств нечетный номер - старшие четыре
-            //бита (2).
-            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
-                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
-                {
-                offset = 4;
-                }
-
-            switch ( new_state )
-                {
-                case V_OFF:
-                    direct_off();
-                    break;
-
-                case V_ON:
-                    direct_on();
-                    break;
-
-                case V_UPPER_SEAT:
-                    {
-                    direct_off();
-
-                    char* data = ( char* ) get_AO_write_data( AO_INDEX );
-                    char* write_state = get_data_with_offset( data );
-                    char read_state = get_state_data( data );
-
-                    int u = ( read_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
-                    if ( 0 == u )
-                        {
-                        start_switch_time = get_millisec();
-                        }
-                    *write_state |= get_upper_seat_offset() << offset;
-
-                    break;
-                    }
-
-                case V_LOWER_SEAT:
-                    {
-                    direct_off();
-
-                    char* data = ( char* ) get_AO_write_data( AO_INDEX );
-                    char* write_state = get_data_with_offset( data );
-                    char read_state = get_state_data( data );
-
-                    int l = ( read_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-                    if ( 0 == l )
-                        {
-                        start_switch_time = get_millisec();
-                        }
-                    *write_state |= get_lower_seat_offset() << offset;
-
-                    break;
-                    }
-
-                default:
-                    direct_on();
-                    break;
-                }
-            }
-
-#endif //DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) override;
 
         enum CONSTANTS
             {
@@ -1656,7 +1322,6 @@ class valve_AS : public valve
 
     private:
         u_int AS_number;    ///< AS-номер устройства.
-
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -1665,15 +1330,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve_AS
     public:
         valve_AS_mix_proof( const char *dev_name );
 
-        void open_upper_seat()
-            {
-            direct_set_state( V_UPPER_SEAT );
-            }
+        void open_upper_seat() override;
 
-        void open_lower_seat()
-            {
-            direct_set_state( V_LOWER_SEAT );
-            }
+        void open_lower_seat() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-i отсечной.
@@ -1684,58 +1343,9 @@ class valve_AS_DO1_DI2 : public valve_AS
 
         void direct_set_state( int new_state );
 
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return (VALVE_STATE) digital_io_device::get_state();
-#else
-            char* data = (char*) get_AO_read_data( AO_INDEX );
-            char state = get_state_data( data );
+        VALVE_STATE get_valve_state() override;
 
-            int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
-
-            return (VALVE_STATE) o;
-#endif // DEBUG_NO_IO_MODULES
-            }
-
-        bool get_fb_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return true;
-#else
-            char* AO_data = (char*)get_AO_read_data( AO_INDEX );
-            char AO_state = get_state_data( AO_data );
-
-            int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-
-            char* AI_data = (char*)get_AI_data( AI_INDEX );
-            char AI_state = get_state_data( AI_data );
-
-            int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-            int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
-
-            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-                ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {
-                start_err_time = get_millisec();
-                return true;
-                }
-
-             if ( get_delta_millisec( start_switch_time ) <
-                get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-             if ( get_delta_millisec( start_err_time ) <
-                 get_par(valve::P_ON_TIME, 0))
-                {
-                return true;
-                }
-
-            return false;
-#endif // DEBUG_NO_IO_MODULES
-            }
+        bool get_fb_state() override;
 
     private:
         u_long start_err_time;
@@ -1745,31 +1355,17 @@ class valve_AS_DO1_DI2 : public valve_AS
 class valve_bottom_mix_proof : public i_mix_proof,  public valve
     {
     public:
-        valve_bottom_mix_proof( const char* dev_name ) : valve(
-            true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
-            is_closing_mini( 0 ),
-            start_off_time( 0 )
-            {
-            }
+        valve_bottom_mix_proof( const char* dev_name );
 
         /// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
         /// седла нет.
-        void open_upper_seat()
-            {
-            }
+        void open_upper_seat() override;
 
         /// @brief Открыть нижнее седло.
-        void open_lower_seat()
-            {
-            direct_set_state( V_LOWER_SEAT );
-            }
+        void open_lower_seat() override;
 
 #ifdef PTUSA_TEST
-        void set_mini_closing_state( bool state )
-            {
-            is_closing_mini = state;
-            start_off_time = get_millisec();
-            }
+        void set_mini_closing_state( bool state );
 #endif
 
 #ifdef _MSC_VER
@@ -1799,46 +1395,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-        void direct_set_state( int new_state )
-            {
-            switch ( new_state )
-                {
-                case V_OFF:
-                    direct_off();
-                    break;
-
-                case V_ON:
-                    direct_on();
-                    break;
-
-                case V_UPPER_SEAT: //Открываем микроклапан
-                    direct_off();
-                    is_closing_mini = 0;
-
-                    if (0 == get_DO(DO_INDEX_MINI_V))
-                        {
-                        start_switch_time = get_millisec();
-                        set_DO( DO_INDEX_MINI_V, 1);
-                        }
-                    break;
-
-                case V_LOWER_SEAT:
-                    direct_off();
-
-                    if ( 0 == get_DO( DO_INDEX_L ) )
-                        {
-                        start_switch_time = get_millisec();
-                        set_DO( DO_INDEX_L, 1 );
-                        }
-                    break;
-
-
-                default:
-                    direct_on();
-                    break;
-                }
-            }
+        void direct_set_state( int new_state ) override;
 
         void direct_on();
         void direct_off();
@@ -1847,50 +1404,13 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
 
-        VALVE_STATE get_valve_state()
-            {
-            int o = get_DO( DO_INDEX );
+        VALVE_STATE get_valve_state() override;
 
-            if (o == 0 && get_DO(DO_INDEX_MINI_V) == 1) return V_UPPER_SEAT;
+        bool get_fb_state() override;
 
-            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
+        int get_off_fb_value() override;
 
-            return ( VALVE_STATE ) o;
-            }
-
-        bool get_fb_state()
-            {
-            int o = get_DO( DO_INDEX );
-            int i0 = get_DI( DI_INDEX_CLOSE );
-            int i1 = get_DI( DI_INDEX_OPEN );
-
-            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-                ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {
-                return true;
-                }
-
-            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
-
-            if ( get_delta_millisec( start_switch_time ) <
-                get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
-
-            return false;
-            }
-
-        int get_off_fb_value()
-            {
-            return get_DI( DI_INDEX_CLOSE );
-            }
-
-        int get_on_fb_value()
-            {
-            return get_DI( DI_INDEX_OPEN );
-            }
-#endif // DEBUG_NO_IO_MODULES
+        int get_on_fb_value() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
@@ -1918,7 +1438,6 @@ class valve_mini_flushing : public i_mix_proof, public valve
             DI_INDEX_CLOSE      ///< Индекс канала дискретного входа Закрыт.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_set_state( int new_state ) final;
 
         void direct_on() final;
@@ -1933,7 +1452,6 @@ class valve_mini_flushing : public i_mix_proof, public valve
 
         int get_off_fb_value() final;
         int get_on_fb_value() final;
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
@@ -1956,26 +1474,23 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
 
         void set_rt_par( u_int idx, float value );
 
-#ifndef DEBUG_NO_IO_MODULES
-        int get_state();
+        int get_state() override;
 
-        float get_value();
+        float get_value() override;
 
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
 
-        int get_on_fb_value();
+        int get_on_fb_value() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        int set_cmd( const char *prop, u_int idx, double val );
+        int set_cmd( const char *prop, u_int idx, double val ) override;
 
-        void direct_set_state( int new_state );
-
-#endif // DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) override;
 
     private:
         struct in_data
@@ -2031,24 +1546,21 @@ class valve_iolink_shut_off_thinktop : public valve
 
         void set_rt_par( u_int idx, float value );
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() override;
 
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
 
-        int get_on_fb_value();
+        int get_on_fb_value() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        void direct_set_state( int new_state );
-
-#endif // DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) override;
 
     private:
         struct in_data
@@ -2106,22 +1618,19 @@ class valve_iolink_shut_off_sorio : public valve
 
         void direct_set_value( float new_value ) final;
 
-#ifndef DEBUG_NO_IO_MODULES
-        bool get_fb_state();
+        bool get_fb_state() override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() override;
 
-        int get_on_fb_value();
+        int get_on_fb_value() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        void direct_set_state( int new_state );
-
-#endif // DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) override;
 
     private:
         struct in_data
@@ -2230,9 +1739,7 @@ class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_on_fb_value() override;
-#endif // DEBUG_NO_IO_MODULES
 
         int get_off_fb_value() override;
     };
@@ -2248,9 +1755,7 @@ class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
 
         int get_on_fb_value() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value() override;
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
@@ -2279,11 +1784,9 @@ class valve_iol_terminal_DO1_DI2 : public valve_iol_terminal
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_on_fb_value() override;
 
         int get_off_fb_value() override;
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления и
@@ -2296,11 +1799,9 @@ class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_D
         /// @brief Получение состояния обратной связи.
         bool get_fb_state() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         int get_on_fb_value() override;
 
         int get_off_fb_value() override;
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
