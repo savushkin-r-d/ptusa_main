@@ -5899,20 +5899,25 @@ int analog_valve_iolink::save_device_ex( char* buff )
     res += sprintf( buff + res, "BLINK=%d, ", blink );
     return res;
     }
-#ifndef DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AO1::direct_on();
+
     direct_set_value( static_cast<float>( CONSTANTS::FULL_OPENED ) );
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AO1::direct_off();
+
     direct_set_value( static_cast<float>( CONSTANTS::FULL_CLOSED ) );
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_set_value( float new_value )
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AO1::direct_set_value( new_value );
+
     out_info->position = new_value;
 
     char *buff = (char*) &out_info->position;
@@ -5923,11 +5928,15 @@ void analog_valve_iolink::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 float analog_valve_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AO1::get_value();
+
     return in_info->position;
     }
 //-----------------------------------------------------------------------------
 int analog_valve_iolink::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AO1::get_state();
+
     return in_info->status;
     }
 //-----------------------------------------------------------------------------
@@ -5956,7 +5965,6 @@ inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val
 
     return 0;
     }
-#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void DI1::direct_on()
@@ -6177,9 +6185,13 @@ float temperature_e_analog::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 int temperature_e_analog::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return AI1::get_state();
+        }
+
     float v = get_AI( C_AI_INDEX, 0, 0 );
     if ( v < 0 )
         {
@@ -6188,7 +6200,6 @@ int temperature_e_analog::get_state()
 
     return 0;
     }
-#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
@@ -6204,9 +6215,10 @@ temperature_e_iolink::~temperature_e_iolink()
     info = nullptr;
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 float temperature_e_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
+
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
         return get_par(P_ERR_T, start_param_idx);
@@ -6221,13 +6233,6 @@ float temperature_e_iolink::get_value()
         return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
         }
     }
-#else
-//-----------------------------------------------------------------------------
-float temperature_e_iolink::get_value()
-   {
-   return analog_io_device::get_value();
-   }
-#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_wages::direct_off()
@@ -6356,18 +6361,21 @@ int wages_RS232::get_state()
 
 void wages_RS232::evaluate_io()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    value = analog_io_device::get_value();
-#else
-    value = get_value_from_wages();
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        value = analog_io_device::get_value();
+        }
+    else
+        {
+        value = get_value_from_wages();
+        }
     }
 
-#ifndef DEBUG_NO_IO_MODULES
 void wages_RS232::direct_set_value( float new_value )
     {
+    if ( G_PAC_INFO()->is_emulator() ) 
+        return analog_io_device::direct_set_value( new_value );
     }
-#endif // DEBUG_NO_IO_MODULES
 
 void wages_RS232::tare()
     {
@@ -6394,9 +6402,9 @@ int wages_eth::get_state()
 
 void wages_eth::evaluate_io()
     {
-#ifndef DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
     weth->evaluate();
-#endif
     }
 
 void wages_eth::tare()
@@ -6417,18 +6425,13 @@ void wages_eth::set_string_property( const char* field, const char* value )
 
 void wages_eth::direct_set_value( float new_value )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    weth->set_wages_value( new_value );
-#endif
+    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_value( new_value );
     }
 
 void wages_eth::direct_set_state( int state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    weth->set_wages_state( state );
-#endif
+    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_state( state );
     }
-
 
 void wages_eth::direct_off()
     {
@@ -6561,7 +6564,7 @@ void wages::tare()
     set_par(P_C0, 0, -weight);
     return;
     }
-
+//-----------------------------------------------------------------------------
 float wages::get_weight()
     {
     if (get_delta_millisec(filter_time) > 500)
@@ -6585,51 +6588,64 @@ float wages::get_weight()
     return weight + get_par(P_C0, 0);
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
-
 float wages::get_value()
     {
-    return weight + get_par(P_C0, 0);
+    if ( G_PAC_INFO()->is_emulator() ) return weight + get_par(P_C0, 0);
+
+    return get_weight();
     }
 //-----------------------------------------------------------------------------
 void wages::direct_set_value( float new_value )
     {
-    weight = new_value;
+    if ( G_PAC_INFO()->is_emulator() ) weight = new_value;
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
-float wages::get_value()
-    {
-    return get_weight();
-    }
-
 void wages::direct_set_state( int new_state )
     {
-    switch ( new_state )
+    if ( G_PAC_INFO()->is_emulator() )
         {
-        case S_TARE:
-            tare();
-            break;
+        switch ( new_state )
+            {
+            case S_TARE:
+                tare();
+                break;
+            }
         }
     }
-
-#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+int wages::get_state()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int wages::save_device_ex( char* buff )
+    {
+    return sprintf( buff, "W=%.3f, ", get_value() );
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+AO1::AO1( const char* dev_name,
+    device::DEVICE_TYPE type,
+    device::DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) :
+    analog_io_device( dev_name, type, sub_type, par_cnt )
+    {
+    }
+//-----------------------------------------------------------------------------
 float AO1::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+
     return get_AO( AO_INDEX, get_min_value(), get_max_value() );
     }
 //-----------------------------------------------------------------------------
 void AO1::direct_set_value( float new_value )
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        return analog_io_device::direct_set_value( new_value );
+
     set_AO( AO_INDEX, new_value, get_min_value(), get_max_value() );
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
@@ -6735,19 +6751,38 @@ int level_e_cone::calc_volume()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
+valve_DO1::valve_DO1( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO1 )
+    {
+    }
+//-----------------------------------------------------------------------------
 void valve_DO1::direct_on()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
+
     set_DO( DO_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
 void valve_DO1::direct_off()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
+
     set_DO( DO_INDEX, 0 );
     }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_DO1::get_valve_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return (VALVE_STATE)digital_io_device::get_state();
+        }
 
-#endif // DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)get_DO( DO_INDEX );
+    };
+//-----------------------------------------------------------------------------
+bool valve_DO1::get_fb_state()
+    {
+    return true;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_motor::i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,

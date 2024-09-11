@@ -1898,11 +1898,9 @@ class temperature_e_analog : public AI1
     public:
         temperature_e_analog( const char* dev_name );
 
-        float get_value();
+        float get_value() override;
 
-#ifndef DEBUG_NO_IO_MODULES
-        int get_state();
-#endif
+        int get_state() override;
 
     private:
         u_int start_param_idx;
@@ -1922,14 +1920,9 @@ class temperature_e_iolink : public AI1
     public:
         temperature_e_iolink( const char *dev_name );
 
-        ~temperature_e_iolink();
+        virtual ~temperature_e_iolink();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
-
-#else
-        float get_value();
-#endif
+        float get_value() override;
 
     private:
         struct TE_data
@@ -2417,9 +2410,7 @@ class wages_RS232 : public analog_io_device, public i_wages
 
         void evaluate_io() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_set_value( float new_value ) override;
-#endif // DEBUG_NO_IO_MODULES
 
         void tare() override;
 
@@ -2568,29 +2559,15 @@ class wages : public analog_io_device, public i_wages
         void tare();
         float get_weight();
 
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
-        void  direct_set_value( float new_value );
-#endif // DEBUG_NO_IO_MODULES
+        float get_value() override;
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
-        void direct_set_state( int new_state );
-        void  direct_set_value( float new_value )
-            {
-            return;
-            }
-#endif // DEBUG_NO_IO_MODULES
+        void direct_set_state( int new_state ) override;
 
-        int get_state()
-            {
-            return 0;
-            }
+        void direct_set_value( float new_value ) override;
 
-        int save_device_ex( char *buff )
-            {
-            return sprintf( buff, "W=%.3f, ", get_value() );
-            }
+        int get_state() override;
+
+        int save_device_ex( char* buff ) override;
 
     private:
         float weight;
@@ -2712,21 +2689,16 @@ class virtual_counter : public device, public i_counter
 class AO1 : public analog_io_device
     {
     public:
-        AO1( const char *dev_name,
+        AO1( const char* dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt ):
-        analog_io_device( dev_name, type, sub_type, par_cnt )
-            {
-            }
+            u_int par_cnt );
 
         virtual float get_min_value() = 0;
         virtual float get_max_value() = 0;
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
-        void  direct_set_value( float new_value );
-#endif // DEBUG_NO_IO_MODULES
+        float get_value() override;
+        void  direct_set_value( float new_value ) override;
 
     protected:
         enum CONSTANTS
@@ -2816,19 +2788,17 @@ class analog_valve_iolink : public AO1
             FULL_OPENED = 100,
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        void direct_set_value( float new_value );
+        void direct_set_value( float new_value ) override;
 
-        float get_value();
+        float get_value() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        int get_state();
-#endif
+        int get_state() override;
 
     private:
         struct in_data
@@ -2897,39 +2867,23 @@ class DI1 : public digital_io_device
 class valve_DO1 : public valve
     {
     public:
-        valve_DO1( const char *dev_name ) : valve( dev_name, DT_V, DST_V_DO1 )
-            {
-            }
+        valve_DO1( const char* dev_name );
 
-    private:
+        void direct_on();
+
+        void direct_off();
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
 
-#ifndef DEBUG_NO_IO_MODULES
-    public:
-        void direct_on();
-        void direct_off();
-
-#endif // DEBUG_NO_IO_MODULES
-
-    protected:
+    private:
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            return ( VALVE_STATE ) digital_io_device::get_state();
-#else
-            return ( VALVE_STATE ) get_DO( DO_INDEX );
-#endif // DEBUG_NO_IO_MODULES
-            };
+        VALVE_STATE get_valve_state() override;
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state()
-            {
-            return true;
-            }
+        bool get_fb_state() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления.
