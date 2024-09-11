@@ -7133,7 +7133,7 @@ int motor::save_device_ex( char *buff )
     int res = 0;
     if ( G_PAC_INFO()->is_emulator() )
         return static_cast<int>(
-        fmt::format_to_n( buff, MAX_COPY_SIZE, "R={0}, ERRT={0}, " ).size );
+        fmt::format_to_n( buff, MAX_COPY_SIZE, "R=0, ERRT=0, " ).size );
 
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||

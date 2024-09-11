@@ -966,6 +966,15 @@ TEST( motor, direct_set_state )
     EXPECT_EQ( 1, M1.get_state() );
     }
 
+TEST( motor, save_device )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    M1.save_device( buff, "" );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, ERRT=0, P_ON_TIME=0},\n", buff );
+    }
+
 
 TEST( motor_altivar, set_cmd )
     {
