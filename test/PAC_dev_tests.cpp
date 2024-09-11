@@ -1561,6 +1561,19 @@ TEST( wages_RS232, evaluate_io )
     }
 
 
+TEST( wages, save_device )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    wages w1( "W1" );
+    w1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "W1={M=0, ST=0, V=0, W=0.000, P_NOMINAL_W=0, P_RKP=0, P_CZ=0, P_DT=0},\n",
+        buff );
+    }
+
+
 TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
