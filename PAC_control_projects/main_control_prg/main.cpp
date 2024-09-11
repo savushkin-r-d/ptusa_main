@@ -198,7 +198,10 @@ int main( int argc, const char *argv[] )
             }
 #endif
         //Основной цикл работы с дополнительными устройствами
-        IOT_EVALUATE();
+        if (!G_NO_IO_NODES && !G_READ_ONLY_IO_NODES)
+            {
+            IOT_EVALUATE( );
+            }
 
         sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
