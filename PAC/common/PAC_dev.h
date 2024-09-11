@@ -7,8 +7,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG_NO_IO_MODULES - простые устройства работают без модулей
-/// ввода\вывода (состояния хранят в себе).
 ///
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -1848,39 +1846,11 @@ class AI1 : public analog_io_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_TE,
-            ADDITIONAL_PARAM_COUNT )
-            {
-            start_param_idx = AI1::get_params_count();
-            set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
-            param_emulator( 20, 2 );    //Average room temperature.
-            }
+        temperature_e( const char* dev_name );
 
-        float get_value()
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            float v = analog_io_device::get_value();
-            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
-                   v;
-#else
-            float v = get_AI( C_AI_INDEX, 0, 0 );
-            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
-                get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
-#endif
-            }
+        float get_value() override;
 
-#ifndef DEBUG_NO_IO_MODULES
-        int get_state()
-            {
-            float v = get_AI( C_AI_INDEX, 0, 0 );
-            if ( -1000 == v )
-                {
-                return -1;
-                }
-
-            return 1;
-            }
-#endif
+        int get_state() override;
 
     private:
         u_int start_param_idx;
@@ -2052,15 +2022,10 @@ class pressure_e_iolink : public analog_io_device
     public:
         pressure_e_iolink( const char* dev_name );
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() override;
 
-        int get_state();
+        int get_state() override;
 
-        void direct_set_value( float new_value )
-            {
-            }
-#endif
         void set_article( const char* new_article );
 
         enum ARTICLE
@@ -2134,11 +2099,9 @@ class circuit_breaker : public analog_io_device
 
         void direct_off();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() override;
 
-        int get_state();
-#endif
+        int get_state() override;
 
         void evaluate_io();
 
@@ -2208,10 +2171,8 @@ class level_e_iolink : public level
 
         int calc_volume();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
-        int get_state();
-#endif
+        float get_value() override;
+        int get_state() override;
 
         void set_article( const char* new_article );
         void evaluate_io();
@@ -2277,13 +2238,10 @@ class concentration_e_ok : public concentration_e
 
         int get_state()
             {
-#ifndef DEBUG_NO_IO_MODULES
-            int i = get_DI( DI_INDEX );
+            if ( G_PAC_INFO()->is_emulator() ) return concentration_e::get_state();
 
+            int i = get_DI( DI_INDEX );
             return i == 1 ? concentration_e::get_state() : -1;
-#else
-            return concentration_e::get_state();
-#endif
             }
 
         int save_device_ex( char* buff ) override;
@@ -2307,16 +2265,9 @@ class concentration_e_iolink : public analog_io_device
 
         float get_temperature() const;
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() override;
 
-        int get_state();
-
-        void direct_set_value( float new_value )
-            {
-            }
-#endif // DEBUG_NO_IO_MODULES
-
+        int get_state() override;
 
         void evaluate_io();
 
@@ -2958,29 +2909,25 @@ class motor : public i_motor, public io_device
             i_motor( dev_name, sub_type, ADDITIONAL_PARAM_COUNT ),
             io_device( dev_name ),
             start_switch_time( get_millisec() )
-#ifdef DEBUG_NO_IO_MODULES
-            ,state( 0 ),
-            freq( 0 )
-#endif // DEBUG_NO_IO_MODULES
             {
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
 
-        int save_device_ex( char *buff );
+        int save_device_ex( char *buff ) override;
 
-        float get_value();
+        float get_value()  override;
 
-        void direct_set_value( float value );
+        void direct_set_value( float new_value ) override;
 
-        void direct_set_state( int new_state );
+        void direct_set_state( int new_state ) override;
 
-        int  get_state();
+        int get_state() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        virtual void print() const
+        virtual void print() const override
             {
             device::print();
             }
@@ -3006,12 +2953,6 @@ class motor : public i_motor, public io_device
             };
 
         u_long start_switch_time;
-
-#ifdef DEBUG_NO_IO_MODULES
-        char  state;  ///< Состояние устройства.
-
-        float freq;   ///< Состояние устройства (частота).
-#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 
@@ -3046,14 +2987,12 @@ public:
 
     float get_amperage() const override;
 
-#ifdef DEBUG_NO_IO_MODULES
     int set_cmd( const char* prop, u_int idx, double val ) override;
 
     float get_rpm() const
         {
         return (float)rpm;
         }
-#endif // DEBUG_NO_IO_MODULES
 
     altivar_node* get_atv() const
         {
@@ -3063,14 +3002,11 @@ public:
 private:
     altivar_node* atv;
 
-#ifdef DEBUG_NO_IO_MODULES
     float freq = .0f;
-    char state = 0;
     int reverse = 0;
     int rpm = 0;
     int est = 0;
     float amperage = .0f;
-#endif // DEBUG_NO_IO_MODULES
 
     enum CONSTANTS
     {
@@ -3131,15 +3067,9 @@ class level_s_iolink : public analog_io_device
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
+        float get_value() override;
 
-        int get_state();
-
-        void direct_set_value( float new_value )
-            {
-            }
-#endif
+        int get_state() override;
 
         bool is_active();
 

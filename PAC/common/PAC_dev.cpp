@@ -6154,6 +6154,43 @@ void AI1::direct_set_value( float new_value )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+temperature_e::temperature_e( const char* dev_name ) : AI1( dev_name, DT_TE, DST_TE,
+    ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
+    param_emulator( 20, 2 );    //Average room temperature.
+    }
+//-----------------------------------------------------------------------------
+float temperature_e::get_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        float v = AI1::get_value();
+        return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : v;
+        }
+    else
+        {
+        float v = get_AI( C_AI_INDEX, 0, 0 );
+        return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
+            get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
+        }
+    }
+//-----------------------------------------------------------------------------
+int temperature_e::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
+
+    float v = get_AI( C_AI_INDEX, 0, 0 );
+    if ( -1000 == v )
+        {
+        return -1;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
     {
@@ -6848,9 +6885,8 @@ virtual_motor::virtual_motor( const char* dev_name ):
 //-----------------------------------------------------------------------------
 float motor::get_value()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return freq;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
+
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
@@ -6860,42 +6896,32 @@ float motor::get_value()
         }
 
     return 0;
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-void motor::direct_set_value( float value )
+void motor::direct_set_value( float new_value )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    freq = value;
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        return device::direct_set_value( new_value );
+
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
-        set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
+        set_AO( AO_INDEX, new_value, C_MIN_VALUE, C_MAX_VALUE );
         }
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void motor::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    if ( -1 == new_state )
-        {
-        state = ( char ) -1;
-        return;
-        }
-#endif // DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() )
+        return device::direct_set_state( new_state );
 
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
         if ( new_state == 2 )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = 2;
-#else
             // Включение прямого пуска.
             int o = get_DO( DO_INDEX );
             if ( 0 == o )
@@ -6911,7 +6937,6 @@ void motor::direct_set_state( int new_state )
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_REVERSE, 1 );
                 }
-#endif // DEBUG_NO_IO_MODULES
 
             return;
             }
@@ -6924,9 +6949,6 @@ void motor::direct_set_state( int new_state )
         {
         if ( new_state == 2 )
             {
-#ifdef DEBUG_NO_IO_MODULES
-            state = 2;
-#else
             // Выключение прямого пуска.
             int o = get_DO( DO_INDEX );
             if ( 1 == o )
@@ -6942,7 +6964,6 @@ void motor::direct_set_state( int new_state )
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_REVERSE, 1 );
                 }
-#endif // DEBUG_NO_IO_MODULES
 
             return;
             }
@@ -6960,9 +6981,8 @@ void motor::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 int motor::get_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return state;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
     int o = get_DO( DO_INDEX );
     auto sub_type = get_sub_type();
 
@@ -7051,14 +7071,12 @@ int motor::get_state()
         {
         return i;
         }
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void motor::direct_on()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = 1;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
+
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
@@ -7080,14 +7098,12 @@ void motor::direct_on()
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
-#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void motor::direct_off()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = 0;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_off();
+
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
@@ -7108,7 +7124,6 @@ void motor::direct_off()
             set_DO( DO_INDEX_REVERSE, 0 );
             }
         }
-#endif // DEBUG_NO_IO_MODULES
 
     direct_set_value( 0 );
     }
@@ -7116,9 +7131,10 @@ void motor::direct_off()
 int motor::save_device_ex( char *buff )
     {
     int res = 0;
-#ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=0, " );
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        return static_cast<int>(
+        fmt::format_to_n( buff, MAX_COPY_SIZE, "R={0}, ERRT={0}, " ).size );
+
     auto sub_type = get_sub_type();
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
@@ -7137,7 +7153,7 @@ int motor::save_device_ex( char *buff )
                 get_DO( DO_INDEX_REVERSE ) ).size );
             }
         }
-#endif //DEBUG_NO_IO_MODULES
+
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -7249,9 +7265,10 @@ void level_s_iolink::set_article( const char* new_article )
         }
     }
 
-#ifndef DEBUG_NO_IO_MODULES
 float level_s_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+
 	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
 		{
 		return get_par( P_ERR, 0 );
@@ -7264,6 +7281,8 @@ float level_s_iolink::get_value()
 
 int level_s_iolink::get_state()
 	{
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
 	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
 	if (devstate != io_device::IOLINKSTATE::OK)
 		{
@@ -7290,7 +7309,6 @@ int level_s_iolink::get_state()
 
     return current_state;
 	}
-#endif
 
 bool level_s_iolink::is_active()
     {
@@ -7313,12 +7331,15 @@ int level_e_iolink::calc_volume()
     {
     int v_kg = 0;
     float v = 0.0;
-#ifndef DEBUG_NO_IO_MODULES
-    v = this->v;
-#else
-    v = get_value();
-    v = v / 100 * get_par(P_MAX_P, start_param_idx);
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        v = get_value();
+        v = v / 100 * get_par( P_MAX_P, start_param_idx );
+        }
+    else
+        {
+        v = this->v;
+        }
 
     if (PT_extra)
         {
@@ -7359,9 +7380,10 @@ int level_e_iolink::calc_volume()
     return v_kg;
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 float level_e_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
+
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
         return get_par( level::P_ERR, level::start_param_idx );
@@ -7374,6 +7396,8 @@ float level_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int level_e_iolink::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
+
     IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
     if (res != io_device::IOLINKSTATE::OK)
         {
@@ -7384,7 +7408,6 @@ int level_e_iolink::get_state()
         return st;
         }
     }
-#endif
 //-----------------------------------------------------------------------------
 void level_e_iolink::set_article( const char* new_article )
     {
@@ -7582,10 +7605,10 @@ void pressure_e_iolink::evaluate_io()
     evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
-
 float pressure_e_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
         return get_par( P_ERR, 0 );
@@ -7598,6 +7621,8 @@ float pressure_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int pressure_e_iolink::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
     IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
     if ( res != io_device::IOLINKSTATE::OK )
         {
@@ -7608,8 +7633,6 @@ int pressure_e_iolink::get_state()
         return st;
         }
     }
-
-#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
@@ -7671,27 +7694,19 @@ int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
             {
             case 1:
                 out_info->switch_ch1 = val;
-#ifdef DEBUG_NO_IO_MODULES
-                in_info.st_ch1 = val;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) in_info.st_ch1 = val;
                 return 0;
             case 2:
                 out_info->switch_ch2 = val;
-#ifdef DEBUG_NO_IO_MODULES
-                in_info.st_ch2 = val;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) in_info.st_ch2 = val;
                 return 0;
             case 3:
                 out_info->switch_ch3 = val;
-#ifdef DEBUG_NO_IO_MODULES
-                in_info.st_ch3 = val;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) in_info.st_ch3 = val;
                 return 0;
             case 4:
                 out_info->switch_ch4 = val;
-#ifdef DEBUG_NO_IO_MODULES
-                in_info.st_ch4 = val;
-#endif
+                if ( G_PAC_INFO()->is_emulator() ) in_info.st_ch4 = val;
                 return 0;
             }
         }
@@ -7719,12 +7734,13 @@ void circuit_breaker::direct_on()
     out_info->switch_ch3 = true;
     out_info->switch_ch4 = true;
 
-#ifdef DEBUG_NO_IO_MODULES
-    in_info.st_ch1 = true;
-    in_info.st_ch2 = true;
-    in_info.st_ch3 = true;
-    in_info.st_ch4 = true;
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        in_info.st_ch1 = true;
+        in_info.st_ch2 = true;
+        in_info.st_ch3 = true;
+        in_info.st_ch4 = true;
+        }
     }
 //-----------------------------------------------------------------------------
 void circuit_breaker::direct_off()
@@ -7735,22 +7751,26 @@ void circuit_breaker::direct_off()
     out_info->switch_ch3 = false;
     out_info->switch_ch4 = false;
 
-#ifdef DEBUG_NO_IO_MODULES
-    in_info.st_ch1 = false;
-    in_info.st_ch2 = false;
-    in_info.st_ch3 = false;
-    in_info.st_ch4 = false;
-#endif
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        in_info.st_ch1 = false;
+        in_info.st_ch2 = false;
+        in_info.st_ch3 = false;
+        in_info.st_ch4 = false;
+        }
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 float circuit_breaker::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+
     return v;
     }
 //-----------------------------------------------------------------------------
 int circuit_breaker::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
     IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
     if ( res != io_device::IOLINKSTATE::OK )
         {
@@ -7761,7 +7781,6 @@ int circuit_breaker::get_state()
         return st;
         }
     }
-#endif
 //-----------------------------------------------------------------------------
 void circuit_breaker::evaluate_io()
     {
@@ -7881,9 +7900,10 @@ float concentration_e_iolink::get_temperature() const
     return 0.1f * info->temperature;
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_IO_MODULES
 float concentration_e_iolink::get_value()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+
     if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
         return get_par( P_ERR, 0 );
@@ -7896,6 +7916,8 @@ float concentration_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::get_state()
 	{
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
     IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
     if ( res != io_device::IOLINKSTATE::OK )
         {
@@ -7906,7 +7928,6 @@ int concentration_e_iolink::get_state()
         return info->status;
         }
 	}
-#endif
 //-----------------------------------------------------------------------------
 void concentration_e_iolink::evaluate_io()
     {
@@ -9170,73 +9191,63 @@ motor_altivar::motor_altivar( const char* dev_name,
 int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
-#ifdef DEBUG_NO_IO_MODULES
-    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
-        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
-        reverse, freq, rpm, est, amperage ).size; 
-#else
-    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
-        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
-        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
-        atv->amperage, atv->frq_max ).size;
-#endif //DEBUG_NO_IO_MODULES
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+            "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
+            reverse, freq, rpm, est, amperage ).size;
+        }
+    else
+        {
+        res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+            "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
+            atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
+            atv->amperage, atv->frq_max ).size;
+        }
+
     return res;
     }
 
 float motor_altivar::get_value()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return freq;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return freq;
+
     return atv->get_output_in_percent();
-#endif // DEBUG_NO_IO_MODULES
     }
 
 void motor_altivar::direct_set_value(float value)
     {
-#ifdef DEBUG_NO_IO_MODULES
-    freq = value;
-#else
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        freq = value;
+        return;
+        }
+
     atv->set_output_in_percent( value );
-#endif // DEBUG_NO_IO_MODULES
     }
 
 void motor_altivar::direct_set_state(int new_state)
     {
-#ifdef DEBUG_NO_IO_MODULES
-    if (-1 == new_state)
-        {
-        state = (char)-1;
-        return;
-        }
-#endif // DEBUG_NO_IO_MODULES
-
+    if ( G_PAC_INFO()->is_emulator() )
+        return device::direct_set_state( new_state );
 
     if (new_state == 2)
         {
-#ifdef DEBUG_NO_IO_MODULES
-        state = 2;
-#else
         atv->cmd = 2;
         atv->reverse = 1;
-#endif // DEBUG_NO_IO_MODULES
         return;
         }
 
     if (new_state == 100)
         {
-#ifndef DEBUG_NO_IO_MODULES
         atv->Disable();
         return;
-#endif
         }
 
     if (new_state == 101)
         {
-#ifndef DEBUG_NO_IO_MODULES
         atv->Enable();
         return;
-#endif
         }
 
     if (new_state)
@@ -9251,29 +9262,23 @@ void motor_altivar::direct_set_state(int new_state)
 
 int motor_altivar::get_state()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return state;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
     return atv->state;
-#endif // DEBUG_NO_IO_MODULES
     }
 
 void motor_altivar::direct_on()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = 1;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
+
     atv->cmd = 1;
     atv->reverse = 0;
-#endif // DEBUG_NO_IO_MODULES
     }
 
 void motor_altivar::direct_off()
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = 0;
-    freq = 0;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return device::direct_off();
+
     if (atv->state < 0)
         {
             atv->cmd = 4; //2 bit - fault reset
@@ -9283,7 +9288,6 @@ void motor_altivar::direct_off()
         atv->cmd = 0;
         }
     atv->reverse = 0;
-#endif // DEBUG_NO_IO_MODULES
     }
 
 void motor_altivar::set_string_property(const char * field, const char * value)
@@ -9326,47 +9330,47 @@ int motor_altivar::get_params_count() const
 
 float motor_altivar::get_amperage() const
     {
-#ifdef DEBUG_NO_IO_MODULES
-    return amperage;
-#else
+    if ( G_PAC_INFO()->is_emulator() ) return amperage;
+
     return atv->amperage;
-#endif
     }
 
-#ifdef DEBUG_NO_IO_MODULES
 int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
     {
-    printf( "motor_altivar::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        prop, idx, val );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        printf( "motor_altivar::set_cmd() - prop = %s, idx = %d, val = %f\n",
+            prop, idx, val );
 
-    if ( strcmp( prop, "R" ) == 0 )
-        {
-        reverse = static_cast<int>( val );
-        }
-    else if ( strcmp( prop, "FRQ" ) == 0 )
-        {
-        freq = static_cast<float>( val );
-        }
-    else if ( strcmp( prop, "RPM" ) == 0 )
-        {
-        rpm = static_cast<int>( val );
-        }
-    else if ( strcmp( prop, "EST" ) == 0 )
-        {
-        est = static_cast<int>( val );
-        }
-    else if ( strcmp( prop, "AMP" ) == 0 )
-        {
-        amperage = static_cast<float>( val );
-        }
-    else
-        {
-        return device::set_cmd( prop, idx, val );
+        if ( strcmp( prop, "R" ) == 0 )
+            {
+            reverse = static_cast<int>( val );
+            return 0;
+            }
+        else if ( strcmp( prop, "FRQ" ) == 0 )
+            {
+            freq = static_cast<float>( val );
+            return 0;
+            }
+        else if ( strcmp( prop, "RPM" ) == 0 )
+            {
+            rpm = static_cast<int>( val );
+            return 0;
+            }
+        else if ( strcmp( prop, "EST" ) == 0 )
+            {
+            est = static_cast<int>( val );
+            return 0;
+            }
+        else if ( strcmp( prop, "AMP" ) == 0 )
+            {
+            amperage = static_cast<float>( val );
+            return 0;
+            }
         }
 
-    return 0;
+    return device::set_cmd( prop, idx, val );    
     }
-#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float motor_altivar_linear::get_linear_speed() const
@@ -9377,11 +9381,14 @@ float motor_altivar_linear::get_linear_speed() const
 
     if ( 0 != d && 0 != n )
         {
-#ifdef DEBUG_NO_IO_MODULES
-        v = ( get_rpm() * (float)M_PI * d ) / ( n * SEC_IN_MIN );
-#else
-        v = ( get_atv()->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
-#endif
+        if ( G_PAC_INFO()->is_emulator() )
+            {
+            v = ( get_rpm() * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+            }
+        else
+            {
+            v = ( get_atv()->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+            }
         }
 
     return v;
