@@ -2905,13 +2905,7 @@ class virtual_motor : public i_motor
 class motor : public i_motor, public io_device
     {
     public:
-        motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-            i_motor( dev_name, sub_type, ADDITIONAL_PARAM_COUNT ),
-            io_device( dev_name ),
-            start_switch_time( get_millisec() )
-            {
-            set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
-            }
+        motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type );
 
         int save_device_ex( char *buff ) override;
 
@@ -2926,11 +2920,6 @@ class motor : public i_motor, public io_device
         void direct_on() override;
 
         void direct_off() override;
-
-        virtual void print() const override
-            {
-            device::print();
-            }
 
     private:
         enum CONSTANTS

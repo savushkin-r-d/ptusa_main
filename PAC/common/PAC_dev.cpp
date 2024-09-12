@@ -6882,6 +6882,14 @@ virtual_motor::virtual_motor( const char* dev_name ):
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+motor::motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
+    i_motor( dev_name, sub_type, ADDITIONAL_PARAM_COUNT ),
+    io_device( dev_name ),
+    start_switch_time( get_millisec() )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    }
+//-----------------------------------------------------------------------------
 float motor::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
