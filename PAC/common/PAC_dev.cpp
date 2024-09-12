@@ -3624,7 +3624,6 @@ float counter_iolink::get_value()
 void digital_io_device::print() const
     {
     device::print();
-    //io_device::print();
     }
 //-----------------------------------------------------------------------------
 digital_io_device::digital_io_device( const char *dev_name, device::DEVICE_TYPE type,

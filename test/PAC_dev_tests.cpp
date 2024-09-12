@@ -477,6 +477,39 @@ TEST( analog_io_device, set_cmd )
     }
 
 
+TEST( DO1, get_state )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    do1.init( 1, 0, 0, 0 );
+    do1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    do1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+
+    G_PAC_INFO()->emulation_off();
+    // Когда отключена эмуляция, пишем в буфер обмена с модулями ввода\вывода.
+    EXPECT_EQ( do1.get_state(), 0 );
+    EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 0 );
+    do1.on();
+    EXPECT_EQ( do1.get_state(), 1 );
+    EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
+
+    G_PAC_INFO()->emulation_on();
+    // Когда включена эмуляция, пишем в поле состояния объекта. Здесь буфер
+    // обмена с модулями ввода\вывода не должен изменяться [ 1 ].
+    EXPECT_EQ( do1.get_state(), 0 );
+    do1.on();
+    EXPECT_EQ( do1.get_state(), 1 );
+    do1.off();
+    EXPECT_EQ( do1.get_state(), 0 );    
+    EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );           //1
+    }
+
+TEST( DO1, get_type_name )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    EXPECT_STREQ( do1.get_type_name(), "Дискретный выходной сигнал" );
+    }
+
+
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;

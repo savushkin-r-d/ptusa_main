@@ -97,6 +97,14 @@ class PAC_info: public i_Lua_save_device
             RESET_PARAMS = 101,
             };
 
+#ifdef PTUSA_TEST
+        void emulation_on();
+
+        void emulation_off();
+
+        bool emulator_state = true;
+#endif
+
     private:
         PAC_info();
 
