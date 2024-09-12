@@ -446,6 +446,18 @@ TEST( device, get_type_name )
     EXPECT_STREQ( "Температура", obj.get_type_name() );
     }
 
+TEST( device, evaluate_io )
+    {
+    temperature_e_analog T1( "T1" );
+    T1.evaluate_io();
+    }
+
+TEST( device, set_property )
+    {
+    temperature_e_analog T1( "T1" );
+    T1.set_property( "site", nullptr );
+    }
+
 
 TEST( analog_io_device, set_cmd )
     {
@@ -510,6 +522,13 @@ TEST( DO1, get_type_name )
     }
 
 
+TEST( concentration_e_ok, get_state )
+    {
+    concentration_e_ok Q1( "Q1" );
+    EXPECT_EQ( Q1.get_state(), 1 );
+    }
+
+
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;
@@ -551,6 +570,14 @@ TEST( valve, evaluate )
     sleep_ms( DELAY_TIME + DELAY_TIME );
     valve::evaluate();
     EXPECT_EQ( valve::V_OFF, V1.get_state() );  //Should be closed.
+    }
+
+TEST( valve, is_closed )
+    {
+    valve V1( true, true, "V1", device::DEVICE_TYPE::DT_V,
+        device::DEVICE_SUB_TYPE::DST_V_DO1 );
+
+    EXPECT_TRUE( V1.is_closed() );
     }
 
 

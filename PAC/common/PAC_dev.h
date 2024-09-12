@@ -385,10 +385,7 @@ class device : public i_DO_AO_device, public par_device
         virtual int save_device( char *buff, const char *prefix );
 
         /// @brief Расчет состояния на основе текущих данных от I/O.
-        virtual void evaluate_io()
-            {
-            //Do nothing by default.
-            }
+        virtual void evaluate_io();
 
         enum CONSTANTS
             {
@@ -717,9 +714,7 @@ class device : public i_DO_AO_device, public par_device
         /// устройства.
         ///
         /// Для использования в Lua.
-        virtual void set_property( const char* field, device* dev )
-            {
-            }
+        virtual void set_property( const char* field, device* dev );
 
         /// @brief Установка дополнительных свойств, значения которых -
         /// строки.
@@ -896,10 +891,7 @@ class valve: public digital_io_device
             }
 
         /// @brief Получение значения выключенного состояния.
-        bool is_closed()
-            {
-            return get_off_fb_value() > 0;
-            }
+        bool is_closed();
 
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value()
@@ -2231,18 +2223,9 @@ class concentration_e : public AI1
 class concentration_e_ok : public concentration_e
     {
     public:
-        concentration_e_ok( const char *dev_name ) : concentration_e( dev_name,
-            DST_QT_OK )
-            {
-            }
+        concentration_e_ok( const char* dev_name );
 
-        int get_state()
-            {
-            if ( G_PAC_INFO()->is_emulator() ) return concentration_e::get_state();
-
-            int i = get_DI( DI_INDEX );
-            return i == 1 ? concentration_e::get_state() : -1;
-            }
+        int get_state() override;
 
         int save_device_ex( char* buff ) override;
 
@@ -2944,7 +2927,6 @@ class motor : public i_motor, public io_device
         u_long start_switch_time;
     };
 //-----------------------------------------------------------------------------
-
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
 /// интерфейсной платой Ethernet.

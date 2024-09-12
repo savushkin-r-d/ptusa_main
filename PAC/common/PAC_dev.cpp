@@ -267,6 +267,11 @@ float device::get_value()
     return value;
     }
 //-----------------------------------------------------------------------------
+void device::set_property( const char* field, device* dev )
+    {
+    // By default do nothing.
+    }
+//-----------------------------------------------------------------------------
 void device::set_string_property( const char* field, const char* new_value )
     {
     if ( G_DEBUG )
@@ -315,6 +320,11 @@ int device::save_device( char* buff, const char* prefix )
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
     return res;
+    }
+//-----------------------------------------------------------------------------
+void device::evaluate_io()
+    {
+    //Do nothing by default.
     }
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, char *val )
@@ -3987,6 +3997,11 @@ void valve::evaluate()
         []( valve* v ) { return v->is_switching_off_finished(); } ),
         to_switch_off.end() );
         }
+//-----------------------------------------------------------------------------
+bool valve::is_closed()
+    {
+    return get_off_fb_value() > 0;
+    }
 //-----------------------------------------------------------------------------
 void valve::off()
     {
@@ -7863,6 +7878,19 @@ float concentration_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+concentration_e_ok::concentration_e_ok( const char* dev_name ) : concentration_e( dev_name,
+    DST_QT_OK )
+    {
+    }
+
+int concentration_e_ok::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return concentration_e::get_state();
+
+    int i = get_DI( DI_INDEX );
+    return i == 1 ? concentration_e::get_state() : -1;
+    }
+
 int concentration_e_ok::save_device_ex( char* buff )
     {
     int res = 0;
