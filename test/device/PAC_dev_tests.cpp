@@ -412,6 +412,36 @@ TEST( device_manager, clear_io_devices )
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
     }
 
+TEST( device_manager, get_device )
+    {
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
+    ASSERT_EQ( nullptr, res );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(),
+        G_DEVICE_MANAGER()->get_device( 0u ) );    //Search should find device.
+    EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
+        G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
+    }
+
+TEST( device_manager, get_name_in_Lua )
+    {
+    ASSERT_STREQ( G_DEVICE_MANAGER()->get_name_in_Lua(), "Device manager" );
+    }
+
+TEST( device_manager, evaluate_io )
+    {
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
+    ASSERT_EQ( nullptr, res );
+
+    G_DEVICE_MANAGER()->evaluate_io();
+    }
+
+
 TEST( dev_stub, get_pump_dt )
     {
     EXPECT_EQ( .0f, STUB()->get_pump_dt() );

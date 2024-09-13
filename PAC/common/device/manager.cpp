@@ -330,9 +330,24 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
+device* device_manager::get_device( u_int serial_dev_n )
+    {
+    if ( serial_dev_n < project_devices.size() )
+        {
+        return project_devices[ serial_dev_n ];
+        }
+
+    return get_stub_device();
+    }
+//-----------------------------------------------------------------------------
 size_t device_manager::get_device_count() const
     {
     return project_devices.size();
+    }
+//-----------------------------------------------------------------------------
+const char* device_manager::get_name_in_Lua() const
+    {
+    return "Device manager";
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение фиктивного устройства.
@@ -1473,6 +1488,14 @@ int device_manager::init_rt_params()
         "init_devices_rt_params", "device_manager::init_rt_params()" );
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void device_manager::evaluate_io()
+    {
+    for ( u_int i = 0; i < project_devices.size(); i++ )
+        {
+        project_devices[ i ]->evaluate_io();
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

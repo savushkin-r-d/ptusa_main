@@ -235,15 +235,7 @@ class device_manager : public i_Lua_save_device
         device* get_device( const char* dev_name );
 
         /// @brief Получение устройства.
-        device* get_device( u_int serial_dev_n )
-            {
-            if ( serial_dev_n < project_devices.size() )
-                {
-                return project_devices[ serial_dev_n ];
-                }
-
-            return get_stub_device();
-            }
+        device* get_device( u_int serial_dev_n );
 
         /// @brief Получение клапана по его номеру.
         i_DO_device* get_V( const char* dev_name );
@@ -330,14 +322,10 @@ class device_manager : public i_Lua_save_device
         ///@brief Получение количества всех устройств.
         size_t get_device_count() const;
 
-
         /// @brief Отладочная печать объекта в консоль.
         void print() const;
 
-        const char* get_name_in_Lua() const
-            {
-            return "Device manager";
-            }
+        const char* get_name_in_Lua() const;
 
         /// @brief Получение фиктивного устройства.
         dev_stub* get_stub();
@@ -348,13 +336,7 @@ class device_manager : public i_Lua_save_device
 
         int init_rt_params();
 
-        void evaluate_io()
-            {
-            for ( u_int i = 0; i < project_devices.size(); i++ )
-                {
-                project_devices[ i ]->evaluate_io();
-                }
-            }
+        void evaluate_io();
 
         int save_device( char* buff );
 
