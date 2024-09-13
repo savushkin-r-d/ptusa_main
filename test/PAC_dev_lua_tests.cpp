@@ -194,3 +194,22 @@ TEST( toLuapp, tolua_PAC_dev_G00 )
 
     lua_close( L );
     }
+
+
+TEST( toLuapp, tolua_PAC_dev_CAM00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_CAM, device.DST_CAM_DO1_DI2, \'CAM1\', \'Test camera\', \'\' )" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = CAM()" ) );   //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "CAM1 = CAM( \'CAM1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "CAM1" );
+    auto CAM1 = static_cast<i_camera*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, CAM1 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
