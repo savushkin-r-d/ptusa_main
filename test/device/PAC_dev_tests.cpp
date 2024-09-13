@@ -2,6 +2,8 @@
 
 using namespace ::testing;
 
+#include <cstring>
+
 /*
     TEST METHOD DEFENITION:
     void turn_off_blue()
