@@ -76,7 +76,7 @@ file(GLOB common_src CONFIGURE_DEPENDS
 
         PAC/common/*.cpp
         PAC/common/sys/*.cpp
-		PAC/common/device/*.cpp
+        PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
 if(USE_OPCUA)
