@@ -3,6 +3,8 @@
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
 
+#include <algorithm>
+
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 

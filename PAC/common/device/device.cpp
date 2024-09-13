@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
 #include <fmt/core.h>
+#include <algorithm>
 
 #include "device.h"
 #include "manager.h"

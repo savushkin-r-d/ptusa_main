@@ -1,6 +1,4 @@
-#ifndef __BORLANDC__
-#include <cstdlib>
-#endif
+#include <algorithm>
 
 #ifdef WIN_OS
 #include <Windows.h>
