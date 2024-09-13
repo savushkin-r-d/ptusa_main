@@ -5,7 +5,8 @@
 #include <open62541/server_config_default.h>
 #include <open62541/types_generated.h>
 
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "tech_def.h"
 
 class OPCUA_server

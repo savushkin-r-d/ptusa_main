@@ -164,7 +164,7 @@ int load_from_stream( alarm &a, char *buff );
 #ifdef PAC
 #include "param_ex.h"
 #include "smart_ptr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "tech_def.h"
 

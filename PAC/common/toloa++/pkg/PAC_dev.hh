@@ -8,7 +8,8 @@
 
 $#include <stdlib.h>
 
-$#include "PAC_dev.h"
+$#include "device/device.h"
+$#include "device/manager.h"
 $#include "tech_def.h"
 $#include "cip_tech_def.h"
 $#include "bus_coupler_io.h"
@@ -764,7 +765,7 @@ i_DO_AO_device* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-camera* CAM( const char* dev_name );
+i_camera* CAM( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение датчика разности давления по имени.
 ///

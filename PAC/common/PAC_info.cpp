@@ -1,4 +1,5 @@
 #include <string.h>
+#include <fmt/core.h>
 
 #include "PAC_info.h"
 #include "PAC_err.h"

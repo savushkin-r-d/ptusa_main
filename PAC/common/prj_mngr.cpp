@@ -6,10 +6,12 @@
 #include <stdlib.h>
 
 #include <cxxopts.hpp>
+#include <fmt/core.h>
 
 #include "prj_mngr.h"
 #include "bus_coupler_io.h"
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "param_ex.h"
 #include "params_recipe_manager.h"
 

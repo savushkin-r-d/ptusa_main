@@ -1,5 +1,6 @@
 #include "param_ex.h"
 #include "lua_manager.h"
+#include "device/manager.h"
 
 auto_smart_ptr< params_manager > params_manager::instance = 0;
 char params_manager::is_init = 0;

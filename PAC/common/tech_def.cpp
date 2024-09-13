@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <stdio.h>
+#include <fmt/core.h>
 
 #include "tech_def.h"
 
