@@ -185,13 +185,7 @@ class level_e_cone : public level
 class pressure_e : public AI1
     {
     public:
-        pressure_e( const char *dev_name ): AI1( dev_name, DT_PT, DST_NONE,
-            ADDITIONAL_PARAM_COUNT )
-            {
-            start_param_idx = AI1::get_params_count();
-            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
-            }
+        pressure_e( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -762,22 +756,11 @@ class virtual_device : public device
 class analog_output : public AO1
     {
     public:
-        analog_output( const char *dev_name ) :
-            AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
-            {
-            set_par_name( P_MIN_VALUE, 0, "P_MIN_V" );
-            set_par_name( P_MAX_VALUE, 0, "P_MAX_V" );
-            }
+        analog_output( const char* dev_name );
 
-        float get_min_value()
-            {
-            return get_par( P_MIN_VALUE, 0 );
-            }
+        float get_min_value() const override;
 
-        float get_max_value()
-            {
-            return get_par( P_MAX_VALUE, 0 );
-            }
+        float get_max_value() const override;
 
     private:
         enum CONSTANTS
@@ -1060,10 +1043,7 @@ class level_s_iolink : public analog_io_device
 class flow_s : public DI1
     {
     public:
-        flow_s( const char *dev_name ): DI1( dev_name, DT_FS, DST_NONE,
-            0 )
-            {
-            }
+        flow_s( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик положения.
@@ -1115,45 +1095,35 @@ class temperature_signal : public DI1
 class DI_signal : public DI1
     {
     public:
-        DI_signal( const char *dev_name ): DI1( dev_name, DT_DI, DST_NONE, 0 )
-            {
-            }
+        DI_signal( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Кнопка.
 class button : public DI1
     {
     public:
-        button( const char *dev_name ): DI1( dev_name, DT_SB, DST_NONE, 0 )
-            {
-            }
+        button( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Дискретный сигнал управления.
 class DO_signal : public DO1
     {
     public:
-        DO_signal( const char *dev_name ): DO1( dev_name, DT_DO, DST_NONE )
-            {
-            }
+        DO_signal( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Аварийная звуковая сигнализация.
 class siren : public DO1
     {
     public:
-        siren( const char *dev_name ): DO1( dev_name, DT_HA, DST_NONE )
-            {
-            }
+        siren( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Аварийная световая сигнализация.
 class lamp : public DO1
     {
     public:
-        lamp( const char *dev_name ): DO1( dev_name, DT_HL, DST_NONE )
-            {
-            }
+        lamp( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Базовый счетчик.
@@ -1822,10 +1792,7 @@ class timer_manager
         timer* operator[] ( unsigned int index );
 
         /// @brief Количество таймеров.
-        int get_count() const
-            {
-            return timers_cnt;
-            }
+        int get_count() const;
 
     private:
         u_int   timers_cnt; ///< Количество таймеров.

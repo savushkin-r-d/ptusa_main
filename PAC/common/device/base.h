@@ -821,8 +821,8 @@ class AO1 : public analog_io_device
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt );
 
-        virtual float get_min_value() = 0;
-        virtual float get_max_value() = 0;
+        virtual float get_min_value() const = 0;
+        virtual float get_max_value() const = 0;
 
         float get_value() override;
         void  direct_set_value( float new_value ) override;
@@ -912,6 +912,12 @@ class AI1 : public analog_io_device
 
         void  direct_set_value( float new_value ) override;
 
+        /// @brief Получение максимального значения выхода устройства.
+        virtual float get_max_val();
+
+        /// @brief Получение минимального значения выхода устройства.
+        virtual float get_min_val();
+
     protected:
         enum CONSTANTS
             {
@@ -921,18 +927,6 @@ class AI1 : public analog_io_device
 
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
-
-        /// @brief Получение максимального значения выхода устройства.
-        virtual float get_max_val()
-            {
-            return 0;
-            }
-
-        /// @brief Получение минимального значения выхода устройства.
-        virtual float get_min_val()
-            {
-            return 0;
-            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс текущего уровня.
@@ -950,10 +944,7 @@ class level : public AI1
         float get_max_val();
         float get_min_val();
 
-        int get_params_count() const
-            {
-            return start_param_idx + LAST_PARAM_IDX - 1;
-            }
+        int get_params_count() const override;
 
         enum CONSTANTS
             {

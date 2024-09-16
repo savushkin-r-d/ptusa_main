@@ -543,7 +543,7 @@ TEST( DO1, get_state )
     do1.on();
     EXPECT_EQ( do1.get_state(), 1 );
     do1.off();
-    EXPECT_EQ( do1.get_state(), 0 );    
+    EXPECT_EQ( do1.get_state(), 0 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );           //1
     }
 
@@ -551,6 +551,108 @@ TEST( DO1, get_type_name )
     {
     DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
     EXPECT_STREQ( do1.get_type_name(), "Дискретный выходной сигнал" );
+    }
+
+
+TEST( AI1, get_max_val )
+    {
+    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI, 0 );
+    EXPECT_EQ( sensor.get_max_val(), 0 );
+    }
+
+TEST( AI1, get_min_val )
+    {
+    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI, 0 );
+    EXPECT_EQ( sensor.get_min_val(), 0 );
+    }
+
+
+TEST( level, get_params_count )
+    {
+    level L1( "L1", device::DEVICE_SUB_TYPE::DST_LT_CONE, 1 );
+    EXPECT_EQ( L1.get_params_count(), 2 );
+    }
+
+
+TEST( pressure_e, pressure_e )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    pressure_e P1( "P1" );
+
+    P1.save_device( buff, "" );
+    EXPECT_STREQ( "P1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, "
+        "P_MIN_V=0, P_MAX_V=0},\n", buff );
+    }
+
+
+TEST( analog_output, get_max_value )
+    {
+    analog_output A1( "A1" );
+    EXPECT_EQ( A1.get_max_value(), 0 );
+    }
+
+TEST( analog_output, get_min_value )
+    {
+    analog_output A1( "A1" );
+    EXPECT_EQ( A1.get_min_value(), 0 );
+    }
+
+
+TEST( flow_s, flow_s )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    flow_s FS1( "FS1" );
+
+    FS1.save_device( buff, "" );
+    EXPECT_STREQ( "FS1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+
+TEST( button, button )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    button BT1( "BT1" );
+
+    BT1.save_device( buff, "" );
+    EXPECT_STREQ( "BT1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+
+TEST( DO_signal, DO_signal )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    DO_signal DO1( "DO1" );
+
+    DO1.save_device( buff, "" );
+    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff );
+    }
+
+
+TEST( siren, siren )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    siren S1( "S1" );
+
+    S1.save_device( buff, "" );
+    EXPECT_STREQ( "S1={M=0, ST=0},\n", buff );
+    }
+
+
+TEST( lamp, lamp )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    lamp L1( "L1" );
+
+    L1.save_device( buff, "" );
+    EXPECT_STREQ( "L1={M=0, ST=0},\n", buff );
     }
 
 
@@ -612,12 +714,33 @@ TEST( valve, is_closed )
     EXPECT_TRUE( V1.is_closed() );
     }
 
+TEST( valve, get_fb_state )
+    {
+    valve V1( true, true, "V1", device::DEVICE_TYPE::DT_V,
+        device::DEVICE_SUB_TYPE::DST_V_DO1 );
+
+    EXPECT_TRUE( V1.get_fb_state() );
+    }
+
+
+TEST( analog_valve, get_min_value )
+    {
+    const analog_valve VC1( "VC1" );
+    EXPECT_EQ( VC1.get_min_value(), 0 );
+    }
+
+TEST( analog_valve, get_max_value )
+    {
+    const analog_valve VC1( "VC1" );
+    EXPECT_EQ( VC1.get_max_value(), 100 );
+    }
+
 
 TEST( valve_bottom_mix_proof, is_switching_off_finished )
     {
     valve_bottom_mix_proof V1( "V1" );
     const auto DELAY_TIME = 1;
-    G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = DELAY_TIME;
+    G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ] = DELAY_TIME;    
 
     EXPECT_EQ( true, V1.is_switching_off_finished() );
 
@@ -2463,4 +2586,12 @@ TEST( power_unit, set_cmd )
         "ST_CH={0,0,0,0,0,0,0,0}, "
         "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
+    }
+
+
+TEST( timer_manager, get_count )
+    {
+    const auto TIMERS_COUNT = 10;
+    const timer_manager TM1( TIMERS_COUNT );
+    EXPECT_EQ( TM1.get_count(), TIMERS_COUNT );
     }

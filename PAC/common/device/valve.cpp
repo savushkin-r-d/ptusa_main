@@ -320,6 +320,32 @@ int valve::set_cmd( const char* prop, u_int idx, double val )
     return device::set_cmd( prop, idx, val );
     }
 //-----------------------------------------------------------------------------
+bool valve::is_wash_seat_active() const
+    {
+    return wash_flag;
+    }
+//-----------------------------------------------------------------------------
+void valve::set_seat_wash_state( bool wash_flag )
+    {
+    this->wash_flag = wash_flag;
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve::get_valve_state()
+    {
+    return (VALVE_STATE)digital_io_device::get_state();
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение состояния обратной связи.
+bool valve::get_fb_state()
+    {
+    return true;
+    }
+//-----------------------------------------------------------------------------
+bool valve::is_switching_off_finished()
+    {
+    return !is_switching_off;
+    };
+//-----------------------------------------------------------------------------
 void valve::evaluate()
     {
     if ( v_bistable.empty() == false )
@@ -363,9 +389,26 @@ void valve::evaluate()
         to_switch_off.end() );
     }
 //-----------------------------------------------------------------------------
+bool valve::is_opened()
+    {
+    return get_on_fb_value() > 0;
+    }
+//-----------------------------------------------------------------------------
 bool valve::is_closed()
     {
     return get_off_fb_value() > 0;
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение значения обратной связи на включенное состояние.
+int valve::get_on_fb_value()
+    {
+    return on_fb;
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение значения обратной связи на выключенное состояние.
+int valve::get_off_fb_value()
+    {
+    return off_fb;
     }
 //-----------------------------------------------------------------------------
 void valve::off()
@@ -2039,6 +2082,11 @@ void valve_iol_terminal::direct_off()
     state = valve::VALVE_STATE::V_OFF;
     }
 //-----------------------------------------------------------------------------
+void valve_iol_terminal::set_st( VALVE_STATE new_state )
+    {
+    state = new_state;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iol_terminal_DO1::valve_iol_terminal_DO1( const char* dev_name ) :
     valve_iol_terminal( dev_name, device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
@@ -2257,12 +2305,12 @@ void analog_valve_iolink::evaluate_io()
 #endif
     }
 //-----------------------------------------------------------------------------
-float analog_valve_iolink::get_min_value()
+float analog_valve_iolink::get_min_value() const
     {
     return static_cast<float>( CONSTANTS::FULL_CLOSED );
     }
 //-----------------------------------------------------------------------------
-float analog_valve_iolink::get_max_value()
+float analog_valve_iolink::get_max_value() const
     {
     return static_cast<float>( CONSTANTS::FULL_OPENED );
     }
@@ -2443,6 +2491,20 @@ int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+analog_valve::analog_valve( const char* dev_name ) :
+    AO1( dev_name, DT_VC, DST_VC, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+float analog_valve::get_min_value() const
+    {
+    return C_MIN;
+    }
+//-----------------------------------------------------------------------------
+float analog_valve::get_max_value() const
+    {
+    return C_MAX;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS::valve_AS( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :

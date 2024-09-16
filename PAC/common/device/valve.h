@@ -46,25 +46,16 @@ class valve : public digital_io_device
 #endif
 
         /// @brief Получение значения включенного состояния.
-        bool is_opened()
-            {
-            return get_on_fb_value() > 0;
-            }
+        bool is_opened();
 
         /// @brief Получение значения выключенного состояния.
         bool is_closed();
 
         /// @brief Получение значения обратной связи на включенное состояние.
-        virtual int get_on_fb_value()
-            {
-            return on_fb;
-            }
+        virtual int get_on_fb_value();
 
         /// @brief Получение значения обратной связи на выключенное состояние.
-        virtual int get_off_fb_value()
-            {
-            return off_fb;
-            }
+        virtual int get_off_fb_value();
 
         /// @brief Сохранение дополнительных данных.
         int save_device_ex( char* buff );
@@ -126,30 +117,19 @@ class valve : public digital_io_device
             V_STOP = 5,       ///< Остановлен.
             };
 
-        bool is_wash_seat_active() const
-            {
-            return wash_flag;
-            }
-        void set_seat_wash_state( bool wash_flag )
-            {
-            this->wash_flag = wash_flag;
-            }
+        bool is_wash_seat_active() const;
+
+        void set_seat_wash_state( bool wash_flag );
+
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-
         /// @brief Получение состояния клапана без учета обратной связи.
-        virtual VALVE_STATE get_valve_state()
-            {
-            return (VALVE_STATE)digital_io_device::get_state();
-            }
+        virtual VALVE_STATE get_valve_state();
 
         /// @brief Получение состояния обратной связи.
-        virtual bool get_fb_state()
-            {
-            return true;
-            }
+        virtual bool get_fb_state();
 
+    protected:
         enum FB_STATE
             {
             FB_IS_AND_OFF = 0, ///< Обратная связь отключена.
@@ -186,10 +166,7 @@ class valve : public digital_io_device
 
     private:
         /// @brief Определение завершения отключения клапана с задержкой.
-        virtual bool is_switching_off_finished()
-            {
-            return !is_switching_off;
-            };
+        virtual bool is_switching_off_finished();
 
         bool is_switching_off; ///Выключается ли клапан с задержкой.
         u_long start_off_time; ///Время начала выключения клапана с задержкой.
@@ -908,12 +885,10 @@ class valve_iol_terminal : public valve
         VALVE_STATE get_valve_state() override;
 
         void direct_on() override;
-        void direct_off() override;
+        void direct_off() override;        
 
-        void set_st( VALVE_STATE new_state )
-            {
-            state = new_state;
-            }
+    protected:
+        void set_st( VALVE_STATE new_state );
 
     private:
         std::vector<unsigned int> terminal_id;
@@ -1006,19 +981,11 @@ class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_D
 class analog_valve : public AO1
     {
     public:
-        analog_valve( const char* dev_name ) : AO1( dev_name, DT_VC, DST_VC, 0 )
-            {
-            }
+        analog_valve( const char* dev_name );
 
-        float get_min_value()
-            {
-            return C_MIN;
-            }
+        float get_min_value() const override;
 
-        float get_max_value()
-            {
-            return C_MAX;
-            }
+        float get_max_value() const override;
 
     private:
         enum CONSTANTS
@@ -1038,9 +1005,9 @@ class analog_valve_iolink : public AO1
 
         void evaluate_io();
 
-        float get_min_value();
+        float get_min_value() const override;
 
-        float get_max_value();
+        float get_max_value() const override;
 
         int save_device_ex( char* buff );
 

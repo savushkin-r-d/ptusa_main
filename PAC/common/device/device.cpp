@@ -2627,6 +2627,37 @@ bool level_s_iolink::is_active()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+flow_s::flow_s( const char* dev_name ) : DI1( dev_name, DT_FS, DST_NONE,
+    0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+DI_signal::DI_signal( const char* dev_name ) : DI1( dev_name, DT_DI, DST_NONE, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+button::button( const char* dev_name ) : DI1( dev_name, DT_SB, DST_NONE, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+DO_signal::DO_signal( const char* dev_name ) : DO1( dev_name, DT_DO, DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+siren::siren( const char* dev_name ) : DO1( dev_name, DT_HA, DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+lamp::lamp( const char* dev_name ) : DO1( dev_name, DT_HL, DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
     level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 ),
     n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 ),
@@ -2743,6 +2774,14 @@ void level_e_iolink::set_string_property(const char* field, const char* value)
         }
     }
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pressure_e::pressure_e( const char* dev_name ) : AI1( dev_name, DT_PT, DST_NONE,
+    ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
 //-----------------------------------------------------------------------------
 float pressure_e::get_max_val()
     {
@@ -3492,6 +3531,11 @@ timer* timer_manager::operator[]( unsigned int index )
     return &stub;
     }
 //-----------------------------------------------------------------------------
+int timer_manager::get_count() const
+    {
+    return timers_cnt;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_device::direct_off()
     {
@@ -3547,6 +3591,24 @@ virtual_device::virtual_device( const char *dev_name,
     value = 0;
     state = 0;
     level_logic_invert = false;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+analog_output::analog_output( const char* dev_name ) :
+    AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
+    {
+    set_par_name( P_MIN_VALUE, 0, "P_MIN_V" );
+    set_par_name( P_MAX_VALUE, 0, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
+float analog_output::get_min_value() const
+    {
+    return get_par( P_MIN_VALUE, 0 );
+    }
+//-----------------------------------------------------------------------------
+float analog_output::get_max_value() const
+    {
+    return get_par( P_MAX_VALUE, 0 );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
