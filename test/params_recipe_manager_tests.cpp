@@ -55,8 +55,15 @@ TEST_F(ParamsRecipeStorageTest, Serialize) {
 
 // define a test case for deserializing the recipes from a file
 TEST_F(ParamsRecipeStorageTest, Deserialize) {
-    // deserialize the recipes from a file named "test.txt"
-    storage->deserialize("test.txt");
+    // create a vector of params for the recipe
+    std::vector<float> params = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+    storage->recipes[ 0 ].name = "Test1";
+    storage->recipes[ 0 ].params = params;
+    // serialize the recipes to a file named "test1.txt"
+    storage->serialize( "test1.txt" );
+
+    // deserialize the recipes from a file named "test1.txt"
+    storage->deserialize("test1.txt");
     // check if the name of the recipe at index 0 is equal to "Test1"
     EXPECT_EQ(storage->recipes[0].name, "Test1");
     // check if the params of the recipe at index 0 are equal to {1.0, 2.0, 3.0, 4.0, 5.0}
