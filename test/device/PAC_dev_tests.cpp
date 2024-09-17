@@ -4,10 +4,6 @@ using namespace ::testing;
 
 #include <cstring>
 
-/*
-    TEST METHOD DEFENITION:
-    void turn_off_blue()
-*/
 
 TEST( signal_column, turn_off_blue )
     {
@@ -31,10 +27,12 @@ TEST( signal_column, turn_off_blue )
     EXPECT_EQ( false, test_dev.is_blue_switched_on() );
     }
 
-/*
-    TEST METHOD DEFENITION:
-    char get_state_data( char* data )
-*/
+TEST( signal_column, get_type_name )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    EXPECT_STREQ( "Сигнальная колонна", test_dev.get_type_name() );
+    }
+
 
 TEST( valve_iol_terminal, get_state_data )
     {
@@ -43,11 +41,6 @@ TEST( valve_iol_terminal, get_state_data )
     }
 
 
-/*
-    TEST METHOD DEFENITION:
-    float temperature_e_analog::get_value()
-*/
-
 TEST( temperature_e_analog, get_value )
     {
     temperature_e_analog t1( "T1" );
@@ -55,11 +48,12 @@ TEST( temperature_e_analog, get_value )
     EXPECT_EQ( .0, v );
     }
 
-/*
-    TEST METHOD DEFENITION:
-    io_device* add_io_device( int dev_type, int dev_sub_type,
-                        const char* dev_name, char * descr, char* article )
-*/
+TEST( temperature_e_analog, get_type_name )
+    {
+    temperature_e_analog test_dev( "test_TE1" );
+    EXPECT_STREQ( "Температура", test_dev.get_type_name() );
+    }
+
 
 TEST( device_manager, add_io_device )
     {
@@ -481,7 +475,6 @@ TEST( device, save_device )
         "P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
-
 TEST( device, set_article )
     {
     temperature_e_analog T1( "T1" );
@@ -507,6 +500,14 @@ TEST( device, set_property )
     {
     temperature_e_analog T1( "T1" );
     T1.set_property( "site", nullptr );
+    }
+
+TEST( device, set_cmd )
+    {
+    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    auto res = dev1.set_cmd( "PROPERTY", 1, "value" );
+    EXPECT_EQ( res, 0 );
     }
 
 
@@ -587,11 +588,24 @@ TEST( AI1, get_min_val )
     EXPECT_EQ( sensor.get_min_val(), 0 );
     }
 
+TEST( AI1, get_type_name )
+    {
+    AI1 test_dev( "test_AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
+    EXPECT_STREQ( "Аналоговый входной сигнал", test_dev.get_type_name() );
+    }
+
 
 TEST( level, get_params_count )
     {
     level L1( "L1", device::DEVICE_SUB_TYPE::DST_LT_CONE, 1 );
     EXPECT_EQ( L1.get_params_count(), 2 );
+    }
+
+TEST( level, get_type_name )
+    {
+    level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
+    EXPECT_STREQ( "Текущий уровень", test_dev.get_type_name() );
     }
 
 
@@ -604,6 +618,12 @@ TEST( pressure_e, pressure_e )
     P1.save_device( buff, "" );
     EXPECT_STREQ( "P1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, "
         "P_MIN_V=0, P_MAX_V=0},\n", buff );
+    }
+
+TEST( pressure_e, get_type_name )
+    {
+    pressure_e test_dev( "test_PT1" );
+    EXPECT_STREQ( "Давление", test_dev.get_type_name() );
     }
 
 
@@ -619,6 +639,12 @@ TEST( analog_output, get_min_value )
     EXPECT_EQ( A1.get_min_value(), 0 );
     }
 
+TEST( analog_output, get_type_name )
+    {
+    analog_output test_dev( "test_AO1" );
+    EXPECT_STREQ( "Аналоговый выходной сигнал", test_dev.get_type_name() );
+    }
+
 
 TEST( flow_s, flow_s )
     {
@@ -628,6 +654,29 @@ TEST( flow_s, flow_s )
 
     FS1.save_device( buff, "" );
     EXPECT_STREQ( "FS1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+TEST( flow_s, get_type_name )
+    {
+    flow_s test_dev( "test_FS1" );
+    EXPECT_STREQ( "Расход", test_dev.get_type_name() );
+    }
+
+
+TEST( DI_signal, DI_signal )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    DI_signal DI1( "DI1" );
+
+    DI1.save_device( buff, "" );
+    EXPECT_STREQ( "DI1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+TEST( DI_signal, get_type_name )
+    {
+    DI_signal test_dev( "test_DI1" );
+    EXPECT_STREQ( "Дискретный входной сигнал", test_dev.get_type_name() );
     }
 
 
@@ -641,6 +690,12 @@ TEST( button, button )
     EXPECT_STREQ( "BT1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
+TEST( button, get_type_name )
+    {
+    button test_dev( "test_BT1" );
+    EXPECT_STREQ( "Кнопка", test_dev.get_type_name() );
+    }
+
 
 TEST( DO_signal, DO_signal )
     {
@@ -650,6 +705,12 @@ TEST( DO_signal, DO_signal )
 
     DO1.save_device( buff, "" );
     EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff );
+    }
+
+TEST( DO_signal, get_type_name )
+    {
+    DO_signal test_dev( "test_DO1" );
+    EXPECT_STREQ( "Дискретный выходной сигнал", test_dev.get_type_name() );
     }
 
 
@@ -663,6 +724,12 @@ TEST( siren, siren )
     EXPECT_STREQ( "S1={M=0, ST=0},\n", buff );
     }
 
+TEST( siren, get_type_name )
+    {
+    siren test_dev( "test_HA1" );
+    EXPECT_STREQ( "Аварийная звуковая сигнализация", test_dev.get_type_name() );
+    }
+
 
 TEST( lamp, lamp )
     {
@@ -672,6 +739,19 @@ TEST( lamp, lamp )
 
     L1.save_device( buff, "" );
     EXPECT_STREQ( "L1={M=0, ST=0},\n", buff );
+    }
+
+TEST( lamp, get_type_name )
+    {
+    lamp test_dev( "test_HA1" );
+    EXPECT_STREQ( "Аварийная световая сигнализация", test_dev.get_type_name() );
+    }
+
+
+TEST( concentration_e, get_type_name )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_STREQ( "Концентрация", test_dev.get_type_name() );
     }
 
 
@@ -692,6 +772,12 @@ TEST( state_s, is_active )
 
     GS1.save_device( buff, "" );
     EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
+    }
+
+TEST( state_s, get_type_name )
+    {
+    state_s test_dev( "test_GS1" );
+    EXPECT_STREQ( "Датчик положения", test_dev.get_type_name() );
     }
 
 TEST( state_s_inverse, is_active )
@@ -752,6 +838,12 @@ TEST( analog_valve, get_max_value )
     {
     const analog_valve VC1( "VC1" );
     EXPECT_EQ( VC1.get_max_value(), 100 );
+    }
+
+TEST( analog_valve, get_type_name )
+    {
+    analog_valve test_dev( "test_VC1" );
+    EXPECT_STREQ( "Управляемый клапан", test_dev.get_type_name() );
     }
 
 
@@ -1184,6 +1276,12 @@ TEST( level_s, is_active )
     EXPECT_EQ( false, LS3.is_active() );
     }
 
+TEST( level_s, get_type_name )
+    {
+    level_s test_dev( "test_LS1", device::DEVICE_SUB_TYPE::DST_LS_VIRT );
+    EXPECT_STREQ( "Уровень", test_dev.get_type_name() );
+    }
+
 
 TEST( level_s_iolink, set_article )
     {
@@ -1207,6 +1305,12 @@ TEST( motor, save_device )
     char buff[ BUFF_SIZE ] = { 0 };
     M1.save_device( buff, "" );
     EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, ERRT=0, P_ON_TIME=0},\n", buff );
+    }
+
+TEST( motor, get_type_name )
+    {
+    motor test_dev( "test_M1", device::DST_M_VIRT );
+    EXPECT_STREQ( "Двигатель", test_dev.get_type_name() );
     }
 
 
@@ -1259,7 +1363,8 @@ TEST( motor_altivar_linear, get_linear_speed )
     EXPECT_EQ( 2.09439516f, m1.get_linear_speed() );
     }
 
-  TEST( camera, is_ready )
+
+TEST( camera, is_ready )
     {
     camera c1( "C1", device::DST_CAM_DO1_DI1 );
     auto v = c1.is_ready();
@@ -1272,6 +1377,12 @@ TEST( motor_altivar_linear, get_linear_speed )
     camera_DI3 c3( "C3" );
     v = c3.is_ready();
     EXPECT_FALSE( v );
+    }
+
+TEST( camera, get_type_name )
+    {
+    camera test_dev( "test_CAM1", device::DST_CAM_DO1_DI1 );
+    EXPECT_STREQ( "Камера", test_dev.get_type_name() );
     }
 
 
@@ -1468,6 +1579,13 @@ TEST( counter, get_max_raw_value )
     auto res = fqt1.get_max_raw_value();
     EXPECT_EQ( USHRT_MAX, res );
     }
+
+TEST( counter, get_type_name )
+    {
+    counter test_dev( "test_FQT1" );
+    EXPECT_STREQ( "Счетчик", test_dev.get_type_name() );
+    }
+
 
 TEST( virtual_counter, get_pump_dt )
     {
@@ -1816,6 +1934,12 @@ TEST( wages, save_device )
         buff );
     }
 
+TEST( wages, get_type_name )
+    {
+    wages test_dev( "test_W1" );
+    EXPECT_STREQ( "Тензорезистор", test_dev.get_type_name() );
+    }
+
 
 TEST( wages_eth, evaluate_io )
     {
@@ -2115,6 +2239,12 @@ TEST( temperature_e, save_device )
         "T1={M=0, ST=1, V=0, E=1, P_CZ=0, P_ERR_T=0},\n", buff );
     }
 
+TEST( temperature_e, get_type_name )
+    {
+    temperature_e test_dev( "test_TE1" );
+    EXPECT_STREQ( "Температура", test_dev.get_type_name() );
+    }
+
 
 TEST( threshold_regulator, set_value )
     {
@@ -2279,6 +2409,12 @@ TEST( threshold_regulator, set_string_property )
     p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
     }
 
+TEST( threshold_regulator, get_type_name )
+    {
+    threshold_regulator test_dev( "test_C1" );
+    EXPECT_STREQ( "ПИД-регулятор", test_dev.get_type_name() );
+    }
+
 
 TEST( par_device, get_par )
     {
@@ -2330,6 +2466,14 @@ TEST ( valve_AS, get_upper_seat_offset)
     EXPECT_EQ( valve.C_OPEN_S3, valve.get_upper_seat_offset() );
     valve.reverse_seat_connection = true;
     EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
+    }
+
+
+TEST( circuit_breaker, get_type_name )
+    {
+    circuit_breaker F1( "F1" );
+    auto res = F1.get_type_name();
+    EXPECT_STREQ( "Автоматический выключатель", res );
     }
 
 
