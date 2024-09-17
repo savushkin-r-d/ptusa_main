@@ -384,7 +384,9 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
 //-----------------------------------------------------------------------------
 const char* device::get_type_str() const
     {
-    return DEV_NAMES[ type ];
+    if ( type >= 0 && type < C_DEVICE_TYPE_CNT ) return DEV_NAMES[ type ];
+
+    return "NONE";
     }
 //-----------------------------------------------------------------------------
 const char* device::get_type_name() const

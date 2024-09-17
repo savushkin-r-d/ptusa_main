@@ -452,6 +452,23 @@ TEST( dev_stub, get_min_flow )
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
     }
 
+TEST( device, device )
+    {
+    device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "?" );
+    }
+
+TEST( device, get_type_str )
+    {
+    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev1.get_type_str(), "NONE" );
+
+    device dev2( "DEV1", device::DEVICE_TYPE::DT_V,
+        device::DEVICE_SUB_TYPE::DST_V_VIRT, 0 );
+    EXPECT_STREQ( dev2.get_type_str(), "V" );
+    }
 
 TEST( device, save_device )
     {
@@ -460,8 +477,10 @@ TEST( device, save_device )
     char buff[ BUFF_SIZE ] = { 0 };
     t1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, "
+        "P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
+
 
 TEST( device, set_article )
     {
@@ -473,9 +492,9 @@ TEST( device, set_article )
 
 TEST( device, get_type_name )
     {
-    analog_io_device obj( "OBJ1", device::DEVICE_TYPE::DT_TE,
-        device::DEVICE_SUB_TYPE::DST_TS, 1 );
-    EXPECT_STREQ( "Температура", obj.get_type_name() );
+    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( "???", dev1.get_type_name() );
     }
 
 TEST( device, evaluate_io )
@@ -2261,18 +2280,40 @@ TEST( threshold_regulator, set_string_property )
     }
 
 
+TEST( par_device, get_par )
+    {
+    const auto IDX = 0;
+    const auto OFFSET = 0;
+    par_device dev1( 2 );
+    dev1.set_par( IDX, OFFSET, 10.f );
+
+    EXPECT_EQ( dev1.get_par( IDX, OFFSET ), 10.f );
+
+    par_device dev2( 0 );
+    // Корректный вызов, когда нет параметров.
+    EXPECT_EQ( dev2.get_par( IDX, OFFSET ), 0.f );
+    }
+
 TEST( par_device, set_par_name )
     {
+    const auto IDX = 1;
+    const auto OFFSET = 0;
+
     par_device dev( 1 );
-    dev.set_par_name( 1, 0, "TEST_VERY_VERY_VERY_LONG_NAME" );
+    dev.set_par_name( 1, OFFSET, "TEST_VERY_VERY_VERY_LONG_NAME" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     dev.save_device( buff );
     EXPECT_STREQ( "", buff );
 
-    dev.set_par_name( 1, 0, "TEST_NAME" );
+    dev.set_par_name( IDX, OFFSET, "TEST_NAME" );
     dev.save_device( buff );
     EXPECT_STREQ( "TEST_NAME=0, ", buff );
+
+    // Попытка повторной установки имени.
+    dev.set_par_name( IDX, OFFSET, "TEST_NAME" );
+    // Попытка установки имени для несуществующего индекса параметра.
+    dev.set_par_name( IDX, OFFSET + 1, "TEST_NAME" );
     } 
 
 TEST ( valve_AS, get_lower_seat_offset)
