@@ -1,4 +1,5 @@
 #include "PAC_dev_tests.h"
+#include "uni_bus_coupler_io.h"
 
 using namespace ::testing;
 
@@ -629,13 +630,13 @@ TEST( pressure_e, get_type_name )
 
 TEST( analog_output, get_max_value )
     {
-    analog_output A1( "A1" );
+    analog_output A1( "AO1" );
     EXPECT_EQ( A1.get_max_value(), 0 );
     }
 
 TEST( analog_output, get_min_value )
     {
-    analog_output A1( "A1" );
+    analog_output A1( "AO1" );
     EXPECT_EQ( A1.get_min_value(), 0 );
     }
 
@@ -643,6 +644,34 @@ TEST( analog_output, get_type_name )
     {
     analog_output test_dev( "test_AO1" );
     EXPECT_STREQ( "Аналоговый выходной сигнал", test_dev.get_type_name() );
+    }
+
+TEST( analog_output, get_value )
+    {
+    analog_output AO01( "AO1" );
+
+    G_PAC_INFO()->emulation_on();
+    EXPECT_EQ( AO01.get_value(), 0.f );
+
+    G_PAC_INFO()->emulation_off();
+    AO01.init( 0, 0, 1, 0 );
+    AO01.AO_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    AO01.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };  
+
+    AO01.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 0, 0, 555, 0 );
+
+
+    AO01.set_value( 10.f );
+    EXPECT_EQ( AO01.get_value(), 10.f );
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
     }
 
 
@@ -1291,11 +1320,40 @@ TEST( level_s_iolink, set_article )
     }
 
 
+TEST( i_motor, i_motor )
+    {
+    i_motor M1( "M1", device::DST_M_FREQ, 0 );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    M1.save_device( buff, "" );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=0},\n", buff );
+    }
+
+TEST( i_motor, reverse )
+    {
+    i_motor M1( "M1", device::DST_M_FREQ, 0 );
+    M1.reverse();
+    EXPECT_EQ( M1.get_state(), 2 );
+    }
+
+TEST( i_motor, get_linear_speed )
+    {
+    i_motor M1( "M1", device::DST_M_FREQ, 0 );
+    EXPECT_EQ( M1.get_linear_speed(), 0.f );
+    }
+
+TEST( i_motor, get_amperage )
+    {
+    i_motor M1( "M1", device::DST_M_FREQ, 0 );
+    EXPECT_EQ( M1.get_amperage(), 0.f );
+    }
+
+
 TEST( motor, direct_set_state )
     {
     motor M1( "M1", device::DST_M_FREQ );
     M1.set_state( 1 );
-    EXPECT_EQ( 1, M1.get_state() );
+    EXPECT_EQ( M1.get_state(), 1 );
     }
 
 TEST( motor, save_device )
