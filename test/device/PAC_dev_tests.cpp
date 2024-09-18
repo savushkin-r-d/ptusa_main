@@ -1643,6 +1643,90 @@ TEST( counter, get_type_name )
     }
 
 
+TEST( virtual_counter, virtual_counter )
+    {
+    virtual_counter fqt1( "FQT1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 0, fqt1.get_value() );
+    EXPECT_EQ( 0, fqt1.get_flow() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=0, ABS_V=0, F=0.00},\n", buff );
+    }
+
+TEST( virtual_counter, direct_on )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.pause();
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+    fqt1.direct_on();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    }
+
+TEST( virtual_counter, start )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.pause();
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+    fqt1.start();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    }
+
+TEST( virtual_counter, reset )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.set_cmd( "V", 0, 200. );
+    EXPECT_EQ( fqt1.get_value(), 200.f );
+    EXPECT_EQ( fqt1.get_quantity(), 200 );
+
+    fqt1.reset();
+    EXPECT_EQ( fqt1.get_value(), 0.f );
+    EXPECT_EQ( fqt1.get_quantity(), 0 );
+    }
+
+TEST( virtual_counter, direct_off )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.set_cmd( "V", 0, 200. );
+    EXPECT_EQ( fqt1.get_value(), 200.f );
+    EXPECT_EQ( fqt1.get_quantity(), 200 );
+
+    fqt1.direct_off();
+    EXPECT_EQ( fqt1.get_value(), 0.f );
+    EXPECT_EQ( fqt1.get_quantity(), 0.f );
+    }
+
+TEST( virtual_counter, set )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.set( 200, 200, 2.f );
+    EXPECT_EQ( fqt1.get_value(), 200.f );
+    EXPECT_EQ( fqt1.get_quantity(), 200 );
+    EXPECT_EQ( fqt1.get_abs_quantity(), 200 );
+    EXPECT_EQ( fqt1.get_flow(), 2.f );
+    }
+
+TEST( virtual_counter, eval )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.eval( 200, 200, 2.f );
+    EXPECT_EQ( fqt1.get_value(), 0.f );
+    EXPECT_EQ( fqt1.get_quantity(), 0 );
+    EXPECT_EQ( fqt1.get_abs_quantity(), 0 );
+    EXPECT_EQ( fqt1.get_flow(), 2.f );
+
+    fqt1.eval( 300, 300, 3.f );
+    EXPECT_EQ( fqt1.get_value(), 100.f );
+    EXPECT_EQ( fqt1.get_quantity(), 100 );
+    EXPECT_EQ( fqt1.get_abs_quantity(), 100 );
+    EXPECT_EQ( fqt1.get_flow(), 3.f );
+    }
+
 TEST( virtual_counter, get_pump_dt )
     {
     virtual_counter fqt1( "FQT1" );
@@ -1660,20 +1744,18 @@ TEST( virtual_counter, get_min_flow )
 TEST( virtual_counter, set_cmd )
     {
     virtual_counter fqt1( "FQT1" );
-    const int BUFF_SIZE = 100;
-    char buff[ BUFF_SIZE ] = { 0 };
-
-    EXPECT_EQ( 0, fqt1.get_quantity() );
-    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
-    EXPECT_EQ( 0, fqt1.get_value() );
-    EXPECT_EQ( 0, fqt1.get_flow() );
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "F", 0, 100. );
+    EXPECT_EQ( fqt1.get_flow(), 100.f );
+
+    fqt1.set_cmd( "V", 0, 200. );
+    EXPECT_EQ( fqt1.get_value(), 200.f );
+    EXPECT_EQ( fqt1.get_quantity(), 200.f );
     }
 
 

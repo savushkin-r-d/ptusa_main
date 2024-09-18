@@ -840,15 +840,11 @@ class virtual_counter : public device, public i_counter
     public:
         virtual_counter( const char* dev_name );
 
-        float get_value();
-
-        void direct_set_value( float new_value );
-
         int get_state();
 
         void direct_on();
 
-        void  direct_off();
+        void direct_off();
 
         void direct_set_state( int new_state );
 
@@ -871,7 +867,7 @@ class virtual_counter : public device, public i_counter
 
         int set_cmd( const char* prop, u_int idx, double val );
 
-        void set( u_int value, u_int abs_value, float flow );
+        void set( u_int new_value, u_int new_abs_value, float flow );
 
         void eval( u_int read_value, u_int abs_read_value, float read_flow );
 
@@ -882,17 +878,14 @@ class virtual_counter : public device, public i_counter
         float get_min_flow() const override;
 
     private:
-        STATES state;
+        float flow_value = 0.f;
 
-        float flow_value;
+        u_int last_read_value = 0;
 
-        u_int value;
-        u_int last_read_value;
+        u_int abs_value = 0; ///< Абсолютное значение (не становится на паузу).
+        u_int abs_last_read_value = 0;
 
-        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
-        u_int abs_last_read_value;
-
-        bool is_first_read;         ///< Флаг первой установки значения.
+        bool is_first_read = true; ///< Флаг первой установки значения.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.

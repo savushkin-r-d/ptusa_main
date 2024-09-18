@@ -541,30 +541,14 @@ void AO1::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 virtual_counter::virtual_counter( const char* dev_name ) :
-    device( dev_name, DT_FQT, DST_FQT_VIRT, 0 ),
-    last_read_value( 0 ),
-    abs_last_read_value( 0 ),
-    state( STATES::S_WORK ),
-    flow_value( 0 ),
-    value( 0 ),
-    abs_value( 0 ),
-    is_first_read( true )
+    device( dev_name, DT_FQT, DST_FQT_VIRT, 0 )
     {
-    }
-//-----------------------------------------------------------------------------
-float virtual_counter::get_value()
-    {
-    return (float)get_quantity();
-    }
-//-----------------------------------------------------------------------------
-void virtual_counter::direct_set_value( float new_value )
-    {
-    value = (u_int)new_value;
+    device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
 int virtual_counter::get_state()
     {
-    return (int)state;
+    return device::get_state();
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::direct_on()
@@ -588,30 +572,31 @@ void virtual_counter::direct_set_state( int new_state )
         case STATES::S_PAUSE:
             pause();
             break;
+
+        default:
+            device::direct_set_state( new_state );
+            break;
         }
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::pause()
     {
-    state = STATES::S_PAUSE;
+    device::direct_set_state( static_cast<int>( STATES::S_PAUSE ) );
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::start()
     {
-    if ( STATES::S_PAUSE == state )
-        {
-        state = STATES::S_WORK;
-        }
+    device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::reset()
     {
-    value = 0;
+    device::direct_set_value( 0.f );
     }
 //-----------------------------------------------------------------------------
 u_int virtual_counter::get_quantity()
     {
-    return value;
+    return static_cast<u_int>( device::get_value() );
     }
 //-----------------------------------------------------------------------------
 float virtual_counter::get_flow()
@@ -651,22 +636,22 @@ int virtual_counter::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::set( u_int value, u_int abs_value, float flow )
+void virtual_counter::set( u_int new_value, u_int new_abs_value, float flow )
     {
-    this->value = value;
-    this->abs_value = abs_value;
-
+    device::direct_set_value( static_cast<float>( new_value ) );
+    abs_value = new_abs_value;
     flow_value = flow;
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     float read_flow = 0 )
-    {
+    {    
     if ( !is_first_read )
         {
         if ( read_value > last_read_value )
             {
-            value += read_value - last_read_value;
+            auto val = device::get_value() + read_value - last_read_value;
+            device::direct_set_value( val );
             }
 
         if ( abs_read_value > abs_last_read_value )
@@ -677,8 +662,7 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     else
         {
         is_first_read = false;
-        }
-
+        }    
     last_read_value = read_value;
     abs_last_read_value = abs_read_value;
     flow_value = read_flow;
