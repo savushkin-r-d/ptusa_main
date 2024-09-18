@@ -2523,6 +2523,87 @@ class valve_iolink_shut_off_sorio : public valve
         bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
+/// @brief Клапан IO-Link отсечной Definox.
+class valve_iolink_gea_tvis_a15 : public valve
+{
+public:
+    static const std::string GEA_TVIS_A15_ARTICLE;
+    static const std::string GEA_TVIS_A15_SOLENOIDES_ARTICLE;
+
+    valve_iolink_gea_tvis_a15(const char* dev_name);
+    valve_iolink_gea_tvis_a15(const char* dev_name, device::DEVICE_SUB_TYPE device_sub_type = device::V_IOLINK_DO1_DI2);
+
+    VALVE_STATE get_valve_state();
+
+    int save_device_ex(char* buff);
+
+    void evaluate_io();
+
+    float get_value() final;
+
+#ifdef DEBUG_NO_IO_MODULES
+    void direct_set_value(float new_value) final;
+#endif
+
+#ifndef DEBUG_NO_IO_MODULES
+    bool get_fb_state();
+
+    int get_off_fb_value();
+
+    int get_on_fb_value();
+
+    void direct_on();
+
+    void direct_off();
+
+    int set_cmd(const char* prop, u_int idx, double val);
+
+    void direct_set_state(int new_state);
+
+#endif // DEBUG_NO_IO_MODULES
+
+private:
+    struct in_data
+    {
+        int16_t  pos;
+
+        bool pv_y1_on : 1; // DI0+ - [0 ; 1] - пилотный клапан соленоида y1 активирован (ли)
+        bool pv_y2_on : 1; // DI1+ - [0 ; 1] - пилотный клапан соленоида y2 активирован (ли)
+        bool pv_y3_on : 1; // DI2+ - [0 ; 1] - пилотный клапан соленоида y3 активирован (ли)
+        bool error_on : 1; // DI3+ - [0 ; 1] - ошибка активна (ли)
+        bool y5       : 1; // DI4+ - незанятый параметр 
+        bool y6       : 1; // DI5+ - незанятый параметр
+        bool y7       : 1; // DI6+ - незанятый параметр
+        bool SUP      : 1; // DI7+ - [0 ; 1] - активна процедура Setup
+
+        bool s1       : 1; // DI0 - [0 ; 1] : односедельный клапан - основной ход: состояние клапана: 1 - в покое, 
+                           //                 двухседельный клапан - состояние клапана: 1 - закрыт, 0 - вне допуска
+        bool s2       : 1; // DI1 - [0 ; 1] - основной ход: 1 - клапан в конечном положении, 0 - клапан вышел за пределы допуска
+        bool s3       : 1; // DI2 - [0 ; 1] : pv_y1 = 0 - сдвоенная тарелка: 1 - закрыта, 0 - не закрыта или нет внешнего датчика
+                           //                 pv_y1 = 1 - сдвоенная тарелка: 1 - не разведена, 0 - разведена
+        bool s4       : 1; // DI3 - [0 ; 1] - двухседельный клапан - основной ход: 1 - клапан в покое, 0 - клапанная тарелка и сдвоенная тарелка не закрыты
+        uint16_t unused11 : 4; // DI4, DI5, DI6, DI7 - незанятые биты
+    };
+
+    struct out_data_swapped   //Swapped low and high byte for easer processing
+    {
+        bool pv_y1  : 1; // DO0 - [0 ; 1] - активация пилотного соленоида y1
+        bool pv_y2  : 1; // DO1 - [0 ; 1] - активация пилотного соленоида y2
+        bool pv_y34 : 1; // DO2 - [0 ; 1] - в зависимости от pv_y1: активация пилотного клапана соленоида y3 или y4
+        bool x4     : 1; // DO3 - незанятый параметр 
+        bool x5     : 1; // DO4 - незанятый параметр 
+        bool x6     : 1; // DO5 - незанятый параметр
+        bool x7     : 1; // DO6 - незанятый параметр 
+        bool HAS    : 1; // DO7 - [1] - активация процедуры Setup
+    };
+
+    in_data in_info{ 0 };
+    static out_data_swapped stub_out_info;
+    out_data_swapped* out_info = &stub_out_info;
+
+    bool blink = false;     //Visual indication
+};
+//-----------------------------------------------------------------------------
 /// @brief Клапан с управлением от пневмоострова IO-link.
 
 class valve_iol_terminal : public valve
