@@ -1689,6 +1689,16 @@ TEST( virtual_counter, reset )
     EXPECT_EQ( fqt1.get_quantity(), 0 );
     }
 
+TEST( virtual_counter, abs_reset )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.set_cmd( "ABS_V", 0, 200. );
+    EXPECT_EQ( fqt1.get_abs_quantity(), 200 );
+
+    fqt1.abs_reset();
+    EXPECT_EQ( fqt1.get_abs_quantity(), 0 );
+    }
+
 TEST( virtual_counter, direct_off )
     {
     virtual_counter fqt1( "FQT1" );
@@ -1699,6 +1709,20 @@ TEST( virtual_counter, direct_off )
     fqt1.direct_off();
     EXPECT_EQ( fqt1.get_value(), 0.f );
     EXPECT_EQ( fqt1.get_quantity(), 0.f );
+    }
+
+TEST( virtual_counter, direct_set_state )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_PAUSE ) );
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_PAUSE ), fqt1.get_state() );
+
+    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_WORK ) );
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ), fqt1.get_state() );
+
+
+    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_ERROR ) );
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_ERROR ), fqt1.get_state() );
     }
 
 TEST( virtual_counter, set )
@@ -1721,6 +1745,12 @@ TEST( virtual_counter, eval )
     EXPECT_EQ( fqt1.get_flow(), 2.f );
 
     fqt1.eval( 300, 300, 3.f );
+    EXPECT_EQ( fqt1.get_value(), 100.f );
+    EXPECT_EQ( fqt1.get_quantity(), 100 );
+    EXPECT_EQ( fqt1.get_abs_quantity(), 100 );
+    EXPECT_EQ( fqt1.get_flow(), 3.f );
+
+    fqt1.eval( 100, 100, 3.f );
     EXPECT_EQ( fqt1.get_value(), 100.f );
     EXPECT_EQ( fqt1.get_quantity(), 100 );
     EXPECT_EQ( fqt1.get_abs_quantity(), 100 );

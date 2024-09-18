@@ -645,7 +645,8 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
         {
         if ( read_value > last_read_value )
             {
-            auto val = device::get_value() + read_value - last_read_value;
+            auto val = device::get_value() +
+                static_cast<float>( read_value - last_read_value );
             device::direct_set_value( val );
             }
 
