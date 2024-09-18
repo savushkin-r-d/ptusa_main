@@ -4822,11 +4822,17 @@ const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_ARTICLE = "GEA.TA15P8I
 const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_SOLENOIDES_ARTICLE = "GEA.TA15L8IAJ";
 
 valve_iolink_gea_tvis_a15::out_data_swapped
-valve_iolink_gea_tvis_a15::stub_out_info;
+    valve_iolink_gea_tvis_a15::stub_out_info;
 //-----------------------------------------------------------------------------
-valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name) : valve(true, true, dev_name, DT_V, V_IOLINK_DO1_DI2){}
+valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name) 
+    : valve(true, true, dev_name, DT_V, V_IOLINK_DO1_DI2)
+    {
+    }
 //-----------------------------------------------------------------------------
-valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name, device::DEVICE_SUB_TYPE device_sub_type) : valve(true, true, dev_name, DT_V, device_sub_type){}
+valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name, device::DEVICE_SUB_TYPE device_sub_type) 
+    : valve(true, true, dev_name, DT_V, device_sub_type)
+    {
+    }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_gea_tvis_a15::get_valve_state()
 {
@@ -4857,34 +4863,42 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
 
-    static bool de_en;
-    static bool main;
-    static uint16_t status;
-    static bool sv1;
-    static uint16_t led_state;
+    static bool pv_y1_on;
+    static bool pv_y2_on;
+    static bool pv_y3_on;
+    static bool error_on;
+    static bool SUP;
+    static bool s1;
+    static bool s2;
+    static bool s3;
+    static bool s4; 
     static uint16_t pos;
 
-    if (de_en != in_info->de_en || main != in_info->main ||
-        status != in_info->status || sv1 != in_info->sv1 || led_state != in_info->led_state ||
-        pos != in_info->pos)
+    if (pv_y1_on != in_info->pv_y1_on || pv_y2_on != in_info->pv_y2_on || pv_y3_on != in_info->pv_y3_on || 
+        error_on != in_info->error_on || SUP      != in_info->SUP      || s1       != in_info->s1       ||
+        s2       != in_info->s2       || s3       != in_info->s3       || s4       != in_info->s4       ||
+        pos      != in_info->pos)
     {
         print_binary(*(int*)tmp);
         printf("\n");
 
         sprintf(G_LOG->msg,
-            "de_en %u, main %u, status %u, sv1 %u, led_state %u, pos %u\n",
-            in_info->de_en, in_info->main, in_info->status,
-            in_info->sv1, in_info->led_state, in_info->pos);
+            "pv_y1_on %u, pv_y2_on %u, pv_y3_on %u, SUP %u, s1 %u, s2 %u, s3 %u, s4 %u, pos %u\n",
+            in_info->pv_y1_on, in_info->pv_y2_on, in_info->pv_y3_on, in_info->SUP
+            in_info->s1, in_info->s2, in_info->s3, in_info->s4, in_info->pos);
         G_LOG->write_log(i_log::P_NOTICE);
 
         print_binary(*(int*)out_info);
         printf("\n\n");
 
-        de_en = in_info->de_en;
-        main = in_info->main;
-        status = in_info->status;
-        sv1 = in_info->sv1;
-        led_state = in_info->led_state;
+        pv_y1_on = in_info->pv_y1_on;
+        pv_y2_on = in_info->pv_y2_on;
+        pv_y3_on = in_info->pv_y3_on;
+        SUP = in_info->SUP;
+        s1 = in_info->s1;
+        s2 = in_info->s2;
+        s3 = in_info->s3;
+        s4 = in_info->s4;
         pos = in_info->pos;
     }
 #endif
@@ -4892,13 +4906,13 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15::save_device_ex(char* buff)
 {
-    bool cs = out_info->sv1;
-    int err = in_info.status;
+    //bool cs = out_info->sv1;
+    //int err = in_info.status;
 
-    int res = sprintf(buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
-    res += sprintf(buff + res, "V=%.1f, ", get_value());
+    //int res = sprintf(buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
+    //res += sprintf(buff + res, "V=%.1f, ", get_value());
 
-    return res;
+    //return res;
 }
 //-----------------------------------------------------------------------------
 float valve_iolink_gea_tvis_a15::get_value()
@@ -4921,25 +4935,25 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
         return false;
     }
 
-    if (in_info.status) return false;
+    //if (in_info.status) return false;
 
     u_long dt = get_delta_millisec(start_switch_time);
     if (dt < get_par(valve::P_ON_TIME, 0)) {
         return true;
     }
 
-    if (!out_info->sv1 && in_info.de_en) return true;
-    if (out_info->sv1 && in_info.main) return true;
+    //if (!out_info->sv1 && in_info.de_en) return true;
+    //if (out_info->sv1 && in_info.main) return true;
 
     return false;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15::get_off_fb_value() {
-    //return !in_info.sv1;
+    return !in_info.SUP;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15::get_on_fb_value() {
-    //return in_info.sv1;
+    return in_info.SUP;
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15::direct_on()
@@ -4970,19 +4984,19 @@ int valve_iolink_gea_tvis_a15::set_cmd(const char* prop, u_int idx, double val)
             get_name(), prop, idx, val);
     }
 
-    switch (prop[0])
-    {
-    case 'B': //BLINK
-    {
-        val > 0 ? out_info->wink = true : out_info->wink = false;
-        blink = out_info->wink;
-        break;
-    }
+    //switch (prop[0])
+    //{
+    //case 'B': //BLINK
+    //{
+    //    val > 0 ? out_info->wink = true : out_info->wink = false;
+    //    blink = out_info->wink;
+    //    break;
+    //}
 
-    default:
-        valve::set_cmd(prop, idx, val);
-        break;
-    }
+    //default:
+    //    valve::set_cmd(prop, idx, val);
+    //    break;
+    //}
 
     return 0;
 }
