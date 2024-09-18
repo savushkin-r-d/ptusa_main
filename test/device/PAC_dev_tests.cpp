@@ -651,21 +651,19 @@ TEST( analog_output, get_value )
     analog_output AO01( "AO1" );
 
     G_PAC_INFO()->emulation_on();
-    EXPECT_EQ( AO01.get_value(), 0.f );
+    EXPECT_EQ( AO01.get_value(), 0.f );     // Check default value.
+    AO01.set_value( 11.f );
+    EXPECT_EQ( AO01.get_value(), 11.f );
 
-    G_PAC_INFO()->emulation_off();
-    AO01.init( 0, 0, 1, 0 );
-    AO01.AO_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
-    AO01.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };  
-
-    AO01.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
     uni_io_manager mngr;
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     mngr.init_node_AO( 0, 0, 555, 0 );
-
+    G_PAC_INFO()->emulation_off();
+    AO01.init( 0, 0, 1, 0 );
+    AO01.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
 
     AO01.set_value( 10.f );
     EXPECT_EQ( AO01.get_value(), 10.f );
