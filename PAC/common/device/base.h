@@ -5,6 +5,8 @@
 /// 
 
 #pragma once
+#include <array>
+
 #include "s_types.h"
 #include "param_ex.h"
 #include "analog_emulator.h"
@@ -96,22 +98,22 @@ class par_device
 
     private:
         /// @brief Ошибки устройства.
-        saved_params_u_int_4* err_par;
+        saved_params_u_int_4* err_par = nullptr;
 
         enum CONSTANTS
             {
             C_MAX_PAR_NAME_LENGTH = 25, ///< Максимальная длина имени параметра.
             };
 
-        saved_params_float* par; ///< Параметры.
-        char** par_name;         ///< Названия параметров.
+        saved_params_float* par = nullptr; ///< Параметры.
+        char** par_name = nullptr;         ///< Названия параметров.
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
 class i_counter
     {
     public:
-        virtual ~i_counter();
+        virtual ~i_counter() = default;
 
         /// @brief Приостановка работы счетчика.
         virtual void pause() = 0;
@@ -308,12 +310,12 @@ class i_DO_AO_device : public i_AO_device, public i_DO_device
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void off() = 0;
+        void off() override = 0;
 
         /// @brief Получение состояния устройства.
         ///
         /// @return состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
+        int get_state() override = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в
@@ -391,7 +393,8 @@ class device : public i_DO_AO_device, public par_device
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
 
-        static const char* const DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ];
+        static const std::array<const char*,
+            device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> DEV_NAMES;
 
         /// Подтипы устройств.
         enum DEVICE_SUB_TYPE
@@ -589,7 +592,7 @@ class device : public i_DO_AO_device, public par_device
         device( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-        virtual ~device();
+        ~device() override;
 
         const char* get_type_str() const;
 
@@ -618,7 +621,7 @@ class device : public i_DO_AO_device, public par_device
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void direct_off();
+        void direct_off() override;
 
         void direct_on() override;
 
@@ -642,7 +645,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Вывод объекта в консоль.
         ///
         /// Для использования в отладочных целях.
-        virtual void print() const;
+        void print() const override;
 
         /// @brief Получение порядкового номера устройства.
         ///
@@ -693,7 +696,7 @@ class device : public i_DO_AO_device, public par_device
             return 0;
             }
 
-        bool get_manual_mode() const
+        bool get_manual_mode() const override
             {
             return is_manual_mode;
             }
@@ -726,14 +729,14 @@ class device : public i_DO_AO_device, public par_device
             }
 
     private:
-        u_int_4 s_number;            ///< Последовательный номер устройства.
+        u_int_4 s_number = 0;        ///< Последовательный номер устройства.
 
         DEVICE_TYPE     type;        ///< Тип устройства.
         DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
 
-        char* article;           ///< Артикул изделия.
+        char* article;               ///< Артикул изделия.
 
-        bool is_manual_mode;      ///< Признак ручного режима.
+        bool is_manual_mode = false; ///< Признак ручного режима.
 
         char name[ C_MAX_NAME ];
         char* description;
@@ -755,9 +758,9 @@ class digital_io_device : public device,
         digital_io_device( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-        virtual ~digital_io_device();
+        ~digital_io_device() override = default;
 
-        virtual void print() const;
+        void print() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.
@@ -838,41 +841,41 @@ class AO1 : public analog_io_device
 class virtual_counter : public device, public i_counter
     {
     public:
-        virtual_counter( const char* dev_name );
+        explicit virtual_counter( const char* dev_name );
 
-        int get_state();
+        int get_state() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        void direct_set_state( int new_state );
+        void direct_set_state( int new_state ) override;
 
-        void pause();
+        void pause() override;
 
-        void start();
+        void start() override;
 
-        void reset();
+        void reset() override;
 
-        u_int get_quantity();
+        u_int get_quantity() override;
 
-        float get_flow();
+        float get_flow() override;
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
-        u_int get_abs_quantity();
+        u_int get_abs_quantity() override;
 
         /// @brief Сброс абсолютного значения счетчика.
-        void  abs_reset();
+        void abs_reset() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
         void set( u_int new_value, u_int new_abs_value, float flow );
 
         void eval( u_int read_value, u_int abs_read_value, float read_flow );
 
         //Lua.
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
@@ -897,7 +900,7 @@ class AI1 : public analog_io_device
         AI1( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-        int get_state();
+        int get_state() override;
 
         virtual int get_params_count() const;
 
@@ -932,10 +935,10 @@ class level : public AI1
         int get_volume();
         virtual int calc_volume();
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) override;
 
-        float get_max_val();
-        float get_min_val();
+        float get_max_val() override;
+        float get_min_val() override;
 
         int get_params_count() const override;
 
@@ -1020,23 +1023,23 @@ class signal_column : public device, public io_device
             SIREN_OFF,
             };
 
-        void set_rt_par( u_int idx, float value );
+        void set_rt_par( u_int idx, float value ) override;
 
-        void direct_set_state( int new_state );
-        void direct_off();
-        void direct_on();
+        void direct_set_state( int new_state ) override;
+        void direct_off() override;
+        void direct_on() override;
 
-        void direct_set_value( float new_value );
-        int get_state();
-        float get_value();
+        void direct_set_value( float new_value ) override;
+        int get_state() override;
+        float get_value() override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) override;
 
 #ifdef _MSC_VER
 #pragma region Сигнализация о событиях
 #endif
         /// @brief Расчет состояния на основе текущих данных от I/O.
-        void evaluate_io();
+        void evaluate_io() override;
 
         void show_error_exists();
 

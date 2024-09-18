@@ -1795,10 +1795,10 @@ class timer_manager
         int get_count() const;
 
     private:
-        u_int   timers_cnt; ///< Количество таймеров.
-        timer   *timers;    ///< Таймеры.
+        u_int   timers_cnt;         ///< Количество таймеров.
+        timer   *timers = nullptr;  ///< Таймеры.
 
-        timer   stub;       ///< Заглушка.
+        timer   stub;               ///< Заглушка.
     };
 
 #endif // PAC_DEVICES_H

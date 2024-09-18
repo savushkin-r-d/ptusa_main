@@ -453,7 +453,7 @@ class valve_AS : public valve
         void set_rt_par( u_int idx, float value );
 
         /// @brief Получение данных состояния устройства.
-        char get_state_data( char* data );
+        char get_state_data( const char* data );
 
         char* get_data_with_offset( char* data );
 

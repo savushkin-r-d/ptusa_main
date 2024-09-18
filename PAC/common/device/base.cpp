@@ -8,7 +8,7 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
-const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
+const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DEV_NAMES = 
     {
     "V",       ///< Клапан.
     "VC",      ///< Управляемый клапан.
@@ -45,7 +45,7 @@ int par_device::save_device( char* str )
     {
     str[ 0 ] = 0;
 
-    if ( par == 0 )
+    if ( par == nullptr )
         {
         return 0;
         }
@@ -95,15 +95,14 @@ void par_device::set_par( u_int idx, u_int offset, float value )
         }
     }
 //-----------------------------------------------------------------------------
-par_device::par_device( u_int par_cnt ) : err_par( 0 ), par( 0 ),
-par_name( 0 )
+par_device::par_device( u_int par_cnt )
     {
     if ( par_cnt )
         {
         par_name = new char* [ par_cnt ];
         for ( u_int i = 0; i < par_cnt; i++ )
             {
-            par_name[ i ] = 0;
+            par_name[ i ] = nullptr;
             }
 
         par = new saved_params_float( par_cnt );
@@ -156,7 +155,7 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
                 return;
                 }
 
-            if ( 0 == par_name[ offset + idx - 1 ] )
+            if ( nullptr == par_name[ offset + idx - 1 ] )
                 {
                 par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
                 strcpy( par_name[ offset + idx - 1 ], name );
@@ -362,8 +361,8 @@ int device::set_cmd( const char* prop, u_int idx, double val )
     }
 //-----------------------------------------------------------------------------
 device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
-    u_int par_cnt ) : par_device( par_cnt ), s_number( 0 ), type( type ),
-    sub_type( sub_type ), is_manual_mode( false ), article( 0 )
+    u_int par_cnt ) : par_device( par_cnt ), type( type ),
+    sub_type( sub_type )
     {
     if ( dev_name )
         {
@@ -508,10 +507,6 @@ digital_io_device::digital_io_device( const char* dev_name, device::DEVICE_TYPE 
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
     device( dev_name, type, sub_type, par_cnt ),
     io_device( dev_name )
-    {
-    }
-//-----------------------------------------------------------------------------
-digital_io_device::~digital_io_device()
     {
     }
 //-----------------------------------------------------------------------------

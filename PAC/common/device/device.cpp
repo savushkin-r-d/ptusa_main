@@ -305,10 +305,6 @@ void i_counter::restart()
     start();
     }
 //-----------------------------------------------------------------------------
-i_counter::~i_counter()
-    {
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool i_DI_device::is_active()
     {
@@ -3492,8 +3488,7 @@ timer::STATE timer::get_state() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-timer_manager::timer_manager( u_int timers_count ) : timers_cnt( timers_count ),
-    timers( 0 )
+timer_manager::timer_manager( u_int timers_count ) : timers_cnt( timers_count )
     {
     if ( timers_cnt )
         {

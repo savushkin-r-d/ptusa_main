@@ -1245,7 +1245,7 @@ int valve_bottom_mix_proof::get_on_fb_value()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
-    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF ), out_info( 0 )
+    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
     in_info->err = 0;
     }
@@ -2533,7 +2533,7 @@ void valve_AS::set_rt_par( u_int idx, float value )
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение данных состояния устройства.
-char valve_AS::get_state_data( char* data )
+char valve_AS::get_state_data( const char* data )
     {
     if ( data == nullptr )
         {
@@ -2568,9 +2568,9 @@ char valve_AS::get_state_data( char* data )
 //-----------------------------------------------------------------------------
 char* valve_AS::get_data_with_offset( char* data )
     {
-    if ( data == 0 )
+    if ( data == nullptr )
         {
-        return 0;
+        return nullptr;
         }
 
     char* state;
