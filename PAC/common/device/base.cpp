@@ -700,14 +700,17 @@ int AI1::get_state()
         return device::get_state();
         }
 
-    if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
+    auto err = 0;
+    auto res = get_AI( C_AI_INDEX, 0, 0, err );
+    if ( err == 1 )
         {
         return -2;
         }
-    if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
+    if ( err == 2 )
         {
         return -3;
         }
+
     return 1;
     }
 //-----------------------------------------------------------------------------

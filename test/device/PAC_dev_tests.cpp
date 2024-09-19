@@ -596,6 +596,52 @@ TEST( AI1, get_type_name )
     EXPECT_STREQ( "Аналоговый входной сигнал", test_dev.get_type_name() );
     }
 
+TEST( AI1, get_state )
+    {
+    G_PAC_INFO()->emulation_on();
+    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI, 0 );
+    EXPECT_EQ( sensor.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 450, 0 );
+    G_PAC_INFO()->emulation_off();
+    sensor.init( 0, 0, 0, 1 );
+    sensor.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
+    EXPECT_EQ( sensor.get_state(), 1 );
+    EXPECT_EQ( sensor.get_value(), 10 );
+
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = -2000;
+    EXPECT_EQ( sensor.get_state(), 1 );
+    EXPECT_EQ( sensor.get_value(), -200 );
+
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = -2001;   // Underrange.
+    EXPECT_EQ( sensor.get_state(), -2 );
+    EXPECT_EQ( sensor.get_value(), -1000 );
+
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 8500;
+    EXPECT_EQ( sensor.get_state(), 1 );
+    EXPECT_EQ( sensor.get_value(), 850 );
+
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 8501;    // Overrange.
+    EXPECT_EQ( sensor.get_state(), -3 );
+    EXPECT_EQ( sensor.get_value(), -1000 );
+
+    mngr.init_node_AI( 0, 0, 466, 0 );
+    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 4;
+    EXPECT_EQ( sensor.get_state(), 1 );
+    EXPECT_EQ( sensor.get_value(), 4.00195360f );
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
 
 TEST( level, get_params_count )
     {
