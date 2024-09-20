@@ -1,4 +1,5 @@
 #include "PAC_dev_tests.h"
+#include "uni_bus_coupler_io.h"
 
 using namespace ::testing;
 
@@ -477,6 +478,66 @@ TEST( analog_io_device, set_cmd )
     }
 
 
+TEST( AI1, get_state )
+    {
+    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI, 0 );
+    EXPECT_EQ( sensor.get_state(), 1 );
+
+    // No I\O data.
+    auto err = 0;
+    auto res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
+    EXPECT_EQ( err, 100 );
+    EXPECT_EQ( res, 0.f );
+
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );    
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );    
+    sensor.init( 0, 0, 0, 1 );
+    sensor.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+
+    auto test_value{ [&]( int in_value, float res_value, int err_value,
+        float abs_err ) {
+
+        sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
+        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
+        EXPECT_EQ( err, err_value );
+        EXPECT_NEAR( res, res_value, abs_err );
+        } };    
+
+    auto test_m{ [&]( int module,
+        int in_range_value, float in_range_res,
+        int under_range_value, float under_range_res,
+        int over_range_value, float over_range_res ) {
+
+        mngr.init_node_AI( 0, 0, module, 0 );        
+        test_value( in_range_value, in_range_res, 0, 0.02f );    // In range.
+        test_value( under_range_value, under_range_res, 1, .0f );// Underrange.
+        test_value( over_range_value, over_range_res, 2, .0f );  // Overrange.
+        } };
+
+    test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
+    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
+    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
+    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
+
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    test_value( 30001, -1000, 3, 0.02f );   // Out of range.
+
+    mngr.init_node_AI( 0, 0, 2688556, 0 );
+    test_value( -32001, -1000, 1, 0.02f );  // Underrange.
+
+    mngr.init_node_AI( 0, 0, 2688491, 0 );
+    test_value( -32001, -1, 1, 0.02f );     // Underrange.
+    mngr.init_node_AI( 0, 0, 2702072, 0 );
+    test_value( -32001, -1, 1, 0.02f );     // Underrange.
+    mngr.init_node_AI( 0, 0, 1088062, 0 );
+    test_value( -32001, -1, 1, 0.02f );     // Underrange.    
+    
+    io_manager::replace_instance( prev_mngr );
+    }
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;

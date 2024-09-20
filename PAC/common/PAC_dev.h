@@ -2693,14 +2693,12 @@ class AI1 : public analog_io_device
 #ifndef DEBUG_NO_IO_MODULES
         int get_state()
             {
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
-                {
-                return -2;
-                }
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
-                {
-                return -3;
-                }
+            auto err = 0;
+            get_AI( C_AI_INDEX, 0, 0, err );
+            if ( err == 1 ) return -2;
+            if ( err == 2 ) return -3;
+            if ( err > 0 ) return -err;
+
             return 1;
             }
 #else
