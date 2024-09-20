@@ -504,9 +504,9 @@ TEST( AI1, get_state )
     const auto OUT_OF_RANGE = static_cast<int>( io_device::ERRORS::OUT_OF_RANGE );
 
     auto test_value{ [&]( int in_value, float res_value, int err_value,
-        float abs_err ) {
+        float abs_err, int min = 0, int max = 0 ) {
         sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
-        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
+        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, min, max, err );
         EXPECT_EQ( err, err_value );
         EXPECT_NEAR( res, res_value, abs_err );
         } };    
@@ -524,20 +524,27 @@ TEST( AI1, get_state )
     test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
     test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
     test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
+    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
     test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
+    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
 
     mngr.init_node_AI( 0, 0, 491, 0 );
-    test_value( 30001, -1000, OUT_OF_RANGE, 0.02f );
+    test_value( 30001, -1000.f, OUT_OF_RANGE, 0.02f );
+    test_value( 1000, 0.5f, NO_ERR, .1f, 10, 20 );
 
     mngr.init_node_AI( 0, 0, 2688556, 0 );
-    test_value( -32001, -1000, UNDER_RANGE, 0.02f );
+    test_value( -32001, -1000.f, UNDER_RANGE, 0.02f );
+    test_value( 1000, 100.f, NO_ERR, .0f, 10, 20 );
 
     mngr.init_node_AI( 0, 0, 2688491, 0 );
-    test_value( -32001, -1, UNDER_RANGE, 0.02f );
+    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
+    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
     mngr.init_node_AI( 0, 0, 2702072, 0 );
-    test_value( -32001, -1, UNDER_RANGE, 0.02f );
+    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
+    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
     mngr.init_node_AI( 0, 0, 1088062, 0 );
-    test_value( -32001, -1, UNDER_RANGE, 0.02f );   
+    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
+    test_value( 1000, 10.6f, NO_ERR, .1f, 10, 20 );
     
     io_manager::replace_instance( prev_mngr );
     }
