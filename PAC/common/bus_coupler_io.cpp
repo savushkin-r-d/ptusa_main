@@ -360,7 +360,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
 //-----------------------------------------------------------------------------
 float io_device::get_AI( u_int index, float min_value, float max_value, int& err )
     {
-    err = 0;
+    err = static_cast< int >( ERRORS::NO_ERR );
     if ( index < AI_channels.count &&
         AI_channels.int_read_values &&
         AI_channels.int_read_values[ index ] )
@@ -394,12 +394,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 450:
                 if ( val < -2000 )  // Underrange.
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1000.f;
                     }
                 if ( val > 8500 )   // Overrange.
                     {
-                    err = 2;
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
                     return -1000.f;
                     }
 
@@ -433,12 +433,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 496:
                 if ( 3 == val )     // Underrange.
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1.f;
                     }
                 if ( 32761 <= val ) // Overrange.
                     {
-                    err = 2;
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
                     return -1.f;
                     }
 
@@ -478,13 +478,13 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                     return val;
                     }
 
-                err = 3;
+                err = static_cast<int>( ERRORS::OUT_OF_RANGE );
                 return -1000;
 
 			case 2688556: //RTD4 1H
 				if (val < -32000 )
 				    {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1000;
 				    }
 				val *= 0.1f;
@@ -494,7 +494,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 2702072:   //AXL F AI2 AO2 1H
 				if (val < -32000)
 					{
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1;
 					}
 
@@ -512,7 +512,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 1088062:   //AXL SE AI4 I 4-20
                 if ( val < -32000 )
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1;
                     }
 
@@ -547,7 +547,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
         printf( "\n" );
         }
 
-    err = 100;
+    err = static_cast<int>( ERRORS::BAD_IO_DATA );
     return 0;
     }
 //-----------------------------------------------------------------------------

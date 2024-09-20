@@ -44,6 +44,16 @@ class io_device
 			DEVICEERROR,
 			};
 
+        enum class ERRORS
+            {
+            NO_ERR = 0,
+            UNDER_RANGE = 2,
+            OVER_RANGE = 3,
+            OUT_OF_RANGE = 4,
+
+            BAD_IO_DATA = 100,
+            };
+
 #ifndef PTUSA_TEST
     protected:
 #endif

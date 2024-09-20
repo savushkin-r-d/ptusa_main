@@ -2695,8 +2695,6 @@ class AI1 : public analog_io_device
             {
             auto err = 0;
             get_AI( C_AI_INDEX, 0, 0, err );
-            if ( err == 1 ) return -2;
-            if ( err == 2 ) return -3;
             if ( err > 0 ) return -err;
 
             return 1;
