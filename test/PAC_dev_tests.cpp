@@ -137,6 +137,28 @@ TEST( device_manager, add_io_device )
     Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
 
+    //device::DT_V, device::V_IOLINK_DO1_DI2, GEA T.VIS A-15 Single-seat
+    name = std::string("VGEA1");
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str());
+    EXPECT_NE(nullptr, res);
+    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
+    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
+    Vx = V(name.c_str());
+    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
+
+    //device::DT_V, device::V_IOLINK_MIXPROOF, GEA T.VIS A-15 Double-seat
+    name = std::string("VGEA2");
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_MIXPROOF, name.c_str(), "Test valve",
+        valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str());
+    EXPECT_NE(nullptr, res);
+    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
+    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
+    Vx = V(name.c_str());
+    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
+
     //device::DT_V, device::DST_V_MINI_FLUSHING, Test
     name = std::string( "V3" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -668,6 +690,47 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
     }
+
+TEST(valve_iolink_gea_tvis_a15_ss, save_device)
+{
+    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
+    const int BUFF_SIZE = 100;
+    char buff[BUFF_SIZE] = { 0 };
+    V1.save_device(buff, "");
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+}
+
+TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
+{
+    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
+    V1.init(0, 0, 1, 1);
+    V1.AO_channels.int_write_values[0] = new int_2[2]{ 0 };
+    V1.AI_channels.int_read_values[0] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[0]);
+
+
+    EXPECT_EQ(0, V1.get_value()); //Default value.
+
+
+    const int POS = 341;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = POS;
+    std::swap(buff[0], buff[3]);  //Reverse byte order to get correct int.
+    std::swap(buff[2], buff[1]);
+    V1.evaluate_io();
+    const int BUFF_SIZE = 100;
+    char str_buff[BUFF_SIZE] = { 0 };
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+
+    V1.direct_set_value(12.1f);
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+}
 
 TEST( valve_iol_terminal, direct_set_state )
     {
