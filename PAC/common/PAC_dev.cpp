@@ -1563,9 +1563,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_MIXPROOF:
-                    if (strcmp(article, valve_iolink_gea_tvis_a15::GEA_TVIS_A15_ARTICLE.c_str()) == 0) {
-                        new_device = new valve_iolink_gea_tvis_a15(dev_name, device::V_IOLINK_MIXPROOF);
-                        new_io_device = (valve_iolink_gea_tvis_a15*)new_device;
+                    if (strcmp(article, valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str()) == 0) {
+                        new_device = new valve_iolink_gea_tvis_a15_ds(dev_name);
+                        new_io_device = (valve_iolink_gea_tvis_a15_ds*)new_device;
                     }
                     else {
                         new_device = new valve_iolink_mix_proof(dev_name);
@@ -1581,9 +1581,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
                         new_io_device = (valve_iolink_shut_off_sorio*)new_device;
                         }
-                    else if (strcmp(article, valve_iolink_gea_tvis_a15::GEA_TVIS_A15_ARTICLE.c_str()) == 0) {
-                        new_device = new valve_iolink_gea_tvis_a15( dev_name, device::V_IOLINK_DO1_DI2 );
-                        new_io_device = (valve_iolink_gea_tvis_a15*)new_device;
+                    else if (strcmp(article, valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str()) == 0) {
+                        new_device = new valve_iolink_gea_tvis_a15_ss( dev_name );
+                        new_io_device = (valve_iolink_gea_tvis_a15_ss*)new_device;
                     }
                     else
                         {
@@ -4624,6 +4624,270 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+const std::string valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE = "GEA.TA15L8IAJ";
+
+valve_iolink_gea_tvis_a15_ds::valve_iolink_gea_tvis_a15_ds(const char* dev_name) :
+    valve(true, true, dev_name, DT_V, V_IOLINK_MIXPROOF), out_info(0)
+{
+    in_info->error_on = 0;
+    in_info->SUP = 0;
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::open_upper_seat()
+{
+    direct_set_state((int)VALVE_STATE::V_UPPER_SEAT);
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::open_lower_seat()
+{
+    direct_set_state((int)VALVE_STATE::V_LOWER_SEAT);
+}
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
+{
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if (in_info->pv_y2_on) return V_UPPER_SEAT;
+    if (in_info->pv_y3_on) return V_LOWER_SEAT;
+    if (in_info->pv_y1_on) return V_ON;
+    else return V_OFF;
+
+#endif // DEBUG_NO_IO_MODULES
+}
+
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::evaluate_io()
+{
+    out_info = (out_data_swapped*)get_AO_write_data(
+        static_cast<u_int>(CONSTANTS::C_AI_INDEX));
+    if (extra_offset < 0)
+    {
+        out_info = (out_data_swapped*)((char*)out_info + extra_offset);
+    }
+
+    char* data = (char*)get_AI_data(
+        static_cast<u_int>(CONSTANTS::C_AI_INDEX));
+    char* buff = (char*)in_info;
+
+    const int SIZE = 4;
+    std::copy(data, data + SIZE, buff);
+    //Reverse byte order to get correct int16.
+    std::swap(buff[0], buff[1]);
+    //Reverse byte order to get correct int16.
+    std::swap(buff[2], buff[3]);
+
+#ifdef DEBUG_IOLINK_MIXPROOF
+    char* tmp = (char*)in_info;
+
+    sprintf(G_LOG->msg, "%x %x %x %x\n",
+        tmp[0], tmp[1], tmp[2], tmp[3]);
+    G_LOG->write_log(i_log::P_WARNING);
+
+    sprintf(G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos);
+    G_LOG->write_log(i_log::P_NOTICE);
+#endif
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::set_rt_par(u_int idx, float value)
+{
+    switch (idx)
+    {
+    case 1:
+        extra_offset = (int)value;
+        break;
+
+    default:
+        valve::set_rt_par(idx, value);
+        break;
+    }
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
+{
+    int res = valve::save_device_ex(buff);
+
+    bool cs = out_info->pv_y1 || out_info->pv_y1 || out_info->pv_y1;
+    int err = in_info->error_on;
+    res += sprintf(buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
+    res += sprintf(buff + res, "V=%.1f, ", get_value());
+
+    return res;
+}
+//-----------------------------------------------------------------------------
+valve_iolink_gea_tvis_a15_ds::~valve_iolink_gea_tvis_a15_ds()
+{
+    delete in_info;
+    in_info = nullptr;
+}
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_gea_tvis_a15_ds::get_fb_state()
+{
+    if (get_AI_IOLINK_state(static_cast<u_int>(CONSTANTS::C_AI_INDEX)) !=
+        io_device::IOLINKSTATE::OK)
+    {
+        return false;
+    }
+
+    if (in_info->error_on) return false;
+
+    if (get_delta_millisec(start_switch_time) <
+        get_par(valve::P_ON_TIME, 0))
+    {
+        return true;
+    }
+
+    if (out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3) return true;
+
+    return false;
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ds::get_state()
+{
+    switch (get_valve_state())
+    {
+    case V_LOWER_SEAT:
+        if (get_manual_mode())
+        {
+            return VX_LOWER_SEAT_MANUAL;
+        }
+
+        //Обратная связь отключена.
+        if (get_par(P_FB, 0) == FB_IS_AND_OFF)
+        {
+            return VX_LOWER_SEAT_FB_OFF;
+        }
+
+        if (get_fb_state()) return VX_LOWER_SEAT;
+
+        return VX_OFF_FB_ERR;
+
+    case V_UPPER_SEAT:
+        if (get_manual_mode())
+        {
+            return VX_UPPER_SEAT_MANUAL;
+        }
+
+        //Обратная связь отключена.
+        if (get_par(P_FB, 0) == FB_IS_AND_OFF)
+        {
+            return VX_UPPER_SEAT_FB_OFF;
+        }
+
+        if (get_fb_state()) return VX_UPPER_SEAT;
+
+        return VX_OFF_FB_ERR;
+    default:
+        break;
+    }
+
+    return valve::get_state();
+}
+//-----------------------------------------------------------------------------
+float valve_iolink_gea_tvis_a15_ds::get_value()
+{
+    return 0.1f * in_info->pos;
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ds::get_off_fb_value()
+{
+    return !(out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3);
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ds::get_on_fb_value()
+{
+    return out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3;
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::direct_on()
+{
+    if (false == in_info->pv_y1_on)
+    {
+        start_switch_time = get_millisec();
+    }
+
+    out_info->pv_y1 = true;
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::direct_off()
+{
+    if (out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3)
+    {
+        start_switch_time = get_millisec();
+    }
+
+    out_info->pv_y1 = false;
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ds::set_cmd(const char* prop, u_int idx, double val)
+{
+    if (G_DEBUG)
+    {
+        G_LOG->debug(
+            "%s\t valve_iolink_gea_tvis_a15_ds::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val);
+    }
+
+    //switch (prop[0])
+    //{
+    //case 'B': //BLINK
+    //{
+    //    val > 0 ? out_info->wink = true : out_info->wink = false;
+    //    blink = out_info->wink;
+    //    break;
+    //}
+
+    //default:
+    //    valve::set_cmd(prop, idx, val);
+    //    break;
+    //}
+
+    return 0;
+}
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::direct_set_state(int new_state)
+{
+    switch (new_state)
+    {
+    case V_OFF:
+        direct_off();
+        break;
+
+    case V_ON:
+        direct_on();
+        break;
+
+    case V_UPPER_SEAT:
+    {
+        direct_off();
+        out_info->pv_y2 = true;
+        break;
+    }
+
+    case V_LOWER_SEAT:
+    {
+        direct_off();
+        out_info->pv_y3 = true;
+        break;
+    }
+
+    default:
+        direct_on();
+        break;
+    }
+}
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
 
 valve_iolink_shut_off_sorio::out_data_swapped
@@ -4818,35 +5082,30 @@ void valve_iolink_shut_off_sorio::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_ARTICLE = "GEA.TA15P8IAJ";
-const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_SOLENOIDES_ARTICLE = "GEA.TA15L8IAJ";
+const std::string valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE = "GEA.TA15P8IAJ";
+//const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_SOLENOIDES_ARTICLE = "GEA.TA15L8IAJ";
 
-valve_iolink_gea_tvis_a15::out_data_swapped
-    valve_iolink_gea_tvis_a15::stub_out_info;
+valve_iolink_gea_tvis_a15_ss::out_data_swapped
+    valve_iolink_gea_tvis_a15_ss::stub_out_info;
 //-----------------------------------------------------------------------------
-valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name) 
+valve_iolink_gea_tvis_a15_ss::valve_iolink_gea_tvis_a15_ss(const char* dev_name)
     : valve(true, true, dev_name, DT_V, V_IOLINK_DO1_DI2)
     {
     }
 //-----------------------------------------------------------------------------
-valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name, device::DEVICE_SUB_TYPE device_sub_type) 
-    : valve(true, true, dev_name, DT_V, device_sub_type)
-    {
-    }
-//-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_gea_tvis_a15::get_valve_state()
+valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state()
 {
 #ifdef DEBUG_NO_IO_MODULES
     return (VALVE_STATE)digital_io_device::get_state();
 #else
 
-    if (in_info.SUP) return V_ON;
+    if (in_info.pv_y1_on == true) return V_ON;
     else return V_OFF;
 
 #endif // DEBUG_NO_IO_MODULES
 }
 //-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15::evaluate_io()
+void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 {
     out_info = (out_data_swapped*)get_AO_write_data(0);
 
@@ -4864,125 +5123,112 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
     char* tmp = (char*)in_info;
 
     static bool pv_y1_on;
-    static bool pv_y2_on;
-    static bool pv_y3_on;
     static bool error_on;
     static bool SUP;
     static bool s1;
     static bool s2;
-    static bool s3;
-    static bool s4; 
     static uint16_t pos;
 
-    if (pv_y1_on != in_info->pv_y1_on || pv_y2_on != in_info->pv_y2_on || pv_y3_on != in_info->pv_y3_on || 
-        error_on != in_info->error_on || SUP      != in_info->SUP      || s1       != in_info->s1       ||
-        s2       != in_info->s2       || s3       != in_info->s3       || s4       != in_info->s4       ||
-        pos      != in_info->pos)
+    if (pv_y1_on != in_info->pv_y1_on || error_on != in_info->error_on || SUP      != in_info->SUP      ||
+        s1       != in_info->s1       || s2       != in_info->s2       || pos      != in_info->pos)
     {
         print_binary(*(int*)tmp);
         printf("\n");
 
         sprintf(G_LOG->msg,
-            "pv_y1_on %u, pv_y2_on %u, pv_y3_on %u, SUP %u, s1 %u, s2 %u, s3 %u, s4 %u, pos %u\n",
-            in_info->pv_y1_on, in_info->pv_y2_on, in_info->pv_y3_on, in_info->SUP
-            in_info->s1, in_info->s2, in_info->s3, in_info->s4, in_info->pos);
+            "pv_y1_on %u, SUP %u, s1 %u, s2 %u, pos %u\n",
+            in_info->pv_y1_on, in_info->SUP, in_info->s1, in_info->s2, in_info->pos);
         G_LOG->write_log(i_log::P_NOTICE);
 
         print_binary(*(int*)out_info);
         printf("\n\n");
 
         pv_y1_on = in_info->pv_y1_on;
-        pv_y2_on = in_info->pv_y2_on;
-        pv_y3_on = in_info->pv_y3_on;
+        error_on = in_info->error_on;
         SUP = in_info->SUP;
         s1 = in_info->s1;
         s2 = in_info->s2;
-        s3 = in_info->s3;
-        s4 = in_info->s4;
         pos = in_info->pos;
     }
 #endif
 }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::save_device_ex(char* buff)
+int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 {
-    //bool cs = out_info->sv1;
-    //int err = in_info.status;
+    bool cs = out_info->pv_y1;
+    int err = in_info.error_on;
 
-    //int res = sprintf(buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
-    //res += sprintf(buff + res, "V=%.1f, ", get_value());
+    int res = sprintf(buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
+    res += sprintf(buff + res, "V=%.1f, ", get_value());
 
-    //return res;
+    return res;
 }
 //-----------------------------------------------------------------------------
-float valve_iolink_gea_tvis_a15::get_value()
+float valve_iolink_gea_tvis_a15_ss::get_value()
 {
     return 0.1f * in_info.pos;
 }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
-void valve_iolink_gea_tvis_a15::direct_set_value(float new_value)
+void valve_iolink_gea_tvis_a15_ss::direct_set_value(float new_value)
 {
     in_info.pos = (int16_t)(new_value * 10);
 }
 #endif
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
-bool valve_iolink_gea_tvis_a15::get_fb_state()
-{
+bool valve_iolink_gea_tvis_a15_ss::get_fb_state() {
     if (get_AI_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
-    {
         return false;
-    }
 
-    //if (in_info.status) return false;
+    if (in_info.error_on) return false;
+
+    if (in_info.SUP) return false;
 
     u_long dt = get_delta_millisec(start_switch_time);
-    if (dt < get_par(valve::P_ON_TIME, 0)) {
+    if (dt < get_par(valve::P_ON_TIME, 0))
         return true;
-    }
 
-    //if (!out_info->sv1 && in_info.de_en) return true;
-    //if (out_info->sv1 && in_info.main) return true;
+    if (out_info->pv_y1) return true;
 
     return false;
 }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::get_off_fb_value() {
-    return !in_info.SUP;
+int valve_iolink_gea_tvis_a15_ss::get_off_fb_value() {
+    return !in_info.pv_y1_on;
 }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::get_on_fb_value() {
-    return in_info.SUP;
+int valve_iolink_gea_tvis_a15_ss::get_on_fb_value() {
+    return in_info.pv_y1_on;
 }
 //-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15::direct_on()
-{
-    if (false == in_info.SUP)
-    {
+void valve_iolink_gea_tvis_a15_ss::direct_on() {
+    if (in_info.pv_y1_on == false) 
         start_switch_time = get_millisec();
-    }
 
-    out_info->HAS = true;
+    out_info->pv_y1 = true;
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
 }
 //-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15::direct_off()
-{
-    if (true == in_info.SUP) {
+void valve_iolink_gea_tvis_a15_ss::direct_off() {
+    if (in_info.pv_y1_on == true) 
         start_switch_time = get_millisec();
-    }
 
-    out_info->HAS = false;
+    out_info->pv_y1 = false;
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
 }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::set_cmd(const char* prop, u_int idx, double val)
+int valve_iolink_gea_tvis_a15_ss::set_cmd(const char* prop, u_int idx, double val)
 {
     if (G_DEBUG)
     {
         G_LOG->debug(
-            "%s\t valve_iolink_gea_tvis_a15::set_cmd() - prop = %s, idx = %d, val = %f",
+            "%s\t valve_iolink_gea_tvis_a15_ss::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
     }
+    valve::set_cmd(prop, idx, val);
 
     //switch (prop[0])
     //{
@@ -5001,7 +5247,7 @@ int valve_iolink_gea_tvis_a15::set_cmd(const char* prop, u_int idx, double val)
     return 0;
 }
 //-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15::direct_set_state(int new_state)
+void valve_iolink_gea_tvis_a15_ss::direct_set_state(int new_state)
 {
     switch (new_state)
     {
