@@ -598,50 +598,84 @@ TEST( AI1, get_type_name )
 
 TEST( AI1, get_state )
     {
-    G_PAC_INFO()->emulation_on();
     AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
         device::DEVICE_SUB_TYPE::DST_AI, 0 );
     EXPECT_EQ( sensor.get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
+
+    // No I\O data.
+    auto err = 0;
+    auto res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
+    EXPECT_EQ( err, static_cast<int>( io_device::ERRORS::BAD_IO_DATA ) );
+    EXPECT_EQ( res, 0.f );
+
     uni_io_manager mngr;
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
-    mngr.init_node_AI( 0, 0, 450, 0 );
-    G_PAC_INFO()->emulation_off();
     sensor.init( 0, 0, 0, 1 );
     sensor.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
 
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
-    EXPECT_EQ( sensor.get_state(), 1 );
-    EXPECT_EQ( sensor.get_value(), 10 );
+    const auto NO_ERR = static_cast<int>( io_device::ERRORS::NO_ERR );
+    const auto UNDER_RANGE = static_cast<int>( io_device::ERRORS::UNDER_RANGE );
+    const auto OVER_RANGE = static_cast<int>( io_device::ERRORS::OVER_RANGE );
+    const auto OUT_OF_RANGE = static_cast<int>( io_device::ERRORS::OUT_OF_RANGE );
 
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = -2000;
-    EXPECT_EQ( sensor.get_state(), 1 );
-    EXPECT_EQ( sensor.get_value(), -200 );
+    auto test_value{ [&]( int in_value, float res_value, int err_value,
+        float abs_err, float min = .0f, float max = .0f ) {
+        sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
+        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, min, max, err );
+        EXPECT_EQ( err, err_value );
+        EXPECT_NEAR( res, res_value, abs_err );
+        EXPECT_EQ( sensor.get_state(), err_value == 0 ? 1 : -err_value );
+        } };
 
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = -2001;   // Underrange.
-    EXPECT_EQ( sensor.get_state(), -2 );
-    EXPECT_EQ( sensor.get_value(), -1000 );
+    auto test_m{ [&]( int module,
+        int in_range_value, float in_range_res,
+        int under_range_value, float under_range_res,
+        int over_range_value, float over_range_res ) {
+        mngr.init_node_AI( 0, 0, module, 0 );
+        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
+        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
+        test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
+        } };
 
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 8500;
-    EXPECT_EQ( sensor.get_state(), 1 );
-    EXPECT_EQ( sensor.get_value(), 850 );
+    const auto MIN_V = 10.f;
+    const auto MAX_V = 20.f;
+    const auto ABS_ERR = .02f;
+    const auto ZERO_ABS_ERR = .0f;
 
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 8501;    // Overrange.
-    EXPECT_EQ( sensor.get_state(), -3 );
-    EXPECT_EQ( sensor.get_value(), -1000 );
+    test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
+    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
+    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
+    test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
+    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
+    test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
-    mngr.init_node_AI( 0, 0, 466, 0 );
-    sensor.AI_channels.int_read_values[ 0 ][ 0 ] = 4;
-    EXPECT_EQ( sensor.get_state(), 1 );
-    EXPECT_EQ( sensor.get_value(), 4.00195360f );
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    test_value( 30001, -1000.f, OUT_OF_RANGE, ABS_ERR );
+    test_value( 1000, 0.5f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
+
+    mngr.init_node_AI( 0, 0, 2688556, 0 );
+    test_value( -32001, -1000.f, UNDER_RANGE, ABS_ERR );
+    test_value( 1000, 100.f, NO_ERR, ZERO_ABS_ERR, MIN_V, MAX_V );
+
+    mngr.init_node_AI( 0, 0, 2688491, 0 );
+    test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
+    test_value( 1000, 10.33f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
+    mngr.init_node_AI( 0, 0, 2702072, 0 );
+    test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
+    test_value( 1000, 10.33f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
+    mngr.init_node_AI( 0, 0, 1088062, 0 );
+    test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
+    test_value( 1000, 10.63f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
     }
+
 
 TEST( level, get_params_count )
     {
@@ -835,76 +869,6 @@ TEST( concentration_e_ok, get_state )
     }
 
 
-TEST( AI1, get_state )
-    {
-    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
-        device::DEVICE_SUB_TYPE::DST_AI, 0 );
-    EXPECT_EQ( sensor.get_state(), 1 );
-
-    // No I\O data.
-    auto err = 0;
-    auto res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
-    EXPECT_EQ( err, static_cast<int>( io_device::ERRORS::BAD_IO_DATA ) );
-    EXPECT_EQ( res, 0.f );
-
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );    
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );    
-    sensor.init( 0, 0, 0, 1 );
-    sensor.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
-
-    const auto NO_ERR = static_cast<int>( io_device::ERRORS::NO_ERR );
-    const auto UNDER_RANGE = static_cast<int>( io_device::ERRORS::UNDER_RANGE );
-    const auto OVER_RANGE = static_cast<int>( io_device::ERRORS::OVER_RANGE );
-    const auto OUT_OF_RANGE = static_cast<int>( io_device::ERRORS::OUT_OF_RANGE );
-
-    auto test_value{ [&]( int in_value, float res_value, int err_value,
-        float abs_err, int min = 0, int max = 0 ) {
-        sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
-        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, min, max, err );
-        EXPECT_EQ( err, err_value );
-        EXPECT_NEAR( res, res_value, abs_err );
-        } };    
-
-    auto test_m{ [&]( int module,
-        int in_range_value, float in_range_res,
-        int under_range_value, float under_range_res,
-        int over_range_value, float over_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );        
-        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
-        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
-        test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
-        } };
-
-    test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
-    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
-    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 491, 0 );
-    test_value( 30001, -1000.f, OUT_OF_RANGE, 0.02f );
-    test_value( 1000, 0.5f, NO_ERR, .1f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 2688556, 0 );
-    test_value( -32001, -1000.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 100.f, NO_ERR, .0f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 2688491, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    mngr.init_node_AI( 0, 0, 2702072, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    mngr.init_node_AI( 0, 0, 1088062, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.6f, NO_ERR, .1f, 10, 20 );
-    
-    io_manager::replace_instance( prev_mngr );
-    }
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;
