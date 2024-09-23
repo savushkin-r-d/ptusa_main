@@ -690,6 +690,7 @@ TEST( AI1, direct_set_value )
     G_PAC_INFO()->emulation_on();
     }
 
+
 TEST( level, get_params_count )
     {
     level L1( "L1", device::DEVICE_SUB_TYPE::DST_LT_CONE, 1 );
@@ -700,6 +701,43 @@ TEST( level, get_type_name )
     {
     level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
     EXPECT_STREQ( "Текущий уровень", test_dev.get_type_name() );
+    }
+
+TEST( level, level )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
+
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_LT1={M=0, ST=1, V=0, CLEVEL=0, P_CZ=0, P_ERR=0},\n", buff );
+    }
+
+TEST( level, get_max_val )
+    {
+    level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
+    EXPECT_EQ( test_dev.get_max_val(), 100.f );
+    }
+
+TEST( level, get_min_val )
+    {
+    level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
+    EXPECT_EQ( test_dev.get_min_val(), 0.f );
+    }
+
+TEST( level, get_volume )
+    {
+    level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
+    EXPECT_EQ( test_dev.get_volume(), 0.f );
+
+    const auto NEW_VAL = 10.f;
+    test_dev.direct_set_value( NEW_VAL );
+    EXPECT_EQ( test_dev.get_volume(), NEW_VAL );
+
+    test_dev.direct_set_state( -1 );
+    const auto ERR_VAL = 100.f;
+    test_dev.set_par( 2, 0, ERR_VAL );
+    EXPECT_EQ( test_dev.get_volume(), ERR_VAL );
     }
 
 
