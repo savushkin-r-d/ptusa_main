@@ -2599,11 +2599,6 @@ private:
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
 
-<<<<<<< HEAD
-=======
-    bool blink = false;     //Visual indication
-
->>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     //Дополнительное смещение, так как область AO занимает 1 байт.
     int extra_offset = 0;
 
@@ -2613,11 +2608,7 @@ private:
     };
 };
 //-----------------------------------------------------------------------------
-<<<<<<< HEAD
 /// @brief Клапан IO-Link GEA T.VIS A-15 односедельный отсечной.
-=======
-/// @brief Клапан IO-Link GEA T.VIS A-15 односедельный.
->>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 class valve_iolink_gea_tvis_a15_ss : public valve
 {
 public:
@@ -2659,8 +2650,9 @@ private:
     {
         int16_t  pos;
 
-        bool pv_y1_on    : 1; // DI0+ - [0 ; 1] - пилотный клапан соленоида y1 активирован 
-        uint16_t unused0 : 2; // DI1+, DI2+ - неиспользуемые параметры клапана (соленоиды y1 и y2)
+        bool pv_y1_on    : 1; // DI0+ - [0 ; 1] - пилотный клапан соленоида y1 активирован
+        bool pv_y2_on    : 1; // DI1+ - [0 ; 1] - пилотный клапан соленоида y2 активирован
+        bool pv_y3_on    : 1; // DI2+ - [0 ; 1] - пилотный клапан соленоида y3 активирован
         bool error_on    : 1; // DI3+ - [0 ; 1] - ошибка активна (ли)
         uint16_t unused1 : 3; // DI4+, DI5+, DI6+ - незанятые параметры
         bool SUP         : 1; // DI7+ - [0 ; 1] - активна процедура Setup
@@ -2682,11 +2674,6 @@ private:
     in_data in_info{ 0 };
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
-<<<<<<< HEAD
-=======
-
-    bool blink = false;     //Visual indication
->>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с управлением от пневмоострова IO-link.
@@ -2858,10 +2845,14 @@ class AI1 : public analog_io_device
 #ifndef DEBUG_NO_IO_MODULES
         int get_state()
             {
-            auto err = 0;
-            get_AI( C_AI_INDEX, 0, 0, err );
-            if ( err > 0 ) return -err;
-
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
+            {
+                return -2;
+            }
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
+            {
+                return -3;
+}
             return 1;
             }
 #else
