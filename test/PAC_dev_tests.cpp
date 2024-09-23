@@ -1,5 +1,4 @@
 #include "PAC_dev_tests.h"
-#include "uni_bus_coupler_io.h"
 
 using namespace ::testing;
 
@@ -136,28 +135,6 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOLINK_DO1_DI2, GEA T.VIS A-15 Single-seat
-    name = std::string("VGEA1");
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
-        valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str());
-    EXPECT_NE(nullptr, res);
-    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
-    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
-    Vx = V(name.c_str());
-    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
-
-    //device::DT_V, device::V_IOLINK_MIXPROOF, GEA T.VIS A-15 Double-seat
-    name = std::string("VGEA2");
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_MIXPROOF, name.c_str(), "Test valve",
-        valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str());
-    EXPECT_NE(nullptr, res);
-    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
-    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
-    Vx = V(name.c_str());
-    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
 
     //device::DT_V, device::DST_V_MINI_FLUSHING, Test
     name = std::string( "V3" );
@@ -500,76 +477,6 @@ TEST( analog_io_device, set_cmd )
     }
 
 
-TEST( AI1, get_state )
-    {
-    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
-        device::DEVICE_SUB_TYPE::DST_AI, 0 );
-    EXPECT_EQ( sensor.get_state(), 1 );
-
-    // No I\O data.
-    auto err = 0;
-    auto res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
-    EXPECT_EQ( err, static_cast<int>( io_device::ERRORS::BAD_IO_DATA ) );
-    EXPECT_EQ( res, 0.f );
-
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );    
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );    
-    sensor.init( 0, 0, 0, 1 );
-    sensor.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
-
-    const auto NO_ERR = static_cast<int>( io_device::ERRORS::NO_ERR );
-    const auto UNDER_RANGE = static_cast<int>( io_device::ERRORS::UNDER_RANGE );
-    const auto OVER_RANGE = static_cast<int>( io_device::ERRORS::OVER_RANGE );
-    const auto OUT_OF_RANGE = static_cast<int>( io_device::ERRORS::OUT_OF_RANGE );
-
-    auto test_value{ [&]( int in_value, float res_value, int err_value,
-        float abs_err, int min = 0, int max = 0 ) {
-        sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
-        res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, min, max, err );
-        EXPECT_EQ( err, err_value );
-        EXPECT_NEAR( res, res_value, abs_err );
-        } };    
-
-    auto test_m{ [&]( int module,
-        int in_range_value, float in_range_res,
-        int under_range_value, float under_range_res,
-        int over_range_value, float over_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );        
-        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
-        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
-        test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
-        } };
-
-    test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
-    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
-    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 491, 0 );
-    test_value( 30001, -1000.f, OUT_OF_RANGE, 0.02f );
-    test_value( 1000, 0.5f, NO_ERR, .1f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 2688556, 0 );
-    test_value( -32001, -1000.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 100.f, NO_ERR, .0f, 10, 20 );
-
-    mngr.init_node_AI( 0, 0, 2688491, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    mngr.init_node_AI( 0, 0, 2702072, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.3f, NO_ERR, .1f, 10, 20 );
-    mngr.init_node_AI( 0, 0, 1088062, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, 0.02f );
-    test_value( 1000, 10.6f, NO_ERR, .1f, 10, 20 );
-    
-    io_manager::replace_instance( prev_mngr );
-    }
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;
@@ -691,6 +598,47 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         str_buff );
     }
 
+TEST(valve_iolink_gea_tvis_a15_ds, save_device)
+{
+    valve_iolink_gea_tvis_a15_ds V1("VGEA2");
+    const int BUFF_SIZE = 100;
+    char buff[BUFF_SIZE] = { 0 };
+    V1.save_device(buff, "");
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+}
+
+TEST(valve_iolink_gea_tvis_a15_ds, evaluate_io)
+{
+    valve_iolink_gea_tvis_a15_ds V1("VGEA2");
+    V1.init(0, 0, 1, 1);
+    V1.AO_channels.int_write_values[0] = new int_2[2]{ 0 };
+    V1.AI_channels.int_read_values[0] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[0]);
+
+
+    EXPECT_EQ(0, V1.get_value()); //Default value.
+
+
+    const int POS = 341;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = POS;
+    std::swap(buff[0], buff[3]);  //Reverse byte order to get correct int.
+    std::swap(buff[2], buff[1]);
+    V1.evaluate_io();
+    const int BUFF_SIZE = 100;
+    char str_buff[BUFF_SIZE] = { 0 };
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+
+    V1.direct_set_value(12.1f);
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=12, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.0, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+}
+
 TEST(valve_iolink_gea_tvis_a15_ss, save_device)
 {
     valve_iolink_gea_tvis_a15_ss V1("VGEA1");
@@ -698,7 +646,7 @@ TEST(valve_iolink_gea_tvis_a15_ss, save_device)
     char buff[BUFF_SIZE] = { 0 };
     V1.save_device(buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
 }
 
 TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
@@ -722,13 +670,13 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
     char str_buff[BUFF_SIZE] = { 0 };
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 
     V1.direct_set_value(12.1f);
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 }
 

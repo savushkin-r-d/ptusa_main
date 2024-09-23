@@ -4713,20 +4713,11 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
 {
     int res = valve::save_device_ex(buff);
 
-    bool cs = in_info->pv_y1_on || in_info->pv_y2_on || in_info->pv_y3_on;
+    int cs = in_info->pv_y1_on || in_info->pv_y2_on || in_info->pv_y3_on;
     int err = in_info->error_on;
-    bool ventilteller = in_info->s1;
-    bool haupthub = in_info->s2;
-    bool doppelteller = false;
-    bool spreizlift = false;
-    if (out_info->pv_y1) {
-        doppelteller = in_info->s3;
-    }
-    else {
-        spreizlift = in_info->s3;
-    }
+    int sup = in_info->SUP;
 
-    res += sprintf(buff + res, "VT=%d, HH=%d, DT=%d, SLDT=%d, CS=%d, ERR=%d, ", ventilteller, haupthub, doppelteller, spreizlift, cs, err);
+    res += sprintf(buff + res, "CS=%d, SUP=%d, ERR=%d, ", cs, sup, err);
     res += sprintf(buff + res, "V=%.1f, ", get_value());
 
     return res;
@@ -4814,12 +4805,12 @@ float valve_iolink_gea_tvis_a15_ds::get_value()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_off_fb_value()
 {
-    return !(bool(this->get_on_fb_value()));
+    return !(in_info->pv_y1_on || in_info->pv_y2_on || in_info->pv_y3_on);
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_on_fb_value()
 {
-    return !(in_info->s1) || in_info->s2 || !(in_info->s3) || !(in_info->s4);
+    return in_info->pv_y1_on || in_info->pv_y2_on || in_info->pv_y3_on;
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ds::direct_on()
@@ -5095,8 +5086,6 @@ valve_iolink_gea_tvis_a15_ss::valve_iolink_gea_tvis_a15_ss(const char* dev_name)
     {
     in_info.SUP = false;
     in_info.error_on = false;
-    in_info.pv_y2_on = false;
-    in_info.pv_y3_on = false;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state()
@@ -5161,7 +5150,7 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 {
-    bool cs = out_info->pv_y1;
+    bool cs = in_info.pv_y1_on;
     bool err = in_info.error_on;
     bool sup = in_info.SUP;
     bool start_valve_state = in_info.s1;

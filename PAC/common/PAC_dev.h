@@ -2569,8 +2569,6 @@ public:
 private:
     struct in_data
     {
-        int16_t  pos;
-
         bool pv_y1_on : 1; // DI0+ - [0 ; 1] - пилотный клапан соленоида y1 активирован (ли)
         bool pv_y2_on : 1; // DI1+ - [0 ; 1] - пилотный клапан соленоида y2 активирован (ли)
         bool pv_y3_on : 1; // DI2+ - [0 ; 1] - пилотный клапан соленоида y3 активирован (ли)
@@ -2584,6 +2582,8 @@ private:
                      //                 pv_y1 = 1 - сдвоенная тарелка: 1 - не разведена, 0 - разведена
         bool s4 : 1; // DI3 - [0 ; 1] - основной ход: 1 - клапан в покое, 0 - клапанная тарелка и сдвоенная тарелка не закрыты
         uint16_t unused12 : 4; // DI4, DI5, DI6, DI7 - незанятые биты
+
+        int16_t  pos;
     };
 
     struct out_data_swapped   //Swapped low and high byte for easer processing
