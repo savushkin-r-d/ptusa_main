@@ -4649,9 +4649,15 @@ valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
     return (VALVE_STATE)digital_io_device::get_state();
 #else
 
+<<<<<<< HEAD
     if (in_info->pv_y1_on == 1 && in_info->pv_y2_on == 0 && in_info->pv_y3_on == 0) return V_ON;
     if (in_info->pv_y1_on == 0 && in_info->pv_y2_on == 1 && in_info->pv_y3_on == 0) return V_UPPER_SEAT;
     if (in_info->pv_y1_on == 0 && in_info->pv_y2_on == 0 && in_info->pv_y3_on == 1) return V_LOWER_SEAT;
+=======
+    if (in_info->pv_y2_on) return V_UPPER_SEAT;
+    if (in_info->pv_y3_on) return V_LOWER_SEAT;
+    if (in_info->pv_y1_on) return V_ON;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     else return V_OFF;
 
 #endif // DEBUG_NO_IO_MODULES
@@ -4686,11 +4692,17 @@ void valve_iolink_gea_tvis_a15_ds::evaluate_io()
     G_LOG->write_log(i_log::P_WARNING);
 
     sprintf(G_LOG->msg,
+<<<<<<< HEAD
         "pv_y1_on %u, pv_y1_on %u, pv_y1_on %u, s1 %u, s2 %u, s3 %u, s4 %u, SUP %u, error_on %u, pos %.1f\n",
         in_info->pv_y1_on, in_info->pv_y2_on, in_info->pv_y3_on,
         in_info->s1, in_info->s2, in_info->s3, in_info->s4,
         in_info->SUP, in_info->error_on,
         0.1 * in_info->pos);
+=======
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos);
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     G_LOG->write_log(i_log::P_NOTICE);
 #endif
 }
@@ -4713,6 +4725,7 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
 {
     int res = valve::save_device_ex(buff);
 
+<<<<<<< HEAD
     bool cs = in_info->pv_y1_on || in_info->pv_y2_on || in_info->pv_y3_on;
     int err = in_info->error_on;
     bool ventilteller = in_info->s1;
@@ -4727,6 +4740,11 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
     }
 
     res += sprintf(buff + res, "VT=%d, HH=%d, DT=%d, SLDT=%d, CS=%d, ERR=%d, ", ventilteller, haupthub, doppelteller, spreizlift, cs, err);
+=======
+    bool cs = out_info->pv_y1 || out_info->pv_y1 || out_info->pv_y1;
+    int err = in_info->error_on;
+    res += sprintf(buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     res += sprintf(buff + res, "V=%.1f, ", get_value());
 
     return res;
@@ -4749,17 +4767,24 @@ bool valve_iolink_gea_tvis_a15_ds::get_fb_state()
 
     if (in_info->error_on) return false;
 
+<<<<<<< HEAD
     if (in_info->SUP) return false;
 
+=======
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     if (get_delta_millisec(start_switch_time) <
         get_par(valve::P_ON_TIME, 0))
     {
         return true;
     }
 
+<<<<<<< HEAD
     if (in_info->pv_y1_on == 1 && in_info->pv_y2_on == 0 && in_info->pv_y3_on == 0) return true;
     if (in_info->pv_y1_on == 0 && in_info->pv_y2_on == 1 && in_info->pv_y3_on == 0) return true;
     if (in_info->pv_y1_on == 0 && in_info->pv_y2_on == 0 && in_info->pv_y3_on == 1) return true;
+=======
+    if (out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3) return true;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 
     return false;
 }
@@ -4813,17 +4838,29 @@ float valve_iolink_gea_tvis_a15_ds::get_value()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_off_fb_value()
 {
+<<<<<<< HEAD
     return !(this->get_on_fb_value);
+=======
+    return !(out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3);
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_on_fb_value()
 {
+<<<<<<< HEAD
     return !(in_info.s1) || in_onfo.s2 || !(in_info.s3) || !(in_info.s4);
+=======
+    return out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ds::direct_on()
 {
+<<<<<<< HEAD
     if (false == in_info->pv_y1_on || false == in_info->pv_y2_on || false == in_info->pv_y3_on)
+=======
+    if (false == in_info->pv_y1_on)
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     {
         start_switch_time = get_millisec();
     }
@@ -4854,6 +4891,23 @@ int valve_iolink_gea_tvis_a15_ds::set_cmd(const char* prop, u_int idx, double va
             get_name(), prop, idx, val);
     }
 
+<<<<<<< HEAD
+=======
+    //switch (prop[0])
+    //{
+    //case 'B': //BLINK
+    //{
+    //    val > 0 ? out_info->wink = true : out_info->wink = false;
+    //    blink = out_info->wink;
+    //    break;
+    //}
+
+    //default:
+    //    valve::set_cmd(prop, idx, val);
+    //    break;
+    //}
+
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -5086,6 +5140,10 @@ void valve_iolink_shut_off_sorio::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 const std::string valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE = "GEA.TA15P8IAJ";
+<<<<<<< HEAD
+=======
+//const std::string valve_iolink_gea_tvis_a15::GEA_TVIS_A15_SOLENOIDES_ARTICLE = "GEA.TA15L8IAJ";
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 
 valve_iolink_gea_tvis_a15_ss::out_data_swapped
     valve_iolink_gea_tvis_a15_ss::stub_out_info;
@@ -5093,10 +5151,13 @@ valve_iolink_gea_tvis_a15_ss::out_data_swapped
 valve_iolink_gea_tvis_a15_ss::valve_iolink_gea_tvis_a15_ss(const char* dev_name)
     : valve(true, true, dev_name, DT_V, V_IOLINK_DO1_DI2)
     {
+<<<<<<< HEAD
     in_info.SUP = false;
     in_info.error_on = false;
     in_info->pv_y2_on = false;
     in_info->pv_y3_on = false;
+=======
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state()
@@ -5161,6 +5222,7 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 {
+<<<<<<< HEAD
     bool cs = out_info->sv1;
     bool err = in_info.error_on;
     bool sup = in_info.SUP;
@@ -5168,6 +5230,12 @@ int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
     bool end_valve_state = in_info.s2;
 
     int res = sprintf(buff, "StartVSt=%d, EndVSt=%d, CS=%d, SUP=%d, ERR=%d, ", start_valve_state, end_valve_state, cs, sup, err);
+=======
+    bool cs = out_info->pv_y1;
+    int err = in_info.error_on;
+
+    int res = sprintf(buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err);
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     res += sprintf(buff + res, "V=%.1f, ", get_value());
 
     return res;
@@ -5204,11 +5272,19 @@ bool valve_iolink_gea_tvis_a15_ss::get_fb_state() {
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::get_off_fb_value() {
+<<<<<<< HEAD
     return in_info.s1;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::get_on_fb_value() {
     return in_info.s2;
+=======
+    return !in_info.pv_y1_on;
+}
+//-----------------------------------------------------------------------------
+int valve_iolink_gea_tvis_a15_ss::get_on_fb_value() {
+    return in_info.pv_y1_on;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ss::direct_on() {
@@ -5216,6 +5292,11 @@ void valve_iolink_gea_tvis_a15_ss::direct_on() {
         start_switch_time = get_millisec();
 
     out_info->pv_y1 = true;
+<<<<<<< HEAD
+=======
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ss::direct_off() {
@@ -5223,6 +5304,11 @@ void valve_iolink_gea_tvis_a15_ss::direct_off() {
         start_switch_time = get_millisec();
 
     out_info->pv_y1 = false;
+<<<<<<< HEAD
+=======
+    out_info->pv_y2 = false;
+    out_info->pv_y3 = false;
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::set_cmd(const char* prop, u_int idx, double val)
@@ -5235,6 +5321,23 @@ int valve_iolink_gea_tvis_a15_ss::set_cmd(const char* prop, u_int idx, double va
     }
     valve::set_cmd(prop, idx, val);
 
+<<<<<<< HEAD
+=======
+    //switch (prop[0])
+    //{
+    //case 'B': //BLINK
+    //{
+    //    val > 0 ? out_info->wink = true : out_info->wink = false;
+    //    blink = out_info->wink;
+    //    break;
+    //}
+
+    //default:
+    //    valve::set_cmd(prop, idx, val);
+    //    break;
+    //}
+
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     return 0;
 }
 //-----------------------------------------------------------------------------

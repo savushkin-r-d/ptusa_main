@@ -2599,6 +2599,11 @@ private:
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
 
+<<<<<<< HEAD
+=======
+    bool blink = false;     //Visual indication
+
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
     //Дополнительное смещение, так как область AO занимает 1 байт.
     int extra_offset = 0;
 
@@ -2608,7 +2613,11 @@ private:
     };
 };
 //-----------------------------------------------------------------------------
+<<<<<<< HEAD
 /// @brief Клапан IO-Link GEA T.VIS A-15 односедельный отсечной.
+=======
+/// @brief Клапан IO-Link GEA T.VIS A-15 односедельный.
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 class valve_iolink_gea_tvis_a15_ss : public valve
 {
 public:
@@ -2673,6 +2682,11 @@ private:
     in_data in_info{ 0 };
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
+<<<<<<< HEAD
+=======
+
+    bool blink = false;     //Visual indication
+>>>>>>> c82263926b3b165583cffa5b72b755bdd3db9c04
 };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с управлением от пневмоострова IO-link.
