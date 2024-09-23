@@ -808,22 +808,22 @@ signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 void signal_column::direct_off()
     {
-    if ( red_lamp_channel ) turn_off_red();
-    if ( yellow_lamp_channel ) turn_off_yellow();
-    if ( green_lamp_channel ) turn_off_green();
-    if ( blue_lamp_channel ) turn_off_blue();
+    turn_off_red();
+    turn_off_yellow();
+    turn_off_green();
+    turn_off_blue();
 
-    if ( siren_channel ) turn_off_siren();
+    turn_off_siren();
     }
 //-----------------------------------------------------------------------------
 void signal_column::direct_on()
     {
-    if ( red_lamp_channel ) turn_off_red();
-    if ( yellow_lamp_channel ) turn_off_yellow();
-    if ( green_lamp_channel ) turn_off_green();
-    if ( blue_lamp_channel ) turn_off_blue();
+    turn_off_red();
+    turn_off_yellow();
+    turn_off_green();
+    turn_off_blue();
 
-    if ( siren_channel ) turn_off_siren();
+    turn_off_siren();    
 
     turn_on_green();
     }
@@ -954,7 +954,7 @@ void signal_column::slow_blink_blue()
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_siren()
     {
-    siren_step = STEP::blink_on;
+    siren_step = STEP::on;
     if ( !G_PAC_INFO()->is_emulator() )
         process_DO( siren_channel, DO_state::ON, SIREN );
     }
@@ -980,21 +980,13 @@ void signal_column::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-void signal_column::direct_set_value( float new_value )
-    {
-    }
-//-----------------------------------------------------------------------------
 int signal_column::get_state()
     {
-    int res = green.step != STEP::off || yellow.step == STEP::off ||
-        red.step == STEP::off || siren_step != STEP::off;
+    int res = green.step != STEP::off || yellow.step != STEP::off ||
+        red.step != STEP::off || blue.step != STEP::off ||
+        siren_step != STEP::off;
 
     return res;
-    }
-//-----------------------------------------------------------------------------
-float signal_column::get_value()
-    {
-    return .0f;
     }
 //-----------------------------------------------------------------------------
 int signal_column::save_device_ex( char* buff )
@@ -1005,6 +997,8 @@ int signal_column::save_device_ex( char* buff )
         yellow.step == STEP::on || yellow.step == STEP::blink_on ? 1 : 0 );
     res += sprintf( buff + res, "L_RED=%d, ",
         red.step == STEP::on || red.step == STEP::blink_on ? 1 : 0 );
+    res += sprintf( buff + res, "L_BLUE=%d, ",
+        blue.step == STEP::on || blue.step == STEP::blink_on ? 1 : 0 );
     res += sprintf( buff + res, "L_SIREN=%d, ",
         siren_step == STEP::on ? 1 : 0 );
 
@@ -1040,6 +1034,7 @@ void signal_column::show_message_exists()
         turn_off_red();
         normal_blink_yellow();
         turn_off_green();
+        turn_off_blue();
         turn_off_siren();
         }
     };
@@ -1071,6 +1066,7 @@ void signal_column::show_batch_is_running()
         turn_off_red();
         turn_off_yellow();
         turn_on_green();
+        turn_off_blue();
         turn_off_siren();
         }
     };
@@ -1087,6 +1083,7 @@ void signal_column::show_operation_is_not_running()
         turn_off_red();
         turn_on_yellow();
         turn_off_green();
+        turn_off_blue();
         turn_off_siren();
         }
     };
@@ -1104,6 +1101,7 @@ void signal_column::show_operation_is_running()
         turn_off_red();
         turn_off_yellow();
         turn_on_green();
+        turn_off_blue();
         turn_off_siren();
         }
     };
@@ -1123,81 +1121,99 @@ void signal_column::show_idle()
         turn_off_red();
         turn_off_yellow();
         turn_off_green();
+        turn_off_blue();
         turn_off_siren();
         }
     };
 //-----------------------------------------------------------------------------
 void signal_column::direct_set_state( int new_state )
     {
-    switch ( (STATE)new_state )
+    switch ( (CMD)new_state )
         {
-        case STATE::TURN_OFF:
+        case CMD::TURN_OFF:
             direct_off();
             break;
 
-        case STATE::TURN_ON:
+        case CMD::TURN_ON:
             direct_on();
             break;
 
-        case STATE::LIGHTS_OFF:
+        case CMD::LIGHTS_OFF:
             turn_off_red();
             turn_off_yellow();
             turn_off_green();
+            turn_off_blue();
             break;
 
-        case STATE::GREEN_ON:
+        case CMD::GREEN_ON:
             turn_on_green();
             break;
 
-        case STATE::YELLOW_ON:
+        case CMD::YELLOW_ON:
             turn_on_yellow();
             break;
 
-        case STATE::RED_ON:
+        case CMD::RED_ON:
             turn_on_red();
             break;
 
-        case STATE::GREEN_NORMAL_BLINK:
+        case CMD::BLUE_ON:
+            turn_on_blue();
+            break;
+
+        case CMD::GREEN_NORMAL_BLINK:
             normal_blink_green();
             break;
 
-        case STATE::GREEN_OFF:
+        case CMD::GREEN_OFF:
             turn_off_green();
             break;
 
-        case STATE::YELLOW_OFF:
+        case CMD::YELLOW_OFF:
             turn_off_yellow();
             break;
 
-        case STATE::RED_OFF:
+        case CMD::RED_OFF:
             turn_off_red();
             break;
 
-        case STATE::YELLOW_NORMAL_BLINK:
+        case CMD::BLUE_OFF:
+            turn_off_blue();
+            break;
+
+        case CMD::YELLOW_NORMAL_BLINK:
             normal_blink_yellow();
             break;
 
-        case STATE::RED_NORMAL_BLINK:
+        case CMD::RED_NORMAL_BLINK:
             normal_blink_red();
             break;
 
-        case STATE::GREEN_SLOW_BLINK:
+        case CMD::BLUE_NORMAL_BLINK:
+            normal_blink_blue();
+            break;
+
+        case CMD::GREEN_SLOW_BLINK:
             slow_blink_green();
             break;
 
-        case STATE::YELLOW_SLOW_BLINK:
+        case CMD::YELLOW_SLOW_BLINK:
             slow_blink_yellow();
             break;
 
-        case STATE::RED_SLOW_BLINK:
+        case CMD::RED_SLOW_BLINK:
             slow_blink_red();
             break;
 
-        case STATE::SIREN_ON:
+        case CMD::BLUE_SLOW_BLINK:
+            slow_blink_blue();
+            break;
+
+        case CMD::SIREN_ON:
             turn_on_siren();
             break;
 
-        case STATE::SIREN_OFF:
+        case CMD::SIREN_OFF:
             turn_off_siren();
             break;
 

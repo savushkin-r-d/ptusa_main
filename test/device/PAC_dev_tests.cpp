@@ -6,32 +6,154 @@ using namespace ::testing;
 #include <cstring>
 
 
-TEST( signal_column, turn_off_blue )
-    {
-    class test_signal_column_iolink : public signal_column_iolink
-        {
-        public:
-            test_signal_column_iolink( const char* dev_name ) :
-                signal_column_iolink( dev_name ) {};
-
-            bool is_blue_switched_on()
-                {
-                return blue.step == STEP::on || blue.step == STEP::blink_on;
-                }
-        };
-
-    test_signal_column_iolink test_dev( "test_HL1" );
-
-    test_dev.turn_on_blue();
-    EXPECT_EQ( true, test_dev.is_blue_switched_on() );
-    test_dev.turn_off_blue();
-    EXPECT_EQ( false, test_dev.is_blue_switched_on() );
-    }
-
 TEST( signal_column, get_type_name )
     {
     signal_column_iolink test_dev( "test_HL1" );
     EXPECT_STREQ( "Сигнальная колонна", test_dev.get_type_name() );
+    }
+
+TEST( signal_column, direct_off )
+    {
+    signal_column_iolink test_dev( "test_HL1" );    
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.direct_on();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ("test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.direct_off();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, turn_off_green )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.turn_on_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, turn_off_yellow )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.turn_on_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, turn_off_red )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.turn_on_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, turn_off_blue )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.turn_on_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, turn_off_siren )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.turn_on_siren();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=1},\n", buff );
+
+    test_dev.turn_off_siren();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, direct_set_state )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.direct_set_state( signal_column::CMD::GREEN_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::YELLOW_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::RED_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::BLUE_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::SIREN_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
+        "L_BLUE=1, L_SIREN=1},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::LIGHTS_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=1},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::TURN_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
     }
 
 

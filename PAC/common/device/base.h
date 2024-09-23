@@ -997,7 +997,7 @@ class signal_column : public device, public io_device
         void turn_on_siren();
         void turn_off_siren();
 
-        enum STATE
+        enum CMD
             {
             TURN_OFF,
 
@@ -1008,18 +1008,22 @@ class signal_column : public device, public io_device
             GREEN_ON,
             YELLOW_ON,
             RED_ON,
+            BLUE_ON,
 
             GREEN_OFF,
             YELLOW_OFF,
             RED_OFF,
+            BLUE_OFF,
 
             GREEN_NORMAL_BLINK,
             YELLOW_NORMAL_BLINK,
             RED_NORMAL_BLINK,
+            BLUE_NORMAL_BLINK,
 
             GREEN_SLOW_BLINK,
             YELLOW_SLOW_BLINK,
             RED_SLOW_BLINK,
+            BLUE_SLOW_BLINK,
 
             SIREN_ON,
             SIREN_OFF,
@@ -1031,9 +1035,7 @@ class signal_column : public device, public io_device
         void direct_off() override;
         void direct_on() override;
 
-        void direct_set_value( float new_value ) override;
         int get_state() override;
-        float get_value() override;
 
         int save_device_ex( char* buff ) override;
 
