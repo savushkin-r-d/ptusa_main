@@ -536,12 +536,12 @@ TEST( signal_column, blink )
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    sleep_ms( 250 );
+    sleep_ms( 250 + 1 );
     test_dev.normal_blink_green();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
-    sleep_ms( 250 );
+    sleep_ms( 250  + 1 );
     test_dev.normal_blink_green();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
