@@ -609,6 +609,7 @@ TEST( AI1, get_state )
     auto res = sensor.get_AI( 0 /*sensor::C_AI_INDEX*/, 0, 0, err );
     EXPECT_EQ( err, static_cast<int>( io_device::ERRORS::BAD_IO_DATA ) );
     EXPECT_EQ( res, 0.f );
+    EXPECT_EQ( sensor.get_value(), 0.f);
 
     uni_io_manager mngr;
     mngr.init( 1 );
@@ -676,6 +677,18 @@ TEST( AI1, get_state )
     io_manager::replace_instance( prev_mngr );
     }
 
+TEST( AI1, direct_set_value )
+    {
+    AI1 sensor( "AI1", device::DEVICE_TYPE::DT_AI,
+        device::DEVICE_SUB_TYPE::DST_AI, 0 );
+    const auto NEW_VAL = 10.1f;
+    sensor.direct_set_value( NEW_VAL );
+    EXPECT_EQ( sensor.get_value(), NEW_VAL );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( sensor.get_value(), .0f );
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( level, get_params_count )
     {
