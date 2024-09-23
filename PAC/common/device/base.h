@@ -31,6 +31,9 @@ class par_device
         par_device( u_int par_cnt );
 
         virtual ~par_device();
+        
+        /// Unmovable classe.
+        par_device& operator=( par_device&& ) = delete;
 
         /// @brief Сохранение в виде скрипта Lua.
         ///
@@ -169,6 +172,7 @@ class i_counter
 class i_mix_proof
     {
     public:
+        virtual ~i_mix_proof() = default;
 
         /// @brief Открыть верхнее седло.
         virtual void open_upper_seat() = 0;
@@ -181,6 +185,8 @@ class i_mix_proof
 class i_wages
     {
     public:
+        virtual ~i_wages() = default;
+
         /// @brief Тарировка.
         virtual void tare() = 0;
         ///@brief Возвращает вес в килограммах
@@ -769,14 +775,8 @@ class digital_io_device : public device,
 class analog_io_device : public device, public io_device
     {
     public:
-        analog_io_device( const char* dev_name,
-            device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt ) :
-            device( dev_name, type, sub_type, par_cnt ),
-            io_device( dev_name )
-            {
-            }
+        analog_io_device( const char* dev_name, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
         void print() const override;
 
@@ -809,6 +809,8 @@ class i_motor : public device
 class i_camera
     {
     public:
+        virtual ~i_camera() = default;
+
         /// @brief Получение статуса событий от камеры.
         virtual int get_result( int n = 1 ) = 0;
     };

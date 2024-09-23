@@ -390,13 +390,7 @@ class level_e_iolink : public level
 class concentration_e : public AI1
     {
     public:
-        concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-            AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
-            {
-            start_param_idx = AI1::get_params_count();
-            set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
-            }
+        concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type );
 
         float get_max_val();
         float get_min_val();
@@ -480,13 +474,7 @@ class concentration_e_iolink : public analog_io_device
 class analog_input : public AI1
     {
     public:
-        analog_input( const char *dev_name ): AI1( dev_name, DT_AI, DST_NONE,
-            ADDITIONAL_PARAM_COUNT )
-            {
-            start_param_idx = AI1::get_params_count();
-            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
-            }
+        analog_input( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -778,15 +766,9 @@ class analog_output : public AO1
 class DI1 : public digital_io_device
     {
     public:
-        DI1( const char *dev_name,
-            device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val = 0 ):
-        digital_io_device( dev_name, type, sub_type,
-            ADDITIONAL_PARAMS_COUNT + par_cnt ),
-            current_state( current_state_init_val )
-            {
-            set_par_name( P_DT,  0, "P_DT" );
-            }
+        DI1( const char* dev_name, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
+            int current_state_init_val = 0 );
 
         void direct_on() override;
 

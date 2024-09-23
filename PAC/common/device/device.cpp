@@ -1502,6 +1502,16 @@ float counter_iolink::get_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+DI1::DI1( const char* dev_name, device::DEVICE_TYPE type,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, 
+    int current_state_init_val ) :
+    digital_io_device( dev_name, type, sub_type,
+    ADDITIONAL_PARAMS_COUNT + par_cnt ),
+    current_state( current_state_init_val )
+    {
+    set_par_name( P_DT, 0, "P_DT" );
+    }
+//-----------------------------------------------------------------------------
 void DI1::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
@@ -3191,6 +3201,15 @@ circuit_breaker::F_data_out::F_data_out(): switch_ch1( false ), switch_ch2( fals
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+concentration_e::concentration_e( const char* dev_name,
+    DEVICE_SUB_TYPE sub_type ) :
+    AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
 float concentration_e::get_max_val()
     {
     return get_par( P_MAX_V, start_param_idx );
@@ -3317,6 +3336,14 @@ void concentration_e_iolink::evaluate_io()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+analog_input::analog_input( const char* dev_name ) : AI1( dev_name, DT_AI,
+    DST_NONE, ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
 float analog_input::get_max_val()
     {
     return get_par( P_MAX_V, start_param_idx );
@@ -3327,6 +3354,13 @@ float analog_input::get_min_val()
     return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+analog_io_device::analog_io_device( const char* dev_name, 
+    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) : device( dev_name, type, sub_type, par_cnt ),
+    io_device( dev_name )
+    {
+    }
 //-----------------------------------------------------------------------------
 void analog_io_device::print() const
     {
