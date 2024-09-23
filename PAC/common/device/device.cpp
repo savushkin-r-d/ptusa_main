@@ -68,8 +68,7 @@ void signal_column_discrete::process_DO( u_int n, DO_state state, const char* na
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 signal_column_iolink::signal_column_iolink( const char* dev_name ) :
-    signal_column( dev_name, DST_HLA_IOLINK ),
-    out_info( 0 )
+    signal_column( dev_name, DST_HLA_IOLINK )
     {
     }
 //-----------------------------------------------------------------------------

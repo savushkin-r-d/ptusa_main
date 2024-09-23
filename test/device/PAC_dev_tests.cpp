@@ -44,6 +44,12 @@ TEST( signal_column, turn_off_green )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYR" );
+    test_dev.turn_on_green();
+    test_dev.turn_off_green();
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( signal_column, turn_off_yellow )
@@ -61,6 +67,12 @@ TEST( signal_column, turn_off_yellow )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYR" );
+    test_dev.turn_on_yellow();
+    test_dev.turn_off_yellow();
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( signal_column, turn_off_red )
@@ -78,6 +90,12 @@ TEST( signal_column, turn_off_red )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYR" );
+    test_dev.turn_on_red();
+    test_dev.turn_off_red();
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( signal_column, turn_off_blue )
@@ -95,6 +113,12 @@ TEST( signal_column, turn_off_blue )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.turn_on_blue();
+    test_dev.turn_off_blue();
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( signal_column, turn_off_siren )
@@ -112,6 +136,12 @@ TEST( signal_column, turn_off_siren )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.turn_on_siren();
+    test_dev.turn_off_siren();
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( signal_column, direct_set_state )
