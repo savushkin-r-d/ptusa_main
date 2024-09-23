@@ -144,6 +144,260 @@ TEST( signal_column, turn_off_siren )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( signal_column, normal_blink_red )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.normal_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Мы управляем красным цветом.
+    test_dev.set_rt_par( 1, 1 );
+    test_dev.normal_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );    
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.normal_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, slow_blink_red )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.slow_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Мы управляем красным цветом.
+    test_dev.set_rt_par( 1, 1 );
+    test_dev.slow_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.slow_blink_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_red();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, normal_blink_yellow )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.normal_blink_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.normal_blink_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, slow_blink_yellow )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.slow_blink_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.slow_blink_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_yellow();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, normal_blink_green )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.normal_blink_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.normal_blink_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, slow_blink_green )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.slow_blink_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.slow_blink_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.turn_off_green();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, normal_blink_blue )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.normal_blink_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.normal_blink_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+    test_dev.turn_off_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( signal_column, slow_blink_blue )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    test_dev.slow_blink_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+
+    test_dev.turn_off_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    test_dev.slow_blink_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+    test_dev.turn_off_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( signal_column, direct_set_state )
     {
     signal_column_iolink test_dev( "test_HL1" );
@@ -181,6 +435,197 @@ TEST( signal_column, direct_set_state )
         "L_BLUE=0, L_SIREN=1},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::TURN_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.direct_set_state( signal_column::CMD::TURN_ON );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Green lamp.
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::GREEN_NORMAL_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::GREEN_SLOW_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.direct_set_state( signal_column::CMD::GREEN_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Yellow lamp
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::YELLOW_NORMAL_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::YELLOW_SLOW_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.direct_set_state( signal_column::CMD::YELLOW_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Red lamp
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::RED_NORMAL_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::RED_SLOW_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    test_dev.direct_set_state( signal_column::CMD::RED_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Blue lamp
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::BLUE_NORMAL_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::BLUE_SLOW_BLINK );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=1, L_SIREN=0},\n", buff );
+    test_dev.direct_set_state( signal_column::CMD::BLUE_OFF );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    // Do nothing.
+    test_dev.off();
+    test_dev.direct_set_state( signal_column::CMD::SIREN_OFF + 1 );
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, set_rt_par )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    // Управление красным цветом.
+    test_dev.set_rt_par( 1, 1 );
+
+    //Несуществующий runtime-параметр.
+    test_dev.set_rt_par( 0, 1 );
+    }
+
+TEST( signal_column, evaluate_io )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен выполниться без исключений.
+    test_dev.evaluate_io();
+    }
+
+TEST( signal_column, show_error_exists )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен включить мигание красной лампы
+    // и сирену.
+    test_dev.show_error_exists();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
+        "L_BLUE=0, L_SIREN=1},\n", buff );
+    }
+
+TEST( signal_column, show_message_exists )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен включить мигание желтой лампы.
+    test_dev.show_message_exists();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, show_batch_is_not_running )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен включить желтую лампу.
+    test_dev.show_batch_is_not_running();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, show_batch_is_running )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен включить зелёную лампу.
+    test_dev.show_batch_is_running();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, show_operation_is_not_running )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    test_dev.turn_on_green();
+    test_dev.turn_on_red();
+    test_dev.turn_on_siren();
+    // Просто вызываем данный метод - он должен включить желтую лампу.
+    test_dev.show_operation_is_not_running();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, show_operation_is_running )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    // Просто вызываем данный метод - он должен включить зелёную лампу.
+    test_dev.show_operation_is_running();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST( signal_column, show_idle )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    signal_column_iolink test_dev( "test_HL1" );
+    test_dev.turn_on_green();
+    test_dev.turn_on_red();
+    test_dev.turn_on_siren();
+    // Просто вызываем данный метод - он должен отключить все лампы и сирену.
+    test_dev.show_idle();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );

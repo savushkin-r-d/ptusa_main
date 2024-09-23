@@ -975,7 +975,7 @@ void signal_column::set_rt_par( u_int idx, float value )
             break;
 
         default:
-            set_rt_par( idx, value );
+            device::set_rt_par( idx, value );
             break;
         }
     }
@@ -1222,13 +1222,6 @@ void signal_column::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-signal_column::state_info::state_info()
-    {
-    step = STEP::off;
-    start_blink_time = 0;
-    start_wait_time = 0;
-    }
-//-----------------------------------------------------------------------------
 void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     {
     switch ( info.step )
@@ -1240,7 +1233,8 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::blink_on:
-            process_DO( lamp_DO, DO_state::ON, "?" );
+            if ( !G_PAC_INFO()->is_emulator() )
+                process_DO( lamp_DO, DO_state::ON, "?" );
             if ( get_delta_millisec( info.start_blink_time ) > delay_time )
                 {
                 info.start_wait_time = get_millisec();
@@ -1249,7 +1243,8 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::blink_off:
-            process_DO( lamp_DO, DO_state::OFF, "?" );
+            if ( !G_PAC_INFO()->is_emulator() )
+                process_DO( lamp_DO, DO_state::OFF, "?" );
             if ( get_delta_millisec( info.start_wait_time ) > delay_time )
                 {
                 info.start_blink_time = get_millisec();

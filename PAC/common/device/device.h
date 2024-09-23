@@ -1343,11 +1343,10 @@ class signal_column_iolink : public signal_column
 
         void set_string_property( const char* field, const char* value );
 
-    protected:
-        void process_DO( u_int n, DO_state state, const char* name ) override;
-
+        void evaluate_io() override;
+    
     private:
-        void evaluate_io();
+        void process_DO( u_int n, DO_state state, const char* name ) override;
 
         struct out_data
             {

@@ -1107,7 +1107,7 @@ class signal_column : public device, public io_device
         enum class CONSTANTS
             {
             NORMAL_BLINK_TIME = 1000 / 2 / 2,                 //2 Гц
-            SLOW_BLINK_TIME = (int)( 1000 / 0.5f / 2 ),        //0.5 Гц
+            SLOW_BLINK_TIME = (int)( 1000 / 0.5f / 2 ),       //0.5 Гц
             };
 
         enum class STEP
@@ -1120,11 +1120,9 @@ class signal_column : public device, public io_device
 
         struct state_info
             {
-            STEP step;
-            unsigned long start_blink_time;
-            unsigned long start_wait_time;
-
-            state_info();
+            STEP step = STEP::off;
+            unsigned long start_blink_time = 0;
+            unsigned long start_wait_time = 0;
             };
 
         state_info green;

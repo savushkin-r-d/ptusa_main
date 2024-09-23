@@ -145,7 +145,15 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
 void signal_column_iolink::evaluate_io()
     {
     signal_column::evaluate_io();
-    out_info = (out_data*)get_AO_write_data( 0 );
+
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        // Ничего не делаем.
+        }
+    else
+        {
+        out_info = (out_data*)get_AO_write_data( 0 );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
