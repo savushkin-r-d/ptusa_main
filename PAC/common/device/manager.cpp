@@ -1,3 +1,5 @@
+#include <fmt/core.h>
+
 #include "manager.h"
 #include "lua_manager.h"
 #include "g_errors.h"
@@ -289,17 +291,20 @@ device* device_manager::get_device( int dev_type,
         }
     else if ( !disable_error_logging )
         {
+        auto size = 0;
         if ( dev_type < device::C_DEVICE_TYPE_CNT )
             {
-            sprintf( G_LOG->msg, "%3s ", device::DEV_NAMES[ dev_type ] );
+            size = ( fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE, "{} ",
+                device::DEV_NAMES[ dev_type ] ) ).size;
             }
         else
             {
-            sprintf( G_LOG->msg, "unknown " );
+            size = ( fmt::format_to_n( G_LOG->msg, MAX_COPY_SIZE, "unknown "
+                ) ).size;
             }
-        sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
+        auto res = fmt::format_to_n( G_LOG->msg + size, MAX_COPY_SIZE, "\"{}\" not found!",
             dev_name );
-
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_ERR );
         }
 
@@ -323,8 +328,7 @@ device* device_manager::get_device( const char* dev_name )
         }
     else if ( !disable_error_logging )
         {
-        sprintf( G_LOG->msg, "Device \"%s\" not found!", dev_name );
-        G_LOG->write_log( i_log::P_ERR );
+        G_LOG->error( "Device \"%s\" not found!", dev_name );
         }
 
     return get_stub_device();
@@ -451,9 +455,7 @@ i_counter* device_manager::get_FQT( const char* dev_name )
                 break;
             }
         }
-
-    sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
-    G_LOG->write_log( i_log::P_ERR );
+    G_LOG->error( "FQT \"%s\" not found!", dev_name );
 
     return stub;
     }
@@ -473,9 +475,7 @@ virtual_counter* device_manager::get_virtual_FQT( const char* dev_name )
                 break;
             }
         }
-
-    sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
-    G_LOG->write_log( i_log::P_ERR );
+    G_LOG->error( "FQT \"%s\" not found!", dev_name );
 
     static virtual_counter stub_fqt( "stub" );
     return &stub_fqt;

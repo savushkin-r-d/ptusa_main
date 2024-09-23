@@ -1551,6 +1551,17 @@ TEST( concentration_e_ok, get_state )
     }
 
 
+TEST( concentration_e_iolink, concentration_e_iolink )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    concentration_e_iolink Q1( "Q1" );
+
+    Q1.save_device( buff, "" );
+    EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0},\n", buff );
+    }
+
+
 TEST( state_s, is_active )
     {
     const int BUFF_SIZE = 200;
@@ -3398,6 +3409,20 @@ TEST ( valve_AS, get_upper_seat_offset)
     EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
     }
 
+
+TEST( circuit_breaker, circuit_breaker )
+    {
+    const int BUFF_SIZE = 1000;
+    char str_buff[ BUFF_SIZE ] = { 0 };
+    circuit_breaker F1( "F1" );
+
+    F1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "F1={M=0, ST=0, V=0, ERR=0, M=0, "
+        "NOMINAL_CURRENT_CH={0,0,0,0}, LOAD_CURRENT_CH={0.0,0.0,0.0,0.0}, "
+        "ST_CH={0,0,0,0}, ERR_CH={0,0,0,0}},\n",
+        str_buff );
+    }
 
 TEST( circuit_breaker, get_type_name )
     {

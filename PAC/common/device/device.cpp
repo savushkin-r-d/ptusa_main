@@ -202,8 +202,8 @@ int camera::get_result( int n )
 
 int camera::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "RESULT=%d, READY=%d, ",
-        get_result(), is_cam_ready );
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT=%d, READY=%d, ",
+        get_result(), is_cam_ready ) ).size;
     return res;
     }
 
@@ -3006,21 +3006,27 @@ circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
 //-----------------------------------------------------------------------------
 int circuit_breaker::save_device_ex( char *buff )
     {
-    int res = sprintf( buff, "ERR=%d,M=%d, ", err, m );
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "ERR={}, M={}, ",
+        err, m ) ).size;
 
-    res += sprintf( buff + res, "NOMINAL_CURRENT_CH={%d,%d,%d,%d}, ",
-        in_info.nominal_current_ch1, in_info.nominal_current_ch2,
-        in_info.nominal_current_ch3, in_info.nominal_current_ch4 );
-    res += sprintf( buff + res, "LOAD_CURRENT_CH={%.1f,%.1f,%.1f,%.1f}, ",
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "NOMINAL_CURRENT_CH={{{},{},{},{}}}, ",
+        +in_info.nominal_current_ch1, +in_info.nominal_current_ch2,
+        +in_info.nominal_current_ch3, +in_info.nominal_current_ch4 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "LOAD_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
         .1f * in_info.load_current_ch1, .1f * in_info.load_current_ch2,
-        .1f * in_info.load_current_ch3, .1f * in_info.load_current_ch4 );
+        .1f * in_info.load_current_ch3, .1f * in_info.load_current_ch4 ) ).size;
 
-    res += sprintf( buff + res, "ST_CH={%d,%d,%d,%d}, ",
-        in_info.st_ch1, in_info.st_ch2,
-        in_info.st_ch3, in_info.st_ch4 );
-    res += sprintf( buff + res, "ERR_CH={%d,%d,%d,%d}, ",
-        in_info.err_ch1, in_info.err_ch2,
-        in_info.err_ch3, in_info.err_ch4 );
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "ST_CH={{{},{},{},{}}}, ",
+        +in_info.st_ch1, +in_info.st_ch2,
+        +in_info.st_ch3, +in_info.st_ch4 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "ERR_CH={{{},{},{},{}}}, ",
+        +in_info.err_ch1, +in_info.err_ch2,
+        +in_info.err_ch3, +in_info.err_ch4 ) ).size;
+
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -3028,10 +3034,9 @@ int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
     {
     if (G_DEBUG)
         {
-        sprintf( G_LOG->msg,
+        G_LOG->debug( 
             "%s\t circuit_breaker::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
-        G_LOG->write_log(i_log::P_DEBUG);
         }
 
     if ( strcmp( prop, "ST" ) == 0 )
@@ -3270,19 +3275,20 @@ concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
 concentration_e_iolink::~concentration_e_iolink()
     {
     delete info;
-    info = 0;
+    info = nullptr;
     }
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff )
     {
-    int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "T={:.1f}, ",
+        get_temperature() ) ).size;
 
     return res;
     }
 //-----------------------------------------------------------------------------
 float concentration_e_iolink::get_temperature() const
     {
-    return 0.1f * info->temperature;
+    return .1f * info->temperature;
     }
 //-----------------------------------------------------------------------------
 float concentration_e_iolink::get_value()

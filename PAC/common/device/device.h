@@ -450,7 +450,7 @@ class concentration_e_iolink : public analog_io_device
             unsigned char              :4;
             unsigned char status       :4;
             unsigned char tmp;
-            unsigned int  temperature;
+            unsigned int  temperature = 0;
             unsigned char tmp1;
             unsigned char tmp2;
             unsigned int  conductivity;
