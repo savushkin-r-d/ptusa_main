@@ -320,13 +320,8 @@ int device::set_cmd( const char* prop, u_int idx, char* val )
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( G_DEBUG )
-        {
-        sprintf( G_LOG->msg,
-            "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f",
-            name, prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
-        }
+    G_LOG->debug( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f",
+        name, prop, idx, val );
 
     switch ( prop[ 0 ] )
         {
@@ -349,11 +344,8 @@ int device::set_cmd( const char* prop, u_int idx, double val )
             return par_device::set_par_by_name( prop, val );
 
         default:
-            if ( G_DEBUG )
-                {
-                printf( "Error device::set_cmd() - prop = %s, val = %f\n",
-                    prop, val );
-                }
+            G_LOG->debug( "Error device::set_cmd() - prop = %s, val = %f\n",
+                prop, val );
             return 1;
         }
 
@@ -667,9 +659,8 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
 //Lua.
 int virtual_counter::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
-    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
-
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "ABS_V={}, F={:.2f}, ",
+        get_abs_quantity(), get_flow() ) ).size;
     return res;
     }
 
@@ -769,8 +760,8 @@ int level::calc_volume()
 //-----------------------------------------------------------------------------
 int level::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
-
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "CLEVEL={}, ",
+        get_volume() ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -991,16 +982,16 @@ int signal_column::get_state()
 //-----------------------------------------------------------------------------
 int signal_column::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "L_GREEN=%d, ",
-        green.step == STEP::on || green.step == STEP::blink_on ? 1 : 0 );
-    res += sprintf( buff + res, "L_YELLOW=%d, ",
-        yellow.step == STEP::on || yellow.step == STEP::blink_on ? 1 : 0 );
-    res += sprintf( buff + res, "L_RED=%d, ",
-        red.step == STEP::on || red.step == STEP::blink_on ? 1 : 0 );
-    res += sprintf( buff + res, "L_BLUE=%d, ",
-        blue.step == STEP::on || blue.step == STEP::blink_on ? 1 : 0 );
-    res += sprintf( buff + res, "L_SIREN=%d, ",
-        siren_step == STEP::on ? 1 : 0 );
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "L_GREEN={}, ",
+        green.step == STEP::on || green.step == STEP::blink_on ? 1 : 0 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "L_YELLOW={}, ",
+        yellow.step == STEP::on || yellow.step == STEP::blink_on ? 1 : 0 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "L_RED={}, ",
+        red.step == STEP::on || red.step == STEP::blink_on ? 1 : 0 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "L_BLUE={}, ",
+        blue.step == STEP::on || blue.step == STEP::blink_on ? 1 : 0 ) ).size;
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "L_SIREN={}, ",
+        siren_step == STEP::on ? 1 : 0 ) ).size;
 
     return res;
     }
