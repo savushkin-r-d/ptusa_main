@@ -360,7 +360,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
 //-----------------------------------------------------------------------------
 float io_device::get_AI( u_int index, float min_value, float max_value, int& err )
     {
-    err = 0;
+    err = static_cast< int >( ERRORS::NO_ERR );
     if ( index < AI_channels.count &&
         AI_channels.int_read_values &&
         AI_channels.int_read_values[ index ] )
@@ -394,37 +394,37 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 450:
                 if ( val < -2000 )  // Underrange.
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1000.f;
                     }
                 if ( val > 8500 )   // Overrange.
                     {
-                    err = 2;
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
                     return -1000.f;
                     }
 
                 val *= 0.1f;    // -200..-0.1..0..850 °C
                 return val;
 
-            // Input       Numerical value                            Status- LE
-            // current                                                byte    AI
-            // 4-20 mA                                                hex.
+            // Input       Numerical value                            Status- LED
+            // current                                                byte    Error
+            // 4-20 mA                                                hex.    AI 1,2
             //             binary
             //             Measured value      *)XFÜ   hex.    dec.
             //------------------------------------------------------------------
             // <0          not possible (Reverse voltage protection)
             // <4- Δ**)    ’0000.0000.0000.0   011’    0x0003  3      0x41    on
-            // <4          ’0000.0000.0000.0   000’    0x0000  0      0x00    of
-            // 4           ’0000.0000.0000.0   000’    0x0000  0      0x00    of
-            // 6           ’0001.0000.0000.0   000’    0x1000  4096   0x00    of
-            // 8           ’0010.0000.0000.0   000’    0x2000  8192   0x00    of
-            // 10          ’0011.0000.0000.0   000’    0x3000  12288  0x00    of
-            // 12          ’0100.0000.0000.0   000’    0x4000  16384  0x00    of
-            // 14          ’0101.0000.0000.0   000’    0x5000  20480  0x00    of
-            // 16          ’0110.0000.0000.0   000’    0x6000  24576  0x00    of
-            // 18          ’0111.0000.0000.0   000’    0x7000  28672  0x00    of
-            // 20          ’0111.1111.1111.1   000’    0x7FF8  32760  0x00    of
-            // >20         ’0111.1111.1111.1   001’    0x7FF9  32761  0x42    of
+            // <4          ’0000.0000.0000.0   000’    0x0000  0      0x00    off
+            // 4           ’0000.0000.0000.0   000’    0x0000  0      0x00    off
+            // 6           ’0001.0000.0000.0   000’    0x1000  4096   0x00    off
+            // 8           ’0010.0000.0000.0   000’    0x2000  8192   0x00    off
+            // 10          ’0011.0000.0000.0   000’    0x3000  12288  0x00    off
+            // 12          ’0100.0000.0000.0   000’    0x4000  16384  0x00    off
+            // 14          ’0101.0000.0000.0   000’    0x5000  20480  0x00    off
+            // 16          ’0110.0000.0000.0   000’    0x6000  24576  0x00    off
+            // 18          ’0111.0000.0000.0   000’    0x7000  28672  0x00    off
+            // 20          ’0111.1111.1111.1   000’    0x7FF8  32760  0x00    off
+            // >20         ’0111.1111.1111.1   001’    0x7FF9  32761  0x42    off
             // >20+ Δ**)   ’0111.1111.1111.1   001’    0x7FF9  32761  0x42    on
             // ------------------------------------------------------------------
             // *) status bits : X = not used, F = short - circuit, Ü = oversize
@@ -433,12 +433,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 496:
                 if ( 3 == val )     // Underrange.
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1.f;
                     }
                 if ( 32761 <= val ) // Overrange.
                     {
-                    err = 2;
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
                     return -1.f;
                     }
 
@@ -478,13 +478,13 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                     return val;
                     }
 
-                err = 1;
+                err = static_cast<int>( ERRORS::OUT_OF_RANGE );
                 return -1000;
 
 			case 2688556: //RTD4 1H
 				if (val < -32000 )
 				    {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1000;
 				    }
 				val *= 0.1f;
@@ -494,7 +494,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 2702072:   //AXL F AI2 AO2 1H
 				if (val < -32000)
 					{
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1;
 					}
 
@@ -512,7 +512,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             case 1088062:   //AXL SE AI4 I 4-20
                 if ( val < -32000 )
                     {
-                    err = 1;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1;
                     }
 
@@ -547,7 +547,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
         printf( "\n" );
         }
 
-    err = 100;
+    err = static_cast<int>( ERRORS::BAD_IO_DATA );
     return 0;
     }
 //-----------------------------------------------------------------------------
