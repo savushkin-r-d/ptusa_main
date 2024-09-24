@@ -4680,7 +4680,7 @@ void valve_iolink_gea_tvis_a15_ds::evaluate_io()
     G_LOG->write_log(i_log::P_WARNING);
 
     sprintf(G_LOG->msg,
-        "pv_y1_on %u, pv_y1_on %u, pv_y1_on %u, s1 %u, s2 %u, s3 %u, s4 %u, SUP %u, error_on %u, pos %.1f\n",
+        "pv_y1_on %u, pv_y2_on %u, pv_y3_on %u, s1 %u, s2 %u, s3 %u, s4 %u, SUP %u, error_on %u, pos %.1f\n",
         in_info.pv_y1_on, in_info.pv_y2_on, in_info.pv_y3_on,
         in_info.s1, in_info.s2, in_info.s3, in_info.s4,
         in_info.SUP, in_info.error_on,
@@ -4702,6 +4702,17 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
 
     return res;
 }
+//-----------------------------------------------------------------------------
+float valve_iolink_gea_tvis_a15_ds::get_value()
+{
+    return 0.1f * in_info.pos;
+}
+#ifdef DEBUG_NO_IO_MODULES
+void valve_iolink_gea_tvis_a15_ds::direct_set_value(float new_value)
+{
+    in_info.pos = (int16_t)(new_value * 10);
+}
+#endif
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_gea_tvis_a15_ds::get_fb_state()
@@ -4769,11 +4780,6 @@ int valve_iolink_gea_tvis_a15_ds::get_state()
     }
 
     return valve::get_state();
-}
-//-----------------------------------------------------------------------------
-float valve_iolink_gea_tvis_a15_ds::get_value()
-{
-    return 0.1f * in_info.pos;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_off_fb_value()

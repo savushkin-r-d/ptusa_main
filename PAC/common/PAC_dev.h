@@ -2541,10 +2541,14 @@ public:
 
     void evaluate_io() final;
 
+    float get_value() final;
+
+#ifdef DEBUG_NO_IO_MODULES
+    void direct_set_value(float new_value) final;
+#endif
+
 #ifndef DEBUG_NO_IO_MODULES
     int get_state() final;
-
-    float get_value() final;
 
     bool get_fb_state() final;
 

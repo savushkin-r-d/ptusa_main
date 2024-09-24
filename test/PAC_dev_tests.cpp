@@ -622,20 +622,65 @@ TEST(valve_iolink_gea_tvis_a15_ds, evaluate_io)
 
     const int POS = 341;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = POS;
-    std::swap(buff[0], buff[3]);  //Reverse byte order to get correct int.
-    std::swap(buff[2], buff[1]);
+    std::swap(buff[0], buff[1]);  //Reverse byte order to get correct int.
+    std::swap(buff[2], buff[3]);
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
     char str_buff[BUFF_SIZE] = { 0 };
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 
     V1.direct_set_value(12.1f);
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA2={M=0, ST=12, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.0, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+
+    V1.direct_on();
+    V1.save_device(str_buff, "");
+#ifdef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=1, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+#ifndef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=1, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+
+    V1.open_lower_seat();
+    V1.save_device(str_buff, "");
+#ifdef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=3, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+#ifndef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=3, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+
+    V1.open_upper_seat();
+    V1.save_device(str_buff, "");
+#ifdef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=2, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+#ifndef DEBUG_NO_IO_MODULES
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=2, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+#endif
+
+    V1.direct_off();
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 }
 
