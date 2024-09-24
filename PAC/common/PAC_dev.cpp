@@ -5089,9 +5089,9 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
     const int SIZE = 4;
     std::copy(data, data + SIZE, buff);
     //Reverse byte order to get correct int16.
-    //std::swap(buff[0], buff[3]);
+    std::swap(buff[0], buff[1]);
     //Reverse byte order to get correct int16.
-    //std::swap(buff[2], buff[1]);
+    std::swap(buff[2], buff[3]);
 
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
