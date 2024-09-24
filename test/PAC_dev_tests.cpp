@@ -237,6 +237,28 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
     EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false);
 
+    //device::DT_V, device::V_IOLINK_DO1_DI2, GEA T.VIS A-15 Single-seat
+    name = std::string("V93");
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
+        valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str());
+    EXPECT_NE(nullptr, res);
+    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
+    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
+    Vx = V(name.c_str());
+    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
+
+    //device::DT_V, device::V_IOLINK_DO1_DI2, GEA T.VIS A-15 Double-seat
+    name = std::string("V94");
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_MIXPROOF, name.c_str(), "Test valve",
+        valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str());
+    EXPECT_NE(nullptr, res);
+    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
+    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
+    Vx = V(name.c_str());
+    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
+
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
