@@ -189,14 +189,14 @@ class valve : public digital_io_device
 class virtual_valve : public valve
     {
     public:
-        virtual_valve( const char* dev_name );
+        explicit virtual_valve( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления.
 class valve_DO1 : public valve
     {
     public:
-        valve_DO1( const char* dev_name );
+        explicit valve_DO1( const char* dev_name );
 
         void direct_on();
 
@@ -244,7 +244,7 @@ class valve_DO2 : public valve
 class valve_DO1_DI1_off : public valve
     {
     public:
-        valve_DO1_DI1_off( const char* dev_name );
+        explicit valve_DO1_DI1_off( const char* dev_name );
 
         void direct_on();
 
@@ -273,7 +273,7 @@ class valve_DO1_DI1_off : public valve
 class valve_DO1_DI1_on : public valve
     {
     public:
-        valve_DO1_DI1_on( const char* dev_name );
+        explicit valve_DO1_DI1_on( const char* dev_name );
 
         void direct_on() override;
 
@@ -302,7 +302,7 @@ class valve_DO1_DI1_on : public valve
 class valve_DO1_DI2 : public valve
     {
     public:
-        valve_DO1_DI2( const char* dev_name );
+        explicit valve_DO1_DI2( const char* dev_name );
 
         void direct_on() override;
 
@@ -333,7 +333,7 @@ class valve_DO1_DI2 : public valve
 class valve_DO2_DI2 : public valve
     {
     public:
-        valve_DO2_DI2( const char* dev_name );
+        explicit valve_DO2_DI2( const char* dev_name );
 
         void direct_on() override;
 
@@ -366,7 +366,7 @@ class valve_DO2_DI2 : public valve
 class valve_DO2_DI2_bistable : public valve
     {
     public:
-        valve_DO2_DI2_bistable( const char* dev_name );
+        explicit valve_DO2_DI2_bistable( const char* dev_name );
 
         int evaluate();
 
@@ -405,7 +405,7 @@ class valve_DO2_DI2_bistable : public valve
 class valve_mix_proof : public i_mix_proof, public valve
     {
     public:
-        valve_mix_proof( const char* dev_name );
+        explicit valve_mix_proof( const char* dev_name );
 
         /// @brief Открыть верхнее седло.
         void open_upper_seat() override;
@@ -503,7 +503,7 @@ class valve_AS : public valve
 class valve_AS_mix_proof : public i_mix_proof, public valve_AS
     {
     public:
-        valve_AS_mix_proof( const char* dev_name );
+        explicit valve_AS_mix_proof( const char* dev_name );
 
         void open_upper_seat() override;
 
@@ -514,7 +514,7 @@ class valve_AS_mix_proof : public i_mix_proof, public valve_AS
 class valve_AS_DO1_DI2 : public valve_AS
     {
     public:
-        valve_AS_DO1_DI2( const char* dev_name );
+        explicit valve_AS_DO1_DI2( const char* dev_name );
 
         void direct_set_state( int new_state );
 
@@ -530,7 +530,7 @@ class valve_AS_DO1_DI2 : public valve_AS
 class valve_bottom_mix_proof : public i_mix_proof, public valve
     {
     public:
-        valve_bottom_mix_proof( const char* dev_name );
+        explicit valve_bottom_mix_proof( const char* dev_name );
 
         /// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
         /// седла нет.
@@ -633,7 +633,7 @@ class valve_mini_flushing : public i_mix_proof, public valve
 class valve_iolink_mix_proof : public i_mix_proof, public valve
     {
     public:
-        valve_iolink_mix_proof( const char* dev_name );
+        explicit valve_iolink_mix_proof( const char* dev_name );
 
         ~valve_iolink_mix_proof();
 
@@ -709,7 +709,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 class valve_iolink_shut_off_thinktop : public valve
     {
     public:
-        valve_iolink_shut_off_thinktop( const char* dev_name );
+        explicit valve_iolink_shut_off_thinktop( const char* dev_name );
 
         ~valve_iolink_shut_off_thinktop();
 
@@ -781,7 +781,7 @@ class valve_iolink_shut_off_sorio : public valve
     public:
         static const std::string SORIO_ARTICLE;
 
-        valve_iolink_shut_off_sorio( const char* dev_name );
+        explicit valve_iolink_shut_off_sorio( const char* dev_name );
 
         VALVE_STATE get_valve_state();
 
@@ -981,7 +981,7 @@ class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_D
 class analog_valve : public AO1
     {
     public:
-        analog_valve( const char* dev_name );
+        explicit analog_valve( const char* dev_name );
 
         float get_min_value() const override;
 
@@ -999,7 +999,7 @@ class analog_valve : public AO1
 class analog_valve_iolink : public AO1
     {
     public:
-        analog_valve_iolink( const char* dev_name );
+        explicit analog_valve_iolink( const char* dev_name );
 
         ~analog_valve_iolink();
 

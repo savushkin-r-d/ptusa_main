@@ -468,6 +468,7 @@ float dev_stub::get_min_flow() const
 //-----------------------------------------------------------------------------
 void dev_stub::abs_reset()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 u_int dev_stub::get_abs_quantity()
@@ -1721,6 +1722,7 @@ int virtual_wages::get_state()
 
 void virtual_wages::tare()
     {
+    // Ничего не делаем.
     }
 
 virtual_wages::virtual_wages( const char* dev_name ) :
@@ -2754,7 +2756,7 @@ float level_e_iolink::get_value()
 
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
-        return get_par( level::P_ERR, level::start_param_idx );
+        return get_par( level::P_ERR, get_start_param_idx() );
         }
     else
         {

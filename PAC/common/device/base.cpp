@@ -41,16 +41,16 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device( char* str )
+int par_device::save_device( char* buff, const char* prefix )
     {
-    str[ 0 ] = 0;
+    buff[ 0 ] = 0;
 
     if ( par == nullptr )
         {
         return 0;
         }
 
-    int size = 0;
+    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}", prefix ).size;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
@@ -58,7 +58,7 @@ int par_device::save_device( char* str )
             auto val = par[ 0 ][ i + 1 ];
             double tmp;
             int precision = modf( val, &tmp ) == 0 ? 0 : 2;
-            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
+            size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
                 par_name[ i ], val, precision ).size;
             }
         }
@@ -307,7 +307,7 @@ void device::evaluate_io()
     //Do nothing by default.
     }
 //-----------------------------------------------------------------------------
-int device::set_cmd( const char* prop, u_int idx, char* val )
+int device::set_cmd( const char* prop, u_int idx, const char* val )
     {
     if ( G_DEBUG )
         {
@@ -778,6 +778,11 @@ float level::get_min_val()
 int level::get_params_count() const
     {
     return start_param_idx + LAST_PARAM_IDX - 1;
+    }
+//-----------------------------------------------------------------------------
+int level::get_start_param_idx() const
+    {
+    return start_param_idx;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

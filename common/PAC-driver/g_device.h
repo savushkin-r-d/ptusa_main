@@ -76,7 +76,7 @@ class i_cmd_device
         ///
         /// @return 0 - ок.
         /// @return 1 - Ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, char *val ) = 0;
+        virtual int set_cmd( const char *prop, u_int idx, const char *val ) = 0;
     };
 
 #endif // DRIVER

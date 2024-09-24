@@ -1115,41 +1115,41 @@ class base_counter: public i_counter, public device, public io_device
         base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
             int extra_par_cnt );
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         void print() const override;
 
         /// @brief Приостановка работы счетчика.
-        virtual void pause();
+        void pause() override;
 
         /// @brief Возобновление работы счетчика.
-        virtual void start();
+        void start() override;
 
         /// @brief Сброс счетчика и остановка счета.
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
-        virtual void reset();
+        void reset() override;
 
         /// @brief Сброс абсолютного значения счетчика.
-        void abs_reset();
+        void abs_reset() override;
 
         /// @brief Сброс счетчика и продолжение счета.
-        void restart();
+        void restart() override;
 
         /// @brief Получение состояния работы счетчика.
-        virtual int get_state();
+        int get_state() override;
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
-        float get_value();
+        float get_value() override;
 
-        void direct_set_state( int new_state );
+        void direct_set_state( int new_state ) override;
 
-        void direct_set_value( float new_value );
+        void direct_set_value( float new_value ) override;
 
-        virtual void set_property( const char* field, device* dev );
+        void set_property( const char* field, device* dev ) override;
 
         /// @brief Получение значение счетчика от устройства.
         virtual float get_raw_value() const = 0;
@@ -1161,14 +1161,14 @@ class base_counter: public i_counter, public device, public io_device
             bool& is_first_read ) const;
 
         /// @brief Получение значения счетчика (c учетом паузы).
-        u_int get_quantity();
+        u_int get_quantity() override;
 
         /// @brief Получение абсолютного значения счетчика (без учета паузы).
-        u_int get_abs_quantity();
+        u_int get_abs_quantity() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) override;
 
         const char* get_error_description() override;
 
@@ -1760,7 +1760,7 @@ class timer_manager
     {
     public:
         /// @param timers_count - количество таймеров в группе.
-        timer_manager( u_int timers_count );
+        explicit timer_manager( u_int timers_count );
 
         ~timer_manager();
 

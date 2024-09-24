@@ -40,8 +40,10 @@ class par_device
         /// Сохраняем на основе названий параметров в виде таблицы:
         /// имя_параметра = 'значение'.
         ///
-        /// @param str - строка, куда сохраняем.
-        int save_device( char* str );
+        /// @param prefix - префикс перед строкой скрипта (обычно символ
+        /// табуляции - для визуального форматирования текста).
+        /// @param buff [out] - буфер записи строки.
+        virtual int save_device( char* buff, const char* prefix = "" );
 
         /// @brief Выполнение команда (установка значения параметра).
         ///
@@ -131,7 +133,7 @@ class i_counter
         virtual void reset() = 0;
 
         /// @brief Сброс счетчика и продолжение счета.
-        void restart();
+        virtual void restart();
 
         /// @brief Получение значения счетчика.
         virtual u_int get_quantity() = 0;
@@ -346,14 +348,14 @@ class device : public i_DO_AO_device, public par_device
         /// @param prop - свойство объекта.
         /// @param idx  - индекс свойства.
         /// @param val  - значение.
-        int set_cmd( const char* prop, u_int idx, char* val ) override;
+        int set_cmd( const char* prop, u_int idx, const char* val ) override;
 
         /// @brief Сохранение устройства в виде скрипта Lua.
         ///
         /// @param prefix - префикс перед строкой скрипта (обычно символ
         /// табуляции - для визуального форматирования текста).
         /// @param buff [out] - буфер записи строки.
-        virtual int save_device( char* buff, const char* prefix );
+        int save_device( char* buff, const char* prefix ) override;
 
         /// @brief Расчет состояния на основе текущих данных от I/O.
         virtual void evaluate_io();
@@ -782,6 +784,7 @@ class analog_io_device : public device, public io_device
         void print() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
+
         int save_device_ex( char* buff ) override;
 
         float get_value() override;
@@ -945,6 +948,8 @@ class level : public AI1
 
         int get_params_count() const override;
 
+        int get_start_param_idx() const;
+
         enum CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
@@ -952,6 +957,7 @@ class level : public AI1
             LAST_PARAM_IDX,
             };
 
+    private:
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
@@ -1060,7 +1066,6 @@ class signal_column : public device, public io_device
 
         void show_idle();
 
-    private:
         enum class show_states
             {
             idle,
@@ -1081,13 +1086,13 @@ class signal_column : public device, public io_device
 #pragma endregion
 #endif
 
-    protected:
         enum class DO_state
             {
             OFF,
             ON
             };
 
+    protected:
         const char* RED_LAMP = "red lamp";
         const char* GREEN_LAMP = "green lamp";
         const char* YELLOW_LAMP = "yellow lamp";
