@@ -692,7 +692,7 @@ int AI1::get_state()
         }
 
     auto err = 0;
-    auto res = get_AI( C_AI_INDEX, 0, 0, err );
+    get_AI( C_AI_INDEX, 0, 0, err );
     if ( err > 0 ) return -err;
 
     return 1;
@@ -786,14 +786,11 @@ signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int green_lamp_channel, int blue_lamp_channel, int siren_channel ) :
     device( dev_name, DT_HLA, sub_type, 0 ),
     io_device( dev_name ),
-    show_state( show_states::idle ),
-    is_const_red( 0 ),
     red_lamp_channel( red_lamp_channel ),
     yellow_lamp_channel( yellow_lamp_channel ),
     green_lamp_channel( green_lamp_channel ),
     blue_lamp_channel( blue_lamp_channel ),
-    siren_channel( siren_channel ),
-    siren_step( STEP::off )
+    siren_channel( siren_channel )
     {
     }
 //-----------------------------------------------------------------------------

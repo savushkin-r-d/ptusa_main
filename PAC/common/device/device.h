@@ -68,7 +68,7 @@ class DO1 : public digital_io_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( const char* dev_name );
+        explicit temperature_e( const char* dev_name );
 
         float get_value() override;
 
@@ -88,7 +88,7 @@ class temperature_e : public AI1
 class temperature_e_analog : public AI1
     {
     public:
-        temperature_e_analog( const char* dev_name );
+        explicit temperature_e_analog( const char* dev_name );
 
         float get_value() override;
 
@@ -110,7 +110,7 @@ class temperature_e_analog : public AI1
 class temperature_e_iolink : public AI1
     {
     public:
-        temperature_e_iolink( const char *dev_name );
+        explicit temperature_e_iolink( const char *dev_name );
 
         virtual ~temperature_e_iolink();
 
@@ -137,14 +137,14 @@ class temperature_e_iolink : public AI1
 class level_e : public level
     {
     public:
-        level_e( const char* dev_name );
+        explicit level_e( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень c для танка цилиндрической формы.
 class level_e_cyl : public level
     {
     public:
-        level_e_cyl( const char* dev_name );
+        explicit level_e_cyl( const char* dev_name );
 
         int calc_volume();
 
@@ -164,7 +164,7 @@ class level_e_cyl : public level
 class level_e_cone : public level
     {
     public:
-        level_e_cone( const char* dev_name );
+        explicit level_e_cone( const char* dev_name );
 
          int calc_volume();
 
@@ -185,7 +185,7 @@ class level_e_cone : public level
 class pressure_e : public AI1
     {
     public:
-        pressure_e( const char* dev_name );
+        explicit pressure_e( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -206,7 +206,7 @@ class pressure_e : public AI1
 class pressure_e_iolink : public analog_io_device
     {
     public:
-        pressure_e_iolink( const char* dev_name );
+        explicit pressure_e_iolink( const char* dev_name );
 
         float get_value() override;
 
@@ -234,7 +234,7 @@ class pressure_e_iolink : public analog_io_device
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
             int& st );
         static void read_article( const char* article, ARTICLE& n_article,
-            device* dev  );
+            const device* dev  );
 
         void evaluate_io();
 
@@ -273,7 +273,7 @@ class pressure_e_iolink : public analog_io_device
 class circuit_breaker : public analog_io_device
     {
     public:
-        circuit_breaker(const char* dev_name);
+        explicit circuit_breaker(const char* dev_name);
 
         int save_device_ex(char* buff);
 
@@ -353,7 +353,7 @@ class circuit_breaker : public analog_io_device
 class level_e_iolink : public level
     {
     public:
-        level_e_iolink( const char* dev_name );
+        explicit level_e_iolink( const char* dev_name );
 
         int calc_volume();
 
@@ -380,10 +380,10 @@ class level_e_iolink : public level
 
         u_int start_param_idx;
 
-        int st;
-        float v;
+        int st = 0;
+        float v = .0f;
 
-        i_AI_device* PT_extra;
+        i_AI_device* PT_extra = nullptr;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
@@ -411,7 +411,7 @@ class concentration_e : public AI1
 class concentration_e_ok : public concentration_e
     {
     public:
-        concentration_e_ok( const char* dev_name );
+        explicit concentration_e_ok( const char* dev_name );
 
         int get_state() override;
 
@@ -428,7 +428,7 @@ class concentration_e_ok : public concentration_e
 class concentration_e_iolink : public analog_io_device
     {
     public:
-        concentration_e_iolink(const char* dev_name);
+        explicit concentration_e_iolink(const char* dev_name);
 
         ~concentration_e_iolink();
 
@@ -474,7 +474,7 @@ class concentration_e_iolink : public analog_io_device
 class analog_input : public AI1
     {
     public:
-        analog_input( const char* dev_name );
+        explicit analog_input( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -494,7 +494,7 @@ class analog_input : public AI1
 class virtual_wages : public device, public i_wages
     {
     public:
-        virtual_wages( const char* dev_name );
+        explicit virtual_wages( const char* dev_name );
 
         virtual void direct_off();
 
@@ -518,7 +518,7 @@ class virtual_wages : public device, public i_wages
 class wages_RS232 : public analog_io_device, public i_wages
     {
     public:
-        wages_RS232( const char* dev_name );
+        explicit wages_RS232( const char* dev_name );
 
         float get_value() override;
 
@@ -670,7 +670,7 @@ class wages_pxc_axl : public analog_io_device, public i_wages
 class wages : public analog_io_device, public i_wages
     {
     public:
-        wages( const char *dev_name);
+        explicit wages( const char *dev_name);
 
         void tare();
         float get_weight();
@@ -744,7 +744,7 @@ class virtual_device : public device
 class analog_output : public AO1
     {
     public:
-        analog_output( const char* dev_name );
+        explicit analog_output( const char* dev_name );
 
         float get_min_value() const override;
 
@@ -793,7 +793,7 @@ class DI1 : public digital_io_device
 class virtual_motor : public i_motor
     {
     public:
-        virtual_motor( const char* dev_name );
+        explicit virtual_motor( const char* dev_name );
 
         virtual void direct_off();
 
@@ -935,7 +935,7 @@ private:
 class motor_altivar_linear : public motor_altivar
     {
     public:
-        motor_altivar_linear( const char* dev_name );
+        explicit motor_altivar_linear( const char* dev_name );
 
         /// @brief Получение линейной скорости.
         float get_linear_speed() const;
@@ -1025,7 +1025,7 @@ class level_s_iolink : public analog_io_device
 class flow_s : public DI1
     {
     public:
-        flow_s( const char* dev_name );
+        explicit flow_s( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик положения.
@@ -1057,7 +1057,7 @@ class state_s_inverse : public DI1
 class diff_pressure : public DI1
     {
     public:
-        diff_pressure( const char* dev_name ) : DI1( dev_name, DT_PDS,
+        explicit diff_pressure( const char* dev_name ) : DI1( dev_name, DT_PDS,
             DST_PDS_VIRT, 0 )
             {
             }
@@ -1067,7 +1067,7 @@ class diff_pressure : public DI1
 class temperature_signal : public DI1
     {
     public:
-        temperature_signal( const char* dev_name ) : DI1( dev_name, DT_TS,
+        explicit temperature_signal( const char* dev_name ) : DI1( dev_name, DT_TS,
             DST_TS_VIRT, 0 )
             {
             }
@@ -1077,35 +1077,35 @@ class temperature_signal : public DI1
 class DI_signal : public DI1
     {
     public:
-        DI_signal( const char* dev_name );
+        explicit DI_signal( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Кнопка.
 class button : public DI1
     {
     public:
-        button( const char* dev_name );
+        explicit button( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Дискретный сигнал управления.
 class DO_signal : public DO1
     {
     public:
-        DO_signal( const char* dev_name );
+        explicit DO_signal( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Аварийная звуковая сигнализация.
 class siren : public DO1
     {
     public:
-        siren( const char* dev_name );
+        explicit siren( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Аварийная световая сигнализация.
 class lamp : public DO1
     {
     public:
-        lamp( const char* dev_name );
+        explicit lamp( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Базовый счетчик.
@@ -1158,7 +1158,7 @@ class base_counter: public i_counter, public device, public io_device
         virtual float get_max_raw_value() const = 0;
 
         void calculate_quantity( float& value, float& last_read_value,
-            bool& is_first_read );
+            bool& is_first_read ) const;
 
         /// @brief Получение значения счетчика (c учетом паузы).
         u_int get_quantity();
@@ -1230,7 +1230,7 @@ class counter : public base_counter
 class counter_f : public counter
     {
     public:
-        counter_f( const char *dev_name );
+        explicit counter_f( const char *dev_name );
 
         int get_state();
 
@@ -1263,7 +1263,7 @@ class counter_f : public counter
 class counter_iolink : public base_counter
     {
     public:
-        counter_iolink( const char* dev_name );
+        explicit counter_iolink( const char* dev_name );
 
         void evaluate_io();
 
@@ -1339,7 +1339,7 @@ class counter_iolink : public base_counter
 class signal_column_iolink : public signal_column
     {
     public:
-        signal_column_iolink( const char* dev_name );
+        explicit signal_column_iolink( const char* dev_name );
 
         void set_string_property( const char* field, const char* value );
 
@@ -1434,7 +1434,7 @@ class camera_DI2 : public camera
 class camera_DI3 : public camera_DI2
     {
     public:
-        camera_DI3( const char* dev_name );
+        explicit camera_DI3( const char* dev_name );
 
         void evaluate_io();
 

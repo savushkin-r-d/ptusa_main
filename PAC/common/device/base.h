@@ -28,7 +28,7 @@ class par_device
 
     public:
         /// @param par_cnt - количество параметров.
-        par_device( u_int par_cnt );
+        explicit par_device( u_int par_cnt );
 
         virtual ~par_device();
         
@@ -65,6 +65,7 @@ class par_device
         /// @param value - новое значение.
         virtual void set_rt_par( u_int idx, float value )
             {
+            // Ничего не делаем.
             }
 
         /// @brief Получение значения параметра.
@@ -89,9 +90,9 @@ class par_device
             }
 
         /// @brief Установка параметров для хранения настроек ошибок устройства.
-        void set_err_par( saved_params_u_int_4* err_par )
+        void set_err_par( saved_params_u_int_4* new_err_par )
             {
-            this->err_par = err_par;
+            err_par = new_err_par;
             }
 
         float get_par( int idx ) const
@@ -1074,7 +1075,7 @@ class signal_column : public device, public io_device
             operation_is_running
             };
 
-        show_states show_state;
+        show_states show_state = show_states::idle;
 
 #ifdef _MSC_VER
 #pragma endregion
@@ -1096,7 +1097,7 @@ class signal_column : public device, public io_device
         virtual void process_DO( u_int n, DO_state state, const char* name ) = 0;
 
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
-        int is_const_red;
+        int is_const_red = 0;
 
         int red_lamp_channel;
         int yellow_lamp_channel;
@@ -1132,5 +1133,5 @@ class signal_column : public device, public io_device
 
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
-        STEP siren_step;
+        STEP siren_step = STEP::off;
     };

@@ -10,7 +10,7 @@
 class PAC_info: public i_Lua_save_device
     {
     public:
-        virtual ~PAC_info();
+        ~PAC_info() override;
 
         void eval();
 

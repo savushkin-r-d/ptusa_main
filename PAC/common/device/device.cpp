@@ -315,7 +315,7 @@ void i_counter::restart()
 //-----------------------------------------------------------------------------
 bool i_DI_device::is_active()
     {
-    return get_state() == 0 ? 0 : 1;
+    return get_state() == 0 ? false : true;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -373,22 +373,27 @@ float dev_stub::get_value()
 //-----------------------------------------------------------------------------
 void dev_stub::direct_set_value( float new_value )
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::off()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::on()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_value( float new_value )
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_state( int new_state )
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE dev_stub::get_valve_state()
@@ -403,14 +408,17 @@ int dev_stub::get_state()
 //-----------------------------------------------------------------------------
 void dev_stub::direct_on()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_off()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_set_state( int new_state )
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 u_int_4 dev_stub::get_serial_n() const
@@ -425,14 +433,17 @@ void dev_stub::print() const
 //-----------------------------------------------------------------------------
 void dev_stub::pause()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::start()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::reset()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 u_int dev_stub::get_quantity()
@@ -466,10 +477,12 @@ u_int dev_stub::get_abs_quantity()
 //-----------------------------------------------------------------------------
 void dev_stub::tare()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1052,6 +1065,7 @@ void base_counter::direct_on()
 //-----------------------------------------------------------------------------
 void base_counter::direct_off()
     {
+    // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
@@ -1088,25 +1102,25 @@ void base_counter::set_abs_value( float new_value )
     abs_value = new_value;
     };
 //-----------------------------------------------------------------------------
-void base_counter::calculate_quantity( float& value, float& last_read_value,
-    bool& is_first_read )
+void base_counter::calculate_quantity( float& val, float& last_read_val,
+    bool& is_first ) const
     {
     float current = get_raw_value();
 
-    if ( is_first_read )
+    if ( is_first )
         {
         if ( current != 0 )
             {
-            last_read_value = current;
-            is_first_read = false;
+            last_read_val = current;
+            is_first = false;
             }
         }
     else
         {
         float delta;
-        if ( current < last_read_value )
+        if ( current < last_read_val )
             {
-            delta = get_max_raw_value() - last_read_value + current;
+            delta = get_max_raw_value() - last_read_val + current;
             if ( delta > MAX_OVERFLOW && current < delta )
                 {
                 delta = current;
@@ -1114,13 +1128,13 @@ void base_counter::calculate_quantity( float& value, float& last_read_value,
             }
         else
             {
-            delta = current - last_read_value;
+            delta = current - last_read_val;
             }
 
-        last_read_value = current;
+        last_read_val = current;
         if ( delta > 0 )
             {
-            value += delta;
+            val += delta;
             }
         }
     }
@@ -1386,10 +1400,10 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    char* data = (char*)get_AI_data( 0 );
+    auto data = (char*)get_AI_data( 0 );
     if ( data )
         {
-        char* buff = (char*)&in_info;
+        auto buff = (char*)&in_info;
 
         const int SIZE = 8;
         std::copy( data, data + SIZE, buff );
@@ -1533,7 +1547,7 @@ int DI1::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
-    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+    auto dt = ( u_int_4 ) get_par( P_DT, 0 );
 
     if ( dt > 0 )
         {
@@ -1664,7 +1678,7 @@ float temperature_e_iolink::get_value()
         }
     else
         {
-        char* data = (char*)get_AI_data(C_AI_INDEX);
+        auto data = (char*)get_AI_data(C_AI_INDEX);
 
         int16_t tmp = data[1] + 256 * data[0];
         memcpy(info, &tmp, 2);
@@ -2673,8 +2687,7 @@ lamp::lamp( const char* dev_name ) : DO1( dev_name, DT_HL, DST_NONE )
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
     level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 ),
-    n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 ),
-    PT_extra( 0 )
+    n_article( pressure_e_iolink::ARTICLE::DEFAULT )
     {
     start_param_idx = level::get_params_count();
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
@@ -2821,7 +2834,7 @@ void pressure_e_iolink::set_article( const char* new_article )
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
-    ARTICLE& n_article, device* dev )
+    ARTICLE& n_article, const device* dev )
     {
     if ( strcmp( article, "IFM.PI2715" ) == 0 )
         {
