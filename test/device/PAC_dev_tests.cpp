@@ -2064,6 +2064,41 @@ TEST( valve_AS_DO1_DI2, direct_set_state )
     }
 
 
+TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, BLINK=0, "
+        "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
+    }
+
+
+TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( 
+        "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
+        buff );
+    }
+
+
+TEST( analog_valve_iolink, analog_valve_iolink )
+    {
+    analog_valve_iolink V1( "V1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0},\n",
+        buff );
+    }
+
+
 TEST( level_s, is_active )
     {
     level_s LS1( "LS1", device::DST_LS_MAX );    

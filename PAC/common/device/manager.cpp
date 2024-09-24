@@ -1423,16 +1423,12 @@ int device_manager::init_params()
 //-----------------------------------------------------------------------------
 int device_manager::save_device( char* buff )
     {
-    int res = sprintf( buff, "t=\n" );
-
-    res += sprintf( buff + res, "\t{\n" );
-
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "t=\n\t{{\n" ) ).size;
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         res += project_devices[ i ]->save_device( buff + res, "\t" );
         }
-
-    res += sprintf( buff + res, "\t}\n" );
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "\t}}\n" ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------

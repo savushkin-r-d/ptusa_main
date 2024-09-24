@@ -1,9 +1,10 @@
+#include <fmt/core.h>
+#include <algorithm>
+
 #include "valve.h"
 
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
-
-#include <algorithm>
 
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
@@ -111,12 +112,13 @@ int valve::save_device_ex( char* buff )
     int res = 0;
     if ( is_on_fb )
         {
-        res += sprintf( buff, "FB_ON_ST=%d, ", get_on_fb_value() );
+        res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "FB_ON_ST={}, ",
+            get_on_fb_value() ) ).size;
         }
-
     if ( is_off_fb )
         {
-        res += sprintf( buff + res, "FB_OFF_ST=%d, ", get_off_fb_value() );
+        res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "FB_OFF_ST={}, ",
+            get_off_fb_value() ) ).size;
         }
     return res;
     }
@@ -1333,8 +1335,9 @@ int valve_iolink_mix_proof::save_device_ex( char* buff )
 
     bool cs = out_info->sv1 || out_info->sv2 || out_info->sv3;
     int err = in_info->err;
-    res += sprintf( buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
-    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+    res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+        "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
+        blink, cs, err, get_value() ) ).size;
 
     return res;
     }
@@ -1609,10 +1612,9 @@ int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
     int err = in_info.status;
-
-    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
-    res += sprintf( buff + res, "V=%.1f, ", get_value() );
-
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
+        blink, cs, err, get_value() ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -1815,10 +1817,9 @@ int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
     int err = in_info->err;
-
-    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
-    res += sprintf( buff + res, "V=%.1f, ", get_value() );
-
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
+        blink, cs, err, get_value() ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -2254,6 +2255,8 @@ void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
     {
+    in_info->closed = true;
+    in_info->opened = false;
     }
 //-----------------------------------------------------------------------------
 analog_valve_iolink::~analog_valve_iolink()
@@ -2317,11 +2320,9 @@ float analog_valve_iolink::get_max_value() const
 //-----------------------------------------------------------------------------
 int analog_valve_iolink::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "NAMUR_ST=%u, ", in_info->namur_state );
-    res += sprintf( buff + res, "OPENED=%u, ", in_info->opened );
-    res += sprintf( buff + res, "CLOSED=%u, ", in_info->closed );
-
-    res += sprintf( buff + res, "BLINK=%d, ", blink );
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "NAMUR_ST={}, OPENED={:d}, CLOSED={:d}, BLINK={:d}, ",
+        +in_info->namur_state, +in_info->opened, +in_info->closed, blink ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------

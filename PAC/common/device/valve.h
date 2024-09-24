@@ -1034,7 +1034,7 @@ class analog_valve_iolink : public AO1
             {
             float position;         //Valve position in percent
             float setpoint;         //Used setpoint in percent
-            uint8_t namur_state;
+            uint8_t namur_state = 0;
             uint8_t status : 6;
             bool opened : 1;        //True = Opened, False = Not opened
             bool closed : 1;        //True = Closed, False = Not closed
