@@ -670,13 +670,13 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
     char str_buff[BUFF_SIZE] = { 0 };
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=1, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 
     V1.direct_set_value(12.1f);
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 }
 

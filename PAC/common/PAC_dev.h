@@ -2529,40 +2529,36 @@ class valve_iolink_gea_tvis_a15_ds : public i_mix_proof, public valve
 public:
     static const std::string GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE;
 
-    valve_iolink_gea_tvis_a15_ds(const char* dev_name);
+    explicit valve_iolink_gea_tvis_a15_ds(const char* dev_name);
 
-    ~valve_iolink_gea_tvis_a15_ds();
+    void open_upper_seat() final;
 
-    void open_upper_seat();
+    void open_lower_seat() final;
 
-    void open_lower_seat();
+    VALVE_STATE get_valve_state() final;
 
-    VALVE_STATE get_valve_state();
+    int save_device_ex(char* buff) final;
 
-    int save_device_ex(char* buff);
-
-    void evaluate_io();
-
-    void set_rt_par(u_int idx, float value);
+    void evaluate_io() final;
 
 #ifndef DEBUG_NO_IO_MODULES
-    int get_state();
+    int get_state() final;
 
-    float get_value();
+    float get_value() final;
 
-    bool get_fb_state();
+    bool get_fb_state() final;
 
-    int get_off_fb_value();
+    int get_off_fb_value() final;
 
-    int get_on_fb_value();
+    int get_on_fb_value() final;
 
-    void direct_on();
+    void direct_on() final;
 
-    void direct_off();
+    void direct_off() final;
 
-    int set_cmd(const char* prop, u_int idx, double val);
+    int set_cmd(const char* prop, u_int idx, double val) final;
 
-    void direct_set_state(int new_state);
+    void direct_set_state(int new_state) final;
 
 #endif // DEBUG_NO_IO_MODULES
 
@@ -2595,12 +2591,9 @@ private:
         bool HAS : 1; // DO7 - [0 ; 1] - активация процедуры Setup
     };
 
-    in_data* in_info = new in_data;
+    in_data in_info{ 0 };
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
-
-    //Дополнительное смещение, так как область AO занимает 1 байт.
-    int extra_offset = 0;
 
     enum class CONSTANTS
     {
@@ -2614,13 +2607,13 @@ class valve_iolink_gea_tvis_a15_ss : public valve
 public:
     static const std::string GEA_TVIS_A15_SINGLE_SEAT_ARTICLE;
 
-    valve_iolink_gea_tvis_a15_ss(const char* dev_name);
+    explicit valve_iolink_gea_tvis_a15_ss(const char* dev_name);
 
-    VALVE_STATE get_valve_state();
+    VALVE_STATE get_valve_state() final;
 
-    int save_device_ex(char* buff);
+    int save_device_ex(char* buff) final;
 
-    void evaluate_io();
+    void evaluate_io() final;
 
     float get_value() final;
 
@@ -2629,27 +2622,25 @@ public:
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
-    bool get_fb_state();
+    bool get_fb_state() final;
 
-    int get_off_fb_value();
+    int get_off_fb_value() final;
 
-    int get_on_fb_value();
+    int get_on_fb_value() final;
 
-    void direct_on();
+    void direct_on() final;
 
-    void direct_off();
+    void direct_off() final;
 
-    int set_cmd(const char* prop, u_int idx, double val);
+    int set_cmd(const char* prop, u_int idx, double val) final;
 
-    void direct_set_state(int new_state);
+    void direct_set_state(int new_state) final;
 
 #endif // DEBUG_NO_IO_MODULES
 
 private:
     struct in_data
     {
-        int16_t  pos;
-
         bool pv_y1_on    : 1; // DI0+ - [0 ; 1] - пилотный клапан соленоида y1 активирован
         bool pv_y2_on    : 1; // DI1+ - [0 ; 1] - пилотный клапан соленоида y2 активирован
         bool pv_y3_on    : 1; // DI2+ - [0 ; 1] - пилотный клапан соленоида y3 активирован
@@ -2660,6 +2651,8 @@ private:
         bool s1          : 1; // DI0 - [0 ; 1] : односедельный клапан - основной ход: состояние клапана: 1 - в покое, 0 - клапан вышел за пределы допуска
         bool s2          : 1; // DI1 - [0 ; 1] - основной ход: 1 - клапан в конечном положении, 0 - клапан вышел за пределы допуска
         uint16_t unused2 : 6; // DI-2 для соленоидов Y2 и Y3, DI-3 только для двухседельного клапана, а DI4, DI5, DI6, DI7 - незанятые биты
+    
+        int16_t  pos;
     };
 
     struct out_data_swapped   //Swapped low and high byte for easer processing
