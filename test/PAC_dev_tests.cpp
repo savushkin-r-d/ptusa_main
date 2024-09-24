@@ -708,8 +708,8 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
 
     const int POS = 341;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = POS;
-    std::swap(buff[0], buff[1]);  //Reverse byte order to get correct int.
-    std::swap(buff[2], buff[3]);
+    //std::swap(buff[0], buff[3]);  //Reverse byte order to get correct int.
+    //std::swap(buff[2], buff[1]);
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
     char str_buff[BUFF_SIZE] = { 0 };
