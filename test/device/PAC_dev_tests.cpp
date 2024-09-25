@@ -741,7 +741,6 @@ TEST( device_manager, add_io_device )
     auto GS3 = GS( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS3 ) );
 
-
     //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
     name = std::string( "V1" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -752,6 +751,8 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
+    auto Vy = V( 1 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vy ) );
 
     //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
     name = std::string( "V2" );
@@ -864,6 +865,52 @@ TEST( device_manager, add_io_device )
     Vx = V( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
     EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false);
+
+    //device::DT_M, device::DST_M
+    name = std::string( "M1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_M, device::DST_M, name.c_str(), "Test motor", "M1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto Mx = M( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Mx ) );
+    auto My = M( 1 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( My ) );
+
+    //device::DT_FS, device::DST_FS
+    name = std::string( "FS1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FS, device::DST_FS, name.c_str(), "Test FS", "FS1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto FSx = FS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FSx ) );
+    auto FSy = FS( 1 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FSy ) );
+
+    //device::DT_AI, device::DST_AI
+    name = std::string( "AI1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_AI, device::DST_AI, name.c_str(), "Test AI", "AI1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto AIx = AI( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AIx ) );
+
+    //device::DT_AO, device::DST_AO
+    name = std::string( "AO1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_AO, device::DST_AO, name.c_str(), "Test AO", "AO1" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto AOx = AO( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AOx ) );
+    auto AOy = AO( 1 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AOy ) );
 
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
