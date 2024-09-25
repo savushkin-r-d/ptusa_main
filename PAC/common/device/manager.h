@@ -223,7 +223,7 @@ class device_manager : public i_Lua_save_device
     public:
         device_manager();
 
-        virtual ~device_manager();
+        ~device_manager() override;
 
         /// @brief Отключение сообщений о ненайденных устройствах.
         bool disable_error_logging;
@@ -325,7 +325,7 @@ class device_manager : public i_Lua_save_device
         /// @brief Отладочная печать объекта в консоль.
         void print() const;
 
-        const char* get_name_in_Lua() const;
+        const char* get_name_in_Lua() const override;
 
         /// @brief Получение фиктивного устройства.
         dev_stub* get_stub();
@@ -338,7 +338,7 @@ class device_manager : public i_Lua_save_device
 
         void evaluate_io();
 
-        int save_device( char* buff );
+        int save_device( char* buff ) override;
 
     protected:
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
@@ -347,12 +347,8 @@ class device_manager : public i_Lua_save_device
 
         struct range    ///< Диапазон устройств одного типа.
             {
-            int start_pos;
-            int end_pos;
-
-            range() : start_pos( -1 ), end_pos( -1 )
-                {
-                }
+            int start_pos = -1;
+            int end_pos = -1;
             };
 
         /// Диапазоны устройств всех типов.

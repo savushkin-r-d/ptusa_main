@@ -61,31 +61,17 @@ valve::valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
     device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
     digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_on_fb( is_on_fb ),
-    is_off_fb( is_off_fb ),
-    on_fb( true ),
-    off_fb( true ),
-    was_on_auto( false ),
-    is_switching_off( false ),
-    start_off_time( 0 ),
-    start_switch_time( get_millisec() ),
-    wash_flag( false )
+    is_off_fb( is_off_fb )
     {
+    on_fb = true;
+    off_fb = true;
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB, 0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
 valve::valve( const char* dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type ) :
-    digital_io_device( dev_name, type, sub_type, 0 ),
-    is_on_fb( false ),
-    is_off_fb( false ),
-    on_fb( false ),
-    off_fb( false ),
-    was_on_auto( false ),
-    is_switching_off( false ),
-    start_off_time( 0 ),
-    start_switch_time( get_millisec() ),
-    wash_flag( false )
+    digital_io_device( dev_name, type, sub_type, 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -94,15 +80,10 @@ valve::valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
     int extra_params_cnt ) :
     digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT + extra_params_cnt ),
     is_on_fb( is_on_fb ),
-    is_off_fb( is_off_fb ),
-    on_fb( true ),
-    off_fb( true ),
-    was_on_auto( false ),
-    is_switching_off( false ),
-    start_off_time( 0 ),
-    start_switch_time( get_millisec() ),
-    wash_flag( false )
+    is_off_fb( is_off_fb )
     {
+    on_fb = true;
+    off_fb = true;
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB, 0, "P_FB" );
     }
@@ -367,11 +348,8 @@ void valve::evaluate()
 
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ];
 
-    for ( std::vector< valve* >::iterator iter = to_switch_off.begin();
-        iter != to_switch_off.end(); iter++ )
+    for ( auto v : to_switch_off )
         {
-        valve* v = *iter;
-
         if ( v->is_switching_off &&
             get_delta_millisec( v->start_off_time ) > delay )
             {

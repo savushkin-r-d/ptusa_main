@@ -18,14 +18,14 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
-circuit_breaker::F_data_out circuit_breaker::stub_out_info;
+circuit_breaker::F_data_out circuit_breaker::stub_out_info{};
 
-power_unit::process_data_out power_unit::stub_p_data_out = {};
+power_unit::process_data_out power_unit::stub_p_data_out{};
 unsigned int power_unit::WAIT_DATA_TIME = 300;
 unsigned int power_unit::WAIT_CMD_TIME = 1000;
 
-analog_valve_iolink::out_data analog_valve_iolink::stub_out_info;
-signal_column_iolink::out_data signal_column_iolink::stub_out_info;
+analog_valve_iolink::out_data analog_valve_iolink::stub_out_info{};
+signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -161,8 +161,7 @@ camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int params_count, bool is_ready ) :
     device( dev_name, DT_CAM, sub_type, params_count ),
     io_device( dev_name ),
-    is_cam_ready( is_ready ),
-    result( 0 )
+    is_cam_ready( is_ready )
     {
     }
 
@@ -242,8 +241,7 @@ bool camera::is_ready() const
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1, false ),
-    start_switch_time( get_millisec() )
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1, false )
     {
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
     }
@@ -276,8 +274,7 @@ void camera_DI2::evaluate_io()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI3::camera_DI3( const char* dev_name ) :
-    camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 ),
-    result_2( 0 )
+    camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 )
     {
     }
 
@@ -1009,9 +1006,9 @@ int base_counter::get_state()
     bool is_pump_working = false;
     if ( !motors.empty() )
         {
-        for ( u_int i = 0; i < motors.size(); i++ )
+        for ( auto m : motors )
             {
-            if ( motors[ i ]->get_state() == 1 )
+            if ( m->get_state() == 1 )
                 {
                 is_pump_working = true;
                 }
@@ -1657,7 +1654,7 @@ int temperature_e_analog::get_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT), info(new TE_data)
+    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT)
     {
     start_param_idx = AI1::get_params_count();
     set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
@@ -1726,15 +1723,14 @@ void virtual_wages::tare()
     }
 
 virtual_wages::virtual_wages( const char* dev_name ) :
-    device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 ),
-    value( 0 ), state( 0 )
+    device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 )
     {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wages_RS232::wages_RS232( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_WT, device::DST_WT_RS232,
-    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ), state( 1 )
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     }
@@ -1748,7 +1744,7 @@ float wages_RS232::get_value_from_wages()
     //Если данные корректные, то в 4м байте символ "+" (ASCII - 43), иначе -
     //ошибка (5).
 
-    char* data = (char*)get_AI_data(
+    auto data = (char*)get_AI_data(
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
 
     if ( !data )
@@ -1791,7 +1787,7 @@ void wages_RS232::set_command( int new_state )
     {
     //Установить состояние чтения состояния буфера (1).
     //Установить состояние чтения данных (2).
-    int* out =
+    auto out =
         (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
     if ( !out ) return;
 
@@ -2010,8 +2006,6 @@ wages::wages( const char *dev_name ) : analog_io_device(
     set_par_name( P_RKP, 0, "P_RKP");
     set_par_name( P_C0, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT");
-    weight = 0;
-    filter_time = get_millisec();
     }
 //-----------------------------------------------------------------------------
 void wages::tare()
@@ -2208,17 +2202,14 @@ int virtual_motor::get_state()
     }
 
 virtual_motor::virtual_motor( const char* dev_name ):
-    i_motor( dev_name, device::DST_M_VIRT, 0 ),
-    value( 0 ),
-    state( 0 )
+    i_motor( dev_name, device::DST_M_VIRT, 0 )
     {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 motor::motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
     i_motor( dev_name, sub_type, ADDITIONAL_PARAM_COUNT ),
-    io_device( dev_name ),
-    start_switch_time( get_millisec() )
+    io_device( dev_name )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }
@@ -2503,13 +2494,13 @@ bool level_s::is_active()
     switch ( get_sub_type() )
         {
         case DST_LS_MIN:
-            return get_state() == 0 ? 0 : 1;
+            return get_state() == 0 ? false : true;
 
         case DST_LS_MAX:
-            return get_state() == 0 ? 1 : 0;
+            return get_state() == 0 ? true : false;
 
         default:
-            return get_state() == 0 ? 0 : 1;
+            return get_state() == 0 ? false : true;
         }
     }
 //-----------------------------------------------------------------------------
@@ -2523,9 +2514,7 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
 level_s_iolink::level_s_iolink( const char *dev_name,
     device::DEVICE_SUB_TYPE sub_type ):
     analog_io_device( dev_name, DT_LS, sub_type, LAST_PARAM_IDX - 1 ),
-    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 ), time( 0 ),
-    n_article( ARTICLE::DEFAULT ),
-    v( 0 ), st( 0 )
+    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 )    
     {
     set_par_name( P_DT, 0, "P_DT" );
     set_par_name( P_ERR, 0, "P_ERR" );
@@ -2533,7 +2522,7 @@ level_s_iolink::level_s_iolink( const char *dev_name,
 
 void level_s_iolink::evaluate_io()
     {
-    char* data = (char*)get_AI_data( C_AI_INDEX );
+    auto data = (char*)get_AI_data( C_AI_INDEX );
 
     if ( !data ) return;
 
@@ -2629,7 +2618,7 @@ int level_s_iolink::get_state()
 		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
 		}
 
-    u_int_4 dt = (u_int_4)get_par( P_DT, 0 );
+    auto dt = (u_int_4)get_par( P_DT, 0 );
     if ( dt > 0 )
         {
         if ( current_state != st )
@@ -2688,8 +2677,7 @@ lamp::lamp( const char* dev_name ) : DO1( dev_name, DT_HL, DST_NONE )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 ),
-    n_article( pressure_e_iolink::ARTICLE::DEFAULT )
+    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 )
     {
     start_param_idx = level::get_params_count();
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
@@ -2787,7 +2775,7 @@ void level_e_iolink::set_article( const char* new_article )
 //-----------------------------------------------------------------------------
 void level_e_iolink::evaluate_io()
     {
-    char* data = (char*)get_AI_data( C_AI_INDEX );
+    auto data = (char*)get_AI_data( C_AI_INDEX );
 
     if ( !data ) return;
 
@@ -2823,8 +2811,7 @@ float pressure_e::get_min_val()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
-    analog_io_device( dev_name, DT_PT, DST_PT_IOLINK, LAST_PARAM_IDX - 1 ),
-    n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
+    analog_io_device( dev_name, DT_PT, DST_PT_IOLINK, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_ERR, 0, "P_ERR" );
     }
@@ -3014,8 +3001,7 @@ int pressure_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
-    dev_name, DT_F, DST_F, 0), is_read_OK( false ), v( 0 ), st( 0 ),
-    err( 0 ), m( 0 ), in_info{}, out_info( new F_data_out() )
+    dev_name, DT_F, DST_F, 0)
     {
     }
 //-----------------------------------------------------------------------------
@@ -3167,9 +3153,10 @@ int circuit_breaker::get_state()
 //-----------------------------------------------------------------------------
 void circuit_breaker::evaluate_io()
     {
-    out_info = ( F_data_out* ) get_AO_write_data( 0 );
+    auto res = get_AO_write_data( 0 );
+    if ( !res ) return;
 
-    if ( !out_info ) return;
+    out_info = (F_data_out*)res;
 
     if ( get_AI_IOLINK_state(C_AI_INDEX) == io_device::IOLINKSTATE::OK )
         {
@@ -3192,7 +3179,7 @@ void circuit_breaker::evaluate_io()
         is_read_OK = false;
         }
 
-    char* data = (char*)get_AI_data(C_AI_INDEX);
+    auto data = (char*)get_AI_data(C_AI_INDEX);
     std::copy(data, data + sizeof(in_info), (char*)&in_info);
 
 #ifdef DEBUG_IOLINK_F
@@ -3281,8 +3268,7 @@ int concentration_e_ok::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     analog_io_device( dev_name,
-    DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 ),
-    info( new QT_data )
+    DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_ERR, 0, "P_ERR" );
     };
@@ -3337,7 +3323,7 @@ int concentration_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 void concentration_e_iolink::evaluate_io()
     {
-    char* data = (char*)get_AI_data(0);
+    auto data = (char*)get_AI_data(0);
     if ( !data ) return;
 
     const int SIZE = 12;
@@ -3460,10 +3446,7 @@ int timer::get_saved_size() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-timer::timer(): last_time( 0 ),
-    work_time( 0 ),
-    state( STATE::S_STOP ),
-    countdown_time( 0 )
+timer::timer()
     {
     }
 //-----------------------------------------------------------------------------
@@ -3645,9 +3628,6 @@ virtual_device::virtual_device( const char *dev_name,
     device::DEVICE_TYPE dev_type,
     device::DEVICE_SUB_TYPE dev_sub_type ) : device (dev_name, dev_type, dev_sub_type, 0)
     {
-    value = 0;
-    state = 0;
-    level_logic_invert = false;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3672,9 +3652,7 @@ float analog_output::get_max_value() const
 motor_altivar::motor_altivar( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
     i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
-    io_device( dev_name ),
-    start_switch_time( get_millisec() ),
-    atv( nullptr )
+    io_device( dev_name )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }
@@ -3792,7 +3770,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
         {
         int port = 502;
         int timeout = 300;
-        std::string nodeip = std::string(value);
+        auto nodeip = std::string(value);
         nodeip.append(":");
         nodeip.append(std::to_string(port));
         nodeip.append(" ");

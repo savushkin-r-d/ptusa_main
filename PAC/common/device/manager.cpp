@@ -386,14 +386,13 @@ device_manager::device_manager() : project_devices( 0 ),
 //-----------------------------------------------------------------------------
 device_manager::~device_manager()
     {
-    for ( u_int i = 0; i < project_devices.size(); i++ )
+    for ( auto dev : project_devices )
         {
-        delete project_devices[ i ];
+        delete dev;
+        dev = nullptr;
         }
 
-#ifndef __BORLANDC__
     project_devices.clear();
-#endif
     }
 //-----------------------------------------------------------------------------
 i_AO_device* device_manager::get_VC( const char* dev_name )
@@ -1397,10 +1396,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 //-----------------------------------------------------------------------------
 void device_manager::clear_io_devices()
     {
-    for ( size_t idx = 0; idx < project_devices.size(); idx++ )
+    for ( auto dev : project_devices )
         {
-        delete project_devices[ idx ];
-        project_devices[ idx ] = nullptr;
+        delete dev;
+        dev = nullptr;
         }
 
     for ( size_t idx = 0; idx < device::C_DEVICE_TYPE_CNT; idx++ )
@@ -1424,9 +1423,9 @@ int device_manager::init_params()
 int device_manager::save_device( char* buff )
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "t=\n\t{{\n" ) ).size;
-    for ( u_int i = 0; i < project_devices.size(); i++ )
+    for ( auto dev : project_devices )
         {
-        res += project_devices[ i ]->save_device( buff + res, "\t" );
+        res += dev->save_device( buff + res, "\t" );
         }
     res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "\t}}\n" ) ).size;
     return res;
@@ -1488,9 +1487,9 @@ int device_manager::init_rt_params()
 //-----------------------------------------------------------------------------
 void device_manager::evaluate_io()
     {
-    for ( u_int i = 0; i < project_devices.size(); i++ )
+    for ( auto dev : project_devices )
         {
-        project_devices[ i ]->evaluate_io();
+        dev->evaluate_io();
         }
     }
 //-----------------------------------------------------------------------------

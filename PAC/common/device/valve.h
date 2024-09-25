@@ -146,13 +146,13 @@ class valve : public digital_io_device
 
     private:
         /// @brief Есть обратная связь на включенное состояние.
-        bool is_on_fb;
+        bool is_on_fb = false;
 
         /// @brief Есть обратная связь на выключенное состояние.
-        bool is_off_fb;
+        bool is_off_fb = false;
 
-        bool on_fb;
-        bool off_fb;
+        bool on_fb = false;
+        bool off_fb = false;
 
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.
@@ -168,9 +168,9 @@ class valve : public digital_io_device
         /// @brief Определение завершения отключения клапана с задержкой.
         virtual bool is_switching_off_finished();
 
-        bool is_switching_off; ///Выключается ли клапан с задержкой.
-        u_long start_off_time; ///Время начала выключения клапана с задержкой.
-        bool was_on_auto;      ///Признак включения клапана управляющей программой.
+        bool is_switching_off = false; ///Выключается ли клапан с задержкой.
+        u_long start_off_time = 0; ///Время начала выключения клапана с задержкой.
+        bool was_on_auto = false;      ///Признак включения клапана управляющей программой.
 
     public:
         static void clear_switching_off_queue();
@@ -180,10 +180,10 @@ class valve : public digital_io_device
 #endif
 
     protected:
-        u_long start_switch_time;
+        u_long start_switch_time = get_millisec();
 
     private:
-        bool wash_flag;
+        bool wash_flag = false;
     };
 //-----------------------------------------------------------------------------
 class virtual_valve : public valve
