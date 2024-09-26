@@ -4627,7 +4627,7 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 const std::string valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE = "GEA.TA15L8IAJ";
 
 valve_iolink_gea_tvis_a15_ds::valve_iolink_gea_tvis_a15_ds(const char* dev_name) :
-    valve(true, true, dev_name, DT_V, V_IOLINK_MIXPROOF), out_info(0)
+    valve(true, true, dev_name, DT_V, V_IOLINK_MIXPROOF), out_info(nullptr)
 {
 }
 //-----------------------------------------------------------------------------
@@ -4697,8 +4697,10 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
     int err = in_info.error_on;
     int sup = in_info.SUP;
 
-    res += sprintf(buff + res, "CS=%d, SUP=%d, ERR=%d, ", cs, sup, err);
-    res += sprintf(buff + res, "V=%.1f, ", get_value());
+    std::string valve_state = "CS=%d, SUP=%d, ERR=%d, ";
+    res += snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state.c_str(), cs, sup, err);
+    std::string v_pos = fmt::format("V=%.1f, ", get_value());
+    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos.c_str(), get_value());
 
     return res;
 }
@@ -5129,14 +5131,15 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 {
-    bool cs = in_info.pv_y1_on;
+    bool pilot_valve = in_info.pv_y1_on;
     bool err = in_info.error_on;
     bool sup = in_info.SUP;
-    bool start_valve_state = in_info.s1;
-    bool end_valve_state = in_info.s2;
+    int res = 0;
 
-    int res = sprintf(buff, "StartVSt=%d, EndVSt=%d, CS=%d, SUP=%d, ERR=%d, ", start_valve_state, end_valve_state, cs, sup, err);
-    res += sprintf(buff + res, "V=%.1f, ", get_value());
+    std::string valve_state = "CS=%d, SUP=%d, ERR=%d, ";
+    res = snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state.c_str(), pilot_valve, sup, err);
+    std::string v_pos = fmt::format("V=%.1f, ", get_value());
+    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos.c_str(), get_value());
 
     return res;
 }

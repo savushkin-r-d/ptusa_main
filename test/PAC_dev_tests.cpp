@@ -259,6 +259,17 @@ TEST( device_manager, add_io_device )
     Vx = V(name.c_str());
     EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
 
+    //device::DT_V, device::V_IOLINK_MIXPROOF, GEA T.VIS A-15 Double-seat
+    name = std::string("V95");
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::V_IOLINK_MIXPROOF, name.c_str(), "Test valve",
+        "Test");
+    EXPECT_NE(nullptr, res);
+    dev = G_DEVICE_MANAGER()->get_device(name.c_str());
+    EXPECT_NE(G_DEVICE_MANAGER()->get_stub_device(), dev);
+    Vx = V(name.c_str());
+    EXPECT_NE(STUB(), dynamic_cast<dev_stub*>(Vx));
+
     //device::DT_FQT, device::DST_FQT_IOLINK
     name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
@@ -630,6 +641,13 @@ TEST(valve_iolink_gea_tvis_a15_ds, save_device)
         "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
 }
 
+TEST(valve_iolink_gea_tvis_a15_ds, get_valve_state)
+{
+    valve_iolink_gea_tvis_a15_ds V1("VGEA2");
+    valve::VALVE_STATE VS = V1.get_valve_state();
+    EXPECT_EQ(valve::VALVE_STATE::V_OFF, VS);
+}
+
 TEST(valve_iolink_gea_tvis_a15_ds, evaluate_io)
 {
     valve_iolink_gea_tvis_a15_ds V1("VGEA2");
@@ -662,42 +680,21 @@ TEST(valve_iolink_gea_tvis_a15_ds, evaluate_io)
 
     V1.direct_on();
     V1.save_device(str_buff, "");
-#ifdef DEBUG_NO_IO_MODULES
     EXPECT_STREQ(
         "VGEA2={M=0, ST=1, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
-#endif
-#ifndef DEBUG_NO_IO_MODULES
-    EXPECT_STREQ(
-        "VGEA2={M=0, ST=1, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
-        str_buff);
-#endif
 
     V1.open_lower_seat();
     V1.save_device(str_buff, "");
-#ifdef DEBUG_NO_IO_MODULES
     EXPECT_STREQ(
         "VGEA2={M=0, ST=3, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
-#endif
-#ifndef DEBUG_NO_IO_MODULES
-    EXPECT_STREQ(
-        "VGEA2={M=0, ST=3, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
-        str_buff);
-#endif
 
     V1.open_upper_seat();
     V1.save_device(str_buff, "");
-#ifdef DEBUG_NO_IO_MODULES
     EXPECT_STREQ(
         "VGEA2={M=0, ST=2, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
-#endif
-#ifndef DEBUG_NO_IO_MODULES
-    EXPECT_STREQ(
-        "VGEA2={M=0, ST=2, FB_ON_ST=1, FB_OFF_ST=1, CS=1, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
-        str_buff);
-#endif
 
     V1.direct_off();
     V1.save_device(str_buff, "");
@@ -713,7 +710,14 @@ TEST(valve_iolink_gea_tvis_a15_ss, save_device)
     char buff[BUFF_SIZE] = { 0 };
     V1.save_device(buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+}
+
+TEST(valve_iolink_gea_tvis_a15_ss, get_valve_state)
+{
+    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
+    valve::VALVE_STATE VS = V1.get_valve_state();
+    EXPECT_EQ(valve::VALVE_STATE::V_OFF, VS);
 }
 
 TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
@@ -737,13 +741,13 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
     char str_buff[BUFF_SIZE] = { 0 };
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 
     V1.direct_set_value(12.1f);
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, StartVSt=0, EndVSt=0, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 }
 
