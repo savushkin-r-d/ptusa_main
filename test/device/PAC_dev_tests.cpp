@@ -686,6 +686,37 @@ TEST( temperature_e_analog, get_type_name )
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
     }
 
+template<typename T1 = i_DI_device, typename T2 = T1>
+void check_dev( const char* name, int type, int sub_type,
+    T1* ( *get_dev )( const char* name ),
+    T2* ( *get_dev_by_n )( unsigned int n ) = nullptr,
+    const char* article = "Article_1",
+    bool is_virtual = false ) {
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        type, sub_type, name, "Test device", article );
+    if ( is_virtual ) EXPECT_EQ( nullptr, res );
+    else  EXPECT_NE( nullptr, res );
+
+    auto dev = G_DEVICE_MANAGER()->get_device( name );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+
+    auto dev_by_name = get_dev( name );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( dev_by_name ) );
+    if ( get_dev_by_n )
+        {
+        auto n = 0;
+        if ( isdigit( strlen( name ) - 2 ) )
+            {
+            n = atoi( name + strlen( name ) - 2 ); // V11.
+            }
+        else
+            {
+            n = atoi( name + strlen( name ) - 1 ); // V1.
+            }
+        auto device_by_n = get_dev_by_n( n );
+        EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( device_by_n ) );
+        }
+    }
 
 TEST( device_manager, add_io_device )
     {
@@ -693,10 +724,6 @@ TEST( device_manager, add_io_device )
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
-    //device::DT_TE, device::DST_TE_ANALOG
-    auto res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
-    EXPECT_NE( nullptr, res );
 
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
@@ -704,371 +731,89 @@ TEST( device_manager, add_io_device )
     EXPECT_STREQ( 
         "t=\n"
             "\t{\n"
-            "\tT1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
             "\t}\n",
         buff );
 
+    check_dev<>( "SB1", device::DT_SB, device::DST_SB, SB );
+    check_dev<>( "DI1", device::DT_DI, device::DST_DI, DI, DI );
+    check_dev<i_DO_device>( "DO1", device::DT_DO, device::DST_DO, DO, DO );
+    check_dev<i_AI_device>( "QT1", device::DT_QT, device::DST_QT, QT, QT );
+    check_dev<i_AI_device>( "PT1", device::DT_PT, device::DST_PT, PT, PT );
+    check_dev<i_DO_AO_device>( "F1", device::DT_F, device::DST_F, F, F );
+    check_dev<signal_column>( "HLA1", device::DT_HLA, device::DST_HLA, HLA );
+    check_dev<>( "GS1", device::DT_GS, device::DST_GS, GS );
+    check_dev<>( "GS2", device::DT_GS, device::DST_GS_INVERSE, GS );
+    check_dev<i_DI_device, i_DI_device>( "GS3", device::DT_GS, device::DST_GS_VIRT,
+        GS, nullptr, "Art_1", true );
 
-    //device::DST_GS, device::DST_GS_INVERSE
-    auto name = std::string( "GS1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_GS, device::DST_GS, name.c_str(), "Test GS", "Firma 1" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto GS1 = GS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS1 ) );
+    check_dev<valve, i_DO_device>( "V1", device::DT_V, device::V_IOLINK_DO1_DI2,
+        V, V, valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
+    check_dev<valve, i_DO_device>( "V2", device::DT_V, device::V_IOLINK_DO1_DI2, V, V /*AlfaLaval*/ );
+    check_dev<valve, i_DO_device>( "V3", device::DT_V, device::DST_V_MINI_FLUSHING, V, V );
+    check_dev<valve, i_DO_device>( "V4", device::DT_V, device::V_IOLINK_VTUG_DO1, V, V );
+    check_dev<valve, i_DO_device>( "V5", device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF, V, V );
+    check_dev<valve, i_DO_device>( "V6", device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON, V, V );
+    check_dev<valve, i_DO_device>( "V7", device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, V, V );
+    check_dev<valve, i_DO_device>( "V8", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, V, V  );
+    check_dev<valve, i_DO_device>( "V9", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, V, V );
 
-    //device::DST_GS, device::DST_GS_VIRT
-    name = std::string( "GS2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_GS, device::DST_GS_VIRT, name.c_str(), "Test GS",
-        "Firma 1" );
-    EXPECT_EQ( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto GS2 = GS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS2 ) );
-
-    //device::DST_GS, device::DST_GS_INVERSE
-    name = std::string( "GS3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_GS, device::DST_GS_INVERSE, name.c_str(), "Test GS",
-        "Firma 1");
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto GS3 = GS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( GS3 ) );
-
-    //device::DT_V, device::V_IOLINK_DO1_DI2, Definox
-    name = std::string( "V1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
-        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-    auto Vy = V( 1 );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vy ) );
-
-    //device::DT_V, device::V_IOLINK_DO1_DI2, AlfaLaval
-    name = std::string( "V2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_DO1_DI2, name.c_str(), "Test valve",
-        "AlfaLaval" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::DST_V_MINI_FLUSHING, Test
-    name = std::string( "V3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::DST_V_MINI_FLUSHING, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOLINK_VTUG_DO1
-    name = std::string( "V4" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_VTUG_DO1, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF
-    name = std::string( "V5" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON
-    name = std::string( "V6" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOLINK_VTUG_DO1_DI2
-    name = std::string( "V7" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
-    name = std::string( "V8" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3
-    name = std::string( "V9" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-
-    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval new V70 mixproof
-    name = std::string( "V91" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
+    check_dev<valve, i_DO_device>( "V91", device::DT_V, device::DST_V_AS_MIXPROOF, V, V,
         "AL.9615-4002-12" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
+    auto Vx = V( "V91");    // AlfaLaval new mixproof.
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, true);
-
-    //device::DT_V, device::DST_V_AS_MIXPROOF, AlfaLaval old mixproof
-    name = std::string( "V92" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_V, device::DST_V_AS_MIXPROOF, name.c_str(), "Test valve",
-        "Test" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    Vx = V( name.c_str() );
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, true );
+    check_dev<valve, i_DO_device>( "V92", device::DT_V, device::DST_V_AS_MIXPROOF, V, V );
+    Vx = V( "V92" );        // AlfaLaval old mixproof.
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
-    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false);
+    EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false );
 
-    //device::DT_M, device::DST_M
-    name = std::string( "M1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_M, device::DST_M, name.c_str(), "Test motor", "M1" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto Mx = M( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Mx ) );
-    auto My = M( 1 );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( My ) );
+    check_dev<i_motor>( "M1", device::DT_M, device::DST_M, M, M );
+    check_dev<>( "FS1", device::DT_FS, device::DST_FS, FS );
+    check_dev<i_AI_device>( "AI1", device::DT_AI, device::DST_AI, AI );
+    check_dev<i_AO_device>( "AO1", device::DT_AO, device::DST_AO, AO );
+    check_dev<i_counter>( "FQT1", device::DT_FQT, device::DST_FQT, FQT );
+    check_dev<i_counter>( "FQT2", device::DT_FQT, device::DST_FQT_IOLINK, FQT );
+    check_dev<i_counter>( "FQT3", device::DT_FQT, device::DST_FQT_F, FQT );
+    check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE );
 
-    //device::DT_FS, device::DST_FS
-    name = std::string( "FS1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_FS, device::DST_FS, name.c_str(), "Test FS", "FS1" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto FSx = FS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FSx ) );
-    auto FSy = FS( 1 );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FSy ) );
-
-    //device::DT_AI, device::DST_AI
-    name = std::string( "AI1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_AI, device::DST_AI, name.c_str(), "Test AI", "AI1" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto AIx = AI( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AIx ) );
-
-    //device::DT_AO, device::DST_AO
-    name = std::string( "AO1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_AO, device::DST_AO, name.c_str(), "Test AO", "AO1" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto AOx = AO( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AOx ) );
-    auto AOy = AO( 1 );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( AOy ) );
-
-    //device::DT_FQT, device::DST_FQT_IOLINK
-    name = std::string( "FQT1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_FQT, device::DST_FQT_IOLINK, name.c_str(), "Test counter", "IFM");
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto FQT1 = FQT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT1 ) );
-
-    //device::DT_FQT, device::DST_FQT
-    name = std::string( "FQT2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_FQT, device::DST_FQT, name.c_str(), "Test counter", "IFM" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto FQT2 = FQT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT2 ) );
-
-    //device::DT_FQT, device::DST_FQT_F
-    name = std::string( "FQT3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_FQT, device::DST_FQT_F, name.c_str(), "Test counter", "IFM" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto FQT3 = FQT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT3 ) );
-
-    //device::DT_PDS, device::DST_PDS
-    name = std::string( "PDS1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_PDS, device::DST_PDS, name.c_str(), "Test sensor", "CR" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto PDS1 = PDS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( PDS1 ) );
-
-    //device::DT_PDS, device::DST_PDS_virt
-    name = std::string( "PDS2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_PDS, device::DST_PDS_VIRT, name.c_str(), "Test sensor", "CR" );
-    EXPECT_EQ( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto PDS2 = PDS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( PDS2 ) );
-
-    //device::DT_PDS, --
-    name = std::string( "PDS3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_PDS, device::DST_PDS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
+    check_dev<>( "PDS1", device::DT_PDS, device::DST_PDS, PDS );
+    check_dev<i_DI_device, i_DI_device>( "PDS2", device::DT_PDS,
+        device::DST_PDS_VIRT, PDS, nullptr, "A", true );
+    auto res = G_DEVICE_MANAGER()->add_io_device( device::DT_PDS,
+        device::DST_PDS_VIRT + 1, "PDS3", "Test sensor", "" );
     EXPECT_EQ( nullptr, res );
 
-    //device::DT_TS, device::DST_TS
-    name = std::string( "TS1" );
+    check_dev<>( "TS1", device::DT_TS, device::DST_TS, TS );
+    check_dev<i_DI_device, i_DI_device>( "TS2", device::DT_TS,
+        device::DST_TS_VIRT, TS, nullptr, "A", true );
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TS, device::DST_TS, name.c_str(), "Test sensor", "CR" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto TS1 = TS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( TS1 ) );
-
-    //device::DT_TS, device::DST_TS_virt
-    name = std::string( "TS2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TS, device::DST_TS_VIRT, name.c_str(), "Test sensor", "CR" );
-    EXPECT_EQ( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto TS2 = TS( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( TS2 ) );
-
-    //device::DT_TS, --
-    name = std::string( "TS3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TS, device::DST_TS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
+        device::DT_TS, device::DST_TS_VIRT + 1, "TS3", "Test sensor", "" );
     EXPECT_EQ( nullptr, res );
 
-    //device::DT_WT, DST_WT_RS232
-    name = std::string( "WT1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_WT, device::DST_WT_RS232, name.c_str(), "Test scales", "W" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto WT1 = WT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( WT1 ) );
+    check_dev<i_wages>( "WT1", device::DT_WT, device::DST_WT, WT );
+    check_dev<i_wages>( "WT2", device::DT_WT, device::DST_WT_RS232, WT );
+    check_dev<i_wages>( "WT3", device::DT_WT, device::DST_WT_ETH, WT );
+    check_dev<i_wages>( "WT4", device::DT_WT, device::DST_WT_PXC_AXL, WT );
 
-    //device::DT_REGULATOR, DST_REGULATOR_PID
-    name = std::string( "C1" );
+    check_dev<i_DO_AO_device, i_DO_AO_device>( 
+        "C1", device::DT_REGULATOR, device::DST_REGULATOR_PID, C, nullptr, "", true );
+    check_dev<i_DO_AO_device, i_DO_AO_device>( 
+        "C2", device::DT_REGULATOR, device::DST_REGULATOR_THLD, C, nullptr, "", true );
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_REGULATOR, device::DST_REGULATOR_PID, name.c_str(),
-        "Test PID", "C" );
-    EXPECT_EQ( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto C1 = C( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( C1 ) );
-
-    //device::DT_REGULATOR, DST_REGULATOR_THLD
-    name = std::string( "C2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_REGULATOR, device::DST_REGULATOR_THLD, name.c_str(),
+        device::DT_REGULATOR, device::DST_REGULATOR_THLD + 1, "C3",
         "Test regulator", "C" );
     EXPECT_EQ( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto C2 = C( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( C2 ) );
 
-    //device::DT_REGULATOR, --
-    name = std::string( "C3" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_REGULATOR, device::DST_REGULATOR_THLD + 1, name.c_str(),
-        "Test regulator", "C" );
-    EXPECT_EQ( nullptr, res );
-    auto C3 = C( name.c_str() );
-    EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( C3 ) );
-
-    //device::DT_WT, DST_WT_ETH
-    name = std::string( "W1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_WT, device::DST_WT_ETH, name.c_str(), "Test wages", "W" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto W1 = WT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W1 ) );
-
-    //device::DT_WT, DST_WT_PXC_AXL
-    name = std::string( "W2" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_WT, device::DST_WT_PXC_AXL, name.c_str(), "Test wages", "W" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto W2 = WT( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( W2 ) );
-
-    //device::DT_G, DST_G_IOL_4
-    name = std::string( "G1" );
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_G, device::DST_G_IOL_4, name.c_str(), "Test power unit", "G" );
-    EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
-    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto G1 = get_G( name.c_str() );
-    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( G1 ) );
+    check_dev<i_DO_AO_device>( "G1", device::DT_G, device::DST_G_IOL_4, get_G );
     //Добавляем устройство с несуществующим подтипом.
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_G, device::DST_G_IOL_8 + 1, name.c_str(), "Test power unit", "G" );
+        device::DT_G, device::DST_G_IOL_8 + 1, "G2", "Test power unit", "");
     EXPECT_EQ( nullptr, res );
+
+    check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
+    check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
     }
+
 
 TEST( device_manager, clear_io_devices )
     {
