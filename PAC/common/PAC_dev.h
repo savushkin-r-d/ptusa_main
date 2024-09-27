@@ -2469,10 +2469,10 @@ class valve_iolink_shut_off_sorio : public valve
 
         void evaluate_io();
 
-        float get_value();
+        float get_value() override;
 
 #ifdef DEBUG_NO_IO_MODULES
-        void direct_set_value( float new_value );
+        void direct_set_value( float new_value ) override;
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2531,13 +2531,10 @@ public:
 
     explicit valve_iolink_gea_tvis_a15_ds(const char* dev_name);
 
-    VALVE_STATE get_valve_state() final;
-
-    int save_device_ex(char* buff) final;
-
     void evaluate_io() final;
-
+    int save_device_ex(char* buff) final;
     float get_value() final;
+    VALVE_STATE get_valve_state() final;
 
 #ifdef DEBUG_NO_IO_MODULES
     void direct_set_value(float new_value) final;
@@ -2545,17 +2542,12 @@ public:
 
 #ifndef DEBUG_NO_IO_MODULES
 
-    bool get_fb_state() final;
-
-    int get_off_fb_value() final;
-
-    int get_on_fb_value() final;
-
-    void direct_on() final;
-
     void direct_off() final;
-
+    int get_on_fb_value() final;
+    bool get_fb_state() final;
     int set_cmd(const char* prop, u_int idx, double val) final;
+    void direct_on() final;
+    int get_off_fb_value() final;
 
 #endif // DEBUG_NO_IO_MODULES
 
@@ -2604,34 +2596,26 @@ class valve_iolink_gea_tvis_a15_ss : public valve_iolink_shut_off_sorio
 public:
     static const std::string GEA_TVIS_A15_SINGLE_SEAT_ARTICLE;
 
-    explicit valve_iolink_gea_tvis_a15_ss(const char* dev_name);
-
     VALVE_STATE get_valve_state() final;
-
+    explicit valve_iolink_gea_tvis_a15_ss(const char* dev_name);
+    float get_value() final;
+    void evaluate_io() final;
     int save_device_ex(char* buff) final;
 
-    void evaluate_io() final;
-
-    float get_value();
-
-#ifdef DEBUG_NO_IO_MODULES
-    void direct_set_value(float new_value);
-#endif
-
 #ifndef DEBUG_NO_IO_MODULES
-    bool get_fb_state() final;
-
-    int get_off_fb_value() final;
-
-    int get_on_fb_value() final;
 
     void direct_on() final;
-
     void direct_off() final;
-
+    bool get_fb_state() final;
     int set_cmd(const char* prop, u_int idx, double val) final;
+    int get_off_fb_value() final;
+    int get_on_fb_value() final;
 
 #endif // DEBUG_NO_IO_MODULES
+
+#ifdef DEBUG_NO_IO_MODULES
+    void direct_set_value(float new_value) final;
+#endif
 
 private:
     struct in_data

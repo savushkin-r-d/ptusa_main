@@ -4687,10 +4687,13 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
     int err = in_info.error_on;
     int sup = in_info.SUP;
 
-    std::string valve_state = "CS=%d, SUP=%d, ERR=%d, ";
-    res += snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state.c_str(), cs, sup, err);
-    std::string v_pos = fmt::format("V=%.1f, ", get_value());
-    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos.c_str(), get_value());
+    const int VALVE_STATE_SIZE = 24;
+    char valve_state[VALVE_STATE_SIZE] = "CS=%d, SUP=%d, ERR=%d, ";
+    res += snprintf(buff + res, sizeof(buff + res) + VALVE_STATE_SIZE, valve_state, cs, sup, err);
+
+    const int V_POS_SIZE = 9;
+    char v_pos[V_POS_SIZE] = "V=%.1f, ";
+    res += snprintf(buff + res, sizeof(buff + res) + V_POS_SIZE, v_pos, get_value());
 
     return res;
 }
@@ -5043,10 +5046,13 @@ int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
     bool sup = in_info.SUP;
     int res = 0;
 
-    std::string valve_state = "CS=%d, SUP=%d, ERR=%d, ";
-    res = snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state.c_str(), pilot_valve, sup, err);
-    std::string v_pos = fmt::format("V=%.1f, ", get_value());
-    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos.c_str(), get_value());
+    const int VALVE_STATE_SIZE = 24;
+    char valve_state[VALVE_STATE_SIZE] = "CS=%d, SUP=%d, ERR=%d, ";
+    res = snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state, pilot_valve, sup, err);
+
+    const int V_POS_SIZE = 9;
+    char v_pos[V_POS_SIZE] = "V=%.1f, ";
+    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos, get_value());
 
     return res;
 }
