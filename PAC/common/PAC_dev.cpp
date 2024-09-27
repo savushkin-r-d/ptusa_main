@@ -4648,19 +4648,15 @@ valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ds::evaluate_io()
 {
-    out_info = (out_data_swapped*)get_AO_write_data(
-        static_cast<u_int>(CONSTANTS::C_AI_INDEX));
+    out_info = (out_data_swapped*)get_AO_write_data(static_cast<u_int>(CONSTANTS::C_AI_INDEX));
 
-    auto data = (char*)get_AI_data(
-        static_cast<u_int>(CONSTANTS::C_AI_INDEX));
-    auto buff = (char*)&in_info;
+    auto in_data = (char*)get_AI_data(static_cast<u_int>(CONSTANTS::C_AI_INDEX));
+    auto buffer = (char*)&in_info;
 
-    const int SIZE = 4;
-    std::copy(data, data + SIZE, buff);
-    //Reverse byte order to get correct int16.
-    std::swap(buff[0], buff[1]);
-    //Reverse byte order to get correct int16.
-    std::swap(buff[2], buff[3]);
+    const int SIZE_PDIn = 4;
+    std::copy(in_data, in_data + SIZE_PDIn, buffer);
+    std::swap(buffer[0], buffer[1]);
+    std::swap(buffer[2], buffer[3]);
 
 #ifdef DEBUG_IOLINK_MIXPROOF
     char* tmp = (char*)in_info;
@@ -4671,10 +4667,8 @@ void valve_iolink_gea_tvis_a15_ds::evaluate_io()
 
     sprintf(G_LOG->msg,
         "pv_y1_on %u, pv_y2_on %u, pv_y3_on %u, s1 %u, s2 %u, s3 %u, s4 %u, SUP %u, error_on %u, pos %.1f\n",
-        in_info.pv_y1_on, in_info.pv_y2_on, in_info.pv_y3_on,
-        in_info.s1, in_info.s2, in_info.s3, in_info.s4,
-        in_info.SUP, in_info.error_on,
-        0.1 * in_info->pos);
+        in_info.pv_y1_on, in_info.pv_y2_on, in_info.pv_y3_on, in_info.s1, in_info.s2, in_info.s3, in_info.s4,
+        in_info.SUP, in_info.error_on, 0.1 * in_info->pos);
     G_LOG->write_log(i_log::P_NOTICE);
 #endif
 }
@@ -4687,13 +4681,9 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
     int err = in_info.error_on;
     int sup = in_info.SUP;
 
-    const int VALVE_STATE_SIZE = 24;
-    char valve_state[VALVE_STATE_SIZE] = "CS=%d, SUP=%d, ERR=%d, ";
-    res += snprintf(buff + res, sizeof(buff + res) + VALVE_STATE_SIZE, valve_state, cs, sup, err);
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)cs, (int)sup, (int)err).size;
 
-    const int V_POS_SIZE = 9;
-    char v_pos[V_POS_SIZE] = "V=%.1f, ";
-    res += snprintf(buff + res, sizeof(buff + res) + V_POS_SIZE, v_pos, get_value());
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", (float)get_value()).size;
 
     return res;
 }
@@ -4995,15 +4985,13 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 {
     out_info = (out_data_swapped*)get_AO_write_data(0);
 
-    auto data = (char*)get_AI_data(0);
-    auto buff = (char*)&in_info;
+    auto input_data = (char*)get_AI_data(0);
+    auto buffer = (char*)&in_info;
 
-    const int SIZE = 4;
-    std::copy(data, data + SIZE, buff);
-    //Reverse byte order to get correct int16.
-    std::swap(buff[0], buff[1]);
-    //Reverse byte order to get correct int16.
-    std::swap(buff[2], buff[3]);
+    const int IN_SIZE = 4;
+    std::copy(input_data, input_data + IN_SIZE, buffer);
+    std::swap(buffer[0], buffer[1]);
+    std::swap(buffer[2], buffer[3]);
 
 #ifdef DEBUG_IOLINK_
     char* tmp = (char*)in_info;
@@ -5046,13 +5034,9 @@ int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
     bool sup = in_info.SUP;
     int res = 0;
 
-    const int VALVE_STATE_SIZE = 24;
-    char valve_state[VALVE_STATE_SIZE] = "CS=%d, SUP=%d, ERR=%d, ";
-    res = snprintf(buff + res, sizeof(buff + res) + sizeof(valve_state), valve_state, pilot_valve, sup, err);
+    res += fmt::format_to_n(buff, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)pilot_valve, (int)sup, (int)err).size;
 
-    const int V_POS_SIZE = 9;
-    char v_pos[V_POS_SIZE] = "V=%.1f, ";
-    res += snprintf(buff + res, sizeof(buff + res) + sizeof(v_pos), v_pos, get_value());
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", (float)get_value()).size;
 
     return res;
 }
