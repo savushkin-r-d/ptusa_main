@@ -4683,7 +4683,7 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
 
     res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)cs, (int)sup, (int)err).size;
 
-    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", (float)get_value()).size;
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", get_value()).size;
 
     return res;
 }
@@ -5036,7 +5036,7 @@ int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 
     res += fmt::format_to_n(buff, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)pilot_valve, (int)sup, (int)err).size;
 
-    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", (float)get_value()).size;
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", get_value()).size;
 
     return res;
 }
