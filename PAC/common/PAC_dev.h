@@ -2469,10 +2469,10 @@ class valve_iolink_shut_off_sorio : public valve
 
         void evaluate_io();
 
-        float get_value() final;
+        float get_value();
 
 #ifdef DEBUG_NO_IO_MODULES
-        void direct_set_value( float new_value ) final;
+        void direct_set_value( float new_value );
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2524,16 +2524,12 @@ class valve_iolink_shut_off_sorio : public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан GEA T.VIS A-15 двухседельный.
-class valve_iolink_gea_tvis_a15_ds : public i_mix_proof, public valve
+class valve_iolink_gea_tvis_a15_ds : public valve_iolink_mix_proof
 {
 public:
     static const std::string GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE;
 
     explicit valve_iolink_gea_tvis_a15_ds(const char* dev_name);
-
-    void open_upper_seat() final;
-
-    void open_lower_seat() final;
 
     VALVE_STATE get_valve_state() final;
 
@@ -2548,7 +2544,6 @@ public:
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
-    int get_state() final;
 
     bool get_fb_state() final;
 
@@ -2561,8 +2556,6 @@ public:
     void direct_off() final;
 
     int set_cmd(const char* prop, u_int idx, double val) final;
-
-    void direct_set_state(int new_state) final;
 
 #endif // DEBUG_NO_IO_MODULES
 
@@ -2606,7 +2599,7 @@ private:
 };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link GEA T.VIS A-15 односедельный отсечной.
-class valve_iolink_gea_tvis_a15_ss : public valve
+class valve_iolink_gea_tvis_a15_ss : public valve_iolink_shut_off_sorio
 {
 public:
     static const std::string GEA_TVIS_A15_SINGLE_SEAT_ARTICLE;
@@ -2619,10 +2612,10 @@ public:
 
     void evaluate_io() final;
 
-    float get_value() final;
+    float get_value();
 
 #ifdef DEBUG_NO_IO_MODULES
-    void direct_set_value(float new_value) final;
+    void direct_set_value(float new_value);
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2637,8 +2630,6 @@ public:
     void direct_off() final;
 
     int set_cmd(const char* prop, u_int idx, double val) final;
-
-    void direct_set_state(int new_state) final;
 
 #endif // DEBUG_NO_IO_MODULES
 

@@ -4627,18 +4627,8 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 const std::string valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE = "GEA.TA15L8IAJ";
 
 valve_iolink_gea_tvis_a15_ds::valve_iolink_gea_tvis_a15_ds(const char* dev_name) :
-    valve(true, true, dev_name, DT_V, V_IOLINK_MIXPROOF), out_info(nullptr)
+    valve_iolink_mix_proof(dev_name), out_info(nullptr)
 {
-}
-//-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15_ds::open_upper_seat()
-{
-    direct_set_state((int)VALVE_STATE::V_UPPER_SEAT);
-}
-//-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15_ds::open_lower_seat()
-{
-    direct_set_state((int)VALVE_STATE::V_LOWER_SEAT);
 }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
@@ -4709,6 +4699,7 @@ float valve_iolink_gea_tvis_a15_ds::get_value()
 {
     return 0.1f * in_info.pos;
 }
+//-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_IO_MODULES
 void valve_iolink_gea_tvis_a15_ds::direct_set_value(float new_value)
 {
@@ -4719,69 +4710,21 @@ void valve_iolink_gea_tvis_a15_ds::direct_set_value(float new_value)
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_gea_tvis_a15_ds::get_fb_state()
 {
-    if (get_AI_IOLINK_state(static_cast<u_int>(CONSTANTS::C_AI_INDEX)) !=
-        io_device::IOLINKSTATE::OK)
-    {
+    if (get_AI_IOLINK_state(static_cast<u_int>(CONSTANTS::C_AI_INDEX)) != io_device::IOLINKSTATE::OK)
         return false;
-    }
 
     if (in_info.error_on) return false;
 
     if (in_info.SUP) return false;
 
-    if (get_delta_millisec(start_switch_time) <
-        get_par(valve::P_ON_TIME, 0))
-    {
+    if (get_delta_millisec(start_switch_time) < get_par(valve::P_ON_TIME, 0))
         return true;
-    }
 
     if (in_info.pv_y1_on == true && in_info.pv_y2_on == false && in_info.pv_y3_on == false) return true;
     if (in_info.pv_y1_on == false && in_info.pv_y2_on == true && in_info.pv_y3_on == false) return true;
     if (in_info.pv_y1_on == false && in_info.pv_y2_on == false && in_info.pv_y3_on == true) return true;
 
     return false;
-}
-//-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15_ds::get_state()
-{
-    switch (get_valve_state())
-    {
-    case V_LOWER_SEAT:
-        if (get_manual_mode())
-        {
-            return VX_LOWER_SEAT_MANUAL;
-        }
-
-        //Обратная связь отключена.
-        if (get_par(P_FB, 0) == FB_IS_AND_OFF)
-        {
-            return VX_LOWER_SEAT_FB_OFF;
-        }
-
-        if (get_fb_state()) return VX_LOWER_SEAT;
-
-        return VX_OFF_FB_ERR;
-
-    case V_UPPER_SEAT:
-        if (get_manual_mode())
-        {
-            return VX_UPPER_SEAT_MANUAL;
-        }
-
-        //Обратная связь отключена.
-        if (get_par(P_FB, 0) == FB_IS_AND_OFF)
-        {
-            return VX_UPPER_SEAT_FB_OFF;
-        }
-
-        if (get_fb_state()) return VX_UPPER_SEAT;
-
-        return VX_OFF_FB_ERR;
-    default:
-        break;
-    }
-
-    return valve::get_state();
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::get_off_fb_value()
@@ -4820,45 +4763,11 @@ void valve_iolink_gea_tvis_a15_ds::direct_off()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ds::set_cmd(const char* prop, u_int idx, double val)
 {
-    if (G_DEBUG)
-    {
+    if (G_DEBUG == true)
         G_LOG->debug(
             "%s\t valve_iolink_gea_tvis_a15_ds::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
-    }
     return 0;
-}
-//-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15_ds::direct_set_state(int new_state)
-{
-    switch (new_state)
-    {
-    case V_OFF:
-        direct_off();
-        break;
-
-    case V_ON:
-        direct_on();
-        break;
-
-    case V_UPPER_SEAT:
-    {
-        direct_off();
-        out_info->pv_y2 = true;
-        break;
-    }
-
-    case V_LOWER_SEAT:
-    {
-        direct_off();
-        out_info->pv_y3 = true;
-        break;
-    }
-
-    default:
-        direct_on();
-        break;
-    }
 }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
@@ -5063,10 +4972,8 @@ valve_iolink_gea_tvis_a15_ss::out_data_swapped
     valve_iolink_gea_tvis_a15_ss::stub_out_info;
 //-----------------------------------------------------------------------------
 valve_iolink_gea_tvis_a15_ss::valve_iolink_gea_tvis_a15_ss(const char* dev_name)
-    : valve(true, true, dev_name, DT_V, V_IOLINK_DO1_DI2)
+    : valve_iolink_shut_off_sorio(dev_name)
     {
-    in_info.SUP = false;
-    in_info.error_on = false;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state()
@@ -5207,24 +5114,6 @@ int valve_iolink_gea_tvis_a15_ss::set_cmd(const char* prop, u_int idx, double va
     valve::set_cmd(prop, idx, val);
 
     return 0;
-}
-//-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15_ss::direct_set_state(int new_state)
-{
-    switch (new_state)
-    {
-    case V_OFF:
-        direct_off();
-        break;
-
-    case V_ON:
-        direct_on();
-        break;
-
-    default:
-        direct_on();
-        break;
-    }
 }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
