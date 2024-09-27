@@ -1194,6 +1194,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_WT:
                     new_device = new wages( dev_name );
                     new_io_device = (wages*)new_device;
+                    break;
 
                 case device::DST_WT_VIRT:
                     new_device = new virtual_wages( dev_name );
