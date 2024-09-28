@@ -58,3 +58,28 @@ TEST( errors_manager, evaluate )
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_RETURN.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
     }
+
+TEST( siren_lights_manager, siren_lights_manager )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    G_SIREN_LIGHTS_MANAGER()->save_device( buff );
+    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );
+    }
+
+TEST( siren_lights_manager, set_cmd )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    G_SIREN_LIGHTS_MANAGER()->save_device( buff );
+    // Do nothing.
+    G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, "1" );
+    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );    
+
+    // Switch on manual mode.
+    G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, 1 );
+    G_SIREN_LIGHTS_MANAGER()->save_device( buff );
+    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=1,\n\t}\n" );
+    }
