@@ -4655,8 +4655,7 @@ void valve_iolink_gea_tvis_a15_ds::evaluate_io()
 
     const int SIZE_PDIn = 4;
     std::copy(in_data, in_data + SIZE_PDIn, buffer);
-    std::swap(buffer[0], buffer[1]);
-    std::swap(buffer[2], buffer[3]);
+    std::swap(buffer[ 2 ], buffer[ 3 ] );
 
 #ifdef DEBUG_IOLINK_MIXPROOF
     char* tmp = (char*)in_info;
@@ -4681,7 +4680,7 @@ int valve_iolink_gea_tvis_a15_ds::save_device_ex(char* buff)
     int err = in_info.error_on;
     int sup = in_info.SUP;
 
-    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)cs, (int)sup, (int)err).size;
+    res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", cs, sup, err).size;
 
     res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", get_value()).size;
 
@@ -4744,7 +4743,7 @@ void valve_iolink_gea_tvis_a15_ds::direct_on()
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ds::direct_off()
 {
-    if (out_info->pv_y1 || out_info->pv_y2 || out_info->pv_y3)
+    if (out_info->pv_y1 == true || out_info->pv_y2 == true || out_info->pv_y3 == true)
     {
         start_switch_time = get_millisec();
     }
@@ -4762,6 +4761,34 @@ int valve_iolink_gea_tvis_a15_ds::set_cmd(const char* prop, u_int idx, double va
             get_name(), prop, idx, val);
     return 0;
 }
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15_ds::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            direct_off();
+            out_info->pv_y2 = true;
+            break;
+
+        case V_LOWER_SEAT:
+            direct_off();
+            out_info->pv_y3 = true;
+            break;
+
+        default:
+            direct_on();
+            break;
+        }
+    }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4990,7 +5017,6 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 
     const int IN_SIZE = 4;
     std::copy(input_data, input_data + IN_SIZE, buffer);
-    std::swap(buffer[0], buffer[1]);
     std::swap(buffer[2], buffer[3]);
 
 #ifdef DEBUG_IOLINK_
@@ -5029,12 +5055,12 @@ void valve_iolink_gea_tvis_a15_ss::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::save_device_ex(char* buff)
 {
-    bool pilot_valve = in_info.pv_y1_on;
-    bool err = in_info.error_on;
-    bool sup = in_info.SUP;
+    int cs = in_info.pv_y1_on;
+    int err = in_info.error_on;
+    int sup = in_info.SUP;
     int res = 0;
 
-    res += fmt::format_to_n(buff, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", (int)pilot_valve, (int)sup, (int)err).size;
+    res += fmt::format_to_n(buff, MAX_COPY_SIZE, "CS={}, SUP={}, ERR={}, ", cs, sup, err).size;
 
     res += fmt::format_to_n(buff + res, MAX_COPY_SIZE, "V={:.1f}, ", get_value()).size;
 
@@ -5066,17 +5092,17 @@ bool valve_iolink_gea_tvis_a15_ss::get_fb_state() {
     if (dt < get_par(valve::P_ON_TIME, 0))
         return true;
 
-    if (out_info->pv_y1) return true;
+    if (in_info.pv_y1_on) return true;
 
     return false;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::get_off_fb_value() {
-    return in_info.s1;
+    return !in_info.pv_y1_on;
 }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15_ss::get_on_fb_value() {
-    return in_info.s2;
+    return in_info.pv_y1_on;
 }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15_ss::direct_on() {
