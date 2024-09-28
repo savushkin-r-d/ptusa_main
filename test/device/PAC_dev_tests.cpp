@@ -743,22 +743,58 @@ TEST( device_manager, add_io_device )
     check_dev<signal_column>( "HLA1", device::DT_HLA, device::DST_HLA, HLA );
     check_dev<>( "GS1", device::DT_GS, device::DST_GS, GS );
     check_dev<>( "GS2", device::DT_GS, device::DST_GS_INVERSE, GS );
-    check_dev<i_DI_device, i_DI_device>( "GS3", device::DT_GS, device::DST_GS_VIRT,
-        GS, nullptr, "Art_1", true );
+    check_dev<i_DI_device, i_DI_device>( 
+        "GS3", device::DT_GS, device::DST_GS_VIRT, GS, nullptr, "Art_1", true );
 
-    check_dev<valve, i_DO_device>( "V1", device::DT_V, device::V_IOLINK_DO1_DI2,
+
+    check_dev<valve, i_DO_device>( "V1", device::DT_V,
+        device::DST_V_DO1, V, V );
+    check_dev<valve, i_DO_device>( "V2", device::DT_V,
+        device::DST_V_DO2, V, V );
+    check_dev<valve, i_DO_device>( "V3", device::DT_V,
+        device::DST_V_DO1_DI1_FB_OFF, V, V );
+    check_dev<valve, i_DO_device>( "V4", device::DT_V,
+        device::DST_V_DO1_DI1_FB_ON, V, V );
+    check_dev<valve, i_DO_device>( "V5", device::DT_V,
+        device::DST_V_DO1_DI2, V, V );
+    check_dev<valve, i_DO_device>( "V6", device::DT_V,
+        device::DST_V_DO2_DI2, V, V );
+    check_dev<valve, i_DO_device>( "V7", device::DT_V,
+        device::DST_V_MIXPROOF, V, V );
+    check_dev<valve, i_DO_device>( "V8", device::DT_V,
+        device::DST_V_AS_MIXPROOF, V, V );
+    check_dev<valve, i_DO_device>( "V9", device::DT_V,
+        device::DST_V_BOTTOM_MIXPROOF, V, V );    
+    check_dev<valve, i_DO_device>( "V91", device::DT_V,
+        device::DST_V_AS_DO1_DI2, V, V );
+    check_dev<valve, i_DO_device>( "V92", device::DT_V,
+        device::V_DO2_DI2_BISTABLE, V, V );
+    check_dev<valve, i_DO_device>( "V93", device::DT_V,
+        device::V_IOLINK_VTUG_DO1, V, V );
+    check_dev<valve, i_DO_device>( "V94", device::DT_V,
+        device::V_IOLINK_VTUG_DO1_FB_OFF, V, V );
+    check_dev<valve, i_DO_device>( "V95", device::DT_V,
+        device::V_IOLINK_VTUG_DO1_FB_ON, V, V );
+    check_dev<valve, i_DO_device>( "V96", device::DT_V,
+        device::V_IOLINK_VTUG_DO1_DI2, V, V );
+    check_dev<valve, i_DO_device>( "V97", device::DT_V,
+        device::V_IOLINK_MIXPROOF, V, V );
+    check_dev<valve, i_DO_device>(
+        "V98", device::DT_V, device::V_IOLINK_DO1_DI2,
         V, V, valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
-    check_dev<valve, i_DO_device>( "V2", device::DT_V, device::V_IOLINK_DO1_DI2, V, V /*AlfaLaval*/ );
-    check_dev<valve, i_DO_device>( "V3", device::DT_V, device::DST_V_MINI_FLUSHING, V, V );
-    check_dev<valve, i_DO_device>( "V4", device::DT_V, device::V_IOLINK_VTUG_DO1, V, V );
-    check_dev<valve, i_DO_device>( "V5", device::DT_V, device::V_IOLINK_VTUG_DO1_FB_OFF, V, V );
-    check_dev<valve, i_DO_device>( "V6", device::DT_V, device::V_IOLINK_VTUG_DO1_FB_ON, V, V );
-    check_dev<valve, i_DO_device>( "V7", device::DT_V, device::V_IOLINK_VTUG_DO1_DI2, V, V );
-    check_dev<valve, i_DO_device>( "V8", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, V, V  );
-    check_dev<valve, i_DO_device>( "V9", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, V, V );
+    check_dev<valve, i_DO_device>(
+        "V99", device::DT_V, device::V_IOLINK_DO1_DI2, V, V /*AlfaLaval*/ );
+    
+    G_DEVICE_MANAGER()->clear_io_devices();
+    check_dev<valve, i_DO_device>(
+        "V1", device::DT_V, device::DST_V_MINI_FLUSHING, V, V );
+    check_dev<valve, i_DO_device>( 
+        "V2", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3, V, V  );
+    check_dev<valve, i_DO_device>( 
+        "V3", device::DT_V, device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2, V, V );
 
-    check_dev<valve, i_DO_device>( "V91", device::DT_V, device::DST_V_AS_MIXPROOF, V, V,
-        "AL.9615-4002-12" );
+    check_dev<valve, i_DO_device>( 
+        "V91", device::DT_V, device::DST_V_AS_MIXPROOF, V, V, "AL.9615-4002-12" );
     auto Vx = V( "V91");    // AlfaLaval new mixproof.
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
     EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, true );
@@ -767,19 +803,23 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( Vx ) );
     EXPECT_EQ( dynamic_cast<valve_AS_mix_proof*>( Vx )->reverse_seat_connection, false );
 
+    auto res = G_DEVICE_MANAGER()->add_io_device( device::DT_V,
+        device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2 + 1, "V2", "", "" );
+    EXPECT_EQ( nullptr, res );
+
     check_dev<i_motor>( "M1", device::DT_M, device::DST_M, M, M );
-    check_dev<>( "FS1", device::DT_FS, device::DST_FS, FS );
+    check_dev<>( "FS1", device::DT_FS, device::DST_FS, FS, FS );
     check_dev<i_AI_device>( "AI1", device::DT_AI, device::DST_AI, AI );
-    check_dev<i_AO_device>( "AO1", device::DT_AO, device::DST_AO, AO );
-    check_dev<i_counter>( "FQT1", device::DT_FQT, device::DST_FQT, FQT );
-    check_dev<i_counter>( "FQT2", device::DT_FQT, device::DST_FQT_IOLINK, FQT );
-    check_dev<i_counter>( "FQT3", device::DT_FQT, device::DST_FQT_F, FQT );
-    check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE );
+    check_dev<i_AO_device>( "AO1", device::DT_AO, device::DST_AO, AO, AO );
+    check_dev<i_counter>( "FQT1", device::DT_FQT, device::DST_FQT, FQT, FQT );
+    check_dev<i_counter>( "FQT2", device::DT_FQT, device::DST_FQT_IOLINK, FQT, FQT );
+    check_dev<i_counter>( "FQT3", device::DT_FQT, device::DST_FQT_F, FQT, FQT );
+    check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE, TE );
 
     check_dev<>( "PDS1", device::DT_PDS, device::DST_PDS, PDS );
     check_dev<i_DI_device, i_DI_device>( "PDS2", device::DT_PDS,
         device::DST_PDS_VIRT, PDS, nullptr, "A", true );
-    auto res = G_DEVICE_MANAGER()->add_io_device( device::DT_PDS,
+    res = G_DEVICE_MANAGER()->add_io_device( device::DT_PDS,
         device::DST_PDS_VIRT + 1, "PDS3", "Test sensor", "" );
     EXPECT_EQ( nullptr, res );
 
@@ -790,10 +830,10 @@ TEST( device_manager, add_io_device )
         device::DT_TS, device::DST_TS_VIRT + 1, "TS3", "Test sensor", "" );
     EXPECT_EQ( nullptr, res );
 
-    check_dev<i_wages>( "WT1", device::DT_WT, device::DST_WT, WT );
-    check_dev<i_wages>( "WT2", device::DT_WT, device::DST_WT_RS232, WT );
-    check_dev<i_wages>( "WT3", device::DT_WT, device::DST_WT_ETH, WT );
-    check_dev<i_wages>( "WT4", device::DT_WT, device::DST_WT_PXC_AXL, WT );
+    check_dev<i_wages>( "WT1", device::DT_WT, device::DST_WT, WT, WT );
+    check_dev<i_wages>( "WT2", device::DT_WT, device::DST_WT_RS232, WT, WT );
+    check_dev<i_wages>( "WT3", device::DT_WT, device::DST_WT_ETH, WT, WT );
+    check_dev<i_wages>( "WT4", device::DT_WT, device::DST_WT_PXC_AXL, WT, WT );
 
     check_dev<i_DO_AO_device, i_DO_AO_device>( 
         "C1", device::DT_REGULATOR, device::DST_REGULATOR_PID, C, nullptr, "", true );
