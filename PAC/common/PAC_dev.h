@@ -2516,7 +2516,7 @@ class valve_iolink_shut_off_sorio : public valve
             uint16_t unused2 : 1;
             };
 
-        in_data in_info{ 0 };
+        in_data in_info{ false };
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 

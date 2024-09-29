@@ -4629,7 +4629,7 @@ valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15(const char* dev_name, devic
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15::save_device_ex(char* buff)
 {
-    int cs = in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on;;
+    int cs = in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on;
     int err = in_info.error_on;
     int sup = in_info.SUP;
 
@@ -4646,7 +4646,7 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
 {
     out_info = (out_data_swapped*)get_AO_write_data(static_cast<u_int>(CONSTANTS::C_AI_INDEX));
 
-    char* input_data = (char*)get_AI_data(static_cast<u_int>(CONSTANTS::C_AI_INDEX));
+    auto input_data = (char*)get_AI_data(static_cast<u_int>(CONSTANTS::C_AI_INDEX));
     auto buffer = (char*)&in_info;
 
     const int IN_SIZE = 4;
