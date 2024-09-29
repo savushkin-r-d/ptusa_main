@@ -4395,7 +4395,7 @@ void valve_iolink_mix_proof::evaluate_io()
         out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
         }
 
-    char* data = (char*)get_AI_data( 
+    char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     char* buff = (char*)in_info;
 
