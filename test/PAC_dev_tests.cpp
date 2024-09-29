@@ -702,7 +702,7 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         str_buff );
     }
 
-TEST(valve_iolink_gea_tvis_a15_ds, save_device)
+TEST(valve_iolink_gea_tvis_a15_ds, save_device_ex)
 {
     valve_iolink_gea_tvis_a15_ds V1("VGEA2");
     const int BUFF_SIZE = 100;
@@ -773,14 +773,14 @@ TEST(valve_iolink_gea_tvis_a15_ds, evaluate_io)
         str_buff);
 }
 
-TEST(valve_iolink_gea_tvis_a15_ss, save_device)
+TEST(valve_iolink_gea_tvis_a15_ss, save_device_ex)
 {
     valve_iolink_gea_tvis_a15_ss V1("VGEA1");
     const int BUFF_SIZE = 100;
     char buff[BUFF_SIZE] = { 0 };
     V1.save_device(buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
+        "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff);
 }
 
 TEST(valve_iolink_gea_tvis_a15_ss, get_valve_state)
@@ -799,7 +799,7 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
     auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[0]);
 
 
-    EXPECT_EQ(0, V1.get_value()); //Default value.
+    EXPECT_EQ(0, V1.get_value()); 
 
 
     const int POS = 341;
@@ -810,13 +810,13 @@ TEST(valve_iolink_gea_tvis_a15_ss, evaluate_io)
     char str_buff[BUFF_SIZE] = { 0 };
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 
     V1.direct_set_value(12.1f);
     V1.save_device(str_buff, "");
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
+        "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff);
 }
 

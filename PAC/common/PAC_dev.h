@@ -2469,10 +2469,10 @@ class valve_iolink_shut_off_sorio : public valve
 
         void evaluate_io();
 
-        float get_value() override;
+        float get_value() final;
 
 #ifdef DEBUG_NO_IO_MODULES
-        void direct_set_value( float new_value ) override;
+        void direct_set_value( float new_value ) final;
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -2523,73 +2523,67 @@ class valve_iolink_shut_off_sorio : public valve
         bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан GEA T.VIS A-15 двухседельный.
-class valve_iolink_gea_tvis_a15_ds : public valve_iolink_mix_proof
+/// @brief Клапан GEA T.VIS A-15.
+class valve_iolink_gea_tvis_a15 : public valve
 {
 public:
-    static const std::string GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE;
+    explicit valve_iolink_gea_tvis_a15(const char* dev_name, device::DEVICE_SUB_TYPE device_sub_type);
 
-    explicit valve_iolink_gea_tvis_a15_ds(const char* dev_name);
-
-    void evaluate_io() final;
     int save_device_ex(char* buff) final;
+    void evaluate_io() final;
     float get_value() final;
-    VALVE_STATE get_valve_state() final;
 
 #ifdef DEBUG_NO_IO_MODULES
     void direct_set_value(float new_value) final;
 #endif
 
 #ifndef DEBUG_NO_IO_MODULES
-
-    void direct_set_state( int new_state );
     void direct_off() final;
-    int get_on_fb_value() final;
-    bool get_fb_state() final;
-    int set_cmd(const char* prop, u_int idx, double val) final;
     void direct_on() final;
+    bool get_fb_state() final;
     int get_off_fb_value() final;
+    int get_on_fb_value() final;
+#endif 
 
-#endif // DEBUG_NO_IO_MODULES
-
-private:
+protected:
     struct in_data
     {
-        bool s1       : 1; // состояние клапана: 1 - закрыт, 0 - вне допуска
-        bool s2       : 1; // основной ход: 1 - клапан в конечном положении, 0 - клапан вышел за пределы допуска
-        bool s3       : 1; // если pv_y1 = 0 - сдвоенная тарелка: 1 - закрыта, 0 - не закрыта или нет внешнего датчика
-                           // если pv_y1 = 1 - сдвоенная тарелка: 1 - не разведена, 0 - разведена
-        bool s4       : 1; // основной ход: 1 - клапан в покое, 0 - клапанная тарелка и сдвоенная тарелка не закрыты
-        bool SUP      : 1; // активна процедура Setup
-        bool Y7       : 1; // незанятый бит
-        bool Y6       : 1; // незанятый бит
-        bool Y5       : 1; // незанятый бит
+        bool s1          : 1; // если односедельный - состояние клапана: 1 - закрыт, 0 - вне допуска
+                              // если двухседельный - клапаная тарелка: 1 - закрыт, 0 - вне допуска
+        bool s2          : 1; // основной ход: 1 - клапан в конечном положении, 0 - клапан вышел за пределы допуска
+        bool s3          : 1; // если pv_y1 = 0 - сдвоенная тарелка: 1 - закрыта, 0 - не закрыта или нет внешнего датчика
+                              // если pv_y1 = 1 - сдвоенная тарелка: 1 - не разведена, 0 - разведена
+        bool s4          : 1; // если двухседельный - основной ход: 1 - клапан в покое, 0 - клапанная тарелка и сдвоенная тарелка не закрыты
+        bool SUP         : 1; // активна процедура Setup
+        bool Y7          : 1; // незанятый бит
+        bool Y6          : 1; // незанятый бит
+        bool Y5          : 1; // незанятый бит
+        bool pv_y1_on    : 1; // пилотный клапан соленоида y1 активирован
+        bool pv_y2_on    : 1; // пилотный клапан соленоида y2 активирован
+        bool pv_y3_on    : 1; // если pv_y1_on = 0: пилотный клапан соленоида y3 активирован
+                              // если pv_y1_on = 1: пилотный клапан соленоида y4 активирован
+        bool error_on    : 1; // ошибка активна 
 
-        bool pv_y1_on : 1; // пилотный клапан соленоида y1 активирован
-        bool pv_y2_on : 1; // пилотный клапан соленоида y2 активирован
-        bool pv_y3_on : 1; // пилотный клапан соленоида y3 активирован
-        bool error_on : 1; // ошибка активна 
-
-        uint16_t  pos : 10; // позиция шкота в 10^-4 м 
+        uint16_t  pos    : 10; // позиция шкота в 10^-4 метра
         uint16_t unused1 : 10; // неиспользуемое битовое пространство
     };
 
-    struct out_data_swapped   //Swapped low and high byte for easer processing
+    struct out_data_swapped
     {
-        bool pv_y1 : 1; // активация пилотного соленоида y1
-        bool pv_y2 : 1; // активация пилотного соленоида y2
-        bool pv_y3 : 1; // в зависимости от pv_y1: активация пилотного клапана соленоида y3 или y4
-        bool X4    : 1; // незанятый бит
-        bool X5    : 1; // незанятый бит
-        bool X6    : 1; // незанятый бит
-        bool X7    : 1; // незанятый бит
-        bool HAS   : 1; // активация процедуры Setup
+        bool pv_y1       : 1; // активация пилотного соленоида y1
+        bool pv_y2       : 1; // активация пилотного соленоида y2
+        bool pv_y3       : 1; // в зависимости от pv_y1: активация пилотного клапана соленоида y3 или y4
+        bool X4          : 1; // незанятый бит
+        bool X5          : 1; // незанятый бит
+        bool X6          : 1; // незанятый бит
+        bool X7          : 1; // незанятый бит
+        bool HAS         : 1; // активация процедуры Setup
     };
 
     in_data in_info{ 0 };
     static out_data_swapped stub_out_info;
     out_data_swapped* out_info = &stub_out_info;
-
+    
     enum class CONSTANTS
     {
         C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
@@ -2597,69 +2591,35 @@ private:
 };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link GEA T.VIS A-15 односедельный отсечной.
-class valve_iolink_gea_tvis_a15_ss : public valve_iolink_shut_off_sorio
+class valve_iolink_gea_tvis_a15_ss : public valve_iolink_gea_tvis_a15
 {
 public:
     static const std::string GEA_TVIS_A15_SINGLE_SEAT_ARTICLE;
+    explicit valve_iolink_gea_tvis_a15_ss(const char* dev_name);
 
     VALVE_STATE get_valve_state() final;
-    explicit valve_iolink_gea_tvis_a15_ss(const char* dev_name);
-    float get_value() final;
-    void evaluate_io() final;
-    int save_device_ex(char* buff) final;
 
 #ifndef DEBUG_NO_IO_MODULES
-
-    void direct_on() final;
-    void direct_off() final;
-    bool get_fb_state() final;
+    void direct_set_state(int new_state) final;
     int set_cmd(const char* prop, u_int idx, double val) final;
-    int get_off_fb_value() final;
-    int get_on_fb_value() final;
+#endif 
+};
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-Link GEA T.VIS A-15 двухседельный mixproof.
+class valve_iolink_gea_tvis_a15_ds : public valve_iolink_gea_tvis_a15, public i_mix_proof
+{
+public:
+    static const std::string GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE;
+    explicit valve_iolink_gea_tvis_a15_ds(const char* dev_name);
+    
+    void open_upper_seat() final;
+    void open_lower_seat() final;
+    VALVE_STATE get_valve_state() final;
 
-#endif // DEBUG_NO_IO_MODULES
-
-#ifdef DEBUG_NO_IO_MODULES
-    void direct_set_value(float new_value) final;
-#endif
-
-private:
-    struct in_data
-    {
-        bool s1       : 1; // состояние клапана: 1 - закрыт, 0 - вне допуска
-        bool s2       : 1; // основной ход: 1 - клапан в конечном положении, 0 - клапан вышел за пределы допуска
-        bool s3       : 1; // если pv_y1 = 0 - сдвоенная тарелка: 1 - закрыта, 0 - не закрыта или нет внешнего датчика
-                           // если pv_y1 = 1 - сдвоенная тарелка: 1 - не разведена, 0 - разведена
-        bool s4       : 1; // основной ход: 1 - клапан в покое, 0 - клапанная тарелка и сдвоенная тарелка не закрыты
-        bool SUP      : 1; // активна процедура Setup
-        bool Y7       : 1; // незанятый бит
-        bool Y6       : 1; // незанятый бит
-        bool Y5       : 1; // незанятый бит
-
-        bool pv_y1_on : 1; // пилотный клапан соленоида y1 активирован
-        bool IINV1    : 1; // недоступный для изменений бит
-        bool IINV2    : 1; // недоступный для изменений бит
-        bool error_on : 1; // ошибка активна 
-
-        uint16_t  pos : 10; // позиция штока в 10^-4 метра
-        uint16_t unused1 : 10; // неиспользуемое битовое пространство
-    };
-
-    struct out_data_swapped   //Swapped low and high byte for easer processing
-    {
-        bool pv_y1 : 1; // активация пилотного соленоида y1
-        bool OINV1 : 1; // недоступный для изменений бит
-        bool OINV2 : 1; // недоступный для изменений бит
-        bool X4    : 1; // незанятый бит
-        bool X5    : 1; // незанятый бит
-        bool X6    : 1; // незанятый бит
-        bool X7    : 1; // незанятый бит
-        bool HAS   : 1; // активация процедуры Setup
-    };
-
-    in_data in_info{ 0 };
-    static out_data_swapped stub_out_info;
-    out_data_swapped* out_info = &stub_out_info;
+#ifndef DEBUG_NO_IO_MODULES
+    void direct_set_state(int new_state) final;
+    int set_cmd(const char* prop, u_int idx, double val) final;
+#endif 
 };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с управлением от пневмоострова IO-link.
