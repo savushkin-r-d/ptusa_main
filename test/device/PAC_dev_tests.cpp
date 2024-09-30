@@ -1595,8 +1595,11 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
     EXPECT_EQ(0, V1.get_value());
 
-    temp_in = 0b1001000000001001; // последовательность бит соответствует перевёрнутой последовательности полей структуры out_data_swapped
-                                  // находящейся в классе valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h
+    // Последовательность бит соответствует перевёрнутой последовательности
+    // полей структуры out_data_swapped, находящейся в классе
+    // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
+    temp_in = 0b1001000000001001; 
+                                  
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 165; // шток, который должен быть
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
@@ -1717,8 +1720,11 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
     EXPECT_EQ(0, V1.get_value());
 
-    temp_in = 0b1001000000000001; // последовательность бит соответствует перевёрнутой последовательности полей структуры out_data_swapped
-                                  // находящейся в классе valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h
+    // Последовательность бит соответствует перевёрнутой последовательности
+    // полей структуры out_data_swapped, находящейся в классе
+    // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
+    temp_in = 0b1001000000000001; 
+                                  
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 165; // шток, который должен быть
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
