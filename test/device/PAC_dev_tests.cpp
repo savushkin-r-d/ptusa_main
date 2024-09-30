@@ -1612,6 +1612,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
         str_buff );
 
     V1.direct_on();
+    memset( str_buff, '\0', sizeof( str_buff ) );
     temp_in = 0b0001000100000010;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 564;
@@ -1625,6 +1626,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
         str_buff );
 
     V1.open_lower_seat();
+    memset(str_buff, '\0', sizeof(str_buff));
     temp_in = 0b0000001000001001;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 166;
@@ -1638,6 +1640,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
         str_buff );
 
     V1.open_upper_seat();
+    memset(str_buff, '\0', sizeof(str_buff));
     temp_in = 0b0000010000000000;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 81;
@@ -1651,6 +1654,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
         str_buff );
 
     V1.direct_off();
+    memset(str_buff, '\0', sizeof(str_buff));
     temp_in = 0b1001000000001001;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 165;
@@ -1714,6 +1718,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
         str_buff);
 
     V1.direct_on();
+    memset(str_buff, '\0', sizeof(str_buff));
     temp_in = 0b0001000100000010;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 564;
@@ -1727,6 +1732,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
         str_buff);
 
     V1.direct_off();
+    memset(str_buff, '\0', sizeof(str_buff));
     temp_in = 0b1001000000000001;
     *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
     pos = 165;
