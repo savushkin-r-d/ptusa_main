@@ -124,7 +124,9 @@ TEST( open_seat_action, evaluate )
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
 	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    valve V1( "V1", device::DEVICE_TYPE::DT_V, device::DEVICE_SUB_TYPE::DST_V_VIRT );
 	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    valve V2( "V1", device::DEVICE_TYPE::DT_V, device::DEVICE_SUB_TYPE::DST_V_VIRT );
 
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
@@ -135,7 +137,9 @@ TEST( open_seat_action, evaluate )
 
 	auto action = step[ 0 ][ step::ACTIONS::A_UPPER_SEATS_ON ];
 	action->add_dev( &test_DO1, 0, valve::V_UPPER_SEAT );
+    action->add_dev( &V1, 0, valve::V_UPPER_SEAT );
 	action->add_dev( &test_DO2, 0, valve::V_LOWER_SEAT );
+    action->add_dev( &V2, 0, valve::V_LOWER_SEAT );
 	action->print();
 
     // Сброс параметров к значению по умолчанию.

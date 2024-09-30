@@ -39,6 +39,8 @@ extern "C" {
 class i_Lua_save_device
     {
     public:
+        virtual ~i_Lua_save_device() = default;
+
         /// @brief Сохранение самого устройства в буфер.
         ///
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
@@ -54,6 +56,8 @@ class i_Lua_save_device
 class i_cmd_device
     {
     public:
+        virtual ~i_cmd_device() = default;
+
         /// @brief Выполнение числовой команды.
         ///
         /// @param prop [ in ] - имя свойства.
@@ -72,7 +76,7 @@ class i_cmd_device
         ///
         /// @return 0 - ок.
         /// @return 1 - Ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, char *val ) = 0;
+        virtual int set_cmd( const char *prop, u_int idx, const char *val ) = 0;
     };
 
 #endif // DRIVER

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: IOT_dev
-** Generated automatically by tolua++-1.0.92 on 02/10/22 15:18:55.
+** Generated automatically by tolua++-1.0.92 on Fri Sep 13 09:59:50 2024.
 */
 
 #ifndef __cplusplus
@@ -14,7 +14,7 @@
 TOLUA_API int  tolua_IOT_dev_open (lua_State* tolua_S);
 
 #include "iot_altivar.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "tech_def.h"
 #ifdef WIN_OS
 #pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)

@@ -11,7 +11,7 @@
 #include "lua_manager.h"
 
 #include "iot_common.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "PAC_err.h"
 #include "error.h"
 #include "tech_def.h"

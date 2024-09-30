@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Jul  9 10:50:42 2024.
+** Generated automatically by tolua++-1.0.92 on Fri Sep 13 10:52:08 2024.
 */
 
 #ifndef __cplusplus
@@ -14,7 +14,8 @@
 TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 
 #include <stdlib.h>
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "tech_def.h"
 #include "cip_tech_def.h"
 #include "bus_coupler_io.h"
@@ -87,26 +88,27 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"siren_lights_manager");
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
+ tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"virtual_counter");
  tolua_usertype(tolua_S,"errors_manager");
  tolua_usertype(tolua_S,"tech_object_manager");
- tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"camera");
- tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"i_Lua_save_device");
+ tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"profibus_slave");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"tm");
+ tolua_usertype(tolua_S,"i_camera");
  tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"PAC_info");
  tolua_usertype(tolua_S,"ParamsRecipeStorage");
@@ -3219,8 +3221,8 @@ static int tolua_PAC_dev_CAM00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   camera* tolua_ret = (camera*)  CAM(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"camera");
+   i_camera* tolua_ret = (i_camera*)  CAM(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_camera");
   }
  }
  return 1;

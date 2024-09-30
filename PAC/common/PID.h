@@ -16,7 +16,8 @@
 #include "dtime.h"
 
 #include "param_ex.h"
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 
 class PID : public device, public i_Lua_save_device
     {

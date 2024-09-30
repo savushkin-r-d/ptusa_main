@@ -29,7 +29,7 @@
 
 #include "dtime.h"
 
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "PAC_info.h"
 #include "param_ex.h"
 

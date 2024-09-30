@@ -1,5 +1,5 @@
 #include "mcaRec.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "cip_tech_def.h"
 #ifdef MSAPANEL
 #include "msapanel.h"

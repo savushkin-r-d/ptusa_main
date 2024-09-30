@@ -1,4 +1,5 @@
 #include <string.h>
+#include <fmt/core.h>
 
 #include "PAC_info.h"
 #include "PAC_err.h"
@@ -369,6 +370,9 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
 bool PAC_info::is_emulator()
     {
+#ifdef PTUSA_TEST
+    return emulator_state;
+#else
 #ifdef DEBUG_NO_IO_MODULES
     return true;
 #else
@@ -376,8 +380,21 @@ bool PAC_info::is_emulator()
         return true;
     else
         return false;
-#endif
+#endif // DEBUG_NO_IO_MODULES
+#endif // PTUSA_TEST
     }
+
+#ifdef PTUSA_TEST
+void PAC_info::emulation_on()
+    {
+    emulator_state = true;
+    }
+
+void PAC_info::emulation_off()
+    {
+    emulator_state = false;
+    }
+#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO()
