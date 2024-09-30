@@ -657,8 +657,14 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_MIXPROOF:
-                    new_device = new valve_iolink_mix_proof( dev_name );
-                    new_io_device = (valve_iolink_mix_proof*)new_device;
+                    if (strcmp(article, valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str()) == 0) {
+                        new_device = new valve_iolink_gea_tvis_a15_ds(dev_name);
+                        new_io_device = (valve_iolink_gea_tvis_a15_ds*)new_device;
+                    }
+                    else {
+                        new_device = new valve_iolink_mix_proof(dev_name);
+                        new_io_device = (valve_iolink_mix_proof*)new_device;
+                    }
                     break;
 
                 case device::V_IOLINK_DO1_DI2:
@@ -668,6 +674,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
                         new_io_device = (valve_iolink_shut_off_sorio*)new_device;
+                        }
+                    else if (strcmp(article, valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str()) == 0) 
+                        {
+                        new_device = new valve_iolink_gea_tvis_a15_ss(dev_name);
+                        new_io_device = (valve_iolink_gea_tvis_a15_ss*)new_device;
                         }
                     else
                         {

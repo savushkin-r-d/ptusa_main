@@ -784,6 +784,12 @@ TEST( device_manager, add_io_device )
         V, V, valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() );
     check_dev<valve, i_DO_device>(
         "V99", device::DT_V, device::V_IOLINK_DO1_DI2, V, V /*AlfaLaval*/ );
+    check_dev<valve, i_DO_device>(
+        "V991", device::DT_V, device::V_IOLINK_DO1_DI2,
+        V, V, valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str());
+    check_dev<valve, i_DO_device>(
+        "V992", device::DT_V, device::V_IOLINK_DO1_DI2,
+        V, V, valve_iolink_gea_tvis_a15_ds::GEA_TVIS_A15_DOUBLE_SEAT_ARTICLE.c_str());
     
     G_DEVICE_MANAGER()->clear_io_devices();
     check_dev<valve, i_DO_device>(
@@ -1554,6 +1560,231 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
+    {
+    valve_iolink_gea_tvis_a15_ds V1( "VGEA2" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ds, get_valve_state )
+    {
+    valve_iolink_gea_tvis_a15_ds V1( "VGEA2" );
+    valve::VALVE_STATE VS = V1.get_valve_state();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, VS );
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
+    {
+    G_PAC_INFO()->emulation_off();
+
+    valve_iolink_gea_tvis_a15_ds V1("VGEA2");
+    V1.init(0, 0, 1, 1);
+    int temp_out;
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    int temp_in;
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    int pos;
+
+    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
+    EXPECT_EQ(0, V1.get_value());
+
+    // Последовательность бит соответствует перевёрнутой последовательности
+    // полей структуры out_data_swapped, находящейся в классе
+    // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
+    temp_in = 0b1001000000001001; 
+                                  
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 165; // шток, который должен быть
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    const int BUFF_SIZE = 100;
+    char str_buff[BUFF_SIZE] = { 0 };
+    V1.save_device( str_buff , "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=16.5, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.direct_on();
+    memset( str_buff, '\0', sizeof( str_buff ) );
+    temp_in = 0b0001000100000010;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 564;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=56.4, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.open_lower_seat();
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b0000001000001001; 
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 166;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=32, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=16.6, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.open_upper_seat();
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b0000010000000000;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 81;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=33, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=8.1, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.direct_off();
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b1001000000001001;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 165;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=16.5, P_ON_TIME=0, P_FB=0},\n",
+        str_buff );
+
+    V1.direct_set_state(777);
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b0001000100000010;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][0]) = temp_in;
+    pos = 564;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = pos;
+    std::swap(buff[2], buff[3]);
+    V1.evaluate_io();
+    V1.save_device(str_buff, "");
+    EXPECT_STREQ(
+        "VGEA2={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=56.4, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+    EXPECT_EQ(true, V1.get_fb_state());
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ss, save_device_ex )
+    {
+    valve_iolink_gea_tvis_a15_ss V1( "VGEA1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    V1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ss, get_valve_state )
+    {
+    valve_iolink_gea_tvis_a15_ss V1( "VGEA1" );
+    valve::VALVE_STATE VS = V1.get_valve_state();
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, VS );
+    }
+
+TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
+    {
+    G_PAC_INFO()->emulation_off();
+
+    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
+    V1.init(0, 0, 1, 1);
+    int temp_out;
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[2]{ 0 };
+    int temp_in;
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    int pos;
+
+    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
+    EXPECT_EQ(0, V1.get_value());
+
+    // Последовательность бит соответствует перевёрнутой последовательности
+    // полей структуры out_data_swapped, находящейся в классе
+    // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
+    temp_in = 0b1001000000000001; 
+                                  
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 165; // шток, который должен быть
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    const int BUFF_SIZE = 100;
+    char str_buff[BUFF_SIZE] = { 0 };
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=16.5, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+    EXPECT_EQ(false, V1.get_fb_state());
+
+    V1.direct_set_state(valve::VALVE_STATE::V_ON);
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b0001000100000010;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 564;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=56.4, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+    EXPECT_EQ(true, V1.get_fb_state());
+
+    V1.direct_set_state(valve::VALVE_STATE::V_OFF);
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b1001000000000001;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 165;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "V=16.5, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+    EXPECT_EQ(false, V1.get_fb_state());
+
+    V1.direct_set_state(777);
+    memset(str_buff, '\0', sizeof(str_buff));
+    temp_in = 0b0001000100000010;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    pos = 564;
+    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    V1.evaluate_io();
+    V1.save_device( str_buff, "" );
+    EXPECT_STREQ(
+        "VGEA1={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
+        "V=56.4, P_ON_TIME=0, P_FB=0},\n",
+        str_buff);
+    EXPECT_EQ(true, V1.get_fb_state());
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( valve_iol_terminal, direct_set_state )
