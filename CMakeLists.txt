@@ -76,6 +76,7 @@ file(GLOB common_src CONFIGURE_DEPENDS
 
         PAC/common/*.cpp
         PAC/common/sys/*.cpp
+        PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
 if(USE_OPCUA)
@@ -86,6 +87,7 @@ endif()
 
 file(GLOB test_src CONFIGURE_DEPENDS
     	    test/*.cpp
+			test/device/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)

@@ -1,6 +1,6 @@
 $#include "iot_altivar.h"
 
-$#include "PAC_dev.h"
+$#include "device/device.h"
 $#include "tech_def.h"
 
 $#ifdef WIN_OS

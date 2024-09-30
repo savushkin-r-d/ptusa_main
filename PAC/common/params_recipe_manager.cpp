@@ -4,6 +4,8 @@
 #include <regex>
 #include <iostream>
 
+#include <fmt/core.h>
+
 #include "PAC_err.h"
 
 auto_smart_ptr<ParamsRecipeManager> ParamsRecipeManager::sInstance = nullptr;

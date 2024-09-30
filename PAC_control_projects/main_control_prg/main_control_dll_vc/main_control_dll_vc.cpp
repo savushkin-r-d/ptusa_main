@@ -6,7 +6,7 @@
 #include "dtime.h"
 
 #include "prj_mngr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "PAC_info.h"
 #include "tech_def.h"
 #include "lua_manager.h"

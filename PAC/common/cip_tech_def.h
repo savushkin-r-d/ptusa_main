@@ -5,7 +5,8 @@
 #include "g_device.h"
 #include "PID.h"
 #include "modbus_serv.h"
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "cip_stats.h"
 #include <unordered_set>
 #include <string>

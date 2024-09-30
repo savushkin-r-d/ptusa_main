@@ -638,7 +638,7 @@ int siren_lights_manager::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int siren_lights_manager::set_cmd( const char *prop, u_int idx, char *val )
+int siren_lights_manager::set_cmd( const char *prop, u_int idx, const char *val )
     {
     return 0;
     }

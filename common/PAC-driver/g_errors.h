@@ -164,7 +164,7 @@ int load_from_stream( alarm &a, char *buff );
 #ifdef PAC
 #include "param_ex.h"
 #include "smart_ptr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "tech_def.h"
 
@@ -445,7 +445,7 @@ class siren_lights_manager: public i_Lua_save_device
             return "G_SIREN_MNGR";
             }
 
-        int set_cmd( const char *prop, u_int idx, char *val );
+        int set_cmd( const char *prop, u_int idx, const char *val );
 
         virtual ~siren_lights_manager()
             {

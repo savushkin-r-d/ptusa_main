@@ -22,7 +22,7 @@
 #include "i_tech_def.h"
 
 #include "g_device.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "tcp_cmctr.h"
 #include "param_ex.h"
