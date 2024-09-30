@@ -1835,7 +1835,7 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
     if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
         return true;
 
-    if ( this->get_on_fb_value() ) return true;
+    if ( in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on ) return true;
 
     return false;
     }
