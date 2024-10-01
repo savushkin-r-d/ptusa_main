@@ -94,7 +94,7 @@ namespace PtusaPLCnextEngineer
             lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, LUA_GC_SIZE );
             sleep_ms( sleep_time_ms );
 
-            if ( !G_NO_IO_MODULES )
+            if ( !G_NO_IO_NODES )
                 {
                 G_IO_MANAGER()->read_inputs();
                 sleep_ms( sleep_time_ms );
@@ -109,7 +109,8 @@ namespace PtusaPLCnextEngineer
 
             sleep_ms( sleep_time_ms );
 
-        if ( !G_NO_IO_MODULES )
+        if ( !G_NO_IO_NODES &&
+            !G_READ_ONLY_IO_NODES )
             {
             G_IO_MANAGER()->write_outputs();
             sleep_ms( sleep_time_ms );
@@ -124,7 +125,10 @@ namespace PtusaPLCnextEngineer
                 }
 #endif
             //Основной цикл работы с дополнительными устройствами
-            IOT_EVALUATE();
+            if ( !G_NO_IO_NODES && !G_READ_ONLY_IO_NODES )
+                {
+                IOT_EVALUATE();
+                }
 
             sleep_ms( sleep_time_ms );
 
