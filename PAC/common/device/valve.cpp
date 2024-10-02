@@ -1745,6 +1745,10 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
     if ( !data ) return;
 
     out_info = (out_data_swapped*)data;
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)data + extra_offset );
+        }
 
     auto input_data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
@@ -1881,6 +1885,20 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
     }
 
     return in_info.pv_y1_on && in_info.s2;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            extra_offset = (int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
