@@ -1889,16 +1889,9 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15::set_rt_par( u_int idx, float value )
     {
-    switch ( idx )
-        {
-        case 1:
-            extra_offset = (int)value;
-            break;
-
-        default:
-            valve::set_rt_par( idx, value );
-            break;
-        }
+    if ( 1u == idx )
+        extra_offset = static_cast<int>( value );
+    else valve::set_rt_par( idx, value );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
