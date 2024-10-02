@@ -1872,6 +1872,14 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
         return valve::get_on_fb_value();
         }
 
+    int active_solenoid_count = static_cast<int>(in_info.pv_y1_on) +
+        static_cast<int>(in_info.pv_y2_on) +
+        static_cast<int>(in_info.pv_y3_on);
+    if (active_solenoid_count > 1)
+    {
+        return false; // Активно более одного соленоида.
+    }
+
     return in_info.pv_y1_on && in_info.s2;
     }
 //-----------------------------------------------------------------------------
