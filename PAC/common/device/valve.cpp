@@ -1971,8 +1971,8 @@ valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
         }
 
     if (  in_info.pv_y1_on && !in_info.pv_y2_on && !in_info.pv_y3_on ) return V_ON;
-    if ( !in_info.pv_y1_on &&  in_info.pv_y2_on && !in_info.pv_y3_on ) return V_UPPER_SEAT;
-    if ( !in_info.pv_y1_on && !in_info.pv_y2_on &&  in_info.pv_y3_on ) return V_LOWER_SEAT;
+    if ( !in_info.pv_y1_on && !in_info.pv_y2_on &&  in_info.pv_y3_on ) return V_UPPER_SEAT;
+    if ( !in_info.pv_y1_on &&  in_info.pv_y2_on && !in_info.pv_y3_on ) return V_LOWER_SEAT;
     else return V_OFF;
     }
 //-----------------------------------------------------------------------------
