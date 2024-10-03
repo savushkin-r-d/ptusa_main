@@ -857,6 +857,8 @@ class valve_iolink_gea_tvis_a15 : public valve
         int get_off_fb_value() final;
         int get_on_fb_value() final;
 
+        void set_rt_par( u_int idx, float value ) override;
+
     protected:
         struct in_data
             {
@@ -872,8 +874,10 @@ class valve_iolink_gea_tvis_a15 : public valve
             bool Y5 : 1;    // незанятый бит
             bool pv_y1_on : 1; // пилотный клапан соленоида y1 активирован
             bool pv_y2_on : 1; // пилотный клапан соленоида y2 активирован
+                               // Управление нижним седлом.
             bool pv_y3_on : 1; // если pv_y1_on = 0: пилотный клапан соленоида y3 активирован
                                // если pv_y1_on = 1: пилотный клапан соленоида y4 активирован
+                               // Управление верхним седлом.
             bool error_on : 1; // ошибка активна 
 
             uint16_t  pos : 10;     // позиция шкота в 10^-4 метра
@@ -900,6 +904,9 @@ class valve_iolink_gea_tvis_a15 : public valve
             {
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
+
+    private:
+        int extra_offset = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link GEA T.VIS A-15 односедельный отсечной.

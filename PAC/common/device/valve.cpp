@@ -1745,6 +1745,10 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
     if ( !data ) return;
 
     out_info = (out_data_swapped*)data;
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)data + extra_offset );
+        }
 
     auto input_data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
@@ -1835,7 +1839,21 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
     if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
         return true;
 
-    if ( in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on ) return true;
+    int active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) + 
+        static_cast<int>( in_info.pv_y2_on ) + 
+        static_cast<int>( in_info.pv_y3_on );
+    if ( active_solenoid_count > 1 )
+        {
+        return false; // Активно более одного соленоида.
+        }
+
+    if ( !in_info.pv_y1_on && !in_info.pv_y2_on && !in_info.pv_y3_on &&
+        in_info.s1 && in_info.s4 ) return true;         // Неактивное состояние.
+    if ( in_info.pv_y1_on &&
+        in_info.s2 ) return true;                       // Активное состяние.
+    if ( in_info.pv_y2_on ) return true;                // Нижнее седло.
+    if ( in_info.pv_y3_on && 
+        in_info.s1 && in_info.s4 ) return true;         // Верхнее седло.    
 
     return false;
     }
@@ -1847,7 +1865,8 @@ int valve_iolink_gea_tvis_a15::get_off_fb_value()
         return valve::get_off_fb_value();
         }
 
-    return !( in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on );
+    return !in_info.pv_y1_on && !in_info.pv_y2_on && !in_info.pv_y3_on &&
+        in_info.s1 && in_info.s4;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_gea_tvis_a15::get_on_fb_value() 
@@ -1857,7 +1876,22 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
         return valve::get_on_fb_value();
         }
 
-    return in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on;
+    int active_solenoid_count = static_cast<int>(in_info.pv_y1_on) +
+        static_cast<int>(in_info.pv_y2_on) +
+        static_cast<int>(in_info.pv_y3_on);
+    if (active_solenoid_count > 1)
+    {
+        return false; // Активно более одного соленоида.
+    }
+
+    return in_info.pv_y1_on && in_info.s2;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_gea_tvis_a15::set_rt_par( u_int idx, float value )
+    {
+    if ( 1u == idx )
+        extra_offset = static_cast<int>( value );
+    else valve::set_rt_par( idx, value );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1930,8 +1964,8 @@ valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
         }
 
     if (  in_info.pv_y1_on && !in_info.pv_y2_on && !in_info.pv_y3_on ) return V_ON;
-    if ( !in_info.pv_y1_on &&  in_info.pv_y2_on && !in_info.pv_y3_on ) return V_UPPER_SEAT;
-    if ( !in_info.pv_y1_on && !in_info.pv_y2_on &&  in_info.pv_y3_on ) return V_LOWER_SEAT;
+    if ( !in_info.pv_y1_on && !in_info.pv_y2_on &&  in_info.pv_y3_on ) return V_UPPER_SEAT;
+    if ( !in_info.pv_y1_on &&  in_info.pv_y2_on && !in_info.pv_y3_on ) return V_LOWER_SEAT;
     else return V_OFF;
     }
 //-----------------------------------------------------------------------------
@@ -1954,12 +1988,12 @@ void valve_iolink_gea_tvis_a15_ds::direct_set_state( int new_state )
 
         case V_UPPER_SEAT:
             direct_off();
-            out_info->pv_y2 = true;
+            out_info->pv_y3 = true;
             break;
 
         case V_LOWER_SEAT:
             direct_off();
-            out_info->pv_y3 = true;
+            out_info->pv_y2 = true;
             break;
 
         default:
