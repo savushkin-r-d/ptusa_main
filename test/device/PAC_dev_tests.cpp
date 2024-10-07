@@ -916,6 +916,12 @@ TEST( dev_stub, get_min_flow )
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
     }
 
+TEST( dev_stub, start )
+    {    
+    STUB()->start();    // Do nothing.
+    EXPECT_EQ( 0, STUB()->get_quantity() );
+    }
+    
 TEST( device, device )
     {
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
@@ -2801,58 +2807,96 @@ TEST( counter_iolink, get_quantity )
 
     counter_iolink_test fqt1( "FQT1" );
     EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
 
-    fqt1.set_raw_value( 10 );
+    const auto START_RAW_VALUE = 10;
+    fqt1.set_raw_value( START_RAW_VALUE );
     // First read - should be 0.
     fqt1.evaluate_io();
     EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
-
-    fqt1.set_raw_value( 20 );
-    fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
+        
+    const auto RAW_VALUE_1 = START_RAW_VALUE + 10;
+    fqt1.set_raw_value( RAW_VALUE_1 );
+    fqt1.evaluate_io();    
+    const auto NEW_VALUE_1 = counter_iolink::mL_in_L * START_RAW_VALUE;
+    // Second read - should be 10'000.
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_abs_quantity() );
 
 
     fqt1.off();
-    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_abs_quantity() );
 
     fqt1.pause();
-    fqt1.set_raw_value( 30 );
+    // В паузе все счетчики кроме главного не изменяются.
+    const auto NEW_VALUE_2 = counter_iolink::mL_in_L * RAW_VALUE_1;
+    const auto RAW_VALUE_2 = START_RAW_VALUE + 20;
+    fqt1.set_raw_value( RAW_VALUE_2 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::DAY ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER1 ) );
+    EXPECT_EQ( NEW_VALUE_1, fqt1.get_quantity( i_counter::USER2 ) );
+    EXPECT_EQ( NEW_VALUE_2, fqt1.get_abs_quantity() );
 
     fqt1.on();
-    fqt1.set_raw_value( 40 );
+    const auto NEW_VALUE_3 = counter_iolink::mL_in_L * RAW_VALUE_2;
+    const auto RAW_VALUE_3 = START_RAW_VALUE + 30;
+    fqt1.set_raw_value( RAW_VALUE_3 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_2, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_3, fqt1.get_abs_quantity() );
 
 
     fqt1.set_state( 0 );        //Off.
-    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_2, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_3, fqt1.get_abs_quantity() );
 
     fqt1.set_state( 2 );        //Pause.
-    fqt1.set_raw_value( 50 );
+    const auto NEW_VALUE_4 = counter_iolink::mL_in_L * RAW_VALUE_3;
+    const auto RAW_VALUE_4 = START_RAW_VALUE + 40;
+    fqt1.set_raw_value( RAW_VALUE_4 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_2, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_4, fqt1.get_abs_quantity() );
 
     fqt1.set_state( 1 );        //Start
-    fqt1.set_raw_value( 60 );
+    const auto NEW_VALUE_5 = counter_iolink::mL_in_L * RAW_VALUE_4;
+    const auto RAW_VALUE_5 = START_RAW_VALUE + 50;
+    fqt1.set_raw_value( RAW_VALUE_5 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_abs_quantity() );
+    EXPECT_EQ( NEW_VALUE_3, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_5, fqt1.get_abs_quantity() );
 
 
-    //Test reset to 0 physical counter after its power reboot.
-    fqt1.set_raw_value( 10 );
+    //Test reset to 10 physical counter after its power reboot.
+    fqt1.set_raw_value( START_RAW_VALUE );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 60, fqt1.get_quantity() );
+    EXPECT_EQ( NEW_VALUE_4, fqt1.get_quantity() );
 
     //Test physical counter overflow.
     fqt1.set_raw_value( fqt1.get_max_raw_value() - 10 );
