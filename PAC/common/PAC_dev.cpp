@@ -1,0 +1,8518 @@
+#include "PAC_dev.h"
+#include "tech_def.h"
+
+#include "g_errors.h"
+#include "lua_manager.h"
+#include "log.h"
+#include "PID.h"
+
+#ifdef WIN_OS
+#pragma warning(push)
+#pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
+#endif // WIN_OS
+
+auto_smart_ptr < device_manager > device_manager::instance;
+
+std::vector<valve*> valve::to_switch_off;
+std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
+
+valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
+valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
+circuit_breaker::F_data_out circuit_breaker::stub_out_info;
+
+power_unit::process_data_out power_unit::stub_p_data_out = {};
+unsigned int power_unit::WAIT_DATA_TIME = 300;
+unsigned int power_unit::WAIT_CMD_TIME = 1000;
+
+analog_valve_iolink::out_data analog_valve_iolink::stub_out_info;
+signal_column_iolink::out_data signal_column_iolink::stub_out_info;
+
+const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
+    {
+    "V",       ///< Клапан.
+    "VC",      ///< Управляемый клапан.
+    "M",       ///< Двигатель.
+    "LS",      ///< Уровень (есть/нет).
+    "TE",      ///< Температура.
+    "FS",      ///< Расход (есть/нет).
+    "GS",      ///< Датчик положения.
+    "FQT",     ///< Счетчик.
+    "LT",      ///< Уровень (значение).
+    "QT",      ///< Концентрация.
+
+    "HA",      ///< Аварийная звуковая сигнализация.
+    "HL",      ///< Аварийная световая сигнализация.
+    "SB",      ///< Кнопка.
+    "DI",      ///< Дискретный входной сигнал.
+    "DO",      ///< Дискретный выходной сигнал.
+    "AI",      ///< Аналоговый входной сигнал.
+    "AO",      ///< Аналоговый выходной сигнал.
+    "WT",      ///< Тензорезистор.
+    "PT",      ///< Давление (значение).
+    "F",       ///< Автоматический выключатель.
+
+    "C",       ///< ПИД-регулятор.
+    "HLA",     ///< Сигнальная колонна.
+    "CAM",     ///< Камера.
+    "PDS",     ///< Датчик разности давления.
+    "TS",      ///< Сигнальный датчик температуры.
+    "G",       ///< Блок питания.
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int par_device::save_device( char* str )
+    {
+    str[ 0 ] = 0;
+
+    if ( par == 0 )
+        {
+        return 0;
+        }
+
+    int size = 0;
+    for ( u_int i = 0; i < par->get_count(); i++ )
+        {
+        if ( par_name[ i ] )
+            {
+            auto val = par[ 0 ][ i + 1 ];
+            double tmp;
+            int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}={:.{}f}, ",
+                par_name[ i ], val, precision ).size;
+            }
+        }
+    return size;
+    }
+//-----------------------------------------------------------------------------
+int par_device::set_par_by_name( const char *name, double val )
+    {
+    if ( par )
+        {
+        for ( u_int i = 0; i < par->get_count(); i++ )
+            {
+            if ( strcmp( par_name[ i ], name ) == 0 )
+                {
+                par->save( i + 1, ( float ) val );
+                return 0;
+                }
+            }
+        }
+
+    if ( G_DEBUG )
+        {
+        printf( "par_device::set_cmd() - name = %s wasn't found.\n",
+            name );
+        }
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+void par_device::set_par( u_int idx, u_int offset, float value )
+    {
+    if ( par )
+        {
+        par[ 0 ][ offset + idx ] = value;
+        }
+    }
+//-----------------------------------------------------------------------------
+par_device::par_device ( u_int par_cnt ) : err_par( 0 ), par ( 0 ),
+    par_name ( 0 )
+    {
+    if ( par_cnt )
+        {
+        par_name = new char*[ par_cnt ];
+        for ( u_int i = 0; i < par_cnt; i++ )
+            {
+            par_name[ i ] = 0;
+            }
+
+        par = new saved_params_float ( par_cnt );
+        }
+    }
+//-----------------------------------------------------------------------------
+par_device::~par_device()
+    {
+    if ( par )
+        {
+        for ( u_int i = 0; i < par->get_count(); i++ )
+            {
+            delete [] par_name[ i ];
+            par_name[ i ] = nullptr;
+            }
+
+        delete [] par_name;
+        par_name = nullptr;
+
+        delete par;
+        par = nullptr;
+        }
+    }
+//-----------------------------------------------------------------------------
+float par_device::get_par( u_int idx, u_int offset ) const
+    {
+    if ( par )
+        {
+        return par[ 0 ][ offset + idx ];
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void par_device::set_par_name( u_int idx, u_int offset, const char* name )
+    {
+    if ( par )
+        {
+        if ( offset + idx <= par->get_count() && ( offset + idx > 0 ) )
+            {
+            if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
+                {
+                if ( G_DEBUG )
+                    {
+                    printf( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
+                        "name length (%zu) > param C_MAX_PAR_NAME_LENGTH (%d).",
+                        strlen( name ), C_MAX_PAR_NAME_LENGTH );
+                    }
+
+                return;
+                }
+
+            if ( 0 == par_name[ offset + idx - 1 ] )
+                {
+                par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
+                strcpy( par_name[ offset + idx - 1 ], name );
+                }
+            else
+                {
+                if ( G_DEBUG )
+                    {
+                    printf( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                        "param (%d %d) already has name (%s).",
+                        offset, idx, par_name[ offset + idx - 1 ] );
+                    }
+                }
+            }
+        else
+            {
+            if ( G_DEBUG )
+                {
+                printf( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                    "offset (%d) + idx (%d) > param count ( %d ).",
+                    offset, idx, par->get_count() );
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void device::set_descr( const char *new_description )
+    {
+    delete[] description;
+
+    //Копирование с учетом нуль-символа.
+    int len = strlen( new_description ) + 1;
+    description = new char[ len ];
+    strcpy( description, new_description );
+    }
+//-----------------------------------------------------------------------------
+void device::set_article( const char* new_article )
+    {
+    delete[] article;
+
+    //Копирование  с учетом нуль-символа.
+    int len = strlen( new_article ) + 1;
+    article = new char[ len ];
+    strcpy( article, new_article );
+    }
+//-----------------------------------------------------------------------------
+void device::print() const
+    {
+    printf( "%s\t", name );
+    }
+//-----------------------------------------------------------------------------
+void device::off()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_off();
+        }
+    }
+//-----------------------------------------------------------------------------
+void device::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t device::set_string_property() - "
+            "field = %s, val = \"%s\"",
+            name, field, value );
+        }
+    }
+//-----------------------------------------------------------------------------
+int device::save_device( char* buff, const char* prefix )
+    {
+    int res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "{}{}={{M={:d}, ", prefix, name, is_manual_mode ).size;
+
+    if ( type != DT_AO )
+        {
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "ST={}, ",
+            get_state() ).size;
+        }
+
+    if ( type != DT_V &&
+
+        type != DT_FS &&
+        type != DT_GS &&
+
+        type != DT_HA &&
+        type != DT_HL &&
+        type != DT_SB &&
+        !( type == DT_LS && ( sub_type == DST_LS_MAX || sub_type == DST_LS_MIN ) ) &&
+
+        type != DT_DI &&
+        type != DT_DO )
+        {
+        auto val = get_value();
+        double tmp;
+        int precision = modf( val, &tmp ) == 0 ? 0 : 2;
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "V={:.{}f}, ",
+            val, precision ).size;
+        }
+
+    res += save_device_ex( buff + res );
+    res += par_device::save_device( buff + res );
+
+    const int extra_symbols_length = 2;                     //Remove last " ,".
+    if ( res > extra_symbols_length ) res -= extra_symbols_length;
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int device::set_cmd( const char *prop, u_int idx, char *val )
+    {
+    if ( G_DEBUG )
+        {
+        printf( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %s\n",
+            name, prop, idx, val );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int device::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        sprintf( G_LOG->msg,
+                "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f",
+                name, prop, idx, val);
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'S':
+            direct_set_state( ( int ) val );
+            break;
+
+        case 'V':
+            direct_set_value( ( float ) val );
+            break;
+
+        case 'M':
+            if ( val == 0. )
+                is_manual_mode = false;
+            else if ( val == 1. )
+                is_manual_mode = true;
+            break;
+
+        case 'P': //Параметры.
+            return par_device::set_par_by_name( prop, val );
+
+        default:
+            if ( G_DEBUG )
+                {
+                printf( "Error device::set_cmd() - prop = %s, val = %f\n",
+                    prop, val );
+                }
+            return 1;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) : par_device( par_cnt ), s_number( 0 ), type( type ),
+    sub_type( sub_type ), is_manual_mode( false ), article( 0 )
+    {
+    if ( dev_name )
+        {
+        strcpy( this->name, dev_name );
+        }
+    else
+        {
+        strcpy( this->name, "?" );
+        }
+
+    description = new char[ 1 ];
+    description[ 0 ] = 0;
+
+    article = new char[ 2 ];
+    article[ 0 ] = ' ';
+    article[ 1 ] = 0;
+    }
+//-----------------------------------------------------------------------------
+const char* device::get_type_str() const
+    {
+    return DEV_NAMES[ type ];
+    }
+//-----------------------------------------------------------------------------
+const char* device::get_type_name() const
+    {
+    switch ( type )
+        {
+        case DT_V:
+            return "Клапан";
+        case DT_VC:
+            return "Управляемый клапан";
+        case DT_M:
+            return "Двигатель";
+
+        case DT_LS:
+            return "Уровень";
+        case DT_TE:
+            return "Температура";
+        case DT_FS:
+            return "Расход";
+        case DT_GS:
+            return "Датчик положения";
+        case DT_FQT:
+            return "Счетчик";
+        case DT_LT:
+            return "Уровень";
+        case DT_QT:
+            return "Концентрация";
+        case DT_HA:
+            return "Аварийная звуковая сигнализация";
+        case DT_HL:
+            return "Аварийная световая сигнализация";
+        case DT_SB:
+            return "Кнопка";
+        case DT_DI:
+            return "Дискретный входной сигнал";
+        case DT_DO:
+            return "Дискретный выходной сигнал";
+        case DT_AI:
+            return "Аналоговый входной сигнал";
+        case DT_AO:
+            return "Аналоговый выходной сигнал";
+        case DT_WT:
+            return "Тензорезистор";
+        case DT_PT:
+            return "Давление";
+        case DT_F:
+            return "Автоматический выключатель";
+        case DT_REGULATOR:
+            return "ПИД-регулятор";
+        case DT_HLA:
+            return "Сигнальная колонна";
+        case DT_CAM:
+            return "Камера";
+        case DT_G:
+            return "Блок питания";
+
+        default:
+            return "???";
+        }
+    }
+//-----------------------------------------------------------------------------
+void device::param_emulator( float math_expec, float stddev )
+    {
+    emulator.param( math_expec, stddev );
+    }
+//-----------------------------------------------------------------------------
+analog_emulator& device::get_emulator()
+    {
+    return emulator;
+    }
+//-----------------------------------------------------------------------------
+bool device::is_emulation() const
+    {
+    return emulation;
+    }
+//-----------------------------------------------------------------------------
+void device::set_emulation( bool new_emulation_state )
+    {
+    emulation = new_emulation_state;
+    }
+//-----------------------------------------------------------------------------
+device::~device()
+    {
+    delete [] description;
+    description = nullptr;
+    delete [] article;
+    article = nullptr;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+int DO1::get_state()
+    {
+    return get_DO( DO_INDEX );
+    }
+//-----------------------------------------------------------------------------
+void DO1::direct_on()
+    {
+    set_DO( DO_INDEX, 1 );
+    }
+//-----------------------------------------------------------------------------
+void DO1::direct_off()
+    {
+    set_DO( DO_INDEX, 0 );
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int red_lamp_channel, int yellow_lamp_channel,
+    int green_lamp_channel, int blue_lamp_channel, int siren_channel ):
+    device( dev_name, DT_HLA, sub_type, 0 ),
+    io_device( dev_name ),
+    show_state( show_states::idle ),
+    is_const_red( 0 ),
+    red_lamp_channel( red_lamp_channel ),
+    yellow_lamp_channel( yellow_lamp_channel ),
+    green_lamp_channel( green_lamp_channel ),
+    blue_lamp_channel( blue_lamp_channel ),
+    siren_channel( siren_channel ),
+    siren_step( STEP::off )
+    {
+    }
+//-----------------------------------------------------------------------------
+void signal_column::direct_off()
+    {
+    if ( red_lamp_channel ) turn_off_red();
+    if ( yellow_lamp_channel ) turn_off_yellow();
+    if ( green_lamp_channel ) turn_off_green();
+    if ( blue_lamp_channel ) turn_off_blue();
+
+    if ( siren_channel ) turn_off_siren();
+    }
+//-----------------------------------------------------------------------------
+void signal_column::direct_on()
+    {
+    if ( red_lamp_channel ) turn_off_red();
+    if ( yellow_lamp_channel ) turn_off_yellow();
+    if ( green_lamp_channel ) turn_off_green();
+    if ( blue_lamp_channel ) turn_off_blue();
+
+    if ( siren_channel ) turn_off_siren();
+
+    turn_on_green();
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_red()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( red_lamp_channel, DO_state::OFF, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    red.step = STEP::off;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_yellow()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( yellow_lamp_channel, DO_state::OFF, YELLOW_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    yellow.step = STEP::off;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_green()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( green_lamp_channel, DO_state::OFF, GREEN_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    green.step = STEP::off;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_blue()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    blue.step = STEP::off;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_red()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    red.step = STEP::on;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_yellow()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( yellow_lamp_channel, DO_state::ON, YELLOW_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    yellow.step = STEP::on;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_green()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    green.step = STEP::on;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_blue()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+    blue.step = STEP::on;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_red()
+    {
+    if ( is_const_red )
+        {
+        blink( red_lamp_channel, red, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+        }
+    else
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+        red.step = STEP::on;
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_yellow()
+    {
+    blink( yellow_lamp_channel, yellow, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_green()
+    {
+    blink( green_lamp_channel, green, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_blue()
+    {
+    blink( blue_lamp_channel, blue, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_red()
+    {
+    if ( is_const_red )
+        {
+        blink( red_lamp_channel, red, (u_long)CONSTANTS::SLOW_BLINK_TIME );
+        }
+    else
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
+        red.step = STEP::on;
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_yellow()
+    {
+    blink( yellow_lamp_channel, yellow, (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_green()
+    {
+    blink( green_lamp_channel, green, (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_blue()
+    {
+    blink( blue_lamp_channel, blue, (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_siren()
+    {
+    siren_step = STEP::blink_on;
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( siren_channel, DO_state::ON, SIREN );
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_siren()
+    {
+    siren_step = STEP::off;
+#ifndef DEBUG_NO_IO_MODULES
+    process_DO( siren_channel, DO_state::OFF, SIREN );
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void signal_column::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            is_const_red = (u_int)value;
+            break;
+
+        default:
+            set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column::direct_set_value( float new_value )
+    {
+    }
+//-----------------------------------------------------------------------------
+int signal_column::get_state()
+    {
+    int res = green.step != STEP::off || yellow.step == STEP::off ||
+        red.step == STEP::off || siren_step != STEP::off;
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+float signal_column::get_value()
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
+int signal_column::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "L_GREEN=%d, ",
+        green.step == STEP::on || green.step == STEP::blink_on ? 1 : 0 );
+    res += sprintf( buff + res, "L_YELLOW=%d, ",
+        yellow.step == STEP::on || yellow.step == STEP::blink_on ? 1 : 0 );
+    res += sprintf( buff + res, "L_RED=%d, ",
+        red.step == STEP::on || red.step == STEP::blink_on ? 1 : 0 );
+    res += sprintf( buff + res, "L_SIREN=%d, ",
+        siren_step == STEP::on ? 1 : 0 );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::evaluate_io()
+    {
+    //Так как колонну могут использовать несколько аппаратов
+    //(агрегатов), то отключаем отображение событий в начале каждого
+    // цикла управляющей программы.
+    show_state = show_states::idle;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::show_error_exists()
+    {
+    if ( get_manual_mode() ) return;
+
+    show_state = show_states::error_exists;
+    normal_blink_red();
+    turn_off_yellow();
+    turn_off_green();
+    turn_on_siren();
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_message_exists()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists )
+        {
+        show_state = show_states::message_exists;
+        turn_off_red();
+        normal_blink_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_batch_is_not_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists )
+        {
+        show_state = show_states::batch_is_not_running;
+        turn_off_red();
+        turn_on_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_batch_is_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running )
+        {
+        show_state = show_states::batch_is_running;
+        turn_off_red();
+        turn_off_yellow();
+        turn_on_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_operation_is_not_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running )
+        {
+        show_state = show_states::operation_is_not_running;
+        turn_off_red();
+        turn_on_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_operation_is_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running &&
+        show_state != show_states::operation_is_not_running )
+        {
+        show_state = show_states::operation_is_running;
+        turn_off_red();
+        turn_off_yellow();
+        turn_on_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_idle()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running &&
+        show_state != show_states::operation_is_not_running &&
+        show_state != show_states::batch_is_running &&
+        show_state != show_states::operation_is_running )
+        {
+        show_state = show_states::idle;
+        turn_off_red();
+        turn_off_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::direct_set_state( int new_state )
+    {
+    switch ( (STATE)new_state )
+        {
+        case STATE::TURN_OFF:
+            direct_off();
+            break;
+
+        case STATE::TURN_ON:
+            direct_on();
+            break;
+
+        case STATE::LIGHTS_OFF:
+            turn_off_red();
+            turn_off_yellow();
+            turn_off_green();
+            break;
+
+        case STATE::GREEN_ON:
+            turn_on_green();
+            break;
+
+        case STATE::YELLOW_ON:
+            turn_on_yellow();
+            break;
+
+        case STATE::RED_ON:
+            turn_on_red();
+            break;
+
+        case STATE::GREEN_NORMAL_BLINK:
+            normal_blink_green();
+            break;
+
+        case STATE::GREEN_OFF:
+            turn_off_green();
+            break;
+
+        case STATE::YELLOW_OFF:
+            turn_off_yellow();
+            break;
+
+        case STATE::RED_OFF:
+            turn_off_red();
+            break;
+
+        case STATE::YELLOW_NORMAL_BLINK:
+            normal_blink_yellow();
+            break;
+
+        case STATE::RED_NORMAL_BLINK:
+            normal_blink_red();
+            break;
+
+        case STATE::GREEN_SLOW_BLINK:
+            slow_blink_green();
+            break;
+
+        case STATE::YELLOW_SLOW_BLINK:
+            slow_blink_yellow();
+            break;
+
+        case STATE::RED_SLOW_BLINK:
+            slow_blink_red();
+            break;
+
+        case STATE::SIREN_ON:
+            turn_on_siren();
+            break;
+
+        case STATE::SIREN_OFF:
+            turn_off_siren();
+            break;
+
+        default:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+signal_column::state_info::state_info()
+    {
+    step = STEP::off;
+    start_blink_time = 0;
+    start_wait_time = 0;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
+    {
+    switch ( info.step )
+        {
+        case STEP::off:
+        case STEP::on:
+            info.start_blink_time = get_millisec();
+            info.step = STEP::blink_on;
+            break;
+
+        case STEP::blink_on:
+            process_DO( lamp_DO, DO_state::ON, "?" );
+            if ( get_delta_millisec( info.start_blink_time ) > delay_time )
+                {
+                info.start_wait_time = get_millisec();
+                info.step = STEP::blink_off;
+                }
+            break;
+
+        case STEP::blink_off:
+            process_DO( lamp_DO, DO_state::OFF, "?" );
+            if ( get_delta_millisec( info.start_wait_time ) > delay_time )
+                {
+                info.start_blink_time = get_millisec();
+                info.step = STEP::blink_on;
+                }
+            break;
+        }
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+signal_column_discrete::signal_column_discrete( const char* dev_name,
+    int red_lamp_channel, int yellow_lamp_channel,
+    int green_lamp_channel, int blue_lamp_channel,
+    int siren_channel ) :
+    signal_column( dev_name, DST_HLA,
+        red_lamp_channel, yellow_lamp_channel, green_lamp_channel,
+        blue_lamp_channel, siren_channel )
+    {
+    }
+//-----------------------------------------------------------------------------
+void signal_column_discrete::process_DO( u_int n, DO_state state, const char* name )
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( n - 1, static_cast<char>( state ) );
+#endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+signal_column_iolink::signal_column_iolink( const char* dev_name ) :
+    signal_column( dev_name, DST_HLA_IOLINK ),
+    out_info( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+void signal_column_iolink::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
+    if ( strcmp( field, "SIGNALS_SEQUENCE" ) == 0 )
+        {
+        auto pos = strchr( value, 'R' );
+        if ( pos )
+            {
+            red_lamp_channel = pos - value + 1;
+            }
+        pos = strchr( value, 'Y' );
+        if ( pos )
+            {
+            yellow_lamp_channel = pos - value + 1;
+            }
+        pos = strchr( value, 'G' );
+        if ( pos )
+            {
+            green_lamp_channel = pos - value + 1;
+            }
+        pos = strchr( value, 'B' );
+        if ( pos )
+            {
+            blue_lamp_channel = pos - value + 1;
+            }
+        pos = strchr( value, 'A' );
+        if ( pos )
+            {
+            siren_channel = pos - value + 1;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name )
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    bool ch_state = state == DO_state::ON;
+    switch ( n )
+        {
+        case 0:
+            G_LOG->warning( "%s\t signal_column_iolink::process_DO() - "
+                "no \'%s\'.", get_name(), name );
+            break;
+
+        case 1:
+            out_info->switch_ch1 = ch_state;
+            break;
+        case 2:
+            out_info->switch_ch2 = ch_state;
+            break;
+        case 3:
+            out_info->switch_ch3 = ch_state;
+            break;
+        case 4:
+            out_info->switch_ch4 = ch_state;
+            break;
+        case 5:
+            out_info->switch_ch5 = ch_state;
+            break;
+
+        default:
+            G_LOG->warning( "%s\t signal_column_iolink::process_DO() - "
+                "unknown \'%s\'.", get_name(), name );
+            break;
+        }
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void signal_column_iolink::evaluate_io()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    signal_column::evaluate_io();
+    out_info = (out_data*)get_AO_write_data( 0 );
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int params_count, bool is_ready ) :
+    device( dev_name, DT_CAM, sub_type, params_count ),
+    io_device( dev_name ),
+    is_cam_ready( is_ready ),
+    result( 0 ),
+    state( 0 )
+    {
+    }
+
+void camera::direct_set_state( int new_state )
+    {
+    if ( new_state ) direct_on(); else direct_off();
+    }
+
+void camera::direct_off()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 0 );
+#endif
+    state = 0;
+    }
+
+void camera::direct_on()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 1 );
+#endif
+    state = 1;
+    }
+
+void camera::direct_set_value( float new_value )
+    {
+    }
+
+int camera::get_state()
+    {
+    return state;
+    }
+
+float camera::get_value()
+    {
+    return static_cast<float>( state );
+    }
+
+int camera::get_result( int n )
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
+#endif
+    return result;
+    }
+
+int camera::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "RESULT=%d, READY=%d, ",
+        get_result(), is_cam_ready );
+    return res;
+    }
+
+int camera::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "RESULT" ) == 0 )
+        {
+        result = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "READY" ) == 0 )
+        {
+        is_cam_ready = val > 0;
+        }
+    else device::set_cmd( prop, idx, val );
+
+    return 0;
+    }
+
+void camera::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
+    if ( strcmp( field, "IP" ) == 0 )
+        {
+        ip = std::string( value );
+        }
+    }
+
+bool camera::is_ready() const
+    {
+    return is_cam_ready;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1, false ),
+    start_switch_time( get_millisec() )
+    {
+    set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
+    }
+
+void camera_DI2::evaluate_io()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
+    int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
+
+    if ( 1 == i )
+        {
+        start_switch_time = get_millisec();
+        state = o;
+        }
+    else if ( get_delta_millisec( start_switch_time ) <
+        get_par( static_cast<u_int>( PARAMS::P_READY_TIME ), 0 ) )
+        {
+        state = o;
+        }
+    else
+        {
+        state = -1;
+        }
+
+    is_cam_ready = i > 0;
+#endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI3::camera_DI3( const char* dev_name ) :
+    camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 ),
+    result_2( 0 )
+    {
+    }
+
+void camera_DI3::evaluate_io()
+    {
+    camera_DI2::evaluate_io();
+#ifndef DEBUG_NO_IO_MODULES
+    result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
+#endif
+    }
+
+int camera_DI3::get_result( int n )
+    {
+    switch ( n )
+        {
+        case 1:
+            return camera::get_result();
+
+        case 2:
+            return result_2;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_V( const char *dev_name )
+    {
+    return get_device( device::DT_V, dev_name );
+    }
+//-----------------------------------------------------------------------------
+device_manager* device_manager::get_instance()
+    {
+    if ( instance.is_null() )
+        {
+        instance = new device_manager();
+        }
+    return instance;
+    }
+//-----------------------------------------------------------------------------
+device* device_manager::get_device( int dev_type,
+                                   const char *dev_name )
+    {
+    int dev_n = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_name );
+
+    if ( dev_n >= 0 )
+        {
+        try
+            {
+            return project_devices[ dev_n ];
+            }
+        catch (...)
+            {
+            return get_stub_device();
+            }
+        }
+    else if ( !disable_error_logging )
+        {
+        if ( dev_type < device::C_DEVICE_TYPE_CNT )
+            {
+            sprintf( G_LOG->msg, "%3s ", device::DEV_NAMES[ dev_type ] );
+            }
+        else
+            {
+            sprintf( G_LOG->msg, "unknown " );
+            }
+        sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
+            dev_name );
+
+        G_LOG->write_log( i_log::P_ERR );
+        }
+
+    return get_stub_device();
+    }
+//-----------------------------------------------------------------------------
+device* device_manager::get_device( const char* dev_name )
+    {
+    int dev_n = get_device_n( dev_name );
+
+    if ( dev_n >= 0 )
+        {
+        try
+            {
+            return project_devices[ dev_n ];
+            }
+        catch ( ... )
+            {
+            return get_stub_device();
+            }
+        }
+    else if ( !disable_error_logging )
+        {
+        sprintf( G_LOG->msg, "Device \"%s\" not found!", dev_name );
+        G_LOG->write_log( i_log::P_ERR );
+        }
+
+    return get_stub_device();
+    }
+//-----------------------------------------------------------------------------
+size_t device_manager::get_device_count() const
+    {
+    return project_devices.size();
+    }
+//-----------------------------------------------------------------------------
+void device_manager::print() const
+    {
+    printf( "Device manager [%zu]:\n", project_devices.size() );
+    for ( u_int i = 0; i < project_devices.size(); i++ )
+        {
+        printf( "    %3i. ", i + 1 );
+        printf( "%-20s %s",
+            project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
+        printf( "\n" );
+        }
+    }
+//-----------------------------------------------------------------------------
+device_manager::device_manager( ) : project_devices( 0 ), disable_error_logging( false )
+    {
+    G_DEVICE_CMMCTR->add_device( this );
+    }
+//-----------------------------------------------------------------------------
+device_manager::~device_manager()
+    {
+    for ( u_int i = 0; i < project_devices.size(); i++ )
+        {
+        delete project_devices[ i ];
+        }
+
+#ifndef __BORLANDC__
+    project_devices.clear();
+#endif
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_VC( const char *dev_name )
+    {
+    return get_device( device::DT_VC, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_motor* device_manager::get_M( const char *dev_name )
+    {
+    return (i_motor*) get_device( device::DT_M, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_LS( const char *dev_name )
+    {
+    return get_device( device::DT_LS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_FS( const char *dev_name )
+    {
+    return get_device( device::DT_FS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_GS( const char *dev_name )
+    {
+    return get_device( device::DT_GS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_AI( const char *dev_name )
+    {
+    return get_device( device::DT_AI, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_AO( const char *dev_name )
+    {
+    return get_device( device::DT_AO, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_counter* device_manager::get_FQT( const char *dev_name )
+    {
+    int res = get_device_n( device::DT_FQT, dev_name );
+    if ( res > -1 )
+        {
+        device *res_ctr = project_devices.at( res );
+        switch ( res_ctr->get_sub_type() )
+            {
+            case device::DST_FQT_F:
+                return ( counter_f* )res_ctr;
+
+            case device::DST_FQT:
+                return ( counter* )res_ctr;
+
+            case device::DST_FQT_VIRT:
+                return ( virtual_counter* ) res_ctr;
+
+            case device::DST_FQT_IOLINK:
+                return ( counter_iolink* ) res_ctr;
+
+            default:
+                break;
+            }
+        }
+
+     sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
+     G_LOG->write_log( i_log::P_ERR );
+
+    return &stub;
+    }
+//-----------------------------------------------------------------------------
+virtual_counter* device_manager::get_virtual_FQT( const char *dev_name )
+    {
+    int res = get_device_n( device::DT_FQT, dev_name );
+    if ( res > -1 )
+        {
+        device *res_ctr = project_devices.at( res );
+        switch ( res_ctr->get_sub_type() )
+            {
+            case device::DST_FQT_VIRT:
+                return ( virtual_counter* ) res_ctr;
+
+            default:
+                break;
+            }
+        }
+
+    sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
+    G_LOG->write_log( i_log::P_ERR );
+
+    static virtual_counter stub_fqt( "stub" );
+    return &stub_fqt;
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_TE( const char *dev_name )
+    {
+    return get_device( device::DT_TE, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_LT( const char *dev_name )
+    {
+    return get_device( device::DT_LT, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_DI( const char *dev_name )
+    {
+    return get_device( device::DT_DI, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_SB( const char *dev_name )
+    {
+    return get_device( device::DT_SB, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_DO( const char *dev_name )
+    {
+    return get_device( device::DT_DO, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_HA( const char *dev_name )
+    {
+    return get_device( device::DT_HA, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_HL( const char *dev_name )
+    {
+    return get_device( device::DT_HL, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_PT( const char *dev_name )
+    {
+    return get_device( device::DT_PT, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_QT( const char *dev_name )
+    {
+    return get_device( device::DT_QT, dev_name );
+    }
+//-----------------------------------------------------------------------------
+wages* device_manager::get_WT( const char *dev_name )
+    {
+    return (wages*)get_device( device::DT_WT, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* device_manager::get_F(const char* dev_name)
+    {
+    return (i_DO_AO_device*)get_device(device::DT_F, dev_name);
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* device_manager::get_C( const char* dev_name )
+    {
+    return dynamic_cast<i_DO_AO_device*>( get_device( device::DT_REGULATOR, dev_name ) );
+    }
+//-----------------------------------------------------------------------------
+signal_column* device_manager::get_HLA( const char* dev_name )
+    {
+    return (signal_column*)get_device( device::DT_HLA, dev_name );
+    }
+//-----------------------------------------------------------------------------
+camera* device_manager::get_CAM( const char* dev_name )
+    {
+    return (camera*)get_device( device::DT_CAM, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_PDS( const char* dev_name )
+    {
+    return get_device( device::DT_PDS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_TS( const char* dev_name )
+    {
+    return get_device( device::DT_TS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* device_manager::get_G( const char* dev_name )
+    {
+    return get_device( device::DT_G, dev_name );
+    }
+//-----------------------------------------------------------------------------
+io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
+                        const char* dev_name, const char * descr, const char* article )
+    {
+    device* new_device = nullptr;
+    io_device* new_io_device = nullptr;
+
+    switch ( dev_type )
+        {
+        case device::DT_V:
+            {
+            switch ( dev_sub_type )
+                {
+                case device::DST_V_DO1:
+                    new_device      = new valve_DO1( dev_name );
+                    new_io_device = ( valve_DO1* ) new_device;
+                    break;
+
+                case device::DST_V_DO2:
+                    new_device      = new valve_DO2( dev_name );
+                    new_io_device = ( valve_DO2* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI1_FB_OFF:
+                    new_device      = new valve_DO1_DI1_off( dev_name );
+                    new_io_device = ( valve_DO1_DI1_off* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI1_FB_ON:
+                    new_device      = new valve_DO1_DI1_on( dev_name );
+                    new_io_device = ( valve_DO1_DI1_on* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI2:
+                    new_device      = new valve_DO1_DI2( dev_name );
+                    new_io_device = ( valve_DO1_DI2* ) new_device;
+                    break;
+
+                case device::DST_V_DO2_DI2:
+                    new_device      = new valve_DO2_DI2( dev_name );
+                    new_io_device = ( valve_DO2_DI2* ) new_device;
+                    break;
+
+                case device::DST_V_MIXPROOF:
+                    new_device      = new valve_mix_proof( dev_name );
+                    new_io_device = ( valve_mix_proof* ) new_device;
+                    break;
+
+                case device::DST_V_AS_MIXPROOF:
+                    new_device      = new valve_AS_mix_proof( dev_name );
+                    new_io_device = ( valve_AS_mix_proof* ) new_device;
+                    if (valve_AS::V70_ARTICLES.count(article) > 0)
+                        {
+                        ((valve_AS_mix_proof*)new_io_device)->reverse_seat_connection = true;
+                        }
+                    break;
+
+                case device::DST_V_BOTTOM_MIXPROOF:
+                    new_device      = new valve_bottom_mix_proof( dev_name );
+                    new_io_device = ( valve_bottom_mix_proof* ) new_device;
+                    break;
+
+                case device::DST_V_AS_DO1_DI2:
+                    new_device      = new valve_AS_DO1_DI2( dev_name );
+                    new_io_device = ( valve_AS_DO1_DI2* ) new_device;
+                    break;
+
+                case device::V_DO2_DI2_BISTABLE:
+                    new_device      = new valve_DO2_DI2_bistable( dev_name );
+                    new_io_device = ( valve_DO2_DI2_bistable* ) new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1:
+                    new_device = new valve_iol_terminal_DO1( dev_name );
+                    new_io_device = (valve_iol_terminal_DO1*)new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1_DI2:
+                    new_device = new valve_iol_terminal_DO1_DI2( dev_name );
+                    new_io_device = (valve_iol_terminal_DO1_DI2*)new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1_FB_OFF:
+                    new_device = new valve_iol_terminal_DO1_DI1_off(dev_name);
+                    new_io_device = (valve_iol_terminal_DO1_DI1_off*)new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1_FB_ON:
+                    new_device = new valve_iol_terminal_DO1_DI1_on(dev_name);
+                    new_io_device = (valve_iol_terminal_DO1_DI1_on*)new_device;
+                    break;
+
+                case device::V_IOLINK_MIXPROOF:
+                    new_device = new valve_iolink_mix_proof( dev_name );
+                    new_io_device = (valve_iolink_mix_proof*)new_device;
+                    break;
+
+                case device::V_IOLINK_DO1_DI2:
+                    {
+                    if ( strcmp( article,
+                        valve_iolink_shut_off_sorio::SORIO_ARTICLE.c_str() ) == 0 )
+                        {
+                        new_device = new valve_iolink_shut_off_sorio( dev_name );
+                        new_io_device = (valve_iolink_shut_off_sorio*)new_device;
+                        }
+                    else
+                        {
+                        new_device = new valve_iolink_shut_off_thinktop( dev_name );
+                        new_io_device = (valve_iolink_shut_off_thinktop*)new_device;
+                        }
+                    break;
+                    }
+
+                case device::DST_V_MINI_FLUSHING:
+                    new_device = new valve_mini_flushing( dev_name );
+                    new_io_device = (valve_mini_flushing*)new_device;
+                    break;
+
+                case device::DST_V_VIRT:
+                    new_device = new virtual_valve( dev_name );
+                    break;
+
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3:
+                    new_device = new valve_iol_terminal_mixproof_DO3( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3*)new_device;
+                    break;
+
+                case device::V_IOL_TERMINAL_MIXPROOF_DO3_DI2:
+                    new_device = new valve_iol_terminal_mixproof_DO3_DI2( dev_name );
+                    new_io_device = (valve_iol_terminal_mixproof_DO3_DI2*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown V device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+            }
+
+        case device::DT_VC:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_VC:
+                    new_device = new analog_valve( dev_name );
+                    new_io_device = (analog_valve*)new_device;
+                    break;
+
+                case device::DST_VC_IOLINK:
+                    new_device = new analog_valve_iolink( dev_name );
+                    new_io_device = (analog_valve_iolink*)new_device;
+                    break;
+
+                case device::DST_VC_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VC_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown VC device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_M:
+            switch ( dev_sub_type )
+                {
+                case device::DST_M:
+                case device::DST_M_FREQ:
+                case device::DST_M_REV:
+                case device::DST_M_REV_FREQ:
+                case device::DST_M_REV_2:
+                case device::DST_M_REV_FREQ_2:
+                case device::M_REV_2_ERROR:
+                case device::DST_M_REV_FREQ_2_ERROR:
+                    new_device = new motor( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
+                    new_io_device = (motor*)new_device;
+                    break;
+
+                case device::M_ATV:
+                    new_device = new motor_altivar( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
+                    new_io_device = (motor_altivar*)new_device;
+                    break;
+
+                case device::M_ATV_LINEAR:
+                    new_device = new motor_altivar_linear( dev_name );
+                    new_io_device = (motor_altivar_linear*)new_device;
+                    break;
+
+                case device::DST_M_VIRT:
+                    new_device = new virtual_motor( dev_name );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown M device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_LS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_LS_MIN:
+                case device::DST_LS_MAX:
+                    new_device = new level_s( dev_name,
+                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    new_io_device = (level_s*)new_device;
+                    break;
+
+                case device::LS_IOLINK_MAX:
+                case device::LS_IOLINK_MIN:
+                    new_device = new level_s_iolink( dev_name,
+                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    new_io_device = (level_s_iolink*)new_device;
+                    break;
+
+                case device::DST_LS_VIRT:
+                    new_device = new virtual_device(dev_name, device::DT_LS, device::DST_LS_VIRT);
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown LS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_TE:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_TE:
+                    new_device      = new temperature_e( dev_name );
+                    new_io_device = ( temperature_e* ) new_device;
+                    break;
+
+                case device::DST_TE_IOLINK:
+                    new_device = new temperature_e_iolink(dev_name);
+                    new_io_device = (temperature_e_iolink*)new_device;
+                    break;
+
+                case device::DST_TE_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_TE, device::DST_TE_VIRT );
+                    break;
+
+                case device::DST_TE_ANALOG:
+                    new_device = new temperature_e_analog( dev_name );
+                    new_io_device = (temperature_e_analog*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown TE device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_FS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_FS:
+                    new_device = new flow_s( dev_name );
+                    new_io_device = (flow_s*)new_device;
+                    break;
+
+                case device::DST_FS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_FS, device::DST_FS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown FS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_FQT:
+            switch ( dev_sub_type )
+                {
+                case device::DST_FQT:
+                    new_device      = new counter( dev_name );
+                    new_io_device = ( counter* ) new_device;
+                    break;
+
+                case device::DST_FQT_F:
+                    new_device      = new counter_f( dev_name );
+                    new_io_device = ( counter_f* ) new_device;
+                    break;
+
+                case device::DST_FQT_VIRT:
+                    new_device = new virtual_counter( dev_name );
+                    break;
+
+                case device::DST_FQT_IOLINK:
+                    new_device = new counter_iolink( dev_name );
+                    new_io_device = (counter_iolink*)new_device;
+                    break;
+                    
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown FQT device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_AO:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_AO:
+                    new_device      = new analog_output( dev_name );
+                    new_io_device = ( analog_output* ) new_device;
+                    break;
+
+                case device::DST_AO_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_AO, device::DST_AO_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown AO device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_LT:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_LT:
+                    new_device = new level_e( dev_name );
+                    new_io_device = ( level_e* ) new_device;
+                    break;
+
+                case device::DST_LT_CYL:
+                    new_device = new level_e_cyl( dev_name );
+                    new_io_device = ( level_e_cyl* ) new_device;
+                    break;
+
+                case device::DST_LT_CONE:
+                    new_device = new level_e_cone( dev_name );
+                    new_io_device = (level_e_cone*)new_device;
+                    break;
+
+                case device::DST_LT_IOLINK:
+                    new_device = new level_e_iolink( dev_name );
+                    new_io_device = (level_e_iolink*)new_device;
+                    break;
+
+                case device::DST_LT_VIRT:
+                    new_device = new virtual_device(dev_name, device::DT_LT, device::DST_LT_VIRT);
+                    break;
+
+                case device::DST_LT_TRUNC:
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown LT device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_DI:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_DI:
+                    new_device      = new DI_signal( dev_name );
+                    new_io_device = ( DI_signal* ) new_device;
+                    break;
+
+                case device::DST_DI_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_DI, device::DST_DI_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown DI device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_DO:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_DO:
+                    new_device      = new DO_signal( dev_name );
+                    new_io_device = ( DO_signal* ) new_device;
+                    break;
+
+                case device::DST_DO_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_DO, device::DST_DO_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown DO device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_PT:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_PT:
+                    new_device      = new pressure_e( dev_name );
+                    new_io_device = ( pressure_e* ) new_device;
+                    break;
+
+                case device::DST_PT_IOLINK:
+                    new_device      = new pressure_e_iolink( dev_name );
+                    new_io_device = ( pressure_e_iolink* ) new_device;
+                    break;
+
+                case device::DST_PT_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_PT, device::DST_PT_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown PT device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_QT:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_QT:
+                    new_device = new concentration_e( dev_name, device::DST_QT );
+                    new_io_device = (concentration_e*)new_device;
+                    break;
+
+                case device::DST_QT_OK:
+                    new_device = new concentration_e_ok( dev_name );
+                    new_io_device = (concentration_e_ok*)new_device;
+                    break;
+
+                case device::DST_QT_IOLINK:
+                    new_device = new concentration_e_iolink(dev_name);
+                    new_io_device = (concentration_e_iolink*)new_device;
+                    break;
+
+                case device::DST_QT_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_QT, device::DST_QT_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown QT device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_AI:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_AI:
+                    new_device      = new analog_input( dev_name );
+                    new_io_device = ( analog_input* ) new_device;
+                    break;
+
+                case device::DST_AI_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_AI, device::DST_AI_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown AI device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_HA:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_HA:
+                    new_device = new siren( dev_name );
+                    new_io_device = (siren*)new_device;
+                    break;
+
+                case device::DST_HA_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_HA, device::DST_HA_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_HL:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_HL:
+                    new_device = new lamp( dev_name );
+                    new_io_device = (lamp*)new_device;
+                    break;
+
+                case device::DST_HL_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_HL, device::DST_HL_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HL device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_SB:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_SB:
+                    new_device = new button( dev_name );
+                    new_io_device = (button*)new_device;
+                    break;
+
+                case device::DST_SB_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_SB, device::DST_SB_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown SB device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_GS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_GS:
+                    new_device = new state_s( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_GS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_GS, device::DST_GS_VIRT );
+                    break;
+
+                case device::DST_GS_INVERSE:
+                    new_device = new state_s_inverse( dev_name );
+                    new_io_device = (state_s_inverse*)new_device;
+                    break;                    
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown GS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_PDS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_PDS:
+                    new_device = new diff_pressure( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_PDS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_PDS, device::DST_PDS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown PDS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_WT:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_WT:
+                    new_device = new wages( dev_name );
+                    new_io_device = (wages*)new_device;
+
+                case device::DST_WT_VIRT:
+                    new_device = new virtual_wages( dev_name );
+                    break;
+
+                case device::DST_WT_RS232:
+                    new_device = new wages_RS232( dev_name );
+                    new_io_device = (wages_RS232*)new_device;
+                    break;
+
+                case device::DST_WT_ETH:
+                    new_device = new wages_eth( dev_name );
+                    new_io_device = (wages_eth*)new_device;
+                    break;
+
+                case device::DST_WT_PXC_AXL:
+                    new_device = new wages_pxc_axl( dev_name );
+                    new_io_device = (wages_pxc_axl*)new_device;
+                    break;                    
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown WT device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_F:
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_F:
+                    new_device = new circuit_breaker(dev_name);
+                    new_io_device = (circuit_breaker*)new_device;
+                    break;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_F, device::DST_F_VIRT );
+                    break;
+
+                default:
+                    if (G_DEBUG)
+                        {
+                        printf("Unknown F device subtype %d!\n", dev_sub_type);
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_REGULATOR:
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_REGULATOR_PID:
+                    new_device = new PID( dev_name );
+                    break;
+
+                case device::DST_REGULATOR_THLD:
+                    new_device = new threshold_regulator( dev_name );
+                    break;
+
+                default:
+                    G_LOG->debug( "unknown DT_REGULATOR device subtype %d",
+                        dev_sub_type );
+                    break;
+                }
+            break;
+
+        case device::DT_HLA:
+            switch ( dev_sub_type )
+                {
+                case device::DST_HLA:
+                    new_device = new signal_column_discrete( dev_name );
+                    new_io_device = (signal_column_discrete*)new_device;
+                    break;
+
+                case device::DST_HLA_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_HLA, device::DST_HLA_VIRT );
+                    break;
+
+                case device::DST_HLA_IOLINK:
+                    new_device = new signal_column_iolink( dev_name );
+                    new_io_device = (signal_column_iolink*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HLA device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_CAM:
+            switch ( dev_sub_type )
+                {
+                case device::DST_CAM_DO1_DI1:
+                    new_device = new camera( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> (dev_sub_type) );
+                    new_io_device = (camera*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI2:
+                    new_device = new camera_DI2( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                    new_io_device = (camera_DI2*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI3:
+                    new_device = new camera_DI3( dev_name );
+                    new_io_device = (camera_DI3*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_TS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_TS:
+                    new_device = new temperature_signal( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_TS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_TS, device::DST_TS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown TS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_G:
+            switch ( dev_sub_type )
+                {
+                case device::DST_G_IOL_4:
+                case device::DST_G_IOL_8:
+                    new_device = new power_unit( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                    new_io_device = (power_unit*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown G device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+
+        default:
+            if ( G_DEBUG )
+                {
+                printf( "Unknown device type %d!\n", dev_type );
+                }
+            break;
+        }
+
+    // Ошибки.
+    if ( !new_device )
+        {
+        new_device = static_cast<device*>( static_cast<valve*>( new dev_stub() ) );
+        }
+
+    G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
+
+    u_int new_dev_index = project_devices.size();
+    project_devices.push_back( new_device );
+    new_device->set_serial_n( new_dev_index );
+    new_device->set_article( article );
+
+    if ( dev_type >= 0 && dev_type < device::C_DEVICE_TYPE_CNT )
+        {
+        if ( 0 == is_first_device[ dev_type ] )
+            {
+            dev_types_ranges[ dev_type ].start_pos = new_dev_index;
+            is_first_device[ dev_type ] = 1;
+            }
+        dev_types_ranges[ dev_type ].end_pos = new_dev_index;
+        }
+
+    return new_io_device;
+    }
+//-----------------------------------------------------------------------------
+void device_manager::clear_io_devices()
+    {
+    for ( size_t idx = 0; idx < project_devices.size(); idx++ )
+        {
+        delete project_devices[ idx ];
+        project_devices[ idx ] = nullptr;
+        }
+
+    for ( size_t idx = 0; idx < device::C_DEVICE_TYPE_CNT; idx++ )
+        {
+        dev_types_ranges[ idx ].start_pos = -1;
+        dev_types_ranges[ idx ].end_pos = -1;
+        is_first_device[ idx ] = 0;
+        }
+
+    project_devices.clear();
+    }
+//-----------------------------------------------------------------------------
+int device_manager::init_params()
+    {
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_devices_params", "device_manager::init_params()" );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::save_device( char *buff )
+    {
+    int res = sprintf( buff, "t=\n" );
+
+    res += sprintf( buff + res, "\t{\n" );
+
+    for ( u_int i = 0; i < project_devices.size(); i++)
+        {
+        res += project_devices[ i ]->save_device( buff + res, "\t" );
+        }
+
+    res += sprintf( buff + res, "\t}\n" );
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_name )
+    {
+    int l = -1;
+    int u = -1;
+
+    if ( dev_type < device::C_DEVICE_TYPE_CNT && dev_type >= device::DT_V )
+        {
+        l = dev_types_ranges[ dev_type ].start_pos;
+        u = dev_types_ranges[ dev_type ].end_pos;
+        }
+
+    if ( -1 == l ) return -1; // Нет устройств.
+
+    while ( l <= u )
+        {
+        int i = ( l + u ) / 2;
+
+        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) == 0 )
+            {
+            return i;
+            }
+
+        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) > 0 )
+            {
+            l = i + 1;
+            }
+        else
+            {
+            u = i - 1;
+            }
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::get_device_n( const char* dev_name )
+    {
+    for ( int dev_type = device::DT_V; dev_type < device::C_DEVICE_TYPE_CNT; dev_type++ )
+        {
+        auto res = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_name );
+        if ( res >= 0 ) return res;
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::init_rt_params()
+    {
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_devices_rt_params", "device_manager::init_rt_params()" );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void i_counter::restart( COUNTERS type )
+    {
+    reset( type );
+    start( type );
+    }
+//-----------------------------------------------------------------------------
+i_counter::~i_counter()
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+bool i_DI_device::is_active()
+    {
+    return get_state() == 0 ? 0 : 1;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void i_DO_device::on()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_on();
+        }
+    }
+//-----------------------------------------------------------------------------
+void i_DO_device::instant_off()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_off();
+        }
+    }
+//-----------------------------------------------------------------------------
+void i_DO_device::set_state( int new_state )
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_set_state( new_state );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Установка текущего состояния устройства с учетом ручного режима.
+void i_AO_device::set_value( float new_value )
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_set_value( new_value );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_valve::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_valve::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_valve::get_value()
+    {
+    return value;
+    }
+
+void virtual_valve::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_valve::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_valve::get_state()
+    {
+    return state;
+    }
+
+virtual_valve::virtual_valve( const char* dev_name ) :
+    valve( dev_name, DT_V, DST_V_VIRT ),
+    value( 0 ),
+    state( 0 )
+    {
+    }
+
+valve::VALVE_STATE virtual_valve::get_valve_state()
+    {
+    return (valve::VALVE_STATE)state;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
+    camera( "STUB", DST_NONE ),
+    signal_column( "STUB", DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
+float dev_stub::get_value()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::direct_set_value( float new_value )
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::off()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_value( float new_value )
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_state( int new_state )
+    {
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE dev_stub::get_valve_state()
+    {
+    return VALVE_STATE::V_OFF;
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::get_state()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::direct_on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::direct_off()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::direct_set_state( int new_state )
+    {
+    }
+//-----------------------------------------------------------------------------
+u_int_4 dev_stub::get_serial_n() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::print() const
+    {
+    printf( "virtual device" );
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::pause( COUNTERS type )
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::start( COUNTERS type )
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::reset( COUNTERS type )
+    {
+    }
+//-----------------------------------------------------------------------------
+u_int dev_stub::get_quantity( COUNTERS type )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+float dev_stub::get_flow()
+    {
+    return 0.;
+    }
+//-----------------------------------------------------------------------------
+u_long dev_stub::get_pump_dt() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+float dev_stub::get_min_flow() const
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::abs_reset()
+    {
+    }
+//-----------------------------------------------------------------------------
+u_int dev_stub::get_abs_quantity()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::tare()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::process_DO( u_int n, DO_state state, const char* name )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+threshold_regulator::threshold_regulator( const char* name ) :device( name,
+    device::DEVICE_TYPE::DT_REGULATOR,
+    device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
+    static_cast<int>( PARAM::PARAMS_COUNT ) - 1 )
+    {
+    set_par_name( static_cast<int>( PARAM::P_delta ), 0, "P_delta" );
+    set_par_name( static_cast<int>( PARAM::P_is_reverse ), 0, "P_is_reverse" );
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::get_state()
+    {
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_off()
+    {
+    if ( state != STATE::OFF )
+        {
+        state = STATE::OFF;
+        if ( actuator )
+            {
+            actuator->off();
+            }
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_state( int new_state )
+    {
+    switch ( static_cast<STATE>( new_state ) )
+        {
+        case STATE::OFF:
+            direct_off();
+            break;
+
+        case STATE::ON:
+            direct_on();
+            break;
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_on()
+    {
+    if ( state != STATE::ON )
+        {
+        state = STATE::ON;
+        }
+    };
+//-----------------------------------------------------------------------------
+const char* threshold_regulator::get_name_in_Lua() const
+    {
+    return get_name();
+    };
+//-----------------------------------------------------------------------------
+float threshold_regulator::get_value()
+    {
+    return static_cast<float>( out_state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_value( float val )
+    {
+    set_value = val;
+    if ( sensor && actuator )
+        {
+        auto in_value = sensor->get_value();
+        if ( sensor->get_type() == DT_FQT )
+            {
+            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
+            }
+
+        auto idx = static_cast<int>( PARAM::P_is_reverse );
+        auto is_reverse = get_par( idx ) > 0;
+        if ( STATE::OFF == state )
+            {
+            out_state = 0;
+            actuator->off();
+            }
+        else
+            {
+            auto delta = get_par( static_cast<int>( PARAM::P_delta ) );
+            if ( in_value > set_value + delta )
+                {
+                out_state = is_reverse ? 1 : 0;
+                }
+            else if ( in_value < set_value - delta )
+                {
+                out_state = is_reverse ? 0 : 1;
+                }
+            }
+
+        actuator->set_state( out_state );
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::set_string_property( const char* field, const char* value )
+    {
+    if ( !field ) return;
+
+    device::set_string_property( field, value );
+    switch ( field[ 0 ] )
+        {
+        //IN_VALUE
+        case 'I':
+            sensor = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        //OUT_VALUE
+        case 'O':
+            actuator = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        default:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::save_device( char* buff )
+    {
+    return device::save_device( buff, "\t" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+power_unit::power_unit( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type  ) :
+    analog_io_device( dev_name, device::DT_G, sub_type, 0 )
+    {
+    memset( &p_data_in, 0, sizeof( p_data_in ) );    
+
+    static_assert( sizeof( process_data_in ) == 18,
+        "Struct `process_data_in` must be the 18 bytes size." );
+    static_assert( sizeof( process_data_out ) == 7,
+        "Struct `process_data_out` must be the 7 bytes size." );
+    }
+//-----------------------------------------------------------------------------
+float power_unit::get_value()
+    {
+    return v;
+    }
+//-----------------------------------------------------------------------------
+int power_unit::get_state()
+    {
+    return st;
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_set_value( float val )
+    {
+    // Здесь нет возможности управлять состоянием - управляем через отдельные 
+    // каналы.
+    }
+//-----------------------------------------------------------------------------
+void power_unit::evaluate_io()
+    {
+    auto data = reinterpret_cast<char*>( get_AI_data( C_AIAO_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + sizeof( p_data_in ),
+        reinterpret_cast<char*>( &p_data_in ) );
+    v = .1f *
+        static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
+        p_data_in.sum_currents ) );
+    err = p_data_in.DC_not_OK;
+    st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
+        p_data_in.status_ch3 || p_data_in.status_ch4 ||
+        p_data_in.status_ch5 || p_data_in.status_ch6 ||
+        p_data_in.status_ch7 || p_data_in.status_ch8;
+
+#ifdef DEBUG_IOLINK_POWER_UNIT
+    auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "{:b} {:b} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x} {:x}",
+        data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ],
+        data[ 4 ], data[ 5 ], data[ 6 ], data[ 7 ],
+        data[ 8 ], data[ 9 ], data[ 10 ], data[ 11 ],
+        data[ 12 ], data[ 13 ], data[ 14 ], data[ 15 ],
+        data[ 16 ], data[ 17 ] );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "voltage = {}, out_voltage_2 = {}, DC_not_OK = {}",
+        p_data_in.out_voltage, +p_data_in.out_voltage_2, +p_data_in.DC_not_OK );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "out voltage {}",
+        .1f * ( ( p_data_in.out_voltage_2 << 8 ) + p_data_in.out_voltage ) );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_INFO );
+
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "nominal_current_ch1 = {}, load_current_ch1 = {}, st_ch1 = {}",
+        +p_data_in.nominal_current_ch1,
+        +p_data_in.load_current_ch1, +p_data_in.status_ch1 );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+    res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "nominal_current_ch4 = {}, load_current_ch4 = {}, st_ch4 = {}\n",
+        +p_data_in.nominal_current_ch4,
+        +p_data_in.load_current_ch4, +p_data_in.status_ch4 );
+    *res.out = 0;
+    G_LOG->write_log( i_log::P_WARNING );
+
+
+    char buff[ 500 ] = { 0 };
+    save_device( buff, "" );
+    fmt::println( "{}", buff );
+#endif
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+
+    if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
+        {
+        if ( is_processing_cmd )
+            {
+            // Устанавливаем управляющий бит через некоторое время после
+            // записи выходных данных.
+            if ( get_delta_millisec( cmd_time ) > WAIT_DATA_TIME )
+                {
+                p_data_out->valid_flag = true;
+                }
+            if ( get_delta_millisec( cmd_time ) > WAIT_CMD_TIME )
+                {
+                is_processing_cmd = false;
+                sync_pdout();
+                }
+            }
+        else
+            {
+            sync_pdout();
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void power_unit::sync_pdout()
+    {
+    p_data_out->valid_flag = false;
+    p_data_out->switch_ch1 = p_data_in.status_ch1;
+    p_data_out->switch_ch2 = p_data_in.status_ch2;
+    p_data_out->switch_ch3 = p_data_in.status_ch3;
+    p_data_out->switch_ch4 = p_data_in.status_ch4;
+    p_data_out->switch_ch5 = p_data_in.status_ch5;
+    p_data_out->switch_ch6 = p_data_in.status_ch6;
+    p_data_out->switch_ch7 = p_data_in.status_ch7;
+    p_data_out->switch_ch8 = p_data_in.status_ch8;
+    p_data_out->nominal_current_ch1 = p_data_in.nominal_current_ch1;
+    p_data_out->nominal_current_ch2 = p_data_in.nominal_current_ch2;
+    p_data_out->nominal_current_ch3 = p_data_in.nominal_current_ch3;
+    p_data_out->nominal_current_ch4 = p_data_in.nominal_current_ch4;
+    p_data_out->nominal_current_ch5 = p_data_in.nominal_current_ch5;
+    p_data_out->nominal_current_ch6 = p_data_in.nominal_current_ch6;
+    p_data_out->nominal_current_ch7 = p_data_in.nominal_current_ch7;
+    p_data_out->nominal_current_ch8 = p_data_in.nominal_current_ch8;
+    }
+//-----------------------------------------------------------------------------
+int power_unit::save_device_ex( char* buff )
+    {
+    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "NOMINAL_CURRENT_CH={{{},{},{},{},{},{},{},{}}}, ",
+        +p_data_in.nominal_current_ch1, +p_data_in.nominal_current_ch2,
+        +p_data_in.nominal_current_ch3, +p_data_in.nominal_current_ch4,
+        +p_data_in.nominal_current_ch5, +p_data_in.nominal_current_ch6,
+        +p_data_in.nominal_current_ch7, +p_data_in.nominal_current_ch8 );
+    auto size = static_cast<int>( res.size );
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "LOAD_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
+        .1f * p_data_in.load_current_ch1, .1f * p_data_in.load_current_ch2,
+        .1f * p_data_in.load_current_ch3, .1f * p_data_in.load_current_ch4,
+        .1f * p_data_in.load_current_ch5, .1f * p_data_in.load_current_ch6,
+        .1f * p_data_in.load_current_ch7, .1f * p_data_in.load_current_ch8 );
+    size += res.size;
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "ST_CH={{{},{},{},{},{},{},{},{}}}, ",
+        +p_data_in.status_ch1, +p_data_in.status_ch2,
+        +p_data_in.status_ch3, +p_data_in.status_ch4,
+        +p_data_in.status_ch5, +p_data_in.status_ch6,
+        +p_data_in.status_ch7, +p_data_in.status_ch8 );
+    size += res.size;    
+
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "SUM_CURRENTS={:.1f}, ", v );
+    size += res.size;
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "VOLTAGE={:.1f}, ",
+        .1f * static_cast<float>( ( ( p_data_in.out_voltage_2 << 8 ) +
+        p_data_in.out_voltage ) ) );
+    size += res.size;
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
+    size += res.size;    
+    res = fmt::format_to_n( buff + size, MAX_COPY_SIZE, "ERR={}, ", err );
+    size += res.size;
+
+    *res.out = 0;
+    return size;
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_on()
+    {
+    p_data_out->switch_ch1 = true;
+    p_data_out->switch_ch2 = true;
+    p_data_out->switch_ch3 = true;
+    p_data_out->switch_ch4 = true;
+    p_data_out->switch_ch5 = true;
+    p_data_out->switch_ch6 = true;
+    p_data_out->switch_ch7 = true;
+    p_data_out->switch_ch8 = true;
+
+#ifdef DEBUG_NO_IO_MODULES
+    p_data_in.status_ch1 = true;
+    p_data_in.status_ch2 = true;
+    p_data_in.status_ch3 = true;
+    p_data_in.status_ch4 = true;
+    p_data_in.status_ch5 = true;
+    p_data_in.status_ch6 = true;
+    p_data_in.status_ch7 = true;
+    p_data_in.status_ch8 = true;
+    st = 1;
+#endif
+
+    is_processing_cmd = true;
+    cmd_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+void power_unit::direct_off()
+    {
+    p_data_out->switch_ch1 = false;
+    p_data_out->switch_ch2 = false;
+    p_data_out->switch_ch3 = false;
+    p_data_out->switch_ch4 = false;
+    p_data_out->switch_ch5 = false;
+    p_data_out->switch_ch6 = false;
+    p_data_out->switch_ch7 = false;
+    p_data_out->switch_ch8 = false;
+
+#ifdef DEBUG_NO_IO_MODULES
+    p_data_in.status_ch1 = false;
+    p_data_in.status_ch2 = false;
+    p_data_in.status_ch3 = false;
+    p_data_in.status_ch4 = false;
+    p_data_in.status_ch5 = false;
+    p_data_in.status_ch6 = false;
+    p_data_in.status_ch7 = false;
+    p_data_in.status_ch8 = false;
+    st = 0;
+#endif
+
+    is_processing_cmd = true;
+    cmd_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+int power_unit::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            "{}\t power_unit::set_cmd() - prop = {}, idx = {}, val = {}",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        auto new_val = static_cast<int>( val );
+        if ( new_val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+
+        return 0;
+        }
+    auto new_st = static_cast<bool>( val );
+#ifdef DEBUG_NO_IO_MODULES
+    auto status = static_cast<int8_t>( val );
+#endif
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->switch_ch1 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch1 = status;
+#endif
+                break;
+            case 2:
+                p_data_out->switch_ch2 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch2 = status;
+#endif
+                break;
+            case 3:
+                p_data_out->switch_ch3 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch3 = status;
+#endif
+                break;
+            case 4:
+                p_data_out->switch_ch4 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch4 = status;
+#endif
+                break;
+            case 5:
+                p_data_out->switch_ch5 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch5 = status;
+#endif
+                break;
+            case 6:
+                p_data_out->switch_ch6 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch6 = status;
+#endif
+                break;
+            case 7:
+                p_data_out->switch_ch7 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch7 = status;
+#endif
+                break;
+            case 8:
+                p_data_out->switch_ch8 = new_st;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.status_ch8 = status;
+#endif
+                break;
+
+            default:
+                // Do nothing.
+                break;
+            }
+        is_processing_cmd = true;
+        cmd_time = get_millisec();
+#ifdef DEBUG_NO_IO_MODULES
+        st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
+            p_data_in.status_ch3 || p_data_in.status_ch4 ||
+            p_data_in.status_ch5 || p_data_in.status_ch6 ||
+            p_data_in.status_ch7 || p_data_in.status_ch8;
+#endif
+        return 0;
+        }
+
+    auto nom_curr = static_cast<int8_t>( val );
+    if ( strcmp( prop, "NOMINAL_CURRENT_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->nominal_current_ch1 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch1 = nom_curr;
+#endif
+                break;
+            case 2:
+                p_data_out->nominal_current_ch2 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch2 = nom_curr;
+#endif
+                break;
+            case 3:
+                p_data_out->nominal_current_ch3 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch3 = nom_curr;
+#endif
+                break;
+            case 4:
+                p_data_out->nominal_current_ch4 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch4 = nom_curr;
+#endif
+                break;
+            case 5:
+                p_data_out->nominal_current_ch5 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch5 = nom_curr;
+#endif
+                break;
+            case 6:
+                p_data_out->nominal_current_ch6 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch6 = nom_curr;
+#endif
+                break;
+            case 7:
+                p_data_out->nominal_current_ch7 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch7 = nom_curr;
+#endif
+                break;
+            case 8:
+                p_data_out->nominal_current_ch8 = nom_curr;
+#ifdef DEBUG_NO_IO_MODULES
+                p_data_in.nominal_current_ch8 = nom_curr;
+#endif
+                break;
+
+            default:
+                // Do nothing.
+                break;
+            }
+        is_processing_cmd = true;
+        cmd_time = get_millisec();
+        return 0;
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int extra_par_cnt ) :
+    device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
+    io_device( dev_name )
+    {
+    }
+//-----------------------------------------------------------------------------
+int base_counter::get_state()
+    {
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void base_counter::direct_on()
+    {
+    start();
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_off()
+    {
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_set_state( int new_state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    if ( new_state < 0 )
+        {
+        state = static_cast<STATES>( new_state );
+        return;
+        }
+#endif
+    
+    switch ( new_state )
+        {
+        case 0:
+            direct_off();
+            break;
+
+        case static_cast<int>( STATES::S_WORK ):
+            direct_on();
+            break;
+
+        case static_cast<int>( STATES::S_PAUSE ):
+            pause();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_abs_value( float new_value )
+    {
+    abs_value = new_value;
+    };
+//-----------------------------------------------------------------------------
+float base_counter::calculate_delta( float& last_read_value,
+    bool& is_first_read )
+    {
+    float current = get_raw_value();
+    float delta = .0f;
+    if ( is_first_read )
+        {
+        if ( current != 0 )
+            {
+            last_read_value = current;
+            is_first_read = false;
+            }
+        }
+    else
+        {
+        if ( current < last_read_value )
+            {
+            delta = get_max_raw_value() - last_read_value + current;
+            if ( delta > MAX_OVERFLOW && current < delta )
+                {
+                delta = current;
+                }
+            }
+        else
+            {
+            delta = current - last_read_value;
+            }
+
+        last_read_value = current;
+        }
+
+    return delta;
+    }
+//-----------------------------------------------------------------------------
+float base_counter::get_value()
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_quantity( COUNTERS type )
+    {
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            return static_cast<u_int>( value );
+
+        case i_counter::DAY:
+            return static_cast<u_int>( current_day_value );
+
+        case i_counter::PREV_DAY:
+            return static_cast<u_int>( prev_day_value );
+
+        case i_counter::USER1:
+            return static_cast<u_int>( user_value1 );
+
+        case i_counter::USER2:
+            return static_cast<u_int>( user_value2 );
+
+        default:
+            return static_cast<u_int>( value );
+        }    
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_abs_quantity()
+    {
+    return static_cast<u_int>( abs_value );
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_property( const char* field, device* dev )
+    {
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
+        {
+        motors.push_back( dev );
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::pause( COUNTERS type )
+    {
+    evaluate_io(); // Пересчитываем значение счетчика.
+
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            state = STATES::S_PAUSE;
+            break;
+        case i_counter::DAY:
+            current_day_state = STATES::S_PAUSE;
+            break;
+        case i_counter::PREV_DAY:
+            break;
+        case i_counter::USER1:
+            user_state1 = STATES::S_PAUSE;
+            break;
+        case i_counter::USER2:
+            user_state2 = STATES::S_PAUSE;
+            break;
+        default:
+            break;
+        }    
+    }
+//-----------------------------------------------------------------------------
+void base_counter::start( COUNTERS type )
+    {
+    evaluate_io(); // Пересчитываем значение счетчика.
+
+    switch ( type )
+        {
+        case i_counter::MAIN:
+            if ( STATES::S_PAUSE == state )
+                {
+                state = STATES::S_WORK;
+                }
+            else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
+                {
+                start_pump_working_time = 0;
+                state = STATES::S_WORK;
+                }
+            break;
+        case i_counter::DAY:
+            current_day_state = STATES::S_WORK;
+            break;
+        case i_counter::PREV_DAY:
+            break;
+        case i_counter::USER1:
+            user_state1 = STATES::S_WORK;
+            break;
+        case i_counter::USER2:
+            user_state2 = STATES::S_WORK;
+            break;
+        default:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::reset( COUNTERS type )
+    {
+    value = .0f;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::abs_reset()
+    {
+    abs_value = .0f;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::evaluate_io()
+    {
+    bool is_pump_working = false;
+    if ( !motors.empty() )
+        {
+        for ( u_int i = 0; i < motors.size(); i++ )
+            {
+            if ( motors[ i ]->get_state() == 1 )
+                {
+                is_pump_working = true;
+                }
+            }
+        }
+
+    auto min_flow = get_min_flow();
+
+    // Насос не работает (при его наличии) или расход ниже минимального.
+    if ( ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
+        {
+        start_pump_working_time = 0;
+        }
+    // Насос работает (при его наличии) или расход выше минимального.
+    else
+        {
+        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
+            {
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
+            }
+        // Работа. 
+        // Проверяем счетчик на ошибку - он должен изменить свои показания.
+        else if ( get_abs_quantity() != counter_prev_value )
+            {
+            start_pump_working_time = get_millisec();
+            counter_prev_value = get_abs_quantity();
+            state = STATES::S_WORK;
+            }
+        else
+            {
+            auto dt = get_pump_dt();
+            if ( get_delta_millisec( start_pump_working_time ) >= dt )
+                {
+                state = STATES::S_ERROR;
+                }
+            }
+        }
+
+    float delta = calculate_delta( last_read_value, is_first_read );
+    if ( delta > 0 )
+        {
+        abs_value += delta;
+        value += delta;
+
+        if ( STATES::S_WORK == current_day_state )
+            {
+            current_day_value += delta;
+            }
+        if ( STATES::S_WORK == user_state1 )
+            {
+            user_value1 += delta;
+            }
+        if ( STATES::S_WORK == user_state2 )
+            {
+            user_value2 += delta;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::print() const
+    {
+    device::print();
+    }
+//-----------------------------------------------------------------------------
+int base_counter::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'A': //ABS_V
+            set_abs_value( static_cast<float>( val ) );
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+int base_counter::save_device_ex( char* buff )
+    {
+    return fmt::format_to_n(
+        buff, MAX_COPY_SIZE, "ABS_V={}, DAY_V={}, PREV_DAY={}, USER_V1={}, USER_V2={}, ",
+        get_abs_quantity(),
+        get_quantity( i_counter::COUNTERS::DAY ),
+        get_quantity( i_counter::COUNTERS::PREV_DAY ),
+        get_quantity( i_counter::COUNTERS::USER1 ),
+        get_quantity( i_counter::COUNTERS::USER2 ) ).size;
+    }
+//-----------------------------------------------------------------------------
+const char* base_counter::get_error_description()
+    {
+    if ( static_cast<int>( state ) < 0 )
+        {
+        switch ( state )
+            {
+            case STATES::S_ERROR:
+                prev_error_state = STATES::S_ERROR;
+                return "счет импульсов";
+
+            case STATES::S_LOW_ERR:
+                prev_error_state = STATES::S_LOW_ERR;
+                return "канал потока (нижний предел)";
+
+            case STATES::S_HI_ERR:
+                prev_error_state = STATES::S_HI_ERR;
+                return "канал потока (верхний предел)";
+
+            default:
+                return device::get_error_description();
+            }
+        }
+
+    switch ( prev_error_state )
+        {
+        case STATES::S_ERROR:
+            return "счет импульсов (rtn)";
+
+        case STATES::S_LOW_ERR:
+            return "канал потока (нижний предел, rtn)";
+
+        case STATES::S_HI_ERR:
+            return "канал потока (верхний предел, rtn)";
+
+        default:
+            // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
+            break;
+        }
+
+    return "нет ошибок";
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
+                     int extra_par_cnt ):
+    base_counter( dev_name, sub_type, extra_par_cnt )
+    {
+    }
+//-----------------------------------------------------------------------------
+float counter::get_raw_value() const
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
+#else
+    return 0;
+#endif
+    }
+//-----------------------------------------------------------------------------
+float counter::get_max_raw_value() const
+    {
+    return USHRT_MAX;
+    }
+//-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
+u_long counter::get_pump_dt() const
+    {
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+float counter::get_min_flow() const
+    {
+    return .0f;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_f::counter_f( const char *dev_name ) :
+    counter( dev_name, DST_FQT_F, LAST_PARAM_IDX - 1 )
+    {
+    set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
+    set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
+    set_par_name( P_CZ, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
+    }
+//-----------------------------------------------------------------------------
+int counter_f::get_state()
+    {
+    if ( get_flow() == -1. )
+        {
+        return (int) STATES::S_LOW_ERR;
+        }
+    if ( get_flow() == -2. )
+        {
+        return (int) STATES::S_HI_ERR;
+        }
+
+    return base_counter::get_state();
+    }
+//-----------------------------------------------------------------------------
+float counter_f::get_flow()
+    {
+    return get_par( P_CZ, 0 ) +
+#ifdef DEBUG_NO_IO_MODULES
+        flow_value;
+#else
+        get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
+#endif // NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+int counter_f::save_device_ex( char *buff )
+    {
+    int res = counter::save_device_ex( buff );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, ",
+        get_flow() ).size;
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+u_long counter_f::get_pump_dt() const
+    {
+    return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_f::get_min_flow() const
+    {
+    return get_par( P_ERR_MIN_FLOW, 0 );
+    }
+//-----------------------------------------------------------------------------
+int counter_f::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            flow_value = static_cast<float>( val );
+            break;
+
+        default:
+            return counter::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
+    device::DST_FQT_IOLINK,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
+        "P_ERR_MIN_FLOW" );    
+    };
+//-----------------------------------------------------------------------------
+void counter_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    if ( data )
+        {
+        char* buff = (char*)&in_info;
+
+        const int SIZE = 8;
+        std::copy( data, data + SIZE, buff );
+
+        //Reverse byte order to get correct float.
+        std::swap( buff[ 3 ], buff[ 0 ] );
+        std::swap( buff[ 1 ], buff[ 2 ] );
+        //Reverse byte order to get correct int16.
+        std::swap( buff[ 4 ], buff[ 5 ] );
+        //Reverse byte order to get correct int16.
+        std::swap( buff[ 6 ], buff[ 7 ] );
+
+#ifdef DEBUG_FQT_IOLINK
+        sprintf( G_LOG->msg,
+            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
+            in_info.totalizer, in_info.flow, in_info.temperature,
+            in_info.out2, in_info.out1 );
+        G_LOG->write_log( i_log::P_NOTICE );
+        sprintf( G_LOG->msg,
+            "get_quantity() %d, get_flow() %f, get_temperature() %f",
+            get_quantity(), get_flow(), get_temperature() );
+        G_LOG->write_log( i_log::P_NOTICE );
+#endif
+        }
+
+    base_counter::evaluate_io();
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_temperature() const
+    {
+    return 0.1f * in_info.temperature;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::get_state()
+    {
+    IOLINKSTATE res = get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::AI_INDEX ) );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -static_cast<int>( res );
+        }
+
+    return base_counter::get_state();
+    }
+//-----------------------------------------------------------------------------
+u_long counter_iolink::get_pump_dt() const
+    {
+    return static_cast<u_long>(
+        get_par( static_cast<u_int>( CONSTANTS::P_DT ), 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_min_flow() const
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0 );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_raw_value() const
+    {
+    return in_info.totalizer;
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_max_raw_value() const
+    {
+    return 499999999.99f; ///< Максимальное значение счетчика.
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow()
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
+        + in_info.flow * 0.01f;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::save_device_ex( char* buff )
+    {
+    int res = base_counter::save_device_ex( buff );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
+        get_flow(), get_temperature() ).size;
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            break;
+
+        case 'T':
+            in_info.temperature = static_cast<int16_t>( val * 10 );
+            break;
+
+        default:
+            return base_counter::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_quantity( COUNTERS type )
+    {
+    return static_cast<u_int>( get_value() );
+    }
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_abs_quantity()
+    {
+    return static_cast<u_int>( mL_in_L * get_abs_value() );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_value()
+    {
+    return base_counter::get_value() * mL_in_L;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float digital_io_device::get_value()
+    {
+    return ( float ) get_state();
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::direct_set_value( float new_value )
+    {
+    direct_set_state( ( int ) new_value );
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::direct_set_state( int new_state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = new_state;
+#else
+    if ( new_state )
+        {
+        direct_on();
+        }
+    else direct_off();
+#endif //DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::print() const
+    {
+    device::print();
+    //io_device::print();
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+int digital_io_device::get_state()
+    {
+    return state;
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::direct_on()
+    {
+    state = 1;
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::direct_off()
+    {
+    state = 0;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+digital_io_device::digital_io_device( const char *dev_name, device::DEVICE_TYPE type,
+                                         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+    device( dev_name, type, sub_type, par_cnt ),
+    io_device( dev_name )
+#ifdef DEBUG_NO_IO_MODULES
+    , state( 0 )
+#endif // DEBUG_NO_IO_MODULES
+    {
+    }
+//-----------------------------------------------------------------------------
+digital_io_device::~digital_io_device()
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+int valve_DO2::get_state()
+    {
+    int b1 = get_DO( DO_INDEX_1 );
+    int b2 = get_DO( DO_INDEX_2 );
+    if ( b1 == b2 ) return -1;
+    return b2;
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2::direct_on()
+    {
+    set_DO( DO_INDEX_1, 0 );
+    set_DO( DO_INDEX_2, 1 );
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2::direct_off()
+    {
+    set_DO( DO_INDEX_1, 1 );
+    set_DO( DO_INDEX_2, 0 );
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
+             device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
+digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
+    is_on_fb( is_on_fb ),
+    is_off_fb( is_off_fb ),
+    on_fb( true ),
+    off_fb( true ),
+    was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
+    start_switch_time( get_millisec() ),
+    wash_flag ( false )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( P_FB,  0, "P_FB" );
+    }
+//-----------------------------------------------------------------------------
+valve::valve( const char *dev_name, device::DEVICE_TYPE type,
+    device::DEVICE_SUB_TYPE sub_type ) :
+    digital_io_device( dev_name, type, sub_type, 0 ),
+    is_on_fb( false ),
+    is_off_fb( false ),
+    on_fb( false ),
+    off_fb( false ),
+    was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
+    start_switch_time( get_millisec() ),
+    wash_flag ( false )
+    {
+    }
+//-----------------------------------------------------------------------------
+valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
+    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
+    int extra_params_cnt ) :
+    digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT + extra_params_cnt ),
+    is_on_fb( is_on_fb ),
+    is_off_fb( is_off_fb ),
+    on_fb( true ),
+    off_fb( true ),
+    was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
+    start_switch_time( get_millisec() ),
+    wash_flag( false )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( P_FB, 0, "P_FB" );
+    }
+//-----------------------------------------------------------------------------
+int valve::save_device_ex( char *buff )
+    {
+    int res = 0;
+    if ( is_on_fb )
+        {
+        res += sprintf( buff, "FB_ON_ST=%d, ", get_on_fb_value() );
+        }
+
+    if ( is_off_fb )
+        {
+        res += sprintf( buff + res, "FB_OFF_ST=%d, ", get_off_fb_value() );
+        }
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int valve::get_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return digital_io_device::get_state();
+#else
+
+    switch ( get_valve_state() )
+        {
+        case V_LOWER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_LOWER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( ( is_off_fb || is_on_fb ) && get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_LOWER_SEAT_FB_OFF;
+                }
+
+            return VX_LOWER_SEAT;
+
+        case V_UPPER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_UPPER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( ( is_off_fb || is_on_fb ) && get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_UPPER_SEAT_FB_OFF;
+                }
+
+            return VX_UPPER_SEAT;
+
+        case V_ON:
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+                {
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
+                    {
+                    //start_switch_time = get_millisec();
+
+                    if ( get_manual_mode() )
+                        {
+                        return VX_ON_FB_OFF_MANUAL;
+                        }
+                    else
+                        {
+                        return VX_ON_FB_OFF;
+                        }
+                    }
+                else //Обратная связь включена.
+                    {
+                    if ( get_manual_mode() ) //Ручной режим включен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            //start_switch_time = get_millisec();
+
+                            return VX_ON_FB_OK_MANUAL;
+                            }
+                        else
+                            {
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_ON_FB_ERR_MANUAL;
+                                }
+                            else
+                                {
+                                return VX_OPENING_MANUAL;
+                                }
+                            }
+                        } // if ( get_manual_mode() )
+                    else  //Ручной режим отключен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            //start_switch_time = get_millisec();
+
+                            return VX_ON_FB_OK;
+                            }
+                        else
+                            {
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_ON_FB_ERR;
+                                }
+                            else
+                                {
+                                return VX_OPENING;
+                                }
+                            }
+                        }
+                    }
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
+                {
+                if ( get_manual_mode() )
+                    {
+                    return VX_ON_FB_OK_MANUAL;
+                    }
+                else
+                    {
+                    return VX_ON_FB_OK;
+                    }
+                }
+            break;
+
+        case V_OFF:
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+                {
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
+                    {
+                    //start_switch_time = get_millisec();
+
+                    if ( get_manual_mode() )
+                        {
+                        return VX_OFF_FB_OFF_MANUAL;
+                        }
+                    else
+                        {
+                        return VX_OFF_FB_OFF;
+                        }
+                    }
+                else //Обратная связь включена.
+                    {
+                    if ( get_manual_mode() ) //Ручной режим включен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            //start_switch_time = get_millisec();
+
+                            return VX_OFF_FB_OK_MANUAL;
+                            }
+                        else
+                            {
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_OFF_FB_ERR_MANUAL;
+                                }
+                            else
+                                {
+                                return VX_CLOSING_MANUAL;
+                                }
+                            }
+                        } // if ( get_manual_mode() )
+                    else  //Ручной режим отключен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            //start_switch_time = get_millisec();
+
+                            return VX_OFF_FB_OK;
+                            }
+                        else
+                            {
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_OFF_FB_ERR;
+                                }
+                            else
+                                {
+                                return VX_CLOSING;
+                                }
+                            }
+                        }
+                    }
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
+                {
+                if ( get_manual_mode() )
+                    {
+                    return VX_OFF_FB_OK_MANUAL;
+                    }
+                else
+                    {
+                    return VX_OFF_FB_OK;
+                    }
+                }
+            break;
+
+        case V_STOP:
+            return V_STOP;
+            break;
+        }
+
+    return VX_UNKNOWN;
+
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+int valve::set_cmd( const char *prop, u_int idx, double val )
+    {
+    printf( "valve::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            if ( strcmp( prop, "FB_ON_ST" ) == 0 )
+                {
+                on_fb = val != .0;
+                }
+            else
+                {
+                off_fb = val != .0;
+                }
+            break;
+
+        default:
+            device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+void valve::evaluate()
+    {
+    if ( v_bistable.empty() == false )
+        {
+        std::vector< valve_DO2_DI2_bistable* >::iterator iter;
+        for ( iter = v_bistable.begin(); iter != v_bistable.end(); iter++ )
+            {
+            valve_DO2_DI2_bistable* v = *iter;
+            v->evaluate();
+            }
+        }
+
+    if ( to_switch_off.empty() )
+        {
+        return;
+        }
+
+    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ];
+
+    for( std::vector< valve* >::iterator iter = to_switch_off.begin();
+            iter != to_switch_off.end(); iter++ )
+        {
+        valve* v = *iter;
+
+        if ( v->is_switching_off &&
+            get_delta_millisec( v->start_off_time ) > delay )
+            {
+            if ( !v->get_manual_mode() )
+                {
+                v->direct_off();
+                }
+
+            v->is_switching_off = false;
+            v->was_on_auto = false;
+            }
+        }
+
+    to_switch_off.erase(
+        std::remove_if( to_switch_off.begin(), to_switch_off.end(),
+        []( valve* v ) { return v->is_switching_off_finished(); } ),
+        to_switch_off.end() );
+        }
+//-----------------------------------------------------------------------------
+void valve::off()
+    {
+    if ( false == was_on_auto ||                //Если был включен вручную.
+        get_valve_state() == VALVE_STATE::V_UPPER_SEAT ||
+        get_valve_state() == VALVE_STATE::V_LOWER_SEAT )
+        {
+        if ( !get_manual_mode() )
+            {
+            direct_off();
+            }
+
+        return;
+        }
+
+    if ( false == is_switching_off )
+        {
+        is_switching_off = true;
+        start_off_time = get_millisec();
+
+        to_switch_off.push_back( this );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve::on()
+    {
+    was_on_auto = true;
+    is_switching_off = false;
+    digital_io_device::on();
+    }
+
+void valve::clear_switching_off_queue()
+    {
+    to_switch_off.clear();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
+    valve( false, true, dev_name, DT_V, DST_V_DO1_DI1_FB_OFF )
+    {
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+void valve_DO1_DI1_off::direct_on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI1_off::direct_off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+void valve_DO1_DI1_on::direct_on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI1_on::direct_off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+void valve_DO1_DI2::direct_on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI2::direct_off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+void valve_DO2_DI2::direct_on()
+    {
+    int o = get_DO( DO_INDEX_1 );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_1, 1 );
+        set_DO( DO_INDEX_2, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO2_DI2::direct_off()
+    {
+    int o = get_DO( DO_INDEX_2 );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_1, 0 );
+        set_DO( DO_INDEX_2, 1 );
+        }
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void valve_mix_proof::open_upper_seat()
+    {
+    direct_set_state( (int) VALVE_STATE::V_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_mix_proof::open_lower_seat()
+    {
+    direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+void valve_mix_proof::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            direct_off();
+
+            int u = get_DO( DO_INDEX_U );
+            if( 0 == u )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_U, 1 );
+                }
+
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            direct_off();
+
+            int l = get_DO( DO_INDEX_L );
+            if ( 0 == l )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_L, 1 );
+                }
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_mix_proof::direct_on()
+    {
+    set_DO( DO_INDEX_U, 0 );
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_mix_proof::direct_off()
+    {
+    VALVE_STATE st = get_valve_state();
+    bool was_seat = st == V_LOWER_SEAT || st == V_UPPER_SEAT;
+
+    set_DO( DO_INDEX_U, 0 );
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( o != 0 || was_seat )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Определение завершения отключения клапана с задержкой.
+bool valve_bottom_mix_proof::is_switching_off_finished()
+    {
+    //Если сняли флаг закрытия, то удаляем из вектора
+    if (!is_closing_mini)
+        {
+        return true;
+        }
+
+    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
+
+    //Если завершилось время задержки, выключаем мини клапан перед удалением
+    //клапана из вектора.
+    if ( get_delta_millisec( start_off_time ) > delay )
+        {
+        is_closing_mini = 0;
+        direct_off();
+        return true;
+        }
+
+    return false;
+    };
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+void valve_bottom_mix_proof::direct_on()
+    {
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        set_DO( DO_INDEX_MINI_V, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_bottom_mix_proof::direct_off()
+    {
+    VALVE_STATE st = get_valve_state();
+
+    if ( st == V_LOWER_SEAT )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_L, 0 );
+        }
+
+    if ( 1 == get_DO( DO_INDEX ) )
+        {
+        start_switch_time = get_millisec();
+        start_off_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        is_closing_mini = 1;
+        }
+
+    if ( 1 == get_DO( DO_INDEX_MINI_V ) && !is_closing_mini )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_MINI_V, 0 );
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF ), out_info( 0 )
+    {
+    in_info->err = 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_upper_seat()
+    {
+    direct_set_state( (int) VALVE_STATE::V_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_lower_seat()
+    {
+    direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if ( in_info->de_en ) return V_OFF;
+    if ( in_info->main ) return V_ON;
+    if ( in_info->usl ) return V_UPPER_SEAT;
+    if ( in_info->lsp ) return V_LOWER_SEAT;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::evaluate_io()
+    {
+    out_info = (out_data_swapped*)get_AO_write_data(
+        static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        }
+
+    char* data = (char*)get_AI_data(
+        static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 2 ], buff[ 3 ] );
+
+#ifdef DEBUG_IOLINK_MIXPROOF
+    char* tmp = (char*)in_info;
+
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            extra_offset = (int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::save_device_ex( char *buff )
+    {
+    int res = valve::save_device_ex( buff );
+
+    bool cs = out_info->sv1 || out_info->sv2 || out_info->sv3;
+    int err = in_info->err;
+    res += sprintf( buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+valve_iolink_mix_proof::~valve_iolink_mix_proof()
+    {
+    delete in_info;
+    in_info = nullptr;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_mix_proof::get_fb_state()
+    {
+    if ( get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) ) !=
+        io_device::IOLINKSTATE::OK )
+        {
+        return false;
+        }
+
+    if ( in_info->err ) return false;
+
+    if ( get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    if ( out_info->sv1 == false && in_info->de_en && in_info->st ) return true;
+
+    if ( out_info->sv1 == true && in_info->main && in_info->st ) return true;
+
+    if ( out_info->sv2 == true && in_info->usl && in_info->st ) return true;
+
+    if ( out_info->sv3 == true && in_info->lsp && in_info->st ) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_state()
+    {
+    switch ( get_valve_state() )
+        {
+        case V_LOWER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_LOWER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_LOWER_SEAT_FB_OFF;
+                }
+
+            if ( get_fb_state() ) return VX_LOWER_SEAT;
+
+            return VX_OFF_FB_ERR;
+
+        case V_UPPER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_UPPER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_UPPER_SEAT_FB_OFF;
+                }
+
+            if ( get_fb_state() ) return VX_UPPER_SEAT;
+
+            return VX_OFF_FB_ERR;
+        default:
+            break;
+        }
+
+    return valve::get_state();
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_mix_proof::get_value()
+    {
+    return 0.1f * in_info->pos;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_off_fb_value()
+    {
+    return out_info->sv1 == false && in_info->main && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_on_fb_value()
+    {
+    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_on()
+    {
+    if ( false == in_info->main )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = true;
+    out_info->sv2 = false;
+    out_info->sv3 = false;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_off()
+    {
+    if ( out_info->sv1 || out_info->sv2 || out_info->sv3 )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = false;
+    out_info->sv2 = false;
+    out_info->sv3 = false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val);
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            valve::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            direct_off();
+
+            out_info->sv2 = true;
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            direct_off();
+
+            out_info->sv3 = true;
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
+
+valve_iolink_shut_off_sorio::out_data_swapped
+    valve_iolink_shut_off_sorio::stub_out_info;
+//-----------------------------------------------------------------------------
+valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
+    {
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if ( in_info.de_en ) return V_OFF;
+    if ( in_info.main ) return V_ON;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_sorio::evaluate_io()
+    {
+    out_info = (out_data_swapped*)get_AO_write_data( 0 );
+
+    auto data = (char*)get_AI_data( 0 );
+    auto buff = (char*)&in_info;
+
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 2 ], buff[ 3 ] );
+
+#ifdef DEBUG_IOLINK_
+    char* tmp = (char*)in_info;
+
+    static bool de_en;
+    static bool main;
+    static uint16_t status;
+    static bool sv1;
+    static uint16_t led_state;
+    static uint16_t pos;
+
+    if ( de_en != in_info->de_en || main != in_info->main ||
+        status != in_info->status || sv1 != in_info->sv1 || led_state != in_info->led_state ||
+        pos != in_info->pos )
+        {
+        print_binary( *(int*)tmp );
+        printf( "\n" );
+
+        sprintf( G_LOG->msg,
+            "de_en %u, main %u, status %u, sv1 %u, led_state %u, pos %u\n",
+            in_info->de_en, in_info->main, in_info->status,
+            in_info->sv1, in_info->led_state, in_info->pos );
+        G_LOG->write_log( i_log::P_NOTICE );
+
+        print_binary( *(int*)out_info );
+        printf( "\n\n" );
+
+        de_en = in_info->de_en;
+        main = in_info->main;
+        status = in_info->status;
+        sv1 = in_info->sv1;
+        led_state = in_info->led_state;
+        pos = in_info->pos;
+        }
+#endif
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
+    {
+    bool cs = out_info->sv1;
+    int err = in_info.status;
+
+    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_shut_off_sorio::get_value()
+    {
+    return 0.1f * in_info.pos;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+void valve_iolink_shut_off_sorio::direct_set_value( float new_value )
+    {
+    in_info.pos = (int16_t)( new_value * 10 );
+    }
+#endif
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_shut_off_sorio::get_fb_state()
+    {
+    if ( get_AI_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return false;
+        }
+
+    if ( in_info.status ) return false;
+
+    u_long dt = get_delta_millisec( start_switch_time );
+    if ( dt < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    if ( !out_info->sv1 && in_info.de_en ) return true;
+    if ( out_info->sv1 && in_info.main ) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_sorio::get_off_fb_value()
+    {
+    return !in_info.sv1;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_sorio::get_on_fb_value()
+    {
+    return in_info.sv1;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_sorio::direct_on()
+    {
+    if ( false == in_info.main )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = true;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_sorio::direct_off()
+    {
+    if ( out_info->sv1 )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_sorio::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            valve::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_sorio::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+       default:
+            direct_on();
+            break;
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
+    {
+    in_info->err = 0;
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if (in_info->de_en) return V_OFF;
+    if (in_info->main) return V_ON;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::evaluate_io()
+    {
+    out_info = (out_data_swapped*)get_AO_write_data(
+        static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        }
+
+    char* data = (char*)get_AI_data(
+        static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 2 ], buff[ 3 ] );
+
+#ifdef DEBUG_IOLINK_
+    char* tmp = (char*)in_info;
+
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            extra_offset = (int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
+    {
+    bool cs = out_info->sv1;
+    int err = in_info->err;
+
+    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
+    {
+    delete in_info;
+    in_info = nullptr;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_shut_off_thinktop::get_fb_state()
+    {
+    if ( get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) ) !=
+        io_device::IOLINKSTATE::OK )
+        {
+        return false;
+        }
+
+    if ( in_info->err ) return false;
+
+    if (get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ))
+        {
+        return true;
+        }
+
+    if (!out_info->sv1 && in_info->de_en && in_info->st) return true;
+    if (out_info->sv1 && in_info->main && in_info->st) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_shut_off_thinktop::get_value()
+    {
+    return 0.1f * in_info->pos;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_off_fb_value()
+    {
+    return !out_info->sv1 && in_info->de_en && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_on_fb_value()
+    {
+    return out_info->sv1 && in_info->main && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::direct_on()
+    {
+    if (false == in_info->main)
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = true;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::direct_off()
+    {
+    if (out_info->sv1)
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        G_LOG->debug(
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
+
+    switch (prop[ 0 ])
+        {
+        case 'B': //BLINK
+        {
+        val > 0 ? out_info->wink = true : out_info->wink = false;
+        blink = out_info->wink;
+        break;
+        }
+
+        default:
+            valve::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
+    {
+    switch (new_state)
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal::valve_iol_terminal( bool is_on_fb, bool is_off_fb,
+    const char* dev_name, device::DEVICE_SUB_TYPE sub_type, u_int terminal_size ) :
+    valve( is_on_fb, is_off_fb, dev_name, DT_V, sub_type )
+    {
+    terminal_id.resize( terminal_size );
+    }
+
+valve_iol_terminal::valve_iol_terminal( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int terminal_size ) :
+    valve( dev_name, DT_V, sub_type )
+    {
+    terminal_id.resize( terminal_size );
+    }
+
+void valve_iol_terminal::set_rt_par( u_int idx, float value )
+    {
+    idx -= 1;
+    if ( idx < terminal_id.size() )
+        {
+        terminal_id[ idx ] = static_cast<u_int>( value );
+        }
+    else
+        {
+        valve::set_rt_par( idx, value );
+        }
+    }
+
+bool valve_iol_terminal::check_config()
+    {
+    auto idx = 0;
+    return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
+        [&]( const unsigned int & id ) 
+        {
+        auto data = (char*)get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
+        if ( !data )
+            {
+            return false;
+            }
+
+        return id > 0;
+        } );
+    }
+
+/// @brief Установка данных состояния устройства.
+void valve_iol_terminal::set_state_bit( char* data,
+    unsigned int n ) const
+    {
+    auto offset = ( n - 1 ) / 8;
+    data[ offset ] |= 1 << ( ( n - 1 ) % 8 );
+    }
+
+void valve_iol_terminal::reset_state_bit( char* data,
+    unsigned int n ) const
+    {
+    auto offset = ( n - 1 ) / 8;
+    data[ offset ] &= ~( 1 << ( ( n - 1 ) % 8 ) );
+    }
+
+unsigned int valve_iol_terminal::get_terminal_id(
+    valve_iol_terminal::TERMINAL_OUTPUT n ) const
+    {
+    return terminal_id[ static_cast<unsigned int>( n ) - 1 ];
+    }
+
+int valve_iol_terminal::get_state()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    IOLINKSTATE res = get_AO_IOLINK_state(
+        static_cast<u_int>( IO_CONSTANT::AO_INDEX_1 ) );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -static_cast<int>( res );
+        }
+    else
+        {
+        return valve::get_state();
+        }
+#else // DEBUG_NO_IO_MODULES
+    return get_valve_state();
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void valve_iol_terminal::direct_set_state( int new_state )
+    {
+    if ( new_state )
+        {
+        direct_on();
+        }
+    else direct_off();
+    };
+
+valve::VALVE_STATE valve_iol_terminal::get_valve_state()
+    {
+    return state;
+    }
+
+void valve_iol_terminal::direct_on()
+    {
+    if ( !check_config() ) return;
+
+    auto st = get_valve_state();
+    if ( valve::VALVE_STATE::V_ON != st )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    auto data = (char*)( get_AO_write_data(
+        static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) ) );
+    set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    for ( u_int i = 1; i < static_cast<u_int>( terminal_id.size() ); i++ )
+        {
+        data = (char*)( get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>(
+            static_cast<size_t>( TERMINAL_OUTPUT::ON ) + i ) ) );
+        }
+    state = valve::VALVE_STATE::V_ON;
+    }
+
+void valve_iol_terminal::direct_off()
+    {
+    if ( !check_config() ) return;
+
+    auto st = get_valve_state();
+    if ( valve::VALVE_STATE::V_OFF != st )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    for ( size_t i = 0; i < terminal_id.size(); i++ )
+        {
+        auto data = (char*)( get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + i ) );
+        reset_state_bit( data, get_terminal_id( static_cast<TERMINAL_OUTPUT>(
+            static_cast<size_t>( TERMINAL_OUTPUT::ON ) + i ) ) );
+        }
+    state = valve::VALVE_STATE::V_OFF;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_DO1::valve_iol_terminal_DO1( const char* dev_name ) :
+    valve_iol_terminal( dev_name, device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 )
+    {
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_DO1_DI1_on::valve_iol_terminal_DO1_DI1_on( const char* dev_name ) :
+    valve_iol_terminal( true, false, dev_name, V_IOLINK_VTUG_DO1_FB_ON )
+    {
+    }
+
+bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
+    {
+    if ( !check_config() ) return false;
+
+    auto o = get_valve_state();
+    int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+
+    if ( o == i )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_DO1_DI1_on::get_on_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+inline int valve_iol_terminal_DO1_DI1_on::get_off_fb_value()
+    {
+    return false;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_DO1_DI1_off::valve_iol_terminal_DO1_DI1_off( const char* dev_name ) :
+    valve_iol_terminal( false, true, dev_name, V_IOLINK_VTUG_DO1_FB_OFF )
+    {
+    }
+
+bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
+    {
+    if ( !check_config() ) return false;
+
+    auto o = get_valve_state();
+    int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+
+
+    if ( o != i )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+int valve_iol_terminal_DO1_DI1_off::get_on_fb_value()
+    {
+    return false;
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
+    bool is_on_fb, bool is_off_fb, device::DEVICE_SUB_TYPE sub_type ) :
+    valve_iol_terminal( is_on_fb, is_off_fb, dev_name, sub_type, 3 )
+    {
+    }
+
+valve_iol_terminal_mixproof_DO3::valve_iol_terminal_mixproof_DO3( const char* dev_name,
+   device::DEVICE_SUB_TYPE sub_type ) : valve_iol_terminal( dev_name, sub_type, 3 )
+    {
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_upper_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 );
+    auto data = (char*)get_AO_write_data( idx );
+    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_2 );
+    data = (char*)get_AO_write_data( idx );
+    set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_3 );
+    data = (char*)get_AO_write_data( idx );
+    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
+
+    set_st( V_UPPER_SEAT );
+    }
+
+void valve_iol_terminal_mixproof_DO3::open_lower_seat()
+    {
+    if ( !check_config() ) return;
+
+    auto idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 );
+    auto data = (char*)get_AO_write_data( idx );
+    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::ON ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_2 );
+    data = (char*)get_AO_write_data( idx );
+    reset_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::UPPER_SEAT ) );
+    idx = static_cast<u_int> ( IO_CONSTANT::AO_INDEX_3 );
+    data = (char*)get_AO_write_data( idx );
+    set_state_bit( data, get_terminal_id( TERMINAL_OUTPUT::LOWER_SEAT ) );
+
+    set_st( V_LOWER_SEAT );
+    }
+
+void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            open_upper_seat();
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            open_lower_seat();
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
+    dev_name, DT_VC, DST_VC_IOLINK, 0 )
+    {
+    }
+
+//-----------------------------------------------------------------------------
+analog_valve_iolink::~analog_valve_iolink()
+    {
+    delete in_info;
+    in_info = nullptr;
+    }
+
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::evaluate_io()
+    {
+    out_info = (out_data*)get_AO_write_data( AO_INDEX );
+
+    char* data = (char*)get_AI_data( AO_INDEX );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 10;
+    std::copy( data, data + SIZE, buff );
+
+#ifdef DEBUG_VC_IOLINK
+    //Variants of float representation.
+    int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+    int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+    int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+    int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+    float* f1 = (float*)&a1;
+    float* f2 = (float*)&a2;
+    float* f3 = (float*)&a3;
+    float* f4 = (float*)&a4;
+    sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
+        *f1, *f2, *f3, *f4 );
+    G_LOG->write_log( i_log::P_WARNING );
+#endif
+
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 3 ], buff[ 0 ] );
+    std::swap( buff[ 1 ], buff[ 2 ] );
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 7 ], buff[ 4 ] );
+    std::swap( buff[ 5 ], buff[ 6 ] );
+
+#ifdef DEBUG_VC_IOLINK
+    sprintf( G_LOG->msg,
+        "closed %u, opened %u, status %u, NAMUR state %u, used setpoint %.3f, valve position %.3f\n",
+        in_info->closed, in_info->opened, in_info->status, in_info->namur_state,
+        in_info->setpoint, in_info->position );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_min_value()
+    {
+    return static_cast<float>( CONSTANTS::FULL_CLOSED );
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_max_value()
+    {
+    return static_cast<float>( CONSTANTS::FULL_OPENED );
+    }
+//-----------------------------------------------------------------------------
+int analog_valve_iolink::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "NAMUR_ST=%u, ", in_info->namur_state );
+    res += sprintf( buff + res, "OPENED=%u, ", in_info->opened );
+    res += sprintf( buff + res, "CLOSED=%u, ", in_info->closed );
+
+    res += sprintf( buff + res, "BLINK=%d, ", blink );
+    return res;
+    }
+#ifndef DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_on()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_OPENED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_off()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_CLOSED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_set_value( float new_value )
+    {
+    out_info->position = new_value;
+
+    char *buff = (char*) &out_info->position;
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 3 ], buff[ 0 ] );
+    std::swap( buff[ 1 ], buff[ 2 ] );
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_value()
+    {
+    return in_info->position;
+    }
+//-----------------------------------------------------------------------------
+int analog_valve_iolink::get_state()
+    {
+    return in_info->status;
+    }
+//-----------------------------------------------------------------------------
+inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug(
+            "%s\t analog_valve_iolink::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            AO1::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+void DI1::direct_on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void DI1::direct_off()
+    {
+    }
+//-----------------------------------------------------------------------------
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( dt > 0 )
+        {
+        if ( current_state != get_DI( DI_INDEX ) )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = get_DI( DI_INDEX );
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = get_DI( DI_INDEX );
+
+    return current_state;
+    }
+//-----------------------------------------------------------------------------
+#else
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( dt > 0 )
+        {
+        if ( current_state != digital_io_device::get_state() )
+            {
+            if ( get_delta_millisec( time ) > dt  )
+                {
+                current_state = digital_io_device::get_state();
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = digital_io_device::get_state();
+
+    return current_state;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_DO1_DI2::valve_iol_terminal_DO1_DI2( const char* dev_name ) :
+    valve_iol_terminal( true, true, dev_name, V_IOLINK_VTUG_DO1_DI2 )
+    {
+    }
+
+bool valve_iol_terminal_DO1_DI2::get_fb_state()
+    {
+    auto o = get_valve_state();
+
+    int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    if ( VALVE_STATE::V_ON == o && i1 == 1 && i2 == 0 ) //Открыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( VALVE_STATE::V_OFF == o && i1 == 0 && i2 == 1 ) //Закрыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < 
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_DO1_DI2::get_on_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    }
+
+inline int valve_iol_terminal_DO1_DI2::get_off_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iol_terminal_mixproof_DO3_DI2::
+    valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name ) :
+    valve_iol_terminal_mixproof_DO3( dev_name, true, true, V_IOL_TERMINAL_MIXPROOF_DO3_DI2 )
+    {
+    }
+
+/// @brief Получение состояния обратной связи.
+bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
+    {
+    auto o = get_valve_state();
+
+    int i1 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    int i2 = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    if ( VALVE_STATE::V_ON == o && i1 == 1 && i2 == 0 ) //Открыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( VALVE_STATE::V_OFF == o && i1 == 0 && i2 == 1 ) //Закрыт.
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( VALVE_STATE::V_LOWER_SEAT == o ||
+        VALVE_STATE::V_UPPER_SEAT == o ) return true;
+
+    if ( get_delta_millisec( start_switch_time ) <
+        static_cast<u_long>( get_par( valve::P_ON_TIME, 0 ) ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iol_terminal_mixproof_DO3_DI2::get_on_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
+    }
+
+int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value()
+    {
+    return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_2 ) );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) : analog_io_device( dev_name, type, sub_type,
+        par_cnt + ADDITIONAL_PARAM_COUNT )
+#ifdef DEBUG_NO_IO_MODULES
+        ,st( 1 )
+#endif
+    {
+    set_par_name( P_ZERO_ADJUST_COEFF, 0, "P_CZ" );
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+
+float AI1::get_value()
+    {
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + analog_io_device::get_value();
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+float AI1::get_value()
+    {
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) +
+        get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
+    }
+//-----------------------------------------------------------------------------
+void AI1::direct_set_value( float new_value )
+    {
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+temperature_e_analog::temperature_e_analog( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    param_emulator( 20, 2 );    //Average room temperature.
+    }
+//-----------------------------------------------------------------------------
+float temperature_e_analog::get_value()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return analog_io_device::get_value();
+#else
+    float v = get_AI( C_AI_INDEX, 0, 0 );
+    if ( v < 0 )
+        {
+        return get_par( P_ERR_T, start_param_idx );
+        }
+    else
+        {
+        auto min = get_par( P_MIN_V, start_param_idx );
+        auto max = get_par( P_MAX_V, start_param_idx );
+        v = get_AI( C_AI_INDEX, min, max );
+        return get_par( P_ZERO_ADJUST_COEFF ) + v;
+        }
+#endif
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+int temperature_e_analog::get_state()
+    {
+    float v = get_AI( C_AI_INDEX, 0, 0 );
+    if ( v < 0 )
+        {
+        return -1;
+        }
+
+    return 0;
+    }
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
+    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT), info(new TE_data)
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
+    }
+//-----------------------------------------------------------------------------
+temperature_e_iolink::~temperature_e_iolink()
+    {
+    delete info;
+    info = nullptr;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+float temperature_e_iolink::get_value()
+    {
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return get_par(P_ERR_T, start_param_idx);
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
+
+        int16_t tmp = data[1] + 256 * data[0];
+        memcpy(info, &tmp, 2);
+
+        return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
+        }
+    }
+#else
+//-----------------------------------------------------------------------------
+float temperature_e_iolink::get_value()
+   {
+   return analog_io_device::get_value();
+   }
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_wages::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_wages::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_wages::get_value()
+    {
+    return value;
+    }
+
+void virtual_wages::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_wages::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_wages::get_state()
+    {
+    return state;
+    }
+
+void virtual_wages::tare()
+    {
+    }
+
+virtual_wages::virtual_wages( const char* dev_name ) :
+    device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 ),
+    value( 0 ), state( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wages_RS232::wages_RS232( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_RS232,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ), state( 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    }
+
+float wages_RS232::get_value_from_wages()
+    {
+    //Получение массива данных (1). Если данные пустые, вернуть старое
+    //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
+    //данных, вернуть старое значение (3). После переключения в режим
+    //считывания данных получаем данные и обрабатываем (4)
+    //Если данные корректные, то в 4м байте символ "+" (ASCII - 43), иначе -
+    //ошибка (5).
+
+    char* data = (char*)get_AI_data(
+        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
+
+    if ( !data )
+        {
+        state = -1;
+        value = 0.0f;
+        return value;
+        }
+
+    if ( data[ 0 ] == 0 && data[ 1 ] == 0 ) return value;                  //2
+    else if ( data[ 0 ] == 1 && data[ 1 ] == 0 )                           //3
+        {
+        set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );
+        return value;
+        }
+
+    set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
+
+    if ( data[ 2 ] != '+' )                                                //5
+        {
+        state = -1;
+        value = 0.0f;
+        return value;
+        }
+
+    std::swap( data[ 6 ], data[ 7 ] );
+    std::swap( data[ 8 ], data[ 9 ] );
+    std::swap( data[ 10 ], data[ 11 ] );
+    state = 1;
+    value = static_cast<float>( atof( data + 6 ) );
+    return value;
+    }
+
+float wages_RS232::get_value()
+    {
+    return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    }
+
+void wages_RS232::set_command( int new_state )
+    {
+    //Установить состояние чтения состояния буфера (1).
+    //Установить состояние чтения данных (2).
+    int* out =
+        (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    if ( !out ) return;
+
+    auto new_st = static_cast<STATES>( new_state );
+    if ( new_st == STATES::BUFFER_MOD )                                    //1                                      
+        {
+        *out = 0;
+        }
+    else if ( new_st == STATES::TOGGLE_COMMAND )                           //2
+        {
+        *out = static_cast<u_int>( STATES::READ_CHARACTER );
+        }
+    }
+
+int wages_RS232::get_state()
+    {
+    //Здесь мы должны получать состояние весов. Например: идёт взвешивание,
+    //взвешивание успешно завершилось, ошибка взвешивания (отрицательные
+    //значения), ожидание взвешивания и т.п.
+    return state;
+    }
+
+void wages_RS232::evaluate_io()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    value = analog_io_device::get_value();
+#else
+    value = get_value_from_wages();
+#endif
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+void wages_RS232::direct_set_value( float new_value )
+    {
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+void wages_RS232::tare()
+    {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
+    }
+//-----------------------------------------------------------------------------
+wages_eth::wages_eth( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_ETH,
+        static_cast< int >( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    }
+
+float wages_eth::get_value()
+    {
+    return weth->get_wages_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    }
+
+int wages_eth::get_state()
+    {
+    return weth->get_wages_state();
+    }
+
+void wages_eth::evaluate_io()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    weth->evaluate();
+#endif
+    }
+
+void wages_eth::tare()
+    {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
+    }
+
+void wages_eth::set_string_property( const char* field, const char* value )
+    {
+    if ( !weth && strcmp( field, "IP" ) == 0 )
+        {
+        int port = 1001;
+        int id = 0;
+        weth = new iot_wages_eth( id, value, port );
+        }
+    }
+
+void wages_eth::direct_set_value( float new_value )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    weth->set_wages_value( new_value );
+#endif
+    }
+
+void wages_eth::direct_set_state( int state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    weth->set_wages_state( state );
+#endif
+    }
+
+
+void wages_eth::direct_off()
+    {
+    weth->set_state( 0 );
+    }
+
+void wages_eth::direct_on()
+    {
+    weth->set_state( 1 );
+    }
+
+void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
+    int new_status )
+    {
+    weth->direct_set_tcp_buff( new_value, size, new_status );
+    }
+//-----------------------------------------------------------------------------
+wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_PXC_AXL,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<int>( CONSTANTS::P_K ), 0, "P_K" );
+    }
+
+void wages_pxc_axl::evaluate_io()
+    {
+    auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
+    auto data = reinterpret_cast<char*>( get_AI_data( idx ) );
+    //Reverse byte order to get correct int32.
+    std::swap( data[ 0 ], data[ 2 ] );
+    std::swap( data[ 1 ], data[ 3 ] );
+    int weigth = 0;
+    std::memcpy( &weigth, data, sizeof( weigth ) );
+    w = 0.001f * static_cast<float>( weigth ) *
+        get_par( static_cast<int>( CONSTANTS::P_K ) );
+
+    switch ( static_cast<ERR_VALUES>( weigth ) )
+        {
+        case ERR_VALUES::ERR_OVERRANGE:
+            st = static_cast<int>( ERR_STATES::ERR_OVERRANGE );
+            break;
+
+        case ERR_VALUES::ERR_WIRE_BREAK:
+            st = static_cast<int>( ERR_STATES::ERR_WIRE_BREAK );
+            break;
+
+        case ERR_VALUES::ERR_SHORT_CIRCUIT:
+            st = static_cast<int>( ERR_STATES::ERR_SHORT_CIRCUIT );
+            break;
+
+        case ERR_VALUES::ERR_INVALID_VALUE:
+            st = static_cast<int>( ERR_STATES::ERR_INVALID_VALUE );
+            break;
+
+        case ERR_VALUES::ERR_FAULTY_SUPPLY_VOLTAGE:
+            st = static_cast<int>( ERR_STATES::ERR_FAULTY_SUPPLY_VOLTAGE );
+            break;
+
+        case ERR_VALUES::ERR_FAULTY_DEVICE:
+            st = static_cast<int>( ERR_STATES::ERR_FAULTY_DEVICE );
+            break;
+
+        case ERR_VALUES::ERR_UNDERRANGE:
+            st = static_cast<int>( ERR_STATES::ERR_UNDERRANGE );
+            break;
+
+        default:
+            st = 0;
+            break;
+        }
+    }
+
+void wages_pxc_axl::tare()
+    {
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, -w );
+    }
+
+void wages_pxc_axl::reset_tare()
+    {
+    set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, 0 );
+    }
+
+float wages_pxc_axl::get_value()
+    {
+    return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
+    }
+
+int wages_pxc_axl::get_state()
+    {
+    return st;
+    }
+
+void wages_pxc_axl::direct_set_state( int new_state )
+    {
+    switch ( static_cast<CMDS>( new_state ) )
+        {
+        case CMDS::TARE:
+            tare();
+            break;
+
+        case CMDS::RESET_TARE:
+            reset_tare();
+            break;
+        }
+    }
+
+void wages_pxc_axl::direct_set_value( float new_value )
+    {
+    // Do nothing.
+    }
+//-----------------------------------------------------------------------------
+wages::wages( const char *dev_name ) : analog_io_device(
+    dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
+    {
+    set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
+    set_par_name( P_RKP, 0, "P_RKP");
+    set_par_name( P_C0, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT");
+    weight = 0;
+    filter_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+void wages::tare()
+    {
+    set_par(P_C0, 0, -weight);
+    return;
+    }
+
+float wages::get_weight()
+    {
+    if (get_delta_millisec(filter_time) > 500)
+        {
+        filter_time = get_millisec();
+        float rkp = get_par(P_RKP, 0);
+        if (0 == rkp) return -1001;
+        float uref = get_AI(C_AI_Uref);
+        if (0 == uref) return -1002;
+        float filterval = get_par(P_DT, 0);
+        float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
+        if (fabs(now_weight - weight) > filterval)
+            {
+            weight = now_weight;
+            }
+        if (filterval >= 1)
+            {
+            weight = ceilf(weight);
+            }
+        }
+    return weight + get_par(P_C0, 0);
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+
+float wages::get_value()
+    {
+    return weight + get_par(P_C0, 0);
+    }
+//-----------------------------------------------------------------------------
+void wages::direct_set_value( float new_value )
+    {
+    weight = new_value;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+float wages::get_value()
+    {
+    return get_weight();
+    }
+
+void wages::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case S_TARE:
+            tare();
+            break;
+        }
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+float AO1::get_value()
+    {
+    return get_AO( AO_INDEX, get_min_value(), get_max_value() );
+    }
+//-----------------------------------------------------------------------------
+void AO1::direct_set_value( float new_value )
+    {
+    set_AO( AO_INDEX, new_value, get_min_value(), get_max_value() );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) :AI1(
+        dev_name, DT_LT, sub_type, par_cnt + LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
+    }
+//-----------------------------------------------------------------------------
+int level::get_volume()
+    {
+    if ( get_state() < 0 )
+        {
+        return (int)get_par( P_ERR, start_param_idx );
+        }
+
+    return calc_volume();
+    }
+//-----------------------------------------------------------------------------
+int level::calc_volume()
+    {
+    return (int)get_value();
+    }
+//-----------------------------------------------------------------------------
+int level::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+float level::get_max_val()
+    {
+    return 100;
+    }
+//-----------------------------------------------------------------------------
+float level::get_min_val()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e::level_e( const char* dev_name ) : level(
+    dev_name, DST_LT, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e_cyl::level_e_cyl( const char* dev_name ) : level(
+    dev_name, DST_LT_CYL, LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = level::get_params_count();
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    }
+//-----------------------------------------------------------------------------
+int level_e_cyl::calc_volume()
+    {
+    float v = get_par( P_R, start_param_idx );
+    v = (float)M_PI * v * v *  get_value() *
+        get_par( P_MAX_P, start_param_idx ) / 9.81f;
+
+    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+
+    return v_kg;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e_cone::level_e_cone( const char* dev_name ) : level(
+    dev_name, DST_LT_CONE, LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = level::get_params_count();
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
+    }
+//-----------------------------------------------------------------------------
+int level_e_cone::calc_volume()
+    {
+    float r = get_par( P_R, start_param_idx );
+    float tg_a = 0;
+    if ( get_par( P_H_CONE, start_param_idx ) > 0 )
+        {
+        tg_a = r / get_par( P_H_CONE, start_param_idx );
+        }
+
+    float h_cone = get_par( P_H_CONE, start_param_idx );
+    float h_curr = get_par( P_MAX_P, start_param_idx ) * get_value() / 9.81f;
+
+    float v = 0;
+    if ( h_curr <= h_cone )
+        {
+        v = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
+        }
+    else
+        {
+        v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
+        }
+    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+
+    return v_kg;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+void valve_DO1::direct_on()
+    {
+    set_DO( DO_INDEX, 1 );
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1::direct_off()
+    {
+    set_DO( DO_INDEX, 0 );
+    }
+
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+i_motor::i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+    int params_count ) :
+    device( dev_name, DT_M, sub_type, params_count )
+    {
+    }
+//-----------------------------------------------------------------------------
+void i_motor::reverse()
+    {
+    set_state( 2 );
+    }
+//-----------------------------------------------------------------------------
+float i_motor::get_linear_speed() const
+    {
+    return 0;
+    }
+float i_motor::get_amperage() const
+    {
+    return 0.0f;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_motor::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_motor::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_motor::get_value()
+    {
+    return value;
+    }
+
+void virtual_motor::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_motor::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_motor::get_state()
+    {
+    return state;
+    }
+
+virtual_motor::virtual_motor( const char* dev_name ):
+    i_motor( dev_name, device::DST_M_VIRT, 0 ),
+    value( 0 ),
+    state( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float motor::get_value()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return freq;
+#else
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
+        }
+
+    return 0;
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_set_value( float value )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    freq = value;
+#else
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
+        }
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_set_state( int new_state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    if ( -1 == new_state )
+        {
+        state = ( char ) -1;
+        return;
+        }
+#endif // DEBUG_NO_IO_MODULES
+
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+        {
+        if ( new_state == 2 )
+            {
+#ifdef DEBUG_NO_IO_MODULES
+            state = 2;
+#else
+            // Включение прямого пуска.
+            int o = get_DO( DO_INDEX );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX, 1 );
+                }
+
+            // Включение реверса.
+            o = get_DO( DO_INDEX_REVERSE );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_REVERSE, 1 );
+                }
+#endif // DEBUG_NO_IO_MODULES
+
+            return;
+            }
+        }
+
+    if ( sub_type == device::DST_M_REV_2 ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        if ( new_state == 2 )
+            {
+#ifdef DEBUG_NO_IO_MODULES
+            state = 2;
+#else
+            // Выключение прямого пуска.
+            int o = get_DO( DO_INDEX );
+            if ( 1 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX, 0 );
+                }
+
+            // Включение реверса.
+            o = get_DO( DO_INDEX_REVERSE );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_REVERSE, 1 );
+                }
+#endif // DEBUG_NO_IO_MODULES
+
+            return;
+            }
+        }
+
+    if ( new_state )
+        {
+        direct_on();
+        }
+    else
+        {
+        direct_off();
+        }
+    }
+//-----------------------------------------------------------------------------
+int motor::get_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return state;
+#else
+    int o = get_DO( DO_INDEX );
+    auto sub_type = get_sub_type();
+
+    if ( sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        int err = get_DI( DI_INDEX_ERROR );
+
+        if ( 1 == err )
+            {
+            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                {
+                return -1;
+                }
+            }
+        else
+            {
+            start_switch_time = get_millisec();
+            }
+
+        int ro = get_DO( DO_INDEX_REVERSE );
+        if ( 1 == ro )
+            {
+            return 2;
+            }
+
+        if ( 1 == o )
+            {
+            return 1;
+            }
+
+        return 0;
+        }
+
+    int i = get_DI( DI_INDEX );
+
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+        {
+        int ro = get_DO( DO_INDEX_REVERSE );
+
+        if ( 0 == ro && 0 == o && 0 == i )
+            {
+            start_switch_time = get_millisec();
+            return 0;
+            }
+
+        if ( 0 == ro && 1 == o && 1 == i )
+            {
+            start_switch_time = get_millisec();
+            return 1;
+            }
+
+        if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+            {
+            if ( 1 == ro && 1 == o && 1 == i )
+                {
+                start_switch_time = get_millisec();
+                return 2;
+                }
+            }
+
+        if ( sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+            {
+            if ( 1 == ro && 0 == o && 1 == i )
+                {
+                start_switch_time = get_millisec();
+                return 2;
+                }
+            }
+        }
+    else
+        {
+        if ( o == i )
+            {
+            start_switch_time = get_millisec();
+            return i;
+            }
+        }
+
+    if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+        {
+        return -1;
+        }
+    else
+        {
+        return i;
+        }
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_on()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = 1;
+#else
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        // Выключение реверса.
+        int o = get_DO( DO_INDEX_REVERSE );
+        if ( 0 != o )
+            {
+            start_switch_time = get_millisec();
+            set_DO( DO_INDEX_REVERSE, 0 );
+            }
+        }
+
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_off()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = 0;
+#else
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        // Отключение реверса.
+        o = get_DO( DO_INDEX_REVERSE );
+        if ( o != 0 )
+            {
+            start_switch_time = get_millisec();
+            set_DO( DO_INDEX_REVERSE, 0 );
+            }
+        }
+#endif // DEBUG_NO_IO_MODULES
+
+    direct_set_value( 0 );
+    }
+//-----------------------------------------------------------------------------
+int motor::save_device_ex( char *buff )
+    {
+    int res = 0;
+#ifdef DEBUG_NO_IO_MODULES
+    res = sprintf( buff, "R=0, " );
+#else
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
+        {
+        if ( sub_type == device::M_REV_2_ERROR ||
+            sub_type == device::DST_M_REV_FREQ_2_ERROR )
+            {
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ERRT={}, ",
+                get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) ).size );
+            }
+        else
+            {
+            res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "R={}, ",
+                get_DO( DO_INDEX_REVERSE ) ).size );
+            }
+        }
+#endif //DEBUG_NO_IO_MODULES
+    return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+bool level_s::is_active()
+    {
+    switch ( get_sub_type() )
+        {
+        case DST_LS_MIN:
+            return get_state() == 0 ? 0 : 1;
+
+        case DST_LS_MAX:
+            return get_state() == 0 ? 1 : 0;
+
+        default:
+            return get_state() == 0 ? 0 : 1;
+        }
+    }
+//-----------------------------------------------------------------------------
+level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
+    DI1( dev_name, DT_LS, sub_type, 0,
+        sub_type == DST_LS_MAX ? 1 : 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_s_iolink::level_s_iolink( const char *dev_name,
+    device::DEVICE_SUB_TYPE sub_type ):
+    analog_io_device( dev_name, DT_LS, sub_type, LAST_PARAM_IDX - 1 ),
+    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 ), time( 0 ),
+    n_article( ARTICLE::DEFAULT ),
+    v( 0 ), st( 0 )
+    {
+    set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR, 0, "P_ERR" );
+    }
+
+void level_s_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( C_AI_INDEX );
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_LMT100:   //IFM.LMT100
+        case ARTICLE::IFM_LMT102:   //IFM.LMT102
+        case ARTICLE::IFM_LMT104:   //IFM.LMT104
+        case ARTICLE::IFM_LMT105:   //IFM.LMT105
+            {
+            LS_data info{};
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+            v = (float) info.v;
+            st = info.st1;
+            break;
+            }
+
+        case ARTICLE::EH_FTL33:     //E&H.FTL33-GR7N2ABW5J
+            {
+            rev_LS_data info{};
+            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
+            v = 0.1f *info.v;
+            st = info.st1;
+            break;
+            }
+
+        case ARTICLE::DEFAULT:
+            v = get_par( P_ERR, 0 );
+            st = 0;
+            break;
+        }
+    }
+
+void level_s_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+
+    auto article = get_article();
+    if ( strcmp( article, "IFM.LMT100" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT100;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT102") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT102;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT104") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT104;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT105") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT105;
+        return;
+        }
+    if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
+        {
+        n_article = ARTICLE::EH_FTL33;
+        return;
+        }
+
+    if ( G_DEBUG )
+        {
+        G_LOG->warning( "%s unknown article \"%s\"",
+            get_name(), new_article );
+        }
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+float level_s_iolink::get_value()
+    {
+	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+		{
+		return get_par( P_ERR, 0 );
+		}
+	else
+		{
+        return v;
+		}
+    }
+
+int level_s_iolink::get_state()
+	{
+	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
+	if (devstate != io_device::IOLINKSTATE::OK)
+		{
+		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
+		}
+
+    u_int_4 dt = (u_int_4)get_par( P_DT, 0 );
+    if ( dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
+
+    return current_state;
+	}
+#endif
+
+bool level_s_iolink::is_active()
+    {
+    return get_state();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e_iolink::level_e_iolink( const char *dev_name ) :
+    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 ),
+    n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 ),
+    PT_extra( 0 )
+    {
+    start_param_idx = level::get_params_count();
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
+    }
+//-----------------------------------------------------------------------------
+int level_e_iolink::calc_volume()
+    {
+    int v_kg = 0;
+    float v = 0.0;
+#ifndef DEBUG_NO_IO_MODULES
+    v = this->v;
+#else
+    v = get_value();
+    v = v / 100 * get_par(P_MAX_P, start_param_idx);
+#endif
+
+    if (PT_extra)
+        {
+        v -= PT_extra->get_value();
+        }
+
+    if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
+        {
+        float val = get_par( P_R, start_param_idx );
+        val = (float)M_PI * val * val * v * 100 / 9.81f;
+
+        v_kg = 10 * (int)( val * 100 + 0.5f ); //Переводим в килограммы.
+        }
+    else
+        {
+        float r = get_par( P_R, start_param_idx );
+        float tg_a = 0;
+        if ( get_par( P_H_CONE, start_param_idx ) > 0 )
+            {
+            tg_a = r / get_par( P_H_CONE, start_param_idx );
+            }
+
+        float h_cone = get_par( P_H_CONE, start_param_idx );
+        float h_curr = 100 * v / 9.81f;
+
+        float val = 0;
+        if ( h_curr <= h_cone )
+            {
+            val = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
+            }
+        else
+            {
+            val = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
+            }
+        v_kg = 10 * (int)( val * 100 + 0.5f ); //Переводим в килограммы.
+        }
+
+    return v_kg;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+float level_e_iolink::get_value()
+    {
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return get_par( level::P_ERR, level::start_param_idx );
+        }
+    else
+        {
+        return v / get_par( P_MAX_P, start_param_idx ) * 100;
+        }
+    }
+//-----------------------------------------------------------------------------
+int level_e_iolink::get_state()
+    {
+    IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
+    if (res != io_device::IOLINKSTATE::OK)
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return st;
+        }
+    }
+#endif
+//-----------------------------------------------------------------------------
+void level_e_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+    pressure_e_iolink::read_article( new_article, n_article, this );
+    }
+//-----------------------------------------------------------------------------
+void level_e_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( C_AI_INDEX );
+    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    }
+
+void level_e_iolink::set_string_property(const char* field, const char* value)
+    {
+    if (strcmp(field, "PT") == 0)
+        {
+        PT_extra = PT(value);
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float pressure_e::get_max_val()
+    {
+    return get_par( P_MAX_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float pressure_e::get_min_val()
+    {
+    return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
+    analog_io_device( dev_name, DT_PT, DST_PT_IOLINK, LAST_PARAM_IDX - 1 ),
+    n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
+    {
+    set_par_name( P_ERR, 0, "P_ERR" );
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+    read_article( new_article, n_article, this );
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::read_article( const char* article,
+    ARTICLE& n_article, device* dev )
+    {
+    if ( strcmp( article, "IFM.PI2715" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2715;
+        return;
+        }
+    if ( strcmp( article, "IFM.PI2794" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2794;
+        return;
+        }
+    if ( strcmp( article, "IFM.PI2797" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2797;
+        return;
+        }
+
+    if ( strcmp( article, "IFM.PM1704" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1704;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1705" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1705;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1707" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1707;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1708" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1708;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1709" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1709;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1715" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1715;
+        return;
+        }
+
+    if ( strcmp( article, "FES.8001446" ) == 0 )
+        {
+        n_article = ARTICLE::FES_8001446;
+        return;
+        }
+
+    if ( G_DEBUG )
+        {
+        G_LOG->warning( "%s unknown article \"%s\"",
+            dev->get_name(), article );
+        }
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
+    float& v, int& st )
+    {
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PI2715:
+        case ARTICLE::IFM_PI2794:
+        case ARTICLE::IFM_PI2797:
+        case ARTICLE::FES_8001446:
+            {
+            PT_data info{};
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+
+            v = info.v;
+            st = 0;
+            }
+            break;
+
+        case ARTICLE::IFM_PM1704:
+        case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1707:
+        case ARTICLE::IFM_PM1708:
+        case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1715:
+            {
+            ex_PT_data info{};
+
+            std::swap( data[ 0 ], data[ 1 ] );
+            std::swap( data[ 2 ], data[ 3 ] );
+            std::copy( data, data + sizeof( info ), (char*)&info );
+
+            v = info.v;
+            st = info.status;
+            }
+            break;
+
+        case ARTICLE::DEFAULT:
+            v = 0;
+            st = 0;
+            break;
+        }
+
+    float alfa = 1;
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PM1708:       //  0.01, mbar
+            alfa = 0.00001f;
+            break;
+
+        case ARTICLE::IFM_PM1707:       //   0.1, mbar
+        case ARTICLE::IFM_PM1709:       //   0.1, mbar
+            alfa = 0.0001f;
+            break;
+
+        case ARTICLE::IFM_PI2715:       // 0.001, bar
+        case ARTICLE::IFM_PI2797:       //     1, mbar
+
+        case ARTICLE::IFM_PM1704:       // 0.001, bar
+        case ARTICLE::IFM_PM1705:       // 0.001, bar
+        case ARTICLE::IFM_PM1715:       // 0.001, bar
+            alfa = 0.001f;
+            break;
+
+        case ARTICLE::IFM_PI2794:       // 0.01, bar
+            alfa = 0.01f;
+            break;
+
+        case ARTICLE::FES_8001446:
+            alfa = 0.000610388818f;
+            break;
+
+        case ARTICLE::DEFAULT:
+            alfa = 1;
+            break;
+        }
+    v = alfa * v;
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::evaluate_io()
+    {
+    evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+float pressure_e_iolink::get_value()
+    {
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return get_par( P_ERR, 0 );
+        }
+    else
+        {
+        return v;
+        }
+    }
+//-----------------------------------------------------------------------------
+int pressure_e_iolink::get_state()
+    {
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return st;
+        }
+    }
+
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
+    dev_name, DT_F, DST_F, 0), is_read_OK( false ), v( 0 ), st( 0 ),
+    err( 0 ), m( 0 ), in_info{}, out_info( new F_data_out() )
+    {
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "ERR=%d,M=%d, ", err, m );
+
+    res += sprintf( buff + res, "NOMINAL_CURRENT_CH={%d,%d,%d,%d}, ",
+        in_info.nominal_current_ch1, in_info.nominal_current_ch2,
+        in_info.nominal_current_ch3, in_info.nominal_current_ch4 );
+    res += sprintf( buff + res, "LOAD_CURRENT_CH={%.1f,%.1f,%.1f,%.1f}, ",
+        .1f * in_info.load_current_ch1, .1f * in_info.load_current_ch2,
+        .1f * in_info.load_current_ch3, .1f * in_info.load_current_ch4 );
+
+    res += sprintf( buff + res, "ST_CH={%d,%d,%d,%d}, ",
+        in_info.st_ch1, in_info.st_ch2,
+        in_info.st_ch3, in_info.st_ch4 );
+    res += sprintf( buff + res, "ERR_CH={%d,%d,%d,%d}, ",
+        in_info.err_ch1, in_info.err_ch2,
+        in_info.err_ch3, in_info.err_ch4 );
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        sprintf( G_LOG->msg,
+            "%s\t circuit_breaker::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val);
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        int new_val = ( int ) val;
+
+        if ( new_val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+
+        return 0;
+        }
+
+
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                out_info->switch_ch1 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch1 = val;
+#endif
+                return 0;
+            case 2:
+                out_info->switch_ch2 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch2 = val;
+#endif
+                return 0;
+            case 3:
+                out_info->switch_ch3 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch3 = val;
+#endif
+                return 0;
+            case 4:
+                out_info->switch_ch4 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch4 = val;
+#endif
+                return 0;
+            }
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_set_value( float v )
+    {
+    if ( v )
+        {
+        on();
+        }
+    else
+        {
+        off();
+        }
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_on()
+    {
+    out_info->valid_flag = true;
+    out_info->switch_ch1 = true;
+    out_info->switch_ch2 = true;
+    out_info->switch_ch3 = true;
+    out_info->switch_ch4 = true;
+
+#ifdef DEBUG_NO_IO_MODULES
+    in_info.st_ch1 = true;
+    in_info.st_ch2 = true;
+    in_info.st_ch3 = true;
+    in_info.st_ch4 = true;
+#endif
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_off()
+    {
+    out_info->valid_flag = true;
+    out_info->switch_ch1 = false;
+    out_info->switch_ch2 = false;
+    out_info->switch_ch3 = false;
+    out_info->switch_ch4 = false;
+
+#ifdef DEBUG_NO_IO_MODULES
+    in_info.st_ch1 = false;
+    in_info.st_ch2 = false;
+    in_info.st_ch3 = false;
+    in_info.st_ch4 = false;
+#endif
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+float circuit_breaker::get_value()
+    {
+    return v;
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::get_state()
+    {
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return st;
+        }
+    }
+#endif
+//-----------------------------------------------------------------------------
+void circuit_breaker::evaluate_io()
+    {
+    out_info = ( F_data_out* ) get_AO_write_data( 0 );
+
+    if ( get_AI_IOLINK_state(C_AI_INDEX) == io_device::IOLINKSTATE::OK )
+        {
+        if ( !is_read_OK )
+            {
+            out_info->switch_ch1 = in_info.st_ch1;
+            out_info->switch_ch2 = in_info.st_ch2;
+            out_info->switch_ch3 = in_info.st_ch3;
+            out_info->switch_ch4 = in_info.st_ch4;
+            out_info->nominal_current_ch1 = in_info.nominal_current_ch1;
+            out_info->nominal_current_ch2 = in_info.nominal_current_ch2;
+            out_info->nominal_current_ch3 = in_info.nominal_current_ch3;
+            out_info->nominal_current_ch4 = in_info.nominal_current_ch4;
+
+            is_read_OK = true;
+            }
+        }
+    else
+        {
+        is_read_OK = false;
+        }
+
+    char* data = (char*)get_AI_data(C_AI_INDEX);
+    std::copy(data, data + sizeof(in_info), (char*)&in_info);
+
+#ifdef DEBUG_IOLINK_F
+    char* tmp = (char*)data;
+    sprintf(G_LOG->msg, "%x %x %x %x %x %x %x %x\n",
+        tmp[0], tmp[1], tmp[2], tmp[3],
+        tmp[4], tmp[5], tmp[6], tmp[7] );
+    G_LOG->write_log(i_log::P_WARNING);
+
+    sprintf(G_LOG->msg, "nominal_current_ch1 %u, load_current_ch1 %u, "
+        "st_ch1 %x, err_ch1 %x, %.1f\n", in_info.nominal_current_ch1,
+        in_info.load_current_ch1, in_info.st_ch1, in_info.err_ch1,
+        .1f * in_info.v );
+    G_LOG->write_log(i_log::P_WARNING);
+    sprintf(G_LOG->msg, "nominal_current_ch2 %u, load_current_ch2 %u, "
+        "st_ch2 %x, err_ch2 %x\n", in_info.nominal_current_ch2,
+        in_info.load_current_ch2, in_info.st_ch2, in_info.err_ch2 );
+    G_LOG->write_log(i_log::P_WARNING);
+#endif
+    v = .1f * in_info.v;
+    st = in_info.st_ch1 || in_info.st_ch2 ||
+        in_info.st_ch3 || in_info.st_ch4 ? 1 : 0;
+    err = in_info.err_ch1 || in_info.err_ch2 ||
+        in_info.err_ch3 || in_info.err_ch4 ? 1 : 0;
+    }
+//-----------------------------------------------------------------------------
+circuit_breaker::F_data_out::F_data_out(): switch_ch1( false ), switch_ch2( false ),
+    switch_ch3( false ), switch_ch4( false ),
+    reserved( 0 ), valid_flag( false ),
+    nominal_current_ch1( 0 ), nominal_current_ch2( 0 ),
+    nominal_current_ch3( 0 ), nominal_current_ch4( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float concentration_e::get_max_val()
+    {
+    return get_par( P_MAX_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float concentration_e::get_min_val()
+    {
+    return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
+    analog_io_device( dev_name,
+    DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 ),
+    info( new QT_data )
+    {
+    set_par_name( P_ERR, 0, "P_ERR" );
+    };
+//-----------------------------------------------------------------------------
+concentration_e_iolink::~concentration_e_iolink()
+    {
+    delete info;
+    info = 0;
+    }
+//-----------------------------------------------------------------------------
+int concentration_e_iolink::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+float concentration_e_iolink::get_temperature() const
+    {
+    return 0.1f * info->temperature;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+float concentration_e_iolink::get_value()
+    {
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( P_ERR, 0 );
+        }
+    else
+        {
+        return 0.001f * info->conductivity;
+        }
+    }
+//-----------------------------------------------------------------------------
+int concentration_e_iolink::get_state()
+	{
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return info->status;
+        }
+	}
+#endif
+//-----------------------------------------------------------------------------
+void concentration_e_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data(0);
+    if ( !data ) return;
+
+    const int SIZE = 12;
+    std::reverse_copy (data, data + SIZE, (char*) info);
+
+#ifdef DEBUG_IOLINK_QT
+    char *tmp = (char*) info;
+    sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+        tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+        tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg, "conductivity %u, temperature %u, "
+            "status %x\n", info->conductivity,
+            info->temperature, info->status);
+    G_LOG->write_log(i_log::P_NOTICE);
+
+    sprintf( G_LOG->msg,
+            "conductivity %.3f, temperature %.1f, status %x\n",
+            get_value(), get_temperature(), get_state());
+    G_LOG->write_log(i_log::P_NOTICE);
+#endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float analog_input::get_max_val()
+    {
+    return get_par( P_MAX_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float analog_input::get_min_val()
+    {
+    return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void analog_io_device::direct_set_state( int new_state )
+    {
+    direct_set_value( ( float ) new_state );
+    }
+//-----------------------------------------------------------------------------
+int analog_io_device::get_state()
+    {
+    return ( int ) get_value();
+    }
+//-----------------------------------------------------------------------------
+void analog_io_device::print() const
+    {
+    device::print();
+    //io_device::print();
+    }
+//-----------------------------------------------------------------------------
+void analog_io_device::direct_on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void analog_io_device::direct_off()
+    {
+    direct_set_value( 0 );
+    }
+
+int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        fmt::format_to( G_LOG->msg,
+            "{}\t analog_io_device::set_cmd() - prop = {}, idx = {}, val = {}",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    analog_emulator& emulator = get_emulator();
+    if ( strcmp( prop, "M_EXP" ) == 0 )
+        {
+        emulator.param( static_cast<float>( val ), emulator.get_st_deviation() );
+        }
+    else if ( strcmp( prop, "S_DEV" ) == 0 )
+        {
+        emulator.param( emulator.get_m_expec(), static_cast<float>( val ) );
+        }
+    else if ( prop[ 0 ] == 'E' )
+        {
+        set_emulation( val != 0 );
+        }
+    else
+        {
+        return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+
+int analog_io_device::save_device_ex( char* buff )
+    {
+    auto res = fmt::format_to_n( 
+        buff, MAX_COPY_SIZE, 
+        "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
+        is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
+        get_emulator().get_st_deviation());
+    return static_cast<int>( res.size );
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_IO_MODULES
+
+float analog_io_device::get_value()
+    {
+    if ( is_emulation() ) return get_emulator().get_value();
+    else return value;
+    }
+//-----------------------------------------------------------------------------
+void analog_io_device::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int timer::save( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int timer::load( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int timer::get_saved_size() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+timer::timer(): last_time( 0 ),
+    work_time( 0 ),
+    state( STATE::S_STOP ),
+    countdown_time( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+void timer::start()
+    {
+    if ( STATE::S_STOP == state )
+        {
+        work_time = 0;
+        }
+
+    if ( STATE::S_PAUSE == state || STATE::S_STOP == state )
+        {
+        state = STATE::S_WORK;
+        last_time = get_millisec();
+        }
+    }
+//-----------------------------------------------------------------------------
+void timer::reset()
+    {
+    state = STATE::S_STOP;
+    work_time = 0;
+    }
+//-----------------------------------------------------------------------------
+void timer::pause()
+    {
+    if ( STATE::S_WORK == state )
+        {
+        work_time += get_delta_millisec( last_time );
+        }
+    state = STATE::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+bool timer::is_time_up() const
+    {
+    if ( STATE::S_WORK == state )
+        {
+        u_int time = work_time + get_delta_millisec( last_time );
+        if (  time <= countdown_time )
+            {
+            return 0;
+            }
+        else
+            {
+            return 1;
+            }
+        }
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+u_long timer::get_work_time() const
+    {
+    if ( STATE::S_WORK == state )
+        {
+        return work_time + get_delta_millisec( last_time );
+        }
+    else
+        {
+        return work_time;
+        }
+    }
+//-----------------------------------------------------------------------------
+void timer::set_countdown_time( u_long new_countdown_time )
+    {
+    if ( G_DEBUG )
+        {
+        if ( 0 == new_countdown_time )
+            {
+            printf( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
+                new_countdown_time );
+            }
+        }
+
+    countdown_time = new_countdown_time;
+    }
+//-----------------------------------------------------------------------------
+u_long timer::get_countdown_time() const
+    {
+    return countdown_time;
+    }
+//-----------------------------------------------------------------------------
+timer::STATE timer::get_state() const
+    {
+    return state;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+timer_manager::timer_manager( u_int timers_count ) : timers_cnt( timers_count ),
+    timers( 0 )
+    {
+    if ( timers_cnt )
+        {
+        timers = new timer[ timers_cnt ];
+        }
+    }
+//-----------------------------------------------------------------------------
+timer_manager::~timer_manager()
+    {
+    if ( timers )
+        {
+        delete [] timers;
+        timers     = nullptr;
+        timers_cnt = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+timer* timer_manager::operator[]( unsigned int index )
+    {
+    index -= 1;
+
+    if ( index < timers_cnt )
+        {
+        return &timers[ index ];
+        }
+    else
+        {
+        if ( G_DEBUG )
+            {
+            printf( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
+                index, timers_cnt );
+            }
+        }
+
+    return &stub;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+device_manager* G_DEVICE_MANAGER()
+    {
+    return device_manager::get_instance();
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* V( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "V%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_V( name );
+    }
+
+valve* V( const char *dev_name )
+    {
+    return ( valve* ) G_DEVICE_MANAGER()->get_V( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* VC( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_VC( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_motor* M( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "M%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_M( name );
+    }
+
+i_motor* M( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_M( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* LS( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "LS%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_LS( name );
+    }
+
+i_DI_device* LS( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_LS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* FS( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "FS%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_FS( name );
+    }
+
+i_DI_device* FS( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_FS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* AI( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_AI( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* AO( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "AO%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_AO( name );
+    }
+
+i_AO_device* AO( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_AO( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_counter* FQT( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "FQT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_FQT( name );
+    }
+
+i_counter* FQT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_FQT( dev_name );
+    }
+
+virtual_counter* virtual_FQT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_virtual_FQT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* TE( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "TE%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_TE( name );
+    }
+
+i_AI_device* TE( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_TE( dev_name );
+    }
+//-----------------------------------------------------------------------------
+level* LT( const char *dev_name )
+    {
+    return ( level* ) G_DEVICE_MANAGER()->get_LT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* GS( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_GS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* HA( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_HA( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* HL( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_HL( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* SB( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_SB( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* DI( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_DI( dev_name );
+    }
+
+i_DI_device* DI( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "DI%d", dev_n );
+    return G_DEVICE_MANAGER()->get_DI( name );
+    }
+
+//-----------------------------------------------------------------------------
+i_DO_device* DO( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_DO( dev_name );
+    }
+
+i_DO_device* DO( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "DO%d", dev_n );
+    return G_DEVICE_MANAGER()->get_DO( name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* QT( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "QT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_QT( name );
+    }
+
+i_AI_device* QT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_QT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* PT( u_int dev_n )
+    {
+    static char name[device::C_MAX_NAME] = "";
+    snprintf( name, device::C_MAX_NAME, "PT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_PT( name );
+    }
+
+i_AI_device* PT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_PT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+wages* WT( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "WT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_WT( name );
+    }
+
+wages* WT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_WT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* F(u_int dev_n)
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf(name, sizeof(name), "F%d", dev_n);
+
+    return G_DEVICE_MANAGER()->get_F(name);
+    }
+
+i_DO_AO_device* F(const char* dev_name)
+    {
+    return G_DEVICE_MANAGER()->get_F(dev_name);
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* C( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_C( dev_name );
+    }
+//-----------------------------------------------------------------------------
+signal_column* HLA( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_HLA( dev_name );
+    }
+//-----------------------------------------------------------------------------
+camera* CAM( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_CAM( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* PDS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_PDS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* TS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_TS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DO_AO_device* get_G( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_G( dev_name );
+    }
+//-----------------------------------------------------------------------------
+dev_stub* STUB()
+    {
+    return G_DEVICE_MANAGER()->get_stub();
+    }
+//-----------------------------------------------------------------------------
+device* DEVICE( int s_number )
+    {
+    return G_DEVICE_MANAGER()->get_device( s_number );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_AS::valve_AS( const char *dev_name, DEVICE_SUB_TYPE sub_type ):
+    valve( true, true, dev_name, DT_V, sub_type ),
+    AS_number( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+std::unordered_set<std::string> valve_AS::V70_ARTICLES = {"AL.9615-4002-12"};
+
+valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
+    valve_AS( dev_name, DST_V_AS_MIXPROOF )
+    {
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
+    valve_AS( dev_name, DST_V_AS_DO1_DI2 ),
+    start_err_time( get_millisec() )
+    {
+    }
+//---------------------------------------------------------------------------
+void valve_AS_DO1_DI2::direct_set_state(int new_state)
+    {
+    switch ( new_state )
+        {
+        case (int) VALVE_STATE::V_UPPER_SEAT:
+        case (int) VALVE_STATE::V_LOWER_SEAT:
+            //Ничего не делаем, так как нет седел.
+            break;
+
+        default:
+            valve_AS::direct_set_state( new_state );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_mini_flushing::valve_mini_flushing( const char* dev_name ) : valve(
+    true, true, dev_name, DT_V, DST_V_MINI_FLUSHING )
+    {
+    }
+
+void valve_mini_flushing::open_upper_seat()
+    {
+    //Не делаем ничего, так как верхнего седла нет.
+    }
+
+void valve_mini_flushing::open_lower_seat()
+    {
+    direct_set_state( V_LOWER_SEAT );
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+void valve_mini_flushing::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT: 
+            direct_off();
+            break;
+
+        case V_LOWER_SEAT:      //Открываем миниклапан.
+            direct_off();
+
+            if ( 0 == get_DO( DO_INDEX_MINI_V ) )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_MINI_V, 1 );
+                }
+            break;
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+
+void valve_mini_flushing::direct_on()
+    {
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        set_DO( DO_INDEX_MINI_V, 0 );
+        }
+    }
+
+void valve_mini_flushing::direct_off()
+    {
+    if ( get_DO( DO_INDEX_MINI_V ) == 1 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_MINI_V, 0 );
+        }
+   
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+
+valve::VALVE_STATE valve_mini_flushing::get_valve_state()
+    {
+    int o = get_DO( DO_INDEX );
+
+    if ( o == 0 && get_DO( DO_INDEX_MINI_V ) == 1 ) return V_LOWER_SEAT;
+
+    return (VALVE_STATE)o;
+    }
+
+bool valve_mini_flushing::get_fb_state()
+    {
+    int o = get_DO( DO_INDEX );
+    int i0 = get_DI( DI_INDEX_CLOSE );
+    int i1 = get_DI( DI_INDEX_OPEN );
+
+    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+        ( o == 1 && i1 == 1 && i0 == 0 ) )
+        {
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+
+int valve_mini_flushing::get_off_fb_value()
+    {
+    return get_DI( DI_INDEX_CLOSE );
+    }
+
+int valve_mini_flushing::get_on_fb_value()
+    {
+    return get_DI( DI_INDEX_OPEN );
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_device::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_device::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_device::get_value()
+    {
+    return value;
+    }
+
+void virtual_device::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_device::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_device::get_state()
+    {
+    return state;
+    }
+
+bool virtual_device::is_active()
+    {
+    bool ret = ((state == 0) ? false : true);
+    return (level_logic_invert ? !ret : ret);
+    }
+
+void virtual_device::set_rt_par(unsigned int idx, float value)
+    {
+    switch (idx)
+        {
+        case 1:
+            level_logic_invert = value != 0;
+            break;
+        }
+    }
+
+virtual_device::virtual_device( const char *dev_name,
+    device::DEVICE_TYPE dev_type,
+    device::DEVICE_SUB_TYPE dev_sub_type ) : device (dev_name, dev_type, dev_sub_type, 0)
+    {
+    value = 0;
+    state = 0;
+    level_logic_invert = false;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+virtual_counter::virtual_counter( const char *dev_name ) :
+    device( dev_name, DT_FQT, DST_FQT_VIRT, 0 ),
+    last_read_value( 0 ),
+    abs_last_read_value( 0 ),
+    state( STATES::S_WORK ),
+    flow_value( 0 ),
+    value( 0 ),
+    abs_value( 0 ),
+    is_first_read( true )
+    {
+    }
+//-----------------------------------------------------------------------------
+float virtual_counter::get_value()
+    {
+    return (float)get_quantity();
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_set_value( float new_value )
+    {
+    value = (u_int)new_value;
+    }
+//-----------------------------------------------------------------------------
+int virtual_counter::get_state()
+    {
+    return (int) state;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_on()
+    {
+    start();
+    }
+
+void  virtual_counter::direct_off()
+    {
+    reset();
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_set_state( int new_state )
+    {
+    switch ( static_cast<STATES>( new_state ) )
+        {
+        case STATES::S_WORK:
+            start();
+            break;
+
+        case STATES::S_PAUSE:
+            pause();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::pause( COUNTERS type )
+    {
+    state = STATES::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::start( COUNTERS type )
+    {
+    if ( STATES::S_PAUSE == state )
+        {
+        state = STATES::S_WORK;
+        }
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::reset( COUNTERS type )
+    {
+    value = 0;
+    }
+//-----------------------------------------------------------------------------
+u_int virtual_counter::get_quantity( COUNTERS type )
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
+float virtual_counter::get_flow()
+    {
+    return flow_value;
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение абсолютного значения счетчика (без учета
+/// состояния паузы).
+u_int virtual_counter::get_abs_quantity()
+    {
+    return abs_value;
+    }
+
+/// @brief Сброс абсолютного значения счетчика.
+void  virtual_counter::abs_reset()
+    {
+    abs_value = 0;
+    }
+//-----------------------------------------------------------------------------
+int virtual_counter::set_cmd( const char *prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'A': //ABS_V
+            abs_value = (u_int)val;
+            break;
+
+        case 'F':
+            flow_value = (float)val;
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::set( u_int value, u_int abs_value, float flow )
+    {
+    this->value = value;
+    this->abs_value = abs_value;
+
+    flow_value = flow;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::eval( u_int read_value, u_int abs_read_value,
+    float read_flow = 0 )
+    {
+    if ( !is_first_read )
+        {
+        if ( read_value > last_read_value )
+            {
+            value += read_value - last_read_value;
+            }
+
+        if ( abs_read_value > abs_last_read_value )
+            {
+            abs_value += abs_read_value - abs_last_read_value;
+            }
+        }
+    else
+        {
+        is_first_read = false;
+        }
+
+    last_read_value = read_value;
+    abs_last_read_value = abs_read_value;
+    flow_value = read_flow;
+    }
+//-----------------------------------------------------------------------------
+//Lua.
+int virtual_counter::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+
+    return res;
+    }
+
+u_long virtual_counter::get_pump_dt() const
+    {
+    return 0;
+    }
+
+float virtual_counter::get_min_flow() const
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+motor_altivar::motor_altivar( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+    i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
+    io_device( dev_name ),
+    start_switch_time( get_millisec() ),
+    atv( nullptr )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    }
+
+int motor_altivar::save_device_ex(char * buff)
+    {
+    int res = 0;
+#ifdef DEBUG_NO_IO_MODULES
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ=0.0, ",
+        reverse, freq, rpm, est, amperage ).size; 
+#else
+    res = fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "R={}, FRQ={:.1f}, RPM={}, EST={}, AMP={:.1f}, MAX_FRQ={:.1f}, ",
+        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state,
+        atv->amperage, atv->frq_max ).size;
+#endif //DEBUG_NO_IO_MODULES
+    return res;
+    }
+
+float motor_altivar::get_value()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return freq;
+#else
+    return atv->get_output_in_percent();
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void motor_altivar::direct_set_value(float value)
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    freq = value;
+#else
+    atv->set_output_in_percent( value );
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void motor_altivar::direct_set_state(int new_state)
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    if (-1 == new_state)
+        {
+        state = (char)-1;
+        return;
+        }
+#endif // DEBUG_NO_IO_MODULES
+
+
+    if (new_state == 2)
+        {
+#ifdef DEBUG_NO_IO_MODULES
+        state = 2;
+#else
+        atv->cmd = 2;
+        atv->reverse = 1;
+#endif // DEBUG_NO_IO_MODULES
+        return;
+        }
+
+    if (new_state == 100)
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        atv->Disable();
+        return;
+#endif
+        }
+
+    if (new_state == 101)
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        atv->Enable();
+        return;
+#endif
+        }
+
+    if (new_state)
+        {
+        direct_on();
+        }
+    else
+        {
+        direct_off();
+        }
+    }
+
+int motor_altivar::get_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return state;
+#else
+    return atv->state;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void motor_altivar::direct_on()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = 1;
+#else
+    atv->cmd = 1;
+    atv->reverse = 0;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void motor_altivar::direct_off()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = 0;
+    freq = 0;
+#else
+    if (atv->state < 0)
+        {
+            atv->cmd = 4; //2 bit - fault reset
+        }
+    else
+        {
+        atv->cmd = 0;
+        }
+    atv->reverse = 0;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+void motor_altivar::set_string_property(const char * field, const char * value)
+    {
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
+    if (strcmp(field, "IP") == 0)
+        {
+        int port = 502;
+        int timeout = 300;
+        std::string nodeip = std::string(value);
+        nodeip.append(":");
+        nodeip.append(std::to_string(port));
+        nodeip.append(" ");
+        nodeip.append(std::to_string(timeout));
+        if (!atv)
+            {
+            atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+            if (!atv)
+                {
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, get_article() );
+                atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+                }
+            }
+        }
+    }
+
+void motor_altivar::print() const
+    {
+    device::print();
+    }
+
+int motor_altivar::get_params_count() const
+    {
+    return ADDITIONAL_PARAM_COUNT;
+    }
+
+float motor_altivar::get_amperage() const
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return amperage;
+#else
+    return atv->amperage;
+#endif
+    }
+
+#ifdef DEBUG_NO_IO_MODULES
+int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
+    {
+    printf( "motor_altivar::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+
+    if ( strcmp( prop, "R" ) == 0 )
+        {
+        reverse = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "FRQ" ) == 0 )
+        {
+        freq = static_cast<float>( val );
+        }
+    else if ( strcmp( prop, "RPM" ) == 0 )
+        {
+        rpm = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "EST" ) == 0 )
+        {
+        est = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "AMP" ) == 0 )
+        {
+        amperage = static_cast<float>( val );
+        }
+    else
+        {
+        return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float motor_altivar_linear::get_linear_speed() const
+    {
+    float d = get_par( P_SHAFT_DIAMETER, start_param_idx );
+    float n = get_par( P_TRANSFER_RATIO, start_param_idx );
+    float v = .0f;
+
+    if ( 0 != d && 0 != n )
+        {
+#ifdef DEBUG_NO_IO_MODULES
+        v = ( get_rpm() * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#else
+        v = ( get_atv()->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#endif
+        }
+
+    return v;
+    }
+
+motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
+    motor_altivar( dev_name, device::M_ATV_LINEAR, ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = motor_altivar::get_params_count();
+    set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
+    set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    }
+
+#ifdef WIN_OS
+#pragma warning(pop)
+#endif // WIN_OS
