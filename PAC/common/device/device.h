@@ -1120,21 +1120,18 @@ class base_counter: public i_counter, public device, public io_device
         void print() const override;
 
         /// @brief Приостановка работы счетчика.
-        void pause() override;
+        void pause( COUNTERS type = COUNTERS::MAIN ) override;
 
         /// @brief Возобновление работы счетчика.
-        void start() override;
+        void start( COUNTERS type = COUNTERS::MAIN ) override;
 
         /// @brief Сброс счетчика и остановка счета.
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
-        void reset() override;
+        void reset( COUNTERS type = COUNTERS::MAIN ) override;
 
         /// @brief Сброс абсолютного значения счетчика.
         void abs_reset() override;
-
-        /// @brief Сброс счетчика и продолжение счета.
-        void restart() override;
 
         /// @brief Получение состояния работы счетчика.
         int get_state() override;
@@ -1157,11 +1154,8 @@ class base_counter: public i_counter, public device, public io_device
         /// @brief Получение максимального значение счетчика от устройства.
         virtual float get_max_raw_value() const = 0;
 
-        void calculate_quantity( float& value, float& last_read_value,
-            bool& is_first_read ) const;
-
         /// @brief Получение значения счетчика (c учетом паузы).
-        u_int get_quantity() override;
+        u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) override;
 
         /// @brief Получение абсолютного значения счетчика (без учета паузы).
         u_int get_abs_quantity() override;
@@ -1179,11 +1173,18 @@ class base_counter: public i_counter, public device, public io_device
             }
 
     private:
+        float calculate_delta( float& l_read_value, bool& is_first_read ) const;
+
         void set_abs_value( float new_value );
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
+        STATES state = STATES::S_WORK;
         STATES prev_error_state = STATES::S_WORK;
+
+        STATES current_day_state = STATES::S_WORK;
+        STATES user_state1 = STATES::S_PAUSE;
+        STATES user_state2 = STATES::S_PAUSE;
 
         u_int_4 start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;
@@ -1197,6 +1198,13 @@ class base_counter: public i_counter, public device, public io_device
         bool abs_is_first_read = true;
         float abs_value = 0.f;  ///< Абсолютное значение (не становится на паузу).
         float abs_last_read_value = 0.f;
+
+        float current_day_value = .0f;
+        float prev_day_value = .0f;
+        float user_value1 = .0f;
+        float user_value2 = .0f;
+
+        int c_day = get_time().tm_yday; // Текущий день.
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
@@ -1284,11 +1292,9 @@ class counter_iolink : public base_counter
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        u_int get_quantity() override;
-
-        u_int get_abs_quantity() override;
-
         float get_value() override;
+
+        float get_scaling_factor() const override;
 
         static const int mL_in_L = 1000;
 
@@ -1474,11 +1480,11 @@ class dev_stub : public i_counter, public valve, public i_wages,
 
         VALVE_STATE get_valve_state() override;
 
-        void    pause() override;
-        void    start() override;
-        void    reset() override;
-        u_int   get_quantity() override;
-        float   get_flow() override;
+        void pause( COUNTERS type = COUNTERS::MAIN ) override;
+        void start( COUNTERS type = COUNTERS::MAIN ) override;
+        void reset( COUNTERS type = COUNTERS::MAIN ) override;
+        u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) override;
+        float get_flow() override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;

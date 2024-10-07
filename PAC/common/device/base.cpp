@@ -566,29 +566,29 @@ void virtual_counter::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::pause()
+void virtual_counter::pause( COUNTERS type )
     {
     device::direct_set_state( static_cast<int>( STATES::S_PAUSE ) );
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::start()
+void virtual_counter::start( COUNTERS type )
     {
     device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
-void virtual_counter::reset()
+void virtual_counter::reset( COUNTERS type )
     {
     device::direct_set_value( 0.f );
-    }
-//-----------------------------------------------------------------------------
-u_int virtual_counter::get_quantity()
-    {
-    return static_cast<u_int>( device::get_value() );
     }
 //-----------------------------------------------------------------------------
 float virtual_counter::get_flow()
     {
     return flow_value;
+    }
+//-----------------------------------------------------------------------------
+u_int virtual_counter::get_quantity( COUNTERS type )
+    {
+    return static_cast<int>( device::get_value() );
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение абсолютного значения счетчика (без учета

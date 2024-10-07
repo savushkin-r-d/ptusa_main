@@ -119,24 +119,31 @@ class par_device
 class i_counter
     {
     public:
-        virtual ~i_counter() = default;
+        enum COUNTERS
+            {
+            MAIN,
+            DAY,
+            PREV_DAY,
+            USER1,
+            USER2
+            };
 
         /// @brief Приостановка работы счетчика.
-        virtual void pause() = 0;
+        virtual void pause( COUNTERS type = COUNTERS::MAIN ) = 0;
 
         /// @brief Возобновление работы счетчика.
-        virtual void start() = 0;
+        virtual void start( COUNTERS type = COUNTERS::MAIN ) = 0;
 
         /// @brief Сброс счетчика и остановка счета.
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
-        virtual void reset() = 0;
+        virtual void reset( COUNTERS type = COUNTERS::MAIN ) = 0;
 
         /// @brief Сброс счетчика и продолжение счета.
-        virtual void restart();
+        void restart( COUNTERS type = COUNTERS::MAIN );
 
         /// @brief Получение значения счетчика.
-        virtual u_int get_quantity() = 0;
+        virtual u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) = 0;
 
         /// @brief Получение значения счетчика.
         virtual float get_flow() = 0;
@@ -161,6 +168,8 @@ class i_counter
             S_LOW_ERR = -12,
             S_HI_ERR = -13,
             };
+
+        virtual float get_scaling_factor() const;
 
     protected:
         /// @brief Получение времени ожидания работы насоса.
@@ -857,13 +866,13 @@ class virtual_counter : public device, public i_counter
 
         void direct_set_state( int new_state ) override;
 
-        void pause() override;
+        void pause( COUNTERS type = COUNTERS::MAIN ) override;
 
-        void start() override;
+        void start( COUNTERS type = COUNTERS::MAIN ) override;
 
-        void reset() override;
+        void reset( COUNTERS type = COUNTERS::MAIN ) override;
 
-        u_int get_quantity() override;
+        u_int get_quantity( COUNTERS type = COUNTERS::MAIN ) final;
 
         float get_flow() override;
 
