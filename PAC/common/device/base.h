@@ -171,6 +171,8 @@ class i_counter
 
         virtual float get_scaling_factor() const;
 
+        virtual ~i_counter() = default;
+
     protected:
         /// @brief Получение времени ожидания работы насоса.
         virtual u_long get_pump_dt() const = 0;

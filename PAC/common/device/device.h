@@ -1189,10 +1189,7 @@ class base_counter: public i_counter, public device, public io_device
         bool is_first_read = true;      ///< Флаг первой установки значения.
         float last_read_value = 0.f;
 
-        bool abs_is_first_read = true;
-        float abs_value = 0.f;  ///< Абсолютное значение (не становится на паузу).
-        float abs_last_read_value = 0.f;
-
+        float abs_value = 0.f;          ///< Абсолютное значение (без паузы).
         float current_day_value = .0f;
         float prev_day_value = .0f;
         float user_value1 = .0f;

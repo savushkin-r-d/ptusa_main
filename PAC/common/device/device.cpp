@@ -1211,9 +1211,9 @@ void base_counter::evaluate_io()
     bool is_pump_working = false;
     if ( !motors.empty() )
         {
-        for ( u_int i = 0; i < motors.size(); i++ )
+        for ( auto motor : motors )
             {
-            if ( motors[ i ]->get_state() == 1 )
+            if ( motor->get_state() == 1 )
                 {
                 is_pump_working = true;
                 }
