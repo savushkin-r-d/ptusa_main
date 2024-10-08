@@ -2755,7 +2755,7 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
 TEST( counter_iolink, evaluate_io )

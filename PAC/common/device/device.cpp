@@ -1008,7 +1008,7 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
-    return static_cast<int>( state );
+    return device::get_state();
     };
 //-----------------------------------------------------------------------------
 void base_counter::direct_on()
@@ -1043,11 +1043,6 @@ void base_counter::direct_set_state( int new_state )
             pause();
             break;
         }
-    }
-//-----------------------------------------------------------------------------
-void base_counter::direct_set_value( float new_value )
-    {
-    value = new_value;
     }
 //-----------------------------------------------------------------------------
 void base_counter::set_abs_value( float new_value )
@@ -1089,17 +1084,12 @@ float base_counter::calculate_delta( float& l_read_value,
     return delta > 0 ? delta : 0;
     }
 //-----------------------------------------------------------------------------
-float base_counter::get_value()
-    {
-    return value;
-    }
-//-----------------------------------------------------------------------------
 u_int base_counter::get_quantity( COUNTERS type )
     {
     switch ( type )
         {
         case i_counter::MAIN:
-            return static_cast<u_int>( get_scaling_factor() * value );
+            return static_cast<u_int>( get_value() );
 
         case i_counter::DAY:
             return static_cast<u_int>( get_scaling_factor() * current_day_value );
@@ -1114,7 +1104,7 @@ u_int base_counter::get_quantity( COUNTERS type )
             return static_cast<u_int>( get_scaling_factor() * user_value2 );
         }
 
-    return static_cast<u_int>( get_scaling_factor() * value );
+    return static_cast<u_int>( get_scaling_factor() * get_value() );
     }
 //-----------------------------------------------------------------------------
 u_int base_counter::get_abs_quantity()
@@ -1137,7 +1127,7 @@ void base_counter::pause( COUNTERS type )
     switch ( type )
         {
         case i_counter::MAIN:
-            state = STATES::S_PAUSE;
+            direct_set_state( static_cast<int> ( STATES::S_PAUSE ) );
             current_day_state = STATES::S_PAUSE;
             user_state1 = STATES::S_PAUSE;
             user_state2 = STATES::S_PAUSE;
@@ -1163,24 +1153,21 @@ void base_counter::start( COUNTERS type )
     switch ( type )
         {
         case i_counter::MAIN:
-            if ( STATES::S_PAUSE == state )
-                {
-                state = STATES::S_WORK;
-                }
-            else if ( static_cast<int>( state ) < 0 ) // Есть какая-либо ошибка.
-                {
-                start_pump_working_time = 0;
-                state = STATES::S_WORK;
-                }
+            device::direct_set_state( static_cast<int> ( STATES::S_WORK ) );
+            start_pump_working_time = 0;
             break;
+
         case i_counter::DAY:
             current_day_state = STATES::S_WORK;
             break;
+
         case i_counter::PREV_DAY:
             break;
+
         case i_counter::USER1:
             user_state1 = STATES::S_WORK;
             break;
+
         case i_counter::USER2:
             user_state2 = STATES::S_WORK;
             break;
@@ -1192,7 +1179,7 @@ void base_counter::reset( COUNTERS type )
     switch ( type )
         {
         case i_counter::MAIN:
-            value = .0f;
+            direct_set_value ( .0f );
             break;
 
         case i_counter::DAY:
@@ -1243,7 +1230,8 @@ void base_counter::evaluate_io()
     // Насос работает (при его наличии) или расход выше минимального.
     else
         {
-        if ( state == STATES::S_PAUSE || 0 == start_pump_working_time )
+        if ( get_state() == static_cast<int> ( STATES::S_PAUSE ) || 
+            0 == start_pump_working_time )
             {
             start_pump_working_time = get_millisec();
             counter_prev_value = get_abs_quantity();
@@ -1254,14 +1242,14 @@ void base_counter::evaluate_io()
             {
             start_pump_working_time = get_millisec();
             counter_prev_value = get_abs_quantity();
-            state = STATES::S_WORK;
+            direct_set_state( static_cast<int> ( STATES::S_WORK ) );
             }
         else
             {
             auto dt = get_pump_dt();
             if ( get_delta_millisec( start_pump_working_time ) >= dt )
                 {
-                state = STATES::S_ERROR;
+                direct_set_state( static_cast<int> ( STATES::S_ERROR ) );
                 }
             }
         }
@@ -1269,9 +1257,12 @@ void base_counter::evaluate_io()
     auto delta = calculate_delta( last_read_value, is_first_read );
     abs_value += delta;
 
-    if ( STATES::S_WORK == state )
+    if ( get_state() == static_cast<int> ( STATES::S_WORK ) )
         {
-        value += delta;
+        auto val = base_counter::get_value();
+        val += delta;
+        direct_set_value( val );
+
         }
     if ( STATES::S_WORK == current_day_state )
         {
@@ -1539,7 +1530,7 @@ int counter_iolink::get_state()
             }
         }
 
-    return base_counter::get_state();
+    return device::get_state();
     }
 //-----------------------------------------------------------------------------
 u_long counter_iolink::get_pump_dt() const

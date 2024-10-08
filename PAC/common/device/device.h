@@ -1140,11 +1140,7 @@ class base_counter: public i_counter, public device, public io_device
 
         void direct_off() override;
 
-        float get_value() override;
-
         void direct_set_state( int new_state ) override;
-
-        void direct_set_value( float new_value ) override;
 
         void set_property( const char* field, device* dev ) override;
 
@@ -1179,7 +1175,6 @@ class base_counter: public i_counter, public device, public io_device
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
-        STATES state = STATES::S_WORK;
         STATES prev_error_state = STATES::S_WORK;
 
         STATES current_day_state = STATES::S_WORK;
@@ -1192,7 +1187,6 @@ class base_counter: public i_counter, public device, public io_device
         std::vector < device* > motors;
 
         bool is_first_read = true;      ///< Флаг первой установки значения.
-        float value = .0f;
         float last_read_value = 0.f;
 
         bool abs_is_first_read = true;
