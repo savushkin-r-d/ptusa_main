@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Aug 22 11:36:25 2024.
+** Generated automatically by tolua++-1.0.92 on Tue Oct  8 12:48:30 2024.
 */
 
 #ifndef __cplusplus
@@ -698,18 +698,20 @@ static int tolua_PAC_dev_i_counter_pause00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::COUNTERS type = ((i_counter::COUNTERS) (int)  tolua_tonumber(tolua_S,2,i_counter::COUNTERS::MAIN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'pause'", NULL);
 #endif
   {
-   self->pause();
+   self->pause(type);
   }
  }
  return 0;
@@ -729,18 +731,20 @@ static int tolua_PAC_dev_i_counter_start00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::COUNTERS type = ((i_counter::COUNTERS) (int)  tolua_tonumber(tolua_S,2,i_counter::COUNTERS::MAIN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'start'", NULL);
 #endif
   {
-   self->start();
+   self->start(type);
   }
  }
  return 0;
@@ -760,18 +764,20 @@ static int tolua_PAC_dev_i_counter_reset00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::COUNTERS type = ((i_counter::COUNTERS) (int)  tolua_tonumber(tolua_S,2,i_counter::COUNTERS::MAIN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'reset'", NULL);
 #endif
   {
-   self->reset();
+   self->reset(type);
   }
  }
  return 0;
@@ -791,18 +797,20 @@ static int tolua_PAC_dev_i_counter_restart00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::COUNTERS type = ((i_counter::COUNTERS) (int)  tolua_tonumber(tolua_S,2,i_counter::COUNTERS::MAIN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'restart'", NULL);
 #endif
   {
-   self->restart();
+   self->restart(type);
   }
  }
  return 0;
@@ -822,18 +830,20 @@ static int tolua_PAC_dev_i_counter_get_quantity00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::COUNTERS type = ((i_counter::COUNTERS) (int)  tolua_tonumber(tolua_S,2,i_counter::COUNTERS::MAIN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_quantity'", NULL);
 #endif
   {
-   unsigned int tolua_ret = (unsigned int)  self->get_quantity();
+   unsigned int tolua_ret = (unsigned int)  self->get_quantity(type);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

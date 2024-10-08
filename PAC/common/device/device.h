@@ -1125,9 +1125,7 @@ class base_counter: public i_counter, public device, public io_device
         /// @brief Возобновление работы счетчика.
         void start( COUNTERS type = COUNTERS::MAIN ) override;
 
-        /// @brief Сброс счетчика и остановка счета.
-        ///
-        /// После сброса для продолжения работы необходимо вызвать @ref start().
+        /// @brief Сброс счетчика.
         void reset( COUNTERS type = COUNTERS::MAIN ) override;
 
         /// @brief Сброс абсолютного значения счетчика.

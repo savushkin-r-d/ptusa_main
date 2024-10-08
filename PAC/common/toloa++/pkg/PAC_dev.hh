@@ -175,21 +175,19 @@ class i_counter
             };
 
         /// @brief Приостановка работы счетчика.
-        void pause();
+        virtual void pause( i_counter::COUNTERS type = i_counter::COUNTERS::MAIN );
 
         /// @brief Возобновление работы счетчика.
-        void start();
+        virtual void start( i_counter::COUNTERS type = i_counter::COUNTERS::MAIN );
 
         /// @brief Сброс счетчика.
-        ///
-        /// После сброса для продолжения работы необходимо вызвать @ref start().
-        void reset();
+        virtual void reset( i_counter::COUNTERS type = i_counter::COUNTERS::MAIN );
 
         /// @brief Сброс счетчика и продолжение счета.
-        void restart();
+        void restart( i_counter::COUNTERS type = i_counter::COUNTERS::MAIN );
 
         /// @brief Получение значения счетчика (объем).
-        unsigned int get_quantity();
+        unsigned int get_quantity( i_counter::COUNTERS type = i_counter::COUNTERS::MAIN );
 
         /// @brief Получение значения счетчика (поток).
         float get_flow();

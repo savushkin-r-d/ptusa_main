@@ -125,7 +125,8 @@ class i_counter
             DAY,
             PREV_DAY,
             USER1,
-            USER2
+            USER2,
+            ALL
             };
 
         /// @brief Приостановка работы счетчика.
@@ -134,9 +135,7 @@ class i_counter
         /// @brief Возобновление работы счетчика.
         virtual void start( COUNTERS type = COUNTERS::MAIN ) = 0;
 
-        /// @brief Сброс счетчика и остановка счета.
-        ///
-        /// После сброса для продолжения работы необходимо вызвать @ref start().
+        /// @brief Сброс счетчика.
         virtual void reset( COUNTERS type = COUNTERS::MAIN ) = 0;
 
         /// @brief Сброс счетчика и продолжение счета.

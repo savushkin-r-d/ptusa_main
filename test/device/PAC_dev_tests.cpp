@@ -2760,6 +2760,8 @@ TEST( counter_iolink, set_cmd )
 
 TEST( counter_iolink, evaluate_io )
     {
+    G_PAC_INFO()->emulation_off();
+
     counter_iolink fqt1( "FQT1" );
     fqt1.init( 0, 0, 0, 1 );
     fqt1.AI_channels.int_read_values[ 0 ] = new int_2[8]{ 0 };
@@ -2782,6 +2784,20 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
     EXPECT_EQ( 22 * 0.01f, fqt1.get_flow() );
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+tm get_time_next_day()
+    {
+    static time_t t_;
+    static struct tm timeInfo_;
+    t_ = time( 0 );
+    localtime_s( &timeInfo_, &t_ );
+
+    timeInfo_.tm_yday++;
+
+    return timeInfo_;
     }
 
 TEST( counter_iolink, get_quantity )
@@ -2808,6 +2824,9 @@ TEST( counter_iolink, get_quantity )
     counter_iolink_test fqt1( "FQT1" );
     EXPECT_EQ( 0, fqt1.get_quantity() );
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::MAIN ) );
+    EXPECT_EQ( 0, fqt1.get_quantity( static_cast<i_counter::COUNTERS> (
+        i_counter::ALL ) ) );         // As MAIN.
+
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::DAY ) );
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::PREV_DAY ) );
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER1 ) );
@@ -2839,7 +2858,7 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( 0, fqt1.get_quantity( i_counter::USER2 ) );
     EXPECT_EQ( NEW_VALUE_1, fqt1.get_abs_quantity() );
 
-    fqt1.pause();
+    fqt1.pause( i_counter::COUNTERS::ALL );
     // В паузе все счетчики кроме главного не изменяются.
     const auto NEW_VALUE_2 = counter_iolink::mL_in_L * RAW_VALUE_1;
     const auto RAW_VALUE_2 = START_RAW_VALUE + 20;
@@ -2908,6 +2927,33 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.abs_reset();
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+
+
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( get_time ),
+        reinterpret_cast<void*>( get_time_next_day ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+    fqt1.evaluate_io();
+    EXPECT_NE( 0, fqt1.get_quantity( i_counter::COUNTERS::PREV_DAY ) );
+    fqt1.reset( i_counter::COUNTERS::PREV_DAY );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::COUNTERS::PREV_DAY ) );
+
+    fqt1.start( i_counter::COUNTERS::ALL );
+    fqt1.set_raw_value( 20 );    
+    fqt1.evaluate_io();
+
+    EXPECT_NE( 0, fqt1.get_quantity( i_counter::COUNTERS::DAY ) );
+    fqt1.reset( i_counter::COUNTERS::DAY );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::COUNTERS::DAY ) );
+
+    EXPECT_NE( 0, fqt1.get_quantity( i_counter::COUNTERS::USER1 ) );
+    fqt1.reset( i_counter::COUNTERS::USER1 );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::COUNTERS::USER1 ) );
+
+    EXPECT_NE( 0, fqt1.get_quantity( i_counter::COUNTERS::USER2 ) );
+    fqt1.reset( i_counter::COUNTERS::USER2 );
+    EXPECT_EQ( 0, fqt1.get_quantity( i_counter::COUNTERS::USER2 ) );
+
+    subhook_remove( get_time_hook );
     }
 
 TEST( counter_iolink, get_pump_dt )

@@ -1124,25 +1124,21 @@ void base_counter::pause( COUNTERS type )
     {
     evaluate_io(); // Пересчитываем значение счетчика.
 
-    switch ( type )
+    if ( type == i_counter::MAIN || type == i_counter::ALL )
         {
-        case i_counter::MAIN:
-            direct_set_state( static_cast<int> ( STATES::S_PAUSE ) );
-            current_day_state = STATES::S_PAUSE;
-            user_state1 = STATES::S_PAUSE;
-            user_state2 = STATES::S_PAUSE;
-            break;
-        case i_counter::DAY:
-            current_day_state = STATES::S_PAUSE;
-            break;
-        case i_counter::PREV_DAY:
-            break;
-        case i_counter::USER1:
-            user_state1 = STATES::S_PAUSE;
-            break;
-        case i_counter::USER2:
-            user_state2 = STATES::S_PAUSE;
-            break;
+        direct_set_state( static_cast<int> ( STATES::S_PAUSE ) );
+        }
+    if ( type == i_counter::DAY || type == i_counter::ALL )
+        {
+        current_day_state = STATES::S_PAUSE;
+        }
+    if ( type == i_counter::USER1 || type == i_counter::ALL )
+        {
+        user_state1 = STATES::S_PAUSE;
+        }
+    if ( type == i_counter::USER2 || type == i_counter::ALL )
+        {
+        user_state2 = STATES::S_PAUSE;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1150,54 +1146,47 @@ void base_counter::start( COUNTERS type )
     {
     evaluate_io(); // Пересчитываем значение счетчика.
 
-    switch ( type )
+    if ( type == i_counter::MAIN || type == i_counter::ALL )
         {
-        case i_counter::MAIN:
-            device::direct_set_state( static_cast<int> ( STATES::S_WORK ) );
-            start_pump_working_time = 0;
-            break;
-
-        case i_counter::DAY:
-            current_day_state = STATES::S_WORK;
-            break;
-
-        case i_counter::PREV_DAY:
-            break;
-
-        case i_counter::USER1:
-            user_state1 = STATES::S_WORK;
-            break;
-
-        case i_counter::USER2:
-            user_state2 = STATES::S_WORK;
-            break;
+        device::direct_set_state( static_cast<int> ( STATES::S_WORK ) );
+        start_pump_working_time = 0;
+        }
+    if ( type == i_counter::DAY || type == i_counter::ALL )
+        {
+        current_day_state = STATES::S_WORK;
+        }
+    if ( type == i_counter::USER1 || type == i_counter::ALL )
+        {
+        user_state1 = STATES::S_WORK;
+        }
+    if ( type == i_counter::USER2 || type == i_counter::ALL )
+        {
+        user_state2 = STATES::S_WORK;
         }
     }
 //-----------------------------------------------------------------------------
 void base_counter::reset( COUNTERS type )
     {
-    switch ( type )
+    start( type );
+    if ( type == i_counter::MAIN || type == i_counter::ALL )
         {
-        case i_counter::MAIN:
-            direct_set_value ( .0f );
-            break;
-
-        case i_counter::DAY:
-            current_day_value = .0f;
-            break;
-
-        case i_counter::PREV_DAY:
-            prev_day_value = .0f;
-            break;
-
-        case i_counter::USER1:
-            user_value1 = .0f;
-            break;
-
-
-        case i_counter::USER2:
-            user_value2 = .0f;
-            break;
+        direct_set_value( .0f );        
+        }
+    if ( type == i_counter::DAY || type == i_counter::ALL )
+        {
+        current_day_value = .0f;
+        }
+    if ( type == i_counter::PREV_DAY || type == i_counter::ALL )
+        {
+        prev_day_value = .0f;
+        }
+    if ( type == i_counter::USER1 || type == i_counter::ALL )
+        {
+        user_value1 = .0f;
+        }
+    if ( type == i_counter::USER2 || type == i_counter::ALL )
+        {
+        user_value2 = .0f;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1481,33 +1470,36 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    auto data = (char*)get_AI_data( 0 );
-    if ( data )
+    if ( !G_PAC_INFO()->is_emulator() )
         {
-        auto buff = (char*)&in_info;
+        auto data = (char*)get_AI_data( 0 );
+        if ( data )
+            {
+            auto buff = (char*)&in_info;
 
-        const int SIZE = 8;
-        std::copy( data, data + SIZE, buff );
+            const int SIZE = 8;
+            std::copy( data, data + SIZE, buff );
 
-        //Reverse byte order to get correct float.
-        std::swap( buff[ 3 ], buff[ 0 ] );
-        std::swap( buff[ 1 ], buff[ 2 ] );
-        //Reverse byte order to get correct int16.
-        std::swap( buff[ 4 ], buff[ 5 ] );
-        //Reverse byte order to get correct int16.
-        std::swap( buff[ 6 ], buff[ 7 ] );
+            //Reverse byte order to get correct float.
+            std::swap( buff[ 3 ], buff[ 0 ] );
+            std::swap( buff[ 1 ], buff[ 2 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 4 ], buff[ 5 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 6 ], buff[ 7 ] );
 
 #ifdef DEBUG_FQT_IOLINK
-        sprintf( G_LOG->msg,
-            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
-            in_info.totalizer, in_info.flow, in_info.temperature,
-            in_info.out2, in_info.out1 );
-        G_LOG->write_log( i_log::P_NOTICE );
-        sprintf( G_LOG->msg,
-            "get_quantity() %d, get_flow() %f, get_temperature() %f",
-            get_quantity(), get_flow(), get_temperature() );
-        G_LOG->write_log( i_log::P_NOTICE );
+            sprintf( G_LOG->msg,
+                "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
+                in_info.totalizer, in_info.flow, in_info.temperature,
+                in_info.out2, in_info.out1 );
+            G_LOG->write_log( i_log::P_NOTICE );
+            sprintf( G_LOG->msg,
+                "get_quantity() %d, get_flow() %f, get_temperature() %f",
+                get_quantity(), get_flow(), get_temperature() );
+            G_LOG->write_log( i_log::P_NOTICE );
 #endif
+            }
         }
 
     base_counter::evaluate_io();
