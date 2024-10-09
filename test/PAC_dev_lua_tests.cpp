@@ -213,3 +213,111 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
 
     lua_close( L );
     }
+
+TEST( toLuapp, tolua_PAC_dev_i_counter_pause00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_VIRT, \'FQT1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = FQT()" ) );   //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( nullptr, dev );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause()" ) );
+    ASSERT_EQ( dev->get_state(), 2 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_i_counter_start00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_VIRT, \'FQT1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause()" ) );
+    auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( nullptr, dev );
+    ASSERT_EQ( dev->get_state(), 2 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start()" ) );
+    ASSERT_EQ( dev->get_state(), 1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause()" ) );
+    ASSERT_EQ( dev->get_state(), 2 );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:restart()" ) );
+    ASSERT_EQ( dev->get_state(), 1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_i_counter )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_VIRT, \'FQT1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    auto virt_dev = G_DEVICE_MANAGER()->get_virtual_FQT( "FQT1" );
+    EXPECT_NE( nullptr, virt_dev );
+    virt_dev->eval( 10, 11, 100 );
+    virt_dev->eval( 10 + 10, 11 + 11, 100 );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = FQT1:get_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 10 );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = FQT1:get_abs_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 11 );
+    
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:reset()" ) );
+    auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( nullptr, dev );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = FQT1:get_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 0 );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = FQT1:get_abs_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 11 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:abs_reset()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = FQT1:get_abs_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 0 );
+
+    lua_close( L );
+    }
