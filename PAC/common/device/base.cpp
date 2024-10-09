@@ -581,14 +581,14 @@ void virtual_counter::reset( COUNTERS type )
     device::direct_set_value( 0.f );
     }
 //-----------------------------------------------------------------------------
-float virtual_counter::get_flow()
-    {
-    return flow_value;
-    }
-//-----------------------------------------------------------------------------
 u_int virtual_counter::get_quantity( COUNTERS type )
     {
     return static_cast<int>( device::get_value() );
+    }
+//-----------------------------------------------------------------------------
+float virtual_counter::get_flow()
+    {
+    return flow_value;
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение абсолютного значения счетчика (без учета

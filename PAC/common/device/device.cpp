@@ -1513,7 +1513,7 @@ int counter_iolink::get_state()
             }
         }
 
-    return device::get_state();
+    return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 u_long counter_iolink::get_pump_dt() const
