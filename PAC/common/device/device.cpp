@@ -1088,9 +1088,6 @@ u_int base_counter::get_quantity( COUNTERS type )
     {
     switch ( type )
         {
-        case i_counter::MAIN:
-            return static_cast<u_int>( get_value() );
-
         case i_counter::DAY:
             return static_cast<u_int>( get_scaling_factor() * current_day_value );
 
@@ -1102,9 +1099,10 @@ u_int base_counter::get_quantity( COUNTERS type )
 
         case i_counter::USER2:
             return static_cast<u_int>( get_scaling_factor() * user_value2 );
-        }
 
-    return static_cast<u_int>( get_scaling_factor() * get_value() );
+        default:
+            return static_cast<u_int>( get_value() );
+        }    
     }
 //-----------------------------------------------------------------------------
 u_int base_counter::get_abs_quantity()
