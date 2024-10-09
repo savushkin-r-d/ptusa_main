@@ -1023,12 +1023,6 @@ void base_counter::direct_off()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        device::direct_set_state( new_state );
-        return;
-        }
-    
     switch ( new_state )
         {
         case 0:
@@ -1042,6 +1036,9 @@ void base_counter::direct_set_state( int new_state )
         case static_cast<int>( STATES::S_PAUSE ):
             pause();
             break;
+
+        default:
+            device::direct_set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1120,11 +1117,9 @@ void base_counter::set_property( const char* field, device* dev )
 //-----------------------------------------------------------------------------
 void base_counter::pause( COUNTERS type )
     {
-    evaluate_io(); // Пересчитываем значение счетчика.
-
     if ( type == i_counter::MAIN || type == i_counter::ALL )
         {
-        direct_set_state( static_cast<int> ( STATES::S_PAUSE ) );
+        device::direct_set_state( static_cast<int> ( STATES::S_PAUSE ) );
         }
     if ( type == i_counter::DAY || type == i_counter::ALL )
         {
@@ -1142,8 +1137,6 @@ void base_counter::pause( COUNTERS type )
 //-----------------------------------------------------------------------------
 void base_counter::start( COUNTERS type )
     {
-    evaluate_io(); // Пересчитываем значение счетчика.
-
     if ( type == i_counter::MAIN || type == i_counter::ALL )
         {
         device::direct_set_state( static_cast<int> ( STATES::S_WORK ) );
