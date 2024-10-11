@@ -642,6 +642,9 @@ class operation_state
         /// @brief Номера параметров максимального времени шагов.
         std::vector< int > step_max_duration_par_ns;
 
+        /// @brief Номера параметров переходного времени шагов.
+        std::vector< int > step_cooperation_par_ns;
+
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
@@ -666,7 +669,7 @@ class operation_state
         void save();
         void load();
 
-        int on_extra_step( int step_idx );
+        int on_extra_step( int step_idx, u_long cooperative_time = 0ul );
 
         int off_extra_step( int step_idx );
 
@@ -684,6 +687,8 @@ class operation_state
     private:
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
+        std::vector< u_long > active_steps_duration;
+        std::vector< u_long > active_steps_start_time;        
 
         std::vector< int > saved_active_steps;
 
