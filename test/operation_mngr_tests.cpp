@@ -529,7 +529,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
-    sleep_ms( DELAY_1MS );
+    sleep_ms( DELAY_1MS + DELAY_1MS );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
