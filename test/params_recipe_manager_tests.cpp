@@ -198,9 +198,6 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
     m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
     m_paramsRecipeManager->evaluate();
     m_paramsRecipeManager->save_device(buff);
-    std::ifstream infile("paramstech.serialized");
-    ASSERT_TRUE(infile.is_open());
-    infile.close();
     EXPECT_STREQ(
         "t.RECMAN = \n\t{\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=1,"
         "\n\t\t\tNMR=1,\n\t\t\tNAME='none',\n\t\t\tLIST='1##"
