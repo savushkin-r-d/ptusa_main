@@ -164,6 +164,73 @@ TEST_F(ParamsRecipeManagerTest, CreateAdapter) {
     m_paramsRecipeManager->recAdapters.clear();
     }
 
+TEST_F(ParamsRecipeManagerTest, save_device) {
+    const int BUFF_SIZE = 1000;
+    char buff[BUFF_SIZE] = { 0 };
+    m_paramsRecipeManager->evaluate();
+    m_paramsRecipeManager->save_device(buff);
+    EXPECT_STREQ(
+        "t.RECMAN = \n\t{\n\t}\n", buff);
+
+    memset(buff, '\0', sizeof(buff));
+    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes(5, 3);
+    m_paramsRecipeManager->evaluate();
+    m_paramsRecipeManager->save_device(buff);
+    EXPECT_STREQ(
+        "t.RECMAN = \n\t{\n\t}\n", buff);
+
+    memset(buff, '\0', sizeof(buff));
+    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
+    m_paramsRecipeManager->evaluate();
+    m_paramsRecipeManager->save_device(buff);
+    EXPECT_STREQ(
+        "t.RECMAN = \n\t{\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=1,\n\t\t\tNMR=1,\n\t\t"
+        "\tNAME='none',\n\t\t\tLIST='1##none||2##none||3##none||4##none||5#"
+        "#none||',\n\t\t\tLIST1='',\n\t\t\tPAR=\n\t\t\t{\n\t\t\t0,0,0,\n"
+        "\t\t\t},\n\t\t},\n\t}\n", buff);
+
+    memset(buff, '\0', sizeof(buff));
+    recipes = m_paramsRecipeManager->createRecipes(2, 1);
+    adapter = m_paramsRecipeManager->createAdapter(recipes);
+    m_paramsRecipeManager->recAdapters[1]->isChanged = true;
+    m_paramsRecipeManager->recPacks[1]->isChanged = true;
+    m_paramsRecipeManager->recAdapters[0]->recipeListChanged = true;
+    m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
+    m_paramsRecipeManager->evaluate();
+    m_paramsRecipeManager->save_device(buff);
+    std::ifstream infile("paramstech.serialized");
+    ASSERT_TRUE(infile.is_open());
+    infile.close();
+    EXPECT_STREQ(
+        "t.RECMAN = \n\t{\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=1,"
+        "\n\t\t\tNMR=1,\n\t\t\tNAME='none',\n\t\t\tLIST='1##"
+        "none||2##none||3##none||4##none||5##none||',\n\t\t\t"
+        "LIST1='',\n\t\t\tPAR=\n\t\t\t{\n\t\t\t0,0,0,\n\t\t"
+        "\t},\n\t\t},\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=0,\n\t"
+        "\t\tNMR=1,\n\t\t\tNAME='none',\n\t\t\tLIST="
+        "'2##none||',\n\t\t\tLIST1='',\n\t\t\tPAR=\n\t\t\t{"
+        "\n\t\t\t0,\n\t\t\t},\n\t\t},\n\t}\n", buff);
+
+    delete adapter;
+    delete recipes;
+    m_paramsRecipeManager->recPacks.clear();
+    m_paramsRecipeManager->recAdapters.clear();
+}
+
+TEST_F(ParamsRecipeManagerTest, get_lua_name) {
+    std::string buff = m_paramsRecipeManager->get_name_in_Lua();
+    EXPECT_STREQ("ParamsRecipeManager", buff.c_str());
+}
+
+TEST_F(ParamsRecipeManagerTest, pars_cmd) {
+    std::string cmd = "__RECMAN[1]:set_cmd(hello, 1, 2.5)";
+    int val = m_paramsRecipeManager->parseDriverCmd(cmd.c_str());
+    EXPECT_EQ(0, val);
+
+    cmd = "__RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
+    val = m_paramsRecipeManager->parseDriverCmd(cmd.c_str());
+    EXPECT_EQ(1, val);
+}
 
 
 class ParamsRecipeAdapterTest : public ::testing::Test {
