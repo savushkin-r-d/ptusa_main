@@ -7,6 +7,11 @@ int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
 bool G_READ_ONLY_IO_NODES = false;
 
+unsigned long get_delta_millisec_as_1001( unsigned long time1 )
+    {
+    return 1001ul;
+    }
+
 int main(int argc, char* argv[])
 {
 #if defined WIN_OS
