@@ -189,24 +189,31 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
         "#none||',\n\t\t\tLIST1='',\n\t\t\tPAR=\n\t\t\t{\n\t\t\t0,0,0,\n"
         "\t\t\t},\n\t\t},\n\t}\n", buff);
 
-    memset(buff, '\0', sizeof(buff));
+    delete adapter;
+    delete recipes;
+    m_paramsRecipeManager->recPacks.clear();
+    m_paramsRecipeManager->recAdapters.clear();
+}
+
+TEST_F(ParamsRecipeManagerTest, evaluate) {
+    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes(4, 3);
+    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
     recipes = m_paramsRecipeManager->createRecipes(2, 1);
     adapter = m_paramsRecipeManager->createAdapter(recipes);
+
     m_paramsRecipeManager->recAdapters[1]->isChanged = true;
     m_paramsRecipeManager->recPacks[1]->isChanged = true;
     m_paramsRecipeManager->recAdapters[0]->recipeListChanged = true;
     m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
+
+    sleep_ms(10001);
+
     m_paramsRecipeManager->evaluate();
-    m_paramsRecipeManager->save_device(buff);
-    EXPECT_STREQ(
-        "t.RECMAN = \n\t{\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=1,"
-        "\n\t\t\tNMR=1,\n\t\t\tNAME='none',\n\t\t\tLIST='1##"
-        "none||2##none||3##none||4##none||5##none||',\n\t\t\t"
-        "LIST1='',\n\t\t\tPAR=\n\t\t\t{\n\t\t\t0,0,0,\n\t\t"
-        "\t},\n\t\t},\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=0,\n\t"
-        "\t\tNMR=1,\n\t\t\tNAME='none',\n\t\t\tLIST="
-        "'2##none||',\n\t\t\tLIST1='',\n\t\t\tPAR=\n\t\t\t{"
-        "\n\t\t\t0,\n\t\t\t},\n\t\t},\n\t}\n", buff);
+
+    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[1]->isChanged);
+    EXPECT_FALSE(m_paramsRecipeManager->recPacks[1]->isChanged);
+    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[0]->recipeListChanged);
+    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[0]->isLoaded);
 
     delete adapter;
     delete recipes;
