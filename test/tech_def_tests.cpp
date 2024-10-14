@@ -292,8 +292,10 @@ t.TANK1=
 
     tank1.set_mode( OPER_N1, operation::RUN );
     tank1.evaluate();
-    sleep_ms( 1000 );
+
+    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
     tank1.save_device( buff );
+    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
 
     auto REF_STR2 = R"(t.TANK1 = t.TANK1 or {}
 t.TANK1=
