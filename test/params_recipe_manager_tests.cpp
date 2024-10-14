@@ -260,4 +260,35 @@ TEST_F(ParamsRecipeAdapterTest, SetActiveState) {
     EXPECT_EQ(m_adapter->getActiveState(), 1);
     }
 
+TEST_F(ParamsRecipeAdapterTest, set_cmd) {
+    EXPECT_FALSE(m_adapter->recipeListChanged);
+    int returned_value;
+    returned_value = m_adapter->set_cmd("ACT", 0, 1, "");
+    EXPECT_EQ(0, returned_value);
+    EXPECT_TRUE(m_adapter->recipeListChanged);
+
+    returned_value = m_adapter->set_cmd("NAME", 0, 0, "SUPER_ADAPTER");
+    EXPECT_EQ(1, returned_value);
+    EXPECT_TRUE(m_adapter->recipeListChanged);
+    EXPECT_TRUE(m_adapter->isChanged);
+
+    returned_value = m_adapter->set_cmd("NMR", 0, 1, "");
+    EXPECT_EQ(0, returned_value);
+
+    m_adapter->serialize();
+    returned_value = m_adapter->set_cmd("CMD", 0, 1001, "");
+    EXPECT_EQ(0, returned_value);
+
+    returned_value = m_adapter->set_cmd("CMD", 0, 789, "");
+    EXPECT_EQ(0, returned_value);
+
+    ParamsRecipeStorage* recipes;
+    returned_value = m_adapter->set_cmd("PAR", 1, 0, "SUPER_ADAPTER");
+    EXPECT_EQ(0, returned_value);
+    ParamsRecipeStorage* temp = m_adapter->getRecStorage();
+    EXPECT_TRUE(temp->isChanged);
+
+    returned_value = m_adapter->set_cmd("HELLO", 10, 10, "NEW_NAME");
+    EXPECT_EQ(0, returned_value);
+}
 
