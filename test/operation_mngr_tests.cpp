@@ -541,7 +541,7 @@ TEST( operation, check_max_step_time )
 	G_LUA_MANAGER->set_Lua( L );
 
 
-	tech_object test_tank( "Танк1", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
+    tech_object test_tank( "Танк1", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
 	const auto MAX_TIME_IDX = 1;
 	test_tank.par_float[ MAX_TIME_IDX ] = 1;
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
@@ -551,24 +551,26 @@ TEST( operation, check_max_step_time )
 	test_op->start();
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	sleep_ms( 1001 );
+    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
 
 	// После запуска опять в паузу из-за превышения времени.
 	test_op->start();
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	sleep_ms( 1001 );
+    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
     //Проверка на превышение максимльного времени шага.
     const unsigned int ERR_STR_SIZE = 80;
     char err_str[ ERR_STR_SIZE ] = {};
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
     const auto RES_STR = "превышено макс. t (1 с) шага 1 'Тестовый перв...'";
     EXPECT_STREQ( RES_STR, err_str );
-
+        
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
 
 	// После запуска опять в паузу из-за превышения времени второго шага,
 	// который является вспомогательным (выполняется параллельно).
@@ -579,14 +581,14 @@ TEST( operation, check_max_step_time )
 	test_op->on_extra_step( 2 );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	sleep_ms( 1001 );
+    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
     const auto RES_STR_EX = "превышено макс. t (1 с) шага 2 'Eval #1'";
-    EXPECT_STREQ( RES_STR_EX, err_str );
+    EXPECT_STREQ( RES_STR_EX, err_str );    
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
-
-
+    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    
 	G_LUA_MANAGER->free_Lua();
 	}
 
