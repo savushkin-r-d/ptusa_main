@@ -522,18 +522,19 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     G_DEBUG = 0;
 
     //Шаг должен отключиться через заданное время.
-    const auto DELAY_1MS = 1ul;
-    test_op->to_step( STEP1, DELAY_1MS );
-    EXPECT_EQ( test_op->active_step(), STEP1 );
-    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
+    G_DEBUG = 1;
+    const auto DELAY_1000MS = 1000UL;
+    test_op->to_step( STEP1, DELAY_1000MS );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
-    sleep_ms( DELAY_1MS + DELAY_1MS );
+    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
+    G_DEBUG = 0;
 
+    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
     G_LUA_MANAGER->free_Lua();
     }
 
@@ -780,7 +781,7 @@ TEST( operation, on_extra_step )
 	EXPECT_FALSE( test_op->is_active_extra_step( ANOTHER_EXTRA_STEP ) );
 	
 
-    G_LUA_MANAGER->free_Lua();
+	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
 

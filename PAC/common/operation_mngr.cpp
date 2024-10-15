@@ -2026,9 +2026,9 @@ void operation_state::evaluate()
         if ( step_n < steps.size() )
             {
             steps[ step_n ]->evaluate();
-            
+
             if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
                 enable_action && !enable_action->is_empty() &&
                 !enable_action->is_any_group_active() &&
                 enable_action->should_turn_off() )
@@ -2490,7 +2490,7 @@ void operation_state::load()
     active_steps.assign( saved_active_steps.begin(), saved_active_steps.end() );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx, u_long cooperative_time )
+int operation_state::on_extra_step( int step_idx, u_long step_time )
     {
     if ( (size_t) step_idx > steps.size() )
         {
@@ -2513,19 +2513,18 @@ int operation_state::on_extra_step( int step_idx, u_long cooperative_time )
         if ( steps[ step_idx - 1 ]->check( err_str, sizeof( err_str ) ) == 0 )
             {
             active_steps.push_back( step_idx );
-            active_steps_duration.push_back( cooperative_time );
+            active_steps_duration.push_back( step_time );
             active_steps_start_time.push_back( get_millisec() );
             steps[ step_idx - 1 ]->init();
             steps[ step_idx - 1 ]->evaluate();
 
             if ( G_DEBUG )
                 {
-                SetColor( YELLOW );
-                printf( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d.\n",
+                G_LOG->debug( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d (%lu ms).\n",
                     owner->owner->get_prefix(),
-                    owner->owner->get_name(), n, name.c_str(), step_idx );
+                    owner->owner->get_name(), n, name.c_str(), step_idx,
+                    step_time );
                 steps[ step_idx - 1 ]->print( owner->owner->get_prefix() );
-                SetColor( RESET );
                 }
             }
         else
