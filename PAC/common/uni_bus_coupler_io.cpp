@@ -708,7 +708,7 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node {}.)",
+                            "Read DI:bus coupler returned error. Node {}.",
                             nd->number );
                         *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
