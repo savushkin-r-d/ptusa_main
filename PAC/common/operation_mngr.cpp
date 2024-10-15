@@ -2026,10 +2026,10 @@ void operation_state::evaluate()
         if ( step_n < steps.size() )
             {
             steps[ step_n ]->evaluate();
-
-            auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && !enable_action->is_empty() &&
+            
+            if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                enable_action && !enable_action->is_empty() &&
                 !enable_action->is_any_group_active() &&
                 enable_action->should_turn_off() )
                 {
@@ -2038,13 +2038,10 @@ void operation_state::evaluate()
                 }
 
             auto duration = active_steps_duration[ idx ];
-            auto start_time = active_steps_start_time[ idx ];
-            if ( duration > 0 )
+            auto start_t = active_steps_start_time[ idx ];
+            if ( duration > 0 && get_delta_millisec( start_t ) > duration )
                 {
-                if ( get_delta_millisec( start_time ) > duration )
-                    {
-                    off_extra_step( step_n + 1 );
-                    }
+                off_extra_step( step_n + 1 );
                 }
             }
         }

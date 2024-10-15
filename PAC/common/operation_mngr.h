@@ -669,7 +669,7 @@ class operation_state
         void save();
         void load();
 
-        int on_extra_step( int step_idx, u_long cooperative_time = 0ul );
+        int on_extra_step( int step_idx, u_long cooperative_time = 0UL );
 
         int off_extra_step( int step_idx );
 
