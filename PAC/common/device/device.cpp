@@ -635,12 +635,12 @@ void power_unit::direct_set_value( float val )
 //-----------------------------------------------------------------------------
 void power_unit::evaluate_io()
     {
-    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
+    auto data = reinterpret_cast<char*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
     std::copy( data, data + sizeof( p_data_in ),
-        reinterpret_cast<std::byte*>( &p_data_in ) );
+        reinterpret_cast<char*>( &p_data_in ) );
     v = .1f *
         static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
         p_data_in.sum_currents ) );
@@ -851,7 +851,7 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "ST" ) == 0 )
         {
-        if ( auto new_val = static_cast<int>(val); new_val )
+        if (auto new_val = static_cast<int>(val); new_val )
             {
             on();
             }
@@ -1015,7 +1015,8 @@ int base_counter::get_state()
         }
 
     // Насос не работает (при его наличии) или расход ниже минимального.
-    if ( auto min_flow = get_min_flow(); ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
+    if ( float min_flow = get_min_flow(); 
+        ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
         {
         start_pump_working_time = 0;
         }
@@ -1040,7 +1041,8 @@ int base_counter::get_state()
             }
         else
             {
-            if ( auto dt = get_pump_dt(); ( start_pump_working_time ) < dt )
+            if ( u_long dt = get_pump_dt(); 
+                get_delta_millisec( start_pump_working_time ) < dt )
                 {
                 return device::get_state();
                 }
@@ -1540,7 +1542,10 @@ int DI1::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
-    if ( auto dt = (u_int_4)get_par(P_DT, 0); dt > 0 )
+    auto dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( auto dt = static_cast<u_int_4>(get_par(P_DT, 0));
+        dt > 0 )
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
@@ -1588,8 +1593,7 @@ int temperature_e::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
 
-    float v = get_AI( C_AI_INDEX, 0, 0 );
-    if ( float v = get_AI(C_AI_INDEX, 0, 0); v == -1000 )
+    if ( float v = get_AI(C_AI_INDEX, 0, 0); -1000 == v )
         {
         return -1;
         }
@@ -1904,7 +1908,7 @@ wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
 void wages_pxc_axl::evaluate_io()
     {
     auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
-    auto data = reinterpret_cast<std::byte*>( get_AI_data( idx ) );
+    auto data = reinterpret_cast<char*>( get_AI_data( idx ) );
 
     if ( !data ) return;
 
@@ -2016,8 +2020,7 @@ float wages::get_weight()
         float uref = get_AI(C_AI_Uref);
         if (0 == uref) return -1002;
         float filterval = get_par(P_DT, 0);
-        float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
-        if (float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0); 
+        if ( float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
             fabs(now_weight - weight) > filterval)
             {
             weight = now_weight;
@@ -2211,7 +2214,7 @@ float motor::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
-    if ( auto sub_type = get_sub_type(); 
+    if (int sub_type = get_sub_type();
         sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
@@ -2310,11 +2313,11 @@ int motor::get_state()
     int o = get_DO( DO_INDEX );
     auto sub_type = get_sub_type();
 
-    if ( sub_type == device::M_REV_2_ERROR ||
+    if ( auto sub_type = get_sub_type();
+        sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
-
-        if ( int err = get_DI(DI_INDEX_ERROR); err == 1 )
+        if ( int err = get_DI(DI_INDEX_ERROR); 1 == err )
             {
             if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
                 {
@@ -2326,7 +2329,7 @@ int motor::get_state()
             start_switch_time = get_millisec();
             }
 
-        if ( int ro = get_DO(DO_INDEX_REVERSE); ro == 1 )
+        if ( int ro = get_DO(DO_INDEX_REVERSE); 1 == ro )
             {
             return 2;
             }
@@ -2399,7 +2402,7 @@ void motor::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
 
-    if ( auto sub_type = get_sub_type(); 
+    if ( int sub_type = get_sub_type(); 
         sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -2432,8 +2435,8 @@ void motor::direct_off()
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
-    if ( auto sub_type = get_sub_type();
-        sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+    auto sub_type = get_sub_type();
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
@@ -2457,7 +2460,7 @@ int motor::save_device_ex( char *buff )
         return static_cast<int>(
         fmt::format_to_n( buff, MAX_COPY_SIZE, "R=0, ERRT=0, " ).size );
 
-    if ( auto sub_type = get_sub_type();
+    if ( int sub_type = get_sub_type(); 
         sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -2609,7 +2612,8 @@ int level_s_iolink::get_state()
 		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
 		}
 
-    if ( auto dt = (u_int_4)get_par(P_DT, 0); dt > 0 )
+    if ( auto dt = static_cast<u_int_4>(get_par(P_DT, 0)); 
+        dt > 0 )
         {
         if ( current_state != st )
             {
