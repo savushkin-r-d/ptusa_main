@@ -276,9 +276,7 @@ device_manager* device_manager::get_instance()
 device* device_manager::get_device( int dev_type,
     const char* dev_name )
     {
-    int dev_n = get_device_n( (device::DEVICE_TYPE)dev_type, dev_name );
-
-    if ( dev_n >= 0 )
+    if ( int dev_n = get_device_n((device::DEVICE_TYPE)dev_type, dev_name); dev_n >= 0 )
         {
         try
             {
@@ -313,9 +311,7 @@ device* device_manager::get_device( int dev_type,
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( const char* dev_name )
     {
-    int dev_n = get_device_n( dev_name );
-
-    if ( dev_n >= 0 )
+    if ( int dev_n = get_device_n(dev_name); dev_n >= 0 )
         {
         try
             {
@@ -432,8 +428,7 @@ i_AO_device* device_manager::get_AO( const char* dev_name )
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_FQT( const char* dev_name )
     {
-    int res = get_device_n( device::DT_FQT, dev_name );
-    if ( res > -1 )
+    if ( int res = get_device_n(device::DT_FQT, dev_name); res > -1 )
         {
         device* res_ctr = project_devices.at( res );
         switch ( res_ctr->get_sub_type() )
@@ -461,8 +456,7 @@ i_counter* device_manager::get_FQT( const char* dev_name )
 //-----------------------------------------------------------------------------
 virtual_counter* device_manager::get_virtual_FQT( const char* dev_name )
     {
-    int res = get_device_n( device::DT_FQT, dev_name );
-    if ( res > -1 )
+    if ( int res = get_device_n(device::DT_FQT, dev_name); res > -1 )
         {
         device* res_ctr = project_devices.at( res );
         switch ( res_ctr->get_sub_type() )
