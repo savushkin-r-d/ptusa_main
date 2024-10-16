@@ -606,8 +606,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     {
     if (0 == strcmp(prop, "CUR_REC"))
         {
-        u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)TRecipeManager::recipeNameLength)
+        if (u_int slen = utf8_strlen(val);  slen < (unsigned int)TRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
             strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
@@ -620,8 +619,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
         {
-        u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
+        if (u_int slen = utf8_strlen(val); slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
             strncpy_s(causticRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
@@ -635,8 +633,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "ACID_PAR_NAME"))
         {
-        u_int slen = utf8_strlen(val);
-        if (slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
+        if (u_int slen = utf8_strlen(val); slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
             {
 #ifdef WIN_OS
             strncpy_s(acidRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
@@ -650,8 +647,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "NCAR"))
         {
-        u_int slen = utf8_strlen(val);
-        if (slen < CAR_NAME_MAX_LENGTH)
+        if (u_int slen = utf8_strlen(val); slen < CAR_NAME_MAX_LENGTH)
             {
             switch (idx)
                 {
@@ -6406,8 +6402,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     rt_par_float[P_OP_TIME_LEFT] = 0;
     if (0 == operT)
         {
-        float divider = rt_par_float[P_ZAD_FLOW];
-        if (0 == divider)
+        if (float divider = rt_par_float[P_ZAD_FLOW]; divider == 0)
             {
             divider = 1;
             }
@@ -7507,8 +7502,7 @@ bool cipline_tech_object::waterTankIsEmpty( )
     {
     auto ret = !LWL->is_active( );
     if ( ret || dont_use_water_tank) return true;
-    auto lowLevelExtreme = parpar[ 0 ][ P_MIN_BULK_FOR_WATER ];
-    if ( lowLevelExtreme > 0 )
+    if (auto lowLevelExtreme = parpar[0][P_MIN_BULK_FOR_WATER];  lowLevelExtreme > 0 )
         {
         auto currentWaterLevel = LTW->get_value( );
         if ( waterTankLastEmptyState )
