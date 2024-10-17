@@ -772,8 +772,8 @@ void delay_on_action::evaluate()
     auto& dev_groups = devices[ MAIN_GROUP ];
     for ( u_int idx = 0; idx < dev_groups.size(); idx++ )
         {
-        int param_idx = par_idx.size() > idx ? par_idx[ idx ] : 0;
-        if ( param_idx > 0 )
+        if ( int param_idx = par_idx.size() > idx ? par_idx[idx] : 0; 
+            param_idx > 0 )
             {
             auto dt = ( *par )[ param_idx ];
             if ( get_delta_millisec( start_time ) <= dt )
@@ -2101,8 +2101,7 @@ void operation_state::evaluate()
     auto active_step = steps[ active_step_n ];
     auto action = ( *active_step )[ step::A_JUMP_IF ];
     auto if_action = static_cast<jump_if_action*>( action );
-    int next_step = -1;
-    if ( if_action->is_jump( next_step ) )
+    if ( int next_step = -1; if_action->is_jump( next_step ) )
         {
         if ( next_step >= 0 )
             {
@@ -2222,8 +2221,8 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
             n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
 
         active_step_max_time = 0;
-        auto max_t_par_n = step_max_duration_par_ns[ active_step_n ];
-        if ( max_t_par_n > 0 )
+        if ( auto max_t_par_n = step_max_duration_par_ns[active_step_n];
+            max_t_par_n > 0 )
             {
             active_step_max_time = u_int( owner->get_step_param( max_t_par_n ) );
             if ( active_step_max_time )
@@ -2538,8 +2537,8 @@ int operation_state::off_extra_step( int step_idx )
         return 0;
         }
 
-    auto res = std::find( active_steps.begin(), active_steps.end(), step_idx );
-    if ( res != active_steps.end() )
+    if ( auto res = std::find(active_steps.begin(), active_steps.end(), step_idx); 
+        res != active_steps.end() )
         {
         steps[ step_idx - 1 ]->finalize();
         active_steps.erase( res );
@@ -2582,8 +2581,8 @@ int operation_state::switch_active_extra_step( int off_step, int on_step )
         return 0;
         }
 
-    auto res = std::find( active_steps.begin(), active_steps.end(), off_step );
-    if ( res != active_steps.end() )
+    if ( auto res = std::find(active_steps.begin(), active_steps.end(), off_step); 
+        res != active_steps.end() )
         {
         steps[ off_step - 1 ]->finalize();
         steps[ on_step - 1 ]->init();
@@ -2612,8 +2611,8 @@ int operation_state::switch_active_extra_step( int off_step, int on_step )
 //-----------------------------------------------------------------------------
 bool operation_state::is_active_extra_step( int step_idx ) const
     {
-    auto res = std::find( active_steps.begin(), active_steps.end(), step_idx );
-    if ( res != active_steps.end() ) return true;
+    if ( auto res = std::find(active_steps.begin(), active_steps.end(), step_idx); 
+        res != active_steps.end() ) return true;
 
     return false;
     }

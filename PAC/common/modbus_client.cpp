@@ -34,8 +34,8 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
     tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
     tcpclient->buff[10] = ((int_2)quantity) >> 8;;
     tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
             {
@@ -60,8 +60,8 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
     tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
     tcpclient->buff[10] = ((int_2)quantity) >> 8;;
     tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
             {
@@ -86,8 +86,8 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
     tcpclient->buff[9] = ((int_2)address) & 0xFF;
     tcpclient->buff[10] = ((int_2)quantity) >> 8;;
     tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity * 2)
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
             {
@@ -112,8 +112,8 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
     tcpclient->buff[9] = ((int_2)address) & 0xFF;
     tcpclient->buff[10] = ((int_2)quantity) >> 8;;
     tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity * 2)
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
             {
@@ -139,8 +139,7 @@ int modbus_client::write_coil( unsigned int address, unsigned char value )
     tcpclient->buff[9] = ((int_2)address) & 0xFF;
     tcpclient->buff[10] = bitstate;
     tcpclient->buff[11] = 0;
-    int res = tcpclient->Communicate(12);
-    if (res != 12)
+    if (int res = tcpclient->Communicate(12); res != 12)
         {
         if ( G_DEBUG )
             {
