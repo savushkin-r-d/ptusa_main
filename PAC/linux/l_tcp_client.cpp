@@ -65,9 +65,7 @@ int linux_tcp_client::Connect()
         return 0;
         }
 
-    const int C_ON = 1;
-
-    if (setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
+    if ( const int C_ON = 1; setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
         sizeof(C_ON)))
         {
         sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting socket params : timeout (%ld ms).", id, ip, connectTimeout );
@@ -156,9 +154,7 @@ int linux_tcp_client::AsyncConnect()
                     return 0;
                     }
 
-                const int C_ON = 1;
-
-                if (setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
+                if ( const int C_ON = 1; setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
                     sizeof(C_ON)))
                     {
                     sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting socket params : timeout (%ld ms).", id, ip, connectTimeout );
@@ -273,9 +269,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     async_result = AR_BUSY;
     async_bytes_to_send = bytestosend;
 
-    auto connectionState = checkConnection();
-
-    if ( !connectionState ) return 0;
+    if ( auto connectionState = checkConnection(); !connectionState ) return 0;
 
     int res = tcp_communicator_linux::sendall( socket_number, ( unsigned char* ) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0 );
     
