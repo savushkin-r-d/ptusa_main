@@ -31,4 +31,9 @@ TEST( device_communicator, write_devices_states_service )
     data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
     G_DEVICE_CMMCTR->write_devices_states_service( cmd_size, data, out_data );
     EXPECT_EQ( 'x', out_data[ 0 ] );
+
+    data[0] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
+    G_DEVICE_CMMCTR->write_devices_states_service(cmd_size, data, out_data);
+    EXPECT_EQ('x', out_data[0]);
+
     }
