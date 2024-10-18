@@ -207,6 +207,11 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
     m_paramsRecipeManager->recAdapters.clear();
 }
 
+
+unsigned long get_10001_ms(unsigned long time1) {
+    return 10001ul;
+}
+
 TEST_F(ParamsRecipeManagerTest, evaluate) {
     ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes(4, 3);
     ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
@@ -217,10 +222,11 @@ TEST_F(ParamsRecipeManagerTest, evaluate) {
     m_paramsRecipeManager->recPacks[1]->isChanged = true;
     m_paramsRecipeManager->recAdapters[0]->recipeListChanged = true;
     m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
-
-    sleep_ms(10001);
-
+    
+    subhook_install(G_RM_DELTA_MILLISEC_HOOK_10001);
     m_paramsRecipeManager->evaluate();
+    subhook_remove(G_RM_DELTA_MILLISEC_HOOK_10001);
+    subhook_free(G_RM_DELTA_MILLISEC_HOOK_10001);
 
     EXPECT_FALSE(m_paramsRecipeManager->recAdapters[1]->isChanged);
     EXPECT_FALSE(m_paramsRecipeManager->recPacks[1]->isChanged);
@@ -303,4 +309,3 @@ TEST_F(ParamsRecipeAdapterTest, set_cmd) {
     returned_value = m_adapter->set_cmd("HELLO", 10, 10, "NEW_NAME");
     EXPECT_EQ(0, returned_value);
 }
-
