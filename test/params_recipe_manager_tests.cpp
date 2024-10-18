@@ -1,5 +1,15 @@
 #include "params_recipe_manager_tests.h"
 
+unsigned long get_delta_millisec_as_10001( unsigned long )
+    {
+    return 10001UL;
+    }
+
+const auto G_RM_DELTA_MILLISEC_HOOK_10001 = subhook_new(
+    reinterpret_cast<void*>( get_delta_millisec ),
+    reinterpret_cast<void*>( get_delta_millisec_as_10001 ),
+    SUBHOOK_64BIT_OFFSET );
+
 using namespace ::testing;
 
 class ParamsRecipeStorageTest : public testing::Test {
@@ -168,21 +178,21 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
     const int BUFF_SIZE = 1000;
     char buff[BUFF_SIZE] = { 0 };
     m_paramsRecipeManager->evaluate();
-    m_paramsRecipeManager->save_device(buff);
+    m_paramsRecipeManager->save_device( buff );
     EXPECT_STREQ(
-        "t.RECMAN = \n\t{\n\t}\n", buff);
+        "t.RECMAN = \n\t{\n\t}\n", buff );
 
-    memset(buff, '\0', sizeof(buff));
-    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes(5, 3);
+    memset( buff, '\0', sizeof(buff) );
+    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes( 5, 3 );
     m_paramsRecipeManager->evaluate();
-    m_paramsRecipeManager->save_device(buff);
+    m_paramsRecipeManager->save_device( buff );
     EXPECT_STREQ(
-        "t.RECMAN = \n\t{\n\t}\n", buff);
+        "t.RECMAN = \n\t{\n\t}\n", buff );
 
-    memset(buff, '\0', sizeof(buff));
-    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
+    memset( buff, '\0', sizeof(buff) );
+    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter( recipes );
     m_paramsRecipeManager->evaluate();
-    m_paramsRecipeManager->save_device(buff);
+    m_paramsRecipeManager->save_device( buff );
     auto REF_STR0 = R"(t.RECMAN = 
 	{
 		{
@@ -199,7 +209,7 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
 		},
 	}
 )";
-    EXPECT_STREQ(REF_STR0, buff);
+    EXPECT_STREQ( REF_STR0, buff );
 
     delete adapter;
     delete recipes;
@@ -207,31 +217,26 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
     m_paramsRecipeManager->recAdapters.clear();
 }
 
-
-unsigned long get_10001_ms(unsigned long time1) {
-    return 10001ul;
-}
-
 TEST_F(ParamsRecipeManagerTest, evaluate) {
-    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes(4, 3);
-    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
-    recipes = m_paramsRecipeManager->createRecipes(2, 1);
-    adapter = m_paramsRecipeManager->createAdapter(recipes);
+    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes( 4, 3 );
+    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter( recipes );
+    recipes = m_paramsRecipeManager->createRecipes( 2, 1 );
+    adapter = m_paramsRecipeManager->createAdapter( recipes );
 
     m_paramsRecipeManager->recAdapters[1]->isChanged = true;
     m_paramsRecipeManager->recPacks[1]->isChanged = true;
     m_paramsRecipeManager->recAdapters[0]->recipeListChanged = true;
     m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
     
-    subhook_install(G_RM_DELTA_MILLISEC_HOOK_10001);
+    subhook_install( G_RM_DELTA_MILLISEC_HOOK_10001 );
     m_paramsRecipeManager->evaluate();
-    subhook_remove(G_RM_DELTA_MILLISEC_HOOK_10001);
-    subhook_free(G_RM_DELTA_MILLISEC_HOOK_10001);
+    subhook_remove( G_RM_DELTA_MILLISEC_HOOK_10001 );
+    subhook_free( G_RM_DELTA_MILLISEC_HOOK_10001 );
 
-    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[1]->isChanged);
-    EXPECT_FALSE(m_paramsRecipeManager->recPacks[1]->isChanged);
-    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[0]->recipeListChanged);
-    EXPECT_FALSE(m_paramsRecipeManager->recAdapters[0]->isLoaded);
+    EXPECT_FALSE( m_paramsRecipeManager->recAdapters[1]->isChanged );
+    EXPECT_FALSE( m_paramsRecipeManager->recPacks[1]->isChanged );
+    EXPECT_FALSE( m_paramsRecipeManager->recAdapters[0]->recipeListChanged );
+    EXPECT_FALSE( m_paramsRecipeManager->recAdapters[0]->isLoaded );
 
     delete adapter;
     delete recipes;
@@ -241,17 +246,17 @@ TEST_F(ParamsRecipeManagerTest, evaluate) {
 
 TEST_F(ParamsRecipeManagerTest, get_lua_name) {
     std::string buff = m_paramsRecipeManager->get_name_in_Lua();
-    EXPECT_STREQ("ParamsRecipeManager", buff.c_str());
+    EXPECT_STREQ( "ParamsRecipeManager", buff.c_str() );
 }
 
 TEST_F(ParamsRecipeManagerTest, pars_cmd) {
     std::string cmd = "__RECMAN[1]:set_cmd(hello, 1, 2.5)";
-    int val = m_paramsRecipeManager->parseDriverCmd(cmd.c_str());
-    EXPECT_EQ(0, val);
+    int val = m_paramsRecipeManager->parseDriverCmd( cmd.c_str() );
+    EXPECT_EQ( 0, val );
 
     cmd = "__RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
-    val = m_paramsRecipeManager->parseDriverCmd(cmd.c_str());
-    EXPECT_EQ(1, val);
+    val = m_paramsRecipeManager->parseDriverCmd( cmd.c_str() );
+    EXPECT_EQ( 1, val );
 }
 
 
@@ -279,33 +284,32 @@ TEST_F(ParamsRecipeAdapterTest, SetActiveState) {
     }
 
 TEST_F(ParamsRecipeAdapterTest, set_cmd) {
-    EXPECT_FALSE(m_adapter->recipeListChanged);
+    EXPECT_FALSE( m_adapter->recipeListChanged );
     int returned_value;
-    returned_value = m_adapter->set_cmd("ACT", 0, 1, "");
-    EXPECT_EQ(0, returned_value);
-    EXPECT_TRUE(m_adapter->recipeListChanged);
+    returned_value = m_adapter->set_cmd( "ACT", 0, 1, "" );
+    EXPECT_EQ( 0, returned_value );
+    EXPECT_TRUE( m_adapter->recipeListChanged );
 
-    returned_value = m_adapter->set_cmd("NAME", 0, 0, "SUPER_ADAPTER");
-    EXPECT_EQ(1, returned_value);
-    EXPECT_TRUE(m_adapter->recipeListChanged);
-    EXPECT_TRUE(m_adapter->isChanged);
+    returned_value = m_adapter->set_cmd( "NAME", 0, 0, "SUPER_ADAPTER" );
+    EXPECT_EQ( 1, returned_value );
+    EXPECT_TRUE( m_adapter->recipeListChanged );
+    EXPECT_TRUE( m_adapter->isChanged );
 
-    returned_value = m_adapter->set_cmd("NMR", 0, 1, "");
-    EXPECT_EQ(0, returned_value);
+    returned_value = m_adapter->set_cmd( "NMR", 0, 1, "" );
+    EXPECT_EQ( 0, returned_value );
 
     m_adapter->serialize();
-    returned_value = m_adapter->set_cmd("CMD", 0, 1001, "");
-    EXPECT_EQ(0, returned_value);
+    returned_value = m_adapter->set_cmd( "CMD", 0, 1001, "") ;
+    EXPECT_EQ( 0, returned_value );
 
-    returned_value = m_adapter->set_cmd("CMD", 0, 789, "");
-    EXPECT_EQ(0, returned_value);
+    returned_value = m_adapter->set_cmd( "CMD", 0, 789, "" );
+    EXPECT_EQ( 0, returned_value );
 
-    ParamsRecipeStorage* recipes;
-    returned_value = m_adapter->set_cmd("PAR", 1, 0, "SUPER_ADAPTER");
-    EXPECT_EQ(0, returned_value);
+    returned_value = m_adapter->set_cmd( "PAR", 1, 0, "SUPER_ADAPTER" );
+    EXPECT_EQ( 0, returned_value );
     ParamsRecipeStorage* temp = m_adapter->getRecStorage();
-    EXPECT_TRUE(temp->isChanged);
+    EXPECT_TRUE( temp->isChanged );
 
-    returned_value = m_adapter->set_cmd("HELLO", 10, 10, "NEW_NAME");
-    EXPECT_EQ(0, returned_value);
+    returned_value = m_adapter->set_cmd( "HELLO", 10, 10, "NEW_NAME" );
+    EXPECT_EQ( 0, returned_value );
 }

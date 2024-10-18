@@ -12,11 +12,6 @@ unsigned long get_delta_millisec_as_1001( unsigned long time1 )
     return 1001ul;
     }
 
-unsigned long get_delta_millisec_as_10001(unsigned long time1) 
-    {
-    return 10001ul;
-    }
-
 int main(int argc, char* argv[])
 {
 #if defined WIN_OS
