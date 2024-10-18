@@ -1717,13 +1717,13 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     {
     G_PAC_INFO()->emulation_off();
 
-    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
-    V1.init(0, 0, 1, 1);
-    V1.AO_channels.int_write_values[ 0 ] = new int_2[2]{ 0 };
-    V1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    valve_iolink_gea_tvis_a15_ss V1( "VGEA1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
 
-    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
-    EXPECT_EQ(0, V1.get_value());
+    auto buff = reinterpret_cast<char*>( V1.AI_channels.int_read_values[ 0 ] );
+    EXPECT_EQ( 0, V1.get_value() );
     
     // Последовательность бит соответствует перевёрнутой последовательности
     // полей структуры out_data_swapped, находящейся в классе
@@ -1803,7 +1803,6 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
         str_buff);
     EXPECT_EQ(false, V1.get_fb_state());
 
-    V1.set_rt_par(1, -1);
     V1.evaluate_io();
 
     V1.direct_set_state(valve::VALVE_STATE::V_ON);
