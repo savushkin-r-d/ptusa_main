@@ -183,11 +183,23 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
     ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter(recipes);
     m_paramsRecipeManager->evaluate();
     m_paramsRecipeManager->save_device(buff);
-    EXPECT_STREQ(
-        "t.RECMAN = \n\t{\n\t\t{\n\t\t\tCMD=0,\n\t\t\tACT=1,\n\t\t\tNMR=1,\n\t\t"
-        "\tNAME='none',\n\t\t\tLIST='1##none||2##none||3##none||4##none||5#"
-        "#none||',\n\t\t\tLIST1='',\n\t\t\tPAR=\n\t\t\t{\n\t\t\t0,0,0,\n"
-        "\t\t\t},\n\t\t},\n\t}\n", buff);
+    auto REF_STR0 = R"(t.RECMAN = 
+	{
+		{
+			CMD=0,
+			ACT=1,
+			NMR=1,
+			NAME='none',
+			LIST='1##none||2##none||3##none||4##none||5##none||',
+			LIST1='',
+			PAR=
+			{
+			0,0,0,
+			},
+		},
+	}
+)";
+    EXPECT_STREQ(REF_STR0, buff);
 
     delete adapter;
     delete recipes;
