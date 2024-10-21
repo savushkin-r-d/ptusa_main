@@ -1548,8 +1548,8 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_EQ( 0, V1.get_value() ); //Default value.
 
 
-    const int POS = 341;
-    *reinterpret_cast<int*>( &V1.AI_channels.int_read_values[ 0 ][ 1 ] ) = POS;
+    const int_2 POS = 341;
+    V1.AI_channels.int_read_values[ 0 ][ 1 ] = POS;
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct int.
     std::swap( buff[ 2 ], buff[ 1 ] );
     V1.evaluate_io();    
@@ -1604,7 +1604,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     // Последовательность бит соответствует перевёрнутой последовательности
     // полей структуры out_data_swapped, находящейся в классе
     // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
-    *temp_in = static_cast<int_2> ( 0b1001000000001001 );
+    *temp_in = static_cast<int_2> ( 0b1001'0000'0000'1001 );
                                   
     *pos = 165; // шток, который должен быть
     std::swap( buff[ 2 ], buff[ 3 ] );
@@ -1619,7 +1619,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
 
     V1.direct_on();
     memset( str_buff, '\0', sizeof( str_buff ) );
-    *temp_in = 0b0001000100000010;
+    *temp_in = 0b0001'0001'0000'0010;
     *pos = 564;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
@@ -1631,7 +1631,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
 
     V1.open_lower_seat();
     memset(str_buff, '\0', sizeof(str_buff));
-    *temp_in = 0b0000001000001001; 
+    *temp_in = 0b0000'0010'0000'1001; 
     *pos = 166;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
@@ -1645,7 +1645,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
 
     V1.open_upper_seat();
     memset(str_buff, '\0', sizeof(str_buff));
-    *temp_in = static_cast<int_2> ( 0b1001010000001001 );
+    *temp_in = static_cast<int_2> ( 0b1001'0100'0000'1001 );
     *pos = 81;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
@@ -1659,7 +1659,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
 
     V1.direct_off();
     memset(str_buff, '\0', sizeof(str_buff));    
-    *temp_in = 0b0000000000001001;
+    *temp_in = 0b0000'0000'0000'1001;
     *pos = 165;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
@@ -1673,7 +1673,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     // На несуществующий номер команды клапан должен открыться.
     V1.direct_set_state(777); 
     memset(str_buff, '\0', sizeof(str_buff));
-    *temp_in = 0b0001000100000010;
+    *temp_in = 0b0001'0001'0000'0010;
     *pos = 564;
     std::swap(buff[2], buff[3]);
     V1.evaluate_io();
@@ -1687,7 +1687,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     // Проверка на запрещенное (невозможное) состояние.
     V1.direct_on();
     memset( str_buff, '\0', sizeof( str_buff ) );
-    *temp_in = 0b0001011100001001;
+    *temp_in = 0b0001'0111'0000'1001;
     *pos = 5;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
@@ -1723,24 +1723,21 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     {
     G_PAC_INFO()->emulation_off();
 
-    valve_iolink_gea_tvis_a15_ss V1("VGEA1");
-    V1.init(0, 0, 1, 1);
-    V1.AO_channels.int_write_values[ 0 ] = new int_2[2]{ 0 };
-    V1.AO_channels.int_write_values[ 0 ] = new int_2[2]{ 0 } + 1;
-    int temp_in;
-    V1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
-    int pos;
+    valve_iolink_gea_tvis_a15_ss V1( "VGEA1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
 
-    auto buff = reinterpret_cast<char*>(V1.AI_channels.int_read_values[ 0 ]);
-    EXPECT_EQ(0, V1.get_value());
+    auto buff = reinterpret_cast<char*>( V1.AI_channels.int_read_values[ 0 ] );
+    EXPECT_EQ( 0, V1.get_value() );
     
     // Последовательность бит соответствует перевёрнутой последовательности
     // полей структуры out_data_swapped, находящейся в классе
     // valve_iolink_gea_tvis_a15 в PAC/common/device/valve.h.
-    temp_in = 0b1001000000001001;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
-    pos = 165; // шток, который должен быть
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    auto temp_in = static_cast<int_2>( 0b1001'0000'0000'1001 );
+    V1.AI_channels.int_read_values[ 0 ][ 0 ] = temp_in;
+    int_2 pos = 165; // шток, который должен быть
+    V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
@@ -1754,10 +1751,10 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
 
     V1.direct_set_state(valve::VALVE_STATE::V_ON);
     memset(str_buff, '\0', sizeof(str_buff));
-    temp_in = 0b0001000100000010;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    temp_in = 0b0001'0001'0000'0010;
+    V1.AI_channels.int_read_values[ 0 ][ 0 ] = temp_in;
     pos = 564;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
     V1.save_device( str_buff, "" );
@@ -1769,10 +1766,10 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
 
     V1.direct_set_state(valve::VALVE_STATE::V_OFF);
     memset(str_buff, '\0', sizeof(str_buff));
-    temp_in = 0b1001000000001001;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    temp_in = static_cast<int_2>( 0b1001'0000'0000'1001 );
+    V1.AI_channels.int_read_values[ 0 ][ 0 ] = temp_in;
     pos = 165;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
     V1.save_device( str_buff, "" );
@@ -1784,10 +1781,10 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
 
     V1.direct_set_state(777);
     memset(str_buff, '\0', sizeof(str_buff));
-    temp_in = 0b0001000100000010;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 0 ]) = temp_in;
+    temp_in = 0b0001'0001'0000'0010;
+    V1.AI_channels.int_read_values[ 0 ][ 0 ] = temp_in;
     pos = 564;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[ 0 ][ 1 ]) = pos;
+    V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
     V1.save_device( str_buff, "" );
@@ -1799,10 +1796,10 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
 
     V1.direct_set_state(valve::VALVE_STATE::V_ON);
     memset(str_buff, '\0', sizeof(str_buff));
-    temp_in = 0b0001011100001111;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][0]) = temp_in;
+    temp_in = 0b0001'0111'0000'1111;
+    V1.AI_channels.int_read_values[0][0] = temp_in;
     pos = 1020;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = pos;
+    V1.AI_channels.int_read_values[0][1] = pos;
     std::swap(buff[2], buff[3]);
     V1.evaluate_io();
     V1.save_device(str_buff, "");
@@ -1812,15 +1809,14 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
         str_buff);
     EXPECT_EQ(false, V1.get_fb_state());
 
-    V1.set_rt_par(1, -1);
     V1.evaluate_io();
 
     V1.direct_set_state(valve::VALVE_STATE::V_ON);
     memset(str_buff, '\0', sizeof(str_buff));
-    temp_in = 0b0001000100000010;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][0]) = temp_in;
+    temp_in = 0b0001'0001'0000'0010;
+    V1.AI_channels.int_read_values[0][0] = temp_in;
     pos = 1020;
-    *reinterpret_cast<int*>(&V1.AI_channels.int_read_values[0][1]) = pos;
+    V1.AI_channels.int_read_values[0][1] = pos;
     std::swap(buff[2], buff[3]);
     V1.evaluate_io();
     V1.save_device(str_buff, "");
@@ -2775,8 +2771,8 @@ TEST( counter_iolink, evaluate_io )
     *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 22.22f;
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
     std::swap( buff[ 2 ], buff[ 1 ] );
-    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 2 ) = 22;
-    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 3 ) = 33 << 2;
+    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 22 );
+    fqt1.AI_channels.int_read_values[ 0 ][ 3 ] = static_cast<int_2>( 33 << 2 );
     std::swap( buff[ 5 ], buff[ 4 ] );  //Reverse byte order to get correct int16.
     std::swap( buff[ 7 ], buff[ 6 ] );
     fqt1.evaluate_io();
@@ -3688,16 +3684,16 @@ TEST( power_unit, evaluate_io )
         str_buff );
 
     // ST = DC_not_OK, OUT_POWER_90, VOLTAGE = 25.7
-    G1.AI_channels.int_read_values[ 0 ][ 0 ] = 0b100011001;
+    G1.AI_channels.int_read_values[ 0 ][ 0 ] = 0b1'0001'1001;
     // SUM_CURRENTS = 0.1
-    G1.AI_channels.int_read_values[ 0 ][ 1 ] = 0b100000000;
+    G1.AI_channels.int_read_values[ 0 ][ 1 ] = 0b1'0000'0000;
     // Status, channel 1
-    G1.AI_channels.int_read_values[ 0 ][ 2 ] = 0b01000000;
+    G1.AI_channels.int_read_values[ 0 ][ 2 ] = 0b0'0100'0000;
     // Nominal current, channel 1
-    G1.AI_channels.int_read_values[ 0 ][ 3 ] = 0b00001000;
+    G1.AI_channels.int_read_values[ 0 ][ 3 ] = 0b0'0000'1000;
     // G1.AI_channels.int_read_values[ 0 ][ 4 ];
     // Load current, channel 1
-    G1.AI_channels.int_read_values[ 0 ][ 5 ] = 0b00001000;
+    G1.AI_channels.int_read_values[ 0 ][ 5 ] = 0b0'0000'1000;
     G1.evaluate_io();
     G1.save_device( str_buff, "" );
     EXPECT_STREQ(
