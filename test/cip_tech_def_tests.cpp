@@ -603,6 +603,9 @@ TEST( cipline_tech_object, _DoStep )
     
 TEST(cipline_tech_object, save_device) 
     {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
     const int BUFF_SIZE = 5000;
     char buff[BUFF_SIZE] = { 0 };
 
