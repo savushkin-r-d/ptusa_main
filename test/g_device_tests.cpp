@@ -20,6 +20,10 @@ TEST( device_communicator, write_devices_states_service )
 
     device_communicator::switch_on_compression();
 
+    data[0] = device_communicator::CMD_GET_INFO_ON_CONNECT;
+    G_DEVICE_CMMCTR->write_devices_states_service(0, data, out_data);
+    EXPECT_EQ('\0', out_data[0]);
+
     data[ 0 ] = device_communicator::CMD_GET_INFO_ON_CONNECT;
     G_DEVICE_CMMCTR->write_devices_states_service( cmd_size, data, out_data );
     EXPECT_EQ( 'x', out_data[ 0 ] );
@@ -46,4 +50,17 @@ TEST( device_communicator, write_devices_states_service )
     EXPECT_EQ('x', out_data[0]);
 
     G_LUA_MANAGER->free_Lua();
+    }
+
+TEST(device_communicator, print) 
+    {
+    try
+        {
+        G_DEVICE_CMMCTR->print();
+        EXPECT_TRUE(true);
+        }
+    catch(...) 
+        {
+        EXPECT_TRUE(false);
+        }
     }
