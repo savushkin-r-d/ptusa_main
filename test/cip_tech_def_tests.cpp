@@ -601,22 +601,20 @@ TEST( cipline_tech_object, _DoStep )
     G_LUA_MANAGER->free_Lua( );
     }
     
-TEST(cipline_tech_object, save_device) 
+TEST( cipline_tech_object, save_device )
     {
-    auto L = lua_open();
-    G_LUA_MANAGER->set_Lua( L );
-
     const int BUFF_SIZE = 5000;
-    char buff[BUFF_SIZE] = { 0 };
+    char buff[ BUFF_SIZE ] = { 0 };
 
     InitCipDevices();
-    cipline_tech_object cip1("CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200);
-    lua_manager::get_instance()->set_Lua(lua_open());
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
 
     cip1.initline();
     InitStationParams();
 
-    cip1.save_device(buff);
+    cip1.lineRecipes->ResetRecipeToDefaults( 0 );
+    cip1.save_device( buff );
 
     auto REF_STR0 = R"(t.CIP1 = t.CIP1 or {}
 t.CIP1=
@@ -731,9 +729,7 @@ t.CIP1=
 	}
 	}
 )";
-    EXPECT_STREQ(REF_STR0, buff);
+    EXPECT_STREQ( REF_STR0, buff );
 
     G_LUA_MANAGER->free_Lua();
     }
-
-
