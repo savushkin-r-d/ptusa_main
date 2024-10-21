@@ -40,5 +40,10 @@ TEST( device_communicator, write_devices_states_service )
     G_DEVICE_CMMCTR->write_devices_states_service( cmd_size, data, out_data );
     EXPECT_EQ( 'x', out_data[ 0 ] );
 
+    unsigned char recman_data[IN_BUFF_SIZE] = " __RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
+    recman_data[0] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
+    G_DEVICE_CMMCTR->write_devices_states_service(cmd_size, recman_data, out_data);
+    EXPECT_EQ('x', out_data[0]);
+
     G_LUA_MANAGER->free_Lua();
     }
