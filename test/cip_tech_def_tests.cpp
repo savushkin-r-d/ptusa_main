@@ -601,36 +601,36 @@ TEST( cipline_tech_object, _DoStep )
     G_LUA_MANAGER->free_Lua( );
     }
     
-TEST( cipline_tech_object, save_device )
+TEST( cipline_tech_object, save_device ) 
     {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
     const int BUFF_SIZE = 5000;
+    unsigned char check_buff[ BUFF_SIZE ] = { 0 };
     char buff[ BUFF_SIZE ] = { 0 };
 
     InitCipDevices();
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
-    lua_manager::get_instance()->set_Lua( lua_open() );
+    lua_manager::get_instance()->set_Lua(lua_open());
 
     cip1.initline();
     InitStationParams();
 
-    cip1.lineRecipes->ResetRecipeToDefaults( 0 );
     cip1.save_device( buff );
 
-    auto REF_STR0 = R"(t.CIP1 = t.CIP1 or {}
+    std::string REF_STR0 = R"(t.CIP1 = t.CIP1 or {}
 t.CIP1=
 	{
 	CMD=0,
 	STATE=0,
 	OPER=0,
-	LOADED_REC=)" "'\xD0\x9D\xD0\xB5 \xD0\xB2\xD1\x8B\xD0\xB1\xD1\x80\xD0\xB0\xD0\xBD" R"(',
+	LOADED_REC='Не выбран',
 	CUR_REC='',
 	LASTRECNMR=0,
-	LASTRECNAME=')" "\xD0\x9D\xD0\xB5 \xD0\xB2\xD1\x8B\xD0\xB1\xD1\x80\xD0\xB0\xD0\xBD" R"(',
-	CUR_PRG=)" "'\xD0\x9D\xD0\xB5 \xD0\xB2\xD1\x8B\xD0\xB1\xD1\x80\xD0\xB0\xD0\xBD" R"(',
-	PRG_LIST='256##)" "\xD0\x9D\xD0\xB0\xD0\xB2\xD0\xB5\xD0\xB4\xD0\xB5\xD0\xBD\xD0\xB8\xD0\xB5"
-        " \xD0\xBA\xD0\xB8\xD1\x81\xD0\xBB\xD0\xBE\xD1\x82\xD1\x8B||512##"
-        "\xD0\x9D\xD0\xB0\xD0\xB2\xD0\xB5\xD0\xB4\xD0\xB5\xD0\xBD\xD0\xB8\xD0\xB5"
-        " \xD1\x89\xD0\xB5\xD0\xBB\xD0\xBE\xD1\x87\xD0\xB8" R"(||',
+	LASTRECNAME='Не выбран',
+	CUR_PRG='Не выбран',
+	PRG_LIST='256##Наведение кислоты||512##Наведение щелочи||',
 	REC_LIST='',
 	NCAR='',
 	NCAR1='',
@@ -702,13 +702,10 @@ t.CIP1=
         "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, "
         "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, " R"(
 	},
-	OBJSTATS_LASTWASH=')" "\xD0\x9D\xD0\xB5 "
-        "\xD0\xB8\xD0\xB7\xD0\xB2\xD0\xB5\xD1\x81\xD1\x82\xD0\xBD\xD0\xBE" R"(',
-	OBJSTATS_LASTPROGRAM=')" "\xD0\x9D\xD0\xB5 "
-        "\xD0\xBE\xD0\xBF\xD1\x80\xD0\xB5\xD0\xB4\xD0\xB5\xD0\xBB\xD0\xB5\xD0\xBD\xD0\xBE" R"(',
+	OBJSTATS_LASTWASH='Не известно',
+	OBJSTATS_LASTPROGRAM='Не определено',
 	OBJSTATS_CAUSTICCOUNT=0,
-	OBJSTATS_LASTACIDWASH=)" "'\xD0\x9D\xD0\xB5 "
-        "\xD0\xB8\xD0\xB7\xD0\xB2\xD0\xB5\xD1\x81\xD1\x82\xD0\xBD\xD0\xBE" R"(',
+	OBJSTATS_LASTACIDWASH='Не известно',
 	CAUSTIC_REC_LIST='',
 	CAUSTIC_REC_NMR='0',
 	CAUSTICNAME='',
@@ -729,7 +726,9 @@ t.CIP1=
 	}
 	}
 )";
-    EXPECT_STREQ( REF_STR0, buff );
+    EXPECT_STREQ(REF_STR0.c_str(), buff);
 
     G_LUA_MANAGER->free_Lua();
     }
+
+
