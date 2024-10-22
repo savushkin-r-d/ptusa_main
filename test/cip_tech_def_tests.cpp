@@ -607,7 +607,6 @@ TEST( cipline_tech_object, save_device )
     G_LUA_MANAGER->set_Lua( L );
 
     const int BUFF_SIZE = 5000;
-    unsigned char check_buff[ BUFF_SIZE ] = { 0 };
     char buff[ BUFF_SIZE ] = { 0 };
 
     InitCipDevices();
