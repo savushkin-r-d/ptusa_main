@@ -225,7 +225,7 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_pause00 )
     ASSERT_EQ( 1, luaL_dostring( L, "res = FQT()" ) );   //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
-    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
     EXPECT_NE( nullptr, FQT1 );
     lua_remove( L, -1 );
 
@@ -248,7 +248,7 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start00 )
         "device.DT_FQT, device.DST_FQT_VIRT, \'FQT1\', \'Test device\', \'\' )" ) );
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
-    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
     EXPECT_NE( nullptr, FQT1 );
     lua_remove( L, -1 );
 
@@ -278,7 +278,7 @@ TEST( toLuapp, tolua_PAC_dev_i_counter )
         "device.DT_FQT, device.DST_FQT_VIRT, \'FQT1\', \'Test device\', \'\' )" ) );
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
-    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, 0 ) );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
     EXPECT_NE( nullptr, FQT1 );
     lua_remove( L, -1 );
 

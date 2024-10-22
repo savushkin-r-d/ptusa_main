@@ -2927,8 +2927,8 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
 
 
-    auto get_time_hook = subhook_new( reinterpret_cast<void*>( get_time ),
-        reinterpret_cast<void*>( get_time_next_day ), SUBHOOK_64BIT_OFFSET );
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_time_next_day ), SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
     fqt1.evaluate_io();
     EXPECT_NE( 0, fqt1.get_quantity( i_counter::COUNTERS::PREV_DAY ) );
