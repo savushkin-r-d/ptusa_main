@@ -635,12 +635,12 @@ void power_unit::direct_set_value( float val )
 //-----------------------------------------------------------------------------
 void power_unit::evaluate_io()
     {
-    auto data = reinterpret_cast<char*>( get_AI_data( C_AIAO_INDEX ) );
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
     std::copy( data, data + sizeof( p_data_in ),
-        reinterpret_cast<char*>( &p_data_in ) );
+        reinterpret_cast<std::byte*>( &p_data_in ) );
     v = .1f *
         static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
         p_data_in.sum_currents ) );
@@ -1908,7 +1908,7 @@ wages_pxc_axl::wages_pxc_axl( const char* dev_name ) :
 void wages_pxc_axl::evaluate_io()
     {
     auto idx = static_cast<u_int>( CONSTANTS::C_AIAO_INDEX );
-    auto data = reinterpret_cast<char*>( get_AI_data( idx ) );
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( idx ) );
 
     if ( !data ) return;
 
