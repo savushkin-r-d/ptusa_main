@@ -259,6 +259,21 @@ TEST_F(ParamsRecipeManagerTest, pars_cmd) {
     EXPECT_EQ( 1, val );
 }
 
+TEST_F(ParamsRecipeManagerTest, saveTechObjects) {
+    m_paramsRecipeManager->saveTechObjects();
+
+    std::ifstream file;
+    file.open( "paramstech.serialized" );
+    if (file.is_open()) 
+        {
+        EXPECT_TRUE(true);
+        file.close();
+        }
+    else
+        {
+        EXPECT_TRUE(false);
+        }
+}
 
 class ParamsRecipeAdapterTest : public ::testing::Test {
     protected:
