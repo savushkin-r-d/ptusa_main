@@ -915,6 +915,12 @@ TEST( dev_stub, get_min_flow )
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
     }
 
+TEST( dev_stub, pause_daily )
+    {
+    STUB()->pause_daily();
+    STUB()->start_daily();
+    }
+
 TEST( device, device )
     {
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
@@ -2522,6 +2528,14 @@ TEST( counter, set_cmd )
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.set_cmd( "DAY_T1", 0, 100 );
+    fqt1.set_cmd( "DAY_T2", 0, 200 );
+    fqt1.set_cmd( "PREV_DAY_T1", 0, 10 );
+    fqt1.set_cmd( "PREV_DAY_T2", 0, 20 );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ( "FQT1={M=0, ST=2, V=50, ABS_V=100, DAY_T1=100, "
+        "PREV_DAY_T1=10, DAY_T2=200, PREV_DAY_T2=20},\n", buff );
     }
 
 TEST( counter, get_pump_dt )
@@ -2697,6 +2711,14 @@ TEST( virtual_counter, set_cmd )
     EXPECT_EQ( fqt1.get_quantity(), 200.f );
     }
 
+TEST( virtual_counter, pause_daily )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.pause_daily();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    fqt1.start_daily();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    }
 
 TEST( counter_iolink, set_cmd )
     {
@@ -2763,8 +2785,26 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
     }
 
+tm get_time_next_day()
+    {
+    static struct tm timeInfo_;
+#ifdef LINUX_OS
+    auto t_ = time( nullptr );
+    localtime_r( &t_, &timeInfo_ );
+#else
+    static time_t t_ = time( nullptr );
+    localtime_s( &timeInfo_, &t_ );
+#endif // LINUX_OS
+    timeInfo_.tm_yday++;
+
+    return timeInfo_;
+    }
+
 TEST( counter_iolink, get_quantity )
     {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
     class counter_iolink_test:public counter_iolink
         {
         float totalizer = .0f;
@@ -2801,6 +2841,20 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=10, PREV_DAY_T1=0, "
+        "DAY_T2=10, PREV_DAY_T2=0, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_time_next_day ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+    fqt1.evaluate_io();         // New day.
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=0, PREV_DAY_T1=10, "
+        "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );   
 
     fqt1.off();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
@@ -2857,6 +2911,8 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.abs_reset();
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+
+    subhook_remove( get_time_hook );
     }
 
 TEST( counter_iolink, get_pump_dt )

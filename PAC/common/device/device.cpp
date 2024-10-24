@@ -1248,14 +1248,25 @@ void base_counter::print() const
 //-----------------------------------------------------------------------------
 int base_counter::set_cmd( const char* prop, u_int idx, double val )
     {
+    auto f_value = static_cast<float>( val );
+
     switch ( prop[ 0 ] )
         {
         case 'A': //ABS_V
-            set_abs_value( static_cast<float>( val ) );
+            set_abs_value( f_value );
+            break;
+
+        case 'D': //DAY_T1, DAY_T2
+            if ( prop[ 5 ] == '1' ) day_t1_value = f_value;
+            else day_t2_value = f_value;
             break;
 
         default:
-            return device::set_cmd( prop, idx, val );
+            if ( strcmp( prop, "PREV_DAY_T1" ) == 0 ) 
+                prev_day_t1_value = f_value;
+            else if ( strcmp( prop, "PREV_DAY_T2" ) == 0 )
+                prev_day_t2_value = f_value;
+            else return device::set_cmd( prop, idx, val );
         }
 
     return 0;

@@ -151,7 +151,7 @@ class i_counter
         /// @brief Сброс абсолютного значения счетчика.
         virtual void  abs_reset() = 0;
 
-        enum class DAY_CTR
+        enum DAY_CTR
             {
             DAY_T1,
             DAY_T2
