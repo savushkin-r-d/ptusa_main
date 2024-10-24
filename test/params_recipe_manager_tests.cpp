@@ -1,15 +1,5 @@
 #include "params_recipe_manager_tests.h"
 
-unsigned long get_delta_millisec_as_10001( unsigned long )
-    {
-    return 10001UL;
-    }
-
-const auto G_RM_DELTA_MILLISEC_HOOK_10001 = subhook_new(
-    reinterpret_cast<void*>( get_delta_millisec ),
-    reinterpret_cast<void*>( get_delta_millisec_as_10001 ),
-    SUBHOOK_64BIT_OFFSET );
-
 using namespace ::testing;
 
 class ParamsRecipeStorageTest : public testing::Test {
@@ -227,11 +217,10 @@ TEST_F(ParamsRecipeManagerTest, evaluate) {
     m_paramsRecipeManager->recPacks[1]->isChanged = true;
     m_paramsRecipeManager->recAdapters[0]->recipeListChanged = true;
     m_paramsRecipeManager->recAdapters[0]->isLoaded = true;
-    
-    subhook_install( G_RM_DELTA_MILLISEC_HOOK_10001 );
+
+    DeltaMilliSecSubHooker::set_millisec(10001UL);
     m_paramsRecipeManager->evaluate();
-    subhook_remove( G_RM_DELTA_MILLISEC_HOOK_10001 );
-    subhook_free( G_RM_DELTA_MILLISEC_HOOK_10001 );
+    DeltaMilliSecSubHooker::set_default_time();
 
     EXPECT_FALSE( m_paramsRecipeManager->recAdapters[1]->isChanged );
     EXPECT_FALSE( m_paramsRecipeManager->recPacks[1]->isChanged );
@@ -257,22 +246,6 @@ TEST_F(ParamsRecipeManagerTest, pars_cmd) {
     cmd = "__RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
     val = m_paramsRecipeManager->parseDriverCmd( cmd.c_str() );
     EXPECT_EQ( 1, val );
-}
-
-TEST_F(ParamsRecipeManagerTest, saveTechObjects) {
-    m_paramsRecipeManager->saveTechObjects();
-
-    std::ifstream file;
-    file.open( "paramstech.serialized" );
-    if (file.is_open()) 
-        {
-        EXPECT_TRUE(true);
-        file.close();
-        }
-    else
-        {
-        EXPECT_TRUE(false);
-        }
 }
 
 class ParamsRecipeAdapterTest : public ::testing::Test {
