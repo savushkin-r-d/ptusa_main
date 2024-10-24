@@ -54,13 +54,12 @@ TEST( device_communicator, write_devices_states_service )
 
 TEST(device_communicator, print) 
     {
-    try
-        {
-        G_DEVICE_CMMCTR->print();
-        EXPECT_TRUE(true);
-        }
-    catch(...) 
-        {
-        EXPECT_TRUE(false);
-        }
+    std::string STR_check = R"(Device communicator. Dev count = 1.
+[   0 ] Device manager
+)";
+    testing::internal::CaptureStdout();
+    G_DEVICE_CMMCTR->print();
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, STR_check);
+    EXPECT_TRUE(true);
     }
