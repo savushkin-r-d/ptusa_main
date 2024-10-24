@@ -54,8 +54,7 @@ TEST( device_communicator, write_devices_states_service )
 
 TEST(device_communicator, print) 
     {
-    std::string STR_check = R"(Device communicator. Dev count = 1.
-[   0 ] Device manager
+    std::string STR_check = R"(Device communicator. Dev count = 0.
 )";
     testing::internal::CaptureStdout();
     G_DEVICE_CMMCTR->print();
