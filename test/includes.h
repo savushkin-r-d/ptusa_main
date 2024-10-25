@@ -11,8 +11,8 @@ unsigned long subhook_for_get_delta_millisec( unsigned long );
 unsigned long get_delta_millisec( unsigned long time1 );
 
 const auto GTESTS_DELTA_MILLISEC_SUBHOOK = subhook_new(
-    reinterpret_cast<void*>( get_delta_millisec ),
-    reinterpret_cast<void*>( subhook_for_get_delta_millisec ),
+    reinterpret_cast<void*>( &get_delta_millisec ),
+    reinterpret_cast<void*>( &subhook_for_get_delta_millisec ),
     SUBHOOK_64BIT_OFFSET );
 
 class DeltaMilliSecSubHooker 
@@ -38,8 +38,8 @@ public:
         subhook_remove( GTESTS_DELTA_MILLISEC_SUBHOOK );
         }
 
-    DeltaMilliSecSubHooker( unsigned long millisec ) 
+    explicit DeltaMilliSecSubHooker( unsigned long millisec ) 
         {
-        this->set_millisec( millisec );
+        DeltaMilliSecSubHooker::set_millisec( millisec );
         }
     };

@@ -167,21 +167,12 @@ TEST_F(ParamsRecipeManagerTest, CreateAdapter) {
 TEST_F(ParamsRecipeManagerTest, save_device) {
     const int BUFF_SIZE = 1000;
     char buff[BUFF_SIZE] = { 0 };
-    m_paramsRecipeManager->evaluate();
     m_paramsRecipeManager->save_device( buff );
     EXPECT_STREQ(
         "t.RECMAN = \n\t{\n\t}\n", buff );
 
     memset( buff, '\0', sizeof(buff) );
-    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes( 5, 3 );
-    m_paramsRecipeManager->evaluate();
-    m_paramsRecipeManager->save_device( buff );
-    EXPECT_STREQ(
-        "t.RECMAN = \n\t{\n\t}\n", buff );
-
-    memset( buff, '\0', sizeof(buff) );
-    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter( recipes );
-    m_paramsRecipeManager->evaluate();
+    m_paramsRecipeManager->createAdapter( m_paramsRecipeManager->createRecipes(5, 3) );
     m_paramsRecipeManager->save_device( buff );
     auto REF_STR0 = R"(t.RECMAN = 
 	{
@@ -201,17 +192,13 @@ TEST_F(ParamsRecipeManagerTest, save_device) {
 )";
     EXPECT_STREQ( REF_STR0, buff );
 
-    delete adapter;
-    delete recipes;
     m_paramsRecipeManager->recPacks.clear();
     m_paramsRecipeManager->recAdapters.clear();
 }
 
 TEST_F(ParamsRecipeManagerTest, evaluate) {
-    ParamsRecipeStorage* recipes = m_paramsRecipeManager->createRecipes( 4, 3 );
-    ParamsRecipeAdapter* adapter = m_paramsRecipeManager->createAdapter( recipes );
-    recipes = m_paramsRecipeManager->createRecipes( 2, 1 );
-    adapter = m_paramsRecipeManager->createAdapter( recipes );
+    m_paramsRecipeManager->createAdapter( m_paramsRecipeManager->createRecipes(4, 3) );
+    m_paramsRecipeManager->createAdapter( m_paramsRecipeManager->createRecipes(2, 1) );
 
     m_paramsRecipeManager->recAdapters[1]->isChanged = true;
     m_paramsRecipeManager->recPacks[1]->isChanged = true;
@@ -227,8 +214,6 @@ TEST_F(ParamsRecipeManagerTest, evaluate) {
     EXPECT_FALSE( m_paramsRecipeManager->recAdapters[0]->recipeListChanged );
     EXPECT_FALSE( m_paramsRecipeManager->recAdapters[0]->isLoaded );
 
-    delete adapter;
-    delete recipes;
     m_paramsRecipeManager->recPacks.clear();
     m_paramsRecipeManager->recAdapters.clear();
 }
@@ -295,7 +280,7 @@ TEST_F(ParamsRecipeAdapterTest, set_cmd) {
 
     returned_value = m_adapter->set_cmd( "PAR", 1, 0, "SUPER_ADAPTER" );
     EXPECT_EQ( 0, returned_value );
-    ParamsRecipeStorage* temp = m_adapter->getRecStorage();
+    const ParamsRecipeStorage* temp = m_adapter->getRecStorage();
     EXPECT_TRUE( temp->isChanged );
 
     returned_value = m_adapter->set_cmd( "HELLO", 10, 10, "NEW_NAME" );
