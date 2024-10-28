@@ -1,7 +1,7 @@
 #include "g_device_tests.h"
 #include "tcp_cmctr.h"
 #include "lua_manager.h"
-#include "device\manager.h"
+#include "device/manager.h"
 
 using namespace ::testing;
 
