@@ -1,6 +1,7 @@
 #include "g_device_tests.h"
 #include "tcp_cmctr.h"
 #include "lua_manager.h"
+#include "device\manager.h"
 
 using namespace ::testing;
 
@@ -52,13 +53,16 @@ TEST( device_communicator, write_devices_states_service )
     G_LUA_MANAGER->free_Lua();
     }
 
-TEST(device_communicator, print) 
+TEST( device_communicator, print )
     {
-    std::string STR_check = R"(Device communicator. Dev count = 0.
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    std::string STR_check = R"(Device communicator. Dev count = 1.
+[   0 ] Device manager
 )";
     testing::internal::CaptureStdout();
     G_DEVICE_CMMCTR->print();
     auto output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, STR_check);
-    EXPECT_TRUE(true);
+    EXPECT_EQ( output, STR_check );
+    EXPECT_TRUE( true );
     }
