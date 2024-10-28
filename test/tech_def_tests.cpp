@@ -293,9 +293,9 @@ t.TANK1=
     tank1.set_mode( OPER_N1, operation::RUN );
     tank1.evaluate();
 
-    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
+	DeltaMilliSecSubHooker::set_millisec(1001UL);
     tank1.save_device( buff );
-    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
+	DeltaMilliSecSubHooker::set_default_time();
 
     auto REF_STR2 = R"(t.TANK1 = t.TANK1 or {}
 t.TANK1=
