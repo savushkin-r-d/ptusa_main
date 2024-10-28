@@ -478,6 +478,16 @@ void dev_stub::tare()
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
+void dev_stub::pause_daily( DAY_CTR n )
+    {
+    // Ничего не делаем.
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::start_daily( DAY_CTR n )
+    {
+    // Ничего не делаем.
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     {
     // Ничего не делаем.
@@ -1100,10 +1110,11 @@ void base_counter::set_abs_value( float new_value )
     abs_value = new_value;
     };
 //-----------------------------------------------------------------------------
-void base_counter::calculate_quantity( float& val, float& last_read_val,
+float base_counter::calculate_quantity( float& val, float& last_read_val,
     bool& is_first ) const
     {
     float current = get_raw_value();
+    float delta = 0;
 
     if ( is_first )
         {
@@ -1115,7 +1126,7 @@ void base_counter::calculate_quantity( float& val, float& last_read_val,
         }
     else
         {
-        float delta;
+        
         if ( current < last_read_val )
             {
             delta = get_max_raw_value() - last_read_val + current;
@@ -1135,6 +1146,8 @@ void base_counter::calculate_quantity( float& val, float& last_read_val,
             val += delta;
             }
         }
+
+    return delta;
     }
 //-----------------------------------------------------------------------------
 float base_counter::get_value()
@@ -1204,7 +1217,28 @@ void base_counter::evaluate_io()
         {
         calculate_quantity( value, last_read_value, is_first_read );
         }
-    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
+    
+    auto delta = calculate_quantity( abs_value, abs_last_read_value,
+        abs_is_first_read );
+
+    if ( STATES::S_WORK == day_t1_state )
+        {
+        day_t1_value += delta;
+        }
+    if ( STATES::S_WORK == day_t2_state )
+        {
+        day_t2_value += delta;
+        }
+
+    if ( c_day != get_time().tm_yday ) // Наступил новый день.
+        {
+        prev_day_t1_value = day_t1_value;
+        day_t1_value = 0;
+        prev_day_t2_value = day_t2_value;
+        day_t2_value = 0;
+
+        c_day = get_time().tm_yday;
+        }
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const
@@ -1214,14 +1248,25 @@ void base_counter::print() const
 //-----------------------------------------------------------------------------
 int base_counter::set_cmd( const char* prop, u_int idx, double val )
     {
+    auto f_value = static_cast<float>( val );
+
     switch ( prop[ 0 ] )
         {
         case 'A': //ABS_V
-            set_abs_value( static_cast<float>( val ) );
+            set_abs_value( f_value );
+            break;
+
+        case 'D': //DAY_T1, DAY_T2
+            if ( prop[ 5 ] == '1' ) day_t1_value = f_value;
+            else day_t2_value = f_value;
             break;
 
         default:
-            return device::set_cmd( prop, idx, val );
+            if ( strcmp( prop, "PREV_DAY_T1" ) == 0 ) 
+                prev_day_t1_value = f_value;
+            else if ( strcmp( prop, "PREV_DAY_T2" ) == 0 )
+                prev_day_t2_value = f_value;
+            else return device::set_cmd( prop, idx, val );
         }
 
     return 0;
@@ -1229,8 +1274,10 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int base_counter::save_device_ex( char* buff )
     {
-    return fmt::format_to_n(
-        buff, MAX_COPY_SIZE, "ABS_V={}, ", get_abs_quantity() ).size;
+    return fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "ABS_V={}, DAY_T1={}, PREV_DAY_T1={}, DAY_T2={}, PREV_DAY_T2={}, ",
+        get_abs_quantity(), day_t1_value, prev_day_t1_value,
+        day_t2_value, prev_day_t2_value ).size;
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
@@ -1273,6 +1320,22 @@ const char* base_counter::get_error_description()
         }
 
     return "нет ошибок";
+    }
+//-----------------------------------------------------------------------------
+void base_counter::pause_daily( DAY_CTR n )
+    {
+    if ( n == DAY_CTR::DAY_T1 )
+        day_t1_state = STATES::S_PAUSE;
+    else if ( n == DAY_CTR::DAY_T2 )
+        day_t2_state = STATES::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::start_daily( DAY_CTR n )
+    {
+    if ( n == DAY_CTR::DAY_T1 )
+        day_t1_state = STATES::S_WORK;
+    else if ( n == DAY_CTR::DAY_T2 )
+        day_t2_state = STATES::S_WORK;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

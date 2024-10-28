@@ -1157,7 +1157,7 @@ class base_counter: public i_counter, public device, public io_device
         /// @brief Получение максимального значение счетчика от устройства.
         virtual float get_max_raw_value() const = 0;
 
-        void calculate_quantity( float& value, float& last_read_value,
+        float calculate_quantity( float& value, float& last_read_value,
             bool& is_first_read ) const;
 
         /// @brief Получение значения счетчика (c учетом паузы).
@@ -1171,6 +1171,12 @@ class base_counter: public i_counter, public device, public io_device
         int save_device_ex( char* buff ) override;
 
         const char* get_error_description() override;
+
+        /// @brief Приостановка работы дневного счетчика.
+        void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
+
+        /// @brief Возобновление работы дневного счетчика.
+        void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
 
     protected:
         float get_abs_value() const
@@ -1197,6 +1203,15 @@ class base_counter: public i_counter, public device, public io_device
         bool abs_is_first_read = true;
         float abs_value = 0.f;  ///< Абсолютное значение (не становится на паузу).
         float abs_last_read_value = 0.f;
+
+        STATES day_t1_state = STATES::S_WORK;
+        float day_t1_value = .0f;               // Текущее значение за день.
+        float prev_day_t1_value = .0f;
+        STATES day_t2_state = STATES::S_WORK;
+        float day_t2_value = .0f;
+        float prev_day_t2_value = .0f;
+
+        int c_day = get_time().tm_yday;         // Текущий день.
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
@@ -1485,6 +1500,9 @@ class dev_stub : public i_counter, public valve, public i_wages,
 
         u_int get_abs_quantity() override;
         void  abs_reset() override;
+
+        void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
+        void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
 
         void tare() override;
 
