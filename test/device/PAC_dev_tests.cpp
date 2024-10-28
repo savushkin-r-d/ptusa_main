@@ -535,7 +535,7 @@ TEST( signal_column, blink )
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_millisec(1001UL);
     test_dev.slow_blink_green();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -546,7 +546,7 @@ TEST( signal_column, blink )
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_on();
-    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_default_time();
     }
 
 TEST( signal_column, set_rt_par )
