@@ -2861,16 +2861,31 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
     fqt1.pause();
+    fqt1.pause_daily( base_counter::DAY_CTR::DAY_T1 );
+    fqt1.pause_daily( base_counter::DAY_CTR::DAY_T2 );
+
     fqt1.set_raw_value( 30 );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=2, V=10000, ABS_V=20000, DAY_T1=0, PREV_DAY_T1=10, "
+        "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.on();
+    fqt1.start_daily( base_counter::DAY_CTR::DAY_T1 );
+    fqt1.start_daily( base_counter::DAY_CTR::DAY_T2 );
     fqt1.set_raw_value( 40 );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=20000, ABS_V=30000, DAY_T1=10, PREV_DAY_T1=10, "
+        "DAY_T2=10, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
 
     fqt1.set_state( 0 );        //Off.

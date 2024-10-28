@@ -232,7 +232,9 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
     EXPECT_NE( nullptr, dev );
 
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.pause_daily()" ) ); //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause_daily()" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.start_daily()" ) ); //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
 
 
