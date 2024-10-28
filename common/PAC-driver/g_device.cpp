@@ -150,7 +150,7 @@ long device_communicator::write_devices_states_service(
             auto str = reinterpret_cast<char*>( data + 1 );
             if ( strstr( str, "__RECMAN" ) != nullptr )
                 {
-                res = G_PARAMS_RECIPE_MANAGER()->getInstance()->parseDriverCmd( str );
+                res = G_PARAMS_RECIPE_MANAGER()->parseDriverCmd( str );
                 }
             else
                 {
