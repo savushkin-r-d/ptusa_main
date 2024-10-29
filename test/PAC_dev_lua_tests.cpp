@@ -213,3 +213,30 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
 
     lua_close( L );
     }
+
+TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_F, \'FQT1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( nullptr, dev );
+
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.pause_daily()" ) ); //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause_daily()" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.start_daily()" ) ); //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
+
+
+    lua_close( L );
+    }

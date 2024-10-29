@@ -8,6 +8,7 @@
 
 $#include <stdlib.h>
 
+$#include "device/base.h"
 $#include "device/device.h"
 $#include "device/manager.h"
 $#include "tech_def.h"
@@ -194,6 +195,18 @@ class i_counter
 
         /// @brief Сброс абсолютного значения счетчика.
         void abs_reset();
+
+        enum DAY_CTR
+            {
+            DAY_T1,
+            DAY_T2
+            };
+
+        /// @brief Приостановка работы дневного счетчика.
+        virtual void pause_daily( DAY_CTR n = i_counter::DAY_CTR::DAY_T1 );
+
+        /// @brief Возобновление работы дневного счетчика.
+        virtual void start_daily( DAY_CTR n = i_counter::DAY_CTR::DAY_T1 );
     };
 //-----------------------------------------------------------------------------
 /// @brief Простое физическое устройство.

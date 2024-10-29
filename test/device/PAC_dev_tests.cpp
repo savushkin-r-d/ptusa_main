@@ -535,7 +535,7 @@ TEST( signal_column, blink )
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_millisec(1001UL);
     test_dev.slow_blink_green();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -546,7 +546,7 @@ TEST( signal_column, blink )
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_on();
-    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_default_time();
     }
 
 TEST( signal_column, set_rt_par )
@@ -913,6 +913,12 @@ TEST( dev_stub, get_pump_dt )
 TEST( dev_stub, get_min_flow )
     {
     EXPECT_EQ( .0f, STUB()->get_min_flow() );
+    }
+
+TEST( dev_stub, pause_daily )
+    {
+    STUB()->pause_daily();
+    STUB()->start_daily();
     }
 
 TEST( device, device )
@@ -2433,8 +2439,9 @@ TEST( counter_f, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "FQT1={M=0, ST=1, V=50, ABS_V=100, F=9.90, P_MIN_FLOW=0,"
-        " P_MAX_FLOW=0, P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
+        "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
+        "DAY_T2=0, PREV_DAY_T2=0, F=9.90, P_MIN_FLOW=0, "
+        "P_MAX_FLOW=0, P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
     }
 
 TEST( counter_f, get_min_flow )
@@ -2501,7 +2508,8 @@ TEST( counter, set_cmd )
     EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
     fqt1.save_device( buff, "" );
-    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50, ABS_V=100},\n", buff );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
+        "DAY_T2=0, PREV_DAY_T2=0},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -2520,6 +2528,14 @@ TEST( counter, set_cmd )
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.set_cmd( "DAY_T1", 0, 100 );
+    fqt1.set_cmd( "DAY_T2", 0, 200 );
+    fqt1.set_cmd( "PREV_DAY_T1", 0, 10 );
+    fqt1.set_cmd( "PREV_DAY_T2", 0, 20 );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ( "FQT1={M=0, ST=2, V=50, ABS_V=100, DAY_T1=100, "
+        "PREV_DAY_T1=10, DAY_T2=200, PREV_DAY_T2=20},\n", buff );
     }
 
 TEST( counter, get_pump_dt )
@@ -2695,11 +2711,19 @@ TEST( virtual_counter, set_cmd )
     EXPECT_EQ( fqt1.get_quantity(), 200.f );
     }
 
+TEST( virtual_counter, pause_daily )
+    {
+    virtual_counter fqt1( "FQT1" );
+    fqt1.pause_daily();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    fqt1.start_daily();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    }
 
 TEST( counter_iolink, set_cmd )
     {
     counter_iolink fqt1( "FQT1" );
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
     EXPECT_EQ( 0, fqt1.get_quantity() );
@@ -2724,7 +2748,8 @@ TEST( counter_iolink, set_cmd )
     
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( 
-        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, F=9.90, T=1.1, "
+        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, DAY_T1=0, PREV_DAY_T1=0, "
+        "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
         "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );
@@ -2760,8 +2785,26 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
     }
 
+tm get_time_next_day()
+    {
+    static struct tm timeInfo_;
+#ifdef LINUX_OS
+    auto t_ = time( nullptr );
+    localtime_r( &t_, &timeInfo_ );
+#else
+    static time_t t_ = time( nullptr );
+    localtime_s( &timeInfo_, &t_ );
+#endif // LINUX_OS
+    timeInfo_.tm_yday++;
+
+    return timeInfo_;
+    }
+
 TEST( counter_iolink, get_quantity )
     {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
     class counter_iolink_test:public counter_iolink
         {
         float totalizer = .0f;
@@ -2798,22 +2841,51 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=10, PREV_DAY_T1=0, "
+        "DAY_T2=10, PREV_DAY_T2=0, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_time_next_day ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+    fqt1.evaluate_io();         // New day.
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=0, PREV_DAY_T1=10, "
+        "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );   
 
     fqt1.off();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
     fqt1.pause();
+    fqt1.pause_daily( base_counter::DAY_CTR::DAY_T1 );
+    fqt1.pause_daily( base_counter::DAY_CTR::DAY_T2 );
+
     fqt1.set_raw_value( 30 );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=2, V=10000, ABS_V=20000, DAY_T1=0, PREV_DAY_T1=10, "
+        "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.on();
+    fqt1.start_daily( base_counter::DAY_CTR::DAY_T1 );
+    fqt1.start_daily( base_counter::DAY_CTR::DAY_T2 );
     fqt1.set_raw_value( 40 );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ(
+        "FQT1={M=0, ST=1, V=20000, ABS_V=30000, DAY_T1=10, PREV_DAY_T1=10, "
+        "DAY_T2=10, PREV_DAY_T2=10, F=0.00, T=0.0, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
 
     fqt1.set_state( 0 );        //Off.
@@ -2854,6 +2926,8 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.abs_reset();
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+
+    subhook_remove( get_time_hook );
     }
 
 TEST( counter_iolink, get_pump_dt )

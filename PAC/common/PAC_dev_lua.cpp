@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Sep 13 10:52:08 2024.
+** Generated automatically by tolua++-1.0.92 on Thu Oct 24 10:11:16 2024.
 */
 
 #ifndef __cplusplus
@@ -14,6 +14,7 @@
 TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 
 #include <stdlib.h>
+#include "device/base.h"
 #include "device/device.h"
 #include "device/manager.h"
 #include "tech_def.h"
@@ -968,6 +969,72 @@ static int tolua_PAC_dev_i_counter_abs_reset00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'abs_reset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: pause_daily of class  i_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_counter_pause_daily00
+static int tolua_PAC_dev_i_counter_pause_daily00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::DAY_CTR n = ((i_counter::DAY_CTR) (int)  tolua_tonumber(tolua_S,2,i_counter::DAY_CTR::DAY_T1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'pause_daily'", NULL);
+#endif
+  {
+   self->pause_daily(n);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'pause_daily'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: start_daily of class  i_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_counter_start_daily00
+static int tolua_PAC_dev_i_counter_start_daily00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::DAY_CTR n = ((i_counter::DAY_CTR) (int)  tolua_tonumber(tolua_S,2,i_counter::DAY_CTR::DAY_T1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'start_daily'", NULL);
+#endif
+  {
+   self->start_daily(n);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'start_daily'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15175,6 +15242,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_i_counter_get_state00);
    tolua_function(tolua_S,"get_abs_quantity",tolua_PAC_dev_i_counter_get_abs_quantity00);
    tolua_function(tolua_S,"abs_reset",tolua_PAC_dev_i_counter_abs_reset00);
+   tolua_constant(tolua_S,"DAY_T1",i_counter::DAY_T1);
+   tolua_constant(tolua_S,"DAY_T2",i_counter::DAY_T2);
+   tolua_function(tolua_S,"pause_daily",tolua_PAC_dev_i_counter_pause_daily00);
+   tolua_function(tolua_S,"start_daily",tolua_PAC_dev_i_counter_start_daily00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"device","device","i_DO_AO_device",NULL);
   tolua_beginmodule(tolua_S,"device");
