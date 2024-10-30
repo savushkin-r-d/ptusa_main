@@ -674,6 +674,16 @@ float virtual_counter::get_min_flow() const
     return .0f;
     }
 //-----------------------------------------------------------------------------
+void virtual_counter::pause_daily( DAY_CTR n )
+    {
+    // Ничего не делаем.
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::start_daily( DAY_CTR n )
+    {
+    // Ничего не делаем.
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 AI1::AI1( const char* dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :

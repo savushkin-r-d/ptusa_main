@@ -151,6 +151,18 @@ class i_counter
         /// @brief Сброс абсолютного значения счетчика.
         virtual void  abs_reset() = 0;
 
+        enum DAY_CTR
+            {
+            DAY_T1,
+            DAY_T2
+            };
+
+        /// @brief Приостановка работы дневного счетчика.
+        virtual void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) = 0;
+
+        /// @brief Возобновление работы дневного счетчика.
+        virtual void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) = 0;
+
         enum class STATES
             {
             S_WORK = 1,
@@ -885,6 +897,9 @@ class virtual_counter : public device, public i_counter
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
+
+        void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
+        void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
 
     private:
         float flow_value = 0.f;
