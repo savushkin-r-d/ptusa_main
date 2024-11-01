@@ -1567,6 +1567,21 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         str_buff );
     }
 
+TEST( valve_iolink_shut_off_sorio, get_fb_state )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    EXPECT_TRUE( V1.get_fb_state() ); //Default value.
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     {
     valve_iolink_gea_tvis_a15_ds V1( "VGEA2" );
