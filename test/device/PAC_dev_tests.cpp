@@ -3089,6 +3089,32 @@ TEST( wages, get_type_name )
     EXPECT_STREQ( "Тензорезистор", test_dev.get_type_name() );
     }
 
+TEST( wages, get_weight )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 2, 2 );
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    mngr.init_node_AI( 0, 1, 491, 1 );
+
+    wages test_dev( "test_W1" );
+    test_dev.init( 0, 0, 0, 2 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 1, 0, 1 );
+    test_dev.AI_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    test_dev.AI_channels.int_read_values[ 1 ] = new int_2[ 1 ]{ 0 };
+    *test_dev.AI_channels.int_read_values[ 1 ] = 65;
+
+    test_dev.set_cmd( "P_NOMINAL_W", 0, 5 );
+    test_dev.set_cmd( "P_RKP", 0, 2 );
+
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 TEST( wages_eth, evaluate_io )
     {
