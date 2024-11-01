@@ -2282,6 +2282,49 @@ TEST( motor, get_type_name )
     EXPECT_STREQ( "Двигатель", test_dev.get_type_name() );
     }
 
+TEST( motor, get_value )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 0, 0, 1, 0 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    M1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto VALUE = 90.f;
+    *M1.AO_channels.int_write_values[ 0 ] = static_cast<int_2>( VALUE );
+
+    EXPECT_EQ( M1.get_value(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( M1.get_value(), VALUE );
+    
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( motor, get_state )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 1, 1, 0, 0 );
+    M1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    M1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    M1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    *M1.DO_channels.char_write_values[ 0 ] = 1;
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( motor_altivar, set_cmd )
     {
