@@ -3110,7 +3110,9 @@ TEST( wages, get_weight )
     test_dev.set_cmd( "P_NOMINAL_W", 0, 5 );
     test_dev.set_cmd( "P_RKP", 0, 2 );
 
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     EXPECT_EQ( test_dev.get_weight(), 0 );
+    DeltaMilliSecSubHooker::set_default_time();
 
     io_manager::replace_instance( prev_mngr );
     }
