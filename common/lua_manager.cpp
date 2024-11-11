@@ -32,21 +32,20 @@ int check_file( const char* file_name, char* err_str )
     strcpy( err_str, "" );
 
     FILE *f = fopen( file_name, "r");
-    if ( 0 == f )
+    if ( !f )
         {
         G_LOG->error( err_str, "File \"%s\" not found!", file_name );
         return -1;
         }
     int version = 0;
 
-    char str[ 100 ] = "";
-    if ( char* res = fgets(str, sizeof(str), f); res != 0 )
+    if ( char str[ 100 ] = ""; fgets( str, sizeof( str ), f ) )
         {
         int err = sscanf( str, "--version = %d", &version );
         }
 
     fclose( f );
-    f = 0;
+    f = nullptr;
 
     if ( G_DEBUG )
         {
