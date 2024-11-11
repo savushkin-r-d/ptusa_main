@@ -528,13 +528,13 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
-    subhook_install( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_millisec( DELAY_1000MS + 1 );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
     G_DEBUG = 0;
 
-    subhook_remove( G_GET_DELTA_MILLISEC_HOOK_1001 );
+    DeltaMilliSecSubHooker::set_default_time();
     G_LUA_MANAGER->free_Lua();
     }
 
