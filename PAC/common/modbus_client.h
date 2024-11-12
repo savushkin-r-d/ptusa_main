@@ -14,7 +14,7 @@ class modbus_client
         static const int write_buff_start = 13; //Начало буфера данных для операций записи
         static const int read_buff_start = 9;  //Начало буфера данных для операций чтения
 
-        void pull_tcpclient(unsigned int address, unsigned int value, unsigned int seventh_byte);
+        void init_frame(unsigned int address, unsigned int value, unsigned int seventh_byte);
 
     public:
         modbus_client(unsigned int id, char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
