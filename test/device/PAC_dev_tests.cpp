@@ -1567,6 +1567,21 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
         str_buff );
     }
 
+TEST( valve_iolink_shut_off_sorio, get_fb_state )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    EXPECT_TRUE( V1.get_fb_state() ); //Default value.
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     {
     valve_iolink_gea_tvis_a15_ds V1( "VGEA2" );
@@ -2280,6 +2295,49 @@ TEST( motor, get_type_name )
     {
     motor test_dev( "test_M1", device::DST_M_VIRT );
     EXPECT_STREQ( "Двигатель", test_dev.get_type_name() );
+    }
+
+TEST( motor, get_value )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 0, 0, 1, 0 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    M1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto VALUE = 90.f;
+    *M1.AO_channels.int_write_values[ 0 ] = static_cast<int_2>( VALUE );
+
+    EXPECT_EQ( M1.get_value(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( M1.get_value(), VALUE );
+    
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( motor, get_state )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 1, 1, 0, 0 );
+    M1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    M1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    M1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    *M1.DO_channels.char_write_values[ 0 ] = 1;
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -3087,6 +3145,34 @@ TEST( wages, get_type_name )
     {
     wages test_dev( "test_W1" );
     EXPECT_STREQ( "Тензорезистор", test_dev.get_type_name() );
+    }
+
+TEST( wages, get_weight )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 2, 2 );
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    mngr.init_node_AI( 0, 1, 491, 1 );
+
+    wages test_dev( "test_W1" );
+    test_dev.init( 0, 0, 0, 2 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 1, 0, 1 );
+    test_dev.AI_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    test_dev.AI_channels.int_read_values[ 1 ] = new int_2[ 1 ]{ 0 };
+    *test_dev.AI_channels.int_read_values[ 1 ] = 65;
+
+    test_dev.set_cmd( "P_NOMINAL_W", 0, 5 );
+    test_dev.set_cmd( "P_RKP", 0, 2 );
+
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+    DeltaMilliSecSubHooker::set_default_time();
+
+    io_manager::replace_instance( prev_mngr );
     }
 
 

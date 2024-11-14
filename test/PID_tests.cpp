@@ -97,3 +97,15 @@ TEST( PID, direct_set_value )
     p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
     EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
     }
+
+TEST( PID, eval )
+    {
+    PID test_PID( "PID1" );
+    test_PID.on();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );    
+    auto res = test_PID.eval( 100 );
+    DeltaMilliSecSubHooker::set_default_time();
+
+    // По умолчанию получить должны 0-ое значение выхода.
+    EXPECT_EQ( res, 0 );
+    }
