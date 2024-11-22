@@ -219,6 +219,7 @@ class pressure_e_iolink : public analog_io_device
             DEFAULT,
             IFM_PM1704,
             IFM_PM1705,
+            IFM_PM1706,
             IFM_PM1707,
             IFM_PM1708,
             IFM_PM1709,
