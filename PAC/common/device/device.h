@@ -254,6 +254,10 @@ class pressure_e_iolink : public analog_io_device
             int16_t reserved : 8;
             };
 
+#ifdef PTUSA_TEST
+        ARTICLE get_article() const;
+#endif
+
     private:
         ARTICLE n_article = ARTICLE::DEFAULT;
 

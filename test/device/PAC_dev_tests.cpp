@@ -1233,6 +1233,59 @@ TEST( pressure_e, get_type_name )
     }
 
 
+TEST( pressure_e_iolink, pressure_e_iolink )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    pressure_e_iolink test_dev( "P1" );
+
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_ERR=0},\n",
+        buff );
+    }
+
+TEST( pressure_e_iolink, read_article )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    pressure_e_iolink test_dev( "P1" );
+    EXPECT_EQ( test_dev.get_article(), pressure_e_iolink::ARTICLE::DEFAULT );
+
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
+    EXPECT_EQ( test_dev.get_article(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
+    }
+
+TEST( pressure_e_iolink, evaluate_io )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    pressure_e_iolink test_dev( "P1" );
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
+
+
+    G_PAC_INFO()->emulation_off();
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    test_dev.init( 0, 0, 0, 1 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
+
+    // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
+    // input data from the line above).
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+
 TEST( analog_output, get_max_value )
     {
     analog_output A1( "AO1" );

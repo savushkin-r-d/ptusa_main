@@ -3040,6 +3040,13 @@ void pressure_e_iolink::evaluate_io()
     evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+pressure_e_iolink::ARTICLE pressure_e_iolink::get_article() const
+    {
+    return n_article;
+    }
+#endif
+//-----------------------------------------------------------------------------
 float pressure_e_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
