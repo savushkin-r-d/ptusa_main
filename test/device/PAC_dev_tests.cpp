@@ -1235,31 +1235,27 @@ TEST( pressure_e, get_type_name )
 
 TEST( pressure_e_iolink, pressure_e_iolink )
     {
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
+    std::array<char, 200> buff{ '\0' };
     pressure_e_iolink test_dev( "P1" );
 
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff.data(), "");
     EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_ERR=0},\n",
-        buff );
+        buff.data() );
     }
 
 TEST( pressure_e_iolink, read_article )
     {
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
     pressure_e_iolink test_dev( "P1" );
-    EXPECT_EQ( test_dev.get_article(), pressure_e_iolink::ARTICLE::DEFAULT );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
 
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
-    EXPECT_EQ( test_dev.get_article(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
     }
 
 TEST( pressure_e_iolink, evaluate_io )
     {
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
     pressure_e_iolink test_dev( "P1" );
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );

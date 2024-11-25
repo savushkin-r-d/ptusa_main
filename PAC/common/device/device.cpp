@@ -3041,7 +3041,7 @@ void pressure_e_iolink::evaluate_io()
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
-pressure_e_iolink::ARTICLE pressure_e_iolink::get_article() const
+pressure_e_iolink::ARTICLE pressure_e_iolink::get_article_n() const
     {
     return n_article;
     }

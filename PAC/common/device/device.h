@@ -255,7 +255,7 @@ class pressure_e_iolink : public analog_io_device
             };
 
 #ifdef PTUSA_TEST
-        ARTICLE get_article() const;
+        ARTICLE get_article_n() const;
 #endif
 
     private:
