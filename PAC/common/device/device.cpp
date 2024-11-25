@@ -2914,6 +2914,11 @@ void pressure_e_iolink::read_article( const char* article,
         n_article = ARTICLE::IFM_PM1705;
         return;
         }
+    if ( strcmp( article, "IFM.PM1706" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1706;
+        return;
+        }
     if ( strcmp( article, "IFM.PM1707" ) == 0 )
         {
         n_article = ARTICLE::IFM_PM1707;
@@ -2970,6 +2975,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
 
         case ARTICLE::IFM_PM1704:
         case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1706:
         case ARTICLE::IFM_PM1707:
         case ARTICLE::IFM_PM1708:
         case ARTICLE::IFM_PM1709:
@@ -2999,6 +3005,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             alfa = 0.00001f;
             break;
 
+        case ARTICLE::IFM_PM1706:
         case ARTICLE::IFM_PM1707:       //   0.1, mbar
         case ARTICLE::IFM_PM1709:       //   0.1, mbar
             alfa = 0.0001f;
@@ -3032,6 +3039,13 @@ void pressure_e_iolink::evaluate_io()
     {
     evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
+//-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+pressure_e_iolink::ARTICLE pressure_e_iolink::get_article_n() const
+    {
+    return n_article;
+    }
+#endif
 //-----------------------------------------------------------------------------
 float pressure_e_iolink::get_value()
     {

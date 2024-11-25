@@ -219,6 +219,7 @@ class pressure_e_iolink : public analog_io_device
             DEFAULT,
             IFM_PM1704,
             IFM_PM1705,
+            IFM_PM1706,
             IFM_PM1707,
             IFM_PM1708,
             IFM_PM1709,
@@ -252,6 +253,10 @@ class pressure_e_iolink : public analog_io_device
             uint16_t  status : 4;
             int16_t reserved : 8;
             };
+
+#ifdef PTUSA_TEST
+        ARTICLE get_article_n() const;
+#endif
 
     private:
         ARTICLE n_article = ARTICLE::DEFAULT;
