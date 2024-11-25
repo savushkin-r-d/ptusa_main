@@ -73,11 +73,11 @@ class tcp_communicator
 
         virtual ~tcp_communicator();
         
-        static void set_port( int new_port, int new_port_modbus )
-            {
-            port = new_port;
-            port_modbus = new_port_modbus;
-            }
+        static void set_port( int new_port, int new_port_modbus );
+
+        static int get_port();
+
+        static int get_modbus_port();
 
         enum CONSTANTS
             {
@@ -94,6 +94,8 @@ class tcp_communicator
             TC_MAX_HOST_NAME      = 70,
             TC_MAX_SERVICE_NUMBER = 16,
             };
+
+        static bool checkBuff( int s );
 
     protected:
         static int port;                  ///< Порт.

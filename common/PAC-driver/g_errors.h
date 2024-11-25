@@ -164,7 +164,7 @@ int load_from_stream( alarm &a, char *buff );
 #ifdef PAC
 #include "param_ex.h"
 #include "smart_ptr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "tech_def.h"
 
@@ -375,6 +375,14 @@ class errors_manager
         /// @brief Получение единственного экземпляра класса.
         static errors_manager* get_instance();
 
+        /// @brief Очистка всех связанных устройств.
+        int clear();
+
+        u_int_2 get_errors_id() const
+            {
+            return errors_id;
+            }
+
     private:
         u_int_2 errors_id; // Cостояние ошибок.
 
@@ -437,7 +445,7 @@ class siren_lights_manager: public i_Lua_save_device
             return "G_SIREN_MNGR";
             }
 
-        int set_cmd( const char *prop, u_int idx, char *val );
+        int set_cmd( const char *prop, u_int idx, const char *val );
 
         virtual ~siren_lights_manager()
             {

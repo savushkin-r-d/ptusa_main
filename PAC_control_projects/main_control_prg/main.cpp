@@ -7,17 +7,17 @@
 /// @c WIN_OS           - компиляция для ОС Windows.
 ///
 
-#include <fmt/core.h>
-
 #include <stdlib.h>
 #include <signal.h>
 #include "fcntl.h"
 #include <codecvt>
 
+#include <fmt/core.h> 
+
 #include "dtime.h"
 
 #include "prj_mngr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "PAC_info.h"
 #include "tech_def.h"
 #include "lua_manager.h"
@@ -44,8 +44,17 @@
 #include "rfid_reader.h"
 #endif
 
-int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
+int G_DEBUG = 0;                //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0;              //Вывод в системный лог (syslog).
+
+// Обмен с модулями ввода/вывода.
+#if defined WIN_OS
+bool G_NO_IO_NODES = true;  // В Windows по умолчанию обмен отключен.
+#else
+bool G_NO_IO_NODES = false; // В Linux по умолчанию обмен включен.
+#endif
+
+bool G_READ_ONLY_IO_NODES = false;
 
 int running = 1;
 static void stopHandler(int sig)
@@ -86,20 +95,21 @@ int main( int argc, const char *argv[] )
     signal(SIGILL, stopHandler);
     signal(SIGSEGV, stopHandler);
 
-    if ( argc < 2 )
-        {
-        fmt::print( "Usage: main script.plua\n" );
-        return EXIT_SUCCESS;
-        }
 #ifdef PAC_WAGO_750_860
     log_mngr::lg = new l_log();
 #endif
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
-    G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
+
+    //-Работа с параметрами командной строки.
+    int res = G_PROJECT_MANAGER->proc_main_params( argc, argv_utf8 );
+    if ( res )
+        {
+        exit( EXIT_SUCCESS );
+        }
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
+    res = G_LUA_MANAGER->init( nullptr, G_PROJECT_MANAGER->main_script.c_str(),
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
         G_PROJECT_MANAGER->extra_paths.c_str() );
 
@@ -117,13 +127,6 @@ int main( int argc, const char *argv[] )
         G_PROFIBUS_SLAVE()->init();
         }
 #endif // USE_PROFIBUS
-
-    long int sleep_time_ms = 2;
-    if ( argc >= 3 )
-        {
-        char *stopstring;
-        sleep_time_ms = strtol( argv_utf8[ 2 ], &stopstring, 10 );
-        }
 
 #if defined WIN_OS
     for ( int i = 0; i < argc; i++ )
@@ -151,8 +154,8 @@ int main( int argc, const char *argv[] )
     //Инициализация дополнительных устройств
     IOT_INIT();
 
-    G_LOG->info( "Starting main loop! Sleep time is %li ms.",
-        sleep_time_ms);
+    G_LOG->info( "Starting main loop! Sleep time is %u ms.",
+        G_PROJECT_MANAGER->sleep_time_ms );
 
     while ( running )
         {
@@ -171,24 +174,21 @@ int main( int argc, const char *argv[] )
 #endif // TEST_SPEED
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
-        sleep_ms( sleep_time_ms );
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
-#ifndef DEBUG_NO_IO_MODULES
-        G_IO_MANAGER()->read_inputs();
-        sleep_ms( sleep_time_ms );
-#endif // DEBUG_NO_IO_MODULES
+        if ( !G_NO_IO_NODES ) G_IO_MANAGER()->read_inputs();
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
         G_DEVICE_MANAGER()->evaluate_io();
 
         valve::evaluate();
 
         G_TECH_OBJECT_MNGR()->evaluate();
-        sleep_ms( sleep_time_ms );
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
-#ifndef DEBUG_NO_IO_MODULES
-        G_IO_MANAGER()->write_outputs();
-        sleep_ms( sleep_time_ms );
-#endif // ifndef
+        if ( !G_NO_IO_NODES &&
+            !G_READ_ONLY_IO_NODES ) G_IO_MANAGER()->write_outputs();
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
         G_CMMCTR->evaluate();
 #ifdef OPCUA
@@ -198,15 +198,18 @@ int main( int argc, const char *argv[] )
             }
 #endif
         //Основной цикл работы с дополнительными устройствами
-        IOT_EVALUATE();
+        if (!G_NO_IO_NODES && !G_READ_ONLY_IO_NODES)
+            {
+            IOT_EVALUATE( );
+            }
 
-        sleep_ms( sleep_time_ms );
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
         G_ERRORS_MANAGER->evaluate();
         G_SIREN_LIGHTS_MANAGER()->eval();
-        sleep_ms( sleep_time_ms );
+        sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
 #ifdef USE_PROFIBUS
         if ( G_PROFIBUS_SLAVE()->is_active() )

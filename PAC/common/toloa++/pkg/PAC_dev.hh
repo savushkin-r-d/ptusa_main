@@ -8,7 +8,9 @@
 
 $#include <stdlib.h>
 
-$#include "PAC_dev.h"
+$#include "device/base.h"
+$#include "device/device.h"
+$#include "device/manager.h"
 $#include "tech_def.h"
 $#include "cip_tech_def.h"
 $#include "bus_coupler_io.h"
@@ -21,6 +23,8 @@ $#include "modbus_client.h"
 $#include "modbus_serv.h"
 
 $#include "profibus_slave.h"
+
+$#include "params_recipe_manager.h"
 
 $#ifdef WIN_OS
 $#pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
@@ -191,6 +195,18 @@ class i_counter
 
         /// @brief Сброс абсолютного значения счетчика.
         void abs_reset();
+
+        enum DAY_CTR
+            {
+            DAY_T1,
+            DAY_T2
+            };
+
+        /// @brief Приостановка работы дневного счетчика.
+        virtual void pause_daily( DAY_CTR n = i_counter::DAY_CTR::DAY_T1 );
+
+        /// @brief Возобновление работы дневного счетчика.
+        virtual void start_daily( DAY_CTR n = i_counter::DAY_CTR::DAY_T1 );
     };
 //-----------------------------------------------------------------------------
 /// @brief Простое физическое устройство.
@@ -272,10 +288,11 @@ class device : public i_DO_AO_device
             DT_PT,      ///< Давление (значение).
             DT_F,       ///< Автоматический выключатель.
             DT_REGULATOR, ///< ПИД-регулятор.
-            DT_HLA,      ///< Сигнальная колонна.
-            DT_CAM,      ///< Камера.
-            DT_PDS,      ///< Датчик разности давления.
+            DT_HLA,     ///< Сигнальная колонна.
+            DT_CAM,     ///< Камера.
+            DT_PDS,     ///< Датчик разности давления.
             DT_TS,      ///< Сигнальный датчик температуры.
+            DT_G,       ///< Блок питания.
             };
 
         /// Подтипы устройств.
@@ -465,6 +482,10 @@ class device : public i_DO_AO_device
             //DT_REGULATOR
             DST_REGULATOR_PID = 1,
             DST_REGULATOR_THLD,
+  
+            //DT_G
+            DST_G_IOL_4 = 1,    ///< 4 канала.
+            DST_G_IOL_8,        ///< 8 каналов.
             };
     };
 //-----------------------------------------------------------------------------
@@ -757,7 +778,7 @@ i_DO_AO_device* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-camera* CAM( const char* dev_name );
+i_camera* CAM( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение датчика разности давления по имени.
 ///
@@ -772,6 +793,13 @@ i_DI_device* PDS( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DI_device* TS( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение блока питания по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DO_AO_device* get_G @ G( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение устройства-заглушки.
 ///
@@ -1145,7 +1173,8 @@ class operation
 
     public:
         step* add_step( const char* name, int next_step_n,
-            unsigned int step_duration_par_n, state_idx s_idx = RUN );
+            int step_duration_par_n, int step_max_duration_par_n,
+            state_idx s_idx = RUN );
 
     public:
 
@@ -1784,6 +1813,7 @@ class cipline_tech_object: public tech_object
         int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
         bool use_internal_medium_recipes; //Вкл./выкл. использование рецептов для моющих средств.
         bool disable_final_rinsing; //Не ополаскивать после дезинфекции
+        bool use_circulation_on_v2_supply; //Вкл./выкл. подачу сигнала "циркуляция" при подаче объема V2
 
         i_DO_device* V00;
         i_DO_device* V01;
@@ -2027,4 +2057,29 @@ class i_log
     };
 
 i_log* G_SYS_LOG();
+//-----------------------------------------------------------------------------
+class ParamsRecipeStorage
+    {
+        int getId() const;
+        int getCount() const;
+        int getParamsCount() const;
+        void setRecPar(int recNo, int parNo, float newValue);
+        float getRecPar(int recNo, int parNo);
+    };
+
+class ParamsRecipeAdapter
+    {
+        void addMap(unsigned int startRecPar, unsigned int startObjPar, unsigned int quantity);
+        void loadParams( int techObject, unsigned int recNo );
+        void setUseSeparateRecipeList( bool state );
+    };
+
+class ParamsRecipeManager
+    {
+        void evaluate();
+        ParamsRecipeStorage* createRecipes(int size, int quantity);
+        ParamsRecipeAdapter* createAdapter( ParamsRecipeStorage* recStorage );
+    };
+
+ParamsRecipeManager* G_PARAMS_RECIPE_MANAGER();
 //-----------------------------------------------------------------------------

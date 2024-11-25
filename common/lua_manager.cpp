@@ -1,6 +1,4 @@
-#ifndef __BORLANDC__
-#include <cstdlib>
-#endif
+#include <algorithm>
 
 #ifdef WIN_OS
 #include <Windows.h>
@@ -9,7 +7,7 @@
 #include "lua_manager.h"
 
 #include "prj_mngr.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "tech_def.h"
 #include "modbus_serv.h"
 

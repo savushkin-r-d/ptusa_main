@@ -10,7 +10,7 @@
 class PAC_info: public i_Lua_save_device
     {
     public:
-        virtual ~PAC_info();
+        ~PAC_info() override;
 
         void eval();
 
@@ -96,6 +96,14 @@ class PAC_info: public i_Lua_save_device
             RELOAD_RESTRICTIONS = 100,
             RESET_PARAMS = 101,
             };
+
+#ifdef PTUSA_TEST
+        void emulation_on();
+
+        void emulation_off();
+
+        bool emulator_state = true;
+#endif
 
     private:
         PAC_info();

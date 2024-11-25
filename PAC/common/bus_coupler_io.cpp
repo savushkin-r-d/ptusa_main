@@ -11,11 +11,11 @@
 #include "dtime.h"
 
 #ifdef WIN_OS
-#include "bus_coupler_io_PC.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_PC
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
@@ -23,11 +23,11 @@
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "bus_coupler_io_PFC200.h"
+#include "l_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-#include "l_bus_coupler_io.h"
+#include "uni_bus_coupler_io.h"
 #endif
 
 #include "log.h"
@@ -38,6 +38,7 @@
 #endif // WIN_OS
 
 auto_smart_ptr < io_manager > io_manager::instance;
+int io_device::last_err = 0;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int io_device::get_DO( u_int index )
@@ -357,8 +358,9 @@ int io_device::set_AO( u_int index, float value, float min_value,
     return 0;
     }
 //-----------------------------------------------------------------------------
-float io_device::get_AI( u_int index, float min_value, float max_value )
+float io_device::get_AI( u_int index, float min_value, float max_value, int& err )
     {
+    err = static_cast< int >( ERRORS::NO_ERR );
     if ( index < AI_channels.count &&
         AI_channels.int_read_values &&
         AI_channels.int_read_values[ index ] )
@@ -390,53 +392,65 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
             //
             case 461:
             case 450:
-                if ( val >= -2000 && val <= -1 ) // -0,1..-200 °C
+                if ( val < -2000 )  // Underrange.
                     {
-                    val *= 0.1f;
-                    return val;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
+                    return -1000.f;
                     }
-                if ( val >= 0 && val < 8500 ) // 0..850 °C
+                if ( val > 8500 )   // Overrange.
                     {
-                    val *= 0.1f;
-                    return val;
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
+                    return -1000.f;
                     }
 
-                return -1000;
+                val *= 0.1f;    // -200..-0.1..0..850 °C
+                return val;
 
-                // Выход модуля 446.
-                // Три наименее значащих бита не учитываются.
-                //    -----------------------------------------------------------------------
-                //    Input           Input           Binary value
-                //    current 0-20	  current 4-20                            Hex.      Dec.
-                //    -----------------------------------------------------------------------
-                //   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
-                //    20              20              0111 1111 1111 1111     7F FF     32767
-                //    10              12              0100 0000 0000 0xxx     40 00     16384
-                //    5               8               0010 0000 0000 0xxx     20 00      8192
-                //    2.5             6               0001 0000 0000 0xxx     10 00      4096
-                //    0.156           4.125           0000 0001 0000 0xxx     01 00       256
-                //    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
-                //    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
-                //    0               4               0000 0000 0000 0111     00 07         7
-                //    0               4               0000 0000 0000 0000     00 00         0
-                //
+            // Input       Numerical value                            Status- LED
+            // current                                                byte    Error
+            // 4-20 mA                                                hex.    AI 1,2
+            //             binary
+            //             Measured value      *)XFÜ   hex.    dec.
+            //------------------------------------------------------------------
+            // <0          not possible (Reverse voltage protection)
+            // <4- Δ**)    ’0000.0000.0000.0   011’    0x0003  3      0x41    on
+            // <4          ’0000.0000.0000.0   000’    0x0000  0      0x00    off
+            // 4           ’0000.0000.0000.0   000’    0x0000  0      0x00    off
+            // 6           ’0001.0000.0000.0   000’    0x1000  4096   0x00    off
+            // 8           ’0010.0000.0000.0   000’    0x2000  8192   0x00    off
+            // 10          ’0011.0000.0000.0   000’    0x3000  12288  0x00    off
+            // 12          ’0100.0000.0000.0   000’    0x4000  16384  0x00    off
+            // 14          ’0101.0000.0000.0   000’    0x5000  20480  0x00    off
+            // 16          ’0110.0000.0000.0   000’    0x6000  24576  0x00    off
+            // 18          ’0111.0000.0000.0   000’    0x7000  28672  0x00    off
+            // 20          ’0111.1111.1111.1   000’    0x7FF8  32760  0x00    off
+            // >20         ’0111.1111.1111.1   001’    0x7FF9  32761  0x42    off
+            // >20+ Δ**)   ’0111.1111.1111.1   001’    0x7FF9  32761  0x42    on
+            // ------------------------------------------------------------------
+            // *) status bits : X = not used, F = short - circuit, Ü = oversize
+            // **) Δ = 0,1 ... 2,0 mA
             case 466:
             case 496:
-                if ( 3 == val )
+                if ( 3 == val )     // Underrange.
                     {
-                    return -1.;
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
+                    return -1.f;
+                    }
+                if ( 32761 <= val ) // Overrange.
+                    {
+                    err = static_cast<int>( ERRORS::OVER_RANGE );
+                    return -1.f;
                     }
 
                 if ( 0 == min_value && 0 == max_value )
                     {
-                    val = 4 + val / 2047.5f;
+                    val = 4 + val / 2047.5f;    // 2047.5f = 32760 / ( 20 - 4 )
                     }
                 else
                     {
                     val = 4 + val / 2047.5f;
                     val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                     }
-
                 return val;
 
                 //Тензорезистор
@@ -463,13 +477,16 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
                     val *= 0.0005f;
                     return val;
                     }
+
+                err = static_cast<int>( ERRORS::OUT_OF_RANGE );
                 return -1000;
 
 			case 2688556: //RTD4 1H
 				if (val < -32000 )
-				{
+				    {
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1000;
-				}
+				    }
 				val *= 0.1f;
 				return val;
 
@@ -477,6 +494,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
             case 2702072:   //AXL F AI2 AO2 1H
 				if (val < -32000)
 					{
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
 					return -1;
 					}
 
@@ -494,6 +512,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
             case 1088062:   //AXL SE AI4 I 4-20
                 if ( val < -32000 )
                     {
+                    err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1;
                     }
 
@@ -528,6 +547,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
         printf( "\n" );
         }
 
+    err = static_cast<int>( ERRORS::BAD_IO_DATA );
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -941,11 +961,11 @@ io_manager* io_manager::get_instance()
     if ( instance.is_null() )
         {
 #ifdef WIN_OS
-        instance = new io_manager_PC();
+        instance = new uni_io_manager();
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-        instance = new io_manager_linux();
+        instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
@@ -953,16 +973,26 @@ io_manager* io_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = new io_manager_PFC200();
+        instance = new io_manager_linux();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-        instance = new io_manager_linux();
+        instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
         }
 
     return instance;
     }
+//-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+/// @brief Получение единственного экземпляра класса.
+io_manager* io_manager::replace_instance( io_manager* new_inst )
+    {
+    io_manager* prev_inst = instance;
+    instance.replace_without_free( new_inst );
+    return prev_inst;
+    }
+#endif
 //-----------------------------------------------------------------------------
 u_char* io_manager::get_DI_read_data( u_int node_n, u_int offset )
     {
@@ -1249,32 +1279,24 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
 
     if ( AI_cnt )
         {
-        AI_offsets = new u_int[ AI_cnt ];
-        AI_types = new u_int[ AI_cnt ];
-
-        memset( AI, 0, sizeof( AI ) );
+        AI_offsets = new u_int[ AI_cnt ]{ 0 };
+        AI_types = new u_int[ AI_cnt ]{ 0 };
         }
     if ( AO_cnt )
         {
-        AO_types = new u_int[ AO_cnt ];
-        AO_offsets = new u_int[ AO_cnt ];
-
-        memset( AO, 0, sizeof( AO ) );
-        memset( AO_, 0, sizeof( AO ) );
+        AO_types = new u_int[ AO_cnt ]{ 0 };
+        AO_offsets = new u_int[ AO_cnt ]{ 0 };
         }
 
     if ( DI_cnt )
         {
-        DI = new u_char[ DI_cnt ];
-        memset( DI, 0, DI_cnt );
+        DI = new u_char[ DI_cnt ]{ 0 };
         }
 
     if ( DO_cnt )
         {
-        DO = new u_char[ DO_cnt ];
-        DO_ = new u_char[ DO_cnt ];
-        memset( DO, 0, DO_cnt );
-        memset( DO_, 0, DO_cnt );
+        DO = new u_char[ DO_cnt ]{ 0 };
+        DO_ = new u_char[ DO_cnt ]{ 0 };
         }
     }
 

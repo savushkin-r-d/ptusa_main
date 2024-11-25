@@ -1,28 +1,31 @@
 [submodule "toluapp"]
-	path = toluapp
+	path = deps/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
 [submodule "lua"]
-	path = lua
+	path = deps/lua
 	url = http://github.com/LuaDist/lua.git
 [submodule "zlib"]
-	path = zlib
+	path = deps/zlib
 	url = https://github.com/savushkin-r-d/zlib.git
 [submodule "subhook"]
-	path = subhook
-	url = https://github.com/Zeex/subhook
+	path = deps/subhook
+	url = https://github.com/savushkin-r-d/subhook
 [submodule "googletest"]
-	path = googletest
+	path = deps/googletest
 	url = https://github.com/google/googletest
 [submodule "demo_projects/T1-PLCnext-Demo"]
 	path = demo_projects/T1-PLCnext-Demo
 	url = https://github.com/savushkin-r-d/T1-PLCnext-Demo.git
 [submodule "fmt"]
-	path = fmt
+	path = deps/fmt
 	url = https://github.com/fmtlib/fmt.git
 [submodule "benchmark"]
-	path = benchmark
+	path = deps/benchmark
 	url = https://github.com/google/benchmark.git
 [submodule "open62541/open62541"]
-	path = open62541/open62541
+	path = deps/open62541/open62541
 	url = https://github.com/open62541/open62541
+[submodule "cxxopts/cxxopts"]
+	path = deps/cxxopts/cxxopts
+	url = https://github.com/savushkin-r-d/cxxopts.git

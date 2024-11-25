@@ -138,6 +138,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     disable_tank_heating = 0;
     default_programlist = 0x13FB;
     use_internal_medium_recipes = false;
+    use_circulation_on_v2_supply = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
@@ -380,6 +381,12 @@ int cipline_tech_object::save_device( char *buff )
     //Имя рецепта для редактирования
     answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
 
+    //Номер последнего загруженного рецепта
+    answer_size += sprintf( buff + answer_size, "\tLASTRECNMR=%d,\n", lastLoadedRecipeNmr );
+
+    //Имя последнего загруженного рецепта
+    answer_size += sprintf( buff + answer_size, "\tLASTRECNAME='%s',\n", lastLoadedRecipeName.c_str() );
+
     //Выбранная программа мойки
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
@@ -395,10 +402,10 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tNCAR2='%s',\n", ncar2);
     answer_size += sprintf(buff + answer_size, "\tNCAR3='%s',\n", ncar3);
     answer_size += sprintf(buff + answer_size, "\tNCAR4='%s',\n", ncar4);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH1='%d',\n", switch1);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH2='%d',\n", switch2);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH3='%d',\n", switch3);
-    answer_size += sprintf(buff + answer_size, "\tSWITCH4='%d',\n", switch4);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH1=%d,\n", switch1);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH2=%d,\n", switch2);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH3=%d,\n", switch3);
+    answer_size += sprintf(buff + answer_size, "\tSWITCH4=%d,\n", switch4);
 
     //Время простоя.
     char up_time_str [ 50 ];
@@ -2709,8 +2716,15 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_circulation)
         {
-        if ((steps_circulation.count(step_to_do) && circ_temp_reached) ||
-            ((steps_additional_rinse.count(step_to_do) || steps_v2_supply.count(step_to_do)) && (!wasflip)))
+        if  (   (steps_circulation.count(step_to_do) && circ_temp_reached) ||
+                (
+                    (
+                        steps_additional_rinse.count(step_to_do) ||
+                        (use_circulation_on_v2_supply && steps_v2_supply.count(step_to_do))
+                    ) &&
+                    (!wasflip)
+                )
+            )
             {
             dev_upr_circulation->on();
             }

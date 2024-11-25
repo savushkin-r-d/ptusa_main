@@ -5,7 +5,8 @@
 #include "g_device.h"
 #include "PID.h"
 #include "modbus_serv.h"
-#include "PAC_dev.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "cip_stats.h"
 #include <unordered_set>
 #include <string>
@@ -683,6 +684,8 @@ class cipline_tech_object: public tech_object
 
         ///Флаг завершения флипования на операциях циркуляции/промывки.
         bool wasflip{};
+        //Флаг использования сигнала "циркуляция" на подаче объема V2
+        bool use_circulation_on_v2_supply;
 
         //Переменные для циркуляции
         char circ_tank_s; //Циркулировать ли через танк со щелочью

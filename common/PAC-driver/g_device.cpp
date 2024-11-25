@@ -1,15 +1,16 @@
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include "g_device.h"
 
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "PAC_err.h"
 #include "g_errors.h"
 
 #include "lua_manager.h"
 #include "tech_def.h"
+#include "params_recipe_manager.h"
 
 char device_communicator::buff[ tcp_communicator::BUFSIZE ];
 
@@ -145,9 +146,17 @@ long device_communicator::write_devices_states_service(
             printf( "\nEXEC_DEVICE_CMD\n" );
             printf( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
-
-            int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1,
-                "CMD_EXEC_DEVICE_COMMAND ");
+            int res;
+            auto str = reinterpret_cast<char*>( data + 1 );
+            if ( strstr( str, "__RECMAN" ) != nullptr )
+                {
+                res = G_PARAMS_RECIPE_MANAGER()->parseDriverCmd( str );
+                }
+            else
+                {
+                res = lua_manager::get_instance()->exec_Lua_str( 
+                    str, "CMD_EXEC_DEVICE_COMMAND " );
+                }
 
             outdata[ 0 ] = 0;
             outdata[ 1 ] = 0; //Возвращаем 0.

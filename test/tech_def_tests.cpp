@@ -170,6 +170,8 @@ TEST( tech_object, save )
 t.TANK0=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		
@@ -227,6 +229,8 @@ t.TANK0=
 t.TANK1=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		0, 
@@ -288,13 +292,17 @@ t.TANK1=
 
     tank1.set_mode( OPER_N1, operation::RUN );
     tank1.evaluate();
-    sleep_ms( 1000 );
+
+	DeltaMilliSecSubHooker::set_millisec(1001UL);
     tank1.save_device( buff );
+	DeltaMilliSecSubHooker::set_default_time();
 
     auto REF_STR2 = R"(t.TANK1 = t.TANK1 or {}
 t.TANK1=
 	{
 	CMD=0,
+	LASTRECNMR=0,
+	LASTRECNAME='Не выбран',
 	ST=
 		{
 		1, 

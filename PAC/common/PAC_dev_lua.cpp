@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Jan 24 16:42:38 2024.
+** Generated automatically by tolua++-1.0.92 on Thu Oct 24 10:11:16 2024.
 */
 
 #ifndef __cplusplus
@@ -14,7 +14,9 @@
 TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 
 #include <stdlib.h>
-#include "PAC_dev.h"
+#include "device/base.h"
+#include "device/device.h"
+#include "device/manager.h"
 #include "tech_def.h"
 #include "cip_tech_def.h"
 #include "bus_coupler_io.h"
@@ -24,6 +26,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "modbus_client.h"
 #include "modbus_serv.h"
 #include "profibus_slave.h"
+#include "params_recipe_manager.h"
 #ifdef WIN_OS
 #pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning(disable: 6011)  //dereferencing NULL pointer <name>.
@@ -86,32 +89,36 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"siren_lights_manager");
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
+ tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"virtual_counter");
  tolua_usertype(tolua_S,"errors_manager");
  tolua_usertype(tolua_S,"tech_object_manager");
+ tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"dev_stub");
+ tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"i_Lua_save_device");
+ tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"profibus_slave");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"tm");
+ tolua_usertype(tolua_S,"i_camera");
  tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"PAC_info");
- tolua_usertype(tolua_S,"camera");
- tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"ParamsRecipeStorage");
+ tolua_usertype(tolua_S,"ParamsRecipeManager");
  tolua_usertype(tolua_S,"io_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
- tolua_usertype(tolua_S,"run_time_params_u_int_4");
+ tolua_usertype(tolua_S,"ParamsRecipeAdapter");
  tolua_usertype(tolua_S,"operation_manager");
  tolua_usertype(tolua_S,"i_counter");
  tolua_usertype(tolua_S,"i_DO_device");
@@ -962,6 +969,72 @@ static int tolua_PAC_dev_i_counter_abs_reset00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'abs_reset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: pause_daily of class  i_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_counter_pause_daily00
+static int tolua_PAC_dev_i_counter_pause_daily00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::DAY_CTR n = ((i_counter::DAY_CTR) (int)  tolua_tonumber(tolua_S,2,i_counter::DAY_CTR::DAY_T1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'pause_daily'", NULL);
+#endif
+  {
+   self->pause_daily(n);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'pause_daily'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: start_daily of class  i_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_counter_start_daily00
+static int tolua_PAC_dev_i_counter_start_daily00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_counter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_counter* self = (i_counter*)  tolua_tousertype(tolua_S,1,0);
+  i_counter::DAY_CTR n = ((i_counter::DAY_CTR) (int)  tolua_tonumber(tolua_S,2,i_counter::DAY_CTR::DAY_T1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'start_daily'", NULL);
+#endif
+  {
+   self->start_daily(n);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'start_daily'.",&tolua_err);
  return 0;
 #endif
 }
@@ -3215,8 +3288,8 @@ static int tolua_PAC_dev_CAM00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   camera* tolua_ret = (camera*)  CAM(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"camera");
+   i_camera* tolua_ret = (i_camera*)  CAM(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_camera");
   }
  }
  return 1;
@@ -3281,6 +3354,35 @@ static int tolua_PAC_dev_TS00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'TS'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: get_G */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G00
+static int tolua_PAC_dev_G00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  get_G(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_AO_device");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G'.",&tolua_err);
  return 0;
 #endif
 }
@@ -5664,8 +5766,9 @@ static int tolua_PAC_dev_operation_add_step00(lua_State* tolua_S)
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,6,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -5674,13 +5777,14 @@ static int tolua_PAC_dev_operation_add_step00(lua_State* tolua_S)
   operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
   int next_step_n = ((int)  tolua_tonumber(tolua_S,3,0));
-  unsigned int step_duration_par_n = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
-  operation::state_idx s_idx = ((operation::state_idx) (int)  tolua_tonumber(tolua_S,5,operation::RUN));
+  int step_duration_par_n = ((int)  tolua_tonumber(tolua_S,4,0));
+  int step_max_duration_par_n = ((int)  tolua_tonumber(tolua_S,5,0));
+  operation::state_idx s_idx = ((operation::state_idx) (int)  tolua_tonumber(tolua_S,6,operation::RUN));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_step'", NULL);
 #endif
   {
-   step* tolua_ret = (step*)  self->add_step(name,next_step_n,step_duration_par_n,s_idx);
+   step* tolua_ret = (step*)  self->add_step(name,next_step_n,step_duration_par_n,step_max_duration_par_n,s_idx);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"step");
   }
  }
@@ -9976,6 +10080,36 @@ static int tolua_set_cipline_tech_object_disable_final_rinsing(lua_State* tolua_
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
   self->disable_final_rinsing = ((bool)  tolua_toboolean(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: use_circulation_on_v2_supply of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_use_circulation_on_v2_supply
+static int tolua_get_cipline_tech_object_use_circulation_on_v2_supply(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'use_circulation_on_v2_supply'",NULL);
+#endif
+  tolua_pushboolean(tolua_S,(bool)self->use_circulation_on_v2_supply);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: use_circulation_on_v2_supply of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_use_circulation_on_v2_supply
+static int tolua_set_cipline_tech_object_use_circulation_on_v2_supply(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'use_circulation_on_v2_supply'",NULL);
+  if (!tolua_isboolean(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->use_circulation_on_v2_supply = ((bool)  tolua_toboolean(tolua_S,2,0))
 ;
  return 0;
 }
@@ -14655,6 +14789,408 @@ static int tolua_PAC_dev_G_SYS_LOG00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: getId of class  ParamsRecipeStorage */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeStorage_getId00
+static int tolua_PAC_dev_ParamsRecipeStorage_getId00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ParamsRecipeStorage* self = (const ParamsRecipeStorage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'getId'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->getId();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'getId'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: getCount of class  ParamsRecipeStorage */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeStorage_getCount00
+static int tolua_PAC_dev_ParamsRecipeStorage_getCount00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ParamsRecipeStorage* self = (const ParamsRecipeStorage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'getCount'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->getCount();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'getCount'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: getParamsCount of class  ParamsRecipeStorage */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeStorage_getParamsCount00
+static int tolua_PAC_dev_ParamsRecipeStorage_getParamsCount00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ParamsRecipeStorage* self = (const ParamsRecipeStorage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'getParamsCount'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->getParamsCount();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'getParamsCount'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: setRecPar of class  ParamsRecipeStorage */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeStorage_setRecPar00
+static int tolua_PAC_dev_ParamsRecipeStorage_setRecPar00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeStorage* self = (ParamsRecipeStorage*)  tolua_tousertype(tolua_S,1,0);
+  int recNo = ((int)  tolua_tonumber(tolua_S,2,0));
+  int parNo = ((int)  tolua_tonumber(tolua_S,3,0));
+  float newValue = ((float)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'setRecPar'", NULL);
+#endif
+  {
+   self->setRecPar(recNo,parNo,newValue);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'setRecPar'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: getRecPar of class  ParamsRecipeStorage */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeStorage_getRecPar00
+static int tolua_PAC_dev_ParamsRecipeStorage_getRecPar00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeStorage* self = (ParamsRecipeStorage*)  tolua_tousertype(tolua_S,1,0);
+  int recNo = ((int)  tolua_tonumber(tolua_S,2,0));
+  int parNo = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'getRecPar'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->getRecPar(recNo,parNo);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'getRecPar'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: addMap of class  ParamsRecipeAdapter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeAdapter_addMap00
+static int tolua_PAC_dev_ParamsRecipeAdapter_addMap00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeAdapter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeAdapter* self = (ParamsRecipeAdapter*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int startRecPar = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int startObjPar = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  unsigned int quantity = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'addMap'", NULL);
+#endif
+  {
+   self->addMap(startRecPar,startObjPar,quantity);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'addMap'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: loadParams of class  ParamsRecipeAdapter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeAdapter_loadParams00
+static int tolua_PAC_dev_ParamsRecipeAdapter_loadParams00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeAdapter",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeAdapter* self = (ParamsRecipeAdapter*)  tolua_tousertype(tolua_S,1,0);
+  int techObject = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int recNo = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'loadParams'", NULL);
+#endif
+  {
+   self->loadParams(techObject,recNo);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'loadParams'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: setUseSeparateRecipeList of class  ParamsRecipeAdapter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00
+static int tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeAdapter",0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeAdapter* self = (ParamsRecipeAdapter*)  tolua_tousertype(tolua_S,1,0);
+  bool state = ((bool)  tolua_toboolean(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'setUseSeparateRecipeList'", NULL);
+#endif
+  {
+   self->setUseSeparateRecipeList(state);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'setUseSeparateRecipeList'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: evaluate of class  ParamsRecipeManager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_evaluate00
+static int tolua_PAC_dev_ParamsRecipeManager_evaluate00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeManager",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeManager* self = (ParamsRecipeManager*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'evaluate'", NULL);
+#endif
+  {
+   self->evaluate();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'evaluate'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: createRecipes of class  ParamsRecipeManager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_createRecipes00
+static int tolua_PAC_dev_ParamsRecipeManager_createRecipes00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeManager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeManager* self = (ParamsRecipeManager*)  tolua_tousertype(tolua_S,1,0);
+  int size = ((int)  tolua_tonumber(tolua_S,2,0));
+  int quantity = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'createRecipes'", NULL);
+#endif
+  {
+   ParamsRecipeStorage* tolua_ret = (ParamsRecipeStorage*)  self->createRecipes(size,quantity);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"ParamsRecipeStorage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'createRecipes'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: createAdapter of class  ParamsRecipeManager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ParamsRecipeManager_createAdapter00
+static int tolua_PAC_dev_ParamsRecipeManager_createAdapter00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ParamsRecipeManager",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,2,"ParamsRecipeStorage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ParamsRecipeManager* self = (ParamsRecipeManager*)  tolua_tousertype(tolua_S,1,0);
+  ParamsRecipeStorage* recStorage = ((ParamsRecipeStorage*)  tolua_tousertype(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'createAdapter'", NULL);
+#endif
+  {
+   ParamsRecipeAdapter* tolua_ret = (ParamsRecipeAdapter*)  self->createAdapter(recStorage);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"ParamsRecipeAdapter");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'createAdapter'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: G_PARAMS_RECIPE_MANAGER */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_PARAMS_RECIPE_MANAGER00
+static int tolua_PAC_dev_G_PARAMS_RECIPE_MANAGER00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   ParamsRecipeManager* tolua_ret = (ParamsRecipeManager*)  G_PARAMS_RECIPE_MANAGER();
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"ParamsRecipeManager");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G_PARAMS_RECIPE_MANAGER'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -14706,6 +15242,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_i_counter_get_state00);
    tolua_function(tolua_S,"get_abs_quantity",tolua_PAC_dev_i_counter_get_abs_quantity00);
    tolua_function(tolua_S,"abs_reset",tolua_PAC_dev_i_counter_abs_reset00);
+   tolua_constant(tolua_S,"DAY_T1",i_counter::DAY_T1);
+   tolua_constant(tolua_S,"DAY_T2",i_counter::DAY_T2);
+   tolua_function(tolua_S,"pause_daily",tolua_PAC_dev_i_counter_pause_daily00);
+   tolua_function(tolua_S,"start_daily",tolua_PAC_dev_i_counter_start_daily00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"device","device","i_DO_AO_device",NULL);
   tolua_beginmodule(tolua_S,"device");
@@ -14748,6 +15288,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_CAM",device::DT_CAM);
    tolua_constant(tolua_S,"DT_PDS",device::DT_PDS);
    tolua_constant(tolua_S,"DT_TS",device::DT_TS);
+   tolua_constant(tolua_S,"DT_G",device::DT_G);
    tolua_constant(tolua_S,"DST_NONE",device::DST_NONE);
    tolua_constant(tolua_S,"DST_V_DO1",device::DST_V_DO1);
    tolua_constant(tolua_S,"DST_V_DO2",device::DST_V_DO2);
@@ -14848,6 +15389,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_TS_VIRT",device::DST_TS_VIRT);
    tolua_constant(tolua_S,"DST_REGULATOR_PID",device::DST_REGULATOR_PID);
    tolua_constant(tolua_S,"DST_REGULATOR_THLD",device::DST_REGULATOR_THLD);
+   tolua_constant(tolua_S,"DST_G_IOL_4",device::DST_G_IOL_4);
+   tolua_constant(tolua_S,"DST_G_IOL_8",device::DST_G_IOL_8);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");
@@ -14937,6 +15480,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"CAM",tolua_PAC_dev_CAM00);
   tolua_function(tolua_S,"PDS",tolua_PAC_dev_PDS00);
   tolua_function(tolua_S,"TS",tolua_PAC_dev_TS00);
+  tolua_function(tolua_S,"G",tolua_PAC_dev_G00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);
@@ -15315,6 +15859,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"no_acid_wash_max",tolua_get_cipline_tech_object_no_acid_wash_max,tolua_set_cipline_tech_object_no_acid_wash_max);
    tolua_variable(tolua_S,"use_internal_medium_recipes",tolua_get_cipline_tech_object_use_internal_medium_recipes,tolua_set_cipline_tech_object_use_internal_medium_recipes);
    tolua_variable(tolua_S,"disable_final_rinsing",tolua_get_cipline_tech_object_disable_final_rinsing,tolua_set_cipline_tech_object_disable_final_rinsing);
+   tolua_variable(tolua_S,"use_circulation_on_v2_supply",tolua_get_cipline_tech_object_use_circulation_on_v2_supply,tolua_set_cipline_tech_object_use_circulation_on_v2_supply);
    tolua_variable(tolua_S,"V00",tolua_get_cipline_tech_object_V00_ptr,tolua_set_cipline_tech_object_V00_ptr);
    tolua_variable(tolua_S,"V01",tolua_get_cipline_tech_object_V01_ptr,tolua_set_cipline_tech_object_V01_ptr);
    tolua_variable(tolua_S,"V02",tolua_get_cipline_tech_object_V02_ptr,tolua_set_cipline_tech_object_V02_ptr);
@@ -15482,6 +16027,27 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"write_log",tolua_PAC_dev_i_log_write_log00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_SYS_LOG",tolua_PAC_dev_G_SYS_LOG00);
+  tolua_cclass(tolua_S,"ParamsRecipeStorage","ParamsRecipeStorage","",NULL);
+  tolua_beginmodule(tolua_S,"ParamsRecipeStorage");
+   tolua_function(tolua_S,"getId",tolua_PAC_dev_ParamsRecipeStorage_getId00);
+   tolua_function(tolua_S,"getCount",tolua_PAC_dev_ParamsRecipeStorage_getCount00);
+   tolua_function(tolua_S,"getParamsCount",tolua_PAC_dev_ParamsRecipeStorage_getParamsCount00);
+   tolua_function(tolua_S,"setRecPar",tolua_PAC_dev_ParamsRecipeStorage_setRecPar00);
+   tolua_function(tolua_S,"getRecPar",tolua_PAC_dev_ParamsRecipeStorage_getRecPar00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"ParamsRecipeAdapter","ParamsRecipeAdapter","",NULL);
+  tolua_beginmodule(tolua_S,"ParamsRecipeAdapter");
+   tolua_function(tolua_S,"addMap",tolua_PAC_dev_ParamsRecipeAdapter_addMap00);
+   tolua_function(tolua_S,"loadParams",tolua_PAC_dev_ParamsRecipeAdapter_loadParams00);
+   tolua_function(tolua_S,"setUseSeparateRecipeList",tolua_PAC_dev_ParamsRecipeAdapter_setUseSeparateRecipeList00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"ParamsRecipeManager","ParamsRecipeManager","",NULL);
+  tolua_beginmodule(tolua_S,"ParamsRecipeManager");
+   tolua_function(tolua_S,"evaluate",tolua_PAC_dev_ParamsRecipeManager_evaluate00);
+   tolua_function(tolua_S,"createRecipes",tolua_PAC_dev_ParamsRecipeManager_createRecipes00);
+   tolua_function(tolua_S,"createAdapter",tolua_PAC_dev_ParamsRecipeManager_createAdapter00);
+  tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"G_PARAMS_RECIPE_MANAGER",tolua_PAC_dev_G_PARAMS_RECIPE_MANAGER00);
  tolua_endmodule(tolua_S);
  return 1;
 }

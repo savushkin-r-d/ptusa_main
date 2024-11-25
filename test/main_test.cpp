@@ -4,6 +4,14 @@
 int G_DEBUG = 1;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
+bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+bool G_READ_ONLY_IO_NODES = false;
+
+unsigned long subhook_for_get_delta_millisec(unsigned long)
+{
+    return DeltaMilliSecSubHooker::get_millisec();
+}
+
 int main(int argc, char* argv[])
 {
 #if defined WIN_OS

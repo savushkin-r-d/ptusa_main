@@ -21,7 +21,8 @@ TEST( OPCUA_server, evaluate )
     auto res = G_OPCUA_SERVER.start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res  );
     res = G_OPCUA_SERVER.start();
-    EXPECT_EQ( UA_STATUSCODE_GOOD, res );   //Correct start() even call again.
+    // Bad start() when call again.
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
 
     G_OPCUA_SERVER.evaluate();
     
@@ -105,7 +106,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_FLOAT ] );
     auto value = static_cast<UA_Float*>( out.data );
-    EXPECT_EQ( 1.0f, *value );
+    EXPECT_EQ( .0f, *value );
 
 
     UA_Variant val;

@@ -20,7 +20,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     lua_remove( L, -1 );
 
     EXPECT_EQ( 0,
-        luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1 )" ) );
+        luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1, -1 )" ) );
     
     // int enable_step_by_signal::set_bool_property( const char* name, bool value )
     EXPECT_EQ( 0,
@@ -173,6 +173,70 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     auto lua_st = tolua_tonumber( L, -1, 0 );
     lua_pop( L, 1 );
     ASSERT_EQ( st, lua_st );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_G00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_G, device.DST_G_IOL_4, \'G1\', \'Test power module\', \'\' )" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = G()" ) );   //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "G1 = G( \'G1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "G1" );
+    auto G1 = static_cast<i_wages*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, G1 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+
+TEST( toLuapp, tolua_PAC_dev_CAM00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_CAM, device.DST_CAM_DO1_DI2, \'CAM1\', \'Test camera\', \'\' )" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = CAM()" ) );   //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "CAM1 = CAM( \'CAM1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "CAM1" );
+    auto CAM1 = static_cast<i_camera*>( tolua_touserdata( L, -1, 0 ) );
+    EXPECT_NE( nullptr, CAM1 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_F, \'FQT1\', \'Test device\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    auto dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( nullptr, dev );
+
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.pause_daily()" ) ); //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause_daily()" ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "FQT1.start_daily()" ) ); //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
+
 
     lua_close( L );
     }

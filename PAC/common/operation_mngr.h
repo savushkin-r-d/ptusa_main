@@ -29,7 +29,7 @@
 
 #include "dtime.h"
 
-#include "PAC_dev.h"
+#include "device/device.h"
 #include "PAC_info.h"
 #include "param_ex.h"
 
@@ -58,7 +58,7 @@ class action
         /// @brief Проверка действия.
         ///
         /// @param [out] reason Пояснение, почему нельзя выполнить действие.
-        virtual int check( char* reason ) const
+        virtual int check( char* reason, unsigned int max_len ) const
             {
             reason[ 0 ] = 0;
             return 0;
@@ -237,6 +237,7 @@ class open_seat_action: public action
 
 #ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
+        int get_wait_time();
 #endif
 
         /// @brief Добавление устройства к действию.
@@ -264,9 +265,6 @@ class open_seat_action: public action
         u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
         u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
-        u_int_4 wait_seat_time; ///< Время ожидания перед промыванием седел группы.
-        u_int_4 wash_time_upper;///< Время промывки верхних седел текущей группы клапанов.
-        u_int_4 wash_time_lower;///< Время промывки нижних седел текущей группы клапанов.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
@@ -294,7 +292,7 @@ class DI_DO_action: public action
     public:
         explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
 
-        int check( char* reason ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void evaluate() override;
 
@@ -324,7 +322,7 @@ class AI_AO_action : public action
     public:
         AI_AO_action();
 
-        int check( char* reason ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void evaluate() override;
 
@@ -341,7 +339,7 @@ class required_DI_action: public action
             {
             }
 
-        int check( char* reason ) const override;
+        int check( char* reason, unsigned int max_len ) const override;
 
         void finalize() override;
     };
@@ -486,7 +484,7 @@ class step
         ///
         /// @return > 0 - нельзя выполнить.
         /// @return   0 - ок.
-        int check( char* reason ) const;
+        int check( char* reason, unsigned int max_len ) const;
 
         void init();
 
@@ -495,7 +493,10 @@ class step
         void finalize();
 
         /// Получение времени выполнения шага.
-        u_int_4 get_eval_time() const;
+        u_long get_eval_time() const;
+
+        /// Получение времени выполнения шага со времени последней паузы/запуска.
+        u_long get_latest_eval_time() const;
 
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
@@ -560,8 +561,8 @@ class operation_state
 
         ~operation_state();
 
-        step* add_step( const char* name, int next_step_n,
-            u_int step_duration_par_n );
+        step* add_step( const char* step_name, int next_step_n = -1,
+            int step_duration_par_n = -1, int step_max_duration_par_n = -1 );
 
         /// @brief Получение операции через операцию индексирования.
         ///
@@ -572,7 +573,7 @@ class operation_state
         /// mode::step_stub.
         step* operator[] ( int idx );
 
-        int check_on( char* reason ) const;
+        int check_on( char* reason, unsigned int max_len ) const;
 
         void init( u_int start_step = 1 );
 
@@ -610,9 +611,11 @@ class operation_state
 
         const char* get_name() const;
 
-        int check_devices( char* err_dev_name, int str_len );
+        int check_devices( char* err_dev_name, unsigned int str_len );
 
-        int check_steps_params( char* err_dev_name, int str_len );
+        int check_steps_params( char* err_dev_name, unsigned int str_len );
+
+        int check_max_step_time( char* err_dev_name, unsigned int str_len );
 
         /// @brief Проверка на отсутствие устройств.
         ///
@@ -630,10 +633,14 @@ class operation_state
 
         int active_step_n;           ///< Активный шаг.
         int active_step_time;        ///< Время активного шага.
+        int active_step_max_time;    ///< Максимальное время активного шага.
         int active_step_next_step_n; ///< Следующий шаг.
 
         /// @brief Номера параметров времен шагов.
         std::vector< int > step_duration_par_ns;
+
+        /// @brief Номера параметров максимального времени шагов.
+        std::vector< int > step_max_duration_par_ns;
 
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
@@ -697,9 +704,9 @@ class operation
 #ifndef __GNUC__
 #pragma region Совместимость со старой версией.
 #endif
-        int check_devices_on_run_state( char* err_dev_name, int str_len );
+        int check_devices_on_run_state( char* err_dev_name, unsigned int str_len );
 
-        int check_on_run_state( char* reason ) const;
+        int check_on_run_state( char* reason, unsigned int max_len ) const;
 
         u_long evaluation_time();
 
@@ -707,7 +714,9 @@ class operation
 
         void finalize();
 
-        int check_steps_params( char* err_dev_name, int str_len );
+        int check_steps_params( char* err_dev_name, unsigned int str_len );
+
+        int check_max_step_time( char* err_dev_name, unsigned int str_len );
 
         u_int active_step() const;
         int get_run_step() const;
@@ -841,8 +850,9 @@ class operation
                 }
             }
 
-        step* add_step( const char* step_name, int next_step_n,
-            unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
+        step* add_step( const char* step_name, int next_step_n = -1,
+            int step_duration_par_n = -1, int step_max_duration_par_n = -1, 
+            state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
 #pragma endregion
@@ -881,6 +891,13 @@ class operation
         int process_auto_switch_on();
 
         int process_new_state_from_run( int next_state );
+
+        /// @brief Обработка перехода по умолчанию - переход к остановке
+        /// или к следующему состоянию.
+        /// 
+        /// @param next_state - новое состояние.
+        /// @param def_state - новое состояние по умолчанию.
+        int default_process_new_state( state_idx next_state, state_idx def_state );
 
         state_idx current_state = IDLE;
 

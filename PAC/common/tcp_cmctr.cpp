@@ -94,6 +94,40 @@ tcp_communicator::~tcp_communicator()
     delete clients;
     }
 //------------------------------------------------------------------------------
+void tcp_communicator::set_port( int new_port, int new_port_modbus )
+    {
+    port = new_port;
+    port_modbus = new_port_modbus;
+    }
+//------------------------------------------------------------------------------
+int tcp_communicator::get_port()
+    {
+    return port;
+    }
+//------------------------------------------------------------------------------
+int tcp_communicator::get_modbus_port()
+    {
+    return port_modbus;
+    }
+//------------------------------------------------------------------------------
+bool tcp_communicator::checkBuff( int s )
+    {
+    // Настраиваем  file descriptor set.
+    fd_set fds;
+    FD_ZERO( &fds );
+    FD_SET( s, &fds );
+
+    // Настраиваем время на таймаут.
+    timeval rec_tv;
+    rec_tv.tv_sec = 0;
+    rec_tv.tv_usec = 0;
+
+    // Ждем таймаута или полученных данных.
+    int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
+
+    return n >= 1;
+    }
+//------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {
 #ifdef PTUSA_TEST
@@ -129,5 +163,4 @@ int tcp_communicator::remove_async_client( tcp_client* client )
         }
     return 0;
     }
-
 //------------------------------------------------------------------------------

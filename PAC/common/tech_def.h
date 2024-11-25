@@ -22,7 +22,7 @@
 #include "i_tech_def.h"
 
 #include "g_device.h"
-#include "PAC_dev.h"
+#include "device/device.h"
 
 #include "tcp_cmctr.h"
 #include "param_ex.h"
@@ -110,7 +110,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        int check_on_mode( u_int mode, char* reason );
+        int check_on_mode( u_int mode, char* reason, int max_len );
 
         /// @brief Проверка возможности выключения режима.
         ///
@@ -325,6 +325,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         ///
         /// @param idx - последовательный номер, >= 1.
         void set_serial_idx( u_int idx );
+
+        std::string lastLoadedRecipeName = "Не выбран";
+        int lastLoadedRecipeNmr = 0;
 
     protected:
         u_int serial_idx;           ///< Последовательный индекс объекта (с 1).

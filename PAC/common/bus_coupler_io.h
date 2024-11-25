@@ -44,7 +44,19 @@ class io_device
 			DEVICEERROR,
 			};
 
+        enum class ERRORS
+            {
+            NO_ERR = 0,
+            UNDER_RANGE = 2,
+            OVER_RANGE = 3,
+            OUT_OF_RANGE = 4,
+
+            BAD_IO_DATA = 100,
+            };
+
+#ifndef PTUSA_TEST
     protected:
+#endif
         /// @brief Получение состояния канала дискретного выхода.
         ///
         /// @param index - индекс канала в таблице дискретных выходных каналов
@@ -103,10 +115,11 @@ class io_device
         /// устройства.
         /// @param min_value - минимальное значение канала.
         /// @param max_value - максимальное значение канала.
+        /// @param err - результат, 0 - Ок, >0 - ошибка.
         ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        float get_AI( u_int index, float min_value = 0, float max_value = 0 );
+        /// @return - аналоговое значение.
+        float get_AI( u_int index, float min_value = 0, float max_value = 0,
+            int& err = last_err );
 
         /// @brief Получение данных канала аналогового входа.
         ///
@@ -211,6 +224,8 @@ class io_device
         void init_channel( int type, int ch_inex, int node, int offset, int module_offset = -1, int logical_port = -1 );
 
         void set_io_vendor( VENDOR vendor );
+
+        static int last_err;
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода.
@@ -236,6 +251,11 @@ class io_manager
 
         /// @brief Получение единственного экземпляра класса.
         static io_manager* get_instance();
+
+#ifdef PTUSA_TEST
+        /// @brief Получение единственного экземпляра класса.
+        static io_manager* replace_instance( io_manager* );
+#endif
 
         /// @brief Получение области данных заданного канала дискретного входа.
         ///
@@ -351,8 +371,8 @@ class io_manager
 
 			// Analog outputs ( AO ).
 			u_int AO_cnt;       			///< Amount of AO.
-			int_2 AO[C_ANALOG_BUF_SIZE];    ///< Current values.
-			int_2 AO_[C_ANALOG_BUF_SIZE];   ///< To write.
+            int_2 AO[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
+            int_2 AO_[ C_ANALOG_BUF_SIZE ] = { 0 };   ///< To write.
 			u_int *AO_offsets;  			///< Offsets in common data.
 			u_int *AO_types;    			///< Channels type.
 			u_int AO_size;
@@ -363,7 +383,7 @@ class io_manager
 
 			// Analog inputs ( AI ).
 			u_int AI_cnt;       			///< Amount of AI.
-			int_2 AI[C_ANALOG_BUF_SIZE];    ///< Current values.
+            int_2 AI[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
 			u_int *AI_offsets;  			///< Offsets in common data.
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
@@ -375,7 +395,10 @@ class io_manager
 			stat_time send_stat;  ///< Статистика работы с сокетом.
 
             bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке связи.
-			};
+
+            private:
+                io_node( const io_node& io_node_copy ); // Not implemented.
+            };
 		//---------------------------------------------------------------------
 
     protected:

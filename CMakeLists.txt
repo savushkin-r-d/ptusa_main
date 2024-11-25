@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2024.01.31.0)
+project(ptusa_main VERSION 2024.09.30.2)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -24,11 +24,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-add_compile_definitions(PAC_PC)
-if(NOT ARP_DEVICE)
-    add_compile_definitions(DEBUG_NO_IO_MODULES)
-endif()
-
 if(LINUX)
     add_compile_definitions(LINUX_OS)
 elseif(WIN32)
@@ -36,7 +31,7 @@ elseif(WIN32)
     add_compile_definitions(SIMPLE_LOG)
 endif()
 
-add_compile_definitions(TEST_SPEED)
+add_compile_definitions(TEST_SPEED MODBUS)
 
 if(MSVC)
     add_compile_options("/utf-8")
@@ -45,31 +40,33 @@ endif(MSVC)
 configure_file( version_info.in version_info.h @ONLY)
 
 set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 set(BUILD_SHARED_LIBS ON)
 
-add_subdirectory(lua EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/deps/lua)
 
-add_subdirectory(toluapp EXCLUDE_FROM_ALL)
+add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
-add_subdirectory(zlib EXCLUDE_FROM_ALL)
+add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
-add_subdirectory(googletest EXCLUDE_FROM_ALL)
+add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
 
 set(SUBHOOK_TESTS OFF)
-add_subdirectory(subhook EXCLUDE_FROM_ALL)
+add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
 if(NOT MINGW)
-    add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+    add_subdirectory(deps/benchmark EXCLUDE_FROM_ALL)
 endif()
 
 if(USE_OPCUA)
-    add_subdirectory(open62541 open62541 EXCLUDE_FROM_ALL)
+    add_subdirectory(deps/open62541 EXCLUDE_FROM_ALL)
     add_compile_definitions(OPCUA)
 endif()
+
+add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -79,6 +76,7 @@ file(GLOB common_src CONFIGURE_DEPENDS
 
         PAC/common/*.cpp
         PAC/common/sys/*.cpp
+        PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
 if(USE_OPCUA)
@@ -89,6 +87,7 @@ endif()
 
 file(GLOB test_src CONFIGURE_DEPENDS
     	    test/*.cpp
+			test/device/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)
@@ -136,6 +135,7 @@ if(LINUX)
 
         file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
@@ -182,6 +182,21 @@ elseif(WIN32)
 endif()
 
 add_dependencies(main_test lua)
+
+target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
+target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
+if(NOT MINGW)
+    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+endif()
+
+if(ARP_DEVICE)
+	target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
+	target_compile_definitions(ptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(libptusa_main PUBLIC PAC_PC)
+	target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)	
+else()
+	add_compile_definitions(PAC_PC)
+endif()
 
 if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
@@ -236,29 +251,31 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
+	    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
 
 endif ()
         if (USE_OPCUA)
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/plugins/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/arch>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/open62541/open62541/deps>
-            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/open62541/open62541/src_generated>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/plugins/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/arch>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/deps>
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/open62541/open62541/src_generated>
         endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/toluapp/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/include>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/lua>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/fmt/include>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/cxxopts/cxxopts/include>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
@@ -267,11 +284,11 @@ if(ARP_DEVICE)
 endif()
 
 set(TEST_INCLUDES
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googletest/googletest>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
 
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googlemock/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googlemock/googlemock>)
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
@@ -370,6 +387,46 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
+if (WIN32)
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
+[[
+(.*)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
+      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+]] )
+else()
+	set_tests_properties( run_no_command_line_arguments 
+		PROPERTIES PASS_REGULAR_EXPRESSION 
+[[
+(.*)
+  -s, --script arg          The script file to execute \(default: main\.plua\)
+  -d, --debug               Enable debugging
+      --no_io_nodes         No communicate with I\\O nodes
+      --read_only_io_nodes  Read only from I\\O nodes
+  -p, --port arg            Param port \(default: 10000\)
+  -h, --help                Print help info
+  -r, --rcrc                Reset params
+      --sys_path arg        Sys path
+      --path arg            Path
+      --extra_paths arg     Extra paths
+      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+]] )
+endif()
+
+  set_property(
+    TARGET libptusa_main
+    PROPERTY VS_DEBUGGER_COMMAND
+    "lua.exe")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(T1-PLCnext-Demo lua
@@ -384,6 +441,8 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
+
+	set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)

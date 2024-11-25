@@ -55,7 +55,7 @@ jobs:
             run_tests: "true"
           }
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
@@ -116,7 +116,7 @@ jobs:
         file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
     - name: ccache cache files
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: .ccache
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -253,6 +253,7 @@ jobs:
       shell: cmd
       run: |
         call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+        luarocks install penlight 1.13.1-1
         luarocks install busted
 
 
@@ -314,7 +315,7 @@ jobs:
 
     - name: Upload coverage to Codecov (Linux only)
       if: runner.os == 'Linux'
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         fail_ci_if_error: true
         verbose: true
@@ -327,7 +328,10 @@ jobs:
         name: C++ Benchmark
         tool: 'googlecpp'
         output-file-path: ./build/benchmark_result.json
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        gh-repository: github.com/savushkin-r-d/benchmark-ptusa-main
+        gh-pages-branch: main
+        benchmark-data-dir-path: docs/dev/bench
+        github-token: ${{ secrets.BENCHMARK_PTUSA_MAIN_TOKEN }}
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '155%'
@@ -346,7 +350,7 @@ jobs:
 
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: ./${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact }}
@@ -359,7 +363,7 @@ jobs:
     steps:
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1.0.0
+      uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -371,7 +375,7 @@ jobs:
     - name: Store Release url
       run: |
         echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: ./upload_url
         name: upload_url
@@ -403,13 +407,13 @@ jobs:
 
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: ./
 
     - name: Download URL
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: upload_url
         path: ./
@@ -419,7 +423,7 @@ jobs:
         echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
     - name: Upload to Release
       id: upload_to_release
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
