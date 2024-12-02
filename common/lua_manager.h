@@ -108,7 +108,7 @@ class lua_manager
                 {
                 lua_close( L );
                 L = nullptr;
-                };
+                }
             }
 #endif
 
