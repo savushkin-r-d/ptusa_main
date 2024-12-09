@@ -240,3 +240,27 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
 
     lua_close( L );
     }
+
+TEST( toLuapp, STUB )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+
+    ASSERT_EQ( 0, luaL_dostring( L, "dev = STUB()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dev" );
+    auto stub = static_cast<dev_stub*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, stub );
+    lua_remove( L, -1 );
+    ASSERT_EQ( 0, stub->get_abs_quantity() );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res = dev:get_abs_quantity()" ) );
+
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( res, 0 );
+
+
+    lua_close( L );
+    }
