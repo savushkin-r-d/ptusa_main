@@ -18,8 +18,7 @@ bool lua_manager::is_print_stack_traceback = true;
 //-----------------------------------------------------------------------------
 lua_manager* lua_manager::get_instance()
     {
-    static int is_init = 0;
-    if ( 0 == is_init )
+    if ( static int is_init = 0; 0 == is_init )
         {
         instance = new lua_manager();
         is_init = 1;
@@ -33,22 +32,20 @@ int check_file( const char* file_name, char* err_str )
     strcpy( err_str, "" );
 
     FILE *f = fopen( file_name, "r");
-    if ( 0 == f )
+    if ( !f )
         {
         G_LOG->error( err_str, "File \"%s\" not found!", file_name );
         return -1;
         }
     int version = 0;
 
-    char str[ 100 ] = "";
-    char* res = fgets( str, sizeof( str ), f );
-    if ( res != 0 )
+    if ( char str[ 100 ] = ""; fgets( str, sizeof( str ), f ) )
         {
         int err = sscanf( str, "--version = %d", &version );
         }
 
     fclose( f );
-    f = 0;
+    f = nullptr;
 
     if ( G_DEBUG )
         {
@@ -289,8 +286,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         return 1;
         }
 
-    int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
-    if ( i_line != 0 )
+    if ( int i_line = lua_pcall(L, 0, LUA_MULTRET, 0); i_line != 0 )
         {
         sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
         G_LOG->write_log( i_log::P_CRIT );
@@ -606,9 +602,7 @@ const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
 int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
                               bool is_print_error_msg /*= true */ ) const
     {
-    int res = luaL_dostring( L, Lua_str );
-
-    if( res != 0  )
+    if( int res = luaL_dostring(L, Lua_str); res != 0  )
         {
         if ( is_print_error_msg )
             {
