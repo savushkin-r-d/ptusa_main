@@ -2436,6 +2436,25 @@ TEST( i_motor, get_amperage )
     EXPECT_EQ( M1.get_amperage(), 0.f );
     }
 
+TEST( motor, direct_off )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init_and_alloc( 1, 1 );
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+        
+    M1.direct_on();
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    M1.direct_off();
+    *M1.DI_channels.char_read_values[ 0 ] = 0;
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( motor, direct_set_state )
     {

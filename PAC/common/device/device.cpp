@@ -2277,7 +2277,7 @@ float motor::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
-    if (int sub_type = get_sub_type();
+    if ( auto sub_type = get_sub_type();
         sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
