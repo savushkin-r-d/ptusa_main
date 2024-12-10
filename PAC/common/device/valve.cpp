@@ -604,12 +604,10 @@ valve::VALVE_STATE valve_DO1_DI2::get_valve_state()
 //-----------------------------------------------------------------------------
 bool valve_DO1_DI2::get_fb_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
 
-    int o = get_DO( DO_INDEX );
-    int i1 = get_DI( DI_INDEX_1 );
-
-    if ( int i0 = get_DI(DI_INDEX_2); 
+    if ( auto o = get_DO( DO_INDEX ), i1 = get_DI( DI_INDEX_1 ), 
+        i0 = get_DI( DI_INDEX_2 );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {

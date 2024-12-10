@@ -308,7 +308,10 @@ class valve_DO1_DI2 : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.

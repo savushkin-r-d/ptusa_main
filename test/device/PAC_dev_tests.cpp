@@ -1520,6 +1520,50 @@ TEST( valve, get_fb_state )
     }
 
 
+TEST( valve_DO1_DI2, valve_DO1_DI2 )
+    {    
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    
+    valve_DO1_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_DO1_DI2, get_fb_state )
+    {
+    valve_DO1_DI2 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init( 1, 2, 0, 0 );
+    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    V1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
+
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 1 ] = 1;
+    // Есть обратная связь для отключенного состояния.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 1;
+    *V1.DI_channels.char_read_values[ 1 ] = 0;
+    // Нет обратной связи для включенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( analog_valve, get_min_value )
     {
     const analog_valve VC1( "VC1" );
@@ -3735,6 +3779,7 @@ TEST( par_device, set_par_name )
     // Попытка установки имени для несуществующего индекса параметра.
     dev.set_par_name( IDX, OFFSET + 1, "TEST_NAME" );
     } 
+
 
 TEST ( valve_AS, get_lower_seat_offset)
     {
