@@ -991,9 +991,8 @@ bool valve_mix_proof::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_CLOSE );
 
-    if ( int i1 = get_DI(DI_INDEX_OPEN); 
+    if ( int i1 = get_DI( DI_INDEX_OPEN ), i0 = get_DI( DI_INDEX_CLOSE );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {

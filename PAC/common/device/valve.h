@@ -422,7 +422,10 @@ class valve_mix_proof : public i_mix_proof, public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
