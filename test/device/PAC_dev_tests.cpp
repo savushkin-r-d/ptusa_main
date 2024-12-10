@@ -921,6 +921,12 @@ TEST( dev_stub, pause_daily )
     STUB()->start_daily();
     }
 
+TEST( dev_stub, get_abs_quantity )
+    {
+    EXPECT_EQ( 0, STUB()->get_abs_quantity() );
+    }
+
+
 TEST( device, device )
     {
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
