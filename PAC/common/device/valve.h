@@ -583,7 +583,12 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
+
+#ifdef PTUSA_TEST
+    public:
+#else
     protected:
+#endif
 
         VALVE_STATE get_valve_state() override;
 

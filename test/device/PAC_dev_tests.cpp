@@ -1621,6 +1621,37 @@ TEST( analog_valve, get_type_name )
     }
 
 
+TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_bottom_mix_proof V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_bottom_mix_proof, get_fb_state )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 2 ] = 1;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( valve_bottom_mix_proof, is_switching_off_finished )
     {
     valve_bottom_mix_proof V1( "V1" );
