@@ -1532,32 +1532,34 @@ TEST( valve_DO1_DI2, valve_DO1_DI2 )
         "P_FB=0},\n", buff );
     }
 
+void check_fb( valve *V1 )
+    {
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 1 ] = 1;
+    // Есть обратная связь для отключенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+
+    *V1->DO_channels.char_write_values[ 0 ] = 1;
+    *V1->DI_channels.char_read_values[ 1 ] = 0;
+    // Нет обратной связи для включенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+    }
+
 TEST( valve_DO1_DI2, get_fb_state )
     {
     valve_DO1_DI2 V1( "V1" );
     EXPECT_TRUE( V1.get_fb_state() );
 
     G_PAC_INFO()->emulation_off();
-    V1.init( 1, 2, 0, 0 );
-    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
-    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
-    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
+    V1.init_and_alloc( 1, 2 );
 
-    // Нет обратной связи для отключенного состояния.
-    EXPECT_FALSE( V1.get_fb_state() );
-
-    *V1.DI_channels.char_read_values[ 1 ] = 1;
-    // Есть обратная связь для отключенного состояния.
-    EXPECT_TRUE( V1.get_fb_state() );
-
-    *V1.DO_channels.char_write_values[ 0 ] = 1;
-    *V1.DI_channels.char_read_values[ 1 ] = 0;
-    // Нет обратной связи для включенного состояния.
-    EXPECT_FALSE( V1.get_fb_state() );
-
-    *V1.DI_channels.char_read_values[ 0 ] = 1;
-    // Есть обратная связь для включенного состояния.
-    EXPECT_TRUE( V1.get_fb_state() );
+    check_fb( &V1 );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -1581,28 +1583,9 @@ TEST( valve_mix_proof, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() );
 
     G_PAC_INFO()->emulation_off();
-    V1.init( 3, 2, 0, 0 );
-    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
-    V1.DO_channels.char_write_values[ 1 ] = new u_char{ 0 };
-    V1.DO_channels.char_write_values[ 2 ] = new u_char{ 0 };
-    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
-    V1.DI_channels.char_read_values[ 1 ] = new u_char{ 0 };
+    V1.init_and_alloc( 3, 2 );
 
-    // Нет обратной связи для отключенного состояния.
-    EXPECT_FALSE( V1.get_fb_state() );
-
-    *V1.DI_channels.char_read_values[ 1 ] = 1;
-    // Есть обратная связь для отключенного состояния.
-    EXPECT_TRUE( V1.get_fb_state() );
-
-    *V1.DO_channels.char_write_values[ 0 ] = 1;
-    *V1.DI_channels.char_read_values[ 1 ] = 0;
-    // Нет обратной связи для включенного состояния.
-    EXPECT_FALSE( V1.get_fb_state() );
-
-    *V1.DI_channels.char_read_values[ 0 ] = 1;
-    // Есть обратная связь для включенного состояния.
-    EXPECT_TRUE( V1.get_fb_state() );
+    check_fb( &V1 );
 
     *V1.DO_channels.char_write_values[ 0 ] = 0;
     *V1.DO_channels.char_write_values[ 1 ] = 1;
