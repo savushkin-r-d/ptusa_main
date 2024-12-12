@@ -2533,7 +2533,7 @@ TEST( motor, get_value )
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     mngr.init_node_AI( 0, 0, 0, 0 );
 
-    motor M1( "M1", device::DST_M_FREQ );
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
     M1.init( 0, 0, 1, 0 );
     M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
     M1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
@@ -2551,7 +2551,7 @@ TEST( motor, get_value )
 
 TEST( motor, get_state )
     {
-    motor M1( "M1", device::DST_M_FREQ );
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
     M1.init( 1, 1, 0, 0 );
     M1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
     M1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
