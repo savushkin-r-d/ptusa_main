@@ -671,12 +671,42 @@ TEST( valve_iol_terminal, get_state_data )
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
-
 TEST( temperature_e_analog, get_value )
     {
-    temperature_e_analog t1( "T1" );
-    auto v = t1.get_value();
-    EXPECT_EQ( .0, v );
+    temperature_e_analog TE1( "T1" );
+    auto v = TE1.get_value();
+    EXPECT_EQ( .0f, v );
+    }
+
+void test_temperature( AI1* TE1 )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+
+    EXPECT_EQ( TE1->get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    TE1->init_and_alloc( 0, 0, 0, 1 );
+    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    EXPECT_EQ( TE1->get_state(), 1 );
+
+    *TE1->AI_channels.int_read_values[ 0 ] = -1000;
+    EXPECT_EQ( TE1->get_state(), -1 );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( temperature_e_analog, get_state )
+    {
+    temperature_e_analog TE1( "test_TE1" );
+    test_temperature( &TE1 );
     }
 
 TEST( temperature_e_analog, get_type_name )
@@ -1366,6 +1396,22 @@ TEST( DI_signal, get_type_name )
     EXPECT_STREQ( "Дискретный входной сигнал", test_dev.get_type_name() );
     }
 
+TEST( DI_signal, get_state )
+    {
+    DI_signal DI1( "DI1" );
+
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    DI1.init_and_alloc( 0, 1 );
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( DI1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( button, button )
     {
@@ -1526,6 +1572,88 @@ TEST( valve, get_fb_state )
     }
 
 
+TEST( valve_DO1_DI2, valve_DO1_DI2 )
+    {    
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    
+    valve_DO1_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+void check_fb( valve *V1 )
+    {
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 1 ] = 1;
+    // Есть обратная связь для отключенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+
+    *V1->DO_channels.char_write_values[ 0 ] = 1;
+    *V1->DI_channels.char_read_values[ 1 ] = 0;
+    // Нет обратной связи для включенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+    }
+
+TEST( valve_DO1_DI2, get_fb_state )
+    {
+    valve_DO1_DI2 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 2 );
+
+    check_fb( &V1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_mix_proof, valve_mix_proof )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_mix_proof V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_mix_proof, get_fb_state )
+    {
+    valve_mix_proof V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 1 ] = 1;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    // Есть обратная связь для активного верхнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    *V1.DO_channels.char_write_values[ 1 ] = 0;
+    *V1.DO_channels.char_write_values[ 2 ] = 1;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( analog_valve, get_min_value )
     {
     const analog_valve VC1( "VC1" );
@@ -1544,6 +1672,37 @@ TEST( analog_valve, get_type_name )
     EXPECT_STREQ( "Управляемый клапан", test_dev.get_type_name() );
     }
 
+
+TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_bottom_mix_proof V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_bottom_mix_proof, get_fb_state )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 2 ] = 1;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( valve_bottom_mix_proof, is_switching_off_finished )
     {
@@ -1620,6 +1779,21 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
+    }
+
+TEST( valve_iolink_shut_off_sorio, get_fb_state )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    EXPECT_TRUE( V1.get_fb_state() ); //Default value.
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
@@ -2314,6 +2488,25 @@ TEST( i_motor, get_amperage )
     EXPECT_EQ( M1.get_amperage(), 0.f );
     }
 
+TEST( motor, direct_off )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init_and_alloc( 1, 1 );
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+        
+    M1.direct_on();
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    M1.direct_off();
+    *M1.DI_channels.char_read_values[ 0 ] = 0;
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( motor, direct_set_state )
     {
@@ -2335,6 +2528,49 @@ TEST( motor, get_type_name )
     {
     motor test_dev( "test_M1", device::DST_M_VIRT );
     EXPECT_STREQ( "Двигатель", test_dev.get_type_name() );
+    }
+
+TEST( motor, get_value )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 0, 0, 1, 0 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    M1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto VALUE = 90.f;
+    *M1.AO_channels.int_write_values[ 0 ] = static_cast<int_2>( VALUE );
+
+    EXPECT_EQ( M1.get_value(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( M1.get_value(), VALUE );
+    
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( motor, get_state )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init( 1, 1, 0, 0 );
+    M1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    M1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    M1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    *M1.DO_channels.char_write_values[ 0 ] = 1;
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -3144,6 +3380,34 @@ TEST( wages, get_type_name )
     EXPECT_STREQ( "Тензорезистор", test_dev.get_type_name() );
     }
 
+TEST( wages, get_weight )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 2, 2 );
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    mngr.init_node_AI( 0, 1, 491, 1 );
+
+    wages test_dev( "test_W1" );
+    test_dev.init( 0, 0, 0, 2 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 1, 0, 1 );
+    test_dev.AI_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    test_dev.AI_channels.int_read_values[ 1 ] = new int_2[ 1 ]{ 0 };
+    *test_dev.AI_channels.int_read_values[ 1 ] = 65;
+
+    test_dev.set_cmd( "P_NOMINAL_W", 0, 5 );
+    test_dev.set_cmd( "P_RKP", 0, 2 );
+
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+    DeltaMilliSecSubHooker::set_default_time();
+
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 TEST( wages_eth, evaluate_io )
     {
@@ -3449,6 +3713,12 @@ TEST( temperature_e, get_type_name )
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
     }
 
+TEST( temperature_e, get_state )
+    {
+    temperature_e TE1( "test_TE1" );
+    test_temperature( &TE1 );
+    }
+
 
 TEST( threshold_regulator, set_value )
     {
@@ -3655,6 +3925,7 @@ TEST( par_device, set_par_name )
     // Попытка установки имени для несуществующего индекса параметра.
     dev.set_par_name( IDX, OFFSET + 1, "TEST_NAME" );
     } 
+
 
 TEST ( valve_AS, get_lower_seat_offset)
     {

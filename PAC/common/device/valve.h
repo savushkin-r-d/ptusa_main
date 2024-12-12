@@ -308,7 +308,10 @@ class valve_DO1_DI2 : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -419,7 +422,10 @@ class valve_mix_proof : public i_mix_proof, public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -577,7 +583,12 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
+
+#ifdef PTUSA_TEST
+    public:
+#else
     protected:
+#endif
 
         VALVE_STATE get_valve_state() override;
 
