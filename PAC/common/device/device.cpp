@@ -1605,10 +1605,7 @@ int DI1::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
-    auto dt = ( u_int_4 ) get_par( P_DT, 0 );
-
-    if ( auto dt = static_cast<u_int_4>(get_par(P_DT, 0));
-        dt > 0 )
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
@@ -1708,7 +1705,7 @@ int temperature_e_analog::get_state()
         return -1;
         }
 
-    return 0;
+    return 1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2373,8 +2370,7 @@ int motor::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    int o = get_DO( DO_INDEX );
-    auto sub_type = get_sub_type();
+    int o = get_DO( DO_INDEX );    
 
     if ( auto sub_type = get_sub_type();
         sub_type == device::M_REV_2_ERROR ||
@@ -2407,7 +2403,8 @@ int motor::get_state()
 
     int i = get_DI( DI_INDEX );
 
-    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+    if ( auto sub_type = get_sub_type(); 
+        sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
         int ro = get_DO( DO_INDEX_REVERSE );

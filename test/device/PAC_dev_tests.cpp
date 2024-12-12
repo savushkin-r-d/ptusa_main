@@ -671,12 +671,37 @@ TEST( valve_iol_terminal, get_state_data )
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
-
 TEST( temperature_e_analog, get_value )
     {
-    temperature_e_analog t1( "T1" );
-    auto v = t1.get_value();
-    EXPECT_EQ( .0, v );
+    temperature_e_analog TE1( "T1" );
+    auto v = TE1.get_value();
+    EXPECT_EQ( .0f, v );
+    }
+
+TEST( temperature_e_analog, get_state )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+
+    temperature_e_analog TE1( "test_TE1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    TE1.init_and_alloc( 0, 0, 0, 1 );
+    TE1.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    *TE1.AI_channels.int_read_values[ 0 ] = -1000;
+    EXPECT_EQ( TE1.get_state(), -1 );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
     }
 
 TEST( temperature_e_analog, get_type_name )
@@ -1358,6 +1383,22 @@ TEST( DI_signal, get_type_name )
     {
     DI_signal test_dev( "test_DI1" );
     EXPECT_STREQ( "Дискретный входной сигнал", test_dev.get_type_name() );
+    }
+
+TEST( DI_signal, get_state )
+    {
+    DI_signal DI1( "DI1" );
+
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    DI1.init_and_alloc( 0, 1 );
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( DI1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -3659,6 +3700,32 @@ TEST( temperature_e, get_type_name )
     {
     temperature_e test_dev( "test_TE1" );
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
+    }
+
+TEST( temperature_e, get_state )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+
+    temperature_e TE1( "test_TE1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    TE1.init_and_alloc( 0, 0, 0, 1 );
+    TE1.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    EXPECT_EQ( TE1.get_state(), 1 );
+        
+    *TE1.AI_channels.int_read_values[ 0 ] = -1000;
+    EXPECT_EQ( TE1.get_state(), -1 );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
     }
 
 
