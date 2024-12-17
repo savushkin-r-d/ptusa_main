@@ -473,7 +473,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 										{
 										if (objnumber >= RC_PRG_START && objnumber < RC_RECIPE_PAR_START)
 											{
-                                            if ( unsigned int prgno = (objnumber - RC_PRG_START) / PROGRAM_MAX_LEN; 
+                                            if ( auto prgno = ( objnumber - RC_PRG_START ) / PROGRAM_MAX_LEN;
 												prgno < cipline_tech_object::Mdls[line-1]->prgArray.size())
 											    Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->prgArray[prgno].data(), &outdata[3+i*2]);
 											i+= PROGRAM_MAX_LEN - 1;
