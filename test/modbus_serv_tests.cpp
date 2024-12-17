@@ -14,12 +14,12 @@ TEST( ModbusServ, ModbusService )
     auto res = ModbusServ::ModbusService( BUFSIZE, buf, buf );
     // Ничего сервис не делает, так как первый байт - 0.
     EXPECT_EQ( res, 0 );
-    
-    isMsa = 0;
-    buf[ 1 ] = 0x01;    // Read coils.
 
-    const auto bad_read_coils_str = 
-R"(function read_coils( n, start_idx, count )
+    isMsa = 0;
+    buf[ 1 ] = 0x01;    // Read Coils.
+
+    const auto bad_read_coils_str = R"(
+function read_coils( n, start_idx, count )
     res[ #res + 1 ] = 0 --Добавляем новый элемент.
     return res
 end)";
@@ -27,8 +27,8 @@ end)";
     res = ModbusServ::ModbusService( BUFSIZE, buf, buf );
     EXPECT_EQ( res, 0 );
 
-    const auto good_read_coils_str =
-R"(function read_coils( n, start_idx, count )
+    const auto good_read_coils_str = R"(
+function read_coils( n, start_idx, count )
     local res = {}
     for coil_n = start_idx, start_idx + count, 1 do
         --local cr_idx = ( n - 1 ) * 2 + 1
@@ -45,6 +45,31 @@ R"(function read_coils( n, start_idx, count )
     return res
 end)";
     ASSERT_EQ( 0, luaL_dostring( L, good_read_coils_str ) );
+    res = ModbusServ::ModbusService( BUFSIZE, buf, buf );
+    EXPECT_EQ( res, 3 );
+
+    isMsa = 0;
+    buf[ 1 ] = 0x03; //Read Holding Registers.
+
+    const auto bad_read_holding_registers_str = R"(
+function read_holding_registers( n, start_idx, count )
+    res[ #res + 1 ] = 0 --Добавляем новый элемент.
+    return res
+end)";
+    ASSERT_EQ( 0, luaL_dostring( L, bad_read_holding_registers_str ) );
+    res = ModbusServ::ModbusService( BUFSIZE, buf, buf );
+    EXPECT_EQ( res, 0 );
+
+    const auto good_read_holding_registers_str = R"(
+function read_holding_registers( n, start_idx, count )
+    local res = { }
+    for coil_n = start_idx, start_idx + count, 1 do
+        res[ #res + 1 ] = 0 --Добавляем новый элемент.
+        res[ #res + 1 ] = 0
+    end
+    return res
+end)";
+    ASSERT_EQ( 0, luaL_dostring( L, good_read_holding_registers_str ) );
     res = ModbusServ::ModbusService( BUFSIZE, buf, buf );
     EXPECT_EQ( res, 3 );
 

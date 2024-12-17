@@ -607,7 +607,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					lua_pushnumber( L, startingAddress );
 					lua_pushnumber( L, numberofElements );
 
-					if ( int i_line = lua_pcall(L, 3, 1, 0); i_line != 0 )
+                    if ( auto i_line = lua_pcall( L, 3, 1, 0 ); i_line != 0 )
 						{
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
