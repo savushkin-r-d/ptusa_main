@@ -3110,7 +3110,7 @@ int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "ST" ) == 0 )
         {
-        if ( int new_val = (int)val; new_val )
+        if ( auto new_val = static_cast<int>( val ); new_val )
             {
             on();
             }
@@ -3175,6 +3175,8 @@ void circuit_breaker::direct_on()
         in_info.st_ch2 = true;
         in_info.st_ch3 = true;
         in_info.st_ch4 = true;
+
+        analog_io_device::direct_on();
         }
     }
 //-----------------------------------------------------------------------------
@@ -3192,6 +3194,8 @@ void circuit_breaker::direct_off()
         in_info.st_ch2 = false;
         in_info.st_ch3 = false;
         in_info.st_ch4 = false;
+
+        analog_io_device::direct_off();
         }
     }
 //-----------------------------------------------------------------------------

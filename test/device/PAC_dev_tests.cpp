@@ -2453,6 +2453,20 @@ TEST( level_s_iolink, set_article )
     EXPECT_EQ( false, LS1.is_active() );
     }
 
+TEST( level_s_iolink, get_state )
+    {
+    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+
+
+    EXPECT_EQ( LS1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( LS1.get_state(), 0 );
+
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( i_motor, i_motor )
     {
@@ -2511,11 +2525,34 @@ TEST( motor, direct_set_state )
 
 TEST( motor, save_device )
     {
-    motor M1( "M1", device::DST_M_FREQ );
-    const int BUFF_SIZE = 100;
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 0, 0, 0, 0 );
+
+
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     M1.save_device( buff, "" );
     EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, ERRT=0, P_ON_TIME=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    M1.init_and_alloc( 2, 1, 1 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    *M1.DO_channels.char_write_values[ 1 ] = 1;
+
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    M1.save_device( buff, "" );
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_STREQ( "M1={M=0, ST=-1, V=0, R=1, ERRT=1, P_ON_TIME=0},\n", buff );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
     }
 
 TEST( motor, get_type_name )
@@ -3957,6 +3994,19 @@ TEST( circuit_breaker, get_type_name )
     circuit_breaker F1( "F1" );
     auto res = F1.get_type_name();
     EXPECT_STREQ( "Автоматический выключатель", res );
+    }
+
+TEST( circuit_breaker, set_cmd )
+    {
+    circuit_breaker F1( "F1" );
+
+    EXPECT_EQ( F1.get_state(), 0 );
+
+    F1.set_cmd( "ST", 0, 1. );
+    EXPECT_EQ( F1.get_state(), 1 );
+
+    F1.set_cmd( "ST", 0, 0. );
+    EXPECT_EQ( F1.get_state(), 0 );
     }
 
 
