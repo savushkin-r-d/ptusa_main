@@ -427,8 +427,11 @@ int tcp_communicator_win::evaluate()
             int is_removed = 0;
             if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
                 {
-                int err = in_buffer_count = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0);
-                if (err <= 0) //Ошибка чтения
+                if ( int err = in_buffer_count = recvtimeout(
+                    it->second->get_socket(),
+                    reinterpret_cast<unsigned char*>( it->second->buff ),
+                    it->second->buff_size, 1, 0 );
+                    err <= 0) //Ошибка чтения
                     {
                     it->second->Disconnect();
                     it->second->set_async_result(it->second->AR_SOCKETERROR);

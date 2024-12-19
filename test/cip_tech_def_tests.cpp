@@ -603,6 +603,10 @@ TEST( cipline_tech_object, _DoStep )
     
 TEST( cipline_tech_object, save_device ) 
     {
+    // Удаляем сохраненные файлы рецептов, чтобы получить значения по умолчанию.
+    auto default_file_name = "line0rec.bin";
+    remove( default_file_name );
+
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
 
@@ -727,6 +731,40 @@ t.CIP1=
 	}
 )";
     EXPECT_STREQ( REF_STR0.c_str(), buff );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+
+TEST( cipline_tech_object, set_cmd )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    const int BUFF_SIZE = 5000;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    cip1.lineRecipes->ResetRecipeToDefaults( 0 );
+
+    auto res = cip1.set_cmd( "CUR_REC", 0, "Test name" );
+    EXPECT_EQ( res, 0 );
+    
+    res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, "Test name" );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1.set_cmd( "ACID_PAR_NAME", 0, "Test name" );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1.set_cmd( "NCAR", 1, "NN 2200" );
+    EXPECT_EQ( res, 0 );
+
 
     G_LUA_MANAGER->free_Lua();
     }
