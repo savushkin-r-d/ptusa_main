@@ -606,7 +606,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     {
     if (0 == strcmp(prop, "CUR_REC"))
         {
-        if (u_int slen = utf8_strlen(val);  slen < (unsigned int)TRecipeManager::recipeNameLength)
+        if ( auto slen = utf8_strlen( val );  slen < TRecipeManager::recipeNameLength )
             {
 #ifdef WIN_OS
             strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
@@ -619,7 +619,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
         {
-        if (u_int slen = utf8_strlen(val); slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
+        if ( auto slen = utf8_strlen( val ); slen < TMediumRecipeManager::recipeNameLength )
             {
 #ifdef WIN_OS
             strncpy_s(causticRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
@@ -633,7 +633,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "ACID_PAR_NAME"))
         {
-        if (u_int slen = utf8_strlen(val); slen < (unsigned int)TMediumRecipeManager::recipeNameLength)
+        if ( auto slen = utf8_strlen( val ); slen < TMediumRecipeManager::recipeNameLength )
             {
 #ifdef WIN_OS
             strncpy_s(acidRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
@@ -647,7 +647,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
     if (0 == strcmp(prop, "NCAR"))
         {
-        if (u_int slen = utf8_strlen(val); slen < CAR_NAME_MAX_LENGTH)
+        if ( auto slen = utf8_strlen( val ); slen < CAR_NAME_MAX_LENGTH )
             {
             switch (idx)
                 {
