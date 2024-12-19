@@ -456,6 +456,29 @@ void valve_DO1_DI1_off::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
+void valve_DO1_DI1_off::direct_set_state( int new_state )
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( new_state );
+        }
+
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        default:
+            direct_on();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_DO1_DI1_off::get_valve_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
@@ -524,6 +547,29 @@ void valve_DO1_DI1_on::direct_off()
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI1_on::direct_set_state( int new_state )
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( new_state );
+        }
+
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        default:
+            direct_on();
+            break;
         }
     }
 //-----------------------------------------------------------------------------

@@ -250,6 +250,8 @@ class valve_DO1_DI1_off : public valve
 
         void direct_off();
 
+        void direct_set_state( int new_state ) override;
+
     private:
         enum CONSTANTS
             {
@@ -278,6 +280,8 @@ class valve_DO1_DI1_on : public valve
         void direct_on() override;
 
         void direct_off() override;
+
+        void direct_set_state( int new_state ) override;
 
     private:
         enum CONSTANTS

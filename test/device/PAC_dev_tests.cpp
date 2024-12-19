@@ -1526,6 +1526,14 @@ TEST( valve, get_fb_state )
     }
 
 
+TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+
+    V1.set_cmd( "ST", 0, 1 );
+    }
+
+
 TEST( analog_valve, get_min_value )
     {
     const analog_valve VC1( "VC1" );
