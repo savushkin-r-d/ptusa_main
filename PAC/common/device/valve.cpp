@@ -344,7 +344,7 @@ void valve::direct_set_state( int new_state )
         default:
             if ( G_DEBUG )
                 {
-                G_LOG->debug( "%s\t valve::direct_set_state() - new_state = %d",
+                G_LOG->warning( "%s\t valve::direct_set_state() - new_state = %d",
                     get_name(), new_state );
                 }
             break;

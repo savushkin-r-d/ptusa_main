@@ -1555,6 +1555,10 @@ TEST( valve_DO1_DI1_off, set_cmd )
     *V1.DI_channels.char_read_values[ 0 ] = 1; // Включаем обратную связь.
     EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
 
+    // Несуществующая команда - состояние не должно изменяться.
+    V1.set_cmd( "ST", 0, 10 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
     G_PAC_INFO()->emulation_on();
     }
 
