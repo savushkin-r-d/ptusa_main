@@ -1525,12 +1525,37 @@ TEST( valve, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() );
     }
 
-
 TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
+    {
+    valve_DO1_DI1_off V2( "V1" );
+    EXPECT_STREQ( "Клапан", V2.get_type_name() );
+    EXPECT_STREQ( "V1", V2.get_name() );
+    }
+
+TEST( valve_DO1_DI1_off, set_cmd )
     {
     valve_DO1_DI1_off V1( "V1" );
 
+    EXPECT_EQ( V1.get_state(), 0 );
+
     V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init( 1, 1, 0, 0 );
+    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    V1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.set_cmd( "ST", 0, 0 );
+    *V1.DI_channels.char_read_values[ 0 ] = 1; // Включаем обратную связь.
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 

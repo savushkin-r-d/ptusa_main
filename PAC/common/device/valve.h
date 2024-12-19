@@ -111,7 +111,7 @@ class valve : public digital_io_device
             V_LOWER_SEAT = 3, ///< Открыто нижнее седло.
             V_UPPER_SEAT = 2, ///< Открыто верхнее седло.
 
-            V_ON = 1,        ///< Включен.
+            V_ON = 1,         ///< Включен.
             V_OFF = 0,        ///< Выключен.
 
             V_STOP = 5,       ///< Остановлен.
@@ -128,6 +128,8 @@ class valve : public digital_io_device
 
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state();
+
+        void direct_set_state( int new_state ) override;
 
     protected:
         enum FB_STATE
@@ -250,8 +252,6 @@ class valve_DO1_DI1_off : public valve
 
         void direct_off();
 
-        void direct_set_state( int new_state ) override;
-
     private:
         enum CONSTANTS
             {
@@ -280,8 +280,6 @@ class valve_DO1_DI1_on : public valve
         void direct_on() override;
 
         void direct_off() override;
-
-        void direct_set_state( int new_state ) override;
 
     private:
         enum CONSTANTS
