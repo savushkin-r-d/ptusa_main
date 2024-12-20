@@ -129,8 +129,6 @@ class valve : public digital_io_device
         /// @brief Получение состояния обратной связи.
         virtual bool get_fb_state();
 
-        void direct_set_state( int new_state ) override;
-
     protected:
         enum FB_STATE
             {

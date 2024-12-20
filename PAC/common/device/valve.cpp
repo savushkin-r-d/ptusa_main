@@ -324,33 +324,6 @@ bool valve::get_fb_state()
     return true;
     }
 //-----------------------------------------------------------------------------
-void valve::direct_set_state( int new_state )
-    {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        return device::direct_set_state( new_state );
-        }
-
-    switch ( new_state )
-        {
-        case V_OFF:
-            direct_off();
-            break;
-
-        case V_ON:
-            direct_on();
-            break;
-
-        default:
-            if ( G_DEBUG )
-                {
-                G_LOG->warning( "%s\t valve::direct_set_state() - new_state = %d",
-                    get_name(), new_state );
-                }
-            break;
-        }
-    }
-//-----------------------------------------------------------------------------
 bool valve::is_switching_off_finished()
     {
     return !is_switching_off;
