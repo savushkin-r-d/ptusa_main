@@ -753,3 +753,18 @@ TEST( lua_manager, error_trace )
     EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "no_exist3", "error_trace" ) );
     G_LUA_MANAGER->free_Lua();
     }
+
+TEST( lua_manager, check_file )
+    {
+    auto FILE_VERSION = 10;
+    char err_str[ 500 ] = {};
+    const char* FILE_NAME = "test.lua";
+    if ( FILE* f = std::fopen( FILE_NAME, "w+" ) )
+        {
+        std::fprintf( f, "--version = %d\n", FILE_VERSION );
+        std::fclose( f );
+        }
+
+    auto res = check_file( FILE_NAME, err_str );
+    EXPECT_EQ( res, FILE_VERSION );
+    }

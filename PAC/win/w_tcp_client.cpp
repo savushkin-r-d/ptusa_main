@@ -397,10 +397,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
     async_result = AR_BUSY;
 	async_bytes_to_send = bytestosend;
 
-    auto connectionState = checkConnection();
-
-    if ( !connectionState ) return 0;
-
+    if ( !checkConnection() ) return 0;
 
     int res = send( socket_number, buff, bytestosend, 0 );
     if ( res == SOCKET_ERROR )
