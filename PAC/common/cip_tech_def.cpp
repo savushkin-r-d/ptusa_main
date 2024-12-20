@@ -6404,14 +6404,13 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     rt_par_float[P_ZAD_FLOW] = operFlow;
     rt_par_float[P_VRAB] = operV;
     rt_par_float[P_OP_TIME_LEFT] = 0;
-    if (0 == operT)
+    if ( 0 == operT )
         {
-        float divider = rt_par_float[P_ZAD_FLOW];
-        if (0 == divider)
+        if ( operFlow == 0 )
             {
-            divider = 1;
+            operFlow = 1;
             }
-        rt_par_float[P_MAX_OPER_TM] = 5 * operV / operFlow;
+        rt_par_float[ P_MAX_OPER_TM ] = 5 * operV / operFlow;
         }
     else
         {
