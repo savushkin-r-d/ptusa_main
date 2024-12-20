@@ -298,9 +298,16 @@ cipline_tech_object::~cipline_tech_object()
     int i;
     if (parpar != nullptr)
         {
+        if ( scparams && scparams == parpar )
+            {
+            scparams = nullptr;
+            // Сама память высвобождается при удалении parpar - строки ниже.
+            }
+
         delete(parpar);
         parpar = nullptr;
         }
+
     if (PIDF != nullptr)
         {
         delete(PIDF);
@@ -6400,13 +6407,13 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     rt_par_float[P_ZAD_FLOW] = operFlow;
     rt_par_float[P_VRAB] = operV;
     rt_par_float[P_OP_TIME_LEFT] = 0;
-    if (0 == operT)
+    if ( 0 == operT )
         {
-        if (float divider = rt_par_float[P_ZAD_FLOW]; divider == 0)
+        if ( operFlow == 0 )
             {
-            divider = 1;
+            operFlow = 1;
             }
-        rt_par_float[P_MAX_OPER_TM] = 5 * operV / operFlow;
+        rt_par_float[ P_MAX_OPER_TM ] = 5 * operV / operFlow;
         }
     else
         {
@@ -7502,7 +7509,7 @@ bool cipline_tech_object::waterTankIsEmpty( )
     {
     auto ret = !LWL->is_active( );
     if ( ret || dont_use_water_tank) return true;
-    if (auto lowLevelExtreme = parpar[0][P_MIN_BULK_FOR_WATER];  lowLevelExtreme > 0 )
+    if ( auto lowLevelExtreme = parpar[ 0 ][ P_MIN_BULK_FOR_WATER ];  lowLevelExtreme > 0 )
         {
         auto currentWaterLevel = LTW->get_value( );
         if ( waterTankLastEmptyState )

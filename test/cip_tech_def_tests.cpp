@@ -560,7 +560,6 @@ TEST( cipline_tech_object, _FromObject )
     G_LUA_MANAGER->free_Lua( );
     }
 
-
 TEST( cipline_tech_object, _DoStep )
     {
     InitCipDevices( );
@@ -604,8 +603,15 @@ TEST( cipline_tech_object, _DoStep )
 TEST( cipline_tech_object, save_device ) 
     {
     // Удаляем сохраненные файлы рецептов, чтобы получить значения по умолчанию.
-    auto default_file_name = "line0rec.bin";
-    remove( default_file_name );
+    const auto LINE_DEF_F_NAME_0 = "line0rec.bin";
+    remove( LINE_DEF_F_NAME_0 );
+    const auto LINE_DEF_F_NAME_1 = "line1rec.bin";
+    remove( LINE_DEF_F_NAME_1 );
+    const auto MEDIUM_DEF_F_NAME_0 = "medium0rec.bin";
+    remove( MEDIUM_DEF_F_NAME_0 );
+    const auto MEDIUM_DEF_F_NAME_1 = "medium1rec.bin";
+    remove( MEDIUM_DEF_F_NAME_1 );
+    
 
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
@@ -735,14 +741,10 @@ t.CIP1=
     G_LUA_MANAGER->free_Lua();
     }
 
-
 TEST( cipline_tech_object, set_cmd )
     {
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
-
-    const int BUFF_SIZE = 5000;
-    char buff[ BUFF_SIZE ] = { 0 };
 
     InitCipDevices();
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
@@ -765,6 +767,24 @@ TEST( cipline_tech_object, set_cmd )
     res = cip1.set_cmd( "NCAR", 1, "NN 2200" );
     EXPECT_EQ( res, 0 );
 
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, SCInitPumping )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.SCInitPumping( -1, -1, -1, 0, 0, 1 );
 
     G_LUA_MANAGER->free_Lua();
     }
