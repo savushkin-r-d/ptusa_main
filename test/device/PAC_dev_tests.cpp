@@ -1054,6 +1054,15 @@ TEST( DO1, get_type_name )
     EXPECT_STREQ( do1.get_type_name(), "Дискретный выходной сигнал" );
     }
 
+TEST( DO1, set_cmd )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    EXPECT_EQ( do1.get_state(), 0 );
+
+    do1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( do1.get_state(), 1 );
+    }
+
 
 TEST( AI1, get_max_val )
     {
