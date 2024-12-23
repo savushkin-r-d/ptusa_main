@@ -6409,7 +6409,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     rt_par_float[P_OP_TIME_LEFT] = 0;
     if ( 0 == operT )
         {
-        if ( operFlow == 0 )
+        if ( operFlow <= 0 )
             {
             operFlow = 1;
             }
