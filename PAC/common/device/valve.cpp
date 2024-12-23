@@ -2842,12 +2842,14 @@ valve::VALVE_STATE valve_AS::get_valve_state()
     char* data = (char*)get_AO_read_data( AO_INDEX );
     char state = get_state_data( data );
 
-    int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
+    auto o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
-    if ( int u = (state & get_upper_seat_offset()) > 0 ? 1 : 0; 
-        o == 0 && u == 1 ) return V_UPPER_SEAT;
-    if ( int l = (state & get_lower_seat_offset()) > 0 ? 1 : 0; 
-        o == 0 && l == 1 ) return V_LOWER_SEAT;
+    if ( auto u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
+        o == 0 && u == 1 )
+        return V_UPPER_SEAT;
+    if ( auto l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+        o == 0 && l == 1 )
+        return V_LOWER_SEAT;
 
     return (VALVE_STATE)o;
     }
@@ -2856,19 +2858,18 @@ bool valve_AS::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    char* AO_data = (char*)get_AO_read_data( AO_INDEX );
-    char AO_state = get_state_data( AO_data );
+    auto* AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_state = get_state_data( AO_data );
 
-    int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-    int l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-    int u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
+    auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+    auto l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+    auto u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
     char* AI_data = (char*)get_AI_data( AI_INDEX );
     char AI_state = get_state_data( AI_data );
-
-    int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-
-    if ( int i1 = (AI_state & S_OPENED) > 0 ? 1 : 0; 
+    
+    if ( auto i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
+        i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
@@ -2939,20 +2940,20 @@ void valve_AS::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
-    char* data = (char*)get_AO_write_data( AO_INDEX );
-    char* write_state = get_data_with_offset( data );
-    char read_state = get_state_data( data );
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
-    if ( int o = (read_state & C_OPEN_S1) > 0 ? 1 : 0; o == 1 )
+    if ( auto o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0; o == 1 )
         {
         start_switch_time = get_millisec();
         }
 
-    int offset = 0;
+    auto offset = 0;
     //Для первого 31-го устройства четный номер - старшие четыре
     //бита (1), для остальных устройств нечетный номер - старшие четыре
     //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;
@@ -2966,20 +2967,20 @@ void valve_AS::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    char* data = (char*)get_AO_write_data( AO_INDEX );
-    char* write_state = get_data_with_offset( data );
-    char read_state = get_state_data( data );
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
-    if ( int o = (read_state & C_OPEN_S1) > 0 ? 1 : 0; 0 == o )
+    if ( auto o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0; 0 == o )
         {
         start_switch_time = get_millisec();
         }
 
-    int offset = 0;
+    auto offset = 0;
     //Для первого 31-го устройства четный номер - старшие четыре
     //бита (1), для остальных устройств нечетный номер - старшие четыре
     //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;

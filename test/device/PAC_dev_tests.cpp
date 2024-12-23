@@ -3974,6 +3974,62 @@ TEST ( valve_AS, get_upper_seat_offset)
     EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
     }
 
+TEST( valve_AS, get_valve_state )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ 5 ]{ 0 };
+
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_AS, get_fb_state )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    EXPECT_TRUE( valve.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ 5 ]{ 0 };
+
+    EXPECT_FALSE( valve.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_AS, direct_off )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    const auto AO_SIZE = 5;
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    valve.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    
+    valve.direct_on();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_ON );
+
+    valve.direct_off();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( circuit_breaker, circuit_breaker )
     {
