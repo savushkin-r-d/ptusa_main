@@ -1785,6 +1785,32 @@ TEST( valve_mix_proof, get_fb_state )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( valve_mix_proof, direct_set_state )
+    {
+    valve_mix_proof V1( "V1" );
+ 
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.direct_set_state( valve::VALVE_STATE::V_UPPER_SEAT );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_UPPER_SEAT );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_LOWER_SEAT );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_LOWER_SEAT );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_OFF );
+    *V1.DI_channels.char_read_values[ 1 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_ON );
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    *V1.DI_channels.char_read_values[ 1 ] = 0;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( analog_valve, get_min_value )
     {

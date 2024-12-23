@@ -911,7 +911,7 @@ void valve_mix_proof::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-            if ( int u = get_DO(DO_INDEX_U); u == 0)
+            if ( auto u = get_DO( DO_INDEX_U ); u == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_U, 1 );
@@ -923,8 +923,7 @@ void valve_mix_proof::direct_set_state( int new_state )
         case V_LOWER_SEAT:
             {
             direct_off();
-
-            if ( int l = get_DO(DO_INDEX_L); l == 0 )
+            if ( auto l = get_DO( DO_INDEX_L ); l == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_L, 1 );
@@ -945,7 +944,7 @@ void valve_mix_proof::direct_on()
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
 
-    if ( int o = get_DO(DO_INDEX); 0 == o )
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -961,9 +960,8 @@ void valve_mix_proof::direct_off()
 
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
-    int o = get_DO( DO_INDEX );
 
-    if ( o != 0 || was_seat )
+    if ( auto o = get_DO( DO_INDEX ); o != 0 || was_seat )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
