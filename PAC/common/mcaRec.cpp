@@ -38,7 +38,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
     strcpy(recipeList,"");
-    ReadMem(startAddr(), recipeNameLength * UNICODE_MULTIPLIER, (unsigned char*)currentRecipeName, true );
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
@@ -192,7 +192,7 @@ void TRecipeManager::SaveRecipeName()
 #ifdef MSAPANEL
     MsaPanel::UpdateRecipes();
 #endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength * UNICODE_MULTIPLIER, (unsigned char*)currentRecipeName, true);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
     }
 
 
@@ -660,7 +660,7 @@ recipeStartAddr(0L)
     currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER ];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 6) * recipePerLine];
     strcpy(recipeList, "");
-    ReadMem(startAddr(), recipeNameLength * UNICODE_MULTIPLIER, (unsigned char*)currentRecipeName);
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
