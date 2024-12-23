@@ -1566,19 +1566,7 @@ TEST( valve, get_fb_state )
     }
 
 
-TEST( valve_DO1_DI2, valve_DO1_DI2 )
-    {    
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
-    
-    valve_DO1_DI2 V1( "V1" );
-
-    V1.save_device( buff, "" );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
-        "P_FB=0},\n", buff );
-    }
-
-void check_fb( valve *V1 )
+void check_fb( valve* V1 )
     {
     // Нет обратной связи для отключенного состояния.
     EXPECT_FALSE( V1->get_fb_state() );
@@ -1597,6 +1585,19 @@ void check_fb( valve *V1 )
     EXPECT_TRUE( V1->get_fb_state() );
     }
 
+
+TEST( valve_DO1_DI2, valve_DO1_DI2 )
+    {    
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    
+    valve_DO1_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
 TEST( valve_DO1_DI2, get_fb_state )
     {
     valve_DO1_DI2 V1( "V1" );
@@ -1606,6 +1607,143 @@ TEST( valve_DO1_DI2, get_fb_state )
     V1.init_and_alloc( 1, 2 );
 
     check_fb( &V1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO2_DI2, valve_DO2_DI2 )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_DO2_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_DO2_DI2, get_fb_state )
+    {
+    valve_DO2_DI2 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 2, 2 );
+
+    // Нет управления и нет обратных связей.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Нет обратной связь для отключенного состояния.
+    *V1.DO_channels.char_write_values[ 0 ] = 1;
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Есть управление и обратная связь для отключенного состояния.
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    // Есть управление и обратная связь для включенного состояния.
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 1 ] = 1;
+    *V1.DI_channels.char_read_values[ 1 ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    // Нет обратная связь для включенного состояния.
+    *V1.DI_channels.char_read_values[ 1 ] = 0;
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_DO1_DI1_off, get_fb_state )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO1_DI1_off, direct_off )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    // Включение уже включенного клапана.
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.direct_off();
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Отключение уже отключенного клапана.
+    V1.direct_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_DO1_DI1_on, get_fb_state )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    // Нет обратной связь для включенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO1_DI1_on, direct_off )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.direct_on();
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    // Включение уже включенного клапана.
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.direct_off();
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Отключение уже отключенного клапана.
+    V1.direct_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
 
     G_PAC_INFO()->emulation_on();
     }

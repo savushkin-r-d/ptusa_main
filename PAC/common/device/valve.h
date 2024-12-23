@@ -250,7 +250,9 @@ class valve_DO1_DI1_off : public valve
 
         void direct_off();
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -279,7 +281,9 @@ class valve_DO1_DI1_on : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -342,7 +346,9 @@ class valve_DO2_DI2 : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX_1 = 0,         ///< Индекс №1 канала дискретного выхода.

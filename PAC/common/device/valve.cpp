@@ -435,9 +435,8 @@ valve_DO1_DI1_off::valve_DO1_DI1_off( const char* dev_name ) :
 void valve_DO1_DI1_off::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
-
-    int o = get_DO( DO_INDEX );
-    if ( 0 == o )
+    
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -447,9 +446,8 @@ void valve_DO1_DI1_off::direct_on()
 void valve_DO1_DI1_off::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
-
-    int o = get_DO( DO_INDEX );
-    if ( o != 0 )
+    
+    if ( auto o = get_DO( DO_INDEX ); o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -468,9 +466,7 @@ bool valve_DO1_DI1_off::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    int o = get_DO( DO_INDEX );
-
-    if ( int i = get_DI(DI_INDEX); o != i )
+    if ( auto o = get_DO( DO_INDEX ), i = get_DI( DI_INDEX ); o != i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -506,7 +502,7 @@ void valve_DO1_DI1_on::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    if ( int o = get_DO(DO_INDEX); 0 == o )
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -517,7 +513,7 @@ void valve_DO1_DI1_on::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
-    if ( int o = get_DO(DO_INDEX); o != 0 )
+    if ( auto o = get_DO( DO_INDEX ); o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -680,11 +676,11 @@ bool valve_DO2_DI2::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    int o0 = get_DO( DO_INDEX_1 );
-    int o1 = get_DO( DO_INDEX_2 );
-    int i0 = get_DI( DI_INDEX_1 );
-
-    if ( int i1 = get_DI(DI_INDEX_2); o1 == i1 && o0 == i0 )
+    if ( auto o0 = get_DO( DO_INDEX_1 ),
+        o1 = get_DO( DO_INDEX_2 ),
+        i0 = get_DI( DI_INDEX_1 ),
+        i1 = get_DI( DI_INDEX_2 );
+        o1 == i1 && o0 == i0 && ( o0 != o1 && i0 != i1 ) )
         {
         return true;
         }
