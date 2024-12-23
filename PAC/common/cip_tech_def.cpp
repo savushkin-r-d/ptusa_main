@@ -298,9 +298,16 @@ cipline_tech_object::~cipline_tech_object()
     int i;
     if (parpar != nullptr)
         {
+        if ( scparams && scparams == parpar )
+            {
+            scparams = nullptr;
+            // Сама память высвобождается при удалении parpar - строки ниже.
+            }
+
         delete(parpar);
         parpar = nullptr;
         }
+
     if (PIDF != nullptr)
         {
         delete(PIDF);
