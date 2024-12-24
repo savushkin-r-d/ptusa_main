@@ -1118,7 +1118,7 @@ void valve_bottom_mix_proof::direct_on()
 
     set_DO( DO_INDEX_L, 0 );
 
-    if ( int o = get_DO(DO_INDEX); o == 0)
+    if ( auto o = get_DO( DO_INDEX ); o == 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );

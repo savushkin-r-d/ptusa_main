@@ -571,7 +571,9 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 #pragma endregion Выключение мини клапана с задержкой.
 #endif
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.

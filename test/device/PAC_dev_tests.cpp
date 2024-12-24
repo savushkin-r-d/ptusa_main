@@ -1880,6 +1880,24 @@ TEST( valve_bottom_mix_proof, is_switching_off_finished )
     EXPECT_EQ( true, V1.is_switching_off_finished() );
     }
 
+TEST( valve_bottom_mix_proof, on )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    V1.on();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 
+        valve_bottom_mix_proof::CONSTANTS::DI_INDEX_OPEN ] = 1;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_mini_flushing, get_state )
     {
