@@ -607,6 +607,10 @@ TEST( cipline_tech_object, save_device )
     remove( LINE_DEF_F_NAME_0 );
     const auto MEDIUM_DEF_F_NAME_0 = "medium0rec.bin";
     remove( MEDIUM_DEF_F_NAME_0 );
+    const auto LINE_DEF_F_NAME_1 = "line1rec.bin";
+    remove( LINE_DEF_F_NAME_1 );
+    const auto MEDIUM_DEF_F_NAME_1 = "medium1rec.bin";
+    remove( MEDIUM_DEF_F_NAME_1 );
 
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );

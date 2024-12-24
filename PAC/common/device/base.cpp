@@ -296,7 +296,8 @@ int device::save_device( char* buff, const char* prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    if (const int extra_symbols_length = 2; res > extra_symbols_length ) //Remove last " ,".
+    if ( const auto extra_symbols_length = 2;
+        res > extra_symbols_length ) //Remove last " ,".
         {
         res -= extra_symbols_length;
         }

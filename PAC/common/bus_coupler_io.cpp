@@ -302,11 +302,11 @@ int io_device::set_AO( u_int index, float value, float min_value,
         AO_channels.int_write_values &&
         AO_channels.int_write_values[ index ] )
         {
-        u_int table_n = AO_channels.tables[ index ];
-        u_int offset = AO_channels.offsets[ index ];
+        auto table_n = AO_channels.tables[ index ];
+        auto offset = AO_channels.offsets[ index ];
 
-        switch ( u_int module_type = G_IO_MANAGER()->get_node(table_n)->AO_types[offset]; 
-            module_type )
+        switch ( auto module_type =
+            G_IO_MANAGER()->get_node( table_n )->AO_types[ offset ]; module_type )
             {
             case 554:
             case 555:

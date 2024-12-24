@@ -1158,8 +1158,8 @@ int tech_object::set_param( int par_id, int index, double value )
 //-----------------------------------------------------------------------------
 int tech_object::is_check_mode( int mode ) const
     {
-    if ( int res = lua_manager::get_instance()->int_exec_lua_method(name_Lua,
-        "is_check_mode", mode, "int tech_object::is_check_mode( u_int mode )"); 
+    if ( auto res = lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+        "is_check_mode", mode, "int tech_object::is_check_mode( u_int mode )" );
         res >= 0 )
         {
         return res;

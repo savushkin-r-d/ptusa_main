@@ -533,8 +533,7 @@ bool valve_DO1_DI1_on::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-
-    if ( int i = get_DI(DI_INDEX); o == i )
+    if ( auto i = get_DI( DI_INDEX ); o == i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -600,7 +599,7 @@ valve::VALVE_STATE valve_DO1_DI2::get_valve_state()
 //-----------------------------------------------------------------------------
 bool valve_DO1_DI2::get_fb_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     if ( auto o = get_DO( DO_INDEX ), i1 = get_DI( DI_INDEX_1 ), 
         i0 = get_DI( DI_INDEX_2 );
@@ -985,8 +984,7 @@ bool valve_mix_proof::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-
-    if ( int i1 = get_DI( DI_INDEX_OPEN ), i0 = get_DI( DI_INDEX_CLOSE );
+    if ( auto i1 = get_DI( DI_INDEX_OPEN ), i0 = get_DI( DI_INDEX_CLOSE );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
@@ -1099,7 +1097,7 @@ bool valve_bottom_mix_proof::is_switching_off_finished()
 
     //Если завершилось время задержки, выключаем мини клапан перед удалением
     //клапана из вектора.
-    if ( u_int delay = G_PAC_INFO()->par[PAC_info::P_V_BOTTOM_OFF_DELAY_TIME];
+    if ( auto delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
         get_delta_millisec( start_off_time ) > delay )
         {
         is_closing_mini = 0;
@@ -1818,9 +1816,9 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
     if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
         return true;
 
-    if (int active_solenoid_count = static_cast<int>(in_info.pv_y1_on) +
-        static_cast<int>(in_info.pv_y2_on) +
-        static_cast<int>(in_info.pv_y3_on); 
+    if ( auto active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) +
+        static_cast<int>( in_info.pv_y2_on ) +
+        static_cast<int>( in_info.pv_y3_on );
         active_solenoid_count > 1 )
         {
         return false; // Активно более одного соленоида.
@@ -1855,13 +1853,13 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
         return valve::get_on_fb_value();
         }
 
-    if (int active_solenoid_count = static_cast<int>(in_info.pv_y1_on) +
-        static_cast<int>(in_info.pv_y2_on) +
-        static_cast<int>(in_info.pv_y3_on); 
-        active_solenoid_count > 1)
-    {
+    if ( auto active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) +
+        static_cast<int>( in_info.pv_y2_on ) +
+        static_cast<int>( in_info.pv_y3_on );
+        active_solenoid_count > 1 )
+        {
         return false; // Активно более одного соленоида.
-    }
+        }
 
     return in_info.pv_y1_on && in_info.s2;
     }
@@ -2218,7 +2216,7 @@ bool valve_iol_terminal::check_config()
         [&]( const unsigned int& id )
         {
         if ( auto data = (char*)get_AO_write_data(
-            static_cast<u_int> (IO_CONSTANT::AO_INDEX_1) + idx++); 
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
             !data )
             {
             return false;
@@ -2283,7 +2281,7 @@ void valve_iol_terminal::direct_on()
     {
     if ( !check_config() ) return;
 
-    if (auto st = get_valve_state(); 
+    if ( auto st = get_valve_state();
         valve::VALVE_STATE::V_ON != st )
         {
         start_switch_time = get_millisec();
@@ -2384,7 +2382,7 @@ bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
 
     int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
 
-    if (auto o = get_valve_state(); o != i )
+    if ( auto o = get_valve_state(); o != i )
         {
         start_switch_time = get_millisec();
         return true;

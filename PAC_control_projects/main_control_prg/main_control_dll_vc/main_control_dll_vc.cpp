@@ -35,7 +35,7 @@ int lua_init( lua_State* L )
     int argc = 0;
     for ( int i = 1; i <= top; i++ )
         {
-        switch ( int t = lua_type(L, 1); t )
+        switch ( auto t = lua_type( L, 1 ); t )
             {
             case LUA_TSTRING:   //Strings
                 {

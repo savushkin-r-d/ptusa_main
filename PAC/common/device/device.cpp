@@ -651,8 +651,7 @@ void power_unit::evaluate_io()
 
     std::copy( data, data + sizeof( p_data_in ),
         reinterpret_cast<std::byte*>( &p_data_in ) );
-    v = .1f *
-        static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
+    v = .1f * static_cast<float>( ( ( p_data_in.sum_currents_2 << 8 ) +
         p_data_in.sum_currents ) );
     err = p_data_in.DC_not_OK;
     st = p_data_in.status_ch1 || p_data_in.status_ch2 ||
@@ -861,7 +860,7 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "ST" ) == 0 )
         {
-        if (auto new_val = static_cast<int>(val); new_val )
+        if ( auto new_val = static_cast<int>( val ); new_val )
             {
             on();
             }
@@ -1025,7 +1024,7 @@ int base_counter::get_state()
         }
 
     // Насос не работает (при его наличии) или расход ниже минимального.
-    if ( float min_flow = get_min_flow(); 
+    if ( auto min_flow = get_min_flow();
         ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
         {
         start_pump_working_time = 0;
@@ -1051,7 +1050,7 @@ int base_counter::get_state()
             }
         else
             {
-            if ( u_long dt = get_pump_dt(); 
+            if ( auto dt = get_pump_dt();
                 get_delta_millisec( start_pump_working_time ) < dt )
                 {
                 return device::get_state();
@@ -1459,7 +1458,7 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    if ( auto data = (char*)get_AI_data(0); data )
+    if ( auto data = (char*)get_AI_data( 0 ); data )
         {
         auto buff = (char*)&in_info;
 
@@ -1653,7 +1652,7 @@ int temperature_e::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
 
-    if ( float v = get_AI(C_AI_INDEX, 0, 0); -1000 == v )
+    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); -1000 == v )
         {
         return -1;
         }
@@ -1700,7 +1699,7 @@ int temperature_e_analog::get_state()
         return AI1::get_state();
         }
 
-    if ( float v = get_AI(C_AI_INDEX, 0, 0); v < 0 )
+    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); v < 0 )
         {
         return -1;
         }
@@ -2080,8 +2079,9 @@ float wages::get_weight()
         float uref = get_AI(C_AI_Uref);
         if (0 == uref) return -1002;
         float filterval = get_par(P_DT, 0);
-        if ( float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
-            fabs(now_weight - weight) > filterval)
+        if ( auto now_weight = 
+            get_AI( C_AI_Ud ) / rkp / uref * get_par( P_NOMINAL_W, 0 );
+            fabs( now_weight - weight ) > filterval )
             {
             weight = now_weight;
             }
@@ -2388,7 +2388,7 @@ int motor::get_state()
             start_switch_time = get_millisec();
             }
 
-        if ( int ro = get_DO(DO_INDEX_REVERSE); 1 == ro )
+        if ( auto ro = get_DO( DO_INDEX_REVERSE ); 1 == ro )
             {
             return 2;
             }
@@ -2462,7 +2462,7 @@ void motor::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
 
-    if ( int sub_type = get_sub_type(); 
+    if ( auto sub_type = get_sub_type();
         sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -2520,7 +2520,7 @@ int motor::save_device_ex( char *buff )
         return static_cast<int>(
         fmt::format_to_n( buff, MAX_COPY_SIZE, "R=0, ERRT=0, " ).size );
 
-    if ( int sub_type = get_sub_type(); 
+    if ( auto sub_type = get_sub_type();
         sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -2666,14 +2666,13 @@ int level_s_iolink::get_state()
 	{
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
-	if ( io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX); 
-        devstate != io_device::IOLINKSTATE::OK)
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
 		{
 		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
 		}
 
-    if ( auto dt = static_cast<u_int_4>(get_par(P_DT, 0)); 
-        dt > 0 )
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
         {
         if ( current_state != st )
             {
