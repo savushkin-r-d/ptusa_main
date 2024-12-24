@@ -2838,11 +2838,9 @@ valve::VALVE_STATE valve_AS::get_valve_state()
 
     auto o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
-    if ( auto u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
-        o == 0 && u == 1 )
+    if ( auto u = state & get_upper_seat_offset() ? 1 : 0; !o && u == 1 )
         return V_UPPER_SEAT;
-    if ( auto l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-        o == 0 && l == 1 )
+    if ( auto l = state & get_lower_seat_offset() ? 1 : 0; !o && l == 1 )
         return V_LOWER_SEAT;
 
     return (VALVE_STATE)o;
@@ -2991,15 +2989,18 @@ void valve_AS::direct_set_state( int new_state )
         return valve::direct_set_state( new_state );
         }
 
-    int offset = 0;
-    //Для первого 31-го устройства четный номер - старшие четыре
-    //бита (1), для остальных устройств нечетный номер - старшие четыре
-    //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    auto offset = 0;
+    // Для первого 31-го устройства четный номер - старшие четыре бита (1),
+    // для остальных устройств нечетный номер - старшие четыре бита (2).
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;
         }
+
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
     switch ( new_state )
         {
@@ -3014,36 +3015,22 @@ void valve_AS::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-
-            char* data = (char*)get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            if ( int u = (read_state & get_upper_seat_offset()) > 0 ? 1 : 0; 
-                u == 0)
+            if ( auto u = read_state & get_upper_seat_offset() ? 1 : 0; !u )
                 {
                 start_switch_time = get_millisec();
                 }
             *write_state |= get_upper_seat_offset() << offset;
-
             break;
             }
 
         case V_LOWER_SEAT:
             {
             direct_off();
-
-            char* data = (char*)get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            if ( int l = (read_state & get_lower_seat_offset()) > 0 ? 1 : 0; 
-                l == 0 )
+            if ( auto l = read_state & get_lower_seat_offset() ? 1 : 0; !l )
                 {
                 start_switch_time = get_millisec();
                 }
             *write_state |= get_lower_seat_offset() << offset;
-
             break;
             }
 
@@ -3114,17 +3101,15 @@ bool valve_AS_DO1_DI2::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    char* AO_data = (char*)get_AO_read_data( AO_INDEX );
-    char AO_state = get_state_data( AO_data );
+    auto AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_state = get_state_data( AO_data );
 
-    int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+    auto AI_data = (char*)get_AI_data( AI_INDEX );
+    auto AI_state = get_state_data( AI_data );
 
-    char* AI_data = (char*)get_AI_data( AI_INDEX );
-    char AI_state = get_state_data( AI_data );
-
-    int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-
-    if ( int i1 = (AI_state & S_OPENED) > 0 ? 1 : 0; 
+    if ( auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0,
+        i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
+        i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
@@ -3242,12 +3227,11 @@ valve::VALVE_STATE valve_mini_flushing::get_valve_state()
 
 bool valve_mini_flushing::get_fb_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
 
-    int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_CLOSE );
-
-    if ( int i1 = get_DI(DI_INDEX_OPEN); 
+    if ( auto o = get_DO( DO_INDEX ),
+        i0 = get_DI( DI_INDEX_CLOSE ),
+        i1 = get_DI( DI_INDEX_OPEN );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {

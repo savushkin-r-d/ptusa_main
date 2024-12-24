@@ -1897,6 +1897,25 @@ TEST( valve_mini_flushing, get_state )
     EXPECT_EQ( valve::V_OFF, V1.get_state() );
     }
 
+TEST( valve_mini_flushing, get_fb_state )
+    {
+    valve_mini_flushing V1( "V1" );
+    V1.init_and_alloc( 2, 2 );
+
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Устанавливаем сигнал обратной связи.    
+    *V1.DI_channels.char_read_values[ 
+        valve_mini_flushing::CONSTANTS_DI::DI_INDEX_CLOSE ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_iolink_shut_off_sorio, save_device )
     {
@@ -2553,6 +2572,23 @@ TEST( valve_AS_DO1_DI2, direct_set_state )
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_state() );
     v1.direct_set_state( 1 );
     EXPECT_EQ( valve::VALVE_STATE::V_ON,v1.get_state() );
+    }
+
+TEST( valve_AS_DO1_DI2, get_fb_state )
+    {
+    valve_AS_DO1_DI2 v1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Задаем AO-область данных устройства.
+    v1.init( 0, 0, 1, 1 );
+    const auto AO_SIZE = 5;
+    v1.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    v1.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+
+    EXPECT_FALSE( v1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -4147,8 +4183,25 @@ TEST( valve_AS, get_valve_state )
     G_PAC_INFO()->emulation_off();
     // Задаем AO-область данных устройства.
     valve.init( 0, 0, 1, 1 );
-    valve.AO_channels.int_read_values[ 0 ] = new int_2[ 5 ]{ 0 };
+    const auto AO_SIZE = 5;
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    valve.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
 
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    valve.set_state( valve::VALVE_STATE::V_UPPER_SEAT );
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_UPPER_SEAT );
+
+    valve.set_state( valve::VALVE_STATE::V_LOWER_SEAT );
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_LOWER_SEAT );
+
+    valve.off();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
     EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
 
     G_PAC_INFO()->emulation_on();

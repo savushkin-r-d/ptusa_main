@@ -617,7 +617,9 @@ class valve_mini_flushing : public i_mix_proof, public valve
         /// @brief Открыть нижнее седло.
         void open_lower_seat() final;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS_DO
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -635,7 +637,11 @@ class valve_mini_flushing : public i_mix_proof, public valve
         void direct_on() final;
         void direct_off() final;
 
+#ifdef PTUSA_TEST
+    public:
+#else
     protected:
+#endif
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
         VALVE_STATE get_valve_state() final;
