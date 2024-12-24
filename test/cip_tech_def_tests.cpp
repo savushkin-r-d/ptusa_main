@@ -605,13 +605,8 @@ TEST( cipline_tech_object, save_device )
     // Удаляем сохраненные файлы рецептов, чтобы получить значения по умолчанию.
     const auto LINE_DEF_F_NAME_0 = "line0rec.bin";
     remove( LINE_DEF_F_NAME_0 );
-    const auto LINE_DEF_F_NAME_1 = "line1rec.bin";
-    remove( LINE_DEF_F_NAME_1 );
     const auto MEDIUM_DEF_F_NAME_0 = "medium0rec.bin";
     remove( MEDIUM_DEF_F_NAME_0 );
-    const auto MEDIUM_DEF_F_NAME_1 = "medium1rec.bin";
-    remove( MEDIUM_DEF_F_NAME_1 );
-    
 
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
@@ -785,6 +780,7 @@ TEST( cipline_tech_object, SCInitPumping )
     InitStationParams();
 
     auto res = cip1.SCInitPumping( -1, -1, -1, 0, 0, 1 );
+    EXPECT_EQ( res, 0 );
 
     G_LUA_MANAGER->free_Lua();
     }

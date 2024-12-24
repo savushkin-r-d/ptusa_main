@@ -81,17 +81,12 @@ class tcp_communicator
 
         enum CONSTANTS
             {
-            BUFSIZE     = 500 * 1024,      ///< Размер буфера.
+            BUFSIZE = 500 * 1024,   ///< Размер буфера.
+            MAX_SOCKETS = 64,       ///< Максимальное количество сокетов.
 
-#ifdef LINUX_OS
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // LINUX_OS
-#ifdef WIN_OS
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // WIN_OS
-            QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
+            QLEN = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
-            TC_MAX_HOST_NAME      = 70,
+            TC_MAX_HOST_NAME = 70,
             TC_MAX_SERVICE_NUMBER = 16,
             };
 

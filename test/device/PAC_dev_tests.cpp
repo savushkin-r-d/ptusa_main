@@ -951,6 +951,12 @@ TEST( dev_stub, pause_daily )
     STUB()->start_daily();
     }
 
+TEST( dev_stub, get_abs_quantity )
+    {
+    EXPECT_EQ( 0, STUB()->get_abs_quantity() );
+    }
+
+
 TEST( device, device )
     {
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
@@ -1076,6 +1082,15 @@ TEST( DO1, get_type_name )
     {
     DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
     EXPECT_STREQ( do1.get_type_name(), "Дискретный выходной сигнал" );
+    }
+
+TEST( DO1, set_cmd )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    EXPECT_EQ( do1.get_state(), 0 );
+
+    do1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( do1.get_state(), 1 );
     }
 
 
@@ -1563,6 +1578,43 @@ TEST( valve, get_fb_state )
         device::DEVICE_SUB_TYPE::DST_V_DO1 );
 
     EXPECT_TRUE( V1.get_fb_state() );
+    }
+
+TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
+    {
+    valve_DO1_DI1_off V2( "V1" );
+    EXPECT_STREQ( "Клапан", V2.get_type_name() );
+    EXPECT_STREQ( "V1", V2.get_name() );
+    }
+
+TEST( valve_DO1_DI1_off, set_cmd )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+
+    EXPECT_EQ( V1.get_state(), 0 );
+
+    V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init( 1, 1, 0, 0 );
+    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    V1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.set_cmd( "ST", 0, 0 );
+    *V1.DI_channels.char_read_values[ 0 ] = 1; // Включаем обратную связь.
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Несуществующая команда - состояние не должно изменяться.
+    V1.set_cmd( "ST", 0, 10 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 

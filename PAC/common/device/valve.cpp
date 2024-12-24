@@ -497,7 +497,7 @@ valve_DO1_DI1_on::valve_DO1_DI1_on( const char* dev_name ) : valve( true, false,
     dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
     {
     }
-
+//-----------------------------------------------------------------------------
 void valve_DO1_DI1_on::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();

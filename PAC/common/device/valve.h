@@ -111,7 +111,7 @@ class valve : public digital_io_device
             V_LOWER_SEAT = 3, ///< Открыто нижнее седло.
             V_UPPER_SEAT = 2, ///< Открыто верхнее седло.
 
-            V_ON = 1,        ///< Включен.
+            V_ON = 1,         ///< Включен.
             V_OFF = 0,        ///< Выключен.
 
             V_STOP = 5,       ///< Остановлен.
