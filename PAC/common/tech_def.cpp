@@ -426,8 +426,8 @@ int tech_object::lua_check_function( const char* function_name,
 //-----------------------------------------------------------------------------
 int tech_object::lua_get_run_step_after_pause( u_int mode ) const
     {
-    auto function_name = "get_run_step_after_pause";
-    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, function_name ) )
+    if ( auto function_name = "get_run_step_after_pause"; 
+        G_LUA_MANAGER->is_exist_lua_function( name_Lua, function_name ) )
         {
         return G_LUA_MANAGER->int_exec_lua_method( name_Lua,
             function_name, mode,
@@ -554,8 +554,8 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
 
     //TODO. Устаревшее название функции. Оставлено для совместимости.
     //Проверка на наличии функции check_on_mode.
-    auto old_function_name = "check_on_mode";
-    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
+    if ( auto old_function_name = "check_on_mode"; 
+        G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
             old_function_name, mode, show_error ? 1 : 0,
@@ -563,8 +563,8 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
         }
 
     //Проверка на наличии функции user_check_operation_on.
-    auto new_function_name = "user_check_operation_on";
-    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )
+    if ( auto new_function_name = "user_check_operation_on"; 
+        G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
             new_function_name, mode, show_error ? 1 : 0,
@@ -1158,10 +1158,9 @@ int tech_object::set_param( int par_id, int index, double value )
 //-----------------------------------------------------------------------------
 int tech_object::is_check_mode( int mode ) const
     {
-    int res = lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+    if ( auto res = lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "is_check_mode", mode, "int tech_object::is_check_mode( u_int mode )" );
-
-    if ( res >= 0 )
+        res >= 0 )
         {
         return res;
         }
@@ -1309,8 +1308,8 @@ bool tech_object::is_any_error() const
     auto iter = errors.begin();
     while ( iter != errors.end() )
         {
-        auto error = *iter;
-        if ( tech_obj_error::get_priority( error->type ) ==
+        if ( auto error = *iter; 
+            tech_obj_error::get_priority( error->type ) ==
             ALARM_CLASS_PRIORITY::P_ALARM )
             return true;
         ++iter;

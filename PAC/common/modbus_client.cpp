@@ -2,7 +2,7 @@
 #include "console.h"
 #include "PAC_err.h"
 
-modbus_client::modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout )
+modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout )
     {
     if ( G_DEBUG )
         {
@@ -20,22 +20,28 @@ modbus_client::~modbus_client()
     delete tcpclient;
     }
 
+void modbus_client::init_frame( unsigned int address, unsigned int value,
+    unsigned int function_code )
+    {
+    tcpclient->buff[ 0 ] = 0;
+    tcpclient->buff[ 1 ] = 0;
+    tcpclient->buff[ 2 ] = 0;
+    tcpclient->buff[ 3 ] = 0;
+    tcpclient->buff[ 4 ] = 0;
+    tcpclient->buff[ 5 ] = 6;
+    tcpclient->buff[ 6 ] = stationid;
+    tcpclient->buff[ 7 ] = function_code;
+    tcpclient->buff[ 8 ] = ( (int_2)address ) >> 8;
+    tcpclient->buff[ 9 ] = ( (int_2)address ) & 0xFF;
+    tcpclient->buff[ 10 ] = ( (int_2)value ) >> 8;
+    tcpclient->buff[ 11 ] = ( (int_2)value ) & 0xFF;
+    }
+
 int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned int quantity )
     {
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
-    tcpclient->buff[5] = 6;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 2;
-    tcpclient->buff[8] = ((int_2)start_address) >> 8;
-    tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
+    this->init_frame(start_address, quantity, 2);
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
             {
@@ -48,20 +54,9 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 
 int modbus_client::read_coils( unsigned int start_address, unsigned int quantity )
     {
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
-    tcpclient->buff[5] = 6;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 1;
-    tcpclient->buff[8] = ((int_2)start_address) >> 8;
-    tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
+    this->init_frame(start_address, quantity, 1);
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
             {
@@ -74,20 +69,9 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 
 int modbus_client::read_holding_registers( unsigned int address, unsigned int quantity )
     {
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
-    tcpclient->buff[5] = 6;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 3;
-    tcpclient->buff[8] = ((int_2)address) >> 8;
-    tcpclient->buff[9] = ((int_2)address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity * 2)
+    this->init_frame(address, quantity, 3);
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
             {
@@ -100,20 +84,9 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 
 int modbus_client::read_input_registers( unsigned int address, unsigned int quantity )
     {
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
-    tcpclient->buff[5] = 6;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 4;
-    tcpclient->buff[8] = ((int_2)address) >> 8;
-    tcpclient->buff[9] = ((int_2)address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-    unsigned int res = tcpclient->Communicate(12);
-    if (res != 9 + quantity * 2)
+    this->init_frame(address, quantity, 4);
+    if (unsigned int res = tcpclient->Communicate(12); 
+        res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
             {
@@ -127,20 +100,10 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
 int modbus_client::write_coil( unsigned int address, unsigned char value )
     {
     unsigned char bitstate = value ? 0xFF : 0;
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
-    tcpclient->buff[5] = 6;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 5;
-    tcpclient->buff[8] = ((int_2)address) >> 8;
-    tcpclient->buff[9] = ((int_2)address) & 0xFF;
+    this->init_frame(address, value, 5);
     tcpclient->buff[10] = bitstate;
     tcpclient->buff[11] = 0;
-    int res = tcpclient->Communicate(12);
-    if (res != 12)
+    if (int res = tcpclient->Communicate(12); res != 12)
         {
         if ( G_DEBUG )
             {
@@ -154,18 +117,8 @@ int modbus_client::write_coil( unsigned int address, unsigned char value )
 int modbus_client::force_multiply_coils( unsigned int address, unsigned int quantity )
     {
     unsigned char bytecount = (unsigned char)quantity / 8 + (((unsigned char)quantity % 8) ? 1:0);
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
-    tcpclient->buff[4] = 0;
+    this->init_frame(address, quantity, 0x0F);
     tcpclient->buff[5] = 7 + bytecount;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 0x0F;
-    tcpclient->buff[8] = ((int_2)address) >> 8;
-    tcpclient->buff[9] = ((int_2)address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
     tcpclient->buff[12] = bytecount;
     int res = tcpclient->Communicate(13 + bytecount);
     zero_output_buff();
@@ -183,18 +136,9 @@ int modbus_client::force_multiply_coils( unsigned int address, unsigned int quan
 int modbus_client::write_multiply_registers( unsigned int address, unsigned int quantity )
     {
     unsigned char bytecount = (unsigned char)(quantity * 2);
-    tcpclient->buff[0] = 0;
-    tcpclient->buff[1] = 0;
-    tcpclient->buff[2] = 0;
-    tcpclient->buff[3] = 0;
+    this->init_frame(address, quantity, 0x10);
     tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
     tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
-    tcpclient->buff[6] = stationid;
-    tcpclient->buff[7] = 0x10;
-    tcpclient->buff[8] = ((int_2)address) >> 8;
-    tcpclient->buff[9] = ((int_2)address) & 0xFF;
-    tcpclient->buff[10] = ((int_2)quantity) >> 8;
-    tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
     tcpclient->buff[12] = bytecount;
     int res = tcpclient->Communicate(13 + bytecount);
     zero_output_buff();
@@ -416,18 +360,7 @@ int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsig
             }
         else
             {
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
-            tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 2;
-            tcpclient->buff[8] = ((int_2)start_address) >> 8;
-            tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            this->init_frame(start_address, quantity, 2);
             modbus_async_result = tcpclient->AsyncSend(12);
             modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
             }
@@ -461,18 +394,7 @@ int modbus_client::async_read_coils( unsigned int start_address, unsigned int qu
             }
         else
             {
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
-            tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 1;
-            tcpclient->buff[8] = ((int_2)start_address) >> 8;
-            tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            this->init_frame(start_address, quantity, 1);
             modbus_async_result = tcpclient->AsyncSend(12);
             modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
             }
@@ -496,18 +418,7 @@ int modbus_client::async_read_holding_registers( unsigned int address, unsigned 
             }
         else
             {
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
-            tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 3;
-            tcpclient->buff[8] = ((int_2)address) >> 8;
-            tcpclient->buff[9] = ((int_2)address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            this->init_frame(address, quantity, 3);
             modbus_async_result = tcpclient->AsyncSend(12);
             modbus_expected_length = 9 + quantity * 2;
             }
@@ -531,18 +442,7 @@ int modbus_client::async_read_input_registers( unsigned int address, unsigned in
             }
         else
             {
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
-            tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 4;
-            tcpclient->buff[8] = ((int_2)address) >> 8;
-            tcpclient->buff[9] = ((int_2)address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            this->init_frame(address, quantity, 4);
             modbus_async_result = tcpclient->AsyncSend(12);
             modbus_expected_length = 9 + quantity * 2;
             }
@@ -568,16 +468,7 @@ int modbus_client::async_write_coil( unsigned int address, unsigned char value )
         else
             {
             unsigned char bitstate = value ? 0xFF : 0;
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
-            tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 5;
-            tcpclient->buff[8] = ((int_2)address) >> 8;
-            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            this->init_frame(address, value, 5);
             tcpclient->buff[10] = bitstate;
             tcpclient->buff[11] = 0;
             modbus_async_result = tcpclient->AsyncSend(12);
@@ -604,18 +495,8 @@ int modbus_client::async_force_multiply_coils( unsigned int address, unsigned in
         else
             {
             unsigned char bytecount = (unsigned char)quantity / 8 + (((unsigned char)quantity % 8) ? 1:0);
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
+            this->init_frame(address, quantity, 0x0F);
             tcpclient->buff[5] = 7 + bytecount;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 0x0F;
-            tcpclient->buff[8] = ((int_2)address) >> 8;
-            tcpclient->buff[9] = ((int_2)address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
             tcpclient->buff[12] = bytecount;
             modbus_async_result = tcpclient->AsyncSend(13 + bytecount);
             modbus_expected_length = 12;
@@ -641,18 +522,9 @@ int modbus_client::async_write_multiply_registers( unsigned int address, unsigne
         else
             {
             unsigned char bytecount = (unsigned char)(quantity * 2);
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
+            this->init_frame(address, quantity, 0x10);
             tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
             tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 0x10;
-            tcpclient->buff[8] = ((int_2)address) >> 8;
-            tcpclient->buff[9] = ((int_2)address) & 0xFF;
-            tcpclient->buff[10] = ((int_2)quantity) >> 8;
-            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
             tcpclient->buff[12] = bytecount;
             modbus_async_result = tcpclient->AsyncSend(13 + bytecount);
             modbus_expected_length = 12;
@@ -725,18 +597,8 @@ int modbus_client::async_mask_write_register(unsigned int writeaddress, unsigned
             }
         else
             {
-            tcpclient->buff[0] = 0;
-            tcpclient->buff[1] = 0;
-            tcpclient->buff[2] = 0;
-            tcpclient->buff[3] = 0;
-            tcpclient->buff[4] = 0;
+            this->init_frame(writeaddress, andmask, 0x16);
             tcpclient->buff[5] = 0x08;
-            tcpclient->buff[6] = stationid;
-            tcpclient->buff[7] = 0x16;
-            tcpclient->buff[8] = ((int_2)writeaddress) >> 8;
-            tcpclient->buff[9] = ((int_2)writeaddress) & 0xFF;
-            tcpclient->buff[10] = ((int_2)andmask) >> 8;
-            tcpclient->buff[11] = ((int_2)andmask) & 0xFF;
             tcpclient->buff[12] = ((int_2)ormask) >> 8;
             tcpclient->buff[13] = ((int_2)ormask) & 0xFF;
             modbus_async_result = tcpclient->AsyncSend(14);

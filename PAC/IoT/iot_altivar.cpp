@@ -28,8 +28,7 @@ void altivar_manager::add_node(const char* IP_address, unsigned int port, unsign
 	{
 	std::string nodeip = std::string(IP_address);
 	int type = altivar_node::TYPE_ATV320;
-	std::string nodearticle = std::string(article);
-	if (nodearticle.find("630") != std::string::npos)
+    if ( auto nodearticle = std::string( article ); nodearticle.find( "630" ) != std::string::npos )
 		{
 		type = altivar_node::TYPE_ATV630;
 		}

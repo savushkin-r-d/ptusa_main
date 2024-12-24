@@ -43,6 +43,9 @@ TEST( tcp_communicator, evaluate )
     cl.buff[ size ] = '\0';
     EXPECT_STREQ( cl.buff, "PAC accept" );
 
+    cl.AsyncSend( 10 );
+    G_CMMCTR->evaluate();
+
     cl.Disconnect();
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 

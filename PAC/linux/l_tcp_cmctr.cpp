@@ -99,9 +99,7 @@ int tcp_communicator_linux::net_init()
     master_socket_state.sin.sin_port 		 = htons ( port );
     master_socket_state.ismodbus = 0;
 
-    const int on = 1;
-
-    if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof( on ) ) )
+    if ( const int on = 1; setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof( on ) ) )
         {
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
@@ -397,8 +395,7 @@ int tcp_communicator_linux::evaluate()
                         }
 
                     // Определение имени клиента.
-                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET);
-                    if (client)
+                    if (hostent* client = gethostbyaddr(&ssin.sin_addr, 4, AF_INET); client)
                         {
                         sprintf( G_LOG->msg,
                            "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".",
@@ -448,10 +445,10 @@ int tcp_communicator_linux::evaluate()
              int is_removed = 0;
              if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
                  {
-                 int err = recvtimeout(it->second->get_socket(),
+                 if ( int err = recvtimeout(it->second->get_socket(),
                      (unsigned char*)it->second->buff, it->second->buff_size,
-             1, 0, it->second->ip, "async client", 0 );
-                 if (err <= 0) //Ошибка чтения
+                     1, 0, it->second->ip, "async client", 0); 
+                     err <= 0 ) //Ошибка чтения
                      {
                      it->second->Disconnect();
                      it->second->set_async_result(it->second->AR_SOCKETERROR);
