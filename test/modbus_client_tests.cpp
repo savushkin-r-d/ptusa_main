@@ -5,7 +5,7 @@ using namespace ::testing;
 class test_modbus_client : public modbus_client
     {
     public:
-        test_modbus_client( unsigned int id, char* ip ):modbus_client( id, ip )
+        test_modbus_client( unsigned int id, const char* ip ):modbus_client( id, ip )
             {
             }
 

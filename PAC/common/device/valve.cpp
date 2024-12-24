@@ -1097,8 +1097,6 @@ bool valve_bottom_mix_proof::is_switching_off_finished()
         return true;
         }
 
-    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
-
     //Если завершилось время задержки, выключаем мини клапан перед удалением
     //клапана из вектора.
     if ( u_int delay = G_PAC_INFO()->par[PAC_info::P_V_BOTTOM_OFF_DELAY_TIME];
@@ -1605,7 +1603,7 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
 
     if ( in_info.status ) return false;
 
-    if ( u_long dt = get_delta_millisec(start_switch_time); 
+    if ( auto dt = get_delta_millisec( start_switch_time );
         dt < get_par( valve::P_ON_TIME, 0 ) )
         {
         return true;
@@ -2850,7 +2848,7 @@ bool valve_AS::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    auto* AO_data = (char*)get_AO_read_data( AO_INDEX );
+    const auto AO_data = (char*)get_AO_read_data( AO_INDEX );
     auto AO_state = get_state_data( AO_data );
 
     auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;

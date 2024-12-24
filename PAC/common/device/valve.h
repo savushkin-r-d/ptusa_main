@@ -592,9 +592,7 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
 
-#ifdef PTUSA_TEST
-    public:
-#else
+#ifndef PTUSA_TEST
     protected:
 #endif
 
@@ -639,9 +637,7 @@ class valve_mini_flushing : public i_mix_proof, public valve
         void direct_on() final;
         void direct_off() final;
 
-#ifdef PTUSA_TEST
-    public:
-#else
+#ifndef PTUSA_TEST
     protected:
 #endif
         //Интерфейс для реализации получения расширенного состояния с учетом
