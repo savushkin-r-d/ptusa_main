@@ -139,10 +139,10 @@ float PID::eval( float currentValue, int deltaSign )
         ek_1 = ek;
 
         //-Зона разгона.
-        unsigned long delta_time = get_delta_millisec( start_time );
         unsigned long acceleration_time = MSEC_IN_SEC *
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
-        if ( delta_time < acceleration_time )
+        if ( unsigned long delta_time = get_delta_millisec( start_time );
+            delta_time < acceleration_time )
             {
             float res = MAX_OUT_VALUE * delta_time / acceleration_time;
             if ( ( *par )[ P_is_zero_start ] )

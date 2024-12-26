@@ -455,8 +455,7 @@ errors_manager::~errors_manager()
 //-----------------------------------------------------------------------------
 errors_manager* errors_manager::get_instance()
     {
-    static int is_init = 0;
-    if ( 0 == is_init )
+    if ( static int is_init = 0; 0 == is_init )
         {
         instance = new errors_manager();
         is_init = 1;

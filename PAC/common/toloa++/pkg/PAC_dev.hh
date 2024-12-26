@@ -1901,7 +1901,7 @@ class modbus_client
     protected:
 
     public:
-        modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
+        modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
         int read_coils(unsigned int start_address, unsigned int quantity);

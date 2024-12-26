@@ -250,7 +250,9 @@ class valve_DO1_DI1_off : public valve
 
         void direct_off();
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -279,7 +281,9 @@ class valve_DO1_DI1_on : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -308,7 +312,10 @@ class valve_DO1_DI2 : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
@@ -339,7 +346,9 @@ class valve_DO2_DI2 : public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX_1 = 0,         ///< Индекс №1 канала дискретного выхода.
@@ -419,7 +428,10 @@ class valve_mix_proof : public i_mix_proof, public valve
 
         void direct_off() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -427,7 +439,7 @@ class valve_mix_proof : public i_mix_proof, public valve
             DO_INDEX_L,     ///< Индекс канала дискретного выхода нижнего седла.
 
             DI_INDEX_OPEN = 0, ///< Индекс канала дискретного входа Открыт.
-            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
+            DI_INDEX_CLOSE,    ///< Индекс канала дискретного входа Закрыт.
             };
 
         //Интерфейс для реализации получения расширенного состояния с учетом
@@ -559,7 +571,9 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 #pragma endregion Выключение мини клапана с задержкой.
 #endif
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -577,7 +591,10 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
+
+#ifndef PTUSA_TEST
     protected:
+#endif
 
         VALVE_STATE get_valve_state() override;
 
@@ -600,7 +617,9 @@ class valve_mini_flushing : public i_mix_proof, public valve
         /// @brief Открыть нижнее седло.
         void open_lower_seat() final;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         enum CONSTANTS_DO
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -618,7 +637,9 @@ class valve_mini_flushing : public i_mix_proof, public valve
         void direct_on() final;
         void direct_off() final;
 
+#ifndef PTUSA_TEST
     protected:
+#endif
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
         VALVE_STATE get_valve_state() final;

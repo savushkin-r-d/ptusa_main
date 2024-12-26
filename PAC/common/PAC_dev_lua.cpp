@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Dec  9 10:29:27 2024.
+** Generated automatically by tolua++-1.0.92 on Tue Dec 24 16:03:22 2024.
 */
 
 #ifndef __cplusplus
@@ -12754,7 +12754,7 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
 #endif
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
-  char* ip = ((char*)  tolua_tostring(tolua_S,3,0));
+  const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
   {
@@ -12790,7 +12790,7 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
 #endif
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
-  char* ip = ((char*)  tolua_tostring(tolua_S,3,0));
+  const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
   {
