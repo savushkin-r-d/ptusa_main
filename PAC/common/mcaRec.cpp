@@ -619,7 +619,7 @@ int TRecipeManager::LoadFromFile( const char* filename )
 #ifdef PAC_PLCNEXT
     sprintf(fname, "/opt/main/%s", filename);
 #else
-    sprintf(fname, "%s", filename);
+    sprintf( fname, "./%s", filename );
 #endif // PAC_PLCNEXT
     memset(recipeMemory, 0, recipeMemorySize);
     memFile = fopen(fname, "r+b");
