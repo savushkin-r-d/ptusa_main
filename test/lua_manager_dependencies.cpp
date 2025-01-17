@@ -25,6 +25,9 @@ void LuaManagerTest::SetUp()
     lua_hooks.push_back(subhook_new((void *) lua_tolstring,         (void *) mock_lua_tolstring,        SUBHOOK_64BIT_OFFSET));
     lua_hooks.push_back(subhook_new((void *) lua_settop,            (void *) mock_lua_settop,           SUBHOOK_64BIT_OFFSET));
 
+    lua_hooks.push_back(subhook_new((void*) lua_close,              (void*) mock_lua_close,             SUBHOOK_64BIT_OFFSET));
+
+
 	// Install hooks
 	for (size_t i = 0; i < lua_hooks.size(); i++) {
 		subhook_install(lua_hooks[i]);

@@ -20,6 +20,8 @@ class profibus_slave
     {
     //Конфигурирование клиента.
     public:
+        virtual ~profibus_slave() = default;
+
         /// <summary>
         /// Включение модуля обмена.
         /// </summary>

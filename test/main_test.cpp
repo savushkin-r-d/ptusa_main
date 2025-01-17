@@ -24,9 +24,11 @@ int main(int argc, char* argv[])
     setlocale( LC_NUMERIC, "C" );
 #endif
 
-    // Eternal hook for testing of LUA_MANAGER
-    subhook_install(subhook_new((void *) lua_close, (void *) mock_lua_close, SUBHOOK_64BIT_OFFSET));
     ::testing::InitGoogleTest(&argc, argv);
 	auto res = RUN_ALL_TESTS();
+
+    subhook_remove( GTESTS_DELTA_MILLISEC_SUBHOOK );
+    subhook_free( GTESTS_DELTA_MILLISEC_SUBHOOK );
+
     return res;
 }
