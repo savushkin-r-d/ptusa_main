@@ -36,6 +36,8 @@ void LuaManagerTest::SetUp()
 
 void LuaManagerTest::TearDown()
 {
+    G_LUA_MANAGER->free_Lua();
+
 	// Remove the hooks and free memory
 	for (size_t i = 0; i < lua_hooks.size(); i++) {
 		subhook_remove(lua_hooks[i]);
