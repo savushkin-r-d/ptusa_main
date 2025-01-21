@@ -75,13 +75,8 @@ jobs:
         run: |
           mkdir coverage-dir
           cd coverage-dir
-          find ../build -name '*.o' -not -path '*/deps/*' -not -path '*/usr/*' | xargs gcov --preserve-paths | grep . 
+          find ../build -path '*deps*' -type d -prune -o -path '*usr*' -type d -prune -o -name '*.o' -type f -print | xargs gcov --preserve-paths | grep . 
           ls -all
-
-      - name: Generate test summary
-        run: |
-          gcovr -r . --sonarqube ./build/coverage.xml
-          cat ./build/coverage.xml
 
       - name: Run sonar-scanner
         env:
