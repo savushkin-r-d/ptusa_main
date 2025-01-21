@@ -70,8 +70,13 @@ jobs:
             message(FATAL_ERROR "Running tests failed!")
           endif()
 
-      - name: Install gcovr
-        run: sudo apt-get install gcovr
+      # Run gcov to translate `.gcda` files into `.gcov` readable by humans and SonarCloud
+      - name: Run gcov
+        run: |
+          mkdir coverage-dir
+          cd coverage-dir
+          find ../build -name '*.o' | xargs gcov --preserve-paths
+          ls -all
 
       - name: Generate test summary
         run: |
@@ -83,4 +88,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" --define sonar.pullrequest.key=${{ github.event.pull_request.number }} --define sonar.scm.revision=${{ github.event.pull_request.head.sha }}
+          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json" --define sonar.pullrequest.key=${{ github.event.pull_request.number }} --define sonar.scm.revision=${{ github.event.pull_request.head.sha }} --define sonar.cfamily.gcov.reportsPath="coverage-dir"
