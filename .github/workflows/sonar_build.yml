@@ -75,7 +75,8 @@ jobs:
         run: |
           mkdir coverage-dir
           cd coverage-dir
-          find ../build -path '*deps*' -type d -prune -o -path '*usr*' -type d -prune -o -name '*.o' -type f -print | xargs gcov --preserve-paths | grep . 
+          find ../build -path '*deps*' -type d -prune -o -path '*usr*' -type d -prune -o -name '*.o' -type f -print | xargs gcov --preserve-paths
+          echo List files
           ls -all
 
       - name: Run sonar-scanner
