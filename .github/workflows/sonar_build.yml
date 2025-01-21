@@ -75,7 +75,7 @@ jobs:
         run: |
           mkdir coverage-dir
           cd coverage-dir
-          find ../build -name '*.o' | xargs gcov --preserve-paths
+          find ../build -name '*.o' -not -path '*/deps/*' -not -path '*/usr/*' | xargs gcov --preserve-paths | grep . 
           ls -all
 
       - name: Generate test summary
