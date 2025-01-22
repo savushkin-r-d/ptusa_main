@@ -70,15 +70,6 @@ class profibus_slave_PC : public profibus_slave
             return 0;
             }
 
-        ~profibus_slave_PC() override
-            {
-            if ( instance )
-                {
-                delete instance;
-                instance = nullptr;
-                }
-            }
-
     private:
         static auto_smart_ptr < profibus_slave_PC > instance;
     };
