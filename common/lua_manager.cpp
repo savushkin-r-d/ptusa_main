@@ -16,6 +16,22 @@
 auto_smart_ptr< lua_manager > lua_manager::instance;
 bool lua_manager::is_print_stack_traceback = true;
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+void lua_manager::set_Lua( lua_State* l )
+    {
+    L = l;
+    }
+
+void lua_manager::free_Lua()
+    {
+    if ( L )
+        {
+        lua_close( L );
+        L = nullptr;
+        }
+    }
+#endif
+//-----------------------------------------------------------------------------
 lua_manager* lua_manager::get_instance()
     {
     if ( static int is_init = 0; 0 == is_init )
@@ -119,7 +135,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( NULL == L )
             {
-            printf( "Error creating Lua context.\n" );
+            G_LOG->critical( "Error creating Lua context." );
             return 1;
             }
         is_free_lua = 1;
@@ -360,7 +376,7 @@ lua_manager::~lua_manager()
         if ( L )
             {
             lua_close( L );
-            L = NULL;
+            L = nullptr;
             }
         }
     }

@@ -2,6 +2,8 @@
 
 void LuaManagerTest::SetUp()
 {
+    ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
+
 	lua_hooks.push_back(subhook_new((void *) lua_pushcclosure,      (void *) mock_lua_pushcclosure,     SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));	
 	lua_hooks.push_back(subhook_new((void *) lua_type,				(void *) mock_lua_type,				SUBHOOK_64BIT_OFFSET));
@@ -36,13 +38,13 @@ void LuaManagerTest::SetUp()
 
 void LuaManagerTest::TearDown()
 {
-    G_LUA_MANAGER->free_Lua();
-
 	// Remove the hooks and free memory
 	for (size_t i = 0; i < lua_hooks.size(); i++) {
 		subhook_remove(lua_hooks[i]);
 		subhook_free(lua_hooks[i]);
 	}
+
+	ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
 }
 
 void set_file_counter(int val)
@@ -111,7 +113,7 @@ int	mock_luaL_loadfile(lua_State *L, const char *filename)
 
 lua_State* mock_luaL_newstate(void)
 {
-    return new lua_State;
+    return new lua_State{};
 }
 
 int	mock_lua_gc(lua_State *L, int what, int data)

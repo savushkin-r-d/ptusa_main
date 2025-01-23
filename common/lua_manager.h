@@ -97,19 +97,9 @@ class lua_manager
             char *res_str, int max_res_str_length );
 
 #ifdef PTUSA_TEST
-        void set_Lua( lua_State* l)
-            {
-            L = l;
-            }
+        void set_Lua( lua_State* l );
 
-        void free_Lua()
-            {
-            if ( L )
-                {
-                lua_close( L );
-                L = nullptr;
-                }
-            }
+        void free_Lua();
 #endif
 
     private:
