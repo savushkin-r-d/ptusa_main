@@ -17,6 +17,8 @@ protected:
 	vector<subhook_t>   lua_hooks;
 	virtual void        SetUp();
 	virtual void        TearDown();
+
+    bool need_free_Lua_state = false;
 };
 
 static int file_counter = 0;

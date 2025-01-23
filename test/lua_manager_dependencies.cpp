@@ -29,20 +29,30 @@ void LuaManagerTest::SetUp()
 
     lua_hooks.push_back(subhook_new((void*) &lua_close,             (void*) &mock_lua_close,             SUBHOOK_64BIT_OFFSET));
 
-
-	// Install hooks
-	for (size_t i = 0; i < lua_hooks.size(); i++) {
-		subhook_install(lua_hooks[i]);
-	}
-}
+    // Install hooks
+    for ( size_t i = 0; i < lua_hooks.size(); i++ )
+        {
+        subhook_install( lua_hooks[ i ] );
+        }
+    }
 
 void LuaManagerTest::TearDown()
-{
-	// Remove the hooks and free memory
-	for (size_t i = 0; i < lua_hooks.size(); i++) {
-		subhook_remove(lua_hooks[i]);
-		subhook_free(lua_hooks[i]);
-	}
+    {
+    // Remove the hooks and free memory.
+    for ( size_t i = 0; i < lua_hooks.size(); i++ )
+        {
+        subhook_remove( lua_hooks[ i ] );
+        subhook_free( lua_hooks[ i ] );
+        }
+
+    if ( need_free_Lua_state )
+        {
+        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
+        // то удаляем с помощью delete.
+        delete G_LUA_MANAGER->get_Lua();
+        G_LUA_MANAGER->set_Lua( nullptr );
+        need_free_Lua_state = false;
+        }
 
 	ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
 }

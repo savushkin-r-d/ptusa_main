@@ -81,10 +81,7 @@ TEST_F(LuaManagerTest, init_success)
 	delete tech_mock;
     test_tcp_communicator::removeObject();
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F( LuaManagerTest, init_creating_lua_context_failure )
@@ -99,13 +96,14 @@ TEST_F( LuaManagerTest, init_creating_lua_context_failure )
 
     EXPECT_EQ( nullptr, G_LUA_MANAGER->get_Lua() );
 
+    EXPECT_EQ( 1, G_LUA_MANAGER->init( nullptr, "", "", "" ) );
+
+    EXPECT_EQ( nullptr, G_LUA_MANAGER->get_Lua() );
+
     subhook_remove( hook_lua_create_context );
     subhook_free( hook_lua_create_context );
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
     }
 
 TEST_F(LuaManagerTest, init_check_file_failure)
@@ -119,10 +117,7 @@ TEST_F(LuaManagerTest, init_check_file_failure)
     subhook_remove(hook_check_file);
     subhook_free(hook_check_file);
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_check_file_version_failure)
@@ -140,21 +135,19 @@ TEST_F(LuaManagerTest, init_check_file_version_failure)
     G_LUA_MANAGER->set_Lua( nullptr );
 }
 
-TEST_F(LuaManagerTest, init_system_scripts_execution_failure)
+TEST_F( LuaManagerTest, init_system_scripts_execution_failure )
 {
     subhook_t hook_luaL_loadfile =
-        subhook_new( (void*)luaL_loadfile, (void*)mock_luaL_loadfile_failure, SUBHOOK_TRAMPOLINE );
-    subhook_install(hook_luaL_loadfile);
+        subhook_new( (void*)luaL_loadfile, (void*)mock_luaL_loadfile_failure,
+        SUBHOOK_TRAMPOLINE );
+    subhook_install( hook_luaL_loadfile );
 
     EXPECT_EQ( 1, G_LUA_MANAGER->init( nullptr, "", "", "" ) );
 
-    subhook_remove(hook_luaL_loadfile);
-    subhook_free(hook_luaL_loadfile);
+    subhook_remove( hook_luaL_loadfile );
+    subhook_free( hook_luaL_loadfile );
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_lua_load_configuration_failure)
@@ -177,10 +170,7 @@ TEST_F(LuaManagerTest, init_lua_load_configuration_failure)
     test_project_manager::removeObject();
     test_params_manager::removeObject();
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_luaL_loadfile_failure)
@@ -206,10 +196,7 @@ TEST_F(LuaManagerTest, init_luaL_loadfile_failure)
     test_project_manager::removeObject();
     test_params_manager::removeObject();
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_lua_pcall_failure)
@@ -238,10 +225,7 @@ TEST_F(LuaManagerTest, init_lua_pcall_failure)
     subhook_remove(hook_lua_pcall);
     subhook_free(hook_lua_pcall);
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_init_objects_failure)
@@ -274,10 +258,7 @@ TEST_F(LuaManagerTest, init_init_objects_failure)
     test_params_manager::removeObject();
     delete tech_mock;
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_PAC_name_rus_failure)
@@ -318,10 +299,7 @@ TEST_F(LuaManagerTest, init_PAC_name_rus_failure)
     subhook_remove(hook_lua_pcall);
     subhook_free(hook_lua_pcall);
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, init_PAC_name_eng_failure)
@@ -362,10 +340,7 @@ TEST_F(LuaManagerTest, init_PAC_name_eng_failure)
     subhook_remove(hook_lua_pcall);
     subhook_free(hook_lua_pcall);
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 /*
@@ -709,10 +684,7 @@ TEST_F(LuaManagerTest, reload_script_lua_state_null_failure)
     subhook_remove(hook_lua_create_context);
     subhook_free(hook_lua_create_context);
 
-    // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
-    // то удаляем с помощью delete.
-    delete G_LUA_MANAGER->get_Lua();
-    G_LUA_MANAGER->set_Lua( nullptr );
+    need_free_Lua_state = true;
 }
 
 TEST_F(LuaManagerTest, reload_script_success)
