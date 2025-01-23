@@ -442,7 +442,8 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
 
-    add_test(T1-PLCnext-Demo_valgrind valgrind
+	if(LINUX)
+	    add_test(T1-PLCnext-Demo_valgrind valgrind
 				--error-exitcode=1
 				--num-callers=100
 				--leak-check=full
@@ -455,6 +456,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+	endif()
 
 
     add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
