@@ -16,6 +16,6 @@ class analog_emulator
         void param( float math_expec, float stddev );
 
     private:
-        std::random_device rd{};
+        static std::random_device rd;
         std::normal_distribution<float> d;
     };

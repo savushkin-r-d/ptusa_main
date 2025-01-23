@@ -435,9 +435,8 @@ valve_DO1_DI1_off::valve_DO1_DI1_off( const char* dev_name ) :
 void valve_DO1_DI1_off::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
-
-    int o = get_DO( DO_INDEX );
-    if ( 0 == o )
+    
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -447,9 +446,8 @@ void valve_DO1_DI1_off::direct_on()
 void valve_DO1_DI1_off::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
-
-    int o = get_DO( DO_INDEX );
-    if ( o != 0 )
+    
+    if ( auto o = get_DO( DO_INDEX ); o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -468,10 +466,7 @@ bool valve_DO1_DI1_off::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    int o = get_DO( DO_INDEX );
-    int i = get_DI( DI_INDEX );
-
-    if ( o != i )
+    if ( auto o = get_DO( DO_INDEX ), i = get_DI( DI_INDEX ); o != i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -502,13 +497,12 @@ valve_DO1_DI1_on::valve_DO1_DI1_on( const char* dev_name ) : valve( true, false,
     dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
     {
     }
-
+//-----------------------------------------------------------------------------
 void valve_DO1_DI1_on::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    int o = get_DO( DO_INDEX );
-    if ( 0 == o )
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -519,8 +513,7 @@ void valve_DO1_DI1_on::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
-    int o = get_DO( DO_INDEX );
-    if ( o != 0 )
+    if ( auto o = get_DO( DO_INDEX ); o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -540,9 +533,7 @@ bool valve_DO1_DI1_on::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-    int i = get_DI( DI_INDEX );
-
-    if ( o == i )
+    if ( auto i = get_DI( DI_INDEX ); o == i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -610,11 +601,9 @@ bool valve_DO1_DI2::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    int o = get_DO( DO_INDEX );
-    int i1 = get_DI( DI_INDEX_1 );
-    int i0 = get_DI( DI_INDEX_2 );
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    if ( auto o = get_DO( DO_INDEX ), i1 = get_DI( DI_INDEX_1 ), 
+        i0 = get_DI( DI_INDEX_2 );
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         return true;
@@ -686,12 +675,11 @@ bool valve_DO2_DI2::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    int o0 = get_DO( DO_INDEX_1 );
-    int o1 = get_DO( DO_INDEX_2 );
-    int i0 = get_DI( DI_INDEX_1 );
-    int i1 = get_DI( DI_INDEX_2 );
-
-    if ( o1 == i1 && o0 == i0 )
+    if ( auto o0 = get_DO( DO_INDEX_1 ),
+        o1 = get_DO( DO_INDEX_2 ),
+        i0 = get_DI( DI_INDEX_1 ),
+        i1 = get_DI( DI_INDEX_2 );
+        o1 == i1 && o0 == i0 && ( o0 != o1 && i0 != i1 ) )
         {
         return true;
         }
@@ -922,9 +910,7 @@ void valve_mix_proof::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-
-            int u = get_DO( DO_INDEX_U );
-            if ( 0 == u )
+            if ( auto u = get_DO( DO_INDEX_U ); u == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_U, 1 );
@@ -936,9 +922,7 @@ void valve_mix_proof::direct_set_state( int new_state )
         case V_LOWER_SEAT:
             {
             direct_off();
-
-            int l = get_DO( DO_INDEX_L );
-            if ( 0 == l )
+            if ( auto l = get_DO( DO_INDEX_L ); l == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_L, 1 );
@@ -958,9 +942,8 @@ void valve_mix_proof::direct_on()
 
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
-    int o = get_DO( DO_INDEX );
 
-    if ( 0 == o )
+    if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -976,9 +959,8 @@ void valve_mix_proof::direct_off()
 
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
-    int o = get_DO( DO_INDEX );
 
-    if ( o != 0 || was_seat )
+    if ( auto o = get_DO( DO_INDEX ); o != 0 || was_seat )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -1002,10 +984,8 @@ bool valve_mix_proof::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_CLOSE );
-    int i1 = get_DI( DI_INDEX_OPEN );
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    if ( auto i1 = get_DI( DI_INDEX_OPEN ), i0 = get_DI( DI_INDEX_CLOSE );
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         return true;
@@ -1115,11 +1095,10 @@ bool valve_bottom_mix_proof::is_switching_off_finished()
         return true;
         }
 
-    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
-
     //Если завершилось время задержки, выключаем мини клапан перед удалением
     //клапана из вектора.
-    if ( get_delta_millisec( start_off_time ) > delay )
+    if ( auto delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
+        get_delta_millisec( start_off_time ) > delay )
         {
         is_closing_mini = 0;
         direct_off();
@@ -1134,9 +1113,8 @@ void valve_bottom_mix_proof::direct_on()
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
     set_DO( DO_INDEX_L, 0 );
-    int o = get_DO( DO_INDEX );
 
-    if ( 0 == o )
+    if ( auto o = get_DO( DO_INDEX ); o == 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
@@ -1189,10 +1167,9 @@ bool valve_bottom_mix_proof::get_fb_state()
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_CLOSE );
-    int i1 = get_DI( DI_INDEX_OPEN );
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    
+    if ( auto i0 = get_DI( DI_INDEX_CLOSE ), i1 = get_DI( DI_INDEX_OPEN );
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         return true;
@@ -1624,8 +1601,8 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
 
     if ( in_info.status ) return false;
 
-    u_long dt = get_delta_millisec( start_switch_time );
-    if ( dt < get_par( valve::P_ON_TIME, 0 ) )
+    if ( auto dt = get_delta_millisec( start_switch_time );
+        dt < get_par( valve::P_ON_TIME, 0 ) )
         {
         return true;
         }
@@ -1839,10 +1816,10 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
     if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
         return true;
 
-    int active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) + 
-        static_cast<int>( in_info.pv_y2_on ) + 
+    if ( auto active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) +
+        static_cast<int>( in_info.pv_y2_on ) +
         static_cast<int>( in_info.pv_y3_on );
-    if ( active_solenoid_count > 1 )
+        active_solenoid_count > 1 )
         {
         return false; // Активно более одного соленоида.
         }
@@ -1876,13 +1853,13 @@ int valve_iolink_gea_tvis_a15::get_on_fb_value()
         return valve::get_on_fb_value();
         }
 
-    int active_solenoid_count = static_cast<int>(in_info.pv_y1_on) +
-        static_cast<int>(in_info.pv_y2_on) +
-        static_cast<int>(in_info.pv_y3_on);
-    if (active_solenoid_count > 1)
-    {
+    if ( auto active_solenoid_count = static_cast<int>( in_info.pv_y1_on ) +
+        static_cast<int>( in_info.pv_y2_on ) +
+        static_cast<int>( in_info.pv_y3_on );
+        active_solenoid_count > 1 )
+        {
         return false; // Активно более одного соленоида.
-    }
+        }
 
     return in_info.pv_y1_on && in_info.s2;
     }
@@ -2238,9 +2215,9 @@ bool valve_iol_terminal::check_config()
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
         {
-        auto data = (char*)get_AO_write_data(
+        if ( auto data = (char*)get_AO_write_data(
             static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
-        if ( !data )
+            !data )
             {
             return false;
             }
@@ -2304,8 +2281,8 @@ void valve_iol_terminal::direct_on()
     {
     if ( !check_config() ) return;
 
-    auto st = get_valve_state();
-    if ( valve::VALVE_STATE::V_ON != st )
+    if ( auto st = get_valve_state();
+        valve::VALVE_STATE::V_ON != st )
         {
         start_switch_time = get_millisec();
         }
@@ -2327,8 +2304,8 @@ void valve_iol_terminal::direct_off()
     {
     if ( !check_config() ) return;
 
-    auto st = get_valve_state();
-    if ( valve::VALVE_STATE::V_OFF != st )
+    if ( auto st = get_valve_state(); 
+        valve::VALVE_STATE::V_OFF != st )
         {
         start_switch_time = get_millisec();
         }
@@ -2364,10 +2341,9 @@ bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
     {
     if ( !check_config() ) return false;
 
-    auto o = get_valve_state();
     int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
 
-    if ( o == i )
+    if ( auto o = get_valve_state(); o == i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -2404,11 +2380,9 @@ bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
     {
     if ( !check_config() ) return false;
 
-    auto o = get_valve_state();
     int i = get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
 
-
-    if ( o != i )
+    if ( auto o = get_valve_state(); o != i )
         {
         start_switch_time = get_millisec();
         return true;
@@ -2858,12 +2832,12 @@ valve::VALVE_STATE valve_AS::get_valve_state()
     char* data = (char*)get_AO_read_data( AO_INDEX );
     char state = get_state_data( data );
 
-    int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
-    int l = ( state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-    int u = ( state & get_upper_seat_offset() ) > 0 ? 1 : 0;
+    auto o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
-    if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
-    if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
+    if ( auto u = state & get_upper_seat_offset() ? 1 : 0; !o && u == 1 )
+        return V_UPPER_SEAT;
+    if ( auto l = state & get_lower_seat_offset() ? 1 : 0; !o && l == 1 )
+        return V_LOWER_SEAT;
 
     return (VALVE_STATE)o;
     }
@@ -2872,20 +2846,19 @@ bool valve_AS::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    char* AO_data = (char*)get_AO_read_data( AO_INDEX );
-    char AO_state = get_state_data( AO_data );
+    const auto AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_state = get_state_data( AO_data );
 
-    int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-    int l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-    int u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
+    auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+    auto l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
+    auto u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
     char* AI_data = (char*)get_AI_data( AI_INDEX );
     char AI_state = get_state_data( AI_data );
-
-    int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-    int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    
+    if ( auto i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
+        i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         return true;
@@ -2955,22 +2928,20 @@ void valve_AS::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
-    char* data = (char*)get_AO_write_data( AO_INDEX );
-    char* write_state = get_data_with_offset( data );
-    char read_state = get_state_data( data );
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
-    int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-
-    if ( 1 == o )
+    if ( auto o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0; o == 1 )
         {
         start_switch_time = get_millisec();
         }
 
-    int offset = 0;
+    auto offset = 0;
     //Для первого 31-го устройства четный номер - старшие четыре
     //бита (1), для остальных устройств нечетный номер - старшие четыре
     //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;
@@ -2984,21 +2955,20 @@ void valve_AS::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    char* data = (char*)get_AO_write_data( AO_INDEX );
-    char* write_state = get_data_with_offset( data );
-    char read_state = get_state_data( data );
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
-    int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-    if ( 0 == o )
+    if ( auto o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0; 0 == o )
         {
         start_switch_time = get_millisec();
         }
 
-    int offset = 0;
+    auto offset = 0;
     //Для первого 31-го устройства четный номер - старшие четыре
     //бита (1), для остальных устройств нечетный номер - старшие четыре
     //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;
@@ -3015,15 +2985,18 @@ void valve_AS::direct_set_state( int new_state )
         return valve::direct_set_state( new_state );
         }
 
-    int offset = 0;
-    //Для первого 31-го устройства четный номер - старшие четыре
-    //бита (1), для остальных устройств нечетный номер - старшие четыре
-    //бита (2).
-    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+    auto offset = 0;
+    // Для первого 31-го устройства четный номер - старшие четыре бита (1),
+    // для остальных устройств нечетный номер - старшие четыре бита (2).
+    if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    		//1
         ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
         {
         offset = 4;
         }
+
+    auto data = (char*)get_AO_write_data( AO_INDEX );
+    auto write_state = get_data_with_offset( data );
+    auto read_state = get_state_data( data );
 
     switch ( new_state )
         {
@@ -3038,36 +3011,22 @@ void valve_AS::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-
-            char* data = (char*)get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            int u = ( read_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
-            if ( 0 == u )
+            if ( auto u = read_state & get_upper_seat_offset() ? 1 : 0; !u )
                 {
                 start_switch_time = get_millisec();
                 }
             *write_state |= get_upper_seat_offset() << offset;
-
             break;
             }
 
         case V_LOWER_SEAT:
             {
             direct_off();
-
-            char* data = (char*)get_AO_write_data( AO_INDEX );
-            char* write_state = get_data_with_offset( data );
-            char read_state = get_state_data( data );
-
-            int l = ( read_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
-            if ( 0 == l )
+            if ( auto l = read_state & get_lower_seat_offset() ? 1 : 0; !l )
                 {
                 start_switch_time = get_millisec();
                 }
             *write_state |= get_lower_seat_offset() << offset;
-
             break;
             }
 
@@ -3138,18 +3097,16 @@ bool valve_AS_DO1_DI2::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    char* AO_data = (char*)get_AO_read_data( AO_INDEX );
-    char AO_state = get_state_data( AO_data );
+    auto AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_state = get_state_data( AO_data );
 
-    int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+    auto AI_data = (char*)get_AI_data( AI_INDEX );
+    auto AI_state = get_state_data( AI_data );
 
-    char* AI_data = (char*)get_AI_data( AI_INDEX );
-    char AI_state = get_state_data( AI_data );
-
-    int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
-    int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    if ( auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0,
+        i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
+        i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         start_err_time = get_millisec();
@@ -3266,13 +3223,12 @@ valve::VALVE_STATE valve_mini_flushing::get_valve_state()
 
 bool valve_mini_flushing::get_fb_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
 
-    int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_CLOSE );
-    int i1 = get_DI( DI_INDEX_OPEN );
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+    if ( auto o = get_DO( DO_INDEX ),
+        i0 = get_DI( DI_INDEX_CLOSE ),
+        i1 = get_DI( DI_INDEX_OPEN );
+        ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         return true;

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Oct 24 10:11:16 2024.
+** Generated automatically by tolua++-1.0.92 on Tue Dec 24 16:03:22 2024.
 */
 
 #ifndef __cplusplus
@@ -3631,131 +3631,6 @@ static int tolua_PAC_dev_dev_stub_get_state00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: pause of class  dev_stub */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_dev_stub_pause00
-static int tolua_PAC_dev_dev_stub_pause00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"dev_stub",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'pause'", NULL);
-#endif
-  {
-   self->pause();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'pause'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: start of class  dev_stub */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_dev_stub_start00
-static int tolua_PAC_dev_dev_stub_start00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"dev_stub",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'start'", NULL);
-#endif
-  {
-   self->start();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'start'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: reset of class  dev_stub */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_dev_stub_reset00
-static int tolua_PAC_dev_dev_stub_reset00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"dev_stub",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'reset'", NULL);
-#endif
-  {
-   self->reset();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'reset'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_quantity of class  dev_stub */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_dev_stub_get_quantity00
-static int tolua_PAC_dev_dev_stub_get_quantity00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"dev_stub",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_quantity'", NULL);
-#endif
-  {
-   unsigned int tolua_ret = (unsigned int)  self->get_quantity();
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_quantity'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12879,7 +12754,7 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
 #endif
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
-  char* ip = ((char*)  tolua_tostring(tolua_S,3,0));
+  const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
   {
@@ -12915,7 +12790,7 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
 #endif
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
-  char* ip = ((char*)  tolua_tostring(tolua_S,3,0));
+  const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
   {
@@ -15483,7 +15358,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"G",tolua_PAC_dev_G00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
-  tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);
+  tolua_cclass(tolua_S,"dev_stub","dev_stub","i_counter",NULL);
   tolua_beginmodule(tolua_S,"dev_stub");
    tolua_function(tolua_S,"get_value",tolua_PAC_dev_dev_stub_get_value00);
    tolua_function(tolua_S,"set_value",tolua_PAC_dev_dev_stub_set_value00);
@@ -15491,10 +15366,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"off",tolua_PAC_dev_dev_stub_off00);
    tolua_function(tolua_S,"set_state",tolua_PAC_dev_dev_stub_set_state00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_dev_stub_get_state00);
-   tolua_function(tolua_S,"pause",tolua_PAC_dev_dev_stub_pause00);
-   tolua_function(tolua_S,"start",tolua_PAC_dev_dev_stub_start00);
-   tolua_function(tolua_S,"reset",tolua_PAC_dev_dev_stub_reset00);
-   tolua_function(tolua_S,"get_quantity",tolua_PAC_dev_dev_stub_get_quantity00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"errors_manager","errors_manager","",NULL);
   tolua_beginmodule(tolua_S,"errors_manager");

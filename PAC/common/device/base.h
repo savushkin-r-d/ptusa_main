@@ -782,6 +782,8 @@ class digital_io_device : public device,
         ~digital_io_device() override = default;
 
         void print() const override;
+
+        void direct_set_state( int new_state ) override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.

@@ -671,12 +671,42 @@ TEST( valve_iol_terminal, get_state_data )
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
-
 TEST( temperature_e_analog, get_value )
     {
-    temperature_e_analog t1( "T1" );
-    auto v = t1.get_value();
-    EXPECT_EQ( .0, v );
+    temperature_e_analog TE1( "T1" );
+    auto v = TE1.get_value();
+    EXPECT_EQ( .0f, v );
+    }
+
+void test_temperature( AI1* TE1 )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+
+    EXPECT_EQ( TE1->get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    TE1->init_and_alloc( 0, 0, 0, 1 );
+    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    EXPECT_EQ( TE1->get_state(), 1 );
+
+    *TE1->AI_channels.int_read_values[ 0 ] = -1000;
+    EXPECT_EQ( TE1->get_state(), -1 );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( temperature_e_analog, get_state )
+    {
+    temperature_e_analog TE1( "test_TE1" );
+    test_temperature( &TE1 );
     }
 
 TEST( temperature_e_analog, get_type_name )
@@ -921,6 +951,12 @@ TEST( dev_stub, pause_daily )
     STUB()->start_daily();
     }
 
+TEST( dev_stub, get_abs_quantity )
+    {
+    EXPECT_EQ( 0, STUB()->get_abs_quantity() );
+    }
+
+
 TEST( device, device )
     {
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
@@ -1046,6 +1082,15 @@ TEST( DO1, get_type_name )
     {
     DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
     EXPECT_STREQ( do1.get_type_name(), "Дискретный выходной сигнал" );
+    }
+
+TEST( DO1, set_cmd )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    EXPECT_EQ( do1.get_state(), 0 );
+
+    do1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( do1.get_state(), 1 );
     }
 
 
@@ -1233,6 +1278,55 @@ TEST( pressure_e, get_type_name )
     }
 
 
+TEST( pressure_e_iolink, pressure_e_iolink )
+    {
+    std::array<char, 200> buff{ '\0' };
+    pressure_e_iolink test_dev( "P1" );
+
+    test_dev.save_device( buff.data(), "");
+    EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_ERR=0},\n",
+        buff.data() );
+    }
+
+TEST( pressure_e_iolink, read_article )
+    {
+    pressure_e_iolink test_dev( "P1" );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
+
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
+    }
+
+TEST( pressure_e_iolink, evaluate_io )
+    {
+    pressure_e_iolink test_dev( "P1" );
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
+
+
+    G_PAC_INFO()->emulation_off();
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    test_dev.init( 0, 0, 0, 1 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
+
+    // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
+    // input data from the line above).
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+
 TEST( analog_output, get_max_value )
     {
     analog_output A1( "AO1" );
@@ -1309,6 +1403,22 @@ TEST( DI_signal, get_type_name )
     {
     DI_signal test_dev( "test_DI1" );
     EXPECT_STREQ( "Дискретный входной сигнал", test_dev.get_type_name() );
+    }
+
+TEST( DI_signal, get_state )
+    {
+    DI_signal DI1( "DI1" );
+
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    DI1.init_and_alloc( 0, 1 );
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( DI1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -1470,6 +1580,289 @@ TEST( valve, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() );
     }
 
+TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
+    {
+    valve_DO1_DI1_off V2( "V1" );
+    EXPECT_STREQ( "Клапан", V2.get_type_name() );
+    EXPECT_STREQ( "V1", V2.get_name() );
+    }
+
+TEST( valve_DO1_DI1_off, set_cmd )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+
+    EXPECT_EQ( V1.get_state(), 0 );
+
+    V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init( 1, 1, 0, 0 );
+    V1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    V1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.set_cmd( "ST", 0, 0 );
+    *V1.DI_channels.char_read_values[ 0 ] = 1; // Включаем обратную связь.
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Несуществующая команда - состояние не должно изменяться.
+    V1.set_cmd( "ST", 0, 10 );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+void check_fb( valve* V1 )
+    {
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 1 ] = 1;
+    // Есть обратная связь для отключенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+
+    *V1->DO_channels.char_write_values[ 0 ] = 1;
+    *V1->DI_channels.char_read_values[ 1 ] = 0;
+    // Нет обратной связи для включенного состояния.
+    EXPECT_FALSE( V1->get_fb_state() );
+
+    *V1->DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1->get_fb_state() );
+    }
+
+
+TEST( valve_DO1_DI2, valve_DO1_DI2 )
+    {    
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    
+    valve_DO1_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_DO1_DI2, get_fb_state )
+    {
+    valve_DO1_DI2 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 2 );
+
+    check_fb( &V1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO2_DI2, valve_DO2_DI2 )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_DO2_DI2 V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_DO2_DI2, get_fb_state )
+    {
+    valve_DO2_DI2 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 2, 2 );
+
+    // Нет управления и нет обратных связей.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Нет обратной связь для отключенного состояния.
+    *V1.DO_channels.char_write_values[ 0 ] = 1;
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Есть управление и обратная связь для отключенного состояния.
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    // Есть управление и обратная связь для включенного состояния.
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 1 ] = 1;
+    *V1.DI_channels.char_read_values[ 1 ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    // Нет обратная связь для включенного состояния.
+    *V1.DI_channels.char_read_values[ 1 ] = 0;
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_DO1_DI1_off, get_fb_state )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+
+    // Нет обратной связи для отключенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    // Есть обратная связь для включенного состояния.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO1_DI1_off, direct_off )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    // Включение уже включенного клапана.
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.direct_off();
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Отключение уже отключенного клапана.
+    V1.direct_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_DO1_DI1_on, get_fb_state )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    // Нет обратной связь для включенного состояния.
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO1_DI1_on, direct_off )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1, 1 );
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    V1.direct_on();
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    // Включение уже включенного клапана.
+    V1.direct_on();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    V1.direct_off();
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    // Отключение уже отключенного клапана.
+    V1.direct_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( valve_mix_proof, valve_mix_proof )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_mix_proof V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_mix_proof, get_fb_state )
+    {
+    valve_mix_proof V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 1 ] = 1;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    // Есть обратная связь для активного верхнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    *V1.DO_channels.char_write_values[ 1 ] = 0;
+    *V1.DO_channels.char_write_values[ 2 ] = 1;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_mix_proof, direct_set_state )
+    {
+    valve_mix_proof V1( "V1" );
+ 
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.direct_set_state( valve::VALVE_STATE::V_UPPER_SEAT );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_UPPER_SEAT );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_LOWER_SEAT );
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_LOWER_SEAT );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_OFF );
+    *V1.DI_channels.char_read_values[ 1 ] = 1;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
+
+    V1.direct_set_state( valve::VALVE_STATE::V_ON );
+    *V1.DI_channels.char_read_values[ 0 ] = 1;
+    *V1.DI_channels.char_read_values[ 1 ] = 0;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_ON );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( analog_valve, get_min_value )
     {
@@ -1490,6 +1883,37 @@ TEST( analog_valve, get_type_name )
     }
 
 
+TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    valve_bottom_mix_proof V1( "V1" );
+
+    V1.save_device( buff, "" );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+        "P_FB=0},\n", buff );
+    }
+
+TEST( valve_bottom_mix_proof, get_fb_state )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 0;
+    *V1.DO_channels.char_write_values[ 2 ] = 1;
+    *V1.DI_channels.char_read_values[ 0 ] = 0;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( valve_bottom_mix_proof, is_switching_off_finished )
     {
     valve_bottom_mix_proof V1( "V1" );
@@ -1508,6 +1932,24 @@ TEST( valve_bottom_mix_proof, is_switching_off_finished )
     EXPECT_EQ( true, V1.is_switching_off_finished() );
     }
 
+TEST( valve_bottom_mix_proof, on )
+    {
+    valve_bottom_mix_proof V1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 3, 2 );
+
+    V1.on();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    *V1.DI_channels.char_read_values[ 
+        valve_bottom_mix_proof::CONSTANTS::DI_INDEX_OPEN ] = 1;
+    // Есть обратная связь для активного нижнего седла.
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_mini_flushing, get_state )
     {
@@ -1523,6 +1965,25 @@ TEST( valve_mini_flushing, get_state )
 
     V1.off();
     EXPECT_EQ( valve::V_OFF, V1.get_state() );
+    }
+
+TEST( valve_mini_flushing, get_fb_state )
+    {
+    valve_mini_flushing V1( "V1" );
+    V1.init_and_alloc( 2, 2 );
+
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    // Устанавливаем сигнал обратной связи.    
+    *V1.DI_channels.char_read_values[ 
+        valve_mini_flushing::CONSTANTS_DI::DI_INDEX_CLOSE ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -1565,6 +2026,21 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
+    }
+
+TEST( valve_iolink_shut_off_sorio, get_fb_state )
+    {
+    valve_iolink_shut_off_sorio V1( "V1" );
+    V1.init( 0, 0, 1, 1 );
+    V1.AO_channels.int_write_values[ 0 ] = new int_2[ 2 ]{ 0 };
+    V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    EXPECT_TRUE( V1.get_fb_state() ); //Default value.
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
@@ -2168,6 +2644,23 @@ TEST( valve_AS_DO1_DI2, direct_set_state )
     EXPECT_EQ( valve::VALVE_STATE::V_ON,v1.get_state() );
     }
 
+TEST( valve_AS_DO1_DI2, get_fb_state )
+    {
+    valve_AS_DO1_DI2 v1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Задаем AO-область данных устройства.
+    v1.init( 0, 0, 1, 1 );
+    const auto AO_SIZE = 5;
+    v1.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    v1.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+
+    EXPECT_FALSE( v1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
     {
@@ -2230,6 +2723,20 @@ TEST( level_s_iolink, set_article )
     EXPECT_EQ( false, LS1.is_active() );
     }
 
+TEST( level_s_iolink, get_state )
+    {
+    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+
+
+    EXPECT_EQ( LS1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( LS1.get_state(), 0 );
+
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( i_motor, i_motor )
     {
@@ -2259,6 +2766,25 @@ TEST( i_motor, get_amperage )
     EXPECT_EQ( M1.get_amperage(), 0.f );
     }
 
+TEST( motor, direct_off )
+    {
+    motor M1( "M1", device::DST_M_FREQ );
+    M1.init_and_alloc( 1, 1 );
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+        
+    M1.direct_on();
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    M1.direct_off();
+    *M1.DI_channels.char_read_values[ 0 ] = 0;
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( motor, direct_set_state )
     {
@@ -2269,17 +2795,83 @@ TEST( motor, direct_set_state )
 
 TEST( motor, save_device )
     {
-    motor M1( "M1", device::DST_M_FREQ );
-    const int BUFF_SIZE = 100;
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 0, 0, 0, 0 );
+
+
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
     M1.save_device( buff, "" );
     EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, ERRT=0, P_ON_TIME=0},\n", buff );
+
+    G_PAC_INFO()->emulation_off();
+    M1.init_and_alloc( 2, 1, 1 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    *M1.DO_channels.char_write_values[ 1 ] = 1;
+
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    M1.save_device( buff, "" );
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_STREQ( "M1={M=0, ST=-1, V=0, R=1, ERRT=1, P_ON_TIME=0},\n", buff );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
     }
 
 TEST( motor, get_type_name )
     {
     motor test_dev( "test_M1", device::DST_M_VIRT );
     EXPECT_STREQ( "Двигатель", test_dev.get_type_name() );
+    }
+
+TEST( motor, get_value )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AI( 0, 0, 0, 0 );
+
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
+    M1.init( 0, 0, 1, 0 );
+    M1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+    M1.AO_channels.int_write_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    auto VALUE = 90.f;
+    *M1.AO_channels.int_write_values[ 0 ] = static_cast<int_2>( VALUE );
+
+    EXPECT_EQ( M1.get_value(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( M1.get_value(), VALUE );
+    
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( motor, get_state )
+    {
+    motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
+    M1.init( 1, 1, 0, 0 );
+    M1.DO_channels.char_write_values[ 0 ] = new u_char{ 0 };
+    M1.DO_channels.char_read_values[ 0 ] = new u_char{ 0 };
+    M1.DI_channels.char_read_values[ 0 ] = new u_char{ 0 };
+
+    EXPECT_EQ( M1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    *M1.DO_channels.char_write_values[ 0 ] = 1;
+    *M1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( M1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -3089,6 +3681,34 @@ TEST( wages, get_type_name )
     EXPECT_STREQ( "Тензорезистор", test_dev.get_type_name() );
     }
 
+TEST( wages, get_weight )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 2, 2 );
+    mngr.init_node_AI( 0, 0, 491, 0 );
+    mngr.init_node_AI( 0, 1, 491, 1 );
+
+    wages test_dev( "test_W1" );
+    test_dev.init( 0, 0, 0, 2 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 1, 0, 1 );
+    test_dev.AI_channels.int_read_values[ 0 ] = new int_2[ 1 ]{ 0 };
+    test_dev.AI_channels.int_read_values[ 1 ] = new int_2[ 1 ]{ 0 };
+    *test_dev.AI_channels.int_read_values[ 1 ] = 65;
+
+    test_dev.set_cmd( "P_NOMINAL_W", 0, 5 );
+    test_dev.set_cmd( "P_RKP", 0, 2 );
+
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+    DeltaMilliSecSubHooker::set_default_time();
+
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 TEST( wages_eth, evaluate_io )
     {
@@ -3394,6 +4014,12 @@ TEST( temperature_e, get_type_name )
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
     }
 
+TEST( temperature_e, get_state )
+    {
+    temperature_e TE1( "test_TE1" );
+    test_temperature( &TE1 );
+    }
+
 
 TEST( threshold_regulator, set_value )
     {
@@ -3601,6 +4227,7 @@ TEST( par_device, set_par_name )
     dev.set_par_name( IDX, OFFSET + 1, "TEST_NAME" );
     } 
 
+
 TEST ( valve_AS, get_lower_seat_offset)
     {
     valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
@@ -3615,6 +4242,79 @@ TEST ( valve_AS, get_upper_seat_offset)
     EXPECT_EQ( valve.C_OPEN_S3, valve.get_upper_seat_offset() );
     valve.reverse_seat_connection = true;
     EXPECT_EQ( valve.C_OPEN_S2, valve.get_upper_seat_offset() );
+    }
+
+TEST( valve_AS, get_valve_state )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    const auto AO_SIZE = 5;
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    valve.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    valve.set_state( valve::VALVE_STATE::V_UPPER_SEAT );
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_UPPER_SEAT );
+
+    valve.set_state( valve::VALVE_STATE::V_LOWER_SEAT );
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_LOWER_SEAT );
+
+    valve.off();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_AS, get_fb_state )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    EXPECT_TRUE( valve.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ 5 ]{ 0 };
+
+    EXPECT_FALSE( valve.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_AS, direct_off )
+    {
+    valve_AS valve( "V1", device::DST_V_AS_MIXPROOF );
+
+    G_PAC_INFO()->emulation_off();
+    // Задаем AO-область данных устройства.
+    valve.init( 0, 0, 1, 1 );
+    const auto AO_SIZE = 5;
+    valve.AO_channels.int_read_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    valve.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
+    
+    valve.direct_on();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_ON );
+
+    valve.direct_off();
+    std::memcpy( *valve.AO_channels.int_read_values,
+        *valve.AO_channels.int_write_values, AO_SIZE * sizeof( int_2 ) );
+    EXPECT_EQ( valve.get_valve_state(), valve::VALVE_STATE::V_OFF );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -3637,6 +4337,19 @@ TEST( circuit_breaker, get_type_name )
     circuit_breaker F1( "F1" );
     auto res = F1.get_type_name();
     EXPECT_STREQ( "Автоматический выключатель", res );
+    }
+
+TEST( circuit_breaker, set_cmd )
+    {
+    circuit_breaker F1( "F1" );
+
+    EXPECT_EQ( F1.get_state(), 0 );
+
+    F1.set_cmd( "ST", 0, 1. );
+    EXPECT_EQ( F1.get_state(), 1 );
+
+    F1.set_cmd( "ST", 0, 0. );
+    EXPECT_EQ( F1.get_state(), 0 );
     }
 
 

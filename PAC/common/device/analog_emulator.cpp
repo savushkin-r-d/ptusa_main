@@ -1,4 +1,5 @@
 #include "analog_emulator.h"
+std::random_device analog_emulator::rd = {};
 
 analog_emulator::analog_emulator( float math_expec, float st_deviation ) :
     d( math_expec, st_deviation )

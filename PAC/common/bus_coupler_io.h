@@ -218,14 +218,19 @@ class io_device
         VENDOR get_io_vendor() const;
 
         // Lua.
-        void init( int DO_count, int DI_count,
-            int AO_count, int AI_count );
+        void init( int DO_count, int DI_count, int AO_count, int AI_count );
 
-        void init_channel( int type, int ch_inex, int node, int offset, int module_offset = -1, int logical_port = -1 );
+        void init_channel( int type, int ch_inex, int node, int offset,
+            int module_offset = -1, int logical_port = -1 );
 
         void set_io_vendor( VENDOR vendor );
 
         static int last_err;
+
+#ifdef PTUSA_TEST
+        void init_and_alloc( int DO_count = 1, int DI_count = 0,
+            int AO_count = 0, int AI_count = 0 );
+#endif
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода.

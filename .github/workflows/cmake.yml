@@ -257,6 +257,13 @@ jobs:
         luarocks install busted
 
 
+    # Install valgrind
+    - name: Install valgrind on Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt install -y valgrind
+
+
     - name: Run tests
       if: matrix.config.run_tests == 'true'
       shell: cmake -P {0}
@@ -309,7 +316,7 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        lcov --capture --directory . --output-file coverage.info
+        lcov --capture --directory . --ignore-errors mismatch --output-file coverage.info
         lcov --remove coverage.info '/usr/*' --remove coverage.info '*/test/*' --remove coverage.info '*/googletest/*' --output-file coverage.info # filter system-files
         lcov --list coverage.info # debug info
 

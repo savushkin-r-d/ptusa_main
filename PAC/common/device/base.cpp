@@ -296,8 +296,11 @@ int device::save_device( char* buff, const char* prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    const int extra_symbols_length = 2;                     //Remove last " ,".
-    if ( res > extra_symbols_length ) res -= extra_symbols_length;
+    if ( const auto extra_symbols_length = 2;
+        res > extra_symbols_length ) //Remove last " ,".
+        {
+        res -= extra_symbols_length;
+        }
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
     return res;
     }
@@ -500,6 +503,34 @@ digital_io_device::digital_io_device( const char* dev_name, device::DEVICE_TYPE 
     device( dev_name, type, sub_type, par_cnt ),
     io_device( dev_name )
     {
+    }
+//-----------------------------------------------------------------------------
+void digital_io_device::direct_set_state( int new_state )
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( new_state );
+        }
+
+    switch ( new_state )
+        {
+        case 0:
+            direct_off();
+            break;
+
+        case 1:
+            direct_on();
+            break;
+
+        default:
+            if ( G_DEBUG )
+                {
+                G_LOG->warning( 
+                    "%s\t digital_io_device::direct_set_state() - new_state = %d",
+                    get_name(), new_state );
+                }
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

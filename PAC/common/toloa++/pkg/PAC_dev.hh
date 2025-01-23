@@ -813,7 +813,7 @@ device* DEVICE( int s_number );
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
-class dev_stub
+class dev_stub : public i_counter
     {
     public:
         /// @brief Получение состояния устройства.
@@ -839,20 +839,6 @@ class dev_stub
         ///
         /// @return 0
         int get_state();
-
-        /// @brief Остановка счетчика. Ничего не делает.
-        void pause();
-
-        /// @brief Возобновление счетчика. Ничего не делает.
-        void start();
-
-        /// @brief Сброс счетчика. Ничего не делает.
-        void reset();
-
-        /// @brief Получение значения счетчика.
-        ///
-        /// @return 0
-        unsigned int get_quantity();
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1915,7 +1901,7 @@ class modbus_client
     protected:
 
     public:
-        modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
+        modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
         int read_coils(unsigned int start_address, unsigned int quantity);

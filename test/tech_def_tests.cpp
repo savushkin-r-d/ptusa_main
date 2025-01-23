@@ -155,6 +155,53 @@ TEST( tech_object, lua_check_function )
     G_LUA_MANAGER->free_Lua();
     }
 
+TEST( tech_object, is_any_error )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+
+    tech_object tank1( "TANK", 1, 1, "TANK1", 10, 1, 10, 10, 10, 10 );
+
+    // У танка не должно быть аварий.
+    auto res = tank1.is_any_error();
+    ASSERT_FALSE( res );
+
+    tank1.set_err_msg( "Тестовое событие", 1, 0,
+        i_tech_object::ERR_MSG_TYPES::ERR_CANT_ON );
+    // У танка появилось событие (но не авария).
+    res = tank1.is_any_error();
+    ASSERT_FALSE( res );
+
+    tank1.set_err_msg( "Тестовая авария", 1, 0,
+        i_tech_object::ERR_MSG_TYPES::ERR_ALARM );
+    // У танка появилась авария.
+    res = tank1.is_any_error();
+    ASSERT_TRUE( res );
+
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( tech_object, is_check_mode )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+
+    tech_object tank1( "TANK", 1, 1, "TANK1", 10, 1, 10, 10, 10, 10 );
+
+    // У танка не должно быть пользовательской функции получения состояния
+    // функциональности проверки операций - должно быть 1 (true).
+    auto res = tank1.is_check_mode( 0 );
+    ASSERT_TRUE( res );
+
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( tech_object, save )
     {
 	lua_State* L = lua_open();

@@ -619,7 +619,7 @@ int TRecipeManager::LoadFromFile( const char* filename )
 #ifdef PAC_PLCNEXT
     sprintf(fname, "/opt/main/%s", filename);
 #else
-    sprintf(fname, "%s", filename);
+    sprintf( fname, "./%s", filename );
 #endif // PAC_PLCNEXT
     memset(recipeMemory, 0, recipeMemorySize);
     memFile = fopen(fname, "r+b");
@@ -657,8 +657,8 @@ recipeStartAddr(0L)
     recipeMemory = new unsigned char[recipeMemorySize];
     LoadFromFile(defaultfilename);
     lastEvalTime = get_millisec();
-    currentRecipeName = new char[recipeNameLength];
-    recipeList = new char[(recipeNameLength + 6) * recipePerLine];
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER ];
+    recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 6) * recipePerLine];
     strcpy(recipeList, "");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
     FormRecipeList();

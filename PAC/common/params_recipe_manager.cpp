@@ -102,8 +102,7 @@ int ParamsRecipeManager::parseDriverCmd( const char *buff )
     std::string cmd = buff;
     G_LOG->debug(cmd.c_str());
     std::regex rmCommand( R"lit(__RECMAN\[(\d+)\]:set_cmd\( "(\w+)", (\d+), ((?:"(.*)")|([\d\.]+)) \))lit" );
-    std::smatch rmMatch;
-    if ( std::regex_match( cmd, rmMatch, rmCommand ))
+    if ( std::smatch rmMatch; std::regex_match( cmd, rmMatch, rmCommand ))
         {
         auto recMgrIdx = std::stoi( rmMatch[ 1 ].str( ));
         auto varName = rmMatch[ 2 ].str( );
@@ -531,7 +530,7 @@ ParamsRecipeStorage *ParamsRecipeAdapter::getRecStorage( ) const
     return mRecStorage;
     }
 
-int ParamsRecipeAdapter::set_cmd( const std::string &varName, int index, float value, const std::string &strValue )
+int ParamsRecipeAdapter::set_cmd( const std::string_view &varName, int index, float value, const std::string_view &strValue )
     {
     if ( varName == "ACT" )
         {

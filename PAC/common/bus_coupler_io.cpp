@@ -302,11 +302,11 @@ int io_device::set_AO( u_int index, float value, float min_value,
         AO_channels.int_write_values &&
         AO_channels.int_write_values[ index ] )
         {
-        u_int table_n = AO_channels.tables[ index ];
-        u_int offset = AO_channels.offsets[ index ];
-        u_int module_type = G_IO_MANAGER()->get_node( table_n )->AO_types[ offset ];
+        auto table_n = AO_channels.tables[ index ];
+        auto offset = AO_channels.offsets[ index ];
 
-        switch ( module_type )
+        switch ( auto module_type =
+            G_IO_MANAGER()->get_node( table_n )->AO_types[ offset ]; module_type )
             {
             case 554:
             case 555:
@@ -717,6 +717,35 @@ void io_device::init( int DO_count, int DI_count, int AO_count,
         AI_channels.init( AI_count );
         }
     }
+//-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+void io_device::init_and_alloc( int DO_count, int DI_count, int AO_count,
+    int AI_count )
+    {
+    init( DO_count, DI_count, AO_count, AI_count );
+
+    for ( auto i = 0; i < DO_count; i++ )
+        {
+        DO_channels.char_read_values[ i ] = new u_char{ 0 };
+        DO_channels.char_write_values[ i ] = new u_char{ 0 };
+        }
+    for ( auto i = 0; i < DI_count; i++ )
+        {
+        DI_channels.char_read_values[ i ] = new u_char{ 0 };
+        }
+    for ( auto i = 0; i < AO_count; i++ )
+        {
+        AO_channels.int_read_values[ i ] = new int_2 { 0 };
+        AO_channels.int_module_read_values[ i ] = new int_2 { 0 };
+        AO_channels.int_write_values[ i ] = new int_2 { 0 };
+        }
+    for ( auto i = 0; i < AI_count; i++ )
+        {
+        AI_channels.int_read_values[ i ] = new int_2 { 0 };
+        AI_channels.int_module_read_values[ i ] = new int_2 { 0 };
+        }
+    }
+#endif
 //-----------------------------------------------------------------------------
 io_device::VENDOR io_device::get_io_vendor() const
     {

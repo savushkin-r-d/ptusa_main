@@ -13,8 +13,11 @@ class modbus_client
         unsigned int andmask;
         static const int write_buff_start = 13; //Начало буфера данных для операций записи
         static const int read_buff_start = 9;  //Начало буфера данных для операций чтения
+
+        void init_frame(unsigned int address, unsigned int value, unsigned int seventh_byte);
+
     public:
-        modbus_client(unsigned int id, char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
+        modbus_client(unsigned int id, const char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
         int get_id();
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
