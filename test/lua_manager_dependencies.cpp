@@ -47,7 +47,8 @@ void LuaManagerTest::TearDown()
 
     if ( need_free_Lua_state )
         {
-        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate,
+        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate 
+        // (или сразу с помощью new lua_state),
         // то удаляем с помощью delete.
         delete G_LUA_MANAGER->get_Lua();
         G_LUA_MANAGER->set_Lua( nullptr );
