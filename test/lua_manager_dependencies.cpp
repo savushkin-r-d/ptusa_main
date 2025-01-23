@@ -47,8 +47,8 @@ void LuaManagerTest::TearDown()
 
     if ( need_free_Lua_state )
         {
-        // Òàê êàê Lua ñîçäàâàëè ñ ïîìîùüþ new lua_state â mock_luaL_newstate,
-        // òî óäàëÿåì ñ ïîìîùüþ delete.
+        // Ð¢Ð°Ðº ÐºÐ°Ðº Lua ÑÐ¾Ð·Ð´Ð°Ð²Ð°Ð»Ð¸ Ñ Ð¿Ð¾Ð¼Ð¾Ñ‰ÑŒÑŽ new lua_state Ð² mock_luaL_newstate,
+        // Ñ‚Ð¾ ÑƒÐ´Ð°Ð»ÑÐµÐ¼ Ñ Ð¿Ð¾Ð¼Ð¾Ñ‰ÑŒÑŽ delete.
         delete G_LUA_MANAGER->get_Lua();
         G_LUA_MANAGER->set_Lua( nullptr );
         need_free_Lua_state = false;
