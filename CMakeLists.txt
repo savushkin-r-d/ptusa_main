@@ -441,6 +441,22 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
+
+    add_test(T1-PLCnext-Demo_valgrind valgrind
+				--error-exitcode=1
+				--num-callers=100
+				--leak-check=full
+				--verbose
+				--track-origins=yes 				
+				--show-leak-kinds=all 
+				lua5.1
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
+                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
+                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
+                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+
+
     add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
             --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json 
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
