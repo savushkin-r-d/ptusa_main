@@ -30,19 +30,19 @@ void LuaManagerTest::SetUp()
     lua_hooks.push_back(subhook_new((void*) &lua_close,             (void*) &mock_lua_close,             SUBHOOK_64BIT_OFFSET));
 
     // Install hooks
-    for ( size_t i = 0; i < lua_hooks.size(); i++ )
+    for ( auto hook : lua_hooks )
         {
-        subhook_install( lua_hooks[ i ] );
+        subhook_install( hook );
         }
     }
 
 void LuaManagerTest::TearDown()
     {
     // Remove the hooks and free memory.
-    for ( size_t i = 0; i < lua_hooks.size(); i++ )
+    for ( auto hook : lua_hooks )
         {
-        subhook_remove( lua_hooks[ i ] );
-        subhook_free( lua_hooks[ i ] );
+        subhook_remove( hook );
+        subhook_free( hook );
         }
 
     if ( need_free_Lua_state )

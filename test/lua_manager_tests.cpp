@@ -122,7 +122,7 @@ TEST_F(LuaManagerTest, init_check_file_failure)
 
 TEST_F(LuaManagerTest, init_check_file_version_failure)
 {
-    lua_State* state = new lua_State{};
+    auto state = new lua_State{};
     set_file_counter(1);
 
     // also checking of set lua_state
@@ -136,8 +136,8 @@ TEST_F(LuaManagerTest, init_check_file_version_failure)
 TEST_F( LuaManagerTest, init_system_scripts_execution_failure )
 {
     subhook_t hook_luaL_loadfile =
-        subhook_new( (void*)luaL_loadfile, (void*)mock_luaL_loadfile_failure,
-        SUBHOOK_TRAMPOLINE );
+        subhook_new( (void*)&luaL_loadfile, (void*)&mock_luaL_loadfile_failure,
+        SUBHOOK_64BIT_OFFSET );
     subhook_install( hook_luaL_loadfile );
 
     EXPECT_EQ( 1, G_LUA_MANAGER->init( nullptr, "", "", "" ) );
@@ -648,7 +648,7 @@ TEST_F(LuaManagerTest, reload_script_lua_state_null_failure)
 
 TEST_F(LuaManagerTest, reload_script_success)
 {
-    lua_State* state = new lua_State{};
+    auto state = new lua_State{};
     set_file_counter(1);
     // easiest way to set lua_state is
     // to shutdown with wrong script version (G->LOG CRITIC message here)
