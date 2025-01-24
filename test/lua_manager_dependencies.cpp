@@ -2,6 +2,8 @@
 
 void LuaManagerTest::SetUp()
 {
+    ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
+
 	lua_hooks.push_back(subhook_new((void *) lua_pushcclosure,      (void *) mock_lua_pushcclosure,     SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));	
 	lua_hooks.push_back(subhook_new((void *) lua_type,				(void *) mock_lua_type,				SUBHOOK_64BIT_OFFSET));
@@ -25,19 +27,35 @@ void LuaManagerTest::SetUp()
     lua_hooks.push_back(subhook_new((void *) lua_tolstring,         (void *) mock_lua_tolstring,        SUBHOOK_64BIT_OFFSET));
     lua_hooks.push_back(subhook_new((void *) lua_settop,            (void *) mock_lua_settop,           SUBHOOK_64BIT_OFFSET));
 
-	// Install hooks
-	for (size_t i = 0; i < lua_hooks.size(); i++) {
-		subhook_install(lua_hooks[i]);
-	}
-}
+    lua_hooks.push_back(subhook_new((void*) &lua_close,             (void*) &mock_lua_close,             SUBHOOK_64BIT_OFFSET));
+
+    // Install hooks
+    for ( auto hook : lua_hooks )
+        {
+        subhook_install( hook );
+        }
+    }
 
 void LuaManagerTest::TearDown()
-{
-	// Remove the hooks and free memory
-	for (size_t i = 0; i < lua_hooks.size(); i++) {
-		subhook_remove(lua_hooks[i]);
-		subhook_free(lua_hooks[i]);
-	}
+    {
+    // Remove the hooks and free memory.
+    for ( auto hook : lua_hooks )
+        {
+        subhook_remove( hook );
+        subhook_free( hook );
+        }
+
+    if ( need_free_Lua_state )
+        {
+        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate 
+        // (или сразу с помощью new lua_state),
+        // то удаляем с помощью delete.
+        delete G_LUA_MANAGER->get_Lua();
+        G_LUA_MANAGER->set_Lua( nullptr );
+        need_free_Lua_state = false;
+        }
+
+	ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
 }
 
 void set_file_counter(int val)
@@ -106,7 +124,7 @@ int	mock_luaL_loadfile(lua_State *L, const char *filename)
 
 lua_State* mock_luaL_newstate(void)
 {
-    return new lua_State;
+    return new lua_State{};
 }
 
 int	mock_lua_gc(lua_State *L, int what, int data)
