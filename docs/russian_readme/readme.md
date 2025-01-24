@@ -98,7 +98,7 @@ flowchart TD
 `git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
 
 Или, если вы клонировали проект без инициализированных и обновленных подмодулей, попробуйте следующее:
-`git submodules update --init --recursive`
+`git submodule update --init --recursive`
 
 ### win ###
 
