@@ -67,4 +67,7 @@ TEST( dll, lua_init )
 
     res = lua_init( L );
     EXPECT_EQ( 1, res );
+
+    lua_close( L );
+    L = nullptr;
     }
