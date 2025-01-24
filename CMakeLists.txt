@@ -404,6 +404,7 @@ if (WIN32)
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
+      --opc                 Start OPC UA server with program start
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
@@ -421,6 +422,7 @@ else()
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
+      --opc                 Start OPC UA server with program start
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
