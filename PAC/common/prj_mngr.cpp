@@ -14,6 +14,7 @@
 #include "device/manager.h"
 #include "param_ex.h"
 #include "params_recipe_manager.h"
+#include "OPCUAServer.h"
 
 #include "lua_manager.h"
 
@@ -56,6 +57,9 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
+#ifdef OPCUA
+        ( "opc", "Start OPC UA server with program start" )
+#endif        
         ( "sys_path", "Sys path", cxxopts::value<std::string>() )
         ( "path", "Path", cxxopts::value<std::string>() )
         ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
@@ -97,6 +101,14 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
             }
         }
+
+#ifdef OPCUA
+    if ( result[ "opc" ].as<bool>() )
+        {
+        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+        G_LOG->warning( "OPC UA server is activated." );
+        }
+#endif
 
     if ( result.count( "sys_path" ) )
         {
