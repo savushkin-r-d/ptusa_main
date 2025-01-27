@@ -104,7 +104,7 @@ You could clone repository by next command:
 `git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
 
 or, if you are cloned without initializing and updating submodules, try next:
-`git submodules update --init --recursive`
+`git submodule update --init --recursive`
 
 ### win ###
 
