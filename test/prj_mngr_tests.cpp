@@ -175,10 +175,7 @@ Resetting params (command line parameter "rcrc").
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );    
+        
 #if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> OPC UA server is activated.\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
@@ -191,14 +188,11 @@ Resetting params (command line parameter "rcrc").
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false", ""};
+    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );    
+
 #if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
@@ -214,10 +208,7 @@ Resetting params (command line parameter "rcrc").
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+
 #if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
@@ -234,10 +225,7 @@ Resetting params (command line parameter "rcrc").
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-    _tm = std::time( nullptr );
-    tm = *std::localtime( &_tm );
-    tmp.str( "" );
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+
 #if defined WIN_OS
     debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
 #else
