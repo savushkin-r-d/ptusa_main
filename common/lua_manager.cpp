@@ -16,6 +16,22 @@
 auto_smart_ptr< lua_manager > lua_manager::instance;
 bool lua_manager::is_print_stack_traceback = true;
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+void lua_manager::set_Lua( lua_State* l )
+    {
+    L = l;
+    }
+
+void lua_manager::free_Lua()
+    {
+    if ( L )
+        {
+        lua_close( L );
+        L = nullptr;
+        }
+    }
+#endif
+//-----------------------------------------------------------------------------
 lua_manager* lua_manager::get_instance()
     {
     if ( static int is_init = 0; 0 == is_init )
@@ -119,7 +135,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( NULL == L )
             {
-            printf( "Error creating Lua context.\n" );
+            G_LOG->critical( "Error creating Lua context." );
             return 1;
             }
         is_free_lua = 1;
@@ -360,7 +376,7 @@ lua_manager::~lua_manager()
         if ( L )
             {
             lua_close( L );
-            L = NULL;
+            L = nullptr;
             }
         }
     }
@@ -460,9 +476,20 @@ int lua_manager::exec_lua_method_var( const char* object_name,
     if ( object_name && strcmp( object_name, "" ) != 0 )
         {
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
+        if ( lua_type( L, -1 ) == LUA_TNIL )
+            {
+            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            return 1;
+            }
+
         lua_getfield( L, -1, function_name );
-        if ( lua_type( L, -1 ) == LUA_TNIL ) return 1;
+        if ( lua_type( L, -1 ) == LUA_TNIL )
+            {
+            lua_pop( L, 1 ); //Удаляем object_name. 
+            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            return 1;
+            }
+
         lua_remove( L, -2 );
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
 

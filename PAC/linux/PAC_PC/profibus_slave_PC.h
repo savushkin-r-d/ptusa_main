@@ -14,6 +14,7 @@
 #ifndef PROFIBUS_SLAVE_PC
 #define PROFIBUS_SLAVE_PC
 
+#include "smart_ptr.h"
 #include "profibus_slave.h"
 
 //-----------------------------------------------------------------------------
@@ -33,6 +34,11 @@ class profibus_slave_PC : public profibus_slave
 
         static profibus_slave* get_instance()
             {
+            if ( instance.is_null() )
+                {
+                instance = new profibus_slave_PC();
+                }
+
             return instance;
             }
 
@@ -65,7 +71,7 @@ class profibus_slave_PC : public profibus_slave
             }
 
     private:
-        static profibus_slave_PC* instance;
+        static auto_smart_ptr < profibus_slave_PC > instance;
     };
 //-----------------------------------------------------------------------------
 
