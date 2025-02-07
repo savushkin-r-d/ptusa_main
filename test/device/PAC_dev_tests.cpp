@@ -6,6 +6,7 @@ using namespace ::testing;
 #include <cstring>
 #include <iomanip>
 
+
 TEST( signal_column, get_type_name )
     {
     signal_column_iolink test_dev( "test_HL1" );
@@ -1076,6 +1077,7 @@ TEST( analog_io_device, set_cmd )
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
     }
+
 
 TEST( DO1, get_state )
     {
