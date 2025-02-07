@@ -4,7 +4,7 @@
 using namespace ::testing;
 
 #include <cstring>
-
+#include <iomanip>
 
 TEST( signal_column, get_type_name )
     {
@@ -1041,16 +1041,42 @@ TEST( analog_io_device, set_cmd )
     obj.set_cmd( "M", 0, 1 );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=1, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
     // Проверка отключения ручного режима.
     obj.set_cmd( "M", 0, 0 );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
     // Проверка включения ручного режима - только на 1 должен включиться.
+    testing::internal::CaptureStdout();
+    std::time_t _tm = std::time( nullptr );
+    std::tm tm = *std::localtime( &_tm );
+    std::stringstream tmp;
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
     obj.set_cmd( "M", 0, 100 );
+    auto output = testing::internal::GetCapturedStdout();
+    auto exp_output = 
+        tmp.str() +
+#if defined LINUX_OS
+        "\x1B[37m" +
+#endif
+        "DEBUG  (7) -> OBJ1\t analog_io_device::set_cmd() - prop =M, idx = 0, val = 100.000000\n" +
+#if defined LINUX_OS
+        "\x1B[0m" +
+#endif
+        tmp.str() +
+#if defined LINUX_OS        
+        "\x1B[37m" +
+#endif
+        "DEBUG  (7) -> OBJ1\t device::set_cmd() - prop = M, idx = 0, val = 100.000000\n"
+#if defined LINUX_OS
+        + "\x1B[0m"
+#endif
+        ;
+    EXPECT_EQ( output, exp_output );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
     }
-
 
 TEST( DO1, get_state )
     {
