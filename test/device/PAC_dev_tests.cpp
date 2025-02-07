@@ -1051,15 +1051,15 @@ TEST( analog_io_device, set_cmd )
 
     // Проверка включения ручного режима - только на 1 должен включиться.
     testing::internal::CaptureStdout();
-    struct tm time_info;
+    struct tm t_info;
     auto t = time( nullptr );
 #ifdef LINUX_OS
-    localtime_r( &t, &time_info );
+    localtime_r( &t, &t_info );
 #else
-    localtime_s( &time_info, &t );
+    localtime_s( &t_info, &t );
 #endif // LINUX_OS
     std::stringstream tmp;
-    tmp << std::put_time( &time_info, "%Y-%m-%d %H.%M.%S " );
+    tmp << std::put_time( &t_info, "%Y-%m-%d %H.%M.%S " );
     obj.set_cmd( "M", 0, 100 );
     auto output = testing::internal::GetCapturedStdout();
     auto exp_output = tmp.str() +
