@@ -5,6 +5,7 @@ using namespace ::testing;
 
 #include <cstring>
 #include <iomanip>
+#include <time.h>
 
 
 TEST( signal_column, get_type_name )
@@ -1050,10 +1051,15 @@ TEST( analog_io_device, set_cmd )
 
     // Проверка включения ручного режима - только на 1 должен включиться.
     testing::internal::CaptureStdout();
-    std::time_t _tm = std::time( nullptr );
-    std::tm tm = *std::localtime( &_tm );
+    struct tm time_info;
+    auto t = time( nullptr );
+#ifdef LINUX_OS
+    localtime_r( &t, &time_info );
+#else
+    localtime_s( &time_info, &t );
+#endif // LINUX_OS
     std::stringstream tmp;
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+    tmp << std::put_time( &time_info, "%Y-%m-%d %H.%M.%S " );
     obj.set_cmd( "M", 0, 100 );
     auto output = testing::internal::GetCapturedStdout();
     auto exp_output = tmp.str() +
