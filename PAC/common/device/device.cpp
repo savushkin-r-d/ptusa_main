@@ -3455,7 +3455,7 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        G_LOG->debug( "%s\t analog_io_device::set_cmd() - prop =%s, idx = %d, val = %f",
+        G_LOG->debug( "%s\t analog_io_device::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
         }
 

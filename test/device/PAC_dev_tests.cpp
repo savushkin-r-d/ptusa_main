@@ -1055,12 +1055,11 @@ TEST( analog_io_device, set_cmd )
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
     obj.set_cmd( "M", 0, 100 );
     auto output = testing::internal::GetCapturedStdout();
-    auto exp_output = 
-        tmp.str() +
+    auto exp_output = tmp.str() +
 #if defined LINUX_OS
         "\x1B[37m" +
 #endif
-        "DEBUG  (7) -> OBJ1\t analog_io_device::set_cmd() - prop =M, idx = 0, val = 100.000000\n" +
+        "DEBUG  (7) -> OBJ1\t analog_io_device::set_cmd() - prop = M, idx = 0, val = 100.000000\n" +
 #if defined LINUX_OS
         "\x1B[0m" +
 #endif
