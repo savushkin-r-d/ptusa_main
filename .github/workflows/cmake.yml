@@ -134,6 +134,7 @@ jobs:
           file(APPEND "$ENV{GITHUB_PATH}" ";${yasm_install_path}")
 
         elseif ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(COMMAND sudo apt-get update)
           execute_process(COMMAND sudo apt-get install -y yasm)
         endif()
 
@@ -225,6 +226,7 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        sudo apt-get update
         sudo apt-get install -y lua5.1
 
 
@@ -232,7 +234,9 @@ jobs:
     - name: Install LuaRocks on Linux
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt-get install -y luarocks
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y luarocks
 
     - name: Install LuaRocks on Windows
       if: runner.os == 'Windows'
@@ -246,7 +250,9 @@ jobs:
     - name: Install busted on Linux
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo luarocks install busted
+      run: |
+        sudo apt-get update
+        sudo luarocks install busted
 
     - name: Install busted on Windows
       if: runner.os == 'Windows'
@@ -261,7 +267,9 @@ jobs:
     - name: Install valgrind on Linux
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt install -y valgrind
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y valgrind
 
 
     - name: Run tests
@@ -310,7 +318,9 @@ jobs:
     - name: Install lcov (Linux only)
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt-get install -y lcov
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lcov
 
     - name: Create lcov report (Linux only)
       if: runner.os == 'Linux'
