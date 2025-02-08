@@ -3455,10 +3455,8 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        fmt::format_to( G_LOG->msg,
-            "{}\t analog_io_device::set_cmd() - prop = {}, idx = {}, val = {}",
+        G_LOG->debug( "%s\t analog_io_device::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
         }
 
     analog_emulator& emulator = get_emulator();
