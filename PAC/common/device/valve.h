@@ -718,7 +718,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             uint16_t unused2 : 8;
             };
 
-        in_data* in_info = new in_data;
+        in_data* in_info = new in_data{};
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 
