@@ -121,6 +121,11 @@ class valve : public digital_io_device
 
         void set_seat_wash_state( bool wash_flag );
 
+        /// @brief Получение информации о том, находится ли клапан в ошибке. 
+        /// Нужно для того, чтобы из промежуточных состояний (выключаюсь, ...)
+        /// переходит в ошибку.
+        virtual bool is_valve_error() const;
+
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
         /// @brief Получение состояния клапана без учета обратной связи.
@@ -688,6 +693,8 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+        bool is_valve_error() const override;
+
     private:
         struct in_data
             {
@@ -745,6 +752,8 @@ class valve_iolink_shut_off_thinktop : public valve
         float get_value() override;
 
         bool get_fb_state() override;
+
+        bool is_valve_error() const override;
 
         int get_off_fb_value() override;
 
@@ -816,6 +825,8 @@ class valve_iolink_shut_off_sorio : public valve
 
         bool get_fb_state() override;
 
+        bool is_valve_error() const override;
+
         int get_off_fb_value() override;
 
         int get_on_fb_value() override;
@@ -878,6 +889,8 @@ class valve_iolink_gea_tvis_a15 : public valve
         int get_off_fb_value() final;
         int get_on_fb_value() final;
 
+        bool is_valve_error() const override;
+
         void set_rt_par( u_int idx, float value ) override;
 
     protected:
@@ -901,7 +914,7 @@ class valve_iolink_gea_tvis_a15 : public valve
                                // Управление верхним седлом.
             bool error_on : 1; // ошибка активна 
 
-            uint16_t  pos : 10;     // позиция шкота в 10^-4 метра
+            uint16_t  pos : 10;     // позиция штока в 10^-4 метра
             uint16_t unused1 : 10;  // неиспользуемое битовое пространство
             };
 

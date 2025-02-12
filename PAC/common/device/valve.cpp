@@ -109,6 +109,9 @@ int valve::get_state()
     if ( G_PAC_INFO()->is_emulator() )
         return digital_io_device::get_state();
 
+    auto is_switch_time_elapsed = get_delta_millisec( start_switch_time ) >
+        static_cast<u_long>( get_par( P_ON_TIME, 0 ) );
+
     switch ( get_valve_state() )
         {
         case V_LOWER_SEAT:
@@ -163,8 +166,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
+                            if ( is_valve_error() || is_switch_time_elapsed )
                                 {
                                 return VX_ON_FB_ERR_MANUAL;
                                 }
@@ -182,8 +184,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
+                            if ( is_valve_error() || is_switch_time_elapsed )
                                 {
                                 return VX_ON_FB_ERR;
                                 }
@@ -232,8 +233,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
+                            if ( is_valve_error() || is_switch_time_elapsed )
                                 {
                                 return VX_OFF_FB_ERR_MANUAL;
                                 }
@@ -251,8 +251,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
+                            if ( is_valve_error() || is_switch_time_elapsed )
                                 {
                                 return VX_OFF_FB_ERR;
                                 }
@@ -311,6 +310,11 @@ bool valve::is_wash_seat_active() const
 void valve::set_seat_wash_state( bool wash_flag )
     {
     this->wash_flag = wash_flag;
+    }
+//-----------------------------------------------------------------------------
+bool valve::is_valve_error() const
+    {
+    return false;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve::get_valve_state()
@@ -1487,6 +1491,11 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
+bool valve_iolink_mix_proof::is_valve_error() const
+    {
+    return in_info->err != 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
 
@@ -1613,6 +1622,11 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
+bool valve_iolink_shut_off_sorio::is_valve_error() const
+    {
+    return in_info.status != 0;
+    }
+//-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_off_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
@@ -1714,6 +1728,11 @@ int valve_iolink_gea_tvis_a15::save_device_ex( char* buff )
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
         "CS={}, SUP={}, ERR={}, V={:.1f}, ", cs, sup, err, get_value() ).size;
     return res;
+    }
+//-----------------------------------------------------------------------------
+bool valve_iolink_gea_tvis_a15::is_valve_error() const
+    {
+    return in_info.error_on != 0;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_gea_tvis_a15::evaluate_io()
@@ -2088,6 +2107,11 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
     if ( out_info->sv1 && in_info->main && in_info->st ) return true;
 
     return false;
+    }
+//-----------------------------------------------------------------------------
+bool valve_iolink_shut_off_thinktop::is_valve_error() const
+    {
+    return in_info->err != 0;
     }
 //-----------------------------------------------------------------------------
 float valve_iolink_shut_off_thinktop::get_value()
