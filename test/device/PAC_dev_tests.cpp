@@ -2991,13 +2991,13 @@ TEST( counter_f, get_state )
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
+    //Малый расход - ошибка должна появиться.
     //Не прошло заданное время.
     fqt1.set_cmd( "P_DT", 0, 1000 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     //Прошло заданное время.
     fqt1.set_cmd( "P_DT", 0, 0 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
 
     //В состоянии паузы ошибки не должно быть.
     fqt1.pause();
@@ -3011,26 +3011,25 @@ TEST( counter_f, get_state )
     fqt1.set_property( "M", &m1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Расход ниже минимального - ошибка не должна появиться.
+    //Насос работает, но счетчик не считает.
     fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
     fqt1.get_state();
-    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
+    EXPECT_EQ( (int) i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
-    //Устанавливаем расход - ошибка должна появиться.
+    //Устанавливаем расход - ошибка должна остаться.
     fqt1.set_cmd( "F", 0, 1 );
     fqt1.get_state();
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
     fqt1.start();
-    //Расход стал ниже минимального - ошибка не должна появиться.
+    //Расход стал ниже минимального - ошибка должна остаться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
     fqt1.get_state();
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
-    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
-    fqt1.get_state();
-    fqt1.set_cmd( "ABS_V", 0, 200 );
+    //Сбрасываем ошибку.
+    fqt1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.pause();
@@ -3090,7 +3089,7 @@ TEST( counter_f, get_error_description )
     res = fqt1.get_error_description();
     EXPECT_STREQ( "обратная связь", res );
 
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_ERROR ) );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_PUMP_ERROR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "счет импульсов", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
@@ -3143,13 +3142,13 @@ TEST( counter, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, -10 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, -10 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -3269,8 +3268,8 @@ TEST( virtual_counter, direct_set_state )
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ), fqt1.get_state() );
 
 
-    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_ERROR ) );
-    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_ERROR ), fqt1.get_state() );
+    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ), fqt1.get_state() );
     }
 
 TEST( virtual_counter, set )
@@ -3381,7 +3380,7 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
 TEST( counter_iolink, evaluate_io )
@@ -3526,14 +3525,14 @@ TEST( counter_iolink, get_quantity )
     fqt1.set_state( 1 );        //Start
     fqt1.set_raw_value( 60 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_abs_quantity() );
 
 
     //Test reset to 0 physical counter after its power reboot.
     fqt1.set_raw_value( 10 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
 
     //Test physical counter overflow.
     fqt1.set_raw_value( fqt1.get_max_raw_value() - 10 );
