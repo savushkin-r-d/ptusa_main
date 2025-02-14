@@ -24,7 +24,11 @@ TEST( errors_manager, evaluate )
 
     //Generate error.
     dev->set_cmd( "F", 0, 1 );
+    dev->set_cmd( "P_DT", 0, 1 );
+    dev->set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    dev->evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
+    dev->evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
 
     //Should get an error.
@@ -52,7 +56,7 @@ TEST( errors_manager, evaluate )
     //Remove error.
     dev->set_cmd( "ABS_V", 0, 100 );
     dev->set_cmd( "P_DT", 0, 1000 );
-    dev->set_cmd( "ST", 0, 1 );   //Ñáðàñûâàåì îøèáêó ñ÷åò÷èêà.
+    dev->set_cmd( "ST", 0, 1 );   //Ð¡Ð±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÐ¼ Ð¾ÑˆÐ¸Ð±ÐºÑƒ ÑÑ‡ÐµÑ‚Ñ‡Ð¸ÐºÐ°.
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_ALARM -> AS_RETURN.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_RETURN.
