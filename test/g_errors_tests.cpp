@@ -28,7 +28,9 @@ TEST( errors_manager, evaluate )
     dev->set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
     dev->evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
+    DeltaMilliSecSubHooker::set_millisec( 2UL );
     dev->evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();    
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
 
     //Should get an error.
