@@ -2983,33 +2983,35 @@ TEST( camera, get_type_name )
 TEST( counter_f, get_state )
     {
     counter_f fqt1( "FQT1" );
+    fqt1.evaluate_io();    
+    fqt1.evaluate_io(); // Второй вызов (здесь и далее) необходим
+                        // для возникновения ошибки.
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Малый расход - но счетчик меняет показания - нет ошибки.
-    fqt1.set_cmd( "F", 0, 1 );
-    fqt1.evaluate_io();
-    // Второй вызов (здесь и далее) необходим для возникновения ошибки.
-    fqt1.evaluate_io();
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    fqt1.set_cmd( "ABS_V", 0, 100 );
-    fqt1.evaluate_io();
-    fqt1.evaluate_io();
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Малый расход - ошибка должна появиться.
-    //Не прошло заданное время.
+    fqt1.set_cmd( "F", 0, 1 );
+    //Не прошло заданное время - поэтому нет ошибки.
     fqt1.set_cmd( "P_DT", 0, 1000 );
     fqt1.evaluate_io();
     fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    //Прошло заданное время, но минимальный расход задан 0.
+    //Прошло заданное время, но минимальный расход задан 0 - поэтому нет
+    //ошибки.
     fqt1.set_cmd( "P_DT", 0, 1 );
     fqt1.evaluate_io();
     fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    //Прошло заданное время, задан минимальный расход.
+    //Прошло заданное время, задан минимальный расход, но счетчик считает -
+    //поэтому нет ошибки.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    DeltaMilliSecSubHooker::set_millisec( 2UL );
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    //Прошло заданное время, задан минимальный расход, счетчик не считает -
+    //есть ошибка.    fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_millisec( 2UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
@@ -3034,14 +3036,20 @@ TEST( counter_f, get_state )
     fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Насос работает, но счетчик не считает.
+    //Насос работает, счетчик считает.
     fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
+    fqt1.evaluate_io();
+    fqt1.set_cmd( "ABS_V", 0, 200 );
+    fqt1.evaluate_io();
+    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Насос работает, но счетчик не считает.
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_millisec( 2UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
-    EXPECT_EQ( (int) i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
     //Устанавливаем расход - ошибка должна остаться.
     fqt1.set_cmd( "F", 0, 1 );
@@ -3128,6 +3136,13 @@ TEST( counter_f, get_error_description )
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "счет импульсов (rtn)", res );
+
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "самотёк", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "самотёк (rtn)", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
     res = fqt1.get_error_description();
