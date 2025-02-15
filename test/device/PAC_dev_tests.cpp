@@ -889,6 +889,8 @@ TEST( device_manager, add_io_device )
 
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 
@@ -918,6 +920,8 @@ TEST( device_manager, get_device )
         G_DEVICE_MANAGER()->get_device( 0u ) );    //Search should find device.
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 TEST( device_manager, get_name_in_Lua )
@@ -934,6 +938,8 @@ TEST( device_manager, evaluate_io )
     ASSERT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->evaluate_io();
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 
@@ -2988,30 +2994,32 @@ TEST( counter_f, get_state )
                         // для возникновения ошибки.
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-
-    //Малый расход - ошибка должна появиться.
+    //Есть расход - ошибка должна появиться.
+    //Но минимальный расход задан 0 - поэтому нет ошибки.
     fqt1.set_cmd( "F", 0, 1 );
-    //Не прошло заданное время - поэтому нет ошибки.
-    fqt1.set_cmd( "P_DT", 0, 1000 );
-    fqt1.evaluate_io();
     fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    //Прошло заданное время, но минимальный расход задан 0 - поэтому нет
-    //ошибки.
+
+    //Минимальный расход задан, но время ожидания задано 0 - поэтому нет ошибки.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    fqt1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Минимальный расход задан, время ожидания задано, но оно не прошло -
+    //поэтому нет ошибки.
     fqt1.set_cmd( "P_DT", 0, 1 );
     fqt1.evaluate_io();
-    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
     //Прошло заданное время, задан минимальный расход, но счетчик считает -
     //поэтому нет ошибки.
-    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
-    fqt1.set_cmd( "ABS_V", 0, 100 );
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
     fqt1.evaluate_io();
-    DeltaMilliSecSubHooker::set_default_time();
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
     //Прошло заданное время, задан минимальный расход, счетчик не считает -
-    //есть ошибка.    fqt1.evaluate_io();
+    //есть ошибка.
     DeltaMilliSecSubHooker::set_millisec( 2UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
@@ -4194,6 +4202,8 @@ TEST( threshold_regulator, set_value )
     FQT1->set_cmd( "F", 0, SET_VALUE );
     dev->set_value( SET_VALUE * 2 );
     EXPECT_EQ( 1, M1->get_state() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 TEST( threshold_regulator, set_cmd )

@@ -63,6 +63,8 @@ TEST( errors_manager, evaluate )
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_RETURN.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 TEST( siren_lights_manager, siren_lights_manager )

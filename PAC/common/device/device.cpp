@@ -1158,6 +1158,102 @@ void base_counter::restart()
     start();
     }
 //-----------------------------------------------------------------------------
+void base_counter::check_self_flow()
+    {
+    auto min_flow = get_min_flow();
+
+    if ( min_flow == .0f )
+        {
+        return; // Если минимальный поток 0 - дальше не проверяем.
+        }
+
+    if ( get_flow() <= min_flow )
+        {
+        // Расход ниже минимального.
+        start_pump_working_time_flow = 0;
+        return;
+        }
+
+    // Расход выше минимального.
+    if ( 0 == start_pump_working_time_flow )
+        {
+        // Фиксируем время и счетчик появления расхода, превышающего
+        // минимальный.
+        start_pump_working_time_flow = get_millisec();
+        counter_prev_value_flow = get_abs_quantity();
+        }
+    else
+        {
+        // Проверяем счетчик на ошибку - он должен изменить свои показания.
+        if ( get_abs_quantity() != counter_prev_value_flow )
+            {
+            start_pump_working_time_flow = get_millisec();
+            counter_prev_value_flow = get_abs_quantity();
+            }
+        else
+            {
+            if ( auto dt = get_pump_dt(); dt > 0 &&
+                get_delta_millisec( start_pump_working_time_flow ) > dt )
+                {
+                device::direct_set_state( static_cast<int>(
+                    STATES::S_FLOW_ERROR ) );
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::check_connected_pumps()
+    {
+    if ( motors.empty() )
+        {
+        return;
+        }
+
+    auto is_pump_working = false;
+    for ( auto m : motors )
+        {
+        if ( m->get_state() == 1 )
+            {
+            is_pump_working = true;
+            }
+        }
+
+    if ( !is_pump_working )
+        {
+        // Насос не работает.
+        start_pump_working_time = 0;
+        return;
+        }
+
+    // Насос работает.
+    if ( 0 == start_pump_working_time )
+        {
+        // Фиксируем время и показания момента включения насоса. 
+        start_pump_working_time = get_millisec();
+        counter_prev_value = get_abs_quantity();
+        return;
+        }
+
+    // Насос работает уже некоторое время, проверяем счетчик на ошибку - он
+    // должен изменить свои показания.
+    if ( get_abs_quantity() != counter_prev_value )
+        {
+        // Показания счетчика меняются - состояние устанавливаем в РАБОТА.
+        start_pump_working_time = get_millisec();
+        counter_prev_value = get_abs_quantity();
+        }
+    else
+        {
+        if ( auto dt = get_pump_dt();
+            get_delta_millisec( start_pump_working_time ) >= dt )
+            {
+            // Показания счетчика не изменяются - состояние устанавливаем в
+            // ОШИБКА_НАСОСА.
+            device::direct_set_state( static_cast<int>( STATES::S_PUMP_ERROR ) );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
 void base_counter::evaluate_io()
     {
     if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
@@ -1196,98 +1292,9 @@ void base_counter::evaluate_io()
         start_pump_working_time = 0;
         return;                     // Не изменяем данное состояние.
         }
-
-    // Проверка на самотёк.
-    if ( auto min_flow = get_min_flow(); min_flow > .0f )
-        {
-        if ( get_flow() <= min_flow )
-            {
-            // Расход ниже минимального.
-            start_pump_working_time_flow = 0;
-            }
-        else
-            {
-            // Расход выше минимального.
-            if ( 0 == start_pump_working_time_flow )
-                {
-                // Фиксируем время и счетчик появления расхода, превышающего
-                // минимальный.
-                start_pump_working_time_flow = get_millisec();
-                counter_prev_value_flow = get_abs_quantity();
-                }
-            else
-                {
-                // Проверяем счетчик на ошибку - он должен изменить свои
-                // показания.
-                if ( get_abs_quantity() != counter_prev_value_flow )
-                    {
-                    start_pump_working_time_flow = get_millisec();
-                    counter_prev_value_flow = get_abs_quantity();
-                    }
-                else
-                    {
-                    if ( auto dt = get_pump_dt(); dt > 0 &&
-                        get_delta_millisec( start_pump_working_time_flow ) > dt )
-                        {
-                        device::direct_set_state( static_cast<int>(
-                            STATES::S_FLOW_ERROR ) );
-                        }
-                    }
-                }
-            }
-        }
-
-    if ( !motors.empty() )
-        {
-        bool is_pump_working = false;
-
-        for ( auto m : motors )
-            {
-            if ( m->get_state() == 1 )
-                {
-                is_pump_working = true;
-                }
-            }
-
-        if ( !is_pump_working )
-            {
-            // Насос не работает.
-            start_pump_working_time = 0;
-            }
-        else
-            {
-            // Насос работает.
-            if ( 0 == start_pump_working_time )
-                {
-                // Фиксируем время и показания момента включения насоса.
-                start_pump_working_time = get_millisec();
-                counter_prev_value = get_abs_quantity();
-                }
-            else
-                {
-                // Насос работает уже некоторое время, проверяем счетчик на
-                // ошибку - он должен изменить свои показания.
-                if ( get_abs_quantity() != counter_prev_value )
-                    {
-                    // Показания счетчика меняются - состояние устанавливаем
-                    // в РАБОТА.
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    }
-                else
-                    {
-                    if ( auto dt = get_pump_dt();
-                        get_delta_millisec( start_pump_working_time ) >= dt )
-                        {
-                        // Показания счетчика не изменяются - состояние
-                        // устанавливаем в ОШИБКА_НАСОСА.
-                        device::direct_set_state( static_cast<int>(
-                            STATES::S_PUMP_ERROR ) );
-                        }
-                    }
-                }
-            }
-        }
+        
+    check_self_flow();          // Проверка на самотёк.
+    check_connected_pumps();    // Проверяем на работу связанных насосов.  
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const

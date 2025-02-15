@@ -1190,6 +1190,9 @@ class base_counter: public i_counter, public device, public io_device
             }
 
     private:
+        void check_self_flow();
+        void check_connected_pumps();
+
         void set_abs_value( float new_value );
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
