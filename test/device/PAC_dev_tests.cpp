@@ -2736,6 +2736,37 @@ TEST( valve_iolink_mix_proof, is_valve_error )
     valve_iolink_mix_proof V1( "V1" );
 
     EXPECT_FALSE( V1.is_valve_error() );
+
+    V1.in_info->err = true;
+    EXPECT_TRUE( V1.is_valve_error() );
+    }
+
+TEST( valve_iolink_mix_proof, get_state )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+    V1.direct_on();
+    V1.direct_off();
+    // Нет обратной связи, но не прошло время проверки, поэтому нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OK, V1.get_state() );
+
+    // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
+    // поэтому есть ошибки.
+    V1.in_info->err = true;
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+
+    // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
+    // поэтому есть ошибка.
+    V1.in_info->err = false;
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+    DeltaMilliSecSubHooker::set_default_time();
+
+
+    G_PAC_INFO()->emulation_on();
     }
 
 

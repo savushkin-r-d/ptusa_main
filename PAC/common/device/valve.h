@@ -695,7 +695,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         bool is_valve_error() const override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         struct in_data
             {
             int16_t  pos;
