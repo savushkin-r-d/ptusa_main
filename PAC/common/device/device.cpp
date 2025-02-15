@@ -1244,8 +1244,8 @@ void base_counter::check_connected_pumps()
         }
     else
         {
-        if ( auto dt = get_pump_dt();
-            get_delta_millisec( start_pump_working_time ) >= dt )
+        if ( auto dt = get_pump_dt(); dt > 0 &&
+            get_delta_millisec( start_pump_working_time ) > dt )
             {
             // Показания счетчика не изменяются - состояние устанавливаем в
             // ОШИБКА_НАСОСА.
