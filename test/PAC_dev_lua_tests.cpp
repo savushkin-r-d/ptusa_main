@@ -143,6 +143,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR_T=0},\n",
         buff );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
 
@@ -174,6 +175,7 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     lua_pop( L, 1 );
     ASSERT_EQ( st, lua_st );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
 
@@ -192,6 +194,7 @@ TEST( toLuapp, tolua_PAC_dev_G00 )
     EXPECT_NE( nullptr, G1 );
     lua_remove( L, -1 );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
 
@@ -211,6 +214,7 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
     EXPECT_NE( nullptr, CAM1 );
     lua_remove( L, -1 );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
 
@@ -237,7 +241,7 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     ASSERT_EQ( 1, luaL_dostring( L, "FQT1.start_daily()" ) ); //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
 
-
+    G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
 

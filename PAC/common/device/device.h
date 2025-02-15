@@ -1190,6 +1190,9 @@ class base_counter: public i_counter, public device, public io_device
             }
 
     private:
+        void check_self_flow();
+        void check_connected_pumps();
+
         void set_abs_value( float new_value );
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
@@ -1198,6 +1201,9 @@ class base_counter: public i_counter, public device, public io_device
 
         u_int_4 start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;
+
+        u_int_4 start_pump_working_time_flow = 0;
+        u_int_4 counter_prev_value_flow = 0;
 
         std::vector < device* > motors;
 
