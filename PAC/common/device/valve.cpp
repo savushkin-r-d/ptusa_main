@@ -1211,7 +1211,7 @@ void valve_iolink_mix_proof::evaluate_io()
 
     char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    char* buff = (char*)&in_info;
+    auto* buff = (char*)&in_info;
 
     if ( !data ) return;
 

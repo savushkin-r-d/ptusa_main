@@ -2707,6 +2707,18 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 
+TEST( valve_iolink_mix_proof, evaluate_io )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.evaluate_io();
+    // Отключена обратная связь - нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OFF, V1.get_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( valve_iolink_mix_proof, get_state )
     {
     valve_iolink_mix_proof V1( "V1" );
