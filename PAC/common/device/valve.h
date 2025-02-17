@@ -91,11 +91,6 @@ class valve : public digital_io_device
             VX_ON_FB_ERR_MANUAL = -12,  ///< Включен вручную, ошибка ОС.
             VX_OFF_FB_ERR_MANUAL = -13,  ///< Выключен вручную, ошибка ОС.
 
-            VX_OPENING = 40,
-            VX_CLOSING,
-            VX_OPENING_MANUAL,
-            VX_CLOSING_MANUAL,
-
             VX_UNKNOWN = 100,            ///< Неизвестное состояние.
             };
 
@@ -656,8 +651,6 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
     public:
         explicit valve_iolink_mix_proof( const char* dev_name );
 
-        ~valve_iolink_mix_proof();
-
         void open_upper_seat();
 
         void open_lower_seat();
@@ -688,7 +681,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         struct in_data
             {
             int16_t  pos;
@@ -711,7 +706,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             uint16_t unused2 : 8;
             };
 
-        in_data* in_info = new in_data;
+        in_data in_info{};
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 
@@ -901,7 +896,7 @@ class valve_iolink_gea_tvis_a15 : public valve
                                // Управление верхним седлом.
             bool error_on : 1; // ошибка активна 
 
-            uint16_t  pos : 10;     // позиция шкота в 10^-4 метра
+            uint16_t  pos : 10;     // позиция штока в 10^-4 метра
             uint16_t unused1 : 10;  // неиспользуемое битовое пространство
             };
 

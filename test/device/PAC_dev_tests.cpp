@@ -1619,6 +1619,7 @@ TEST( valve, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() );
     }
 
+
 TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
     {
     valve_DO1_DI1_off V2( "V1" );
@@ -2081,6 +2082,7 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
 
     G_PAC_INFO()->emulation_on();
     }
+
 
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     {
@@ -2709,6 +2711,46 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
     V1.save_device( buff, "" );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, BLINK=0, "
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
+    }
+
+TEST( valve_iolink_mix_proof, evaluate_io )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.evaluate_io();
+    // Отключена обратная связь - нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OFF, V1.get_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, get_state )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+    V1.direct_on();
+    V1.direct_off();
+    // Нет обратной связи, но не прошло время проверки, поэтому нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OK, V1.get_state() );
+
+    // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
+    // поэтому есть ошибки.
+    V1.in_info.err = true;
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+
+    // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
+    // поэтому есть ошибка.
+    V1.in_info.err = false;
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+    DeltaMilliSecSubHooker::set_default_time();
+
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
