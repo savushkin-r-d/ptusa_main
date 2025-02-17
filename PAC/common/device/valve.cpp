@@ -166,14 +166,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( is_valve_error() || is_switch_time_elapsed )
-                                {
-                                return VX_ON_FB_ERR_MANUAL;
-                                }
-                            else
-                                {
-                                return VX_OPENING_MANUAL;
-                                }
+                            return VX_ON_FB_ERR_MANUAL;
                             }
                         } // if ( get_manual_mode() )
                     else  //Ручной режим отключен.
@@ -184,14 +177,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( is_valve_error() || is_switch_time_elapsed )
-                                {
-                                return VX_ON_FB_ERR;
-                                }
-                            else
-                                {
-                                return VX_OPENING;
-                                }
+                            return VX_ON_FB_ERR;
                             }
                         }
                     }
@@ -233,14 +219,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( is_valve_error() || is_switch_time_elapsed )
-                                {
-                                return VX_OFF_FB_ERR_MANUAL;
-                                }
-                            else
-                                {
-                                return VX_CLOSING_MANUAL;
-                                }
+                            return VX_OFF_FB_ERR_MANUAL;
                             }
                         } // if ( get_manual_mode() )
                     else  //Ручной режим отключен.
@@ -251,14 +230,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( is_valve_error() || is_switch_time_elapsed )
-                                {
-                                return VX_OFF_FB_ERR;
-                                }
-                            else
-                                {
-                                return VX_CLOSING;
-                                }
+                            return VX_OFF_FB_ERR;
                             }
                         }
                     }
