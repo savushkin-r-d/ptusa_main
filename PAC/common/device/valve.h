@@ -116,11 +116,6 @@ class valve : public digital_io_device
 
         void set_seat_wash_state( bool wash_flag );
 
-        /// @brief Получение информации о том, находится ли клапан в ошибке. 
-        /// Нужно для того, чтобы из промежуточных состояний (выключаюсь, ...)
-        /// переходит в ошибку.
-        virtual bool is_valve_error() const;
-
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
         /// @brief Получение состояния клапана без учета обратной связи.
@@ -656,8 +651,6 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
     public:
         explicit valve_iolink_mix_proof( const char* dev_name );
 
-        ~valve_iolink_mix_proof();
-
         void open_upper_seat();
 
         void open_lower_seat();
@@ -688,8 +681,6 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
-        bool is_valve_error() const override;
-
 #ifndef PTUSA_TEST
     private:
 #endif
@@ -715,7 +706,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             uint16_t unused2 : 8;
             };
 
-        in_data* in_info = new in_data{};
+        in_data in_info{};
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 
@@ -749,8 +740,6 @@ class valve_iolink_shut_off_thinktop : public valve
         float get_value() override;
 
         bool get_fb_state() override;
-
-        bool is_valve_error() const override;
 
         int get_off_fb_value() override;
 
@@ -822,8 +811,6 @@ class valve_iolink_shut_off_sorio : public valve
 
         bool get_fb_state() override;
 
-        bool is_valve_error() const override;
-
         int get_off_fb_value() override;
 
         int get_on_fb_value() override;
@@ -885,8 +872,6 @@ class valve_iolink_gea_tvis_a15 : public valve
         bool get_fb_state() final;
         int get_off_fb_value() final;
         int get_on_fb_value() final;
-
-        bool is_valve_error() const override;
 
         void set_rt_par( u_int idx, float value ) override;
 

@@ -1613,15 +1613,6 @@ TEST( valve, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() );
     }
 
-TEST( valve, is_valve_error )
-    {
-    valve V1( true, true, "V1", device::DEVICE_TYPE::DT_V,
-        device::DEVICE_SUB_TYPE::DST_V_DO1 );
-
-    // Для данного класса метод возвращет всегда false.
-    EXPECT_FALSE( V1.is_valve_error() );
-    }
-
 
 TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
     {
@@ -2084,21 +2075,6 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
     EXPECT_FALSE( V1.get_fb_state() );
 
     G_PAC_INFO()->emulation_on();
-    }
-
-TEST( valve_iolink_shut_off_sorio, is_valve_error )
-    {
-    valve_iolink_shut_off_sorio V1( "V1" );
-
-    EXPECT_FALSE( V1.is_valve_error() ); 
-    }
-
-
-TEST( valve_iolink_gea_tvis_a15, is_valve_error )
-    {
-    valve_iolink_gea_tvis_a15 V1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_DO1_DI2 );
-
-    EXPECT_FALSE( V1.is_valve_error() );
     }
 
 
@@ -2731,16 +2707,6 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 
-TEST( valve_iolink_mix_proof, is_valve_error )
-    {
-    valve_iolink_mix_proof V1( "V1" );
-
-    EXPECT_FALSE( V1.is_valve_error() );
-
-    V1.in_info->err = true;
-    EXPECT_TRUE( V1.is_valve_error() );
-    }
-
 TEST( valve_iolink_mix_proof, get_state )
     {
     valve_iolink_mix_proof V1( "V1" );
@@ -2755,12 +2721,12 @@ TEST( valve_iolink_mix_proof, get_state )
 
     // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
     // поэтому есть ошибки.
-    V1.in_info->err = true;
+    V1.in_info.err = true;
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
 
     // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
     // поэтому есть ошибка.
-    V1.in_info->err = false;
+    V1.in_info.err = false;
     DeltaMilliSecSubHooker::set_millisec( 101UL );
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
@@ -2779,13 +2745,6 @@ TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     EXPECT_STREQ( 
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
         buff );
-    }
-
-TEST( valve_iolink_shut_off_thinktop, is_valve_error )
-    {
-    valve_iolink_shut_off_thinktop V1( "V1" );
-
-    EXPECT_FALSE( V1.is_valve_error() );
     }
 
 
