@@ -138,7 +138,7 @@ int main( int argc, const char *argv[] )
     argv_utf8 = 0;
 #endif
 
-#ifdef OPCUA    
+#ifdef OPCUA
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
@@ -168,9 +168,13 @@ int main( int argc, const char *argv[] )
         static u_long st_time;
         static u_long all_time   = 0;
         static u_long cycles_cnt = 0;
+        u_long begin_iter_time; 
+        //u_long end_iter_time;
+        u_long duration;
 
         st_time = get_millisec();
         cycles_cnt++;
+        begin_iter_time = get_millisec();
 #endif // TEST_SPEED
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
@@ -271,6 +275,7 @@ int main( int argc, const char *argv[] )
             print_cycle_last_h       = timeInfo_->tm_hour;
             }
         //-Информация о времени выполнения цикла программы.!->
+        duration = get_delta_millisec(begin_iter_time);
 #endif // TEST_SPEED
         }
 #ifdef OPCUA
