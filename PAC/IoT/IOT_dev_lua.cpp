@@ -1,6 +1,6 @@
 /*
 ** Lua binding: IOT_dev
-** Generated automatically by tolua++-1.0.92 on Wed Feb 19 09:43:08 2025.
+** Generated automatically by tolua++-1.0.92 on Fri Sep 13 09:59:50 2024.
 */
 
 #ifndef __cplusplus
