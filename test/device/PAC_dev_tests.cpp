@@ -3183,30 +3183,18 @@ TEST( counter_f, get_error_description )
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_PUMP_ERROR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "счет импульсов", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "счет импульсов (rtn)", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "самотёк", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "самотёк (rtn)", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (нижний предел)", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (нижний предел, rtn)", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (верхний предел)", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (верхний предел, rtn)", res );
     }
 
 

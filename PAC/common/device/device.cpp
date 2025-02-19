@@ -1343,43 +1343,20 @@ const char* base_counter::get_error_description()
         switch ( device::get_state() )
             {
             case static_cast<int>( STATES::S_PUMP_ERROR ):
-                prev_error_state = STATES::S_PUMP_ERROR;
                 return "счет импульсов";
 
             case static_cast<int>( STATES::S_FLOW_ERROR ):
-                prev_error_state = STATES::S_FLOW_ERROR;
                 return "самотёк";
 
             case static_cast<int>( STATES::S_LOW_ERR ):
-                prev_error_state = STATES::S_LOW_ERR;
                 return "канал потока (нижний предел)";
 
             case static_cast<int>( STATES::S_HI_ERR ):
-                prev_error_state = STATES::S_HI_ERR;
                 return "канал потока (верхний предел)";
 
             default:
                 return device::get_error_description();
             }
-        }
-
-    switch ( prev_error_state )
-        {
-        case STATES::S_PUMP_ERROR:
-            return "счет импульсов (rtn)";
-
-        case STATES::S_FLOW_ERROR:
-            return "самотёк (rtn)";
-
-        case STATES::S_LOW_ERR:
-            return "канал потока (нижний предел, rtn)";
-
-        case STATES::S_HI_ERR:
-            return "канал потока (верхний предел, rtn)";
-
-        default:
-            // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
-            break;
         }
 
     return "нет ошибок";
