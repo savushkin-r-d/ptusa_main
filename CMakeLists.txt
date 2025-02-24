@@ -4,6 +4,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#set(CMAKE_C_COMPILER "C:\CLI\sdks\AXCF2152\2022_0\sysroots\x86_64-w64-mingw32\usr\bin\arm-pxc-linux\arm-pxc-linux-gcc.exe")
+#set(CMAKE_CXX_COMPILER "C:\CLI\sdks\AXCF2152\2022_0\sysroots\x86_64-w64-mingw32\usr\bin\arm-pxc-linux\arm-pxc-linux-g++.exe")
+
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2025.02.15.0)
