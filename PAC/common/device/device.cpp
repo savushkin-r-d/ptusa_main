@@ -1342,9 +1342,6 @@ const char* base_counter::get_error_description()
         {
         switch ( device::get_state() )
             {
-            case static_cast<int>( STATES::S_DEVICE_DISABLED):
-                return "устройство выключено";
-
             case static_cast<int>( STATES::S_PUMP_ERROR ):
                 return "счет импульсов";
 
@@ -1357,8 +1354,13 @@ const char* base_counter::get_error_description()
             case static_cast<int>( STATES::S_HI_ERR ):
                 return "канал потока (верхний предел)";
 
-            default:
-                return this->get_description();
+            default: {
+                char* str = const_cast<char*>(this->get_description());
+                if (strlen(str) == 0) {
+                    str = "обратная связь";
+                }
+                return str;
+                }
             }
         }
 

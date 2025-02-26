@@ -3173,12 +3173,16 @@ TEST( counter_f, get_min_flow )
 TEST( counter_f, get_error_description )
     {
     counter fqt1( "FQT1" );
-    auto res = fqt1.get_error_description();        //Нет ошибок.
+    auto res = fqt1.get_error_description(); //Нет ошибок.
     EXPECT_STREQ( "нет ошибок", res );
 
     fqt1.set_cmd( "ST", 0, -1 );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "обратная связь", res );
+
+    fqt1.set_descr("Счётчик");
+    res = fqt1.get_error_description();
+    EXPECT_STREQ("Счётчик", res);
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_PUMP_ERROR ) );
     res = fqt1.get_error_description();

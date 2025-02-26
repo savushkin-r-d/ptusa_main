@@ -168,8 +168,6 @@ class i_counter
             S_WORK = 1,
             S_PAUSE,
 
-            S_DEVICE_DISABLED = -1,
-
             S_PUMP_ERROR = -9,  // Ошибка связанного насоса.
             S_FLOW_ERROR = -10, // Ошибка расхода (самотёка).
 
