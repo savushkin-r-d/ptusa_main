@@ -138,7 +138,7 @@ int main( int argc, const char *argv[] )
     argv_utf8 = 0;
 #endif
 
-#ifdef OPCUA    
+#ifdef OPCUA
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
@@ -159,19 +159,21 @@ int main( int argc, const char *argv[] )
 
     while ( running )
         {
+#ifdef TEST_SPEED
+        static u_long st_time;
+        st_time = get_millisec();
+
+        static u_long all_time = 0;
+
+        static u_long cycles_cnt = 0;
+        cycles_cnt++;
+
+#endif // TEST_SPEED
+
         if ( G_DEBUG )
             {
             fflush( stdout );
             }
-
-#ifdef TEST_SPEED
-        static u_long st_time;
-        static u_long all_time   = 0;
-        static u_long cycles_cnt = 0;
-
-        st_time = get_millisec();
-        cycles_cnt++;
-#endif // TEST_SPEED
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
@@ -225,18 +227,19 @@ int main( int argc, const char *argv[] )
         //-Информация о времени выполнения цикла программы.!->
         all_time += get_delta_millisec( st_time );
 
-        static u_int cycle_time = 0;
-        cycle_time = get_delta_millisec( st_time );
-
-        static u_int max_iteration_cycle_time = 0;
-        static u_int cycles_per_period        = 0;
-        cycles_per_period++;
-
         static time_t t_now;
         struct tm *timeInfo_;
         t_now = time( 0 );
         timeInfo_ = localtime( &t_now );
         static int print_cycle_last_h = timeInfo_->tm_hour;
+
+        static u_int max_iteration_cycle_time = 0;
+        static u_int cycles_per_period = 0;
+        cycles_per_period++;
+
+        static u_int cycle_time = 0;
+        cycle_time = get_delta_millisec(st_time);
+        G_PAC_INFO()->par[PAC_info::P_CYCLE_TIME] = cycle_time;
 
         if ( max_iteration_cycle_time < cycle_time )
             {

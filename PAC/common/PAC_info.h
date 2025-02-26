@@ -15,18 +15,18 @@ class PAC_info: public i_Lua_save_device
         void eval();
 
         enum PARAMETERS
-            {
+        {
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
-			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
+            P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
 
             P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
 
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME,
 
-	        ///< Среднее время задержки получения ответа от узла I/O, мсек.
-	        P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
+            ///< Среднее время задержки получения ответа от узла I/O, мсек.
+            P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
             ///< Среднее время цикла программы, мсек.
             P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,
 
@@ -57,6 +57,9 @@ class PAC_info: public i_Lua_save_device
             ///< Возможность управлять через сервер OPC UA,
             /// 0 - нет, 1 - да.
             P_IS_OPC_UA_SERVER_CONTROL,
+
+            ///< Время, затраченное на итерацию цикла
+            P_CYCLE_TIME,
 
             ///< Количество параметров.
             P_PARAMS_COUNT

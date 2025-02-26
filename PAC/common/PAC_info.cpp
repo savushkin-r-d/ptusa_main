@@ -91,6 +91,8 @@ void PAC_info::reset_params()
     par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
     par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
 
+    par[ P_CYCLE_TIME ] = 0;
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -135,6 +137,9 @@ int PAC_info::save_device( char* buff )
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR={},\n", par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] ).size;
 
+    size += fmt::format_to_n(buff + size, MAX_COPY_SIZE,
+        "\tP_CYCLE_TIME={},\n", par[P_CYCLE_TIME]).size;
+
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tCMD={},\n", cmd ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -157,7 +162,7 @@ int PAC_info::save_device( char* buff )
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-        "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;    
+        "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
@@ -284,6 +289,12 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, (u_int_4)val );
         return 0;
         }
+
+    if (strcmp(prop, "P_CYCLE_TIME") == 0)
+    {
+        par.save(P_CYCLE_TIME, (u_int_4)val);
+        return 0;
+    }
 
     if ( strcmp( prop, "NODEENABLED" ) == 0 )
         {
