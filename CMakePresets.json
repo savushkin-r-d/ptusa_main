@@ -119,13 +119,12 @@
       "displayName": "Windows AXCF2152 2021 LTS Release",
       "description": "Using Windows OS",
       "inherits": "windows-AXCF-default",
-        "environment": {
-            "ARP_DEVICE": "AXCF2152",
-            //"ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
-            "ARP_DEVICE_VERSION": "2021.6.0 (21.6.0.46)",
-            "ARP_DEVICE_SHORT_VERSION": "2021_0",
-            "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
-        }
+      "environment": {
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
+        "ARP_DEVICE_SHORT_VERSION": "2021_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
+      }
     },
     {
       "name": "build-windows-AXCF2152-2022-LTS-Release",
