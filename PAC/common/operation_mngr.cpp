@@ -2341,10 +2341,10 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
             if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 )
                 res.out--;
 
-            *( res.out++ ) = '.';
-            *( res.out++ ) = '.';
-            *( res.out++ ) = '.';
-            *( res.out++ ) = '\'';
+            *res.out++ = '.';
+            *res.out++ = '.';
+            *res.out++ = '.';
+            *res.out++ = '\'';
             *res.out = '\0';
             }
         };
