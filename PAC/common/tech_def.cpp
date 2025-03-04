@@ -365,7 +365,7 @@ int tech_object::evaluate()
                 lua_on_pause( idx );
                 }
 
-            //Проверка на превышение максимльного времени шага.
+            //Проверка на превышение максимального времени шага.
             res_str[ 0 ] = '\0';
             res = op->check_max_step_time( res_str, ERR_STR_SIZE );
             if ( res )
