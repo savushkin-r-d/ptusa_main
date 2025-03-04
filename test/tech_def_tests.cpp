@@ -82,7 +82,7 @@ TEST( tech_object, evaluate )
     G_LUA_MANAGER->set_Lua( L );
 
     ASSERT_EQ( 0,
-        luaL_dostring( L, "o1=tech_object( \'O1\', 1, 1, \'o1\', 1, 1, 10, 10, 10, 10 )" ) );
+        luaL_dostring( L, "o1=tech_object( \'O1\', 1, 1, \'o1\', 1, 1, 10, 10, 1, 1 )" ) );
     ASSERT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
 
@@ -115,9 +115,8 @@ TEST( tech_object, evaluate )
     //Корректный переход от выполнения к паузе и опять к выполнению.
     const unsigned int STEP_N1 = 1;
     const unsigned int STEP_N2 = 2;
-    operation_1->add_step( "Init", 2, -1 );
-    operation_1->add_step( "Process #1", 3, -1 );
-    operation_1->add_step( "Process #2", 2, -1 );
+    operation_1->add_step( "Init #1", 2, -1 );
+    operation_1->add_step( "Process #2", 3, -1 );
 
     tank->set_mode( OPER_N1, operation::RUN );
     EXPECT_EQ( operation::RUN, tank->get_mode( OPER_N1 ) );
@@ -129,6 +128,29 @@ TEST( tech_object, evaluate )
     //После возобновления после паузы должен быть активен шаг, который был
     //до паузы.
     EXPECT_EQ( STEP_N2, operation_1->active_step() );
+
+
+    const unsigned int STEP_N3 = 3;
+    const unsigned int STEP_N3_MAX_DURATION_PAR_IDX = 5;
+    operation_1->add_step( "1  Шаг с очень длинным названием #3", -1, -1,
+        STEP_N3_MAX_DURATION_PAR_IDX );
+    tank->par_float[ STEP_N3_MAX_DURATION_PAR_IDX ] = 1;
+    operation_1->to_step( STEP_N3 );    
+    testing::internal::CaptureStdout();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    operation_1->evaluate();
+    tank->evaluate();
+    DeltaMilliSecSubHooker::set_default_time();
+    auto msg =
+        R"(Событие -> 'O1 1' - авария операции 1 'Test operation' - превышено макс. t (1 с) шага 3 '1  Шаг с очень ...'.
+FINAL ACTIVE STEP №3
+"Шаг операции"
+ { }
+)";
+
+    auto output = testing::internal::GetCapturedStdout();
+    ASSERT_STREQ( output.c_str(), msg );
+       
 
     tank->set_mode( OPER_N1, operation::IDLE );
     EXPECT_EQ( operation::IDLE, tank->get_mode( OPER_N1 ) );
