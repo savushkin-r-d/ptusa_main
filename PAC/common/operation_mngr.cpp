@@ -2337,16 +2337,15 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
         *res.out = '\0';
         if ( res.size > str_len )
             {
-            auto extra_offset = 0;
             // Удаляем часть некорректного utf8 символа при его наличии.
-            if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 )
-                extra_offset = -1;
+            if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 ) 
+                res.out--;
 
-            *( res.out + 4 + extra_offset ) = '\0';
-            *( res.out + 3 + extra_offset ) = '\'';
-            *( res.out + 2 + extra_offset ) = '.';
-            *( res.out + 1 + extra_offset ) = '.';
-            *( res.out + extra_offset ) = '.';
+            *( res.out++ ) = '.';
+            *( res.out++ ) = '.';
+            *( res.out++ ) = '.';
+            *( res.out++ ) = '\'';
+            *( res.out++ ) = '\0';                        
             }
         };
 
