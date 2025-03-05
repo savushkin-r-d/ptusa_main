@@ -53,7 +53,7 @@ TEST( PAC_info, save_device )
             "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME=300,\n"
             "\tP_RESTRICTIONS_MODE=0,\n"
             "\tP_RESTRICTIONS_MANUAL_TIME=120000,\n"
-            "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=0,\n"            
+            "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=0,\n"
             "\tCMD=0,\n"
             "\tCMD_ANSWER=\"\",\n"
             "\tVERSION=\"" PRODUCT_VERSION_FULL_STR "\",\n"
