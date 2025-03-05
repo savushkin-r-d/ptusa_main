@@ -238,8 +238,8 @@ int main( int argc, const char *argv[] )
         cycles_per_period++;
 
         static u_int cycle_time = 0;
-        cycle_time = get_delta_millisec(st_time);
-        G_PAC_INFO()->par[PAC_info::P_CYCLE_TIME] = cycle_time;
+        cycle_time = get_delta_millisec( st_time );
+        G_PAC_INFO()->set_cycle_time( cycle_time );
 
         if ( max_iteration_cycle_time < cycle_time )
             {

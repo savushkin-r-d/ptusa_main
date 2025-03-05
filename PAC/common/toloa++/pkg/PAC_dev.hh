@@ -1685,9 +1685,6 @@ class PAC_info: public i_Lua_save_device
             ///< Переход на паузу операции при ошибке устройств,
             /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
-
-            ///< Время, затраченное на итерацию цикла
-            P_CYCLE_TIME,
             };
 
         saved_params_u_int_4 par;

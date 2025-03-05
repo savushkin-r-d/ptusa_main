@@ -58,9 +58,6 @@ class PAC_info: public i_Lua_save_device
             /// 0 - нет, 1 - да.
             P_IS_OPC_UA_SERVER_CONTROL,
 
-            ///< Время, затраченное на итерацию цикла
-            P_CYCLE_TIME,
-
             ///< Количество параметров.
             P_PARAMS_COUNT
             };
@@ -108,6 +105,8 @@ class PAC_info: public i_Lua_save_device
         bool emulator_state = true;
 #endif
 
+        void set_cycle_time( int cycle_time );
+
     private:
         PAC_info();
 
@@ -135,6 +134,8 @@ class PAC_info: public i_Lua_save_device
         char cmd_answer[ 200 ];
 
         u_int_4 restrictions_set_to_off_time;
+
+        int cycle_time{};
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();
