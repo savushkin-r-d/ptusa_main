@@ -399,7 +399,7 @@ void PAC_info::emulation_off()
     }
 #endif
 //-----------------------------------------------------------------------------
-void PAC_info::set_cycle_time( int current_cycle_time )
+void PAC_info::set_cycle_time( u_long current_cycle_time )
     {
     cycle_time = current_cycle_time;
     }

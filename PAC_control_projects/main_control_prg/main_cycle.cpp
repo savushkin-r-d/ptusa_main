@@ -89,7 +89,7 @@ int main_cycle()
     timeInfo_ = get_time();
     static int print_cycle_last_h = timeInfo_.tm_hour;
 
-    static u_int max_iteration_cycle_time = 0;
+    static u_long max_iteration_cycle_time = 0;
     static u_int cycles_per_period = 0;
     cycles_per_period++;
 
@@ -117,7 +117,7 @@ int main_cycle()
             }
 
         G_LOG->info( "Main control cycle performance : "
-            "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
+            "avg = %lu, max = %4lu, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
             avg_time, max_iteration_cycle_time, TRESH_AVG,
             cycles_per_period,
             lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
