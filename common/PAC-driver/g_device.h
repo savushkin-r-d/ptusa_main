@@ -173,6 +173,9 @@ class device_communicator
         /// @brief Сервис для работы с device_communicator.
         static long write_devices_states_service( long len, u_char *data,
             u_char *outdata );
+
+        /// @brief Удаление устройств.
+        void clear_devices();
 #endif // !DRIVER
     };
 //-----------------------------------------------------------------------------

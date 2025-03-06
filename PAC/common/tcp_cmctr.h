@@ -44,6 +44,8 @@ class tcp_communicator
 
 #ifdef PTUSA_TEST
         static bool is_init;
+
+        static void clear_instance();
 #endif //PTUSA_TEST
 
         static void init_instance( const char *name_rus, const char *name_eng );
