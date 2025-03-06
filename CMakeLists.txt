@@ -110,12 +110,14 @@ endif()
 
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp
             PAC_control_projects/main_control_prg/main.cpp)
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
+           PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
     
@@ -144,6 +146,7 @@ if(LINUX)
 
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp
             PAC_control_projects/main_control_prg/main.cpp
             PAC_control_projects/main_control_prg/version.rc)
 
@@ -154,6 +157,7 @@ elseif(WIN32)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
            test/main_test.cpp           
+           PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
@@ -236,6 +240,7 @@ set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC_control_projects/main_control_prg>
 
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 

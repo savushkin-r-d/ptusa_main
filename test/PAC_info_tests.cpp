@@ -32,6 +32,7 @@ TEST( PAC_info, save_device )
 
     G_PAC_INFO()->reset_params();
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::CLEAR_RESULT_CMD );
+    G_PAC_INFO()->set_cycle_time( 100 );
 
     const auto MAX_SIZE = 1000;
     const auto REF_STR =
@@ -43,6 +44,7 @@ TEST( PAC_info, save_device )
             "\tUP_MINS=0,\n"
             "\tUP_SECS=0,\n"
             "\tUP_TIME=\"0 дн. 0:0:0\",\n"
+            "\tCYCLE_TIME=100,\n"
             "\tWASH_VALVE_SEAT_PERIOD=180,\n"
             "\tWASH_VALVE_UPPER_SEAT_TIME=2000,\n"
             "\tWASH_VALVE_LOWER_SEAT_TIME=1000,\n"

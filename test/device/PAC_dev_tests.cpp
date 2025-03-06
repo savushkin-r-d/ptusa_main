@@ -752,6 +752,8 @@ void check_dev( const char* name, int type, int sub_type,
 TEST( device_manager, add_io_device )
     {
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
@@ -891,13 +893,13 @@ TEST( device_manager, add_io_device )
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    valve::clear_v_bistable();
     }
 
 
 TEST( device_manager, clear_io_devices )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );    
@@ -907,12 +909,12 @@ TEST( device_manager, clear_io_devices )
     G_DEVICE_MANAGER()->clear_io_devices();
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
+
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_device )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
@@ -922,6 +924,7 @@ TEST( device_manager, get_device )
         G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_name_in_Lua )
@@ -931,8 +934,6 @@ TEST( device_manager, get_name_in_Lua )
 
 TEST( device_manager, evaluate_io )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
@@ -940,6 +941,7 @@ TEST( device_manager, evaluate_io )
     G_DEVICE_MANAGER()->evaluate_io();
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 
@@ -1601,6 +1603,8 @@ TEST( valve, evaluate )
     sleep_ms( DELAY_TIME + DELAY_TIME );
     valve::evaluate();
     EXPECT_EQ( valve::V_OFF, V1.get_state() );  //Should be closed.
+
+    valve::clear_switching_off_queue();
     }
 
 TEST( valve, is_closed )
@@ -1970,6 +1974,8 @@ TEST( valve_bottom_mix_proof, is_switching_off_finished )
     EXPECT_EQ( false, V1.is_switching_off_finished() );
     sleep_ms( DELAY_TIME + DELAY_TIME );
     EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    valve::clear_switching_off_queue();
     }
 
 TEST( valve_bottom_mix_proof, on )
@@ -3049,20 +3055,21 @@ TEST( counter_f, get_state )
 
     //Минимальный расход задан, время ожидания задано, но оно не прошло -
     //поэтому нет ошибки.
-    fqt1.set_cmd( "P_DT", 0, 1 );
+    fqt1.set_cmd( "P_DT", 0, 1000 );
     fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Прошло заданное время, задан минимальный расход, но счетчик считает -
     //поэтому нет ошибки.
-    fqt1.evaluate_io();
     fqt1.set_cmd( "ABS_V", 0, 100 );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();    
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Прошло заданное время, задан минимальный расход, счетчик не считает -
     //есть ошибка.
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
@@ -3096,7 +3103,7 @@ TEST( counter_f, get_state )
 
     //Насос работает, но счетчик не считает.
     fqt1.evaluate_io();
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
@@ -4156,7 +4163,6 @@ TEST( threshold_regulator, set_value )
     threshold_regulator TRC1( "TRC1" );
     device* dev = static_cast<device*>( &TRC1 );
 
-    G_DEVICE_MANAGER()->clear_io_devices();
     auto TE_name = std::string( "TE1" );
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, TE_name.c_str(), "Test sensor", "T" );
@@ -4246,6 +4252,7 @@ TEST( threshold_regulator, set_value )
     EXPECT_EQ( 1, M1->get_state() );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( threshold_regulator, set_cmd )

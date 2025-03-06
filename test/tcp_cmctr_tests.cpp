@@ -3,9 +3,10 @@
 using namespace ::testing;
 
 TEST( tcp_communicator, evaluate )
-    {
-    G_CMMCTR->set_port( 30000, 30001 );
-    G_CMMCTR->init_instance( "Тест", "Test" );    
+    {    
+    tcp_communicator::set_port( 30000, 30001 );
+    tcp_communicator::init_instance( "Тест", "Test" );    
+
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
 #ifdef LINUX_OS
@@ -79,6 +80,8 @@ TEST( tcp_communicator, evaluate )
 
     modbus_cl.Disconnect();
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+
+    tcp_communicator::clear_instance();
     }
 
 TEST( tcp_communicator, checkBuff )
