@@ -164,7 +164,7 @@ class i_counter
         virtual void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) = 0;
 
         enum class STATES
-        {
+            {
             S_WORK = 1,
             S_PAUSE,
 
