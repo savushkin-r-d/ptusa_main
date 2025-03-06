@@ -3055,20 +3055,21 @@ TEST( counter_f, get_state )
 
     //Минимальный расход задан, время ожидания задано, но оно не прошло -
     //поэтому нет ошибки.
-    fqt1.set_cmd( "P_DT", 0, 1 );
+    fqt1.set_cmd( "P_DT", 0, 1000 );
     fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Прошло заданное время, задан минимальный расход, но счетчик считает -
     //поэтому нет ошибки.
-    fqt1.evaluate_io();
     fqt1.set_cmd( "ABS_V", 0, 100 );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();    
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Прошло заданное время, задан минимальный расход, счетчик не считает -
     //есть ошибка.
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
@@ -3102,7 +3103,7 @@ TEST( counter_f, get_state )
 
     //Насос работает, но счетчик не считает.
     fqt1.evaluate_io();
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );

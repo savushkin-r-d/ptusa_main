@@ -85,17 +85,15 @@ int main_cycle()
     //-Информация о времени выполнения цикла программы.!->
     all_time += get_delta_millisec( st_time );
 
-    static time_t t_now;
-    static struct tm* timeInfo_;
-    t_now = time( 0 );
-    timeInfo_ = localtime( &t_now );
-    static int print_cycle_last_h = timeInfo_->tm_hour;
+    static tm timeInfo_;
+    timeInfo_ = get_time();
+    static int print_cycle_last_h = timeInfo_.tm_hour;
 
     static u_int max_iteration_cycle_time = 0;
     static u_int cycles_per_period = 0;
     cycles_per_period++;
 
-    static u_int cycle_time = 0;
+    static u_long cycle_time = 0;
     cycle_time = get_delta_millisec( st_time );
     G_PAC_INFO()->set_cycle_time( cycle_time );
 
@@ -105,7 +103,7 @@ int main_cycle()
         }
 
     //Once per hour writing performance info.
-    if ( print_cycle_last_h != timeInfo_->tm_hour )
+    if ( print_cycle_last_h != timeInfo_.tm_hour )
         {
         u_long avg_time = all_time / cycles_cnt;
 
@@ -129,7 +127,7 @@ int main_cycle()
         cycles_cnt = 0;
         max_iteration_cycle_time = 0;
         cycles_per_period = 0;
-        print_cycle_last_h = timeInfo_->tm_hour;
+        print_cycle_last_h = timeInfo_.tm_hour;
         }
     //-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED
