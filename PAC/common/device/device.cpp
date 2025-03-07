@@ -383,9 +383,9 @@ void dev_stub::on()
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
-bool dev_stub::is_active() const
+bool dev_stub::is_active()
     {
-    return false;
+    return get_state() == 0 ? false : true;
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_value( float new_value )
