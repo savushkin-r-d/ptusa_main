@@ -1486,6 +1486,8 @@ class dev_stub : public i_counter, public valve, public i_wages,
         float get_value() override;
         void direct_set_value( float new_value ) override;
 
+        bool is_active() const;
+
         void off() override;
         void on() override;
 
