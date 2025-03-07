@@ -173,6 +173,8 @@ class i_counter
 
             S_LOW_ERR = -12,
             S_HI_ERR = -13,
+
+            S_UNKNOWN = -14,
             };
 
     protected:

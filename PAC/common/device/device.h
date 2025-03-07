@@ -1189,6 +1189,8 @@ class base_counter: public i_counter, public device, public io_device
             return abs_value;
             }
 
+        int prev_error_state = 0;
+
     private:
         void check_self_flow();
         void check_connected_pumps();
@@ -1315,6 +1317,8 @@ class counter_iolink : public base_counter
         float get_value() override;
 
         static const int mL_in_L = 1000;
+
+        const char* get_error_description() override;
 
     private:
         enum class CONSTANTS

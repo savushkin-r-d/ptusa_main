@@ -47,8 +47,9 @@ int tech_dev_error::save_as_Lua_str( char *str )
 
         res += sprintf( str + res, "\t%s\n", "{" );
 
-        res += sprintf( str + res, "\tdescription=\"%s - %s\",\n",
-            simple_device->get_name(), simple_device->get_error_description() );
+        res += sprintf( str + res, "\tdescription=\"%s - %s (%d)\",\n",
+            simple_device->get_name(), simple_device->get_error_description(),
+            simple_device->get_state() );
 
         res += sprintf( str + res, "priority=%d%s", P_ALARM, "," );
         res += sprintf( str + res, "state=%d,\n", error_state );
