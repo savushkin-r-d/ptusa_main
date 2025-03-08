@@ -263,6 +263,7 @@ TEST( toLuapp, STUB )
     EXPECT_NE( nullptr, stub );
     lua_remove( L, -1 );
     ASSERT_EQ( 0, stub->get_abs_quantity() );
+    ASSERT_FALSE(stub->is_active());
 
     ASSERT_EQ( 0, luaL_dostring( L, "res = dev:get_abs_quantity()" ) );
 
@@ -270,6 +271,13 @@ TEST( toLuapp, STUB )
     auto res = tolua_tonumber( L, -1, 0 );
     lua_pop( L, 1 );
     ASSERT_EQ( res, 0 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "active = dev:is_active()" ) );
+
+    lua_getfield( L, LUA_GLOBALSINDEX, "active" );
+    auto active = tolua_toboolean( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_FALSE(active);
 
 
     lua_close( L );
