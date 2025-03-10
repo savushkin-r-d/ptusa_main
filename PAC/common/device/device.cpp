@@ -1337,12 +1337,10 @@ int base_counter::save_device_ex( char* buff )
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
-    {
-    if ( get_state() < 0 )
+    {    
+    if ( auto err_id = get_error_id(); err_id < 0 )
         {
-        prev_error_state = get_state();
-
-        switch ( device::get_state() )
+        switch ( err_id )
             {
             case static_cast<int>( STATES::S_PUMP_ERROR ):
                 return "счет импульсов";
@@ -1358,27 +1356,6 @@ const char* base_counter::get_error_description()
 
             default:
                 return "неизвестная ошибка";
-            }
-        }
-
-    if ( prev_error_state < 0 )
-        {
-        switch ( prev_error_state )
-            {
-            case static_cast<int>( STATES::S_PUMP_ERROR ):
-                return "счет импульсов (rtn)";
-
-            case static_cast<int>( STATES::S_FLOW_ERROR ):
-                return "самотёк (rtn)";
-
-            case static_cast<int>( STATES::S_LOW_ERR ):
-                return "канал потока (нижний предел, rtn)";
-
-            case static_cast<int>( STATES::S_HI_ERR ):
-                return "канал потока (верхний предел, rtn)";
-
-            default:
-                return "неизвестная ошибка (rtn)";
             }
         }
 
@@ -1646,31 +1623,16 @@ float counter_iolink::get_value()
     }
 //-----------------------------------------------------------------------------
 const char* counter_iolink::get_error_description()
-    {
-    switch ( device::get_state() )
+    {    
+    switch ( get_error_id() )
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-            prev_error_state = -io_device::IOLINKSTATE::NOTCONNECTED;
             return "IOL-устройство не подключено";
 
         case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-            prev_error_state = -io_device::IOLINKSTATE::DEVICEERROR;
             return "ошибка IOL-устройства";
 
         default:
-            switch ( prev_error_state )
-                {
-                case static_cast<int>( STATES::S_LOW_ERR ):
-                    return "IOL-устройство не подключено (rtn)";
-
-                case static_cast<int>( STATES::S_HI_ERR ):
-                    return "ошибка IOL-устройства, (rtn)";
-
-                default:
-                    // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
-                    break;
-                }
-
             return base_counter::get_error_description();
         }
     }

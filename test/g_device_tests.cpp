@@ -2,6 +2,7 @@
 #include "tcp_cmctr.h"
 #include "lua_manager.h"
 #include "device/manager.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
@@ -65,4 +66,82 @@ TEST( device_communicator, print )
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, STR_check );
     EXPECT_TRUE( true );
+    }
+
+TEST( tech_dev_error, save_as_Lua_str )
+    {
+    std::array<char, 300> buff{};
+    u_int_2 err_id = 0;
+    
+    G_ERRORS_MANAGER->clear();
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
+    EXPECT_STREQ( buff.data(), "" );    // Нет устройств - нет ошибок.
+
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_V, device::DST_V_DO1_DI1_FB_OFF, "V1", "Test valve", "Gea" );
+    auto v1 = G_DEVICE_MANAGER()->get_device( "V1" );
+    v1->set_cmd( "ST", 0, -1 );
+    G_ERRORS_MANAGER->evaluate();
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
+    auto res_str =
+        R"s({
+description="V1 - обратная связь (-1)",
+priority=250,
+state=1,
+type=4,
+group="тревога",
+id_n=0,
+id_type=0,
+suppress=false
+},
+)s";
+    EXPECT_STREQ( buff.data(), res_str );
+    
+    v1->set_cmd( "ST", 0, .0 );
+    G_ERRORS_MANAGER->set_cmd( base_error::COMMANDS::C_CMD_ACCEPT, 0, 0, 0 );
+    G_ERRORS_MANAGER->evaluate();
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );   
+    EXPECT_STREQ( buff.data(), "" );    // Не должно быть ошибок.
+
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_IOLINK, "FQT1", "Test counter", "IFM" );
+    auto fqt1 = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    fqt1->set_cmd( "ST", 0, -1 );
+
+    G_ERRORS_MANAGER->evaluate();
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
+    res_str =
+        R"s({
+description="FQT1 - IOL-устройство не подключено (-1)",
+priority=250,
+state=1,
+type=4,
+group="тревога",
+id_n=1,
+id_type=7,
+suppress=false
+},
+)s";
+    EXPECT_STREQ( buff.data(), res_str );
+
+    fqt1->set_cmd( "ST", 0, 1 );
+    G_ERRORS_MANAGER->evaluate();
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
+    res_str =
+        R"s({
+description="FQT1 - IOL-устройство не подключено (-1)",
+priority=250,
+state=2,
+type=4,
+group="тревога",
+id_n=1,
+id_type=7,
+suppress=false
+},
+)s";
+    EXPECT_STREQ( buff.data(), res_str );
+
+
+    G_ERRORS_MANAGER->clear();
+    G_DEVICE_MANAGER()->clear_io_devices();
     }

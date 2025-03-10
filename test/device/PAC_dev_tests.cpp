@@ -2950,7 +2950,11 @@ TEST( motor, get_state )
     G_PAC_INFO()->emulation_off();
     *M1.DO_channels.char_write_values[ 0 ] = 1;
     *M1.DI_channels.char_read_values[ 0 ] = 1;
+    DeltaMilliSecSubHooker::set_millisec( 0UL );
     EXPECT_EQ( M1.get_state(), 1 );
+    DeltaMilliSecSubHooker::set_millisec( 1UL );
+    EXPECT_EQ( M1.get_state(), -1 );
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
@@ -3185,17 +3189,26 @@ TEST( counter_f, get_error_description )
     EXPECT_STREQ( "счет импульсов", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
-    EXPECT_STREQ( "счет импульсов (rtn)", res );
+    EXPECT_STREQ( "счет импульсов", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "самотёк", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "самотёк", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (нижний предел)", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (нижний предел)", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (верхний предел)", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (верхний предел)", res );
     }
@@ -3513,12 +3526,34 @@ tm get_time_next_day()
     return timeInfo_;
     }
 
+TEST( counter_iolink, get_error_description )
+    {
+    counter_iolink fqt1( "FQT1" );
+    auto res = fqt1.get_error_description(); //Нет ошибок.
+    EXPECT_STREQ( "нет ошибок", res );
+
+    fqt1.set_cmd( "ST", 0, -1 );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+
+
+    fqt1.set_cmd( "ST", 0, -2 );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
+    }
+
 TEST( counter_iolink, get_quantity )
     {
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
-    class counter_iolink_test:public counter_iolink
+    class counter_iolink_test :public counter_iolink
         {
         float totalizer = .0f;
 
@@ -3567,7 +3602,7 @@ TEST( counter_iolink, get_quantity )
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=0, PREV_DAY_T1=10, "
         "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
-        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );   
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.off();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
