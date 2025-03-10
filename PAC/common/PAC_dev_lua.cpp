@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Dec 24 16:03:22 2024.
+** Generated automatically by tolua++-1.0.92 on Mon Mar 10 16:34:05 2025.
 */
 
 #ifndef __cplusplus
@@ -3504,6 +3504,38 @@ static int tolua_PAC_dev_dev_stub_set_value00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_value'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_active of class  dev_stub */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_dev_stub_is_active00
+static int tolua_PAC_dev_dev_stub_is_active00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"dev_stub",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_active'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_active();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_active'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15362,6 +15394,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"dev_stub");
    tolua_function(tolua_S,"get_value",tolua_PAC_dev_dev_stub_get_value00);
    tolua_function(tolua_S,"set_value",tolua_PAC_dev_dev_stub_set_value00);
+   tolua_function(tolua_S,"is_active",tolua_PAC_dev_dev_stub_is_active00);
    tolua_function(tolua_S,"on",tolua_PAC_dev_dev_stub_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_dev_stub_off00);
    tolua_function(tolua_S,"set_state",tolua_PAC_dev_dev_stub_set_state00);
