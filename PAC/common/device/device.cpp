@@ -1337,7 +1337,7 @@ int base_counter::save_device_ex( char* buff )
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
-    {    
+    {
     if ( auto err_id = get_error_id(); err_id < 0 )
         {
         switch ( err_id )

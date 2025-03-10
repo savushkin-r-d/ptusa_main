@@ -1189,8 +1189,6 @@ class base_counter: public i_counter, public device, public io_device
             return abs_value;
             }
 
-        int prev_error_state = 0;
-
     private:
         void check_self_flow();
         void check_connected_pumps();

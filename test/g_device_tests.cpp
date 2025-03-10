@@ -75,7 +75,7 @@ TEST( tech_dev_error, save_as_Lua_str )
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     EXPECT_STREQ( buff.data(), "" );    // Нет устройств - нет ошибок.
 
-    auto res = G_DEVICE_MANAGER()->add_io_device(
+    G_DEVICE_MANAGER()->add_io_device(
         device::DT_V, device::DST_V_DO1_DI1_FB_OFF, "V1", "Test valve", "Gea" );
     auto v1 = G_DEVICE_MANAGER()->get_device( "V1" );
     v1->set_cmd( "ST", 0, -1 );
@@ -101,7 +101,7 @@ suppress=false
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );   
     EXPECT_STREQ( buff.data(), "" );    // Не должно быть ошибок.
 
-    res = G_DEVICE_MANAGER()->add_io_device(
+    G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_IOLINK, "FQT1", "Test counter", "IFM" );
     auto fqt1 = G_DEVICE_MANAGER()->get_device( "FQT1" );
     fqt1->set_cmd( "ST", 0, -1 );
