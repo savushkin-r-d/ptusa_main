@@ -635,6 +635,16 @@ class device : public i_DO_AO_device, public par_device
             return "обратная связь";
             }
 
+        /// @brief Получение ошибки (активной или ранее возникшей).
+        virtual int get_error_id()
+            {
+            if ( auto st = get_state(); st < 0 )
+                {
+                prev_error_state = st;
+                }
+            return prev_error_state;
+            }
+
         void set_descr( const char* new_description );
 
         virtual void set_article( const char* new_article );
@@ -768,6 +778,8 @@ class device : public i_DO_AO_device, public par_device
 
         int state = 0;      ///< Состояние устройства.
         float value = .0f;  ///< Значение устройства.
+
+        int prev_error_state = 0; //< Значение ошибки.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
