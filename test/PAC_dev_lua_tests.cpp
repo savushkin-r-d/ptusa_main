@@ -277,7 +277,7 @@ TEST( toLuapp, STUB )
     lua_getfield( L, LUA_GLOBALSINDEX, "active" );
     auto active = tolua_toboolean( L, -1, 0 );
     lua_pop( L, 1 );
-    ASSERT_FALSE(active);
+    ASSERT_EQ( active, 0 );
 
 
     lua_close( L );
