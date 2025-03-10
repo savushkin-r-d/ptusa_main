@@ -1012,7 +1012,7 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 int base_counter::get_state()
     {
     return device::get_state();
-    };
+    }
 //-----------------------------------------------------------------------------
 void base_counter::direct_on()
     {

@@ -146,14 +146,25 @@ void tcp_communicator::init_instance( const char *name_rus, const char *name_eng
         }
 #endif //PTUSA_TEST
     }
-
+//------------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+void tcp_communicator::clear_instance()
+    {
+    if ( instance )
+        {
+        instance.free();
+        is_init = false;
+        }
+    }
+#endif //PTUSA_TEST
+//------------------------------------------------------------------------------
 int tcp_communicator::add_async_client( tcp_client* client )
     {
     clients[0][client->get_socket()] = client;
     client->async_queued = get_millisec();
     return 0;
     }
-
+//------------------------------------------------------------------------------
 int tcp_communicator::remove_async_client( tcp_client* client )
     {
     std::map<int, tcp_client*>::iterator it = clients->find(client->get_socket());

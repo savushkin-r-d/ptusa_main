@@ -169,6 +169,7 @@ class valve : public digital_io_device
 
     public:
         static void clear_switching_off_queue();
+        static void clear_v_bistable();
 
 #ifdef _MSC_VER
 #pragma endregion Отключение клапана с задержкой.

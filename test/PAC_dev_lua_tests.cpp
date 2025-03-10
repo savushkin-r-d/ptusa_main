@@ -1,4 +1,5 @@
 #include "PAC_dev_lua_tests.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
@@ -144,6 +145,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
         buff );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -176,6 +178,7 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     ASSERT_EQ( st, lua_st );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -195,6 +198,7 @@ TEST( toLuapp, tolua_PAC_dev_G00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -215,6 +219,7 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -242,6 +247,7 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 

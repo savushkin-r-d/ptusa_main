@@ -2337,10 +2337,15 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
         *res.out = '\0';
         if ( res.size > str_len )
             {
-            *( res.out + 3 ) = '\'';
-            *( res.out + 2 ) = '.';
-            *( res.out + 1 ) = '.';
-            *( res.out ) = '.';
+            // Удаляем часть некорректного utf8 символа при его наличии.
+            if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 )
+                res.out--;
+
+            *res.out++ = '.';
+            *res.out++ = '.';
+            *res.out++ = '.';
+            *res.out++ = '\'';
+            *res.out = '\0';
             }
         };
 

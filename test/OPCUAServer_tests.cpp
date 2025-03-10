@@ -1,4 +1,5 @@
 #include "OPCUAServer_tests.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
@@ -9,7 +10,6 @@ TEST( OPCUA_server, evaluate )
     G_OPCUA_SERVER.init();
     G_OPCUA_SERVER.init();      //Correct init() even call again.
 
-    G_DEVICE_MANAGER()->clear_io_devices();
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
         "Valve1", "Test Valve", "" );
     auto valve1 = G_DEVICE_MANAGER()->get_V( "Valve1" );  
@@ -172,4 +172,7 @@ TEST( OPCUA_server, evaluate )
     res = G_OPCUA_SERVER.init_all_and_start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     G_OPCUA_SERVER.shutdown();
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }

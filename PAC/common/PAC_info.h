@@ -15,18 +15,18 @@ class PAC_info: public i_Lua_save_device
         void eval();
 
         enum PARAMETERS
-            {
+        {
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
-			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
+            P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
 
             P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
 
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME,
 
-	        ///< Среднее время задержки получения ответа от узла I/O, мсек.
-	        P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
+            ///< Среднее время задержки получения ответа от узла I/O, мсек.
+            P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
             ///< Среднее время цикла программы, мсек.
             P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,
 
@@ -105,6 +105,8 @@ class PAC_info: public i_Lua_save_device
         bool emulator_state = true;
 #endif
 
+        void set_cycle_time( u_long current_cycle_time );
+
     private:
         PAC_info();
 
@@ -132,6 +134,8 @@ class PAC_info: public i_Lua_save_device
         char cmd_answer[ 200 ];
 
         u_int_4 restrictions_set_to_off_time;
+
+        u_long cycle_time = 0;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();

@@ -56,12 +56,10 @@ TEST( device_communicator, write_devices_states_service )
 
 TEST( device_communicator, print )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
-    std::string STR_check = R"(Device communicator. Dev count = 1.
-[   0 ] Device manager
+    std::string STR_check = R"(Device communicator. Dev count = 0.
 )";
     testing::internal::CaptureStdout();
+    G_DEVICE_CMMCTR->clear_devices();
     G_DEVICE_CMMCTR->print();
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, STR_check );
