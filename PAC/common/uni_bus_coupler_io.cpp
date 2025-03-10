@@ -708,8 +708,8 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node {}.",
-                            nd->number );
+                            "Read DI:bus coupler returned error. Node \"{}\":\"{}\".",
+                            nd->name, nd->ip_address );
                         *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
 
@@ -765,8 +765,8 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} ).",
-                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                            "Read AI:bus coupler returned error. Node \"{}\":\"{}\" (function code = {}, expected size = {}, received = {}).",
+                            nd->name, nd->ip_address, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
                         *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
                         }
