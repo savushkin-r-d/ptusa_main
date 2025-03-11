@@ -1197,8 +1197,6 @@ class base_counter: public i_counter, public device, public io_device
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
-        STATES prev_error_state = STATES::S_WORK;
-
         u_int_4 start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;
 
@@ -1317,6 +1315,8 @@ class counter_iolink : public base_counter
         float get_value() override;
 
         static const int mL_in_L = 1000;
+
+        const char* get_error_description() override;
 
     private:
         enum class CONSTANTS
