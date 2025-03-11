@@ -708,7 +708,7 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node \"{}\":\"{}\".",
+                            R"(Read DI:bus coupler returned error. Node "{}":"{}".)",
                             nd->name, nd->ip_address );
                         *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
@@ -765,8 +765,10 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read AI:bus coupler returned error. Node \"{}\":\"{}\" (function code = {}, expected size = {}, received = {}).",
-                            nd->name, nd->ip_address, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                            R"(Read AI:bus coupler returned error. Node "{}":"{}" )"
+                            R"(function code = {}, expected size = {}, received = {}).)",
+                            nd->name, nd->ip_address,
+                            (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
                         *res.out = '\0';
                         G_LOG->write_log( i_log::P_ERR );
                         }
@@ -859,8 +861,10 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                                nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+                            G_LOG->error(R"(Read AI:bus coupler returned error. Node "%s":"%s" )"
+                                R"((function code = %d, expected size = %d, received = %d).)",
+                                nd->name, nd->ip_address,
+                                (int)buff[ 7 ], (int)buff[ 8 ], registers_count * 2);
                             break;
                             }
                         }
