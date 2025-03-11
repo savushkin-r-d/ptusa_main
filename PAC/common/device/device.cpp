@@ -385,7 +385,7 @@ void dev_stub::on()
 //-----------------------------------------------------------------------------
 bool dev_stub::is_active()
     {
-    return get_state() == 0 ? false : true;
+    return i_DI_device::is_active();
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_value( float new_value )
