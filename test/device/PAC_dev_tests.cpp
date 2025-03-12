@@ -944,6 +944,10 @@ TEST( device_manager, evaluate_io )
     G_ERRORS_MANAGER->clear();
     }
 
+TEST( dev_stub, is_active )
+    {
+    EXPECT_FALSE( STUB()->is_active() );
+    }
 
 TEST( dev_stub, get_pump_dt )
     {

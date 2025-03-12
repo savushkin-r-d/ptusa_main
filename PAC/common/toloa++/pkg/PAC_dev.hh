@@ -824,6 +824,11 @@ class dev_stub : public i_counter
         /// @brief Установка состояния устройства. Ничего не делает.
         void set_value( float new_value );
 
+        /// @brief Проверка активного состояния.
+        ///
+        /// @return 1 - устройство активно.
+        /// @return 0 - устройство неактивно.
+        bool is_active();
 
         /// @brief Включение устройства. Ничего не делает.
         void on();
