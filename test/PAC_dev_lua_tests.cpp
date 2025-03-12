@@ -263,7 +263,7 @@ TEST( toLuapp, STUB )
     EXPECT_NE( nullptr, stub );
     lua_remove( L, -1 );
     ASSERT_EQ( 0, stub->get_abs_quantity() );
-    ASSERT_FALSE(stub->is_active());
+    ASSERT_FALSE( stub->is_active() );
 
     ASSERT_EQ( 0, luaL_dostring( L, "res = dev:get_abs_quantity()" ) );
 
