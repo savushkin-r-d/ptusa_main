@@ -1197,20 +1197,20 @@ TEST( AI1, get_state )
         EXPECT_EQ( sensor.get_state(), err_value == 0 ? 1 : -err_value );
         } };
 
-    auto test_m{ [&]( int module,
+    auto test_m{ [&]( int io_module,
         int in_range_value, float in_range_res,
         int under_range_value, float under_range_res,
         int over_range_value, float over_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );
+        mngr.init_node_AI( 0, 0, io_module, 0 );
         test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
         test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
         } };
 
-    auto test_m_no_over_range{ [&]( int module,
+    auto test_m_no_over_range{ [&]( int io_module,
         int in_range_value, float in_range_res,
         int under_range_value, float under_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );
+        mngr.init_node_AI( 0, 0, io_module, 0 );
         test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
         test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         } };
