@@ -162,6 +162,21 @@ class test_uni_io_manager : public uni_io_manager
         int res = 0;
     };
 
+tm get_fixed_time()
+{
+    static struct tm timeInfo_;
+#ifdef LINUX_OS
+    auto t_ = 1741726800;
+    localtime_r(&t_, &timeInfo_);
+#else
+    static time_t t_ = 1741726800;
+    localtime_s(&timeInfo_, &t_);
+#endif // LINUX_OS
+    timeInfo_.tm_yday++;
+
+    return timeInfo_;
+}
+
 TEST( uni_io_manager, read_inputs )
     {
     test_uni_io_manager mngr;
@@ -183,8 +198,29 @@ TEST( uni_io_manager, read_inputs )
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
 
+    std::ostringstream testBuffer;
+    std::streambuf* originalCoutBuffer = std::cout.rdbuf(testBuffer.rdbuf());
+
+    auto get_time_hook = subhook_new(reinterpret_cast<void*>(&get_time),
+        reinterpret_cast<void*>(&get_fixed_time), SUBHOOK_64BIT_OFFSET);
+
+    subhook_install(get_time_hook);
+    subhook_install(get_time_hook);
+
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
+
+    const std::string expectedOutput =
+    "2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node \"A300\":\"127.0.0.1\".\n"
+    "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A300\":\"127.0.0.1\" (function code = 4, expected size = 0, received = 1).\n"
+    "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A100\":\"127.0.0.1\" (function code = 4, expected size = 31, received = 2).\n";
+
+    EXPECT_EQ( testBuffer.str(), expectedOutput );
+
+    std::cout.rdbuf(originalCoutBuffer);
+
+    subhook_remove(get_time_hook);
+    subhook_free(get_time_hook);
 
     io_manager::replace_instance( prev_mngr );
     }
