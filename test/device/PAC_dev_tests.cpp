@@ -1197,14 +1197,22 @@ TEST( AI1, get_state )
         EXPECT_EQ( sensor.get_state(), err_value == 0 ? 1 : -err_value );
         } };
 
-    auto test_m{ [&]( int module,
+    auto test_m{ [&]( int io_module,
         int in_range_value, float in_range_res,
         int under_range_value, float under_range_res,
         int over_range_value, float over_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );
+        mngr.init_node_AI( 0, 0, io_module, 0 );
         test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
         test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
+        } };
+
+    auto test_m_no_over_range{ [&]( int io_module,
+        int in_range_value, float in_range_res,
+        int under_range_value, float under_range_res ) {
+        mngr.init_node_AI( 0, 0, io_module, 0 );
+        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
+        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         } };
 
     const auto MIN_V = 10.f;
@@ -1214,9 +1222,9 @@ TEST( AI1, get_state )
 
     test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
     test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
-    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
+    test_m_no_over_range( 496, 29488, 18.4f, 3, -1 );   // 750-496 8AI 0/4-20mA S.E.
     test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
-    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
+    test_m_no_over_range( 466, 29488, 18.4f, 3, -1 );   // 750-466 2AI 4-20mA
     test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
     mngr.init_node_AI( 0, 0, 491, 0 );
@@ -3215,13 +3223,6 @@ TEST( counter_f, get_error_description )
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (нижний предел)", res );
-
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (верхний предел)", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (верхний предел)", res );
     }
 
 

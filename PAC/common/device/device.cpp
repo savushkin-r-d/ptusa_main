@@ -1356,9 +1356,6 @@ const char* base_counter::get_error_description()
             case static_cast<int>( STATES::S_LOW_ERR ):
                 return "канал потока (нижний предел)";
 
-            case static_cast<int>( STATES::S_HI_ERR ):
-                return "канал потока (верхний предел)";
-
             default:
                 return "неизвестная ошибка";
             }
@@ -1436,10 +1433,6 @@ int counter_f::get_state()
     if ( get_flow() == -1. )
         {
         return (int) STATES::S_LOW_ERR;
-        }
-    if ( get_flow() == -2. )
-        {
-        return (int) STATES::S_HI_ERR;
         }
 
     return base_counter::get_state();

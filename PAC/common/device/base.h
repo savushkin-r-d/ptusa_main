@@ -172,7 +172,6 @@ class i_counter
             S_FLOW_ERROR = -10, // Ошибка расхода (самотёка).
 
             S_LOW_ERR = -12,
-            S_HI_ERR = -13,
             };
 
     protected:
