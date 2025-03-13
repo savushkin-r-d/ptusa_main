@@ -436,11 +436,6 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                     err = static_cast<int>( ERRORS::UNDER_RANGE );
                     return -1.f;
                     }
-                if ( 32761 <= val ) // Overrange.
-                    {
-                    err = static_cast<int>( ERRORS::OVER_RANGE );
-                    return -1.f;
-                    }
 
                 if ( 0 == min_value && 0 == max_value )
                     {
