@@ -208,10 +208,19 @@ TEST( uni_io_manager, read_inputs )
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
 
-    const std::string expectedOutput =
-    "2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node \"A300\":\"127.0.0.1\".\n"
-    "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A300\":\"127.0.0.1\" (function code = 4, expected size = 0, received = 1).\n"
-    "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A100\":\"127.0.0.1\" (function code = 4, expected size = 31, received = 2).\n";
+
+
+    #ifdef LINUX_OS
+        const std::string expectedOutput =
+            "ERROR  (3) -> Read DI:bus coupler returned error. Node \"A300\":\"127.0.0.1\".\n"
+            "ERROR  (3) -> Read AI:bus coupler returned error. Node \"A300\":\"127.0.0.1\" (function code = 4, expected size = 0, received = 1).\n"
+            "ERROR  (3) -> Read AI:bus coupler returned error. Node \"A100\":\"127.0.0.1\" (function code = 4, expected size = 31, received = 2).\n";
+    #else
+        const std::string expectedOutput =
+            "2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node \"A300\":\"127.0.0.1\".\n"
+            "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A300\":\"127.0.0.1\" (function code = 4, expected size = 0, received = 1).\n"
+            "2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node \"A100\":\"127.0.0.1\" (function code = 4, expected size = 31, received = 2).\n";
+    #endif
 
     EXPECT_EQ( testBuffer.str(), expectedOutput );
 
