@@ -16,6 +16,7 @@
 #include <iostream>
 #include <iomanip>
 #include <ctime>
+#include <dtime.h>
 
 #ifndef SIMPLE_LOG
 #include <syslog.h>
