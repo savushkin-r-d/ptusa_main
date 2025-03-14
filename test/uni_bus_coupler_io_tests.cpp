@@ -162,20 +162,18 @@ class test_uni_io_manager : public uni_io_manager
         int res = 0;
     };
 
-tm get_fixed_time()
-{
+tm get_fixed_time() 
+    {
     static struct tm timeInfo_;
-#ifdef LINUX_OS
-    auto t_ = 1741726800;
-    localtime_r(&t_, &timeInfo_);
-#else
-    static time_t t_ = 1741726800;
-    localtime_s(&timeInfo_, &t_);
-#endif // LINUX_OS
-    timeInfo_.tm_yday++;
+    static time_t t_ = 1741737600;
+    #ifdef LINUX_OS
+        gmtime_r(&t_, &timeInfo_);
+    #else
+        gmtime_s(&timeInfo_, &t_);
+    #endif // LINUX_OS
 
     return timeInfo_;
-}
+    }
 
 TEST( uni_io_manager, read_inputs )
     {
