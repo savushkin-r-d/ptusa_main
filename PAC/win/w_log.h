@@ -8,6 +8,7 @@
 #include "ctime"
 
 #include "w_console.h"
+#include <dtime.h>
 //-----------------------------------------------------------------------------
 /// @brief Работа с журналом.
 ///
@@ -26,8 +27,7 @@ class w_log: public i_log
 #pragma warning( disable: 4996 ) //warning C4996: 'localtime': This function or variable may be unsafe.
 		void virtual write_log(PRIORITIES priority)
 			{
-            std::time_t _tm = std::time( nullptr );
-            std::tm tm = *std::localtime( &_tm );
+            std::tm tm = get_time();
 
             std::cout << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 
