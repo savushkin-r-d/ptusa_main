@@ -111,6 +111,9 @@ int PAC_info::save_device( char* buff )
         "\tUP_TIME=\"{}\",\n", up_time_str ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tCYCLE_TIME={},\n", cycle_time ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tWASH_VALVE_SEAT_PERIOD={},\n", par[ P_MIX_FLIP_PERIOD ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tWASH_VALVE_UPPER_SEAT_TIME={},\n", par[ P_MIX_FLIP_UPPER_TIME ] ).size;
@@ -157,7 +160,7 @@ int PAC_info::save_device( char* buff )
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-        "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;    
+        "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
@@ -395,6 +398,11 @@ void PAC_info::emulation_off()
     emulator_state = false;
     }
 #endif
+//-----------------------------------------------------------------------------
+void PAC_info::set_cycle_time( u_long current_cycle_time )
+    {
+    cycle_time = current_cycle_time;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO()

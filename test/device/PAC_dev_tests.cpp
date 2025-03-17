@@ -4,6 +4,8 @@
 using namespace ::testing;
 
 #include <cstring>
+#include <iomanip>
+#include <time.h>
 
 
 TEST( signal_column, get_type_name )
@@ -750,6 +752,8 @@ void check_dev( const char* name, int type, int sub_type,
 TEST( device_manager, add_io_device )
     {
     G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
 
@@ -887,13 +891,15 @@ TEST( device_manager, add_io_device )
 
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    valve::clear_v_bistable();
     }
 
 
 TEST( device_manager, clear_io_devices )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );    
@@ -903,12 +909,12 @@ TEST( device_manager, clear_io_devices )
     G_DEVICE_MANAGER()->clear_io_devices();
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
+
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_device )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
@@ -916,6 +922,9 @@ TEST( device_manager, get_device )
         G_DEVICE_MANAGER()->get_device( 0u ) );    //Search should find device.
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_name_in_Lua )
@@ -925,15 +934,20 @@ TEST( device_manager, get_name_in_Lua )
 
 TEST( device_manager, evaluate_io )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->evaluate_io();
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
+TEST( dev_stub, is_active )
+    {
+    EXPECT_FALSE( STUB()->is_active() );
+    }
 
 TEST( dev_stub, get_pump_dt )
     {
@@ -1041,12 +1055,43 @@ TEST( analog_io_device, set_cmd )
     obj.set_cmd( "M", 0, 1 );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=1, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
     // Проверка отключения ручного режима.
     obj.set_cmd( "M", 0, 0 );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
     // Проверка включения ручного режима - только на 1 должен включиться.
+    testing::internal::CaptureStdout();
+    struct tm t_info;
+    auto t = time( nullptr );
+#ifdef LINUX_OS
+    localtime_r( &t, &t_info );
+#else
+    localtime_s( &t_info, &t );
+#endif // LINUX_OS
+    std::stringstream tmp;
+    tmp << std::put_time( &t_info, "%Y-%m-%d %H.%M.%S " );
     obj.set_cmd( "M", 0, 100 );
+    auto output = testing::internal::GetCapturedStdout();
+    auto exp_output = tmp.str() +
+#if defined LINUX_OS
+        "\x1B[37m" +
+#endif
+        "DEBUG  (7) -> OBJ1\t analog_io_device::set_cmd() - prop = M, idx = 0, val = 100.000000\n" +
+#if defined LINUX_OS
+        "\x1B[0m" +
+#endif
+        tmp.str() +
+#if defined LINUX_OS        
+        "\x1B[37m" +
+#endif
+        "DEBUG  (7) -> OBJ1\t device::set_cmd() - prop = M, idx = 0, val = 100.000000\n"
+#if defined LINUX_OS
+        + "\x1B[0m"
+#endif
+        ;
+    EXPECT_EQ( output, exp_output );
     obj.save_device( buff, "" );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
     }
@@ -1152,14 +1197,22 @@ TEST( AI1, get_state )
         EXPECT_EQ( sensor.get_state(), err_value == 0 ? 1 : -err_value );
         } };
 
-    auto test_m{ [&]( int module,
+    auto test_m{ [&]( int io_module,
         int in_range_value, float in_range_res,
         int under_range_value, float under_range_res,
         int over_range_value, float over_range_res ) {
-        mngr.init_node_AI( 0, 0, module, 0 );
+        mngr.init_node_AI( 0, 0, io_module, 0 );
         test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
         test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
+        } };
+
+    auto test_m_no_over_range{ [&]( int io_module,
+        int in_range_value, float in_range_res,
+        int under_range_value, float under_range_res ) {
+        mngr.init_node_AI( 0, 0, io_module, 0 );
+        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
+        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
         } };
 
     const auto MIN_V = 10.f;
@@ -1169,9 +1222,9 @@ TEST( AI1, get_state )
 
     test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
     test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
-    test_m( 496, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-496 8AI 0/4-20mA S.E.
+    test_m_no_over_range( 496, 29488, 18.4f, 3, -1 );   // 750-496 8AI 0/4-20mA S.E.
     test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
-    test_m( 466, 29488, 18.4f, 3, -1, 32761, -1 ); // 750-466 2AI 4-20mA
+    test_m_no_over_range( 466, 29488, 18.4f, 3, -1 );   // 750-466 2AI 4-20mA
     test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
     mngr.init_node_AI( 0, 0, 491, 0 );
@@ -1562,6 +1615,8 @@ TEST( valve, evaluate )
     sleep_ms( DELAY_TIME + DELAY_TIME );
     valve::evaluate();
     EXPECT_EQ( valve::V_OFF, V1.get_state() );  //Should be closed.
+
+    valve::clear_switching_off_queue();
     }
 
 TEST( valve, is_closed )
@@ -1579,6 +1634,7 @@ TEST( valve, get_fb_state )
 
     EXPECT_TRUE( V1.get_fb_state() );
     }
+
 
 TEST( valve_DO1_DI1_off, valve_DO1_DI1_off )
     {
@@ -1930,6 +1986,8 @@ TEST( valve_bottom_mix_proof, is_switching_off_finished )
     EXPECT_EQ( false, V1.is_switching_off_finished() );
     sleep_ms( DELAY_TIME + DELAY_TIME );
     EXPECT_EQ( true, V1.is_switching_off_finished() );
+
+    valve::clear_switching_off_queue();
     }
 
 TEST( valve_bottom_mix_proof, on )
@@ -2042,6 +2100,7 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
 
     G_PAC_INFO()->emulation_on();
     }
+
 
 TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     {
@@ -2672,6 +2731,46 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 
+TEST( valve_iolink_mix_proof, evaluate_io )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.evaluate_io();
+    // Отключена обратная связь - нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OFF, V1.get_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, get_state )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+    V1.direct_on();
+    V1.direct_off();
+    // Нет обратной связи, но не прошло время проверки, поэтому нет ошибки.
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_OK, V1.get_state() );
+
+    // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
+    // поэтому есть ошибки.
+    V1.in_info.err = true;
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+
+    // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
+    // поэтому есть ошибка.
+    V1.in_info.err = false;
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+    DeltaMilliSecSubHooker::set_default_time();
+
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     {
@@ -2869,7 +2968,11 @@ TEST( motor, get_state )
     G_PAC_INFO()->emulation_off();
     *M1.DO_channels.char_write_values[ 0 ] = 1;
     *M1.DI_channels.char_read_values[ 0 ] = 1;
+    DeltaMilliSecSubHooker::set_millisec( 0UL );
     EXPECT_EQ( M1.get_state(), 1 );
+    DeltaMilliSecSubHooker::set_millisec( 1UL );
+    EXPECT_EQ( M1.get_state(), -1 );
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
@@ -2950,60 +3053,103 @@ TEST( camera, get_type_name )
 TEST( counter_f, get_state )
     {
     counter_f fqt1( "FQT1" );
+    fqt1.evaluate_io();    
+    fqt1.evaluate_io(); // Второй вызов (здесь и далее) необходим
+                        // для возникновения ошибки.
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Малый расход - но счетчик меняет показания - нет ошибки.
+    //Есть расход - ошибка должна появиться.
+    //Но минимальный расход задан 0 - поэтому нет ошибки.
     fqt1.set_cmd( "F", 0, 1 );
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    fqt1.set_cmd( "ABS_V", 0, 100 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Малый расход - ошибка должна появиться, даже при отсутствии мотора.
-    //Не прошло заданное время.
-    fqt1.set_cmd( "P_DT", 0, 1000 );
+    //Минимальный расход задан, но время ожидания задано 0 - поэтому нет ошибки.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    //Прошло заданное время.
-    fqt1.set_cmd( "P_DT", 0, 0 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+
+    //Минимальный расход задан, время ожидания задано, но оно не прошло -
+    //поэтому нет ошибки.
+    fqt1.set_cmd( "P_DT", 0, 1000 );
+    fqt1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Прошло заданное время, задан минимальный расход, но счетчик считает -
+    //поэтому нет ошибки.
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();    
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    //Прошло заданное время, задан минимальный расход, счетчик не считает -
+    //есть ошибка.
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
+
 
     //В состоянии паузы ошибки не должно быть.
     fqt1.pause();
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
     fqt1.start();
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
 
     //Далее проверяем на ошибки при наличии привязанного мотора.
     motor m1( "M1", device::DST_M_FREQ );
     fqt1.set_property( "M", &m1 );
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Расход ниже минимального - ошибка не должна появиться.
+    //Насос работает, счетчик считает.
     fqt1.set_cmd( "F", 0, 0 );
     m1.on();    
-    fqt1.get_state();
+    fqt1.evaluate_io();
+    fqt1.set_cmd( "ABS_V", 0, 200 );
+    fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Устанавливаем расход - ошибка должна появиться.
+    //Насос работает, но счетчик не считает.
+    fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+
+    //Устанавливаем расход - ошибка должна остаться.
     fqt1.set_cmd( "F", 0, 1 );
-    fqt1.get_state();
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
-    fqt1.start();
-    //Расход стал ниже минимального - ошибка не должна появиться.
+    //Расход стал ниже минимального - ошибка должна остаться.
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
-    fqt1.get_state();
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
-    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
-    fqt1.get_state();
-    fqt1.set_cmd( "ABS_V", 0, 200 );
+    //Сбрасываем ошибку.
+    fqt1.set_cmd( "ST", 0, 1 ); // Косвенно вызывается fqt1.start().
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.pause();
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
     fqt1.start();
+    fqt1.evaluate_io();
+    fqt1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
@@ -3050,33 +3196,33 @@ TEST( counter_f, get_min_flow )
 TEST( counter_f, get_error_description )
     {
     counter fqt1( "FQT1" );
-    auto res = fqt1.get_error_description();        //Нет ошибок.
+    auto res = fqt1.get_error_description(); //Нет ошибок.
     EXPECT_STREQ( "нет ошибок", res );
 
     fqt1.set_cmd( "ST", 0, -1 );
     res = fqt1.get_error_description();
-    EXPECT_STREQ( "обратная связь", res );
+    EXPECT_STREQ( "неизвестная ошибка", res );
 
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_ERROR ) );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_PUMP_ERROR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "счет импульсов", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
-    EXPECT_STREQ( "счет импульсов (rtn)", res );
+    EXPECT_STREQ( "счет импульсов", res );
+
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "самотёк", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "самотёк", res );
 
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "канал потока (нижний предел)", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
     res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (нижний предел, rtn)", res );
-
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (верхний предел)", res );
-    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
-    res = fqt1.get_error_description();
-    EXPECT_STREQ( "канал потока (верхний предел, rtn)", res );
+    EXPECT_STREQ( "канал потока (нижний предел)", res );
     }
 
 
@@ -3110,13 +3256,13 @@ TEST( counter, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, -10 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, -10 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -3236,8 +3382,8 @@ TEST( virtual_counter, direct_set_state )
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ), fqt1.get_state() );
 
 
-    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_ERROR ) );
-    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_ERROR ), fqt1.get_state() );
+    fqt1.direct_set_state( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ) );
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ), fqt1.get_state() );
     }
 
 TEST( virtual_counter, set )
@@ -3348,7 +3494,7 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
     fqt1.set_cmd( "ST", 0, 1 );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
 TEST( counter_iolink, evaluate_io )
@@ -3392,12 +3538,34 @@ tm get_time_next_day()
     return timeInfo_;
     }
 
+TEST( counter_iolink, get_error_description )
+    {
+    counter_iolink fqt1( "FQT1" );
+    auto res = fqt1.get_error_description(); //Нет ошибок.
+    EXPECT_STREQ( "нет ошибок", res );
+
+    fqt1.set_cmd( "ST", 0, -1 );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+
+
+    fqt1.set_cmd( "ST", 0, -2 );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
+    }
+
 TEST( counter_iolink, get_quantity )
     {
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
-    class counter_iolink_test:public counter_iolink
+    class counter_iolink_test :public counter_iolink
         {
         float totalizer = .0f;
 
@@ -3446,7 +3614,7 @@ TEST( counter_iolink, get_quantity )
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=0, PREV_DAY_T1=10, "
         "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
-        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );   
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.off();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
@@ -3493,14 +3661,14 @@ TEST( counter_iolink, get_quantity )
     fqt1.set_state( 1 );        //Start
     fqt1.set_raw_value( 60 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_abs_quantity() );
 
 
     //Test reset to 0 physical counter after its power reboot.
     fqt1.set_raw_value( 10 );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 40, fqt1.get_quantity() );
 
     //Test physical counter overflow.
     fqt1.set_raw_value( fqt1.get_max_raw_value() - 10 );
@@ -4026,7 +4194,6 @@ TEST( threshold_regulator, set_value )
     threshold_regulator TRC1( "TRC1" );
     device* dev = static_cast<device*>( &TRC1 );
 
-    G_DEVICE_MANAGER()->clear_io_devices();
     auto TE_name = std::string( "TE1" );
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, TE_name.c_str(), "Test sensor", "T" );
@@ -4114,6 +4281,9 @@ TEST( threshold_regulator, set_value )
     FQT1->set_cmd( "F", 0, SET_VALUE );
     dev->set_value( SET_VALUE * 2 );
     EXPECT_EQ( 1, M1->get_state() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( threshold_regulator, set_cmd )

@@ -383,6 +383,11 @@ void dev_stub::on()
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
+bool dev_stub::is_active()
+    {
+    return valve::is_active();
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::set_value( float new_value )
     {
     // Ничего не делаем.
@@ -1011,57 +1016,8 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
-    bool is_pump_working = false;
-    if ( !motors.empty() )
-        {
-        for ( auto m : motors )
-            {
-            if ( m->get_state() == 1 )
-                {
-                is_pump_working = true;
-                }
-            }
-        }
-
-    // Насос не работает (при его наличии) или расход ниже минимального.
-    if ( auto min_flow = get_min_flow();
-        ( !motors.empty() && !is_pump_working ) || get_flow() <= min_flow )
-        {
-        start_pump_working_time = 0;
-        }
-    // Насос работает (при его наличии) или расход выше минимального.
-    else
-        {
-        if ( device::get_state() == static_cast<int>( STATES::S_PAUSE ) ||
-            0 == start_pump_working_time )
-            {
-            start_pump_working_time = get_millisec();
-            counter_prev_value = get_abs_quantity();
-            return device::get_state();
-            }
-
-        // Работа. 
-        // Проверяем счетчик на ошибку - он должен изменить свои показания.
-        if ( get_abs_quantity() != counter_prev_value )
-            {
-            start_pump_working_time = get_millisec();
-            counter_prev_value = get_abs_quantity();
-            device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
-            }
-        else
-            {
-            if ( auto dt = get_pump_dt();
-                get_delta_millisec( start_pump_working_time ) < dt )
-                {
-                return device::get_state();
-                }
-
-            device::direct_set_state( static_cast<int>( STATES::S_ERROR ) );
-            }
-        }
-
     return device::get_state();
-    };
+    }
 //-----------------------------------------------------------------------------
 void base_counter::direct_on()
     {
@@ -1075,12 +1031,6 @@ void base_counter::direct_off()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        device::direct_set_state( new_state );
-        return;
-        }
-    
     switch ( new_state )
         {
         case 0:
@@ -1094,6 +1044,11 @@ void base_counter::direct_set_state( int new_state )
         case static_cast<int>( STATES::S_PAUSE ):
             pause();
             break;
+        }
+
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        device::direct_set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1180,10 +1135,10 @@ void base_counter::pause()
 void base_counter::start()
     {
     if ( static_cast<int>( STATES::S_PAUSE ) == device::get_state() )
-        {
-        device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
+        {        
         last_read_value = get_raw_value();
         start_pump_working_time = 0;
+        device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
@@ -1206,6 +1161,102 @@ void base_counter::restart()
     {
     reset();
     start();
+    }
+//-----------------------------------------------------------------------------
+void base_counter::check_self_flow()
+    {
+    auto min_flow = get_min_flow();
+
+    if ( min_flow == .0f )
+        {
+        return; // Если минимальный поток 0 - дальше не проверяем.
+        }
+
+    if ( get_flow() <= min_flow )
+        {
+        // Расход ниже минимального.
+        start_pump_working_time_flow = 0;
+        return;
+        }
+
+    // Расход выше минимального.
+    if ( 0 == start_pump_working_time_flow )
+        {
+        // Фиксируем время и счетчик появления расхода, превышающего
+        // минимальный.
+        start_pump_working_time_flow = get_millisec();
+        counter_prev_value_flow = get_abs_quantity();
+        }
+    else
+        {
+        // Проверяем счетчик на ошибку - он должен изменить свои показания.
+        if ( get_abs_quantity() != counter_prev_value_flow )
+            {
+            start_pump_working_time_flow = get_millisec();
+            counter_prev_value_flow = get_abs_quantity();
+            }
+        else
+            {
+            if ( auto dt = get_pump_dt(); dt > 0 &&
+                get_delta_millisec( start_pump_working_time_flow ) > dt )
+                {
+                device::direct_set_state( static_cast<int>(
+                    STATES::S_FLOW_ERROR ) );
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::check_connected_pumps()
+    {
+    if ( motors.empty() )
+        {
+        return;
+        }
+
+    auto is_pump_working = false;
+    for ( auto m : motors )
+        {
+        if ( m->get_state() == 1 )
+            {
+            is_pump_working = true;
+            }
+        }
+
+    if ( !is_pump_working )
+        {
+        // Насос не работает.
+        start_pump_working_time = 0;
+        return;
+        }
+
+    // Насос работает.
+    if ( 0 == start_pump_working_time )
+        {
+        // Фиксируем время и показания момента включения насоса. 
+        start_pump_working_time = get_millisec();
+        counter_prev_value = get_abs_quantity();
+        return;
+        }
+
+    // Насос работает уже некоторое время, проверяем счетчик на ошибку - он
+    // должен изменить свои показания.
+    if ( get_abs_quantity() != counter_prev_value )
+        {
+        // Показания счетчика меняются - состояние устанавливаем в РАБОТА.
+        start_pump_working_time = get_millisec();
+        counter_prev_value = get_abs_quantity();
+        }
+    else
+        {
+        if ( auto dt = get_pump_dt(); dt > 0 &&
+            get_delta_millisec( start_pump_working_time ) > dt )
+            {
+            // Показания счетчика не изменяются - состояние устанавливаем в
+            // ОШИБКА_НАСОСА.
+            device::direct_set_state( static_cast<int>( STATES::S_PUMP_ERROR ) );
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 void base_counter::evaluate_io()
@@ -1236,6 +1287,19 @@ void base_counter::evaluate_io()
 
         c_day = get_time().tm_yday;
         }
+
+
+    // В паузе счетчика или при наличии ошибок - возвращаем данное состояние.
+    if ( device::get_state() == static_cast<int>( STATES::S_PAUSE ) ||
+        device::get_state() < 0 )
+        {
+        start_pump_working_time_flow = 0;
+        start_pump_working_time = 0;
+        return;                     // Не изменяем данное состояние.
+        }
+        
+    check_self_flow();          // Проверка на самотёк.
+    check_connected_pumps();    // Проверяем на работу связанных насосов.  
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const
@@ -1279,41 +1343,22 @@ int base_counter::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
     {
-    if ( device::get_state() < 0 )
+    if ( auto err_id = get_error_id(); err_id < 0 )
         {
-        switch ( device::get_state() )
+        switch ( err_id )
             {
-            case static_cast<int>( STATES::S_ERROR ):
-                prev_error_state = STATES::S_ERROR;
+            case static_cast<int>( STATES::S_PUMP_ERROR ):
                 return "счет импульсов";
 
+            case static_cast<int>( STATES::S_FLOW_ERROR ):
+                return "самотёк";
+
             case static_cast<int>( STATES::S_LOW_ERR ):
-                prev_error_state = STATES::S_LOW_ERR;
                 return "канал потока (нижний предел)";
 
-            case static_cast<int>( STATES::S_HI_ERR ):
-                prev_error_state = STATES::S_HI_ERR;
-                return "канал потока (верхний предел)";
-
             default:
-                return device::get_error_description();
+                return "неизвестная ошибка";
             }
-        }
-
-    switch ( prev_error_state )
-        {
-        case STATES::S_ERROR:
-            return "счет импульсов (rtn)";
-
-        case STATES::S_LOW_ERR:
-            return "канал потока (нижний предел, rtn)";
-
-        case STATES::S_HI_ERR:
-            return "канал потока (верхний предел, rtn)";
-
-        default:
-            // Ничего не делаем. Вернем в конце функции строку, что всё хорошо.
-            break;
         }
 
     return "нет ошибок";
@@ -1388,10 +1433,6 @@ int counter_f::get_state()
     if ( get_flow() == -1. )
         {
         return (int) STATES::S_LOW_ERR;
-        }
-    if ( get_flow() == -2. )
-        {
-        return (int) STATES::S_HI_ERR;
         }
 
     return base_counter::get_state();
@@ -1577,6 +1618,21 @@ u_int counter_iolink::get_abs_quantity()
 float counter_iolink::get_value()
     {
     return base_counter::get_value() * mL_in_L;
+    }
+//-----------------------------------------------------------------------------
+const char* counter_iolink::get_error_description()
+    {    
+    switch ( get_error_id() )
+        {
+        case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
+            return "IOL-устройство не подключено";
+
+        case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
+            return "ошибка IOL-устройства";
+
+        default:
+            return base_counter::get_error_description();
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3455,10 +3511,8 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        fmt::format_to( G_LOG->msg,
-            "{}\t analog_io_device::set_cmd() - prop = {}, idx = {}, val = {}",
+        G_LOG->debug( "%s\t analog_io_device::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val );
-        G_LOG->write_log( i_log::P_DEBUG );
         }
 
     analog_emulator& emulator = get_emulator();

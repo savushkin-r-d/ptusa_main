@@ -9,8 +9,8 @@
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
-valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
-valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
+valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info{};
+valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -163,15 +163,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
-                                {
-                                return VX_ON_FB_ERR_MANUAL;
-                                }
-                            else
-                                {
-                                return VX_OPENING_MANUAL;
-                                }
+                            return VX_ON_FB_ERR_MANUAL;
                             }
                         } // if ( get_manual_mode() )
                     else  //Ручной режим отключен.
@@ -182,15 +174,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
-                                {
-                                return VX_ON_FB_ERR;
-                                }
-                            else
-                                {
-                                return VX_OPENING;
-                                }
+                            return VX_ON_FB_ERR;
                             }
                         }
                     }
@@ -232,15 +216,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
-                                {
-                                return VX_OFF_FB_ERR_MANUAL;
-                                }
-                            else
-                                {
-                                return VX_CLOSING_MANUAL;
-                                }
+                            return VX_OFF_FB_ERR_MANUAL;
                             }
                         } // if ( get_manual_mode() )
                     else  //Ручной режим отключен.
@@ -251,15 +227,7 @@ int valve::get_state()
                             }
                         else
                             {
-                            if ( get_delta_millisec( start_switch_time ) >
-                                static_cast<u_long>( get_par( P_ON_TIME, 0 ) ) )
-                                {
-                                return VX_OFF_FB_ERR;
-                                }
-                            else
-                                {
-                                return VX_CLOSING;
-                                }
+                            return VX_OFF_FB_ERR;
                             }
                         }
                     }
@@ -420,10 +388,15 @@ void valve::on()
     is_switching_off = false;
     digital_io_device::on();
     }
-
+//-----------------------------------------------------------------------------
 void valve::clear_switching_off_queue()
     {
     to_switch_off.clear();
+    }
+//-----------------------------------------------------------------------------
+void valve::clear_v_bistable()
+    {
+    v_bistable.clear();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1204,7 +1177,6 @@ int valve_bottom_mix_proof::get_on_fb_value()
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
-    in_info->err = 0;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::open_upper_seat()
@@ -1224,10 +1196,10 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
         return valve::get_valve_state();
         }
 
-    if ( in_info->de_en ) return V_OFF;
-    if ( in_info->main ) return V_ON;
-    if ( in_info->usl ) return V_UPPER_SEAT;
-    if ( in_info->lsp ) return V_LOWER_SEAT;
+    if ( in_info.de_en ) return V_OFF;
+    if ( in_info.main ) return V_ON;
+    if ( in_info.usl ) return V_UPPER_SEAT;
+    if ( in_info.lsp ) return V_LOWER_SEAT;
 
     return V_OFF;
     }
@@ -1244,7 +1216,7 @@ void valve_iolink_mix_proof::evaluate_io()
 
     char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    char* buff = (char*)in_info;
+    auto* buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -1289,18 +1261,12 @@ int valve_iolink_mix_proof::save_device_ex( char* buff )
     int res = valve::save_device_ex( buff );
 
     bool cs = out_info->sv1 || out_info->sv2 || out_info->sv3;
-    int err = in_info->err;
+    int err = in_info.err;
     res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE,
         "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
         blink, cs, err, get_value() ) ).size;
 
     return res;
-    }
-//-----------------------------------------------------------------------------
-valve_iolink_mix_proof::~valve_iolink_mix_proof()
-    {
-    delete in_info;
-    in_info = nullptr;
     }
 //-----------------------------------------------------------------------------
 bool valve_iolink_mix_proof::get_fb_state()
@@ -1313,7 +1279,7 @@ bool valve_iolink_mix_proof::get_fb_state()
         return false;
         }
 
-    if ( in_info->err ) return false;
+    if ( in_info.err ) return false;
 
     if ( get_delta_millisec( start_switch_time ) <
         get_par( valve::P_ON_TIME, 0 ) )
@@ -1321,13 +1287,13 @@ bool valve_iolink_mix_proof::get_fb_state()
         return true;
         }
 
-    if ( out_info->sv1 == false && in_info->de_en && in_info->st ) return true;
+    if ( out_info->sv1 == false && in_info.de_en && in_info.st ) return true;
 
-    if ( out_info->sv1 == true && in_info->main && in_info->st ) return true;
+    if ( out_info->sv1 == true && in_info.main && in_info.st ) return true;
 
-    if ( out_info->sv2 == true && in_info->usl && in_info->st ) return true;
+    if ( out_info->sv2 == true && in_info.usl && in_info.st ) return true;
 
-    if ( out_info->sv3 == true && in_info->lsp && in_info->st ) return true;
+    if ( out_info->sv3 == true && in_info.lsp && in_info.st ) return true;
 
     return false;
     }
@@ -1380,28 +1346,28 @@ float valve_iolink_mix_proof::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_value();
 
-    return 0.1f * in_info->pos;
+    return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::get_off_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
-    return out_info->sv1 == false && in_info->main && in_info->st;
+    return out_info->sv1 == false && in_info.main && in_info.st;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::get_on_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
-    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    return out_info->sv1 == true && in_info.de_en && in_info.st;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    if ( false == in_info->main )
+    if ( false == in_info.main )
         {
         start_switch_time = get_millisec();
         }

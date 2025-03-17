@@ -1,4 +1,5 @@
 #include "PAC_dev_lua_tests.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
@@ -143,6 +144,8 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR_T=0},\n",
         buff );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -174,6 +177,8 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     lua_pop( L, 1 );
     ASSERT_EQ( st, lua_st );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -192,6 +197,8 @@ TEST( toLuapp, tolua_PAC_dev_G00 )
     EXPECT_NE( nullptr, G1 );
     lua_remove( L, -1 );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -211,6 +218,8 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
     EXPECT_NE( nullptr, CAM1 );
     lua_remove( L, -1 );
 
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -237,7 +246,8 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     ASSERT_EQ( 1, luaL_dostring( L, "FQT1.start_daily()" ) ); //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
 
-
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -253,6 +263,7 @@ TEST( toLuapp, STUB )
     EXPECT_NE( nullptr, stub );
     lua_remove( L, -1 );
     ASSERT_EQ( 0, stub->get_abs_quantity() );
+    ASSERT_FALSE( stub->is_active() );
 
     ASSERT_EQ( 0, luaL_dostring( L, "res = dev:get_abs_quantity()" ) );
 
@@ -260,6 +271,13 @@ TEST( toLuapp, STUB )
     auto res = tolua_tonumber( L, -1, 0 );
     lua_pop( L, 1 );
     ASSERT_EQ( res, 0 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "active = dev:is_active()" ) );
+
+    lua_getfield( L, LUA_GLOBALSINDEX, "active" );
+    auto active = tolua_toboolean( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_EQ( active, 0 );
 
 
     lua_close( L );

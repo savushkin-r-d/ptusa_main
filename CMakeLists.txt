@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2024.12.12.3)
+project(ptusa_main VERSION 2025.03.12.1)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -110,12 +110,14 @@ endif()
 
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp
             PAC_control_projects/main_control_prg/main.cpp)
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
+           PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
     
@@ -144,6 +146,7 @@ if(LINUX)
 
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp
             PAC_control_projects/main_control_prg/main.cpp
             PAC_control_projects/main_control_prg/version.rc)
 
@@ -154,6 +157,7 @@ elseif(WIN32)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
            test/main_test.cpp           
+           PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
@@ -238,6 +242,7 @@ set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC_control_projects/main_control_prg>
 
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 
@@ -399,6 +404,7 @@ if (WIN32)
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
+      --opc                 Start OPC UA server with program start
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
@@ -416,6 +422,7 @@ else()
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
+      --opc                 Start OPC UA server with program start
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
@@ -435,6 +442,24 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+
+
+	if(LINUX)
+	    add_test(T1-PLCnext-Demo_valgrind valgrind
+				--error-exitcode=1
+				--num-callers=100
+				--leak-check=full
+				--verbose
+				--track-origins=yes 				
+				--show-leak-kinds=all 
+				lua5.1
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
+                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
+                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
+                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+	endif()
+
 
     add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
             --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json 

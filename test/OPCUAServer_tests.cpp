@@ -1,4 +1,5 @@
 #include "OPCUAServer_tests.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
@@ -9,7 +10,6 @@ TEST( OPCUA_server, evaluate )
     G_OPCUA_SERVER.init();
     G_OPCUA_SERVER.init();      //Correct init() even call again.
 
-    G_DEVICE_MANAGER()->clear_io_devices();
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
         "Valve1", "Test Valve", "" );
     auto valve1 = G_DEVICE_MANAGER()->get_V( "Valve1" );  
@@ -73,22 +73,24 @@ TEST( OPCUA_server, evaluate )
             name.length ) == "devices" )
             {            
             bd.nodeId = br.references[ i ].nodeId.nodeId;
-            br = UA_Server_browse( UA_server, 0, &bd );
+            UA_BrowseResult br1 = UA_Server_browse( UA_server, 0, &bd );
             EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
 
-            auto devices_count = br.referencesSize;
+            auto devices_count = br1.referencesSize;
             for ( auto l = 0u; l < devices_count; ++l )
                 {
-                name = br.references[ l ].browseName.name;
+                name = br1.references[ l ].browseName.name;
                 if ( std::string( reinterpret_cast<char*>( name.data ),
                     name.length ) == "Valve1" )
                     {
                     is_exist_node = true;
                     }
-                }            
-            }
+                }
+            UA_BrowseResult_clear( &br1 );
+            }            
         }   
     EXPECT_TRUE( is_exist_node );
+    UA_BrowseDescription_clear( &bd );
     UA_BrowseResult_clear( &br );
 
     UA_Variant out;
@@ -99,7 +101,8 @@ TEST( OPCUA_server, evaluate )
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_INT32 ] );
     auto state = static_cast<UA_Int32*>( out.data );
     EXPECT_EQ( 1, *state );
-
+    UA_Variant_clear( &out );
+    
 
     UA_NodeId valve1_value_NodeId = UA_NODEID_STRING_ALLOC( 0, "Valve1.value" );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
@@ -107,6 +110,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_TRUE( out.type == &UA_TYPES[ UA_TYPES_FLOAT ] );
     auto value = static_cast<UA_Float*>( out.data );
     EXPECT_EQ( .0f, *value );
+    UA_Variant_clear( &out );
 
 
     UA_Variant val;
@@ -120,9 +124,14 @@ TEST( OPCUA_server, evaluate )
     res = UA_Server_writeValue( UA_server, valve1_state_NodeId, val );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     res = UA_Server_readValue( UA_server, valve1_state_NodeId, &out );
+    UA_NodeId_clear( &valve1_state_NodeId );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     state = static_cast<UA_Int32*>( out.data );
     EXPECT_EQ( 10, *state );
+    UA_Variant_clear( &out );
+    // Вызывать UA_Variant_clear( &val ); не надо, так как значение храниться в
+    // локальной переменной new_state.
+
 
     UA_Float new_value = 100.f;
     UA_Variant_setScalar( &val, &new_value, &UA_TYPES[ UA_TYPES_FLOAT ] );
@@ -133,9 +142,11 @@ TEST( OPCUA_server, evaluate )
     res = UA_Server_writeValue( UA_server, valve1_value_NodeId, val );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
+    UA_NodeId_clear( &valve1_value_NodeId );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     value = static_cast<UA_Float*>( out.data );
     EXPECT_EQ( 100.f, *value );
+    UA_Variant_clear( &out );
 
 
     UA_NodeId uptime_NodeId = UA_NODEID_STRING_ALLOC( 0, "PAC_info.uptime" );
@@ -144,17 +155,24 @@ TEST( OPCUA_server, evaluate )
     auto str = static_cast<UA_String*>( out.data );
     EXPECT_EQ( "0 дн. 0:0:0", std::string( reinterpret_cast<char*>( str->data ),
         str->length ) );
+    UA_Variant_clear( &out );
+    UA_NodeId_clear( &uptime_NodeId );
 
     UA_NodeId version_NodeId = UA_NODEID_STRING_ALLOC( 0, "PAC_info.version" );
     res = UA_Server_readValue( UA_server, version_NodeId, &out );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     str = static_cast<UA_String*>( out.data );
     EXPECT_EQ( PRODUCT_VERSION_FULL_STR,
-        std::string( reinterpret_cast<char*>( str->data ), str->length ) );    
+        std::string( reinterpret_cast<char*>( str->data ), str->length ) ); 
+    UA_Variant_clear( &out );
+    UA_NodeId_clear( &version_NodeId );
 
     G_OPCUA_SERVER.shutdown();
 
     res = G_OPCUA_SERVER.init_all_and_start();
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     G_OPCUA_SERVER.shutdown();
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }

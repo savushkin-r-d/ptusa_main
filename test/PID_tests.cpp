@@ -1,11 +1,10 @@
 #include "PID_tests.h"
+#include "g_errors.h"
 
 using namespace ::testing;
 
 TEST( PID, get_actuator )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_REGULATOR, device::DST_REGULATOR_PID, "TC1",
         "Test controller", "T" );
@@ -30,6 +29,9 @@ TEST( PID, get_actuator )
     m = p1->get_actuator();
     ASSERT_NE( nullptr, m );
     ASSERT_EQ( m1, m );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( PID, direct_set_value )

@@ -5,7 +5,6 @@ using namespace ::testing;
 
 TEST( errors_manager, evaluate )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     G_ERRORS_MANAGER->evaluate();
     EXPECT_EQ( 0, G_ERRORS_MANAGER->get_errors_id() ); //No devices - no errors.
@@ -24,8 +23,14 @@ TEST( errors_manager, evaluate )
 
     //Generate error.
     dev->set_cmd( "F", 0, 1 );
+    dev->set_cmd( "P_DT", 0, 1 );
+    dev->set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    dev->evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
-    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, dev->get_state() );
+    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    dev->evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();    
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
 
     //Should get an error.
     G_ERRORS_MANAGER->evaluate();
@@ -52,11 +57,14 @@ TEST( errors_manager, evaluate )
     //Remove error.
     dev->set_cmd( "ABS_V", 0, 100 );
     dev->set_cmd( "P_DT", 0, 1000 );
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
+    dev->set_cmd( "ST", 0, 1 );   //Сбрасываем ошибку счетчика.
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_ALARM -> AS_RETURN.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
     G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_RETURN.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
     }
 
 TEST( siren_lights_manager, siren_lights_manager )

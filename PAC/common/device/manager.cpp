@@ -389,6 +389,9 @@ device_manager::~device_manager()
         dev = nullptr;
         }
 
+    delete stub;
+    stub = nullptr;
+
     project_devices.clear();
     }
 //-----------------------------------------------------------------------------

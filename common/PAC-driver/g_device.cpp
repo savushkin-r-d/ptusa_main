@@ -321,6 +321,11 @@ int device_communicator::add_device( i_Lua_save_device *device )
     return 0;
     }
 //-----------------------------------------------------------------------------
+void device_communicator::clear_devices()
+    {
+    dev.clear();
+    }
+//-----------------------------------------------------------------------------
 void device_communicator::print() const
     {
     char tmp_str[ 200 ];
