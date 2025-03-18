@@ -655,6 +655,27 @@ int uni_io_manager::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
+    auto create_write_err_log = []( const char* node_name, const char* node_ip_address ) 
+        {
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            R"(Read DI:bus coupler returned error. Node "{}":"{}".)",
+            node_name, node_ip_address );
+        *res.out = '\0';
+        G_LOG->write_log( i_log::P_ERR );
+        };
+
+    auto create_write_err_log_extended = []( const char* node_name, const char* node_ip_address,
+        int fun_code, int exp_size, int received ) 
+        {
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                R"(Read AI:bus coupler returned error. Node "{}":"{}" )"
+                R"((function code = {}, expected size = {}, received = {}).)",
+                node_name, node_ip_address, fun_code, exp_size, received );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_ERR );
+        };
+
+
     for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -707,12 +728,7 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            R"(Read DI:bus coupler returned error. Node "{}":"{}".)",
-                            nd->name, nd->ip_address );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
-
+                        create_write_err_log( nd->name, nd->ip_address );
                         if ( G_DEBUG )
                             {
                             //printf("\nRead DI:I/O returned error...\n");
@@ -764,13 +780,8 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            R"(Read AI:bus coupler returned error. Node "{}":"{}" )"
-                            R"((function code = {}, expected size = {}, received = {}).)",
-                            nd->name, nd->ip_address,
-                            (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
+                        create_write_err_log_extended( nd->name, nd->ip_address,
+                            (int)buff[7], (int)buff[8], bytes_cnt );
                         }
                     }
                 }// if ( nd->AI_cnt > 0 )
@@ -861,13 +872,8 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                                R"(Read AI:bus coupler returned error. Node "{}":"{}" )"
-                                R"((function code = {}, expected size = {}, received = {}).)",
-                                nd->name, nd->ip_address,
-                                (int)buff[ 7 ], (int)buff[ 8 ], registers_count * 2 );
-                            *res.out = '\0';
-                            G_LOG->write_log( i_log::P_ERR );
+                            create_write_err_log_extended( nd->name, nd->ip_address,
+                                (int)buff[7], (int)buff[8], registers_count * 2 );
                             break;
                             }
                         }
