@@ -125,6 +125,8 @@ if(LINUX)
            test/perfomance/main_perfomance_test.cpp           
            PAC_control_projects/main_control_prg/version.rc)
 
+    set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
     if(ARP_DEVICE)
         execute_process(COMMAND plcncli
             generate code -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code --verbose
@@ -452,7 +454,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 				--verbose
 				--track-origins=yes 				
 				--show-leak-kinds=all 
-				lua5.1
+				lua
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
