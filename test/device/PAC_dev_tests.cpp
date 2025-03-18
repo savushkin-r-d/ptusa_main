@@ -1549,6 +1549,21 @@ TEST( concentration_e, get_type_name )
     EXPECT_STREQ( "Концентрация", test_dev.get_type_name() );
     }
 
+TEST( concentration_e, get_error_description )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_STREQ( "нет ошибок", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::UNDER_RANGE ) );
+    EXPECT_STREQ( "ниже предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OVER_RANGE ) );
+    EXPECT_STREQ( "выше предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) );
+    EXPECT_STREQ( "вне диапазона", test_dev.get_error_description() );
+    }
+
 
 TEST( concentration_e_ok, get_state )
     {

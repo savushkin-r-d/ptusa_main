@@ -937,6 +937,8 @@ class AI1 : public analog_io_device
 
         int get_state() override;
 
+        const char* get_error_description() override;
+
         virtual int get_params_count() const;
 
         float get_value() override;

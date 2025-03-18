@@ -739,6 +739,29 @@ int AI1::get_state()
     return 1;
     }
 //-----------------------------------------------------------------------------
+const char* AI1::get_error_description()
+	{
+	if ( auto err_id = get_error_id(); err_id < 0 )
+		{
+		switch ( err_id )
+			{
+			case -static_cast<int>( io_device::ERRORS::UNDER_RANGE ) :
+				return "ниже предела";
+
+			case -static_cast<int>( io_device::ERRORS::OVER_RANGE ) :
+				return "выше предела";
+
+			case -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) :
+				return "вне диапазона";
+
+			default:
+				return "неизвестная ошибка";
+			}
+		}
+
+	return "нет ошибок";
+	}
+//-----------------------------------------------------------------------------
 int AI1::get_params_count() const
     {
     return ADDITIONAL_PARAM_COUNT;
