@@ -655,23 +655,24 @@ int uni_io_manager::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
-    auto create_write_err_log = []( const char* node_name, const char* node_ip_address ) 
+    auto create_write_err_log = []( const char* node_name, const char* node_ip_address,
+        int fun_code = -1, int exp_size = -1, int received = -1 )
         {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            R"(Read DI:bus coupler returned error. Node "{}":"{}".)",
-            node_name, node_ip_address );
-        *res.out = '\0';
-        G_LOG->write_log( i_log::P_ERR );
-        };
-
-    auto create_write_err_log_extended = []( const char* node_name, const char* node_ip_address,
-        int fun_code, int exp_size, int received ) 
-        {
+            if ( (fun_code != -1) && (exp_size != -1) && (received != -1) ) 
+            {
             auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                 R"(Read AI:bus coupler returned error. Node "{}":"{}" )"
                 R"((function code = {}, expected size = {}, received = {}).)",
                 node_name, node_ip_address, fun_code, exp_size, received );
             *res.out = '\0';
+            }
+            else
+            {
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                R"(Read DI:bus coupler returned error. Node "{}":"{}".)",
+                node_name, node_ip_address );
+            *res.out = '\0';
+            }
             G_LOG->write_log( i_log::P_ERR );
         };
 
@@ -780,7 +781,7 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        create_write_err_log_extended( nd->name, nd->ip_address,
+                        create_write_err_log( nd->name, nd->ip_address,
                             (int)buff[7], (int)buff[8], bytes_cnt );
                         }
                     }
@@ -872,7 +873,7 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            create_write_err_log_extended( nd->name, nd->ip_address,
+                            create_write_err_log( nd->name, nd->ip_address,
                                 (int)buff[7], (int)buff[8], registers_count * 2 );
                             break;
                             }
