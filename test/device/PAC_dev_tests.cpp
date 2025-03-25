@@ -1562,6 +1562,9 @@ TEST( concentration_e, get_error_description )
 
     test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) );
     EXPECT_STREQ( "вне диапазона", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
+    EXPECT_STREQ( "неизвестная ошибка", test_dev.get_error_description() );
     }
 
 
