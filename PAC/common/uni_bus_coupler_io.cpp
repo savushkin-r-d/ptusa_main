@@ -659,11 +659,11 @@ int uni_io_manager::read_inputs()
         const char* node_name, const char* node_ip_address,
         int fun_code, int exp_size, int received )
         {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             R"({}:bus coupler returned error. Node "{}":"{}" )"
             R"((function code = {}, expected size = {}, received = {}).)",
             cmd, node_name, node_ip_address, fun_code, exp_size, received );
-        *res.out = '\0';
+        *result.out = '\0';
         G_LOG->write_log( i_log::P_ERR );
         };
 
@@ -814,7 +814,7 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_BK_MIN
                     G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    int result = read_input_registers(nd, start_read_address + start_register, registers_count);
+                    int res = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
                     printf("\n\r");
@@ -824,10 +824,9 @@ int uni_io_manager::read_inputs()
                         }
 #endif
 
-
-                    if (result >= 0)
+                    if (res >= 0)
                         {
-                        if (result)
+                        if (res)
                             {
                             for (int index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
