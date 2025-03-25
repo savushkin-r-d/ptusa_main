@@ -158,6 +158,18 @@ class test_uni_io_manager : public uni_io_manager
             res = 1;
             }
 
+        static tm get_fixed_time()
+            {
+            static struct tm timeInfo_;
+            static time_t t_ = 1741737600;  // 2025-03-12 00.00.00
+#ifdef LINUX_OS
+            gmtime_r( &t_, &timeInfo_ );
+#else
+            gmtime_s( &timeInfo_, &t_ );
+#endif
+            return timeInfo_;
+            }
+
     private:
         int res = 0;
     };
@@ -183,8 +195,36 @@ TEST( uni_io_manager, read_inputs )
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
 
+    std::ostringstream testBuffer;
+    std::streambuf* originalCoutBuffer = std::cout.rdbuf( testBuffer.rdbuf() );
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
+
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
+    const std::string expectedOutput = 1 +
+#ifdef LINUX_OS
+R"(
+ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
+ERROR  (3) -> Read AI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 4, expected size = 0, received = 1).
+ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
+)";
+#else
+R"(
+2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
+2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 4, expected size = 0, received = 1).
+2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
+)";
+#endif
+    EXPECT_EQ( testBuffer.str(), expectedOutput );
+
+
+    std::cout.rdbuf( originalCoutBuffer );
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
 
     io_manager::replace_instance( prev_mngr );
     }
