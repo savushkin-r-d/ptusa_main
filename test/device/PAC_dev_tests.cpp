@@ -687,18 +687,19 @@ void test_temperature( AI1* TE1 )
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
-    mngr.init_node_AI( 0, 0, 0, 0 );
-
+    mngr.init_node_AI( 0, 0, 491, 0 );
 
     EXPECT_EQ( TE1->get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
     TE1->init_and_alloc( 0, 0, 0, 1 );
-    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );    
     EXPECT_EQ( TE1->get_state(), 1 );
 
-    *TE1->AI_channels.int_read_values[ 0 ] = -1000;
-    EXPECT_EQ( TE1->get_state(), -1 );
+    *TE1->AI_channels.int_read_values[ 0 ] = -30001;
+    EXPECT_EQ( TE1->get_state(), -4 );
+
+    EXPECT_STREQ( TE1->get_error_description(), "вне диапазона" );
 
 
     G_PAC_INFO()->emulation_on();

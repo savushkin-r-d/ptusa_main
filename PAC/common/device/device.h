@@ -72,8 +72,6 @@ class temperature_e : public AI1
 
         float get_value() override;
 
-        int get_state() override;
-
     private:
         u_int start_param_idx;
         enum CONSTANTS
@@ -91,8 +89,6 @@ class temperature_e_analog : public AI1
         explicit temperature_e_analog( const char* dev_name );
 
         float get_value() override;
-
-        int get_state() override;
 
     private:
         u_int start_param_idx;
@@ -115,6 +111,10 @@ class temperature_e_iolink : public AI1
         ~temperature_e_iolink() override;
 
         float get_value() override;
+
+        int get_state() override;
+
+        const char* get_error_description() override;
 
     private:
         struct TE_data

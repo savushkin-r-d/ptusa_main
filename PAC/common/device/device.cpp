@@ -1704,18 +1704,6 @@ float temperature_e::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int temperature_e::get_state()
-    {
-    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
-
-    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); -1000 == v )
-        {
-        return -1;
-        }
-
-    return 1;
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
@@ -1746,21 +1734,6 @@ float temperature_e_analog::get_value()
         v = get_AI( C_AI_INDEX, min, max );
         return get_par( P_ZERO_ADJUST_COEFF ) + v;
         }
-    }
-//-----------------------------------------------------------------------------
-int temperature_e_analog::get_state()
-    {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        return AI1::get_state();
-        }
-
-    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); v < 0 )
-        {
-        return -1;
-        }
-
-    return 1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1794,6 +1767,38 @@ float temperature_e_iolink::get_value()
 
         return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
         }
+    }
+//-----------------------------------------------------------------------------
+int temperature_e_iolink::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX ); st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+const char* temperature_e_iolink::get_error_description()
+    {
+    if ( auto err_id = get_error_id(); err_id < 0 )
+        {
+        switch ( err_id )
+            {
+            case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
+                return "IOL-устройство не подключено";
+
+                case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
+                    return "ошибка IOL-устройства";
+
+                default:
+                    return "неизвестная ошибка";
+            }
+        }
+
+    return "нет ошибок";
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
