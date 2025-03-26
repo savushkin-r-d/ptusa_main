@@ -673,12 +673,6 @@ TEST( valve_iol_terminal, get_state_data )
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
-TEST( temperature_e_analog, get_value )
-    {
-    temperature_e_analog TE1( "T1" );
-    auto v = TE1.get_value();
-    EXPECT_EQ( .0f, v );
-    }
 
 void test_temperature( AI1* TE1 )
     {
@@ -687,22 +681,30 @@ void test_temperature( AI1* TE1 )
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
-    mngr.init_node_AI( 0, 0, 0, 0 );
-
+    mngr.init_node_AI( 0, 0, 491, 0 );
 
     EXPECT_EQ( TE1->get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
     TE1->init_and_alloc( 0, 0, 0, 1 );
-    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );    
     EXPECT_EQ( TE1->get_state(), 1 );
 
-    *TE1->AI_channels.int_read_values[ 0 ] = -1000;
-    EXPECT_EQ( TE1->get_state(), -1 );
+    *TE1->AI_channels.int_read_values[ 0 ] = -30001;
+    EXPECT_EQ( TE1->get_state(), -4 );
+
+    EXPECT_STREQ( TE1->get_error_description(), "вне диапазона" );
 
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( temperature_e_analog, get_value )
+    {
+    temperature_e_analog TE1( "T1" );
+    auto v = TE1.get_value();
+    EXPECT_EQ( .0f, v );
     }
 
 TEST( temperature_e_analog, get_state )
@@ -716,6 +718,50 @@ TEST( temperature_e_analog, get_type_name )
     temperature_e_analog test_dev( "test_TE1" );
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
     }
+
+
+TEST( temperature_e_iolink, get_value )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+    }
+
+TEST( temperature_e_iolink, get_state )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_STREQ( TE1.get_error_description(), "нет ошибок" );
+
+    TE1.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
+    EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
+
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+    mngr.init_node_AI( 0, 0, 1027843, 0 );
+
+
+    G_PAC_INFO()->emulation_off();
+    TE1.init_and_alloc( 0, 0, 0, 1 );
+    TE1.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+    EXPECT_EQ( TE1.get_state(), -1 );    
+    EXPECT_STREQ( TE1.get_error_description(), "IOL-устройство не подключено" );
+
+    *TE1.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
+    EXPECT_EQ( TE1.get_state(), -2 );
+    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
+
+    *TE1.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
+
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 template<typename T1 = i_DI_device, typename T2 = T1>
 void check_dev( const char* name, int type, int sub_type,
@@ -853,7 +899,9 @@ TEST( device_manager, add_io_device )
     check_dev<i_counter>( "FQT1", device::DT_FQT, device::DST_FQT, FQT, FQT );
     check_dev<i_counter>( "FQT2", device::DT_FQT, device::DST_FQT_IOLINK, FQT, FQT );
     check_dev<i_counter>( "FQT3", device::DT_FQT, device::DST_FQT_F, FQT, FQT );
+    
     check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE, TE );
+    check_dev<i_AI_device>( "TE2", device::DT_TE, device::DST_TE_IOLINK, TE, TE );
 
     check_dev<>( "PDS1", device::DT_PDS, device::DST_PDS, PDS );
     check_dev<i_DI_device, i_DI_device>( "PDS2", device::DT_PDS,
@@ -1547,6 +1595,24 @@ TEST( concentration_e, get_type_name )
     {
     concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
     EXPECT_STREQ( "Концентрация", test_dev.get_type_name() );
+    }
+
+TEST( concentration_e, get_error_description )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_STREQ( "нет ошибок", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::UNDER_RANGE ) );
+    EXPECT_STREQ( "ниже предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OVER_RANGE ) );
+    EXPECT_STREQ( "выше предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) );
+    EXPECT_STREQ( "вне диапазона", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
+    EXPECT_STREQ( "неизвестная ошибка", test_dev.get_error_description() );
     }
 
 

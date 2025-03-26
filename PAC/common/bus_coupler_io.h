@@ -52,6 +52,8 @@ class io_device
             OUT_OF_RANGE = 4,
 
             BAD_IO_DATA = 100,
+
+            LAST_ERR_IDX
             };
 
 #ifndef PTUSA_TEST
