@@ -857,9 +857,10 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "{}\t power_unit::set_cmd() - prop = {}, idx = {}, val = {}",
             get_name(), prop, idx, val );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_DEBUG );
         }
 
