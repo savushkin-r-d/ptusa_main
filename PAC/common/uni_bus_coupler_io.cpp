@@ -655,6 +655,19 @@ int uni_io_manager::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
+    auto add_err_to_log = []( const char* cmd,
+        const char* node_name, const char* node_ip_address,
+        int fun_code, int exp_size, int received )
+        {
+        auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+            R"({}:bus coupler returned error. Node "{}":"{}" )"
+            R"((function code = {}, expected size = {}, received = {}).)",
+            cmd, node_name, node_ip_address, fun_code, exp_size, received );
+        *result.out = '\0';
+        G_LOG->write_log( i_log::P_ERR );
+        };
+
+
     for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -707,16 +720,9 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node {}.",
-                            nd->number );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
-
-                        if ( G_DEBUG )
-                            {
-                            //printf("\nRead DI:I/O returned error...\n");
-                            }
+                        add_err_to_log( "Read DI", nd->name, nd->ip_address,
+                            static_cast<int>( buff[ 7 ] ),
+                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         }
                     }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->DI_cnt > 0 )
@@ -764,11 +770,9 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} ).",
-                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
+                        add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                            static_cast<int>( buff[ 7 ] ),
+                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         }
                     }
                 }// if ( nd->AI_cnt > 0 )
@@ -820,7 +824,6 @@ int uni_io_manager::read_inputs()
                         }
 #endif
 
-
                     if (res >= 0)
                         {
                         if (res)
@@ -859,8 +862,9 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                                nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+                            add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ),
+                                static_cast<int>( buff[ 8 ] ), registers_count * 2 );
                             break;
                             }
                         }
