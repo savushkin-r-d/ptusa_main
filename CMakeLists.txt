@@ -86,8 +86,8 @@ else()
 endif()
 
 file(GLOB test_src CONFIGURE_DEPENDS
-    	    test/*.cpp
-			test/device/*.cpp
+            test/*.cpp
+            test/device/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)
@@ -137,13 +137,13 @@ if(LINUX)
 
         file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
-		    ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
         add_library(PtusaPLCnextEngineer SHARED
-			${common_src} ${linux_src} ${PLCnext_engineer_src}
-			PAC_control_projects/main_control_prg/main_cycle.cpp )
+            ${common_src} ${linux_src} ${PLCnext_engineer_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp )
     endif()
 
 elseif(WIN32)
@@ -194,12 +194,12 @@ if(NOT MINGW)
 endif()
 
 if(ARP_DEVICE)
-	target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
-	target_compile_definitions(ptusa_main PUBLIC PAC_PC)
-	target_compile_definitions(libptusa_main PUBLIC PAC_PC)
-	target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)	
+    target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
+    target_compile_definitions(ptusa_main PUBLIC PAC_PC)
+    target_compile_definitions(libptusa_main PUBLIC PAC_PC)
+    target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)
 else()
-	add_compile_definitions(PAC_PC)
+    add_compile_definitions(PAC_PC)
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -256,7 +256,7 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
-	    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
@@ -289,11 +289,11 @@ if(ARP_DEVICE)
 endif()
 
 set(TEST_INCLUDES
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
 
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
@@ -400,8 +400,8 @@ endif()
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 if (WIN32)
-	set_tests_properties( run_no_command_line_arguments 
-		PROPERTIES PASS_REGULAR_EXPRESSION 
+    set_tests_properties( run_no_command_line_arguments 
+        PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
@@ -418,8 +418,8 @@ if (WIN32)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
-	set_tests_properties( run_no_command_line_arguments 
-		PROPERTIES PASS_REGULAR_EXPRESSION 
+    set_tests_properties( run_no_command_line_arguments 
+        PROPERTIES PASS_REGULAR_EXPRESSION 
 [[
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
@@ -451,21 +451,21 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
 
-	if(LINUX)
-	    add_test(T1-PLCnext-Demo_valgrind valgrind
-				--error-exitcode=1
-				--num-callers=100
-				--leak-check=full
-				--verbose
-				--track-origins=yes 				
-				--show-leak-kinds=all 
-				lua5.1
+    if(LINUX)
+        add_test(T1-PLCnext-Demo_valgrind valgrind
+                --error-exitcode=1
+                --num-callers=100
+                --leak-check=full
+                --verbose
+                --track-origins=yes
+                --show-leak-kinds=all 
+                lua5.1
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
-	endif()
+    endif()
 
 
     add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
@@ -474,7 +474,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
-	set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
+    set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
