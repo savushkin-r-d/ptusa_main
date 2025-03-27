@@ -141,7 +141,9 @@ if(LINUX)
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
-        add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
+        add_library(PtusaPLCnextEngineer SHARED
+			${common_src} ${linux_src} ${PLCnext_engineer_src}
+			PAC_control_projects/main_control_prg/main_cycle.cpp )
     endif()
 
 elseif(WIN32)
