@@ -1231,6 +1231,13 @@ void base_counter::check_connected_pumps()
         return;
         }
 
+    if ( auto min_flow = get_min_flow(); get_flow() < min_flow )
+        {
+        // Расход ниже минимального.
+        start_pump_working_time_flow = 0;
+        return;
+        }
+
     // Насос работает.
     if ( 0 == start_pump_working_time )
         {

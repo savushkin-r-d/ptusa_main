@@ -3183,23 +3183,28 @@ TEST( counter_f, get_state )
     fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Насос работает, но счетчик не считает.
+    //Насос работает, но счетчик не считает. Ошибки нет, так как расход
+    //нулевой - ниже минимального.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2.f );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
-    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Устанавливаем расход - ошибка должна остаться.
-    fqt1.set_cmd( "F", 0, 1 );
+    //Устанавливаем расход - ошибки нет, так как расход ниже
+    //минимального.
+    fqt1.set_cmd( "F", 0, 1.f );
     fqt1.evaluate_io();
     fqt1.evaluate_io();
-    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Расход стал ниже минимального - ошибка должна остаться.
-    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
+    //Расход стал выше минимального - ошибка должна появиться.
+    fqt1.set_cmd( "F", 0, 2.1f );    
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
     //Сбрасываем ошибку.
