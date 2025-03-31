@@ -1231,12 +1231,7 @@ void base_counter::check_connected_pumps()
         return;
         }
 
-    auto min_flow = get_min_flow();
-    if ( min_flow == .0f )
-        {
-        return; // Если минимальный поток 0 - дальше не проверяем.
-        }
-    if ( get_flow() <= min_flow )
+    if ( auto min_flow = get_min_flow(); get_flow() < min_flow )
         {
         // Расход ниже минимального.
         start_pump_working_time_flow = 0;
