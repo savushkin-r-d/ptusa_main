@@ -1,5 +1,5 @@
 [submodule "toluapp"]
-	path = deps/toluapp
+	path = deps/toluapp/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
 [submodule "zlib"]
@@ -20,10 +20,10 @@
 [submodule "benchmark"]
 	path = deps/benchmark
 	url = https://github.com/google/benchmark.git
-[submodule "open62541/open62541"]
+[submodule "open62541"]
 	path = deps/open62541/open62541
 	url = https://github.com/open62541/open62541
-[submodule "cxxopts/cxxopts"]
+[submodule "cxxopts"]
 	path = deps/cxxopts/cxxopts
 	url = https://github.com/savushkin-r-d/cxxopts.git
 [submodule "lua"]
