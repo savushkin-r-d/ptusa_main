@@ -26,6 +26,6 @@
 [submodule "cxxopts/cxxopts"]
 	path = deps/cxxopts/cxxopts
 	url = https://github.com/savushkin-r-d/cxxopts.git
-[submodule "deps/lua/lua"]
+[submodule "lua"]
 	path = deps/lua/lua
 	url = http://github.com/LuaDist/lua.git
