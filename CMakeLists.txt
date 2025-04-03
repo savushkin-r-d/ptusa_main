@@ -46,7 +46,7 @@ set(BUILD_SHARED_LIBS ON)
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/deps/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src;${CMAKE_BINARY_DIR}/deps/lua/lua)
 
 add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
@@ -272,10 +272,10 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/toluapp/include>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua/lua>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib>
