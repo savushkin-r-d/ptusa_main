@@ -43,6 +43,10 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 set(BUILD_SHARED_LIBS ON)
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+endif()
+
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
