@@ -2,4 +2,4 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 endif()
 
-add_subdirectory(lua)
+add_subdirectory(lua EXCLUDE_FROM_ALL)
