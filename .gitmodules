@@ -16,3 +16,6 @@
 [submodule "cxxopts/cxxopts"]
 	path = deps/cxxopts/cxxopts
 	url = https://github.com/savushkin-r-d/cxxopts.git
+[submodule "zlib"]
+	path = deps/zlib/zlib
+	url = https://github.com/madler/zlib.git
