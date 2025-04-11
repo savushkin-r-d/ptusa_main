@@ -25,3 +25,6 @@
 [submodule "lua"]
 	path = deps/lua/lua
 	url = http://github.com/LuaDist/lua.git
+[submodule "toluapp"]
+	path = deps/toluapp/toluapp
+	url = https://github.com/savushkin-r-d/toluapp.git
