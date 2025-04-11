@@ -1,6 +1,3 @@
-[submodule "subhook"]
-	path = deps/subhook
-	url = https://github.com/savushkin-r-d/subhook
 [submodule "googletest"]
 	path = deps/googletest
 	url = https://github.com/google/googletest
