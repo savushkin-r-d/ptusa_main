@@ -22,3 +22,6 @@
 [submodule "subhook"]
 	path = deps/subhook/subhook
 	url = https://github.com/savushkin-r-d/subhook
+[submodule "lua"]
+	path = deps/lua/lua
+	url = http://github.com/LuaDist/lua.git
