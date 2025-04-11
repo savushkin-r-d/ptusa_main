@@ -1,7 +1,3 @@
-[submodule "toluapp"]
-	path = deps/toluapp
-	url = https://github.com/savushkin-r-d/toluapp.git
-	branch = dev
 [submodule "subhook"]
 	path = deps/subhook
 	url = https://github.com/savushkin-r-d/subhook
