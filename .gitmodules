@@ -2,9 +2,6 @@
 	path = deps/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
-[submodule "lua"]
-	path = deps/lua
-	url = http://github.com/LuaDist/lua.git
 [submodule "zlib"]
 	path = deps/zlib
 	url = https://github.com/savushkin-r-d/zlib.git
