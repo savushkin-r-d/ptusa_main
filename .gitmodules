@@ -2,9 +2,6 @@
 	path = deps/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
-[submodule "zlib"]
-	path = deps/zlib
-	url = https://github.com/savushkin-r-d/zlib.git
 [submodule "subhook"]
 	path = deps/subhook
 	url = https://github.com/savushkin-r-d/subhook
