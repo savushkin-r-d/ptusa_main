@@ -25,3 +25,6 @@
 [submodule "toluapp"]
 	path = deps/toluapp/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
+[submodule "cxxopts"]
+	path = deps/cxxopts/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
