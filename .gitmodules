@@ -13,9 +13,9 @@
 [submodule "open62541/open62541"]
 	path = deps/open62541/open62541
 	url = https://github.com/open62541/open62541
-[submodule "cxxopts/cxxopts"]
+[submodule "cxxopts"]
 	path = deps/cxxopts/cxxopts
-	url = https://github.com/savushkin-r-d/cxxopts.git
+	url = https://github.com/jarro2783/cxxopts.git	
 [submodule "zlib"]
 	path = deps/zlib/zlib
 	url = https://github.com/madler/zlib.git
