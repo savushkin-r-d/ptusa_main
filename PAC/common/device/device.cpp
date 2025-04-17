@@ -2655,6 +2655,8 @@ void level_s_iolink::evaluate_io()
         case ARTICLE::IFM_LMT102:   //IFM.LMT102
         case ARTICLE::IFM_LMT104:   //IFM.LMT104
         case ARTICLE::IFM_LMT105:   //IFM.LMT105
+        case ARTICLE::IFM_LMT121:   //IFM.LMT121
+        case ARTICLE::IFM_LMT202:   //IFM.LMT202
             {
             LS_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );

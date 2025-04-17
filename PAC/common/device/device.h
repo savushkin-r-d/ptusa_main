@@ -993,6 +993,8 @@ class level_s_iolink : public analog_io_device
             IFM_LMT102,
             IFM_LMT104,
             IFM_LMT105,
+            IFM_LMT121,
+            IFM_LMT202,
 
             EH_FTL33,
             };
