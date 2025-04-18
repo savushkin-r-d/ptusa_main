@@ -982,21 +982,30 @@ class level_s_iolink : public analog_io_device
 
         void set_article( const char* new_article ) override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         int current_state;
         u_int_4 time = get_millisec();
 
-        enum ARTICLE
+        enum class ARTICLE
             {
             DEFAULT,
             IFM_LMT100,
             IFM_LMT102,
             IFM_LMT104,
             IFM_LMT105,
+            IFM_LMT121,
+            IFM_LMT202,
 
             EH_FTL33,
             };
         ARTICLE n_article = ARTICLE::DEFAULT;
+
+#ifdef PTUSA_TEST
+        ARTICLE get_article_n() const;
+#endif
 
         struct LS_data
             {
@@ -1014,7 +1023,6 @@ class level_s_iolink : public analog_io_device
         float v = .0f;
         int st = 0;
 
-    private:
         enum CONSTANTS
             {
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.

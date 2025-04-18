@@ -2881,23 +2881,65 @@ TEST( level_s, get_type_name )
     }
 
 
-TEST( level_s_iolink, set_article )
+class LevelSIOLinkTest : public ::testing::Test
     {
-    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
-    LS1.set_article( "IFM.LMT100" );
-    EXPECT_EQ( false, LS1.is_active() );
+    protected:
+        std::unique_ptr<level_s_iolink> device = 
+            std::make_unique<level_s_iolink>(
+            "TestDevice", device::LS_IOLINK_MAX );
+    };
+
+TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
+    {
+    struct TestCase
+        {
+        const char* article;
+        level_s_iolink::ARTICLE expected;
+        };
+
+    std::array<TestCase, 7> testCases =
+        { {
+        {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
+        {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
+        {"IFM.LMT104", level_s_iolink::ARTICLE::IFM_LMT104},
+        {"IFM.LMT105", level_s_iolink::ARTICLE::IFM_LMT105},
+        {"IFM.LMT121", level_s_iolink::ARTICLE::IFM_LMT121},
+        {"IFM.LMT202", level_s_iolink::ARTICLE::IFM_LMT202},
+        {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
+        } };
+
+    for ( const auto& testCase : testCases )
+        {
+        device->set_article( testCase.article );
+        EXPECT_EQ( device->get_article_n(), testCase.expected )
+            << "Failed for article: " << testCase.article;
+        }
     }
 
-TEST( level_s_iolink, get_state )
+TEST_F( LevelSIOLinkTest, SetArticle_UnknownArticle )
     {
-    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+    const char* unknownArticle = "UNKNOWN.ARTICLE";
+    device->set_article( unknownArticle );
 
+    EXPECT_EQ( device->get_article_n(), level_s_iolink::ARTICLE::DEFAULT )
+        << "Failed for unknown article: " << unknownArticle;
+    }
 
-    EXPECT_EQ( LS1.get_state(), 0 );
+TEST_F( LevelSIOLinkTest, SetArticle_EmptyArticle )
+    {
+    const char* emptyArticle = "";
+    device->set_article( emptyArticle );
+
+    EXPECT_EQ( device->get_article_n(), level_s_iolink::ARTICLE::DEFAULT )
+        << "Failed for empty article.";
+    }
+
+TEST_F( LevelSIOLinkTest, get_state )
+    {
+    EXPECT_EQ( device->get_state(), 0 );
 
     G_PAC_INFO()->emulation_off();
-    EXPECT_EQ( LS1.get_state(), 0 );
-
+    EXPECT_EQ( device->get_state(), 0 );
 
     G_PAC_INFO()->emulation_on();
     }
