@@ -2884,17 +2884,9 @@ TEST( level_s, get_type_name )
 class LevelSIOLinkTest : public ::testing::Test
     {
     protected:
-        level_s_iolink* device;
-
-        void SetUp() override
-            {
-            device = new level_s_iolink( "TestDevice", device::LS_IOLINK_MAX );
-            }
-
-        void TearDown() override
-            {
-            delete device;
-            }
+        std::unique_ptr<level_s_iolink> device = 
+            std::make_unique<level_s_iolink>(
+            "TestDevice", device::LS_IOLINK_MAX );
     };
 
 TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )

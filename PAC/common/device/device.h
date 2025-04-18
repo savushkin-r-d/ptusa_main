@@ -989,7 +989,7 @@ class level_s_iolink : public analog_io_device
         int current_state;
         u_int_4 time = get_millisec();
 
-        enum ARTICLE
+        enum class ARTICLE
             {
             DEFAULT,
             IFM_LMT100,
