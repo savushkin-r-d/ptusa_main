@@ -2886,16 +2886,18 @@ class LevelSIOLinkTest : public ::testing::Test
     protected:
         level_s_iolink* device;
 
-        void SetUp() override {
+        void SetUp() override
+            {
             device = new level_s_iolink( "TestDevice", device::LS_IOLINK_MAX );
             }
 
-        void TearDown() override {
+        void TearDown() override
+            {
             delete device;
             }
     };
 
-TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles ) 
+TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
     {
     struct TestCase
         {
@@ -2903,7 +2905,8 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         level_s_iolink::ARTICLE expected;
         };
 
-    std::array<TestCase, 7> testCases = { {
+    std::array<TestCase, 7> testCases =
+        { {
         {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
         {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
         {"IFM.LMT104", level_s_iolink::ARTICLE::IFM_LMT104},
@@ -2911,9 +2914,9 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         {"IFM.LMT121", level_s_iolink::ARTICLE::IFM_LMT121},
         {"IFM.LMT202", level_s_iolink::ARTICLE::IFM_LMT202},
         {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
-    } };
+        } };
 
-    for ( const auto& testCase : testCases ) 
+    for ( const auto& testCase : testCases )
         {
         device->set_article( testCase.article );
         EXPECT_EQ( device->get_article_n(), testCase.expected )
@@ -2921,7 +2924,7 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         }
     }
 
-TEST_F( LevelSIOLinkTest, SetArticle_UnknownArticle ) 
+TEST_F( LevelSIOLinkTest, SetArticle_UnknownArticle )
     {
     const char* unknownArticle = "UNKNOWN.ARTICLE";
     device->set_article( unknownArticle );
@@ -2945,7 +2948,7 @@ TEST_F( LevelSIOLinkTest, get_state )
 
     G_PAC_INFO()->emulation_off();
     EXPECT_EQ( device->get_state(), 0 );
-    
+
     G_PAC_INFO()->emulation_on();
     }
 
