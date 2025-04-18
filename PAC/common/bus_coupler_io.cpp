@@ -1243,6 +1243,7 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
     number( number ),
 
     is_active( true ),
+    io_error_flag( false ),
 
     last_poll_time( get_millisec() ),
     is_set_err( 0 ),

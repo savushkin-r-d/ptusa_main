@@ -252,6 +252,12 @@ int uni_io_manager::write_outputs()
                 continue;
                 }
 
+            if (nd->io_error_flag)
+            {
+                nd->io_error_flag = false;
+                continue;
+            }
+
             if ( nd->DO_cnt > 0 )
                 {
                 u_int bytes_cnt = nd->DO_cnt / 8 + ( nd->DO_cnt % 8 > 0 ? 1 : 0 );
@@ -291,6 +297,15 @@ int uni_io_manager::write_outputs()
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
                     }
+                else {
+                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                        nd->name, nd->ip_address);
+                    *result.out = '\0';
+                    G_LOG->write_log(i_log::P_ERR);
+                    nd->io_error_flag = true;
+                    continue;
+                }
 
                 // Закомментированный фрагмент - используется для отладки.
                 //else
@@ -348,6 +363,15 @@ int uni_io_manager::write_outputs()
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         }
                     }
+                else {
+                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                        nd->name, nd->ip_address);
+                    *result.out = '\0';
+                    G_LOG->write_log(i_log::P_ERR);
+                    nd->io_error_flag = true;
+                    continue;
+                }
 
                 // Закомментированный фрагмент - используется для отладки.
                 //else
@@ -474,6 +498,7 @@ int uni_io_manager::write_outputs()
                                 {
                                 G_LOG->error("Write AO: returned error %d", buff[7]);
                                 nd->flag_error_write_message = true;
+                                nd->io_error_flag = true;
                                 }
                             }
                         }
@@ -483,6 +508,7 @@ int uni_io_manager::write_outputs()
                             {
                             G_LOG->error("Write AO: returned error");
                             nd->flag_error_write_message = true;
+                            nd->io_error_flag = true;
                             res = 1;
                             }
                         }
@@ -679,6 +705,12 @@ int uni_io_manager::read_inputs()
                 continue;
                 }
 
+            if ( nd->io_error_flag )
+                {
+                nd->io_error_flag = false;
+                continue;
+                }
+
             if ( nd->DI_cnt > 0 )
                 {
                 buff[ 0 ] = 's';
@@ -723,8 +755,19 @@ int uni_io_manager::read_inputs()
                         add_err_to_log( "Read DI", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ),
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        nd->io_error_flag = true;
+                        continue;
                         }
                     }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                else {
+                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                        nd->name, nd->ip_address);
+                    *result.out = '\0';
+                    G_LOG->write_log(i_log::P_ERR);
+                    nd->io_error_flag = true;
+                    continue;
+                }
                 }// if ( nd->DI_cnt > 0 )
 
             if ( nd->AI_cnt > 0 )
@@ -773,7 +816,19 @@ int uni_io_manager::read_inputs()
                         add_err_to_log( "Read AI", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ),
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        nd->io_error_flag = true;
+                        continue;
                         }
+                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                else
+                    {
+                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                        nd->name, nd->ip_address);
+                    *result.out = '\0';
+                    G_LOG->write_log(i_log::P_ERR);
+                    nd->io_error_flag = true;
+                    continue;
                     }
                 }// if ( nd->AI_cnt > 0 )
 
@@ -790,6 +845,12 @@ int uni_io_manager::read_inputs()
                 {
                 continue;
                 }
+
+            if (nd->io_error_flag)
+            {
+                nd->io_error_flag = false;
+                continue;
+            }
 
             if (nd->AI_cnt > 0)
                 {
@@ -866,11 +927,18 @@ int uni_io_manager::read_inputs()
                                 static_cast<int>( buff[ 7 ] ),
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
                             break;
+                            nd->io_error_flag = true;
+                            break;
                             }
                         }
                     else
                         {
-                        //node doesn't respond
+                        auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                            R"(Bus coupler returned error. Node "{}":"{}" node doesn't respond)",
+                            nd->name, nd->ip_address);
+                        *result.out = '\0';
+                        G_LOG->write_log(i_log::P_ERR);
+                        nd->io_error_flag = true;
                         break;
                         }
                     start_register += registers_count;
