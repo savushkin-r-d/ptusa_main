@@ -15,9 +15,9 @@ void lifebit::evaluate_io()
         return;
         }
 
-    if ( prev_di_state != di_device->get_state() )
+    if ( auto st = di_device->get_state(); prev_di_state != st )
         {
-        prev_di_state = di_device->get_state();
+        prev_di_state = st;
         device::set_state( 1 );
         start_time = get_millisec();        
         return;
@@ -46,6 +46,23 @@ void lifebit::set_string_property( const char* field, const char* value )
 
         default:
             device::set_string_property( field, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void lifebit::set_property( const char* field, device* value )
+    {
+    if ( !field ) return;
+
+    switch ( field[ 0 ] )
+        {
+        //DI
+        case 'D':
+            di_device = value;
+            break;
+
+        default:
+            device::set_property( field, value );
             break;
         }
     }

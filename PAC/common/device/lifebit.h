@@ -24,12 +24,16 @@ class lifebit : public device, public i_Lua_save_device
         void evaluate_io() override;
 
         void set_string_property( const char* field, const char* value ) override;
+        void set_property( const char* field, device* value ) override;
 
         int save_device( char* buff ) override;
 
         const char* get_name_in_Lua() const override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
         device* di_device = nullptr;
         int prev_di_state = 0;
         unsigned long start_time = get_millisec();
