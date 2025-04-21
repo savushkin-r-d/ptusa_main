@@ -351,6 +351,12 @@ class device_manager : public i_Lua_save_device
 
         int save_device( char* buff ) override;
 
+#ifdef PTUSA_TEST
+        int add_device( device* new_device, device::DEVICE_TYPE dev_type );
+
+        int remove_device( u_int idx );
+#endif
+
     protected:
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 

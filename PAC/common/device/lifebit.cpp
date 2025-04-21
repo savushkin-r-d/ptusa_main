@@ -35,41 +35,51 @@ void lifebit::evaluate_io()
 //-----------------------------------------------------------------------------
 void lifebit::set_string_property( const char* field, const char* value )
     {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t lifebit::set_string_property() - "
+            "field = %s, val = \"%s\"",
+            get_name(), field, value);
+        }
+
     if ( !field ) return;
 
     switch ( field[ 0 ] )
         {
-        //DI
-        case 'D':
+        case 'D': // "DI".
             di_device = G_DEVICE_MANAGER()->get_device( value );
             break;
 
-        default:
-            device::set_string_property( field, value );
+        default: // Do nothing.
             break;
         }
     }
 //-----------------------------------------------------------------------------
 void lifebit::set_property( const char* field, device* value )
     {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t lifebit::set_property() - "
+            "field = %s, val = \"%s\"",
+            get_name(), field, value ? value->get_name() : "nullptr" );
+        }
+
     if ( !field ) return;
 
     switch ( field[ 0 ] )
         {
-        //DI
-        case 'D':
+        case 'D': // "DI".
             di_device = value;
             break;
 
-        default:
-            device::set_property( field, value );
+        default: // Do nothing.
             break;
         }
     }
 //-----------------------------------------------------------------------------
 int lifebit::save_device( char* buff )
     {
-    auto answer_size = device::save_device( buff, "\t" );
+    auto answer_size = device::save_device( buff, "" );
 
     return answer_size;
     }

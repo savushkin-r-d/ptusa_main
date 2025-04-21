@@ -1467,6 +1467,42 @@ int device_manager::save_device( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+int device_manager::add_device( device* new_device, device::DEVICE_TYPE dev_type )
+    {
+    u_int new_dev_index = project_devices.size();
+    project_devices.push_back( new_device );
+    new_device->set_serial_n( new_dev_index );
+
+    if ( dev_type >= 0 && dev_type < device::C_DEVICE_TYPE_CNT )
+        {
+        if ( 0 == is_first_device[ dev_type ] )
+            {
+            dev_types_ranges[ dev_type ].start_pos = new_dev_index;
+            is_first_device[ dev_type ] = 1;
+            }
+        dev_types_ranges[ dev_type ].end_pos = new_dev_index;
+        }
+    else
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->debug( "Unknown device type %d!\n", dev_type );
+            }
+
+        return 1;
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+int device_manager::remove_device( u_int idx )
+    {
+    project_devices.erase( project_devices.begin() + idx );
+    return 0;
+    }
+#endif
+//-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_name )
     {
     int l = -1;

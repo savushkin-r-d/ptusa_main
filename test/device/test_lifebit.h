@@ -37,7 +37,7 @@ class LifebitTest : public ::testing::Test
             }
     };
 
-TEST_F( LifebitTest, EvaluateIo_NoDiDevice_NoAction ) 
+TEST_F( LifebitTest, EvaluateIO_NoDiDevice_NoAction ) 
     {
     EXPECT_EQ( lb_dev->get_state(), 0 );   // Состояние должно быть нулевое.
     
@@ -49,7 +49,7 @@ TEST_F( LifebitTest, EvaluateIo_NoDiDevice_NoAction )
     EXPECT_EQ( lb_dev->get_state(), 0 );   // Состояние должно быть нулевое.
     }
 
-TEST_F( LifebitTest, EvaluateIo_StateChanged_DeviceActivated ) 
+TEST_F( LifebitTest, EvaluateIO_StateChanged_DeviceActivated ) 
     {
     EXPECT_CALL( *mock_di_device, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние сигнала изменилось.
@@ -58,7 +58,7 @@ TEST_F( LifebitTest, EvaluateIo_StateChanged_DeviceActivated )
     EXPECT_EQ( lb_dev->get_state(), 1 );     // Устройство должно активироваться.
     }
 
-TEST_F( LifebitTest, EvaluateIo_TimerExceeded_DeviceDeactivated )
+TEST_F( LifebitTest, EvaluateIO_TimerExceeded_DeviceDeactivated )
     {
     EXPECT_CALL( *mock_di_device, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние изменилось.
@@ -76,4 +76,46 @@ TEST_F( LifebitTest, EvaluateIo_TimerExceeded_DeviceDeactivated )
     lb_dev->start_time -= 200;
     lb_dev->evaluate_io();
     EXPECT_EQ( lb_dev->get_state(), 0 ); // Устройство должно деактивироваться
+    }
+
+TEST_F( LifebitTest, save_device )
+    {
+    // Создаем std::array для записи
+    std::array<char, 256> buffer = { 0 };
+
+    // Вызываем метод save_device
+    auto bytes_written = lb_dev->save_device( buffer.data() );
+
+    // Проверяем, что метод вернул корректное количество записанных байт.
+    EXPECT_GT( bytes_written, 0 );
+
+    EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, DT=0},\n", buffer.data() );
+    }
+
+TEST_F( LifebitTest, SetStringProperty_SetsDIDevice )
+    {
+    lb_dev->set_property( "DI", nullptr );
+    // Проверяем, что изначально di_device равен nullptr
+    EXPECT_EQ( lb_dev->di_device, nullptr );
+
+    // Устанавливаем свойство "DI" с именем устройства
+    const char* device_name = "MockDevice1";
+    auto dev_idx = G_DEVICE_MANAGER()->add_device( mock_di_device,
+        device::DEVICE_TYPE::DT_LIFE_DEVICE );
+    lb_dev->set_string_property( "DI", device_name );
+
+    // Проверяем, что di_device был установлен
+    EXPECT_EQ( lb_dev->di_device, mock_di_device );
+
+    G_DEVICE_MANAGER()->remove_device( mock_di_device->get_serial_n() );
+    }
+
+TEST_F( LifebitTest, SetStringProperty_InvalidField_NoAction )
+    {
+    // Устанавливаем несуществующее поле
+    const char* invalid_field = "INVALID";
+    lb_dev->set_string_property( invalid_field, "SomeValue" );
+
+    // Проверяем, что di_device не изменился
+    EXPECT_EQ( lb_dev->di_device, mock_di_device );
     }
