@@ -2655,6 +2655,8 @@ void level_s_iolink::evaluate_io()
         case ARTICLE::IFM_LMT102:   //IFM.LMT102
         case ARTICLE::IFM_LMT104:   //IFM.LMT104
         case ARTICLE::IFM_LMT105:   //IFM.LMT105
+        case ARTICLE::IFM_LMT121:   //IFM.LMT121
+        case ARTICLE::IFM_LMT202:   //IFM.LMT202
             {
             LS_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
@@ -2704,6 +2706,17 @@ void level_s_iolink::set_article( const char* new_article )
         n_article = ARTICLE::IFM_LMT105;
         return;
         }
+    if ( strcmp( article, "IFM.LMT121" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT121;
+        return;
+        }
+    if ( strcmp( article, "IFM.LMT202" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT202;
+        return;
+        }
+
     if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
         {
         n_article = ARTICLE::EH_FTL33;
@@ -2716,6 +2729,13 @@ void level_s_iolink::set_article( const char* new_article )
             get_name(), new_article );
         }
     }
+
+#ifdef PTUSA_TEST
+level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
+    {
+    return n_article;
+    }
+#endif
 
 float level_s_iolink::get_value()
     {
