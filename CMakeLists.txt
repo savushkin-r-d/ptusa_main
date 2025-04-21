@@ -56,11 +56,13 @@ add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
+set(INSTALL_GTEST OFF)
 add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
 if(NOT MINGW)
+    set (BENCHMARK_ENABLE_TESTING OFF)
     add_subdirectory(deps/benchmark EXCLUDE_FROM_ALL)
 endif()
 
