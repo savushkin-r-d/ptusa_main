@@ -940,6 +940,9 @@ TEST( device_manager, add_io_device )
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
 
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFEBIT1", device::DT_LIFE_DEVICE,
+        device::DST_LIFEBIT, LIFE_DEVICE, nullptr, "Art_1", true );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     valve::clear_v_bistable();

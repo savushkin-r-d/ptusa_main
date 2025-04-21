@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include "valve.h"
+#include "lifebit.h"
 
 class dev_stub;
 //-----------------------------------------------------------------------------
@@ -202,6 +203,13 @@ i_DI_device* TS( const char* dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_DO_AO_device* get_G( const char* dev_name );
 //-----------------------------------------------------------------------------
+/// @brief Получение устройства проверки связи.
+///
+/// @param number - номер обратной связи.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* LIFE_DEVICE( const char* dev_name );
+//-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
 /// @return - виртуальное устройство.
@@ -315,6 +323,9 @@ class device_manager : public i_Lua_save_device
 
         /// @brief Получение блока питания температуры по имени.
         i_DO_AO_device* get_G( const char* dev_name );
+
+        /// @brief Получение устройства проверки связи по имени.
+        i_DI_device* get_life_device( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();

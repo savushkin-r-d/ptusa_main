@@ -248,6 +248,11 @@ i_DO_AO_device* get_G( const char* dev_name )
     return G_DEVICE_MANAGER()->get_G( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* LIFE_DEVICE( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_life_device( dev_name );
+    }
+//-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
@@ -561,6 +566,11 @@ i_DI_device* device_manager::get_TS( const char* dev_name )
 i_DO_AO_device* device_manager::get_G( const char* dev_name )
     {
     return get_device( device::DT_G, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_life_device( const char* dev_name )
+    {
+    return get_device( device::DT_LIFE_DEVICE, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1364,6 +1374,22 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     if ( G_DEBUG )
                         {
                         printf( "Unknown G device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_LIFE_DEVICE:
+            switch ( dev_sub_type )
+                {
+                case device::DST_LIFEBIT:
+                    new_device = new lifebit( dev_name );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown LIFEDEVICE device subtype %d!\n", dev_sub_type );
                         }
                     break;
                 }
