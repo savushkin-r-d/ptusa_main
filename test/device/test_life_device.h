@@ -3,24 +3,24 @@
 
 #include "device/life_device.h"
 
-class MockDevice : public device
+class mock_DI_device : public device
     {
     public:
-        MockDevice() : device( "MockDevice1", DEVICE_TYPE::DT_DI,
+        mock_DI_device() : device( "MockDevice1", DEVICE_TYPE::DT_DI,
             DEVICE_SUB_TYPE::DST_DI, 0 ) {}
 
         MOCK_METHOD( int, get_state, ( ), ( override ) );
     };
 
-class LifebitTest : public ::testing::Test
+class lifebit_test : public ::testing::Test
     {
     protected:
         life_device* lb_dev;
-        MockDevice* mock_dev;
+        mock_DI_device* mock_dev;
 
         void SetUp() override 
             {
-            mock_dev = new MockDevice();
+            mock_dev = new mock_DI_device();
 
             lb_dev = new life_device( "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFEBIT );
             // Устанавливаем mock устройство.
@@ -37,7 +37,42 @@ class LifebitTest : public ::testing::Test
             }
     };
 
-TEST_F( LifebitTest, EvaluateIO_NoDiDevice_NoAction ) 
+class mock_AI_device : public device
+    {
+    public:
+        mock_AI_device() : device( "MockDevice2", DEVICE_TYPE::DT_AI,
+            DEVICE_SUB_TYPE::DST_AI, 0 ) {
+            }
+
+        MOCK_METHOD( float, get_value, ( ), ( override ) );
+    };
+
+class lifecounter_test : public ::testing::Test
+    {
+    protected:
+        life_device* life_counter;
+        mock_AI_device* mock_AI_dev;
+
+        void SetUp() override
+            {
+            mock_AI_dev = new mock_AI_device();
+
+            life_counter = new life_device( "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFECOUNTER );
+            // Устанавливаем mock устройство.
+            life_counter->set_property( "DEV", mock_AI_dev );
+            }
+
+        void TearDown() override
+            {
+            delete life_counter;
+            life_counter = nullptr;
+
+            delete mock_AI_dev;
+            mock_AI_dev = nullptr;
+            }
+    };
+
+TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction ) 
     {
     EXPECT_EQ( lb_dev->get_state(), 0 );   // Состояние должно быть нулевое.
     
@@ -49,7 +84,7 @@ TEST_F( LifebitTest, EvaluateIO_NoDiDevice_NoAction )
     EXPECT_EQ( lb_dev->get_state(), 0 );   // Состояние должно быть нулевое.
     }
 
-TEST_F( LifebitTest, EvaluateIO_StateChanged_DeviceActivated ) 
+TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated ) 
     {
     EXPECT_CALL( *mock_dev, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние сигнала изменилось.
@@ -58,13 +93,14 @@ TEST_F( LifebitTest, EvaluateIO_StateChanged_DeviceActivated )
     EXPECT_EQ( lb_dev->get_state(), 1 );     // Устройство должно активироваться.
     }
 
-TEST_F( LifebitTest, EvaluateIO_TimerExceeded_DeviceDeactivated )
+TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     {
     EXPECT_CALL( *mock_dev, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние изменилось.
 
     lb_dev->evaluate_io();                
     EXPECT_EQ( lb_dev->get_state(), 1 );     // Устройство должно активироваться.
+
 
     // Эмулируем превышение времени.
     // Устанавливаем DT = 100 мс.
@@ -76,9 +112,16 @@ TEST_F( LifebitTest, EvaluateIO_TimerExceeded_DeviceDeactivated )
     lb_dev->start_time -= 200;
     lb_dev->evaluate_io();
     EXPECT_EQ( lb_dev->get_state(), 0 ); // Устройство должно деактивироваться
+
+
+    EXPECT_CALL( *mock_dev, get_state() )
+        .WillOnce( ::testing::Return( 0 ) ); // Состояние изменилось.
+
+    lb_dev->evaluate_io();
+    EXPECT_EQ( lb_dev->get_state(), 1 );     // Устройство должно активироваться.
     }
 
-TEST_F( LifebitTest, save_device )
+TEST_F( lifebit_test, save_device )
     {
     // Создаем std::array для записи
     std::array<char, 256> buffer = { 0 };
@@ -92,7 +135,7 @@ TEST_F( LifebitTest, save_device )
     EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, DT=0},\n", buffer.data() );
     }
 
-TEST_F( LifebitTest, SetStringProperty_SetsDIDevice )
+TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
     {
     lb_dev->set_property( "DI", nullptr );
     // Проверяем, что изначально dev равен nullptr
@@ -110,7 +153,7 @@ TEST_F( LifebitTest, SetStringProperty_SetsDIDevice )
     G_DEVICE_MANAGER()->remove_device( mock_dev->get_serial_n() );
     }
 
-TEST_F( LifebitTest, SetStringProperty_InvalidField_NoAction )
+TEST_F( lifebit_test, SetStringProperty_InvalidField_NoAction )
     {
     // Устанавливаем несуществующее поле
     const char* invalid_field = "INVALID";
@@ -120,10 +163,31 @@ TEST_F( LifebitTest, SetStringProperty_InvalidField_NoAction )
     EXPECT_EQ( lb_dev->dev, mock_dev );
     }
 
-TEST_F( LifebitTest, GetNameInLua_ReturnsCorrectName )
+TEST_F( lifebit_test, GetNameInLua_ReturnsCorrectName )
     {
     const char* expected_name = "TestDevice";
     const char* lua_name = lb_dev->get_name_in_Lua();
     ASSERT_STREQ( lua_name, expected_name ) << "get_name_in_Lua() should"
         "return the correct device name.";
+    }
+
+
+TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
+    {
+    EXPECT_CALL( *mock_AI_dev, get_value() )
+        .WillOnce( ::testing::Return( 10 ) ); // Состояние изменилось.
+    life_counter->evaluate_io();
+    EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
+
+    EXPECT_CALL( *mock_AI_dev, get_value() )
+        .WillRepeatedly( ::testing::Return( 10 ) );// Состояние не меняется.
+    // Эмулируем время. Устанавливаем время так, чтобы таймер истек.
+    life_counter->start_time -= 200;
+    life_counter->evaluate_io();
+    EXPECT_EQ( life_counter->get_state(), 0 );     // Устройство должно деактивироваться
+
+    EXPECT_CALL( *mock_AI_dev, get_value() )
+        .WillOnce( ::testing::Return( 11 ) ); // Состояние изменилось.
+    life_counter->evaluate_io();
+    EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
     }
