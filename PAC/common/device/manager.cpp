@@ -1383,7 +1383,13 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             switch ( dev_sub_type )
                 {
                 case device::DST_LIFEBIT:
-                    new_device = new lifebit( dev_name );
+                    new_device = new life_device( dev_name,
+                        life_device::TYPE::T_BIT );
+                    break;
+
+                case device::DST_LIFECOUNTER:
+                    new_device = new life_device( dev_name,
+                        life_device::TYPE::T_COUNTER );
                     break;
 
                 default:

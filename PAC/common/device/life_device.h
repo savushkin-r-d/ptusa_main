@@ -6,7 +6,7 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class lifebit : public device, public i_Lua_save_device
+class life_device : public device, public i_Lua_save_device
     {
     public:
         enum class PARAM
@@ -16,10 +16,16 @@ class lifebit : public device, public i_Lua_save_device
             PARAMS_COUNT
             };
 
-        /// @param name - имя.
-        explicit lifebit( const char* name );
+        enum class TYPE
+            {
+            T_BIT,
+            T_COUNTER,
+            };
 
-        ~lifebit() override = default;
+        /// @param name - имя.
+        explicit life_device( const char* name, TYPE type );
+
+        ~life_device() override = default;
 
         void evaluate_io() override;
 
@@ -34,7 +40,10 @@ class lifebit : public device, public i_Lua_save_device
     private:
 #endif
 
-        device* di_device = nullptr;
-        int prev_di_state = 0;
+        device* dev = nullptr;
+        int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
+        float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
         unsigned long start_time = get_millisec();
+
+        TYPE dev_type = TYPE::T_BIT;
     };

@@ -612,6 +612,7 @@ class device : public i_DO_AO_device, public par_device
 
             //DT_LIFE_DEVICE
             DST_LIFEBIT = 1,
+            DST_LIFECOUNTER,
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
