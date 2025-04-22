@@ -100,7 +100,7 @@ TEST_F( LifebitTest, SetStringProperty_SetsDIDevice )
 
     // Устанавливаем свойство "DI" с именем устройства
     const char* device_name = "MockDevice1";
-    auto dev_idx = G_DEVICE_MANAGER()->add_device( mock_di_device,
+    G_DEVICE_MANAGER()->add_device( mock_di_device,
         device::DEVICE_TYPE::DT_LIFE_DEVICE );
     lb_dev->set_string_property( "DI", device_name );
 
@@ -118,4 +118,12 @@ TEST_F( LifebitTest, SetStringProperty_InvalidField_NoAction )
 
     // Проверяем, что di_device не изменился
     EXPECT_EQ( lb_dev->di_device, mock_di_device );
+    }
+
+TEST_F( LifebitTest, GetNameInLua_ReturnsCorrectName )
+    {
+    const char* expected_name = "TestDevice";
+    const char* lua_name = lb_dev->get_name_in_Lua();
+    ASSERT_STREQ( lua_name, expected_name ) << "get_name_in_Lua() should"
+        "return the correct device name.";
     }

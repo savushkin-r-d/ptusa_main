@@ -17,9 +17,9 @@ class lifebit : public device, public i_Lua_save_device
             };
 
         /// @param name - имя.
-        lifebit( const char* name );
+        explicit lifebit( const char* name );
 
-        virtual ~lifebit() = default;
+        ~lifebit() override = default;
 
         void evaluate_io() override;
 

@@ -25,7 +25,8 @@ void lifebit::evaluate_io()
 
     unsigned long now = get_millisec();
     unsigned long dt = now - start_time;
-    if ( dt > get_par( static_cast<u_int>( PARAM::DT ) ) )
+    auto set_dt = static_cast<u_long>( get_par( static_cast<u_int>( PARAM::DT ) ) );
+    if ( dt > set_dt )
         {
         start_time = now;
         device::set_state( 0 );
@@ -39,19 +40,14 @@ void lifebit::set_string_property( const char* field, const char* value )
         {
         G_LOG->debug( "%s\t lifebit::set_string_property() - "
             "field = %s, val = \"%s\"",
-            get_name(), field, value);
+            get_name(), field, value );
         }
 
     if ( !field ) return;
 
-    switch ( field[ 0 ] )
+    if ( field[ 0 ] == 'D' )    // "DI".
         {
-        case 'D': // "DI".
-            di_device = G_DEVICE_MANAGER()->get_device( value );
-            break;
-
-        default: // Do nothing.
-            break;
+        di_device = G_DEVICE_MANAGER()->get_device( value );
         }
     }
 //-----------------------------------------------------------------------------
@@ -66,14 +62,9 @@ void lifebit::set_property( const char* field, device* value )
 
     if ( !field ) return;
 
-    switch ( field[ 0 ] )
+    if ( field[ 0 ] == 'D' )    // "DI".
         {
-        case 'D': // "DI".
-            di_device = value;
-            break;
-
-        default: // Do nothing.
-            break;
+        di_device = value;
         }
     }
 //-----------------------------------------------------------------------------
