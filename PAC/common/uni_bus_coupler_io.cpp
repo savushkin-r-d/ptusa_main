@@ -911,7 +911,6 @@ int uni_io_manager::read_inputs()
                             add_err_to_log( "Read AI", nd->name, nd->ip_address,
                                 static_cast<int>( buff[ 7 ] ),
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
-                            break;
                             nd->io_error_flag = true;
                             break;
                             }
