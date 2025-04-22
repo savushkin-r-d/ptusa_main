@@ -59,7 +59,7 @@ TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction )
     life_bit->evaluate_io();
     EXPECT_EQ( life_bit->get_state(), 0 );   // Состояние должно быть нулевое.
 
-    life_bit->set_property( "DI", nullptr ); // Убираем устройство.
+    life_bit->set_property( "DEV", nullptr ); // Убираем устройство.
     life_bit->evaluate_io();
     EXPECT_EQ( life_bit->get_state(), 0 );   // Состояние должно быть нулевое.
     }
@@ -117,15 +117,15 @@ TEST_F( lifebit_test, save_device )
 
 TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
     {
-    life_bit->set_property( "DI", nullptr );
+    life_bit->set_property( "DEV", nullptr );
     // Проверяем, что изначально dev равен nullptr
     EXPECT_EQ( life_bit->dev, nullptr );
 
-    // Устанавливаем свойство "DI" с именем устройства
+    // Устанавливаем свойство "DEV" с именем устройства
     const char* device_name = "MockDevice1";
     G_DEVICE_MANAGER()->add_device(static_cast<device*>( mock_DI_dev.get() ),
         device::DEVICE_TYPE::DT_LIFE_DEVICE );
-    life_bit->set_string_property( "DI", device_name );
+    life_bit->set_string_property( "DEV", device_name );
 
     // Проверяем, что dev был установлен
     EXPECT_EQ( life_bit->dev, mock_DI_dev.get() );

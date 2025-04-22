@@ -57,9 +57,14 @@ void life_device::set_string_property( const char* field, const char* value )
 
     if ( !field ) return;
 
-    if ( field[ 0 ] == 'D' )    // "DEV".
+    if ( strcmp( field, "DEV" ) == 0 )    // Explicitly match "DEV".
         {
         dev = G_DEVICE_MANAGER()->get_device( value );
+        }
+    else
+        {
+        G_LOG->alert( "%s\t life_device::set_string_property() - "
+            "Unknown field \"%s\"", get_name(), field );
         }
     }
 //-----------------------------------------------------------------------------
@@ -74,9 +79,14 @@ void life_device::set_property( const char* field, device* value )
 
     if ( !field ) return;
 
-    if ( field[ 0 ] == 'D' )    // "DEV".
+    if ( strcmp( field, "DEV" ) == 0 )    // Explicitly match "DEV".
         {
         dev = value;
+        }
+    else
+        {
+        G_LOG->alert( "%s\t life_device::set_property() - "
+            "Unknown field \"%s\"", get_name(), field );
         }
     }
 //-----------------------------------------------------------------------------
@@ -90,5 +100,5 @@ int life_device::save_device( char* buff )
 const char* life_device::get_name_in_Lua() const
     {
     return get_name();
-    }   
+    }
 //-----------------------------------------------------------------------------
