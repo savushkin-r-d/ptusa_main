@@ -238,7 +238,10 @@ int uni_io_manager::net_init( io_node* node ) const
 //-----------------------------------------------------------------------------
 int uni_io_manager::write_outputs()
     {
-    if ( 0 == nodes_count ) return 0;
+    if ( 0 == nodes_count ) 
+        {
+        return 0;
+        }
 
     auto add_communicate_err_to_log = []( const char* node_name, const char* node_ip_address )
         {
@@ -258,12 +261,6 @@ int uni_io_manager::write_outputs()
             {
             if ( !nd->is_active )
                 {
-                continue;
-                }
-
-            if (nd->io_error_flag)
-                {
-                nd->io_error_flag = false;
                 continue;
                 }
 
@@ -376,6 +373,12 @@ int uni_io_manager::write_outputs()
         u_int ao_module_type = 0;
         u_int ao_module_offset = 0;
 
+        if (nd->io_error_flag)
+        {
+            nd->io_error_flag = false;
+            continue;
+        }
+
         if ( nd->type == io_node::PHOENIX_BK_ETH )
             {
             if ( !nd->is_active )
@@ -481,7 +484,6 @@ int uni_io_manager::write_outputs()
                                 {
                                 G_LOG->error("Write AO: returned error %d", buff[7]);
                                 nd->flag_error_write_message = true;
-                                nd->io_error_flag = true;
                                 }
                             }
                         }
@@ -491,7 +493,6 @@ int uni_io_manager::write_outputs()
                             {
                             G_LOG->error("Write AO: returned error");
                             nd->flag_error_write_message = true;
-                            nd->io_error_flag = true;
                             res = 1;
                             }
                         }
@@ -662,7 +663,10 @@ int uni_io_manager::write_holding_registers(io_node* node, unsigned int address,
 //-----------------------------------------------------------------------------
 int uni_io_manager::read_inputs()
     {
-    if ( 0 == nodes_count ) return 0;
+    if ( 0 == nodes_count )
+        {
+        return 0;
+        }
 
     auto add_err_to_log = []( const char* cmd,
         const char* node_name, const char* node_ip_address,
@@ -694,12 +698,6 @@ int uni_io_manager::read_inputs()
             {
             if ( !nd->is_active )
                 {
-                continue;
-                }
-
-            if ( nd->io_error_flag )
-                {
-                nd->io_error_flag = false;
                 continue;
                 }
 
@@ -832,10 +830,10 @@ int uni_io_manager::read_inputs()
                 }
 
             if (nd->io_error_flag)
-            {
+                {
                 nd->io_error_flag = false;
                 continue;
-            }
+                }
 
             if (nd->AI_cnt > 0)
                 {
@@ -911,14 +909,12 @@ int uni_io_manager::read_inputs()
                             add_err_to_log( "Read AI", nd->name, nd->ip_address,
                                 static_cast<int>( buff[ 7 ] ),
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
-                            nd->io_error_flag = true;
                             break;
                             }
                         }
                     else
                         {
                         add_communicate_err_to_log(nd->name, nd->ip_address);
-                        nd->io_error_flag = true;
                         break;
                         }
                     start_register += registers_count;
