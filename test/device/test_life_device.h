@@ -1,7 +1,7 @@
 #pragma once
 #include "../includes.h"
 
-#include "device/lifebit.h"
+#include "device/life_device.h"
 
 class MockDevice : public device
     {

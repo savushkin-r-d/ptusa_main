@@ -2,7 +2,7 @@
 
 #include "base.h"
 #include "valve.h"
-#include "lifebit.h"
+#include "life_device.h"
 
 class dev_stub;
 //-----------------------------------------------------------------------------

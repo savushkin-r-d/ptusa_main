@@ -1,4 +1,4 @@
-#include "lifebit.h"
+#include "life_device.h"
 //-----------------------------------------------------------------------------
 lifebit::lifebit( const char* name ) :device( name,
     device::DEVICE_TYPE::DT_LIFE_DEVICE,
