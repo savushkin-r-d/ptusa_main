@@ -945,7 +945,7 @@ TEST( device_manager, add_io_device )
     check_dev<i_DI_device, i_DI_device>( "POU1LIFECOUNTER1", device::DT_LIFE_DEVICE,
         device::DST_LIFECOUNTER, LIFE_DEVICE, nullptr, "Art_1", true );
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_LIFE_DEVICE, device::DST_LIFEBIT + 1, "POU1LIFEBIT2",
+        device::DT_LIFE_DEVICE, device::DST_LIFECOUNTER + 1, "POU1LIFEBIT2",
         "Test life_device", "Art_1" );
     EXPECT_EQ( nullptr, res );
 

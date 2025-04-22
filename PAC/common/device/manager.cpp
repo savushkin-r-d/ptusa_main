@@ -1383,19 +1383,16 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             switch ( dev_sub_type )
                 {
                 case device::DST_LIFEBIT:
-                    new_device = new life_device( dev_name,
-                        life_device::TYPE::T_BIT );
-                    break;
-
                 case device::DST_LIFECOUNTER:
-                    new_device = new life_device( dev_name,
-                        life_device::TYPE::T_COUNTER );
+                    new_device = new life_device( dev_name, 
+                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
                     break;
 
                 default:
                     if ( G_DEBUG )
                         {
-                        printf( "Unknown LIFEDEVICE device subtype %d!\n", dev_sub_type );
+                        G_LOG->alert( "Unknown LIFEDEVICE device subtype %d!\n",
+                            dev_sub_type ); 
                         }
                     break;
                 }

@@ -6,8 +6,8 @@
 class MockDevice : public device
     {
     public:
-        MockDevice() : device( "MockDevice1", DEVICE_TYPE::DT_LIFE_DEVICE,
-            DEVICE_SUB_TYPE::DST_LIFEBIT, 0 ) {}
+        MockDevice() : device( "MockDevice1", DEVICE_TYPE::DT_DI,
+            DEVICE_SUB_TYPE::DST_DI, 0 ) {}
 
         MOCK_METHOD( int, get_state, ( ), ( override ) );
     };
@@ -22,7 +22,7 @@ class LifebitTest : public ::testing::Test
             {
             mock_dev = new MockDevice();
 
-            lb_dev = new life_device( "TestDevice", life_device::TYPE::T_BIT );
+            lb_dev = new life_device( "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFEBIT );
             // Устанавливаем mock устройство.
             lb_dev->set_property( "DEV", mock_dev );
             }

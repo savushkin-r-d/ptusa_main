@@ -1,10 +1,8 @@
 #include "life_device.h"
 //-----------------------------------------------------------------------------
-life_device::life_device( const char* name, life_device::TYPE type ) :device( name,
-    device::DEVICE_TYPE::DT_LIFE_DEVICE,
-    device::DEVICE_SUB_TYPE::DST_LIFEBIT,
-    static_cast<u_int>( PARAM::PARAMS_COUNT ) - 1 ),
-    dev_type( type )
+life_device::life_device( const char* name, device::DEVICE_SUB_TYPE sub_type ) :device( name,
+    device::DEVICE_TYPE::DT_LIFE_DEVICE, sub_type,
+    static_cast<u_int>( PARAM::PARAMS_COUNT ) - 1 )
     {
     set_par_name( static_cast<u_int>( PARAM::DT ), 0, "DT" );
     }
@@ -16,7 +14,7 @@ void life_device::evaluate_io()
         return;
         }
 
-    if ( dev_type == TYPE::T_BIT )
+    if ( get_sub_type() == device::DEVICE_SUB_TYPE::DST_LIFEBIT )
         {
         if ( auto st = dev->get_state(); prev_dev_state != st )
             {
@@ -26,7 +24,7 @@ void life_device::evaluate_io()
             return;
             }
         }
-    else  // TYPE::T_COUNTER
+    else  // DST_LIFECOUNTER
         {
         if ( auto v = dev->get_value(); prev_dev_value != v )
             {

@@ -16,14 +16,8 @@ class life_device : public device, public i_Lua_save_device
             PARAMS_COUNT
             };
 
-        enum class TYPE
-            {
-            T_BIT,
-            T_COUNTER,
-            };
-
         /// @param name - имя.
-        explicit life_device( const char* name, TYPE type );
+        explicit life_device( const char* name, device::DEVICE_SUB_TYPE sub_type );
 
         ~life_device() override = default;
 
@@ -44,6 +38,4 @@ class life_device : public device, public i_Lua_save_device
         int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
         float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
         unsigned long start_time = get_millisec();
-
-        TYPE dev_type = TYPE::T_BIT;
     };
