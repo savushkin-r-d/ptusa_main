@@ -17,7 +17,8 @@ class lifebit_test : public ::testing::Test
     protected:
         std::unique_ptr<life_device> life_bit = std::make_unique<life_device>(
             "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFEBIT );
-        std::unique_ptr<mock_DI_device> mock_DI_dev{};
+        std::unique_ptr<mock_DI_device> mock_DI_dev = 
+            std::make_unique<mock_DI_device>();
 
         void SetUp() override 
             {
@@ -41,7 +42,8 @@ class lifecounter_test : public ::testing::Test
     protected:
         std::unique_ptr<life_device> life_counter = std::make_unique<life_device>(
             "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFECOUNTER );
-        std::unique_ptr<mock_AI_device> mock_AI_dev{};
+        std::unique_ptr<mock_AI_device> mock_AI_dev = 
+            std::make_unique<mock_AI_device>();
 
         void SetUp() override
             {
