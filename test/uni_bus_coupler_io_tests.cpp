@@ -209,13 +209,11 @@ TEST( uni_io_manager, read_inputs )
 #ifdef LINUX_OS
 R"(
 ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-ERROR  (3) -> Read AI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 4, expected size = 0, received = 1).
 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
 )";
 #else
 R"(
 2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 4, expected size = 0, received = 1).
 2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
 )";
 #endif

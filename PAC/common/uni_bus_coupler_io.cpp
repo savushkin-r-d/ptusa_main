@@ -240,6 +240,15 @@ int uni_io_manager::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
 
+    auto add_communicate_err_to_log = []( const char* node_name, const char* node_ip_address )
+        {
+            auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                node_name, node_ip_address);
+            *result.out = '\0';
+            G_LOG->write_log(i_log::P_ERR);
+        };
+
     int res = 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
@@ -253,10 +262,10 @@ int uni_io_manager::write_outputs()
                 }
 
             if (nd->io_error_flag)
-            {
+                {
                 nd->io_error_flag = false;
                 continue;
-            }
+                }
 
             if ( nd->DO_cnt > 0 )
                 {
@@ -297,24 +306,12 @@ int uni_io_manager::write_outputs()
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
                     }
-                else {
-                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
-                        nd->name, nd->ip_address);
-                    *result.out = '\0';
-                    G_LOG->write_log(i_log::P_ERR);
+                else
+                    {
+                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
-                }
-
-                // Закомментированный фрагмент - используется для отладки.
-                //else
-                //    {
-                //    if ( G_DEBUG )
-                //        {
-                //        printf("\nWrite DO: returned error...\n");
-                //        }
-                //    }
+                    }
 
                 }// if ( nd->DO_cnt > 0 )
 
@@ -363,27 +360,13 @@ int uni_io_manager::write_outputs()
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         }
                     }
-                else {
-                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
-                        nd->name, nd->ip_address);
-                    *result.out = '\0';
-                    G_LOG->write_log(i_log::P_ERR);
+                else
+                    {
+                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
-                }
-
-                // Закомментированный фрагмент - используется для отладки.
-                //else
-                //    {
-                //    if ( G_DEBUG )
-                //        {
-                //        printf("\nWrite AO: returned error...\n");
-                //        }
-                //    }
-
+                    }
                 }// if ( nd->AO_cnt > 0 )
-
             }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
@@ -693,6 +676,15 @@ int uni_io_manager::read_inputs()
         G_LOG->write_log( i_log::P_ERR );
         };
 
+    auto add_communicate_err_to_log = [](const char* node_name, const char* node_ip_address)
+        {
+            auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                node_name, node_ip_address);
+            *result.out = '\0';
+            G_LOG->write_log(i_log::P_ERR);
+        };
+
 
     for (u_int i = 0; i < nodes_count; i++ )
         {
@@ -760,11 +752,7 @@ int uni_io_manager::read_inputs()
                         }
                     }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 else {
-                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
-                        nd->name, nd->ip_address);
-                    *result.out = '\0';
-                    G_LOG->write_log(i_log::P_ERR);
+                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
                 }
@@ -822,11 +810,7 @@ int uni_io_manager::read_inputs()
                     } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 else
                     {
-                    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
-                        nd->name, nd->ip_address);
-                    *result.out = '\0';
-                    G_LOG->write_log(i_log::P_ERR);
+                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
                     }
@@ -841,6 +825,7 @@ int uni_io_manager::read_inputs()
 
         if ( nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
             {
+
             if ( !nd->is_active )
                 {
                 continue;
@@ -933,11 +918,7 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                            R"(Bus coupler returned error. Node "{}":"{}" node doesn't respond)",
-                            nd->name, nd->ip_address);
-                        *result.out = '\0';
-                        G_LOG->write_log(i_log::P_ERR);
+                        add_communicate_err_to_log(nd->name, nd->ip_address);
                         nd->io_error_flag = true;
                         break;
                         }
