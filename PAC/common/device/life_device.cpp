@@ -11,6 +11,7 @@ void life_device::evaluate_io()
     {
     if ( !dev )
         {
+        device::set_state( 0 );
         return;
         }
 
@@ -41,7 +42,7 @@ void life_device::evaluate_io()
     if ( dt > set_dt )
         {
         start_time = now;
-        device::set_state( 0 );
+        device::set_state( -1 );
         return;
         }
     }

@@ -54,23 +54,20 @@ class lifecounter_test : public ::testing::Test
 
 TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction ) 
     {
-    EXPECT_EQ( life_bit->get_state(), 0 );   // Состояние должно быть нулевое.
-    
+    life_bit->set_property( "DEV", nullptr );// Убираем устройство.
     life_bit->evaluate_io();
     EXPECT_EQ( life_bit->get_state(), 0 );   // Состояние должно быть нулевое.
 
-    life_bit->set_property( "DEV", nullptr ); // Убираем устройство.
-    life_bit->evaluate_io();
-    EXPECT_EQ( life_bit->get_state(), 0 );   // Состояние должно быть нулевое.
+    life_bit->set_property( "DEV", mock_DI_dev.get() );  // Добавляем устройство.
     }
 
-TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated ) 
+TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated )
     {
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние сигнала изменилось.
 
     life_bit->evaluate_io();
-    EXPECT_EQ( life_bit->get_state(), 1 );     // Устройство должно активироваться.
+    EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
     }
 
 TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
@@ -79,26 +76,24 @@ TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние изменилось.
 
     life_bit->evaluate_io();                
-    EXPECT_EQ( life_bit->get_state(), 1 );     // Устройство должно активироваться.
+    EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
 
-
-    // Эмулируем превышение времени.
     // Устанавливаем DT = 100 мс.
     life_bit->set_par( static_cast<u_int>( life_device::PARAM::DT ), 0, 100 );
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillRepeatedly( ::testing::Return( 1 ) ); // Состояние не меняется.
 
-    // Эмулируем время. Устанавливаем время так, чтобы таймер истек.
+    // Эмулируем время - устанавливаем время так, чтобы таймер истек.
     life_bit->start_time -= 200;
     life_bit->evaluate_io();
-    EXPECT_EQ( life_bit->get_state(), 0 ); // Устройство должно деактивироваться
+    EXPECT_EQ( life_bit->get_state(), -1 );  // Устройство должно деактивироваться
 
 
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillOnce( ::testing::Return( 0 ) ); // Состояние изменилось.
 
     life_bit->evaluate_io();
-    EXPECT_EQ( life_bit->get_state(), 1 );     // Устройство должно активироваться.
+    EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
     }
 
 TEST_F( lifebit_test, save_device )
@@ -159,15 +154,18 @@ TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     life_counter->evaluate_io();
     EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
 
+    // Устанавливаем DT = 100 мс.
+    life_counter->set_par( static_cast<u_int>( life_device::PARAM::DT ), 0, 100 );
     EXPECT_CALL( *mock_AI_dev, get_value() )
         .WillRepeatedly( ::testing::Return( 10 ) );// Состояние не меняется.
-    // Эмулируем время. Устанавливаем время так, чтобы таймер истек.
+
+    // Эмулируем время - устанавливаем время так, чтобы таймер истек.
     life_counter->start_time -= 200;
     life_counter->evaluate_io();
-    EXPECT_EQ( life_counter->get_state(), 0 );     // Устройство должно деактивироваться
+    EXPECT_EQ( life_counter->get_state(), -1 );// Устройство должно деактивироваться
 
     EXPECT_CALL( *mock_AI_dev, get_value() )
-        .WillOnce( ::testing::Return( 11 ) ); // Состояние изменилось.
+        .WillOnce( ::testing::Return( 11 ) );  // Состояние изменилось.
     life_counter->evaluate_io();
-    EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
+    EXPECT_EQ( life_counter->get_state(), 1 ); // Устройство должно активироваться.
     }
