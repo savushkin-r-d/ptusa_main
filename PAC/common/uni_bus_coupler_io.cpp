@@ -246,7 +246,7 @@ int uni_io_manager::write_outputs()
     auto add_communicate_err_to_log = []( const char* node_name, const char* node_ip_address )
         {
             auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
                 node_name, node_ip_address);
             *result.out = '\0';
             G_LOG->write_log(i_log::P_ERR);
@@ -261,6 +261,12 @@ int uni_io_manager::write_outputs()
             {
             if ( !nd->is_active )
                 {
+                continue;
+                }
+
+            if (nd->io_error_flag)
+                {
+                add_communicate_err_to_log(nd->name, nd->ip_address);
                 continue;
                 }
 
@@ -373,16 +379,16 @@ int uni_io_manager::write_outputs()
         u_int ao_module_type = 0;
         u_int ao_module_offset = 0;
 
-        if (nd->io_error_flag)
-        {
-            nd->io_error_flag = false;
-            continue;
-        }
-
         if ( nd->type == io_node::PHOENIX_BK_ETH )
             {
             if ( !nd->is_active )
                 {
+                continue;
+                }
+
+            if (nd->io_error_flag)
+                {
+                add_communicate_err_to_log(nd->name, nd->ip_address);
                 continue;
                 }
 
@@ -404,7 +410,7 @@ int uni_io_manager::write_outputs()
                 int bit_src = 0;
 
                 do
-                {
+                    {
                     for (u_int j = 0; j < registers_count * 2; j++)
                         {
                         u_char b = 0;
@@ -504,8 +510,7 @@ int uni_io_manager::write_outputs()
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
 
-                }
-                 while (start_register < nd->AO_cnt);
+                    } while (start_register < nd->AO_cnt);
 
 
                 }// if ( nd->AO_cnt > 0 )
@@ -683,7 +688,7 @@ int uni_io_manager::read_inputs()
     auto add_communicate_err_to_log = [](const char* node_name, const char* node_ip_address)
         {
             auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate)",
+                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
                 node_name, node_ip_address);
             *result.out = '\0';
             G_LOG->write_log(i_log::P_ERR);
@@ -739,6 +744,7 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_KBUS
                         printf( "\n" );
 #endif // DEBUG_KBUS
+                        nd->io_error_flag = false;
                         }
                     else
                         {
@@ -748,12 +754,13 @@ int uni_io_manager::read_inputs()
                         nd->io_error_flag = true;
                         continue;
                         }
-                    }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
-                else {
+                    } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
+                else
+                    {
                     add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
-                }
+                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->DI_cnt > 0 )
 
             if ( nd->AI_cnt > 0 )
@@ -796,7 +803,8 @@ int uni_io_manager::read_inputs()
                                     break;
                                 }
                             }
-                        }
+                        nd->io_error_flag = false;
+                        } // if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                     else
                         {
                         add_err_to_log( "Read AI", nd->name, nd->ip_address,
@@ -805,13 +813,13 @@ int uni_io_manager::read_inputs()
                         nd->io_error_flag = true;
                         continue;
                         }
-                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    }
                 else
                     {
                     add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
-                    }
+                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->AI_cnt > 0 )
 
             }// if ( nd->type == io_node::T_750_341 || ...
@@ -826,12 +834,6 @@ int uni_io_manager::read_inputs()
 
             if ( !nd->is_active )
                 {
-                continue;
-                }
-
-            if (nd->io_error_flag)
-                {
-                nd->io_error_flag = false;
                 continue;
                 }
 
@@ -909,12 +911,14 @@ int uni_io_manager::read_inputs()
                             add_err_to_log( "Read AI", nd->name, nd->ip_address,
                                 static_cast<int>( buff[ 7 ] ),
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
+                            nd->io_error_flag = true;
                             break;
                             }
                         }
                     else
                         {
                         add_communicate_err_to_log(nd->name, nd->ip_address);
+                        nd->io_error_flag = true;
                         break;
                         }
                     start_register += registers_count;
@@ -923,10 +927,9 @@ int uni_io_manager::read_inputs()
                         {
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
-                    }
-                while (start_register < nd->AI_cnt);
-                }
-
+                    nd->io_error_flag = false;
+                    } while (start_register < nd->AI_cnt);
+                } // if (nd->AI_cnt > 0)
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 

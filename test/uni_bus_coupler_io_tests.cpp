@@ -152,10 +152,14 @@ class test_uni_io_manager : public uni_io_manager
             return res;
             }
 
-        void set_error_result()
+        void set_result_to_error()
             {
-            // Set error result.
             res = 1;
+            }
+
+        void set_result_to_ok()
+            {
+            res = 0;
             }
 
         static tm get_fixed_time()
@@ -194,6 +198,7 @@ TEST( uni_io_manager, read_inputs )
     mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
+
 
     std::ostringstream testBuffer;
     std::streambuf* originalCoutBuffer = std::cout.rdbuf( testBuffer.rdbuf() );
@@ -260,13 +265,89 @@ TEST( uni_io_manager, write_outputs )
     res = mngr.write_outputs();
     EXPECT_EQ( res, 0 );
 
-    mngr.set_error_result();
+    mngr.set_result_to_error();
     //Should fail - e_communicate() returns 1.
     res = mngr.write_outputs();
     EXPECT_EQ( res, 1 );
 
     io_manager::replace_instance( prev_mngr );
     }
+
+TEST(uni_io_manager, read_write_data)
+{
+    test_uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance(&mngr);
+
+    mngr.init(2);
+    mngr.add_node(0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1);
+    mngr.add_node(1, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1);
+
+    std::ostringstream testBuffer;
+    std::streambuf* originalCoutBuffer = std::cout.rdbuf(testBuffer.rdbuf());
+    auto get_time_hook = subhook_new(reinterpret_cast<void*>(&get_time),
+        reinterpret_cast<void*>(&test_uni_io_manager::get_fixed_time),
+        SUBHOOK_64BIT_OFFSET);
+    subhook_install(get_time_hook);
+
+    mngr.set_result_to_error();
+    auto res = mngr.read_inputs();
+    io_manager::io_node* temp_node = mngr.get_node(0);
+    EXPECT_TRUE(temp_node->io_error_flag);
+    temp_node = nullptr;
+    res = mngr.write_outputs();
+    temp_node = mngr.get_node(1);
+    EXPECT_TRUE(temp_node->io_error_flag);
+    temp_node = nullptr;
+
+    const std::string expectedOutput1 = 1 +
+#ifdef LINUX_OS
+        R"(
+ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+)";
+#else
+        R"(
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+)";
+#endif
+    ASSERT_EQ(testBuffer.str(), expectedOutput1);
+
+    mngr.set_result_to_ok();
+    res = mngr.read_inputs();
+    res = mngr.write_outputs();
+
+    const std::string expectedOutput2 = 1 +
+#ifdef LINUX_OS
+        R"(
+ERROR  (3) -> Read DI:bus coupler returned error. Node "A200":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
+ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
+ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+)";
+#else
+        R"(
+2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node "A200":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
+2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
+)";
+#endif
+    originalCoutBuffer = std::cout.rdbuf(testBuffer.rdbuf() + 2);
+    std::string test_tmp = testBuffer.str();
+    test_tmp = test_tmp.substr(expectedOutput1.size());
+    EXPECT_EQ(test_tmp, expectedOutput2);
+
+    subhook_remove(get_time_hook);
+    subhook_free(get_time_hook);
+    io_manager::replace_instance(prev_mngr);
+}
 
 TEST( uni_io_manager, e_communicate )
     {

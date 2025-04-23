@@ -365,8 +365,8 @@ class io_manager
 			char    ip_address[16];///< IP-адрес.
 			char    name[20];      ///< Имя.
 
-			bool is_active;          ///< Признак работающего узла.
-            bool io_error_flag;
+			bool is_active;             ///< Признак работающего узла.
+            bool io_error_flag = false; ///< Флаг ошибки связи с узлом.
 
 			u_long  last_poll_time; ///< Время последнего опроса.
 			bool    is_set_err;     ///< Установлена ли ошибка связи.
