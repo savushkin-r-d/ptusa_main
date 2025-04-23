@@ -339,7 +339,6 @@ ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communi
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 )";
 #endif
-    std::cout.rdbuf(testBuffer.rdbuf() + 2);
     std::string test_tmp = testBuffer.str();
     test_tmp = test_tmp.substr(expectedOutput1.size());
     EXPECT_EQ(test_tmp, expectedOutput2);
