@@ -92,7 +92,7 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    float dt = ( *par )[ P_dt ];
+    float set_delta_ms = ( *par )[ P_dt ];
     float dmax = ( *par )[ P_max ];
     float dmin = ( *par )[ P_min ];
 
@@ -110,7 +110,7 @@ float PID::eval( float currentValue, int deltaSign )
 
     if ( G_DEBUG )
         {
-        if ( dt == 0 )
+        if ( set_delta_ms == 0 )
             {
             printf( "Error! PID::eval() - dt = 0!\n" );
             }
@@ -120,12 +120,12 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    if ( dt == 0 ) dt = 1;
+    if ( set_delta_ms == 0 ) set_delta_ms = 1'000;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( auto eval_dt = get_delta_millisec( last_time ); eval_dt > dt )
+    if ( auto actual_delta_ms = get_delta_millisec( last_time ); actual_delta_ms > set_delta_ms )
         {
-        dt = eval_dt / MSEC_IN_SEC;
+        auto dt = actual_delta_ms / MSEC_IN_SEC;
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
         q2 = K * TD / dt;
