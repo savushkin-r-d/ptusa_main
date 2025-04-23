@@ -320,8 +320,8 @@ ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communi
     ASSERT_EQ(testBuffer.str(), expectedOutput1);
 
     mngr.set_result_to_ok();
-    res = mngr.read_inputs();
-    res = mngr.write_outputs();
+    mngr.read_inputs();
+    mngr.write_outputs();
 
     const std::string expectedOutput2 = 1 +
 #ifdef LINUX_OS
@@ -339,7 +339,7 @@ ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communi
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 )";
 #endif
-    originalCoutBuffer = std::cout.rdbuf(testBuffer.rdbuf() + 2);
+    std::cout.rdbuf(testBuffer.rdbuf() + 2);
     std::string test_tmp = testBuffer.str();
     test_tmp = test_tmp.substr(expectedOutput1.size());
     EXPECT_EQ(test_tmp, expectedOutput2);
