@@ -194,16 +194,23 @@ float PID::eval( float currentValue, int deltaSign )
         {
         if ( out_max <= out_min )
             {
-            printf( "Error! PID::eval() - out_max <= out_min (%f == %f)!\n",
+            G_LOG->alert( "Error! PID::eval() - out_max <= out_min (%f <= %f)!",
                 out_max, out_min );
             }
         if ( out_max == MIN_OUT_VALUE )
             {
-            printf( "Error! PID::eval() - out_max = %f!\n", MIN_OUT_VALUE );
+            G_LOG->alert( "Error! PID::eval() - out_max = out_min (%f)!",
+                MIN_OUT_VALUE );
             }
         }
 
-    if ( Uk < out_min )
+
+    // Масштабирование Uk в диапазон out_min..out_max
+    Uk = out_min + ( Uk - MIN_OUT_VALUE ) * ( out_max - out_min ) / 
+        ( MAX_OUT_VALUE - MIN_OUT_VALUE );
+
+    // Ограничение на случай выхода за пределы из-за погрешностей
+    if ( Uk < out_min ) 
         {
         Uk = out_min;
         }
