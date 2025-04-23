@@ -410,7 +410,7 @@ class device : public i_DO_AO_device, public par_device
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
-            DT_LIFE_DEVICE, ///<Устройство проверки связи.
+            DT_LIFE_DEVICE, ///< Устройство проверки связи.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };

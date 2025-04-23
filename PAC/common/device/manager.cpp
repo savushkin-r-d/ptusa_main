@@ -1391,7 +1391,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 default:
                     if ( G_DEBUG )
                         {
-                        G_LOG->alert( "Unknown LIFEDEVICE device subtype %d!\n",
+                        G_LOG->alert( "Unknown LIFE_DEVICE device subtype %d!\n",
                             dev_sub_type ); 
                         }
                     break;
