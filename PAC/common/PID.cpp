@@ -92,7 +92,7 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    float dt = ( *par )[ P_dt ] / MSEC_IN_SEC;
+    float dt = ( *par )[ P_dt ];
     float dmax = ( *par )[ P_max ];
     float dmin = ( *par )[ P_min ];
 
@@ -123,7 +123,7 @@ float PID::eval( float currentValue, int deltaSign )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( auto eval_dt = get_delta_millisec( last_time ); eval_dt > dt * MSEC_IN_SEC )
+    if ( auto eval_dt = get_delta_millisec( last_time ); eval_dt > dt )
         {
         dt = eval_dt / MSEC_IN_SEC;
         q0 = K * ( 1 + TD / dt );
