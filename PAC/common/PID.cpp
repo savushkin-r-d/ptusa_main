@@ -123,8 +123,9 @@ float PID::eval( float currentValue, int deltaSign )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt * MSEC_IN_SEC )
+    if ( auto eval_dt = get_delta_millisec( last_time ); eval_dt > dt * MSEC_IN_SEC )
         {
+        dt = eval_dt / MSEC_IN_SEC;
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
         q2 = K * TD / dt;
