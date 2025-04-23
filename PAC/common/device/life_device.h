@@ -11,13 +11,14 @@ class life_device : public device, public i_Lua_save_device
     public:
         enum class PARAM
             {
-            DT = 1,                 ///< Интервал расчёта.
+            P_DT = 1,               ///< Интервал расчёта.
 
             PARAMS_COUNT
             };
 
         /// @param name - имя.
-        explicit life_device( const char* name, device::DEVICE_SUB_TYPE sub_type );
+        explicit life_device( const char* name, 
+            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_LIFEBIT );
 
         ~life_device() override = default;
 

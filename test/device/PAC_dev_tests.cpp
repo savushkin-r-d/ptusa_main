@@ -1041,9 +1041,13 @@ TEST( device, get_type_str )
         device::DEVICE_SUB_TYPE::DST_NONE, 0 );
     EXPECT_STREQ( dev1.get_type_str(), "NONE" );
 
-    device dev2( "DEV1", device::DEVICE_TYPE::DT_V,
+    device dev2( "DEV2", device::DEVICE_TYPE::DT_V,
         device::DEVICE_SUB_TYPE::DST_V_VIRT, 0 );
     EXPECT_STREQ( dev2.get_type_str(), "V" );
+
+    device dev3( "DEV3", device::DEVICE_TYPE::DT_LIFE_DEVICE,
+        device::DEVICE_SUB_TYPE::DST_LIFEBIT, 0 );
+    EXPECT_STREQ( dev3.get_type_str(), "LIFE_DEVICE" );
     }
 
 TEST( device, save_device )

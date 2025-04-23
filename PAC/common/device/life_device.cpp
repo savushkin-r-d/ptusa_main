@@ -4,7 +4,7 @@ life_device::life_device( const char* name, device::DEVICE_SUB_TYPE sub_type ) :
     device::DEVICE_TYPE::DT_LIFE_DEVICE, sub_type,
     static_cast<u_int>( PARAM::PARAMS_COUNT ) - 1 )
     {
-    set_par_name( static_cast<u_int>( PARAM::DT ), 0, "DT" );
+    set_par_name( static_cast<u_int>( PARAM::P_DT ), 0, "P_DT" );
     }
 //-----------------------------------------------------------------------------
 void life_device::evaluate_io()
@@ -36,10 +36,11 @@ void life_device::evaluate_io()
             }
         }
 
-    unsigned long now = get_millisec();
-    unsigned long dt = now - start_time;
-    auto set_dt = static_cast<u_long>( get_par( static_cast<u_int>( PARAM::DT ) ) );
-    if ( dt > set_dt )
+    
+    if ( auto now = get_millisec(), dt = now - start_time,
+        set_dt = static_cast<unsigned long>(
+        get_par( static_cast<u_int>( PARAM::P_DT ) ) ); 
+        dt > set_dt )
         {
         start_time = now;
         device::set_state( -1 );
