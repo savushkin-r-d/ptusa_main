@@ -143,7 +143,13 @@ float PID::eval( float currentValue, int deltaSign )
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
         if ( unsigned long delta_time = get_delta_millisec( start_time );
             delta_time < acceleration_time )
-            {
+            {            
+            if ( auto out_min = ( *par )[ P_out_min ]; start_value < out_min )
+                {
+                // Начинаем с out_min. 
+                start_value = out_min;
+                }
+
             float res = MAX_OUT_VALUE * delta_time / acceleration_time;
             if ( ( *par )[ P_is_zero_start ] )
                 {
@@ -199,21 +205,12 @@ float PID::eval( float currentValue, int deltaSign )
             }
         if ( out_max == MIN_OUT_VALUE )
             {
-            G_LOG->alert( "Error! PID::eval() - out_max = out_min (%f)!",
+            G_LOG->alert( "Error! PID::eval() - out_max == MIN_OUT_VALUE (%f)!",
                 MIN_OUT_VALUE );
             }
         }
 
-
-    // Масштабирование Uk в диапазон out_min..out_max
-    Uk = out_min + ( Uk - MIN_OUT_VALUE ) * ( out_max - out_min ) / 
-        ( MAX_OUT_VALUE - MIN_OUT_VALUE );
-
-    // Ограничение на случай выхода за пределы из-за погрешностей
-    if ( Uk < out_min ) 
-        {
-        Uk = out_min;
-        }
+    // Ограничение на out_max.
     if ( Uk > out_max )
         {
         Uk = out_max;
