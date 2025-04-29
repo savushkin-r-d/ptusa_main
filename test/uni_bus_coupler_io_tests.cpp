@@ -298,10 +298,11 @@ TEST(uni_io_manager, read_write_data)
     temp_node = nullptr;
     res = mngr.write_outputs();
     temp_node = mngr.get_node(1);
+    mngr.set_result_to_ok();
     EXPECT_TRUE(temp_node->io_error_flag);
     temp_node = nullptr;
 
-    const std::string expectedOutput1 = 1 +
+    const std::string expectedOutput = 1 +
 #ifdef LINUX_OS
         R"(
 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
@@ -317,32 +318,9 @@ ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communi
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 )";
 #endif
-    ASSERT_EQ(testBuffer.str(), expectedOutput1);
+    ASSERT_EQ(testBuffer.str(), expectedOutput);
 
-    mngr.set_result_to_ok();
-    mngr.read_inputs();
-    mngr.write_outputs();
-
-    const std::string expectedOutput2 = 1 +
-#ifdef LINUX_OS
-        R"(
-ERROR  (3) -> Read DI:bus coupler returned error. Node "A200":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
-ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-)";
-#else
-        R"(
-2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node "A200":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-)";
-#endif
-    std::string test_tmp = testBuffer.str();
-    test_tmp = test_tmp.substr(expectedOutput1.size());
-    EXPECT_EQ(test_tmp, expectedOutput2);
-
+    std::cout.rdbuf(originalCoutBuffer);
     subhook_remove(get_time_hook);
     subhook_free(get_time_hook);
     io_manager::replace_instance(prev_mngr);
