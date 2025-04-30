@@ -3,5 +3,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
 endif()
 
 set(SUBHOOK_TESTS OFF)
+set(SUBHOOK_STATIC ON)
+set(SUBHOOK_INSTALL OFF)
 
 add_subdirectory(subhook)
