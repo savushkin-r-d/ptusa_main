@@ -257,7 +257,6 @@ int uni_io_manager::write_outputs()
 
             if (nd->io_error_flag)
                 {
-                add_communicate_err_to_log(nd->name, nd->ip_address);
                 continue;
                 }
 
@@ -379,7 +378,6 @@ int uni_io_manager::write_outputs()
 
             if (nd->io_error_flag)
                 {
-                add_communicate_err_to_log(nd->name, nd->ip_address);
                 continue;
                 }
 
