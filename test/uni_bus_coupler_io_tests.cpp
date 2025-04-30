@@ -302,17 +302,15 @@ TEST(uni_io_manager, read_write_data)
     EXPECT_TRUE(temp_node->io_error_flag);
     temp_node = nullptr;
 
-    const std::string expectedOutput = 1 +
+    const std::string expectedOutput =
 #ifdef LINUX_OS
-        R"(
-ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+R"(ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 )";
 #else
-        R"(
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
+R"(2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
 2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.

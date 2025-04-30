@@ -243,15 +243,6 @@ int uni_io_manager::write_outputs()
         return 0;
         }
 
-    auto add_communicate_err_to_log = []( const char* node_name, const char* node_ip_address )
-        {
-            auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
-                node_name, node_ip_address);
-            *result.out = '\0';
-            G_LOG->write_log(i_log::P_ERR);
-        };
-
     int res = 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
@@ -685,15 +676,6 @@ int uni_io_manager::read_inputs()
         G_LOG->write_log( i_log::P_ERR );
         };
 
-    auto add_communicate_err_to_log = [](const char* node_name, const char* node_ip_address)
-        {
-            auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-                R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
-                node_name, node_ip_address);
-            *result.out = '\0';
-            G_LOG->write_log(i_log::P_ERR);
-        };
-
 
     for (u_int i = 0; i < nodes_count; i++ )
         {
@@ -958,6 +940,14 @@ void uni_io_manager::disconnect( io_node* node )
         }
     node->state = io_node::ST_NO_CONNECT;
     }
+//-----------------------------------------------------------------------------
+void uni_io_manager::add_communicate_err_to_log(const char* node_name, const char* node_ip_address) {
+    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
+        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
+        node_name, node_ip_address);
+    *result.out = '\0';
+    G_LOG->write_log(i_log::P_ERR);
+}
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
     {

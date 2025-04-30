@@ -13,6 +13,8 @@
 #ifndef WAGO_L_H
 #define WAGO_L_H
 
+#include <functional>
+
 #ifdef WIN_OS
 #include <winsock2.h>
 #include "w_tcp_cmctr.h"
@@ -67,6 +69,8 @@ class uni_io_manager : public io_manager
             unsigned int quantity, unsigned char station = 0 );
         int write_holding_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
+
+        void add_communicate_err_to_log(const char* node_name, const char* node_ip_address);
 
     public:
         int read_inputs() override;
