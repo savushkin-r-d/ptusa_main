@@ -13,8 +13,6 @@
 #ifndef WAGO_L_H
 #define WAGO_L_H
 
-#include <functional>
-
 #ifdef WIN_OS
 #include <winsock2.h>
 #include "w_tcp_cmctr.h"
