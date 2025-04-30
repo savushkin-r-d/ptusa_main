@@ -940,6 +940,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 											confirmPrgUpdateCtr[line] = 0;
 											}
 										}
+									break;
 								default:
 									if (objnumber >= RC_RECIPE_PAR_START)
 										{
