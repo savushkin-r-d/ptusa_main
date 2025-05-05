@@ -19,6 +19,8 @@ int uni_io_manager::net_init( io_node* node ) const
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "Не задан узел." );
         *res.out = '\0';
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 1;
         }
 
@@ -30,6 +32,8 @@ int uni_io_manager::net_init( io_node* node ) const
             "Ошибка инициализации сетевой библиотеки: {}",
             WSA_Last_Err_Decode() );
         *res.out = '\0';
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 2;
         }
 #endif // WIN_OS
@@ -142,6 +146,9 @@ int uni_io_manager::net_init( io_node* node ) const
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
+    static u_long st_time;
+    st_time = get_millisec();
+
     err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
 
     if ( err <= 0 )
@@ -223,12 +230,12 @@ int uni_io_manager::net_init( io_node* node ) const
             }
         }
 
-    if ( G_DEBUG )
-        {
-        printf( "uni_io_manager:net_init() : socket %d is successfully"
-            " connected to \"%s\":\"%s\":%d\n",
-            sock, node->name, node->ip_address, PORT );
-        }
+    static u_long connect_time = 0;
+    connect_time = get_delta_millisec( st_time );
+
+    G_LOG->debug( "uni_io_manager:net_init() : socket %d is successfully "
+        "connected to \"%s\":\"%s\":%d (%lu ms).",
+        sock, node->name, node->ip_address, PORT, connect_time );
 
     node->sock = sock;
     node->state = io_node::ST_OK;
@@ -255,7 +262,7 @@ int uni_io_manager::write_outputs()
                 continue;
                 }
 
-            if (nd->io_error_flag)
+            if ( nd->io_error_flag )
                 {
                 continue;
                 }
@@ -301,7 +308,7 @@ int uni_io_manager::write_outputs()
                     }
                 else
                     {
-                    add_communicate_err_to_log(nd->name, nd->ip_address);
+                    add_communicate_err_to_log( nd->name, nd->ip_address );
                     nd->io_error_flag = true;
                     continue;
                     }
@@ -737,10 +744,10 @@ int uni_io_manager::read_inputs()
                     } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
                 else
                     {
-                    add_communicate_err_to_log(nd->name, nd->ip_address);
+                    add_communicate_err_to_log( nd->name, nd->ip_address );
                     nd->io_error_flag = true;
                     continue;
-                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    }
                 }// if ( nd->DI_cnt > 0 )
 
             if ( nd->AI_cnt > 0 )
@@ -939,13 +946,15 @@ void uni_io_manager::disconnect( io_node* node )
     node->state = io_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
-void uni_io_manager::add_communicate_err_to_log(const char* node_name, const char* node_ip_address) {
-    auto result = fmt::format_to_n(G_LOG->msg, i_log::C_BUFF_SIZE,
-        R"(Bus coupler returned error. Node "{}":"{}" cannot communicate.)",
-        node_name, node_ip_address);
+void uni_io_manager::add_communicate_err_to_log( const char* node_name,
+    const char* node_ip_address ) 
+    {
+    auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        R"(Bus coupler returned error. Node "{}":"{}" - can't communicate.)",
+        node_name, node_ip_address );
     *result.out = '\0';
-    G_LOG->write_log(i_log::P_ERR);
-}
+    G_LOG->write_log( i_log::P_ERR );
+    }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
     {

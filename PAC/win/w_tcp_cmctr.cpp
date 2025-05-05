@@ -547,7 +547,7 @@ int tcp_communicator_win::do_echo( int idx )
                 }
             }
 
-        shutdown( sock_state.socket, 0 );
+        shutdown( sock_state.socket, SD_BOTH );
         closesocket( sock_state.socket );
         sst.erase( sst.begin() + idx, sst.begin() + idx + 1 );
         return err;
