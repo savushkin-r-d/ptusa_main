@@ -68,7 +68,9 @@ class uni_io_manager : public io_manager
         int write_holding_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
 
-        void add_communicate_err_to_log(const char* node_name, const char* node_ip_address);
+        void add_err_to_log( const char* cmd,
+            const char* node_name, const char* node_ip_address,
+            int exp_fun_code, int rec_fun_code, int exp_size, int rec_size );
 
     public:
         int read_inputs() override;

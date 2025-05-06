@@ -305,10 +305,17 @@ int uni_io_manager::write_outputs()
                         {
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
+                    else
+                        {
+                        add_err_to_log( "Write DO", nd->name, nd->ip_address,
+                            static_cast<int>( buff[ 7 ] ), 0x0F,
+                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        nd->io_error_flag = true;
+                        continue;
+                        }
                     }
                 else
                     {
-                    add_communicate_err_to_log( nd->name, nd->ip_address );
                     nd->io_error_flag = true;
                     continue;
                     }
@@ -359,10 +366,17 @@ int uni_io_manager::write_outputs()
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         }
+                    else
+                        {
+                        add_err_to_log( "Write AO", nd->name, nd->ip_address,
+                            static_cast<int>( buff[ 7 ] ), 0x10,
+                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        nd->io_error_flag = true;
+                        continue;
+                        }
                     }
                 else
                     {
-                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
                     }
@@ -484,7 +498,10 @@ int uni_io_manager::write_outputs()
                             {
                             if (!nd->flag_error_write_message)
                                 {
-                                G_LOG->error("Write AO: returned error %d", buff[7]);
+                                add_err_to_log( "Write AO", nd->name, nd->ip_address,
+                                    static_cast<int>( buff[ 7 ] ), 0x10,
+                                    static_cast<int>( buff[ 8 ] ), registers_count );
+
                                 nd->flag_error_write_message = true;
                                 }
                             }
@@ -582,14 +599,9 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
         }
 
     // Получение данных.
-#ifdef WIN_OS
-    tcp_communicator_win::recvtimeout( node->sock, buff,bytes_to_receive, 0,
-        io_node::C_RCV_TIMEOUT_US );
-#else
-    res = tcp_communicator_linux::recvtimeout( node->sock, buff,
-        bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
-        node->name, &node->recv_stat );
-#endif // WIN_OS
+    res = tcp_communicator::recvtimeout( node->sock, buff, bytes_to_receive,
+        io_node::C_RCV_TIMEOUT_SEC, io_node::C_RCV_TIMEOUT_US,
+        node->ip_address, node->name, &node->recv_stat );
 
     if ( res <= 0 ) /* read error */
         {
@@ -661,6 +673,18 @@ int uni_io_manager::write_holding_registers(io_node* node, unsigned int address,
     return -1;
     }
 
+void uni_io_manager::add_err_to_log( const char* cmd,
+    const char* node_name, const char* node_ip_address,
+    int exp_fun_code, int rec_fun_code, int exp_size, int rec_size )
+    {
+    auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        "{}:bus coupler returned error. \"{}\":\"{}\" "
+        "(received code={}, expected={}, received size={}, expected={}).",
+        cmd, node_name, node_ip_address, exp_fun_code, rec_fun_code, exp_size,
+        rec_size );
+    *result.out = '\0';
+    G_LOG->write_log( i_log::P_ERR );
+    };
 //-----------------------------------------------------------------------------
 int uni_io_manager::read_inputs()
     {
@@ -668,19 +692,6 @@ int uni_io_manager::read_inputs()
         {
         return 0;
         }
-
-    auto add_err_to_log = []( const char* cmd,
-        const char* node_name, const char* node_ip_address,
-        int fun_code, int exp_size, int received )
-        {
-        auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            R"({}:bus coupler returned error. Node "{}":"{}" )"
-            R"((function code = {}, expected size = {}, received = {}).)",
-            cmd, node_name, node_ip_address, fun_code, exp_size, received );
-        *result.out = '\0';
-        G_LOG->write_log( i_log::P_ERR );
-        };
-
 
     for (u_int i = 0; i < nodes_count; i++ )
         {
@@ -736,7 +747,7 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         add_err_to_log( "Read DI", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ),
+                            static_cast<int>( buff[ 7 ] ), 0x02,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         nd->io_error_flag = true;
                         continue;
@@ -744,7 +755,6 @@ int uni_io_manager::read_inputs()
                     } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
                 else
                     {
-                    add_communicate_err_to_log( nd->name, nd->ip_address );
                     nd->io_error_flag = true;
                     continue;
                     }
@@ -795,7 +805,7 @@ int uni_io_manager::read_inputs()
                     else
                         {
                         add_err_to_log( "Read AI", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ),
+                            static_cast<int>( buff[ 7 ] ), 0x04,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         nd->io_error_flag = true;
                         continue;
@@ -803,7 +813,6 @@ int uni_io_manager::read_inputs()
                     }
                 else
                     {
-                    add_communicate_err_to_log(nd->name, nd->ip_address);
                     nd->io_error_flag = true;
                     continue;
                     } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
@@ -896,7 +905,7 @@ int uni_io_manager::read_inputs()
                         else
                             {
                             add_err_to_log( "Read AI", nd->name, nd->ip_address,
-                                static_cast<int>( buff[ 7 ] ),
+                                static_cast<int>( buff[ 7 ] ), 0x04,
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
                             nd->io_error_flag = true;
                             break;
@@ -904,7 +913,6 @@ int uni_io_manager::read_inputs()
                         }
                     else
                         {
-                        add_communicate_err_to_log(nd->name, nd->ip_address);
                         nd->io_error_flag = true;
                         break;
                         }
@@ -944,16 +952,6 @@ void uni_io_manager::disconnect( io_node* node )
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
-    }
-//-----------------------------------------------------------------------------
-void uni_io_manager::add_communicate_err_to_log( const char* node_name,
-    const char* node_ip_address ) 
-    {
-    auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-        R"(Bus coupler returned error. Node "{}":"{}" - can't communicate.)",
-        node_name, node_ip_address );
-    *result.out = '\0';
-    G_LOG->write_log( i_log::P_ERR );
     }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()

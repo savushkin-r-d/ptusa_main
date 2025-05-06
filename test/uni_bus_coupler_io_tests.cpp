@@ -199,33 +199,37 @@ TEST( uni_io_manager, read_inputs )
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
 
-
-    std::ostringstream testBuffer;
-    std::streambuf* originalCoutBuffer = std::cout.rdbuf( testBuffer.rdbuf() );
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
         reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
-
+    testing::internal::CaptureStdout();
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
-    const std::string expectedOutput = 1 +
-#ifdef LINUX_OS
-R"(
-ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
-)";
-#else
-R"(
-2025-03-12 00.00.00 ERROR  (3) -> Read DI:bus coupler returned error. Node "A300":"127.0.0.1" (function code = 2, expected size = 0, received = 1).
-2025-03-12 00.00.00 ERROR  (3) -> Read AI:bus coupler returned error. Node "A100":"127.0.0.1" (function code = 4, expected size = 31, received = 2).
-)";
+    const std::string EXP_TIME = "2025-03-12 00.00.00 ";
+    const std::string expectedOutput =
+        EXP_TIME +
+#if defined LINUX_OS
+        "\x1B[31m" +
 #endif
-    EXPECT_EQ( testBuffer.str(), expectedOutput );
+        "ERROR  (3) -> Read DI:bus coupler returned error. \"A300\":\"127.0.0.1\" (received code=2, expected=2, received size=0, expected=1).\n" +
+#if defined LINUX_OS
+        "\x1B[0m" +
+#endif
+        EXP_TIME +
+#if defined LINUX_OS        
+        "\x1B[31m" +
+#endif
+        "ERROR  (3) -> Read AI:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=4, expected=4, received size=31, expected=2).\n" +
+#if defined LINUX_OS
+        + "\x1B[0m"
+#endif
+        ;
 
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, expectedOutput );
 
-    std::cout.rdbuf( originalCoutBuffer );
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
 
@@ -302,20 +306,7 @@ TEST(uni_io_manager, read_write_data)
     EXPECT_TRUE(temp_node->io_error_flag);
     temp_node = nullptr;
 
-    const std::string expectedOutput =
-#ifdef LINUX_OS
-R"(ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-)";
-#else
-R"(2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A200":"127.0.0.1" cannot communicate.
-2025-03-12 00.00.00 ERROR  (3) -> Bus coupler returned error. Node "A100":"127.0.0.1" cannot communicate.
-)";
-#endif
+    const std::string expectedOutput = "";
     ASSERT_EQ(testBuffer.str(), expectedOutput);
 
     std::cout.rdbuf(originalCoutBuffer);
