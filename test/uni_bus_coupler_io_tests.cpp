@@ -221,7 +221,7 @@ TEST( uni_io_manager, read_inputs )
 #if defined LINUX_OS        
         "\x1B[31m" +
 #endif
-        "ERROR  (3) -> Read AI:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=4, expected=4, received size=31, expected=2).\n" +
+        "ERROR  (3) -> Read AI:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=4, expected=4, received size=31, expected=2).\n"
 #if defined LINUX_OS
         + "\x1B[0m"
 #endif

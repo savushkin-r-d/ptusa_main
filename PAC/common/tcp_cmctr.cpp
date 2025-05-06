@@ -153,21 +153,16 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             stat->print_cycle_last_h = timeInfo_->tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
-            sprintf( G_LOG->msg,
-                "Network performance : recv : s%d->\"%s\":\"%s\" "
+            G_LOG->debug( "Network performance : recv : s%d->\"%s\":\"%s\" "
                 "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
-                s, name, IP,
-                avg_time, stat->min_iteration_cycle_time,
+                s, name, IP, avg_time, stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
-            G_LOG->write_log( i_log::P_DEBUG );
 
             if ( t < avg_time )
                 {
-                sprintf( G_LOG->msg,
-                    "Network performance : recv : s%d->\"%s\":\"%s\" "
-                    "avg %lu > tresh %u (ms).",
+                G_LOG->alert( "Network performance : recv : s%d->\"%s\":\"%s\" "
+                    "avg %lu > tresh %u (ms).", 
                     s, name, IP, avg_time, t );
-                G_LOG->write_log( i_log::P_ALERT );
                 }
 
             stat->clear();
@@ -198,19 +193,17 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         {
         if ( !first_connect )
             {
-            sprintf( G_LOG->msg,
+            G_LOG->error(
                 "Network device : s%d->\"%s\":\"%s\""
                 " disconnected on select read try : timeout (%ld ms).",
                 s, name, IP, sec * 1000 + usec / 1000 );
-
-            G_LOG->write_log( i_log::P_ERR );
             }
         return -2;  // timeout!
         }
 
     if ( -1 == n )
         {
-        sprintf( G_LOG->msg,
+        G_LOG->error(
             "Network device : s%d->\"%s\":\"%s\""
             " disconnected on select read try : %s.",
             s, name, IP, 
@@ -220,7 +213,6 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             strerror( errno )
 #endif // WIN_OS
             );
-        G_LOG->write_log( i_log::P_ERR );
 
         return -1; // error
         }
@@ -232,16 +224,15 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
 
     if ( 0 == res )
         {
-        sprintf( G_LOG->msg,
+        G_LOG->warning(
             "Network device : s%d->\"%s\":\"%s\""
             " was closed.",
             s, name, IP );
-        G_LOG->write_log( i_log::P_WARNING );
         }
 
     if ( res < 0 )
         {
-        sprintf( G_LOG->msg,
+        G_LOG->error(
             "Network device : s%d->\"%s\":\"%s\""
             " disconnected on read try : %s.",
             s, name, IP, 
@@ -251,7 +242,6 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             strerror( errno )
 #endif // WIN_OS
         );
-        G_LOG->write_log( i_log::P_ERR );
         }
 
     //Network performance info.
