@@ -87,4 +87,9 @@ struct stat_time
 	min_iteration_cycle_time = 10000;
 	}
     };
+
+#ifdef PTUSA_TEST
+tm get_time_next_hour();
+#endif
+
 #endif // DTIME_H

@@ -139,18 +139,15 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     //Network performance info.
     if ( stat )
         {
-        static time_t t_;
-        struct tm* timeInfo_;
-        t_ = time( 0 );
-        timeInfo_ = localtime( &t_ );
+        auto timeInfo_ = get_time();        
 
         //Once per hour writes performance info.
-        if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+        if ( stat->print_cycle_last_h != timeInfo_.tm_hour )
             {
             u_int t =
                 G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
 
-            stat->print_cycle_last_h = timeInfo_->tm_hour;
+            stat->print_cycle_last_h = timeInfo_.tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
             G_LOG->debug( "Network performance : recv : s%d->\"%s\":\"%s\" "
@@ -168,7 +165,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             stat->clear();
             }
         }
-  
+ 
     errno = 0;
 
     // Настраиваем  file descriptor set.
@@ -186,6 +183,24 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     static u_int select_wait_time;
     st_time = get_millisec();
 
+    auto update_stat_time = [&]()
+        {
+        if ( !stat ) return;
+
+        u_long select_wait_time = get_delta_millisec( st_time );
+        stat->cycles_cnt++;
+        stat->all_time += select_wait_time;
+
+        if ( select_wait_time > stat->max_iteration_cycle_time )
+            {
+            stat->max_iteration_cycle_time = select_wait_time;
+            }
+        if ( select_wait_time < stat->min_iteration_cycle_time )
+            {
+            stat->min_iteration_cycle_time = select_wait_time;
+            }
+        };
+
     // Ждем таймаута или полученных данных.
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
 
@@ -198,6 +213,8 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
                 " disconnected on select read try : timeout (%ld ms).",
                 s, name, IP, sec * 1000 + usec / 1000 );
             }
+
+        update_stat_time();
         return -2;  // timeout!
         }
 
@@ -214,13 +231,12 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
 #endif // WIN_OS
             );
 
+        update_stat_time();
         return -1; // error
         }
 
     // Данные должны быть здесь, поэтому делаем обычный recv().
     int res = recv( s, reinterpret_cast<char*>( buf ), len, 0 );
-
-    select_wait_time = get_delta_millisec( st_time );
 
     if ( 0 == res )
         {
@@ -243,23 +259,8 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
 #endif // WIN_OS
         );
         }
-
-    //Network performance info.
-    if ( stat )
-        {
-        stat->cycles_cnt++;
-        stat->all_time += select_wait_time;
-
-        if ( select_wait_time > stat->max_iteration_cycle_time )
-            {
-            stat->max_iteration_cycle_time = select_wait_time;
-            }
-        if ( select_wait_time < stat->min_iteration_cycle_time )
-            {
-            stat->min_iteration_cycle_time = select_wait_time;
-            }
-        }
-
+    
+    update_stat_time();
     return res;
     };
 //------------------------------------------------------------------------------

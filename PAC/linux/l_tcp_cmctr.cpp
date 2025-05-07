@@ -32,7 +32,7 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
         printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
         }
 
-    //net_init();
+    net_init();
     slave_socket = 0;
     modbus_socket = 0;
     master_socket = 0;
