@@ -210,7 +210,10 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    // Ограничение на out_max.
+    if ( Uk < out_min )
+        {
+        Uk = out_min;
+        }
     if ( Uk > out_max )
         {
         Uk = out_max;
