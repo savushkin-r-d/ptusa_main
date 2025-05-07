@@ -112,7 +112,7 @@ float PID::eval( float currentValue, int deltaSign )
         {
         if ( set_delta_ms == 0 )
             {
-            printf( "Error! PID::eval() - dt = 0!\n" );
+            printf( "Error! PID::eval() - set_delta_ms = 0!\n" );
             }
         if ( TI == 0 )
             {
@@ -160,7 +160,7 @@ float PID::eval( float currentValue, int deltaSign )
         //-Зона разгона.-!>
 
         last_time = get_millisec();
-        } // if ( get_millisec() - last_time > dt*1000L )
+        }
 
     //-Мягкий пуск.
     // Включили ручной режим.
