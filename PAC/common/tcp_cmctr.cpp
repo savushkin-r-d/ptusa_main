@@ -1,9 +1,12 @@
 #if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
 #endif
+#include <cerrno>
 
 #include "tcp_cmctr.h"
 #include "tcp_client.h"
+#include "log.h"
+#include "PAC_info.h"
 
 #ifdef WIN_OS
 #include "w_tcp_cmctr.h"
@@ -127,6 +130,139 @@ bool tcp_communicator::checkBuff( int s )
 
     return n >= 1;
     }
+//------------------------------------------------------------------------------
+int tcp_communicator::recvtimeout( int s, u_char* buf,
+    int len, long int sec, long int usec, const char* IP, const char* name,
+    stat_time* stat, char first_connect )
+    {
+
+    //Network performance info.
+    if ( stat )
+        {
+        auto timeInfo_ = get_time();        
+
+        //Once per hour writes performance info.
+        if ( stat->print_cycle_last_h != timeInfo_.tm_hour )
+            {
+            u_int t =
+                G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ];
+
+            stat->print_cycle_last_h = timeInfo_.tm_hour;
+
+            u_long avg_time = stat->all_time / stat->cycles_cnt;
+            G_LOG->debug( "Network performance : recv : s%d->\"%s\":\"%s\" "
+                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                s, name, IP, avg_time, stat->min_iteration_cycle_time,
+                stat->max_iteration_cycle_time, t );
+
+            if ( t < avg_time )
+                {
+                G_LOG->alert( "Network performance : recv : s%d->\"%s\":\"%s\" "
+                    "avg %lu > tresh %u (ms).", 
+                    s, name, IP, avg_time, t );
+                }
+
+            stat->clear();
+            }
+        }
+ 
+    errno = 0;
+
+    // Настраиваем  file descriptor set.
+    fd_set fds;
+    FD_ZERO( &fds );
+    FD_SET( s, &fds );
+
+    // Настраиваем время на таймаут.
+    timeval rec_tv;
+    rec_tv.tv_sec = sec;
+    rec_tv.tv_usec = usec;
+
+    //Network performance info.
+    static u_long st_time;
+    static u_int select_wait_time;
+    st_time = get_millisec();
+
+    auto update_stat_time = [&]()
+        {
+        if ( !stat ) return;
+
+        u_long select_wait_time = get_delta_millisec( st_time );
+        stat->cycles_cnt++;
+        stat->all_time += select_wait_time;
+
+        if ( select_wait_time > stat->max_iteration_cycle_time )
+            {
+            stat->max_iteration_cycle_time = select_wait_time;
+            }
+        if ( select_wait_time < stat->min_iteration_cycle_time )
+            {
+            stat->min_iteration_cycle_time = select_wait_time;
+            }
+        };
+
+    // Ждем таймаута или полученных данных.
+    int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
+
+    if ( 0 == n )
+        {
+        if ( !first_connect )
+            {
+            G_LOG->error(
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select read try : timeout (%ld ms).",
+                s, name, IP, sec * 1000 + usec / 1000 );
+            }
+
+        update_stat_time();
+        return -2;  // timeout!
+        }
+
+    if ( -1 == n )
+        {
+        G_LOG->error(
+            "Network device : s%d->\"%s\":\"%s\""
+            " disconnected on select read try : %s.",
+            s, name, IP, 
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+            );
+
+        update_stat_time();
+        return -1; // error
+        }
+
+    // Данные должны быть здесь, поэтому делаем обычный recv().
+    int res = recv( s, reinterpret_cast<char*>( buf ), len, 0 );
+
+    if ( 0 == res )
+        {
+        G_LOG->warning(
+            "Network device : s%d->\"%s\":\"%s\""
+            " was closed.",
+            s, name, IP );
+        }
+
+    if ( res < 0 )
+        {
+        G_LOG->error(
+            "Network device : s%d->\"%s\":\"%s\""
+            " disconnected on read try : %s.",
+            s, name, IP, 
+#ifdef WIN_OS
+            WSA_Last_Err_Decode()
+#else
+            strerror( errno )
+#endif // WIN_OS
+        );
+        }
+    
+    update_stat_time();
+    return res;
+    };
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {

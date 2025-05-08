@@ -98,3 +98,30 @@ TEST( tcp_communicator, checkBuff )
     res = tcp_communicator::checkBuff( -10 );
     EXPECT_FALSE( res );
     }
+
+TEST( tcp_communicator, recvtimeout )
+    {
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_time_next_hour ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
+    const auto SIZE = 100;
+    u_char buff[ SIZE ] = { 0 };
+    auto stat = stat_time();
+
+    tcp_communicator::set_port( 30000, 30001 );
+    tcp_communicator::init_instance( "Тест", "Test" );
+
+    auto s = socket( AF_INET, SOCK_STREAM, 0 );
+
+    auto res = tcp_communicator::recvtimeout( s, buff, SIZE, 1, 0, "", "", &stat );
+    EXPECT_EQ( res, -2 );
+    //Проверяем, что время ожидания истекло.
+    EXPECT_GE( stat.all_time, 1000 );
+    EXPECT_GE( stat.cycles_cnt, 1 );
+    EXPECT_GE( stat.max_iteration_cycle_time, 1000 );
+    EXPECT_GE( stat.min_iteration_cycle_time, 1000 );
+
+    subhook_remove( get_time_hook );
+    tcp_communicator::clear_instance();
+    }
