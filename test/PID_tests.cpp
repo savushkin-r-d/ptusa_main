@@ -103,11 +103,40 @@ TEST( PID, direct_set_value )
 TEST( PID, eval )
     {
     PID test_PID( "PID1" );
+
+    test_PID.init_param( PID::P_k, 1 );
+    test_PID.init_param( PID::P_Ti, 15 );
+    test_PID.init_param( PID::P_Td, 0.01 );
+    test_PID.init_param( PID::P_dt, 1000 );
+    test_PID.init_param( PID::P_max, 100 );
+    test_PID.init_param( PID::P_min, 0 );
+    test_PID.init_param( PID::P_acceleration_time, 30 );
+    test_PID.init_param( PID::P_is_manual_mode, 0 );
+    test_PID.init_param( PID::P_U_manual, 65 );
+
+    test_PID.init_param( PID::P_out_max, 100 );
+    auto MIN_VALUE = 35.f;
+    test_PID.init_param( PID::P_out_min, MIN_VALUE );
+    test_PID.save_param();
+        
+    test_PID.set( 100.f );
+    test_PID.reset();
     test_PID.on();
-    DeltaMilliSecSubHooker::set_millisec( 1001UL );    
-    auto res = test_PID.eval( 100 );
+
+    // Должны получить значение выхода, которое больше минимального.
+    // Так должен работать ПИД во время разгона.
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    auto res = test_PID.eval( 0 );
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_GT( res, MIN_VALUE );
+
+    DeltaMilliSecSubHooker::set_millisec( 2UL * 1001UL );
+    res = test_PID.eval( 1 );
+    EXPECT_GT( res, MIN_VALUE );
     DeltaMilliSecSubHooker::set_default_time();
 
-    // По умолчанию получить должны 0-ое значение выхода.
-    EXPECT_EQ( res, 0 );
+    DeltaMilliSecSubHooker::set_millisec( 3UL * 1001UL );
+    res = test_PID.eval( 2 );
+    EXPECT_GT( res, MIN_VALUE );
+    DeltaMilliSecSubHooker::set_default_time();
     }
