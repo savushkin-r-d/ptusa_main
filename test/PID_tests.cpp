@@ -106,7 +106,7 @@ TEST( PID, eval )
 
     test_PID.init_param( PID::P_k, 1 );
     test_PID.init_param( PID::P_Ti, 15 );
-    test_PID.init_param( PID::P_Td, 0.01 );
+    test_PID.init_param( PID::P_Td, 0.01f );
     test_PID.init_param( PID::P_dt, 1000 );
     test_PID.init_param( PID::P_max, 100 );
     test_PID.init_param( PID::P_min, 0 );
