@@ -298,12 +298,12 @@ TEST(uni_io_manager, read_write_data)
     mngr.set_result_to_error();
     auto res = mngr.read_inputs();
     io_manager::io_node* temp_node = mngr.get_node(0);
-    EXPECT_TRUE(temp_node->io_error_flag);
+    EXPECT_TRUE(temp_node->read_io_error_flag);
     temp_node = nullptr;
     res = mngr.write_outputs();
     temp_node = mngr.get_node(1);
     mngr.set_result_to_ok();
-    EXPECT_TRUE(temp_node->io_error_flag);
+    EXPECT_TRUE(temp_node->read_io_error_flag);
     temp_node = nullptr;
 
     const std::string expectedOutput = "";

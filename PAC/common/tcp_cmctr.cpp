@@ -179,9 +179,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     rec_tv.tv_usec = usec;
 
     //Network performance info.
-    static u_long st_time;
-    static u_int select_wait_time;
-    st_time = get_millisec();
+    auto st_time = get_millisec();
 
     auto update_stat_time = [&]()
         {

@@ -371,7 +371,7 @@ class io_manager
 			char    name[20];      ///< Имя.
 
 			bool is_active;             ///< Признак работающего узла.
-            bool io_error_flag = false; ///< Флаг ошибки связи с узлом.
+            bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
 			u_long  last_poll_time; ///< Время последнего опроса.
 			bool    is_set_err;     ///< Установлена ли ошибка связи.

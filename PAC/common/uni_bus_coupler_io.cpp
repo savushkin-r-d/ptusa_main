@@ -262,7 +262,7 @@ int uni_io_manager::write_outputs()
                 continue;
                 }
 
-            if ( nd->io_error_flag )
+            if ( nd->read_io_error_flag )
                 {
                 continue;
                 }
@@ -310,13 +310,11 @@ int uni_io_manager::write_outputs()
                         add_err_to_log( "Write DO", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ), 0x0F,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
-                        nd->io_error_flag = true;
                         continue;
                         }
                     }
                 else
                     {
-                    nd->io_error_flag = true;
                     continue;
                     }
 
@@ -371,13 +369,11 @@ int uni_io_manager::write_outputs()
                         add_err_to_log( "Write AO", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ), 0x10,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
-                        nd->io_error_flag = true;
                         continue;
                         }
                     }
                 else
                     {
-                    nd->io_error_flag = true;
                     continue;
                     }
                 }// if ( nd->AO_cnt > 0 )
@@ -397,7 +393,7 @@ int uni_io_manager::write_outputs()
                 continue;
                 }
 
-            if (nd->io_error_flag)
+            if ( nd->read_io_error_flag )
                 {
                 continue;
                 }
@@ -742,20 +738,20 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_KBUS
                         printf( "\n" );
 #endif // DEBUG_KBUS
-                        nd->io_error_flag = false;
+                        nd->read_io_error_flag = false;
                         }
                     else
                         {
                         add_err_to_log( "Read DI", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ), 0x02,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
-                        nd->io_error_flag = true;
+                        nd->read_io_error_flag = true;
                         continue;
                         }
                     } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
                 else
                     {
-                    nd->io_error_flag = true;
+                    nd->read_io_error_flag = true;
                     continue;
                     }
                 }// if ( nd->DI_cnt > 0 )
@@ -800,20 +796,20 @@ int uni_io_manager::read_inputs()
                                     break;
                                 }
                             }
-                        nd->io_error_flag = false;
+                        nd->read_io_error_flag = false;
                         } // if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                     else
                         {
                         add_err_to_log( "Read AI", nd->name, nd->ip_address,
                             static_cast<int>( buff[ 7 ] ), 0x04,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
-                        nd->io_error_flag = true;
+                        nd->read_io_error_flag = true;
                         continue;
                         }
                     }
                 else
                     {
-                    nd->io_error_flag = true;
+                    nd->read_io_error_flag = true;
                     continue;
                     } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->AI_cnt > 0 )
@@ -907,13 +903,13 @@ int uni_io_manager::read_inputs()
                             add_err_to_log( "Read AI", nd->name, nd->ip_address,
                                 static_cast<int>( buff[ 7 ] ), 0x04,
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
-                            nd->io_error_flag = true;
+                            nd->read_io_error_flag = true;
                             break;
                             }
                         }
                     else
                         {
-                        nd->io_error_flag = true;
+                        nd->read_io_error_flag = true;
                         break;
                         }
                     start_register += registers_count;
@@ -922,7 +918,7 @@ int uni_io_manager::read_inputs()
                         {
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
-                    nd->io_error_flag = false;
+                    nd->read_io_error_flag = false;
                     } while (start_register < nd->AI_cnt);
                 } // if (nd->AI_cnt > 0)
             }// nd->type == io_node::PHOENIX_BK_ETH
