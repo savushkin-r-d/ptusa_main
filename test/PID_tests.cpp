@@ -34,6 +34,26 @@ TEST( PID, get_actuator )
     G_ERRORS_MANAGER->clear();
     }
 
+void init_PID_parameters( PID& test_PID, float min_value = 0.f )
+    {
+    test_PID.init_param( PID::P_k, 1 );
+    test_PID.init_param( PID::P_Ti, 15 );
+    test_PID.init_param( PID::P_Td, 0.01f );
+    test_PID.init_param( PID::P_dt, 1000 );
+    test_PID.init_param( PID::P_max, 100 );
+    test_PID.init_param( PID::P_min, 0 );
+    test_PID.init_param( PID::P_acceleration_time, 30 );
+    test_PID.init_param( PID::P_is_manual_mode, 0 );
+    test_PID.init_param( PID::P_U_manual, 65 );
+
+    test_PID.init_param( PID::P_out_max, 100 );    
+    test_PID.init_param( PID::P_out_min, min_value );
+    test_PID.init_param( PID::P_is_zero_start, 1 );
+    test_PID.save_param();
+
+    test_PID.set( 100.f );
+    }
+
 TEST( PID, direct_set_value )
     {
     G_DEVICE_MANAGER()->clear_io_devices();
@@ -59,6 +79,8 @@ TEST( PID, direct_set_value )
 
     p1->set_string_property( "IN_VALUE", "TE1" );
     p1->set_string_property( "OUT_VALUE", "M1" );
+
+    init_PID_parameters( *p1 );
 
     //PID switched off.
     p1_dev->set_value( 10 );
@@ -104,29 +126,20 @@ TEST( PID, eval )
     {
     PID test_PID( "PID1" );
 
-    test_PID.init_param( PID::P_k, 1 );
-    test_PID.init_param( PID::P_Ti, 15 );
-    test_PID.init_param( PID::P_Td, 0.01f );
-    test_PID.init_param( PID::P_dt, 1000 );
-    test_PID.init_param( PID::P_max, 100 );
-    test_PID.init_param( PID::P_min, 0 );
-    test_PID.init_param( PID::P_acceleration_time, 30 );
-    test_PID.init_param( PID::P_is_manual_mode, 0 );
-    test_PID.init_param( PID::P_U_manual, 65 );
+    // Корректная работа регулятора, когда параметры не инициализированы.
+    test_PID.on();
+    auto res = test_PID.eval( 0 );
+    EXPECT_EQ( res, .0f );
 
-    test_PID.init_param( PID::P_out_max, 100 );
     auto MIN_VALUE = 35.f;
-    test_PID.init_param( PID::P_out_min, MIN_VALUE );
-    test_PID.save_param();
-        
-    test_PID.set( 100.f );
+    init_PID_parameters( test_PID, MIN_VALUE );
     test_PID.reset();
     test_PID.on();
 
     // Должны получить значение выхода, которое больше минимального.
     // Так должен работать ПИД во время разгона.
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
-    auto res = test_PID.eval( 0 );
+    res = test_PID.eval( 0 );
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_GT( res, MIN_VALUE );
 
