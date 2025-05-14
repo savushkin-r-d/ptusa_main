@@ -940,6 +940,15 @@ TEST( device_manager, add_io_device )
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
 
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFEBIT1", device::DT_LIFE_DEVICE,
+        device::DST_LIFEBIT, LIFE_DEVICE, nullptr, "Art_1", true );
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFECOUNTER1", device::DT_LIFE_DEVICE,
+        device::DST_LIFECOUNTER, LIFE_DEVICE, nullptr, "Art_1", true );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_LIFE_DEVICE, device::DST_LIFECOUNTER + 1, "POU1LIFEBIT2",
+        "Test life_device", "Art_1" );
+    EXPECT_EQ( nullptr, res );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     valve::clear_v_bistable();
@@ -1032,9 +1041,13 @@ TEST( device, get_type_str )
         device::DEVICE_SUB_TYPE::DST_NONE, 0 );
     EXPECT_STREQ( dev1.get_type_str(), "NONE" );
 
-    device dev2( "DEV1", device::DEVICE_TYPE::DT_V,
+    device dev2( "DEV2", device::DEVICE_TYPE::DT_V,
         device::DEVICE_SUB_TYPE::DST_V_VIRT, 0 );
     EXPECT_STREQ( dev2.get_type_str(), "V" );
+
+    device dev3( "DEV3", device::DEVICE_TYPE::DT_LIFE_DEVICE,
+        device::DEVICE_SUB_TYPE::DST_LIFEBIT, 0 );
+    EXPECT_STREQ( dev3.get_type_str(), "LIFE_DEVICE" );
     }
 
 TEST( device, save_device )
