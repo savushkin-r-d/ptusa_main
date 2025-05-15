@@ -31,14 +31,9 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
         {
         printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
         }
-
-    net_init();
-    slave_socket = 0;
-    modbus_socket = 0;
-    master_socket = 0;
-    rc = 0;
-
+    
     glob_last_transfer_time = get_millisec();
+    net_init();    
     }
 //------------------------------------------------------------------------------
 void tcp_communicator_linux::killsockets()

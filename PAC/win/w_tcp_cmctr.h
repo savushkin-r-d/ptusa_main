@@ -44,7 +44,6 @@ class tcp_communicator_win : public tcp_communicator
     private:
             sockaddr_in ssin; 	        ///< Адрес клиента.
             int         sin_len;    	///< Длина адреса.
-            int         master_socket;  ///< Мастер-сокет для прослушивания.
 
 #ifdef MODBUS
             int modbus_socket;  ///< Модбас сокет.

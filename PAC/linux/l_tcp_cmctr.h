@@ -56,13 +56,12 @@ class tcp_communicator_linux : public tcp_communicator
             int evaluate();
 
     private:
-            sockaddr_in ssin; 	        ///< Адрес клиента.
-            u_int       sin_len;    	///< Длина адреса.
-            int         master_socket;	///< Мастер-сокет для прослушивания.
+            sockaddr_in ssin;       ///< Адрес клиента.
+            u_int sin_len;    	    ///< Длина адреса.            
 
-            int modbus_socket;          ///< Модбас сокет.
-            int slave_socket; ///< Слейв-сокет, получаемый при подключении клиента.
-            int rc; ///< Код возврата select.
+            int modbus_socket = 0;  ///< Модбас сокет.
+            int slave_socket = 0;   ///< Слейв-сокет, получаемый при подключении клиента.
+            int rc = 0;             ///< Код возврата select.
 
             /// @brief Посылка ответных данных на сервер.
             ///

@@ -17,6 +17,7 @@
 #endif
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
+int tcp_communicator::master_socket = 0;
 int tcp_communicator::port = 10000;
 int tcp_communicator::port_modbus = 10502;
 #ifdef PTUSA_TEST
@@ -111,6 +112,11 @@ int tcp_communicator::get_port()
 int tcp_communicator::get_modbus_port()
     {
     return port_modbus;
+    }
+//------------------------------------------------------------------------------
+int tcp_communicator::get_master_socket()
+    {
+    return master_socket;
     }
 //------------------------------------------------------------------------------
 bool tcp_communicator::checkBuff( int s )

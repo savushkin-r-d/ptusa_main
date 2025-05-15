@@ -111,10 +111,10 @@ TEST( tcp_communicator, recvtimeout )
 
     tcp_communicator::set_port( 30010, 30011 );
     tcp_communicator::init_instance( "Тест", "Test" );
+    G_CMMCTR->evaluate();
 
-    auto s = socket( AF_INET, SOCK_STREAM, 0 );
-
-    auto res = tcp_communicator::recvtimeout( s, buff, SIZE, 1, 0, "", "", &stat );
+    auto res = tcp_communicator::recvtimeout(
+        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat);
     EXPECT_EQ( res, -2 );
     //Проверяем, что время ожидания истекло.
     EXPECT_GE( stat.all_time, 1000 );
