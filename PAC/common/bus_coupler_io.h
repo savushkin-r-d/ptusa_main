@@ -407,7 +407,8 @@ class io_manager
 			stat_time recv_stat;  ///< Статистика работы с сокетом.
 			stat_time send_stat;  ///< Статистика работы с сокетом.
 
-            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке связи.
+            bool flag_error_read_message = false; ///< Флаг для вывода сообщений об ошибке чтения.
+            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке записи.
 
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.

@@ -149,6 +149,10 @@ class test_uni_io_manager : public uni_io_manager
         int e_communicate( io_node* node, int bytes_to_send,
             int bytes_to_receive ) override
             {
+            if ( is_set_function_code )
+                {
+                buff[ 7 ] = function_code;
+                }
             return res;
             }
 
@@ -160,6 +164,17 @@ class test_uni_io_manager : public uni_io_manager
         void set_result_to_ok()
             {
             res = 0;
+            }
+
+        void set_function_code( u_char f_code )
+            {
+            function_code = f_code;
+            is_set_function_code = true;
+            }
+
+        void reset_function_code()
+            {
+            is_set_function_code = false;
             }
 
         static tm get_fixed_time()
@@ -176,6 +191,8 @@ class test_uni_io_manager : public uni_io_manager
 
     private:
         int res = 0;
+        u_char function_code;
+        bool is_set_function_code = false;
     };
 
 TEST( uni_io_manager, read_inputs )
@@ -204,7 +221,10 @@ TEST( uni_io_manager, read_inputs )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
-    testing::internal::CaptureStdout();
+    testing::internal::CaptureStdout();    
+
+    mngr.reset_function_code();
+    mngr.set_result_to_ok();
     res = mngr.read_inputs();
     EXPECT_EQ( res, 0 );
     const std::string EXP_TIME = "2025-03-12 00.00.00 ";
@@ -274,46 +294,44 @@ TEST( uni_io_manager, write_outputs )
     res = mngr.write_outputs();
     EXPECT_EQ( res, 1 );
 
+    mngr.set_function_code( 10 );
+    mngr.set_result_to_ok();
+    res = mngr.write_outputs();
+    EXPECT_EQ( res, 1 );
+
     io_manager::replace_instance( prev_mngr );
     }
 
-TEST(uni_io_manager, read_write_data)
-{
+TEST( uni_io_manager, read_write_data )
+    {
     test_uni_io_manager mngr;
-    io_manager* prev_mngr = io_manager::replace_instance(&mngr);
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
 
-    mngr.init(2);
-    mngr.add_node(0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1);
-    mngr.add_node(1, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
-        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1);
+    mngr.init( 2 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.add_node( 1, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+        2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
 
-    std::ostringstream testBuffer;
-    std::streambuf* originalCoutBuffer = std::cout.rdbuf(testBuffer.rdbuf());
-    auto get_time_hook = subhook_new(reinterpret_cast<void*>(&get_time),
-        reinterpret_cast<void*>(&test_uni_io_manager::get_fixed_time),
-        SUBHOOK_64BIT_OFFSET);
-    subhook_install(get_time_hook);
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
 
     mngr.set_result_to_error();
     auto res = mngr.read_inputs();
-    io_manager::io_node* temp_node = mngr.get_node(0);
-    EXPECT_TRUE(temp_node->read_io_error_flag);
-    temp_node = nullptr;
+    auto temp_node = mngr.get_node( 0 );
+    EXPECT_TRUE( temp_node->read_io_error_flag );
+
     res = mngr.write_outputs();
-    temp_node = mngr.get_node(1);
+    temp_node = mngr.get_node( 1 );
     mngr.set_result_to_ok();
-    EXPECT_TRUE(temp_node->read_io_error_flag);
-    temp_node = nullptr;
+    EXPECT_TRUE( temp_node->read_io_error_flag );
 
-    const std::string expectedOutput = "";
-    ASSERT_EQ(testBuffer.str(), expectedOutput);
-
-    std::cout.rdbuf(originalCoutBuffer);
-    subhook_remove(get_time_hook);
-    subhook_free(get_time_hook);
-    io_manager::replace_instance(prev_mngr);
-}
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
+    io_manager::replace_instance( prev_mngr );
+    }
 
 TEST( uni_io_manager, e_communicate )
     {

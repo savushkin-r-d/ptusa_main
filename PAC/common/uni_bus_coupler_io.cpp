@@ -234,7 +234,7 @@ int uni_io_manager::net_init( io_node* node ) const
     connect_time = get_delta_millisec( st_time );
 
     G_LOG->debug( "uni_io_manager:net_init() : socket %d is successfully "
-        "connected to \"%s\":\"%s\":%d (%lu ms).",
+        R"(connected to "%s":"%s":%d (%lu ms).)",
         sock, node->name, node->ip_address, PORT, connect_time );
 
     node->sock = sock;
@@ -304,17 +304,25 @@ int uni_io_manager::write_outputs()
                     if ( buff[ 7 ] == 0x0F )
                         {
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
+                        nd->flag_error_write_message = false;
                         }
                     else
                         {
-                        add_err_to_log( "Write DO", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ), 0x0F,
-                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        if ( !nd->flag_error_write_message )
+                            {
+                            // Есть какая-то ошибка на прикладном уровне.
+                            add_err_to_log( "Write DO", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x0F,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            res = 1;
+                            }
                         continue;
                         }
                     }
                 else
                     {
+                    // Была какая-то сетевая ошибка.
+                    res = 1;
                     continue;
                     }
 
@@ -363,12 +371,16 @@ int uni_io_manager::write_outputs()
                     if ( buff[ 7 ] == 0x10 )
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+                        nd->flag_error_write_message = false;
                         }
                     else
                         {
-                        add_err_to_log( "Write AO", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ), 0x10,
-                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        if ( !nd->flag_error_write_message )
+                            {
+                            add_err_to_log( "Write AO", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x10,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            }
                         continue;
                         }
                     }
@@ -500,16 +512,12 @@ int uni_io_manager::write_outputs()
 
                                 nd->flag_error_write_message = true;
                                 }
+                            res = 1;
                             }
                         }
                     else
                         {
-                        if (!nd->flag_error_write_message)
-                            {
-                            G_LOG->error("Write AO: returned error");
-                            nd->flag_error_write_message = true;
-                            res = 1;
-                            }
+                        res = 1;
                         }
 
                     start_register += registers_count;
