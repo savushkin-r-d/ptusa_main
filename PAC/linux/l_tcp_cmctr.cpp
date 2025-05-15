@@ -509,8 +509,8 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
             sprintf( G_LOG->msg,
-                "Network performance : send : s%d->\"%s\":\"%s\" "
-                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                R"(Network performance : send : s%d->"%s":"%s" )"
+                "avg = %lu, min = %lu, max = %lu, tresh = %u (ms).",
                 sockfd, name, IP,
                 avg_time, stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
@@ -519,7 +519,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
             if (t < avg_time)
                 {
                 sprintf( G_LOG->msg,
-                    "Network performance : send : s%d->\"%s\":\"%s\" "
+                    R"(Network performance : send : s%d->"%s":"%s" )"
                     "avg %lu > tresh %u (ms).",
                     sockfd, name, IP, avg_time, t );
                 G_LOG->write_log( i_log::P_ALERT );

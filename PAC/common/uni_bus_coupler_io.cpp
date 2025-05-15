@@ -679,10 +679,10 @@ int uni_io_manager::write_holding_registers(io_node* node, unsigned int address,
 
 void uni_io_manager::add_err_to_log( const char* cmd,
     const char* node_name, const char* node_ip_address,
-    int exp_fun_code, int rec_fun_code, int exp_size, int rec_size )
+    int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const
     {
     auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-        "{}:bus coupler returned error. \"{}\":\"{}\" "
+        R"({}:bus coupler returned error. "{}":"{}" )"
         "(received code={}, expected={}, received size={}, expected={}).",
         cmd, node_name, node_ip_address, exp_fun_code, rec_fun_code, exp_size,
         rec_size );
@@ -697,6 +697,7 @@ int uni_io_manager::read_inputs()
         return 0;
         }
 
+    auto res = 0;
     for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -754,12 +755,14 @@ int uni_io_manager::read_inputs()
                             static_cast<int>( buff[ 7 ] ), 0x02,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         nd->read_io_error_flag = true;
+                        res = 1;
                         continue;
                         }
                     } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
                 else
                     {
                     nd->read_io_error_flag = true;
+                    res = 1;
                     continue;
                     }
                 }// if ( nd->DI_cnt > 0 )
@@ -812,12 +815,14 @@ int uni_io_manager::read_inputs()
                             static_cast<int>( buff[ 7 ] ), 0x04,
                             static_cast<int>( buff[ 8 ] ), bytes_cnt );
                         nd->read_io_error_flag = true;
+                        res = 1;
                         continue;
                         }
                     }
                 else
                     {
                     nd->read_io_error_flag = true;
+                    res = 1;
                     continue;
                     } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->AI_cnt > 0 )
@@ -860,7 +865,7 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_BK_MIN
                     G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    int res = read_input_registers(nd, start_read_address + start_register, registers_count);
+                    int result = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
                     printf("\n\r");
@@ -870,9 +875,9 @@ int uni_io_manager::read_inputs()
                         }
 #endif
 
-                    if (res >= 0)
+                    if (result >= 0)
                         {
-                        if (res)
+                        if (result)
                             {
                             for (int index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
@@ -912,12 +917,14 @@ int uni_io_manager::read_inputs()
                                 static_cast<int>( buff[ 7 ] ), 0x04,
                                 static_cast<int>( buff[ 8 ] ), registers_count * 2 );
                             nd->read_io_error_flag = true;
+                            res = 1;
                             break;
                             }
                         }
                     else
                         {
                         nd->read_io_error_flag = true;
+                        res = 1;
                         break;
                         }
                     start_register += registers_count;
@@ -932,7 +939,7 @@ int uni_io_manager::read_inputs()
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )

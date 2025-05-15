@@ -77,7 +77,7 @@ class uni_io_manager : public io_manager
         /// @param rec_size Полученный размер ответа.
         void add_err_to_log( const char* cmd,
             const char* node_name, const char* node_ip_address,
-            int exp_fun_code, int rec_fun_code, int exp_size, int rec_size );
+            int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const;
 
     public:
         int read_inputs() override;

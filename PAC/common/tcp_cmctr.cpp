@@ -156,14 +156,14 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             stat->print_cycle_last_h = timeInfo_.tm_hour;
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
-            G_LOG->debug( "Network performance : recv : s%d->\"%s\":\"%s\" "
-                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+            G_LOG->debug( R"(Network performance : recv : s%d->"%s":"%s" )"
+                "avg = %lu, min = %lu, max = %lu, tresh = %u (ms).",
                 s, name, IP, avg_time, stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
 
             if ( t < avg_time )
                 {
-                G_LOG->alert( "Network performance : recv : s%d->\"%s\":\"%s\" "
+                G_LOG->alert( R"(Network performance : recv : s%d->"%s":"%s" )"
                     "avg %lu > tresh %u (ms).", 
                     s, name, IP, avg_time, t );
                 }
@@ -185,13 +185,13 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     rec_tv.tv_usec = usec;
 
     //Network performance info.
-    auto st_time = get_millisec();
+    auto start_time = get_millisec();
 
     auto update_stat_time = [&]()
         {
         if ( !stat ) return;
 
-        u_long select_wait_time = get_delta_millisec( st_time );
+        auto select_wait_time = get_delta_millisec( start_time );
         stat->cycles_cnt++;
         stat->all_time += select_wait_time;
 
@@ -206,14 +206,14 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         };
 
     // Ждем таймаута или полученных данных.
-    int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
+    int n = select( s + 1, &fds, nullptr, nullptr, &rec_tv );
 
     if ( 0 == n )
         {
         if ( !first_connect )
             {
             G_LOG->error(
-                "Network device : s%d->\"%s\":\"%s\""
+                R"(Network device : s%d->"%s":"%s")"
                 " disconnected on select read try : timeout (%ld ms).",
                 s, name, IP, sec * 1000 + usec / 1000 );
             }
@@ -225,7 +225,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     if ( -1 == n )
         {
         G_LOG->error(
-            "Network device : s%d->\"%s\":\"%s\""
+            R"(Network device : s%d->"%s":"%s")"
             " disconnected on select read try : %s.",
             s, name, IP, 
 #ifdef WIN_OS
@@ -245,7 +245,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     if ( 0 == res )
         {
         G_LOG->warning(
-            "Network device : s%d->\"%s\":\"%s\""
+            R"(Network device : s%d->"%s":"%s")"
             " was closed.",
             s, name, IP );
         }
@@ -253,7 +253,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     if ( res < 0 )
         {
         G_LOG->error(
-            "Network device : s%d->\"%s\":\"%s\""
+            R"(Network device : s%d->"%s":"%s")"
             " disconnected on read try : %s.",
             s, name, IP, 
 #ifdef WIN_OS

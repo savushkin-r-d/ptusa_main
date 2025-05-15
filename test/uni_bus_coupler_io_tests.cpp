@@ -226,7 +226,7 @@ TEST( uni_io_manager, read_inputs )
     mngr.reset_function_code();
     mngr.set_result_to_ok();
     res = mngr.read_inputs();
-    EXPECT_EQ( res, 0 );
+    EXPECT_EQ( res, 1 );
     const std::string EXP_TIME = "2025-03-12 00.00.00 ";
     const std::string expectedOutput =
         EXP_TIME +
