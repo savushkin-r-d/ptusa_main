@@ -46,7 +46,7 @@ void init_PID_parameters( PID& test_PID, float min_value = 0.f )
     test_PID.init_param( PID::P_is_manual_mode, 0 );
     test_PID.init_param( PID::P_U_manual, 65 );
 
-    test_PID.init_param( PID::P_out_max, 100 );    
+    test_PID.init_param( PID::P_out_max, 100 );
     test_PID.init_param( PID::P_out_min, min_value );
     test_PID.init_param( PID::P_is_zero_start, 1 );
     test_PID.save_param();
