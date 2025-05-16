@@ -322,11 +322,12 @@ TEST( uni_io_manager, read_write_data )
     auto res = mngr.read_inputs();
     auto temp_node = mngr.get_node( 0 );
     EXPECT_TRUE( temp_node->read_io_error_flag );
+    EXPECT_EQ( res, 1 );
 
     res = mngr.write_outputs();
     temp_node = mngr.get_node( 1 );
-    mngr.set_result_to_ok();
     EXPECT_TRUE( temp_node->read_io_error_flag );
+    EXPECT_EQ( res, 1 );
 
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );

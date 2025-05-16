@@ -264,7 +264,8 @@ int uni_io_manager::write_outputs()
 
             if ( nd->read_io_error_flag )
                 {
-                continue;
+                res = 1;
+                continue;                
                 }
 
             if ( nd->DO_cnt > 0 )
@@ -407,6 +408,7 @@ int uni_io_manager::write_outputs()
 
             if ( nd->read_io_error_flag )
                 {
+                res = 1;
                 continue;
                 }
 

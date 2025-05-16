@@ -24,8 +24,6 @@ class tcp_client;
 
 #ifdef WIN_OS
 const char* WSA_Last_Err_Decode();
-#else
-extern int errno;
 #endif // WIN_OS
 
 //-----------------------------------------------------------------------------

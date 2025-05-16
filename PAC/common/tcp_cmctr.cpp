@@ -240,7 +240,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         }
 
     // Данные должны быть здесь, поэтому делаем обычный recv().
-    int res = recv( s, reinterpret_cast<char*>( buf ), len, 0 );
+    auto res = recv( s, reinterpret_cast<char*>( buf ), len, 0 );
 
     if ( 0 == res )
         {
@@ -265,7 +265,12 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         }
     
     update_stat_time();
-    return res;
+    return
+#ifdef WIN_OS
+        res;
+#else
+        static_cast<int>( res );
+#endif
     };
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
