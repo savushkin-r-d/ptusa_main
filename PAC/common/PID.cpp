@@ -201,15 +201,17 @@ float PID::eval( float currentValue, int deltaSign )
 
     if ( out_min >= out_max )
         {
-        G_LOG->warning( "PID::eval() : out_min >= out_max (%f <= %f).",
+        G_LOG->warning( "PID::eval() : out_min >= out_max (%f >= %f).",
             out_min, out_max );
         out_min = MIN_OUT_VALUE;
+        ( *par )[ P_out_min ] = MIN_OUT_VALUE;
         }
-    if ( out_max == MIN_OUT_VALUE )
+    if ( out_max <= MIN_OUT_VALUE )
         {
-        G_LOG->warning( "PID::eval() : out_max == MIN_OUT_VALUE (%f).",
+        G_LOG->warning( "PID::eval() : out_max <= MIN_OUT_VALUE (%f).",
             MIN_OUT_VALUE );
         out_max = MAX_OUT_VALUE;
+        ( *par )[ P_out_max ] = MAX_OUT_VALUE;
         }        
 
     if ( Uk < out_min )
