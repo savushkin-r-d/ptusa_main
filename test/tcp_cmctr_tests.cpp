@@ -1,6 +1,11 @@
 #include "tcp_cmctr_tests.h"
+#include "PAC_info.h"
 
 using namespace ::testing;
+
+#ifndef WIN_OS // For linux to deal with __stdcall.
+#define __stdcall
+#endif
 
 TEST( tcp_communicator, evaluate )
     {    
@@ -99,6 +104,17 @@ TEST( tcp_communicator, checkBuff )
     EXPECT_FALSE( res );
     }
 
+int __stdcall fail_select_1( int, fd_set*, fd_set*, fd_set*, struct timeval* )
+    {
+    return -1;
+    }
+
+
+int __stdcall good_select( int, fd_set*, fd_set*, fd_set*, struct timeval* )
+    {
+    return 1;
+    }
+
 TEST( tcp_communicator, recvtimeout )
     {
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
@@ -122,6 +138,36 @@ TEST( tcp_communicator, recvtimeout )
     EXPECT_GE( stat.max_iteration_cycle_time, 1000 );
     EXPECT_GE( stat.min_iteration_cycle_time, 1000 );
 
+    stat.print_cycle_last_h--;
+    // Устанавливаем в 0 время ожидания ответа, при превышении которого
+    // будет уведомление.
+    G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] = 0;
+    res = tcp_communicator::recvtimeout(
+        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+    EXPECT_EQ( res, -2 );
+
+    // Should fail - fail with select() returns -1.
+    subhook_t select_m1_hook = subhook_new( reinterpret_cast<void*>( &select ),
+        reinterpret_cast<void*>( fail_select_1 ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( select_m1_hook );    
+    res = tcp_communicator::recvtimeout(
+        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+    EXPECT_EQ( res, -1 );
+    subhook_remove( select_m1_hook );
+    subhook_free( select_m1_hook );
+
+    // Should fail - fail with recv() returns -1.
+    subhook_t select_good_hook = subhook_new( reinterpret_cast<void*>( &select ),
+        reinterpret_cast<void*>( good_select ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( select_good_hook );    
+    res = tcp_communicator::recvtimeout(
+        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+    EXPECT_EQ( res, -1 );
+    subhook_remove( select_good_hook );
+    subhook_free( select_good_hook );
+
+    
     subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     tcp_communicator::clear_instance();
     }

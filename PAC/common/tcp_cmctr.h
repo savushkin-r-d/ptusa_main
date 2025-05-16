@@ -104,7 +104,7 @@ class tcp_communicator
         static int recvtimeout( int s, u_char* buf,
             int len, long int sec, long int usec,
             const char* IP = nullptr, const char* name = nullptr,
-            stat_time* stat = nullptr, char first_connect = 0 );
+            stat_time* stat = nullptr );
 
     protected:
         static int master_socket;   ///< Мастер-сокет для прослушивания.

@@ -316,6 +316,7 @@ int uni_io_manager::write_outputs()
                                 static_cast<int>( buff[ 7 ] ), 0x0F,
                                 static_cast<int>( buff[ 8 ] ), bytes_cnt );
                             res = 1;
+                            nd->flag_error_write_message = true;
                             }
                         continue;
                         }

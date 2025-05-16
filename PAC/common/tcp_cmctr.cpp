@@ -139,7 +139,7 @@ bool tcp_communicator::checkBuff( int s )
 //------------------------------------------------------------------------------
 int tcp_communicator::recvtimeout( int s, u_char* buf,
     int len, long int sec, long int usec, const char* IP, const char* name,
-    stat_time* stat, char first_connect )
+    stat_time* stat )
     {
 
     //Network performance info.
@@ -210,13 +210,10 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
 
     if ( 0 == n )
         {
-        if ( !first_connect )
-            {
-            G_LOG->error(
-                R"(Network device : s%d->"%s":"%s")"
-                " disconnected on select read try : timeout (%ld ms).",
-                s, name, IP, sec * 1000 + usec / 1000 );
-            }
+        G_LOG->error(
+            R"(Network device : s%d->"%s":"%s")"
+            " disconnected on select read try : timeout (%ld ms).",
+            s, name, IP, sec * 1000 + usec / 1000 );
 
         update_stat_time();
         return -2;  // timeout!

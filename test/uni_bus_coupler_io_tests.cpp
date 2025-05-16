@@ -221,7 +221,7 @@ TEST( uni_io_manager, read_inputs )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
-    testing::internal::CaptureStdout();    
+    testing::internal::CaptureStdout();
 
     mngr.reset_function_code();
     mngr.set_result_to_ok();
@@ -250,9 +250,9 @@ TEST( uni_io_manager, read_inputs )
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, expectedOutput );
 
+
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
-
     io_manager::replace_instance( prev_mngr );
     }
 
@@ -286,19 +286,56 @@ TEST( uni_io_manager, write_outputs )
     mngr.add_node( 3, io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         4, "127.0.0.1", "A400", 1, 1, 1, 1, 1, 1 );
     mngr.get_node( 3 )->is_active = false;
-    res = mngr.write_outputs();
-    EXPECT_EQ( res, 0 );
 
+    // Должна быть успешная запись.
+    res = mngr.write_outputs();
+    EXPECT_EQ( res, 0 ); 
+
+    // Должна быть неуспешная запись (e_communicate() возвращает 1 - 
+    // неуспешная сетевая операция). Сообщений не должно быть.
+    std::string expectedOutput = "";
+    testing::internal::CaptureStdout();
     mngr.set_result_to_error();
-    //Should fail - e_communicate() returns 1.
     res = mngr.write_outputs();
+    auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( res, 1 );
+    EXPECT_EQ( output, expectedOutput );
 
-    mngr.set_function_code( 10 );
+    // Должна быть неуспешная запись (ошибки на уровне данных). Сообщения должны быть.
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+    const std::string EXP_TIME = "2025-03-12 00.00.00 ";
+    expectedOutput =
+        EXP_TIME +
+#if defined LINUX_OS
+        "\x1B[31m" +
+#endif
+        "ERROR  (3) -> Write DO:bus coupler returned error. \"A300\":\"127.0.0.1\" (received code=1, expected=15, received size=0, expected=1).\n" +
+#if defined LINUX_OS
+        "\x1B[0m" +
+#endif
+        EXP_TIME +
+#if defined LINUX_OS        
+        "\x1B[31m" +
+#endif
+        "ERROR  (3) -> Write AO:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=1, expected=16, received size=35, expected=6).\n"
+#if defined LINUX_OS
+        + "\x1B[0m"
+#endif
+        ;
+    testing::internal::CaptureStdout();
+    mngr.set_function_code( 1 );
     mngr.set_result_to_ok();
     res = mngr.write_outputs();
+    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( res, 1 );
+    EXPECT_EQ( output, expectedOutput );
 
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     io_manager::replace_instance( prev_mngr );
     }
 
@@ -324,10 +361,13 @@ TEST( uni_io_manager, read_write_data )
     EXPECT_TRUE( temp_node->read_io_error_flag );
     EXPECT_EQ( res, 1 );
 
+    // Так ранее попытка чтения состояния узлов была неуспешной,
+    // записи выходов не будет.
     res = mngr.write_outputs();
     temp_node = mngr.get_node( 1 );
     EXPECT_TRUE( temp_node->read_io_error_flag );
     EXPECT_EQ( res, 1 );
+
 
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );

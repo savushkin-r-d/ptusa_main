@@ -646,7 +646,7 @@ int tcp_communicator_linux::do_echo ( int idx )
             {
             // Ожидаем данные с таймаутом 50 мсек.
             err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 50000L,
-                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat, 1 );
+                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
             if (err == -2)
                 {
                 //Если при подключении на модбас-сокет первый раз данные не пришли, то игнорируем(панель Weintek)
