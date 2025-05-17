@@ -423,7 +423,7 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
     {    
     //Проверяем обработку неуспешной записи выходов (сетевая ошибка).
     ON_CALL( mngr, e_communicate( _, _, _ ) ).WillByDefault(
-        []( io_manager::io_node*, int, int )
+        []( const io_manager::io_node*, int, int )
         {
         return -1;
         } );
@@ -437,7 +437,7 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
 
     //Проверяем обработку получения ошибки при записи выходов.
     ON_CALL( mngr, e_communicate( _, _, _ ) ).WillByDefault(
-        [&]( io_manager::io_node*, int, int )
+        [this]( const io_manager::io_node*, int, int )
         {
         mngr.buff[ 7 ] = 0x11; // Любое значение, кроме 0x10.
         return 0;
