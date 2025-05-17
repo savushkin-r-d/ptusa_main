@@ -682,6 +682,8 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+        const char* get_error_description() override;
+
 #ifndef PTUSA_TEST
     private:
 #endif

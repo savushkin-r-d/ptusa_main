@@ -2850,6 +2850,60 @@ TEST( valve_iolink_mix_proof, get_state )
     G_PAC_INFO()->emulation_on();
     }
 
+class valve_iolink_mix_proof_testable : public valve_iolink_mix_proof
+    {
+    public:
+        explicit valve_iolink_mix_proof_testable( const char* dev_name )
+            : valve_iolink_mix_proof( dev_name )
+            {
+            }
+
+        void set_err( uint16_t err ) 
+            { 
+            in_info.err = err; 
+            }
+    };
+
+
+
+TEST( valve_iolink_mix_proof, get_error_description )
+    {
+    struct ErrorDescCase
+        {
+        uint16_t err;
+        const char* expected;
+        };
+
+    valve_iolink_mix_proof_testable v( "V1" );
+
+    const ErrorDescCase cases[] =
+        {
+        {0, "обратная связь"},
+        {16, "sensor target missing (#16)"},
+        {17, "setup prerequisite issue (#17)"},
+        {18, "pneumatic part issue (#18)"},
+        {19, "seat-lift sensor issue (#19)"},
+        {20, "position not reached (#20)"},
+        {21, "unexpected movement (#21)"},
+        {22, "seat-lift sensor missing (#22)"},
+        {23, "pilot valve 1 missing (#23)"},
+        {24, "pilot valve 2 missing (#24)"},
+        {25, "pilot valve 3 missing (#25)"},
+        {26, "interlock active (#26)"},
+        {27, "output short circuit (#27)"},
+        {28, "setup aborted (#28)"},
+        {29, "blocked button (#29)"},
+        {30, "communication failure (#30)"},
+        {31, "safety stop active (#31)"},
+        {99, "unknown error"}
+        };
+
+    for ( const auto& c : cases )
+        {
+        v.set_err( c.err );
+        EXPECT_STREQ( v.get_error_description(), c.expected ) << "err=" << c.err;
+        }
+    }
 
 TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     {

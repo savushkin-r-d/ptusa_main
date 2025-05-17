@@ -1453,6 +1453,53 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
+const char* valve_iolink_mix_proof::get_error_description()
+    {
+    switch ( in_info.err )
+        {
+        case 0:
+            // Everything is OK.
+            break;
+        case 16:
+            return "sensor target missing (#16)";
+        case 17:
+            return "setup prerequisite issue (#17)";
+        case 18:
+            return "pneumatic part issue (#18)";
+        case 19:
+            return "seat-lift sensor issue (#19)";
+        case 20:
+            return "position not reached (#20)";
+        case 21:
+            return "unexpected movement (#21)";
+        case 22:
+            return "seat-lift sensor missing (#22)";
+        case 23:
+            return "pilot valve 1 missing (#23)";
+        case 24:
+            return "pilot valve 2 missing (#24)";
+        case 25:
+            return "pilot valve 3 missing (#25)";
+        case 26:
+            return "interlock active (#26)";
+        case 27:
+            return "output short circuit (#27)";
+        case 28:
+            return "setup aborted (#28)";
+        case 29:
+            return "blocked button (#29)";
+        case 30:
+            return "communication failure (#30)";
+        case 31:
+            return "safety stop active (#31)";
+        default:
+            return "unknown error";
+            break;
+        }
+
+    return "обратная связь";
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 const std::string valve_iolink_shut_off_sorio::SORIO_ARTICLE = "DEF.SORIO-1SV";
 
