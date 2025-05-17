@@ -65,8 +65,8 @@ struct stat_time
     u_long all_time;
     u_long cycles_cnt;
 
-    u_int  max_iteration_cycle_time;
-    u_int  min_iteration_cycle_time;
+    u_long  max_iteration_cycle_time;
+    u_long  min_iteration_cycle_time;
 
     int print_cycle_last_h;
 
@@ -87,4 +87,9 @@ struct stat_time
 	min_iteration_cycle_time = 10000;
 	}
     };
+
+#ifdef PTUSA_TEST
+tm get_time_next_hour();
+#endif
+
 #endif // DTIME_H

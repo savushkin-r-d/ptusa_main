@@ -18,8 +18,13 @@
 #include <map>
 
 #include "smart_ptr.h"
+#include "dtime.h"
 
 class tcp_client;
+
+#ifdef WIN_OS
+const char* WSA_Last_Err_Decode();
+#endif // WIN_OS
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
@@ -81,6 +86,8 @@ class tcp_communicator
 
         static int get_modbus_port();
 
+        static int get_master_socket();
+
         enum CONSTANTS
             {
             BUFSIZE = 500 * 1024,   ///< Размер буфера.
@@ -94,8 +101,15 @@ class tcp_communicator
 
         static bool checkBuff( int s );
 
+        static int recvtimeout( int s, u_char* buf,
+            int len, long int sec, long int usec,
+            const char* IP = nullptr, const char* name = nullptr,
+            stat_time* stat = nullptr );
+
     protected:
-        static int port;                  ///< Порт.
+        static int master_socket;   ///< Мастер-сокет для прослушивания.
+
+        static int port;            ///< Порт.
         static int port_modbus;
 
         tcp_communicator();

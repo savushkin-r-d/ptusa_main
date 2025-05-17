@@ -1,4 +1,4 @@
-/// @file l_wago.h
+/// @file uni_bus_coupler_io.h
 /// @brief Работа с I/O узлами для OC Linux.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
@@ -10,13 +10,12 @@
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-17 09:39:32#$.
 
-#ifndef WAGO_L_H
-#define WAGO_L_H
+#ifndef UNI_BUS_COUPLER_IO_H
+#define UNI_BUS_COUPLER_IO_H
 
 #ifdef WIN_OS
 #include <winsock2.h>
 #include "w_tcp_cmctr.h"
-
 #else
 #include <sys/socket.h>
 #include <unistd.h>
@@ -25,7 +24,6 @@
 #endif // WIN_OS
 
 #include "bus_coupler_io.h"
-
 #include "dtime.h"
 #include "PAC_err.h"
 
@@ -49,8 +47,8 @@ class uni_io_manager : public io_manager
             };
 
         u_char buff[ BUFF_SIZE ] = { 0 };
-        u_char* resultbuff;
-        u_char* writebuff;
+        u_char* resultbuff = nullptr;
+        u_char* writebuff = nullptr;
 
         /// @brief Обмен с узлом I/O.
         ///
@@ -67,6 +65,19 @@ class uni_io_manager : public io_manager
             unsigned int quantity, unsigned char station = 0 );
         int write_holding_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 );
+
+        /// @brief Логирование ошибки обмена с узлом.
+        ///
+        /// @param cmd Команда.
+        /// @param node_name Имя узла.
+        /// @param node_ip_address IP-адрес узла.
+        /// @param exp_fun_code Ожидаемый код функции.
+        /// @param rec_fun_code Полученный код функции.
+        /// @param exp_size Ожидаемый размер ответа.
+        /// @param rec_size Полученный размер ответа.
+        virtual void add_err_to_log( const char* cmd,
+            const char* node_name, const char* node_ip_address,
+            int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const;
 
     public:
         int read_inputs() override;
@@ -90,4 +101,4 @@ class uni_io_manager : public io_manager
         void disconnect( io_node* node ) override;
     };
 //-----------------------------------------------------------------------------
-#endif // WAGO_L_H
+#endif // UNI_BUS_COUPLER_IO_H
