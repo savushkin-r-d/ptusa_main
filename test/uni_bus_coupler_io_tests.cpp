@@ -233,7 +233,8 @@ TEST( uni_io_manager, read_inputs )
 #if defined LINUX_OS
         "\x1B[31m" +
 #endif
-        "ERROR  (3) -> Read DI:bus coupler returned error. \"A300\":\"127.0.0.1\" (received code=2, expected=2, received size=0, expected=1).\n" +
+        R"(ERROR  (3) -> Read DI:bus coupler returned error. "A300":"127.0.0.1" )"
+        "(received code=2, expected=2, received size=0, expected=1).\n" +
 #if defined LINUX_OS
         "\x1B[0m" +
 #endif
@@ -241,12 +242,12 @@ TEST( uni_io_manager, read_inputs )
 #if defined LINUX_OS        
         "\x1B[31m" +
 #endif
-        "ERROR  (3) -> Read AI:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=4, expected=4, received size=31, expected=2).\n"
+        R"(ERROR  (3) -> Read AI:bus coupler returned error. "A100":"127.0.0.1" )"
+        "(received code=4, expected=4, received size=31, expected=2).\n"
 #if defined LINUX_OS
         + "\x1B[0m"
 #endif
         ;
-
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, expectedOutput );
 
@@ -312,7 +313,8 @@ TEST( uni_io_manager, write_outputs )
 #if defined LINUX_OS
         "\x1B[31m" +
 #endif
-        "ERROR  (3) -> Write DO:bus coupler returned error. \"A300\":\"127.0.0.1\" (received code=1, expected=15, received size=0, expected=1).\n" +
+        R"(ERROR  (3) -> Write DO:bus coupler returned error. "A300":"127.0.0.1" )"
+        "(received code=1, expected=15, received size=0, expected=1).\n" +
 #if defined LINUX_OS
         "\x1B[0m" +
 #endif
@@ -320,7 +322,8 @@ TEST( uni_io_manager, write_outputs )
 #if defined LINUX_OS        
         "\x1B[31m" +
 #endif
-        "ERROR  (3) -> Write AO:bus coupler returned error. \"A100\":\"127.0.0.1\" (received code=1, expected=16, received size=35, expected=6).\n"
+        R"(ERROR  (3) -> Write AO:bus coupler returned error. "A100":"127.0.0.1" )"
+        "(received code=1, expected=16, received size=35, expected=6).\n"
 #if defined LINUX_OS
         + "\x1B[0m"
 #endif

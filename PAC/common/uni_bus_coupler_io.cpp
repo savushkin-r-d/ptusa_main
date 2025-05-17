@@ -751,12 +751,17 @@ int uni_io_manager::read_inputs()
                         printf( "\n" );
 #endif // DEBUG_KBUS
                         nd->read_io_error_flag = false;
+                        nd->flag_error_read_message = false;
                         }
                     else
                         {
-                        add_err_to_log( "Read DI", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ), 0x02,
-                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        if ( !nd->flag_error_read_message )
+                            {
+                            add_err_to_log( "Read DI", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x02,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            nd->flag_error_read_message = true;
+                            }
                         nd->read_io_error_flag = true;
                         res = 1;
                         continue;
@@ -811,12 +816,17 @@ int uni_io_manager::read_inputs()
                                 }
                             }
                         nd->read_io_error_flag = false;
+                        nd->flag_error_read_message = false;
                         } // if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                     else
                         {
-                        add_err_to_log( "Read AI", nd->name, nd->ip_address,
-                            static_cast<int>( buff[ 7 ] ), 0x04,
-                            static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                        if ( !nd->flag_error_read_message )
+                            {
+                            add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x04,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            nd->flag_error_read_message = true;
+                            }
                         nd->read_io_error_flag = true;
                         res = 1;
                         continue;
@@ -916,9 +926,13 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            add_err_to_log( "Read AI", nd->name, nd->ip_address,
-                                static_cast<int>( buff[ 7 ] ), 0x04,
-                                static_cast<int>( buff[ 8 ] ), registers_count * 2 );
+                            if ( !nd->flag_error_read_message )
+                                {
+                                add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                                    static_cast<int>( buff[ 7 ] ), 0x04,
+                                    static_cast<int>( buff[ 8 ] ), registers_count * 2 );
+                                nd->flag_error_read_message = true;
+                                }
                             nd->read_io_error_flag = true;
                             res = 1;
                             break;
@@ -937,6 +951,7 @@ int uni_io_manager::read_inputs()
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
                     nd->read_io_error_flag = false;
+                    nd->flag_error_read_message = false;
                     } while (start_register < nd->AI_cnt);
                 } // if (nd->AI_cnt > 0)
             }// nd->type == io_node::PHOENIX_BK_ETH

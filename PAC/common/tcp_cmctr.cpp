@@ -223,7 +223,11 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         {
         G_LOG->error(
             R"(Network device : s%d->"%s":"%s")"
-            " disconnected on select read try : %s.",
+            " disconnected on select read try : %s"
+#ifndef WIN_OS
+            "."
+#endif            
+            ,
             s, name, IP, 
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
@@ -251,7 +255,11 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
         {
         G_LOG->error(
             R"(Network device : s%d->"%s":"%s")"
-            " disconnected on read try : %s.",
+            " disconnected on read try : %s"
+#ifndef WIN_OS
+            "."
+#endif
+            ,
             s, name, IP, 
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
