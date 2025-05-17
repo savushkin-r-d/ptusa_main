@@ -386,3 +386,77 @@ TEST( uni_io_manager, e_communicate )
     auto res = mngr.e_communicate( &node, 1, 1 );
     EXPECT_NE( res, 0 );
     }
+
+
+class MockUniIoManager : public uni_io_manager
+    {
+    public:
+        MOCK_METHOD( void, add_err_to_log, ( const char*, const char*,
+            const char*, int, int, int, int ), ( const, override ) );
+        // Переопределяем e_communicate, чтобы не было реального обмена
+        MOCK_METHOD( int, e_communicate, ( io_node*, int, int ), ( override ) );
+    };
+
+class UniBusCouplerIoTest : public ::testing::Test
+    {
+    protected:
+        void SetUp() override 
+            {
+            mngr.init( 1 );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 6 * 16, 6 * 16, 6, 6, 1, 1 );
+            node = mngr.get_node( 0 );
+            // Just for testing add set of modules.
+            mngr.init_node_AO( 0, 0, 1027843, 0 );
+            mngr.init_node_AO( 0, 1, 2688093, 1 );
+            mngr.init_node_AO( 0, 2, 2688527, 2 );
+            mngr.init_node_AO( 0, 3, 2688527, 3 );
+            mngr.init_node_AO( 0, 4, 2688666, 4 );
+            mngr.init_node_AO( 0, 5, 10, 5 );
+            };
+
+        io_manager::io_node* node;
+        NiceMock<MockUniIoManager> mngr;
+    };
+
+TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
+    {    
+    //Проверяем обработку неуспешной записи выходов (сетевая ошибка).
+    ON_CALL( mngr, e_communicate( _, _, _ ) ).WillByDefault(
+        []( io_manager::io_node*, int, int )
+        {
+        return -1;
+        } );
+    EXPECT_CALL( mngr, add_err_to_log( _, _, _, _, _, _, _ ) )
+        .Times( 0 );
+
+    auto res = mngr.write_outputs();
+    // Проверяем, что флаг не изменился (остался false).
+    EXPECT_FALSE( node->flag_error_write_message );
+    EXPECT_EQ( res, 1 );
+
+    //Проверяем обработку получения ошибки при записи выходов.
+    ON_CALL( mngr, e_communicate( _, _, _ ) ).WillByDefault(
+        [&]( io_manager::io_node*, int, int )
+        {
+        mngr.buff[ 7 ] = 0x11; // Любое значение, кроме 0x10.
+        return 0;
+        } );   
+    uni_io_manager real_mngr;
+    EXPECT_CALL( mngr, add_err_to_log( ::testing::StrEq( "Write AO" ),
+        _, _, 0x11, 0x10, 35, 6 ) )
+        .WillRepeatedly( Invoke( &real_mngr, &uni_io_manager::add_err_to_log ) );    
+    testing::internal::CaptureStdout();
+    res = mngr.write_outputs();
+    auto output = testing::internal::GetCapturedStdout();
+    // Проверяем, что флаг изменился (стал true).
+    EXPECT_TRUE( node->flag_error_write_message );
+    EXPECT_EQ( res, 1 );
+    EXPECT_NE( output, "" ); //Здесь должно быть сообщение.
+
+    testing::internal::CaptureStdout();
+    res = mngr.write_outputs();
+    EXPECT_EQ( res, 1 );
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, "" ); //Здесь уже не должно быть сообщения.
+    }
