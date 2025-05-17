@@ -2853,10 +2853,7 @@ TEST( valve_iolink_mix_proof, get_state )
 class valve_iolink_mix_proof_testable : public valve_iolink_mix_proof
     {
     public:
-        explicit valve_iolink_mix_proof_testable( const char* dev_name )
-            : valve_iolink_mix_proof( dev_name )
-            {
-            }
+        using valve_iolink_mix_proof::valve_iolink_mix_proof;
 
         void set_err( uint16_t err ) 
             { 
@@ -2876,7 +2873,7 @@ TEST( valve_iolink_mix_proof, get_error_description )
 
     valve_iolink_mix_proof_testable v( "V1" );
 
-    const ErrorDescCase cases[] =
+    const std::vector<ErrorDescCase> cases =
         {
         {0, "обратная связь"},
         {16, "sensor target missing (#16)"},
@@ -2895,7 +2892,8 @@ TEST( valve_iolink_mix_proof, get_error_description )
         {29, "blocked button (#29)"},
         {30, "communication failure (#30)"},
         {31, "safety stop active (#31)"},
-        {99, "unknown error"}
+
+        {7, "unknown error (#7)"}
         };
 
     for ( const auto& c : cases )

@@ -1492,9 +1492,13 @@ const char* valve_iolink_mix_proof::get_error_description()
             return "communication failure (#30)";
         case 31:
             return "safety stop active (#31)";
+
         default:
-            return "unknown error";
-            break;
+            static thread_local char buf[ 64 ];
+            auto res = fmt::format_to_n( buf, sizeof( buf ) - 1,
+                "unknown error (#{})", +in_info.err );
+            buf[ res.size ] = '\0';
+            return buf;
         }
 
     return "обратная связь";

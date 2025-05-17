@@ -682,6 +682,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+        /// @brief Returns a description of the error that is active.
+        /// 
+        /// @return A C-string containing the error description.
         const char* get_error_description() override;
 
 #ifndef PTUSA_TEST
