@@ -103,7 +103,7 @@ class temperature_e_analog : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик температуры IO-Link.
-class temperature_e_iolink : public AI1
+class temperature_e_iolink : public AI1, public io_link_device
     {
     public:
         explicit temperature_e_iolink( const char *dev_name );
@@ -203,7 +203,7 @@ class pressure_e : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущее давление.
-class pressure_e_iolink : public analog_io_device
+class pressure_e_iolink : public analog_io_device, public io_link_device
     {
     public:
         explicit pressure_e_iolink( const char* dev_name );
@@ -238,6 +238,8 @@ class pressure_e_iolink : public analog_io_device
             const device* dev  );
 
         void evaluate_io() override;
+
+        const char* get_error_description() override;
 
         struct PT_data
             {
@@ -355,7 +357,7 @@ class circuit_breaker : public analog_io_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_e_iolink : public level
+class level_e_iolink : public level, public io_link_device
     {
     public:
         explicit level_e_iolink( const char* dev_name );
@@ -369,6 +371,8 @@ class level_e_iolink : public level
         void evaluate_io() override;
 
         void set_string_property(const char* field, const char* value) override;
+
+        const char* get_error_description() override;
 
     private:
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
@@ -430,7 +434,7 @@ class concentration_e_ok : public concentration_e
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик концентрации IO-Link.
-class concentration_e_iolink : public analog_io_device
+class concentration_e_iolink : public analog_io_device, public io_link_device
     {
     public:
         explicit concentration_e_iolink(const char* dev_name);
@@ -446,6 +450,8 @@ class concentration_e_iolink : public analog_io_device
         int get_state() override;
 
         void evaluate_io() override;
+
+        const char* get_error_description() override;
 
     private:
 
@@ -967,7 +973,7 @@ class level_s : public DI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_s_iolink : public analog_io_device
+class level_s_iolink : public analog_io_device, public io_link_device
     {
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
@@ -981,6 +987,8 @@ class level_s_iolink : public analog_io_device
         void evaluate_io() override;
 
         void set_article( const char* new_article ) override;
+
+        const char* get_error_description() override;
 
 #ifndef PTUSA_TEST
     private:
@@ -1292,7 +1300,7 @@ class counter_f : public counter
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.
-class counter_iolink : public base_counter
+class counter_iolink : public base_counter, public io_link_device
     {
     public:
         explicit counter_iolink( const char* dev_name );
@@ -1370,7 +1378,7 @@ class counter_iolink : public base_counter
 /// @brief Сигнальная колонна с IO-Link.
 ///
 /// Служит для уведомления оператора о событиях.
-class signal_column_iolink : public signal_column
+class signal_column_iolink : public signal_column, public io_link_device
     {
     public:
         explicit signal_column_iolink( const char* dev_name );
@@ -1378,7 +1386,7 @@ class signal_column_iolink : public signal_column
         void set_string_property( const char* field, const char* value ) override;
 
         void evaluate_io() override;
-    
+
     private:
         void process_DO( u_int n, DO_state state, const char* name ) override;
 
@@ -1394,7 +1402,9 @@ class signal_column_iolink : public signal_column
             };
 
         static out_data stub_out_info;
-        out_data *out_info = &stub_out_info;
+        out_data* out_info = &stub_out_info;
+
+        const char* get_error_description() override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
