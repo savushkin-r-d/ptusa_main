@@ -1181,5 +1181,8 @@ class signal_column : public device, public io_device
 class io_link_device
     {        
     public:
-        const char* get_error_description( int err_id );
+        /// @brief Получение ошибки (активной или ранее возникшей).
+        virtual int get_error_id() = 0;
+
+        virtual const char* get_error_description();
     };

@@ -116,6 +116,11 @@ class temperature_e_iolink : public AI1, public io_link_device
 
         const char* get_error_description() override;
 
+        int get_error_id() override
+            {
+            return AI1::get_error_id();
+            };
+
     private:
         struct TE_data
             {
@@ -240,6 +245,11 @@ class pressure_e_iolink : public analog_io_device, public io_link_device
         void evaluate_io() override;
 
         const char* get_error_description() override;
+
+        int get_error_id() override
+            {
+            return analog_io_device::get_error_id();
+            };
 
         struct PT_data
             {
@@ -374,6 +384,11 @@ class level_e_iolink : public level, public io_link_device
 
         const char* get_error_description() override;
 
+        int get_error_id() override
+            {
+            return level::get_error_id();
+            };
+
     private:
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
 
@@ -452,6 +467,11 @@ class concentration_e_iolink : public analog_io_device, public io_link_device
         void evaluate_io() override;
 
         const char* get_error_description() override;
+
+        int get_error_id() override
+            {
+            return analog_io_device::get_error_id();
+            };
 
     private:
 
@@ -990,6 +1010,11 @@ class level_s_iolink : public analog_io_device, public io_link_device
 
         const char* get_error_description() override;
 
+        int get_error_id() override
+            {
+            return analog_io_device::get_error_id();
+            };
+
 #ifndef PTUSA_TEST
     private:
 #endif
@@ -1334,6 +1359,11 @@ class counter_iolink : public base_counter, public io_link_device
 
         const char* get_error_description() override;
 
+        int get_error_id() override
+            {
+            return base_counter::get_error_id();
+            };
+
     private:
         enum class CONSTANTS
             {
@@ -1387,6 +1417,13 @@ class signal_column_iolink : public signal_column, public io_link_device
 
         void evaluate_io() override;
 
+        const char* get_error_description() override;
+
+        int get_error_id() override
+            {
+            return signal_column::get_error_id();
+            };
+
     private:
         void process_DO( u_int n, DO_state state, const char* name ) override;
 
@@ -1402,9 +1439,7 @@ class signal_column_iolink : public signal_column, public io_link_device
             };
 
         static out_data stub_out_info;
-        out_data* out_info = &stub_out_info;
-
-        const char* get_error_description() override;
+        out_data* out_info = &stub_out_info;        
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.

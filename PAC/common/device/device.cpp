@@ -158,7 +158,7 @@ void signal_column_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 const char* signal_column_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1639,7 +1639,7 @@ const char* counter_iolink::get_error_description()
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
         case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-            return io_link_device::get_error_description( etrr_id );
+            return io_link_device::get_error_description();
 
         default:
             return base_counter::get_error_description();
@@ -1794,7 +1794,7 @@ int temperature_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 const char* temperature_e_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2776,7 +2776,7 @@ bool level_s_iolink::is_active()
 
 const char* level_s_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2927,7 +2927,7 @@ void level_e_iolink::set_string_property(const char* field, const char* value)
 
 const char* level_e_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description( );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3119,7 +3119,7 @@ void pressure_e_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 const char* pressure_e_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description( );
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
@@ -3512,7 +3512,7 @@ void concentration_e_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 const char* concentration_e_iolink::get_error_description()
     {
-    return io_link_device::get_error_description( get_error_id() );
+    return io_link_device::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
