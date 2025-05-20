@@ -103,7 +103,7 @@ class temperature_e_analog : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик температуры IO-Link.
-class temperature_e_iolink : public AI1, public io_link_device
+class temperature_e_iolink : public AI1
     {
     public:
         explicit temperature_e_iolink( const char *dev_name );
@@ -115,11 +115,6 @@ class temperature_e_iolink : public AI1, public io_link_device
         int get_state() override;
 
         const char* get_error_description() override;
-
-        int get_error_id() override
-            {
-            return AI1::get_error_id();
-            };
 
     private:
         struct TE_data
@@ -136,6 +131,8 @@ class temperature_e_iolink : public AI1, public io_link_device
 
 			ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
 			};
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
@@ -208,7 +205,7 @@ class pressure_e : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущее давление.
-class pressure_e_iolink : public analog_io_device, public io_link_device
+class pressure_e_iolink : public analog_io_device
     {
     public:
         explicit pressure_e_iolink( const char* dev_name );
@@ -284,6 +281,8 @@ class pressure_e_iolink : public analog_io_device, public io_link_device
 
         float v = .0f;
         int st = 0;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Автоматический выключатель.
@@ -367,7 +366,7 @@ class circuit_breaker : public analog_io_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_e_iolink : public level, public io_link_device
+class level_e_iolink : public level
     {
     public:
         explicit level_e_iolink( const char* dev_name );
@@ -383,11 +382,6 @@ class level_e_iolink : public level, public io_link_device
         void set_string_property(const char* field, const char* value) override;
 
         const char* get_error_description() override;
-
-        int get_error_id() override
-            {
-            return level::get_error_id();
-            };
 
     private:
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
@@ -408,6 +402,8 @@ class level_e_iolink : public level, public io_link_device
         float v = .0f;
 
         i_AI_device* PT_extra = nullptr;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
@@ -449,7 +445,7 @@ class concentration_e_ok : public concentration_e
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик концентрации IO-Link.
-class concentration_e_iolink : public analog_io_device, public io_link_device
+class concentration_e_iolink : public analog_io_device
     {
     public:
         explicit concentration_e_iolink(const char* dev_name);
@@ -467,11 +463,6 @@ class concentration_e_iolink : public analog_io_device, public io_link_device
         void evaluate_io() override;
 
         const char* get_error_description() override;
-
-        int get_error_id() override
-            {
-            return analog_io_device::get_error_id();
-            };
 
     private:
 
@@ -499,6 +490,8 @@ class concentration_e_iolink : public analog_io_device, public io_link_device
 
             LAST_PARAM_IDX,
             };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
@@ -993,7 +986,7 @@ class level_s : public DI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_s_iolink : public analog_io_device, public io_link_device
+class level_s_iolink : public analog_io_device
     {
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
@@ -1009,11 +1002,6 @@ class level_s_iolink : public analog_io_device, public io_link_device
         void set_article( const char* new_article ) override;
 
         const char* get_error_description() override;
-
-        int get_error_id() override
-            {
-            return analog_io_device::get_error_id();
-            };
 
 #ifndef PTUSA_TEST
     private:
@@ -1065,6 +1053,8 @@ class level_s_iolink : public analog_io_device, public io_link_device
 
             LAST_PARAM_IDX,
             };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -1325,7 +1315,7 @@ class counter_f : public counter
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.
-class counter_iolink : public base_counter, public io_link_device
+class counter_iolink : public base_counter
     {
     public:
         explicit counter_iolink( const char* dev_name );
@@ -1359,11 +1349,6 @@ class counter_iolink : public base_counter, public io_link_device
 
         const char* get_error_description() override;
 
-        int get_error_id() override
-            {
-            return base_counter::get_error_id();
-            };
-
     private:
         enum class CONSTANTS
             {
@@ -1390,6 +1375,8 @@ class counter_iolink : public base_counter, public io_link_device
             };
 
         in_data in_info{ 0, 0, 0, 0, 0 };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.
@@ -1408,7 +1395,7 @@ class counter_iolink : public base_counter, public io_link_device
 /// @brief Сигнальная колонна с IO-Link.
 ///
 /// Служит для уведомления оператора о событиях.
-class signal_column_iolink : public signal_column, public io_link_device
+class signal_column_iolink : public signal_column
     {
     public:
         explicit signal_column_iolink( const char* dev_name );
@@ -1418,11 +1405,6 @@ class signal_column_iolink : public signal_column, public io_link_device
         void evaluate_io() override;
 
         const char* get_error_description() override;
-
-        int get_error_id() override
-            {
-            return signal_column::get_error_id();
-            };
 
     private:
         void process_DO( u_int n, DO_state state, const char* name ) override;
@@ -1439,7 +1421,9 @@ class signal_column_iolink : public signal_column, public io_link_device
             };
 
         static out_data stub_out_info;
-        out_data* out_info = &stub_out_info;        
+        out_data* out_info = &stub_out_info;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.

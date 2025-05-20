@@ -1315,9 +1315,9 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const char* io_link_device::get_error_description()
+const char* io_link_device::get_error_description( int err_id ) const
     {
-    if ( auto err_id = get_error_id(); err_id < 0 )
+    if ( err_id < 0 )
         {
         switch ( err_id )
             {
