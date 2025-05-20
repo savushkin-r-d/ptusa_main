@@ -243,11 +243,6 @@ class pressure_e_iolink : public analog_io_device
 
         const char* get_error_description() override;
 
-        int get_error_id() override
-            {
-            return analog_io_device::get_error_id();
-            };
-
         struct PT_data
             {
             uint16_t st1 :1;
@@ -481,7 +476,6 @@ class concentration_e_iolink : public analog_io_device
 
         QT_data* info = new QT_data();
 
-    private:
         enum CONSTANTS
             {
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
@@ -1403,6 +1397,8 @@ class signal_column_iolink : public signal_column
         void set_string_property( const char* field, const char* value ) override;
 
         void evaluate_io() override;
+
+        int get_state() override;
 
         const char* get_error_description() override;
 

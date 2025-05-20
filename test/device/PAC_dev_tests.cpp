@@ -8,6 +8,47 @@ using namespace ::testing;
 #include <time.h>
 
 
+class iolink_dev_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            mngr.init_node_AI( 0, 0, 1027843, 0 );
+            };
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            };
+
+        void test_dev_err( device& dev, io_device& io_dev )
+            {
+            G_PAC_INFO()->emulation_off();
+            io_dev.init_and_alloc( 0, 0, 0, 1 );
+            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+            EXPECT_EQ( dev.get_state(), -1 );
+            EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
+
+            *io_dev.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
+            EXPECT_EQ( dev.get_state(), -2 );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+
+            *io_dev.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            EXPECT_EQ( dev.get_state(), 0 );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+
+            G_PAC_INFO()->emulation_on();
+            }
+
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+
 TEST( signal_column, get_type_name )
     {
     signal_column_iolink test_dev( "test_HL1" );
@@ -664,6 +705,14 @@ TEST( signal_column, show_idle )
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
+    }
+
+TEST_F( iolink_dev_test, signal_column_iolink_get_error_description )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    EXPECT_STREQ( test_dev.get_error_description(), "нет ошибок" );
+
+    test_dev_err( test_dev, test_dev );
     }
 
 

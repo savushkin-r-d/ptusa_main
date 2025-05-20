@@ -161,6 +161,16 @@ const char* signal_column_iolink::get_error_description()
     return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
+int signal_column_iolink::get_state()
+    {
+    if ( auto st = get_AI_IOLINK_state( 0 ); st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return signal_column::get_state();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int params_count, bool is_ready ) :
