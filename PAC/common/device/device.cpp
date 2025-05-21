@@ -2639,6 +2639,8 @@ level_s_iolink::level_s_iolink( const char *dev_name,
     {
     set_par_name( P_DT, 0, "P_DT" );
     set_par_name( P_ERR, 0, "P_ERR" );
+    
+    analog_io_device::set_state( current_state );
     }
 
 void level_s_iolink::evaluate_io()
@@ -2677,6 +2679,23 @@ void level_s_iolink::evaluate_io()
             st = 0;
             break;
         }
+
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
     }
 
 void level_s_iolink::set_article( const char* new_article )
@@ -2756,32 +2775,23 @@ int level_s_iolink::get_state()
     if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
         devstate != io_device::IOLINKSTATE::OK )
 		{
-		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
+		return -devstate;
 		}
-
-    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
-        {
-        if ( current_state != st )
-            {
-            if ( get_delta_millisec( time ) > dt )
-                {
-                current_state = st;
-                time = get_millisec();
-                }
-            }
-        else
-            {
-            time = get_millisec();
-            }
-        }
-    else current_state = st;
 
     return current_state;
 	}
 
 bool level_s_iolink::is_active()
     {
-    return get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
+        {
+        return true;
+        }
+
+    return current_state;
     }
 
 const char* level_s_iolink::get_error_description()
