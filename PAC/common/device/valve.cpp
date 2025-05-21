@@ -1174,6 +1174,58 @@ int valve_bottom_mix_proof::get_on_fb_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+const char* io_link_valve::get_error_description( int err_id ) const
+    {
+    switch ( err_id )
+        {
+        case 0:
+            // Everything is OK.
+            break;
+        case 16:
+            return "sensor target missing (#16)";
+        case 17:
+            return "setup prerequisite issue (#17)";
+        case 18:
+            return "pneumatic part issue (#18)";
+        case 19:
+            return "seat-lift sensor issue (#19)";
+        case 20:
+            return "position not reached (#20)";
+        case 21:
+            return "unexpected movement (#21)";
+        case 22:
+            return "seat-lift sensor missing (#22)";
+        case 23:
+            return "pilot valve 1 missing (#23)";
+        case 24:
+            return "pilot valve 2 missing (#24)";
+        case 25:
+            return "pilot valve 3 missing (#25)";
+        case 26:
+            return "interlock active (#26)";
+        case 27:
+            return "output short circuit (#27)";
+        case 28:
+            return "setup aborted (#28)";
+        case 29:
+            return "blocked button (#29)";
+        case 30:
+            return "communication failure (#30)";
+        case 31:
+            return "safety stop active (#31)";
+
+        default:
+            static thread_local char buf[ 64 ];
+            auto res = fmt::format_to_n( buf, sizeof( buf ) - 1,
+                "unknown error (#{})", err_id );
+            buf[ res.size ] = '\0';
+            return buf;
+        }
+
+    return "обратная связь";
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
@@ -1455,53 +1507,7 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_mix_proof::get_error_description()
     {
-    switch ( in_info.err )
-        {
-        case 0:
-            // Everything is OK.
-            break;
-        case 16:
-            return "sensor target missing (#16)";
-        case 17:
-            return "setup prerequisite issue (#17)";
-        case 18:
-            return "pneumatic part issue (#18)";
-        case 19:
-            return "seat-lift sensor issue (#19)";
-        case 20:
-            return "position not reached (#20)";
-        case 21:
-            return "unexpected movement (#21)";
-        case 22:
-            return "seat-lift sensor missing (#22)";
-        case 23:
-            return "pilot valve 1 missing (#23)";
-        case 24:
-            return "pilot valve 2 missing (#24)";
-        case 25:
-            return "pilot valve 3 missing (#25)";
-        case 26:
-            return "interlock active (#26)";
-        case 27:
-            return "output short circuit (#27)";
-        case 28:
-            return "setup aborted (#28)";
-        case 29:
-            return "blocked button (#29)";
-        case 30:
-            return "communication failure (#30)";
-        case 31:
-            return "safety stop active (#31)";
-
-        default:
-            static thread_local char buf[ 64 ];
-            auto res = fmt::format_to_n( buf, sizeof( buf ) - 1,
-                "unknown error (#{})", +in_info.err );
-            buf[ res.size ] = '\0';
-            return buf;
-        }
-
-    return "обратная связь";
+    return iol_valve.get_error_description( in_info.err );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2000,7 +2006,7 @@ void valve_iolink_gea_tvis_a15_ds::direct_set_state( int new_state )
 valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
-    in_info->err = 0;
+    in_info.err = 0;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
@@ -2010,8 +2016,8 @@ valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
         return valve::get_valve_state();
         }
 
-    if ( in_info->de_en ) return V_OFF;
-    if ( in_info->main ) return V_ON;
+    if ( in_info.de_en ) return V_OFF;
+    if ( in_info.main ) return V_ON;
 
     return V_OFF;
     }
@@ -2027,7 +2033,7 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
 
     char* data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    char* buff = (char*)in_info;
+    char* buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -2039,7 +2045,7 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
     std::swap( buff[ 2 ], buff[ 3 ] );
 
 #ifdef DEBUG_IOLINK_
-    char* tmp = (char*)in_info;
+    char* tmp = (char*)&in_info;
 
     sprintf( G_LOG->msg, "%x %x %x %x\n",
         tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
@@ -2047,8 +2053,8 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
 
     sprintf( G_LOG->msg,
         "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-        in_info->de_en, in_info->main, in_info->usl,
-        in_info->lsp, 0.1 * in_info->pos );
+        in_info.de_en, in_info.main, in_info.usl,
+        in_info.lsp, 0.1 * in_info.pos );
     G_LOG->write_log( i_log::P_NOTICE );
 #endif
     }
@@ -2070,17 +2076,11 @@ void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
 int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
-    int err = in_info->err;
+    int err = in_info.err;
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
         "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
         blink, cs, err, get_value() ) ).size;
     return res;
-    }
-//-----------------------------------------------------------------------------
-valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
-    {
-    delete in_info;
-    in_info = nullptr;
     }
 //-----------------------------------------------------------------------------
 bool valve_iolink_shut_off_thinktop::get_fb_state()
@@ -2093,7 +2093,7 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
         return false;
         }
 
-    if ( in_info->err ) return false;
+    if ( in_info.err ) return false;
 
     if ( get_delta_millisec( start_switch_time ) <
         get_par( valve::P_ON_TIME, 0 ) )
@@ -2101,8 +2101,8 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
         return true;
         }
 
-    if ( !out_info->sv1 && in_info->de_en && in_info->st ) return true;
-    if ( out_info->sv1 && in_info->main && in_info->st ) return true;
+    if ( !out_info->sv1 && in_info.de_en && in_info.st ) return true;
+    if ( out_info->sv1 && in_info.main && in_info.st ) return true;
 
     return false;
     }
@@ -2111,28 +2111,28 @@ float valve_iolink_shut_off_thinktop::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_value();
 
-    return 0.1f * in_info->pos;
+    return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_off_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
-    return !out_info->sv1 && in_info->de_en && in_info->st;
+    return !out_info->sv1 && in_info.de_en && in_info.st;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_on_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
-    return out_info->sv1 && in_info->main && in_info->st;
+    return out_info->sv1 && in_info.main && in_info.st;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    if ( false == in_info->main )
+    if ( false == in_info.main )
         {
         start_switch_time = get_millisec();
         }
@@ -2196,6 +2196,11 @@ void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
             direct_on();
             break;
         }
+    }
+//-----------------------------------------------------------------------------
+const char* valve_iolink_shut_off_thinktop::get_error_description()
+    {
+    return iol_valve.get_error_description( in_info.err );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -646,6 +646,15 @@ class valve_mini_flushing : public i_mix_proof, public valve
         int get_on_fb_value() final;
     };
 //-----------------------------------------------------------------------------
+class io_link_valve
+    {
+    public:
+        /// @brief Returns a description of the error that is active.
+        /// 
+        /// @return A C-string containing the error description.
+        const char* get_error_description( int err_id ) const;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve
     {
@@ -682,9 +691,6 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
-        /// @brief Returns a description of the error that is active.
-        /// 
-        /// @return A C-string containing the error description.
         const char* get_error_description() override;
 
 #ifndef PTUSA_TEST
@@ -725,6 +731,8 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             {
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
+
+        io_link_valve iol_valve;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -733,7 +741,7 @@ class valve_iolink_shut_off_thinktop : public valve
     public:
         explicit valve_iolink_shut_off_thinktop( const char* dev_name );
 
-        ~valve_iolink_shut_off_thinktop();
+        ~valve_iolink_shut_off_thinktop() = default;
 
         VALVE_STATE get_valve_state();
 
@@ -759,6 +767,8 @@ class valve_iolink_shut_off_thinktop : public valve
 
         void direct_set_state( int new_state ) override;
 
+        const char* get_error_description() override;
+
     private:
         struct in_data
             {
@@ -782,7 +792,7 @@ class valve_iolink_shut_off_thinktop : public valve
             uint16_t unused2 : 8;
             };
 
-        in_data* in_info = new in_data;
+        in_data in_info{};
         static out_data_swapped stub_out_info;
         out_data_swapped* out_info = &stub_out_info;
 
@@ -795,6 +805,8 @@ class valve_iolink_shut_off_thinktop : public valve
             {
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
+
+        io_link_valve iol_valve;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
