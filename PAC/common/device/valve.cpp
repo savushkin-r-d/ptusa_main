@@ -2037,9 +2037,9 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
             ( (char*)out_info + extra_offset );
         }
 
-    char* data = (char*)get_AI_data(
+    auto data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    char* buff = (char*)&in_info;
+    auto buff = (char*)&in_info;
 
     if ( !data ) return;
 

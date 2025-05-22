@@ -742,7 +742,7 @@ class valve_iolink_shut_off_thinktop : public valve
     public:
         explicit valve_iolink_shut_off_thinktop( const char* dev_name );
 
-        ~valve_iolink_shut_off_thinktop() = default;
+        ~valve_iolink_shut_off_thinktop() override = default;
 
         VALVE_STATE get_valve_state();
 
