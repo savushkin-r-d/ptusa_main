@@ -1221,11 +1221,9 @@ const char* io_link_valve::get_error_description( int err_id ) const
                 "ход штока (#31)";
 
         default:
-            static thread_local char buf[ 64 ];
-            auto res = fmt::format_to_n( buf, sizeof( buf ) - 1,
-                "неизвестная ошибка (#{})", err_id );
-            buf[ res.size ] = '\0';
-            return buf;
+            static thread_local std::string buf;
+            buf = fmt::format( "неизвестная ошибка (#{})", err_id );
+            return buf.c_str();
         }
     }
 //-----------------------------------------------------------------------------
