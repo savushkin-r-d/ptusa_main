@@ -1179,46 +1179,51 @@ const char* io_link_valve::get_error_description( int err_id ) const
     switch ( err_id )
         {
         case 0:
-            // Everything is OK. External feedback error. 
             return "обратная связь";
 
         case 16:
-            return "sensor target missing (#16)";
+            return "не обнаружен магнитный индикатор на штоке клапана (#16)";
         case 17:
-            return "setup prerequisite issue (#17)";
+            return "конфигурация не соответствует требованиям автоматической "
+                "настройки (#17)";
         case 18:
-            return "pneumatic part issue (#18)";
+            return "ошибка в пневматических соединениях - проверьте подключение "
+                "трубок или соленоидов (#18)";
         case 19:
-            return "seat-lift sensor issue (#19)";
+            return "нет сигнала от датчика верхнего седла (#19)";
         case 20:
-            return "position not reached (#20)";
+            return "клапан не достиг заданного положения в установленное время "
+                "(#20)";
         case 21:
-            return "unexpected movement (#21)";
+            return "обнаружен самопроизвольный ход штока (#21)";
         case 22:
-            return "seat-lift sensor missing (#22)";
+            return "не подключен датчик верхнего седла (#22)";
         case 23:
-            return "pilot valve 1 missing (#23)";
+            return "не обнаружен соленоидный клапан 1 (#23)";
         case 24:
-            return "pilot valve 2 missing (#24)";
+            return "не обнаружен соленоидный клапан 2 (#24)";
         case 25:
-            return "pilot valve 3 missing (#25)";
+            return "не обнаружен соленоидный клапан 3 (#25)";
         case 26:
-            return "interlock active (#26)";
+            return "активировано несколько входных сигналов соленоидных клапанов "
+                "(#26)";
         case 27:
-            return "output short circuit (#27)";
+            return "обнаружено короткое замыкание на цифровых выходах (#27)";
         case 28:
-            return "setup aborted (#28)";
+            return "процесс настройки был прерван (#28)";
         case 29:
-            return "blocked button (#29)";
+            return "постоянное срабатывание кнопки - проверьте кнопки или "
+                "замените плату управления (#29)";
         case 30:
-            return "communication failure (#30)";
+            return "потеряна связь с системой управления (#30)";
         case 31:
-            return "safety stop active (#31)";
+            return "сработала аварийная остановка - превышен допустимый "
+                "ход штока (#31)";
 
         default:
             static thread_local char buf[ 64 ];
             auto res = fmt::format_to_n( buf, sizeof( buf ) - 1,
-                "unknown error (#{})", err_id );
+                "неизвестная ошибка (#{})", err_id );
             buf[ res.size ] = '\0';
             return buf;
         }
