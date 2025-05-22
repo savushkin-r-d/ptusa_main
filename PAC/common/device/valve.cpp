@@ -1179,8 +1179,9 @@ const char* io_link_valve::get_error_description( int err_id ) const
     switch ( err_id )
         {
         case 0:
-            // Everything is OK.
-            break;
+            // Everything is OK. External feedback error. 
+            return "обратная связь";
+
         case 16:
             return "sensor target missing (#16)";
         case 17:
@@ -1221,8 +1222,6 @@ const char* io_link_valve::get_error_description( int err_id ) const
             buf[ res.size ] = '\0';
             return buf;
         }
-
-    return "обратная связь";
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
