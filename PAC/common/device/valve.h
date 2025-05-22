@@ -655,6 +655,29 @@ class io_link_valve
         const char* get_error_description( int err_id ) const;
     };
 //-----------------------------------------------------------------------------
+struct aLfalaval_iol_valve_in_data
+    {
+    int16_t  pos;
+    uint16_t de_en : 1; //De-Energized
+    bool main : 1; //Main energized position
+    bool usl : 1; //Upper Seat Lift energized position
+    bool lsp : 1; //Lower Seat Push energized position
+    bool st : 1; //Current Valve state
+    uint16_t unused : 3;
+    uint16_t err : 5;
+    };
+
+// Swapped low and high byte for easer processing.
+struct aLfalaval_iol_valve_out_data_swapped
+    {
+    uint16_t unused1 : 4;
+    bool sv1 : 1; //Main valve activation
+    bool sv2 : 1; //Upper seat lift activation
+    bool sv3 : 1; //Lower Seat Push energized position
+    bool wink : 1; //Visual indication
+    uint16_t unused2 : 8;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve
     {
@@ -696,31 +719,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 #ifndef PTUSA_TEST
     private:
 #endif
-        struct in_data
-            {
-            int16_t  pos;
-            uint16_t de_en : 1; //De-Energized
-            bool main : 1; //Main energized position
-            bool usl : 1; //Upper Seat Lift energized position
-            bool lsp : 1; //Lower Seat Push energized position
-            bool st : 1; //Current Valve state
-            uint16_t unused : 3;
-            uint16_t err : 5;
-            };
-
-        struct out_data_swapped   //Swapped low and high byte for easer processing
-            {
-            uint16_t unused1 : 4;
-            bool sv1 : 1; //Main valve activation
-            bool sv2 : 1; //Upper seat lift activation
-            bool sv3 : 1; //Lower Seat Push energized position
-            bool wink : 1; //Visual indication
-            uint16_t unused2 : 8;
-            };
-
-        in_data in_info{};
-        static out_data_swapped stub_out_info;
-        out_data_swapped* out_info = &stub_out_info;
+        aLfalaval_iol_valve_in_data in_info{};
+        static aLfalaval_iol_valve_out_data_swapped stub_out_info;
+        aLfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -770,31 +771,10 @@ class valve_iolink_shut_off_thinktop : public valve
         const char* get_error_description() override;
 
     private:
-        struct in_data
-            {
-            int16_t  pos;
-            uint16_t de_en : 1; //De-Energized
-            bool main : 1; //Main energized position
-            bool usl : 1; //Upper Seat Lift energized position
-            bool lsp : 1; //Lower Seat Push energized position
-            bool st : 1; //Current Valve state
-            uint16_t unused : 3;
-            uint16_t err : 5;
-            };
 
-        struct out_data_swapped   //Swapped low and high byte for easer processing
-            {
-            uint16_t unused1 : 4;
-            bool sv1 : 1; //Main valve activation
-            bool sv2 : 1; //Upper seat lift activation
-            bool sv3 : 1; //Lower Seat Push energized position
-            bool wink : 1; //Visual indication
-            uint16_t unused2 : 8;
-            };
-
-        in_data in_info{};
-        static out_data_swapped stub_out_info;
-        out_data_swapped* out_info = &stub_out_info;
+        aLfalaval_iol_valve_in_data in_info{};
+        static aLfalaval_iol_valve_out_data_swapped stub_out_info;
+        aLfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 

@@ -9,8 +9,8 @@
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
-valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info{};
-valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
+aLfalaval_iol_valve_out_data_swapped valve_iolink_mix_proof::stub_out_info{};
+aLfalaval_iol_valve_out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1259,11 +1259,12 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::evaluate_io()
     {
-    out_info = (out_data_swapped*)get_AO_write_data(
+    out_info = (aLfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        out_info = (aLfalaval_iol_valve_out_data_swapped*)
+            ( (char*)out_info + extra_offset );
         }
 
     char* data = (char*)get_AI_data(
@@ -2024,11 +2025,12 @@ valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::evaluate_io()
     {
-    out_info = (out_data_swapped*)get_AO_write_data(
+    out_info = (aLfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        out_info = (aLfalaval_iol_valve_out_data_swapped*)
+            ( (char*)out_info + extra_offset );
         }
 
     char* data = (char*)get_AI_data(
