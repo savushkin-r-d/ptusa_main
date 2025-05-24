@@ -5,6 +5,7 @@
 
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
+#include "g_errors.h"
 
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
@@ -1174,13 +1175,16 @@ int valve_bottom_mix_proof::get_on_fb_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const char* io_link_valve::get_error_description( int err_id ) const
+const char* io_link_valve::get_error_description( int err_id )
     {
+    if ( prev_err != err_id )
+        {
+        prev_err = err_id;
+        G_ERRORS_MANAGER->inc_errors_id();
+        }
+
     switch ( err_id )
         {
-        case 0:
-            return "обратная связь";
-
         case 16:
             return "не обнаружен магнитный индикатор на штоке клапана (#16)";
         case 17:
@@ -1510,7 +1514,19 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_mix_proof::get_error_description()
     {
-    return iol_valve.get_error_description( in_info.err );
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return iol_dev.get_error_description( -error_id );
+        }
+
+    if ( auto error_id = in_info.err; error_id > 0 )
+        {
+        return iol_valve.get_error_description( error_id );
+        }
+
+    return valve::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

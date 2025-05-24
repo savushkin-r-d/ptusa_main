@@ -383,6 +383,11 @@ class errors_manager
             return errors_id;
             }
 
+        void inc_errors_id()
+            {
+            ++errors_id;
+            }
+
     private:
         u_int_2 errors_id; // Cостояние ошибок.
 
