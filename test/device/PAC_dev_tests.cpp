@@ -8,6 +8,51 @@ using namespace ::testing;
 #include <time.h>
 
 
+class iolink_dev_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            mngr.init_node_AI( 0, 0, 1027843, 0 );
+            };
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            };
+
+        void test_dev_err( device& dev, io_device& io_dev, int expected_dev_state ) const
+            {
+            EXPECT_STREQ( dev.get_error_description(), "нет ошибок" );
+
+
+            G_PAC_INFO()->emulation_off();
+            io_dev.init_and_alloc( 0, 0, 0, 1 );
+            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+            EXPECT_EQ( dev.get_state(), -1 );
+            EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
+
+            *io_dev.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
+            EXPECT_EQ( dev.get_state(), -2 );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+
+            *io_dev.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            EXPECT_EQ( dev.get_state(), expected_dev_state );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+
+            G_PAC_INFO()->emulation_on();
+            }
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+
 TEST( signal_column, get_type_name )
     {
     signal_column_iolink test_dev( "test_HL1" );
@@ -666,6 +711,12 @@ TEST( signal_column, show_idle )
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
 
+TEST_F( iolink_dev_test, signal_column_iolink_get_error_description )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    test_dev_err( test_dev, test_dev, 0 );
+    }
+
 
 TEST( valve_iol_terminal, get_state_data )
     {
@@ -726,40 +777,14 @@ TEST( temperature_e_iolink, get_value )
     EXPECT_EQ( TE1.get_value(), .0f );
     }
 
-TEST( temperature_e_iolink, get_state )
+TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
     {
     temperature_e_iolink TE1( "T1" );
     EXPECT_EQ( TE1.get_state(), 1 );
-    EXPECT_STREQ( TE1.get_error_description(), "нет ошибок" );
+    test_dev_err( TE1, TE1, 1 );
 
     TE1.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
     EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
-
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
-    mngr.init_node_AI( 0, 0, 1027843, 0 );
-
-
-    G_PAC_INFO()->emulation_off();
-    TE1.init_and_alloc( 0, 0, 0, 1 );
-    TE1.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
-    EXPECT_EQ( TE1.get_state(), -1 );    
-    EXPECT_STREQ( TE1.get_error_description(), "IOL-устройство не подключено" );
-
-    *TE1.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
-    EXPECT_EQ( TE1.get_state(), -2 );
-    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
-
-    *TE1.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
-    EXPECT_EQ( TE1.get_state(), 1 );
-    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
-
-
-    G_PAC_INFO()->emulation_on();
-    io_manager::replace_instance( prev_mngr );
     }
 
 
@@ -1374,6 +1399,13 @@ TEST( level, get_volume )
     }
 
 
+TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
+    {
+    level_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
+    }
+
+
 TEST( pressure_e, pressure_e )
     {
     const int BUFF_SIZE = 200;
@@ -1438,6 +1470,12 @@ TEST( pressure_e_iolink, evaluate_io )
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
+    }
+
+TEST_F( iolink_dev_test, pressure_e_iolink_get_error_description )
+    {
+    pressure_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
     }
 
 
@@ -1644,6 +1682,12 @@ TEST( concentration_e_iolink, concentration_e_iolink )
 
     Q1.save_device( buff, "" );
     EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0},\n", buff );
+    }
+
+TEST_F( iolink_dev_test, concentration_e_iolink_get_error_description )
+    {
+    concentration_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
     }
 
 
@@ -3008,12 +3052,27 @@ TEST_F( LevelSIOLinkTest, SetArticle_EmptyArticle )
 
 TEST_F( LevelSIOLinkTest, get_state )
     {
-    EXPECT_EQ( device->get_state(), 0 );
+    EXPECT_EQ( device->get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
-    EXPECT_EQ( device->get_state(), 0 );
+    EXPECT_EQ( device->get_state(), 1 );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( LevelSIOLinkTest, is_active )
+    {
+    EXPECT_TRUE( device->is_active() );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_TRUE( device->is_active() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_get_error_description )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    test_dev_err( test_dev_max, test_dev_max, 1 );
     }
 
 

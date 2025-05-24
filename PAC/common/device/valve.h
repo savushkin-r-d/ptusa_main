@@ -652,31 +652,35 @@ class io_link_valve
         /// @brief Returns a description of the error that is active.
         /// 
         /// @return A C-string containing the error description.
-        const char* get_error_description( int err_id ) const;
+        const char* get_error_description( int err_id );
+
+    private:
+        int prev_err = 0;
     };
 //-----------------------------------------------------------------------------
+#pragma pack(push,1)
 struct aLfalaval_iol_valve_in_data
     {
     int16_t  pos;
-    uint16_t de_en : 1; //De-Energized
-    bool main : 1; //Main energized position
-    bool usl : 1; //Upper Seat Lift energized position
-    bool lsp : 1; //Lower Seat Push energized position
-    bool st : 1; //Current Valve state
-    uint16_t unused : 3;
-    uint16_t err : 5;
+    bool     de_en   : 1,    // De-energized.
+             main    : 1,    // Main energized position.
+             usl     : 1,    // Upper Seat Lift energized position.
+             lsp     : 1,    // Lower Seat Push energized position.
+             st      : 1;    // Current Valve state.
+    uint8_t  unused  : 3,
+             err     : 5;
     };
 
 // Swapped low and high byte for easer processing.
 struct aLfalaval_iol_valve_out_data_swapped
     {
-    uint16_t unused1 : 4;
-    bool sv1 : 1; //Main valve activation
-    bool sv2 : 1; //Upper seat lift activation
-    bool sv3 : 1; //Lower Seat Push energized position
-    bool wink : 1; //Visual indication
-    uint16_t unused2 : 8;
+    uint8_t unused1 : 4;
+    bool    sv1     : 1,   // Main valve activation.
+            sv2     : 1,   // Upper seat lift activation.
+            sv3     : 1,   // Lower Seat Push energized position.
+            wink    : 1;   // Visual indication.
     };
+#pragma pack(pop)
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve
@@ -733,6 +737,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
+        io_link_device iol_dev;
         io_link_valve iol_valve;
     };
 //-----------------------------------------------------------------------------
