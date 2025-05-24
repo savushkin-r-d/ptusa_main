@@ -31,14 +31,9 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
         {
         printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
         }
-
-    //net_init();
-    slave_socket = 0;
-    modbus_socket = 0;
-    master_socket = 0;
-    rc = 0;
-
+    
     glob_last_transfer_time = get_millisec();
+    net_init();    
     }
 //------------------------------------------------------------------------------
 void tcp_communicator_linux::killsockets()
@@ -514,8 +509,8 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
 
             u_long avg_time = stat->all_time / stat->cycles_cnt;
             sprintf( G_LOG->msg,
-                "Network performance : send : s%d->\"%s\":\"%s\" "
-                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                R"(Network performance : send : s%d->"%s":"%s" )"
+                "avg = %lu, min = %lu, max = %lu, tresh = %u (ms).",
                 sockfd, name, IP,
                 avg_time, stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
@@ -524,7 +519,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
             if (t < avg_time)
                 {
                 sprintf( G_LOG->msg,
-                    "Network performance : send : s%d->\"%s\":\"%s\" "
+                    R"(Network performance : send : s%d->"%s":"%s" )"
                     "avg %lu > tresh %u (ms).",
                     sockfd, name, IP, avg_time, t );
                 G_LOG->write_log( i_log::P_ALERT );
@@ -625,136 +620,6 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
     return res;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
-    int len, long int sec, long int usec, const char* IP, const char* name,
-    stat_time *stat, char first_connect )
-    {
-
-    //Network performance info.
-    if (stat)
-        {
-        static time_t t_;
-        struct tm *timeInfo_;
-        t_ = time(0);
-        timeInfo_ = localtime(&t_);
-
-        //Once per hour writes performance info.
-        if (stat->print_cycle_last_h != timeInfo_->tm_hour)
-            {
-            u_int t =
-                G_PAC_INFO()->par[PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME];
-
-            stat->print_cycle_last_h = timeInfo_->tm_hour;
-
-            u_long avg_time = stat->all_time / stat->cycles_cnt;
-            sprintf( G_LOG->msg,
-                "Network performance : recv : s%d->\"%s\":\"%s\" "
-                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
-                s, name, IP,
-                avg_time, stat->min_iteration_cycle_time,
-                stat->max_iteration_cycle_time, t );
-            G_LOG->write_log( i_log::P_DEBUG );
-
-            if (t < avg_time)
-                {
-                sprintf( G_LOG->msg,
-                    "Network performance : recv : s%d->\"%s\":\"%s\" "
-                    "avg %lu > tresh %u (ms).",
-                    s, name, IP, avg_time, t );
-                G_LOG->write_log( i_log::P_ALERT );
-                }
-
-            stat->clear();
-            }
-        }
-
-    errno = 0;
-
-    // Настраиваем  file descriptor set.
-    fd_set fds;
-    FD_ZERO( &fds );
-    FD_SET( s, &fds );
-
-    // Настраиваем время на таймаут.
-    timeval rec_tv;
-    rec_tv.tv_sec = sec;
-    rec_tv.tv_usec = usec;
-
-    //Network performance info.
-    static u_long st_time;
-    static u_int select_wait_time;
-    st_time = get_millisec();
-
-    // Ждем таймаута или полученных данных.
-    int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
-
-    if ( 0 == n )
-        {
-        if (!first_connect)
-            {
-            sprintf( G_LOG->msg,
-                "Network device : s%d->\"%s\":\"%s\""
-                " disconnected on select read try : timeout (%ld ms).",
-                s, name, IP, sec * 1000 + usec / 1000 );
-
-            G_LOG->write_log( i_log::P_ERR );
-            }
-        return -2;  // timeout!
-        }
-
-    if ( -1 == n )
-        {
-        sprintf( G_LOG->msg,
-            "Network device : s%d->\"%s\":\"%s\""
-            " disconnected on select read try : %s.",
-            s, name, IP, strerror( errno ) );
-        G_LOG->write_log( i_log::P_ERR );
-
-        return -1; // error
-        }
-
-    // Данные должны быть здесь, поэтому делаем обычный recv().
-    int res = recv( s, buf, len, MSG_NOSIGNAL );
-
-    select_wait_time = get_delta_millisec( st_time );
-
-    if ( 0 == res )
-        {
-        sprintf( G_LOG->msg,
-            "Network device : s%d->\"%s\":\"%s\""
-            " was closed.",
-            s, name, IP );
-        G_LOG->write_log( i_log::P_WARNING );
-        }
-
-    if ( res < 0 )
-        {
-        sprintf( G_LOG->msg,
-            "Network device : s%d->\"%s\":\"%s\""
-            " disconnected on read try : %s.",
-            s, name, IP, strerror( errno ) );
-        G_LOG->write_log( i_log::P_ERR );
-        }
-
-    //Network performance info.
-    if ( stat )
-        {
-        stat->cycles_cnt++;
-        stat->all_time += select_wait_time;
-
-        if ( select_wait_time > stat->max_iteration_cycle_time )
-            {
-            stat->max_iteration_cycle_time = select_wait_time;
-            }
-        if ( select_wait_time < stat->min_iteration_cycle_time )
-            {
-            stat->min_iteration_cycle_time = select_wait_time;
-            }
-        }
-
-    return res;
-    }
-//------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int idx )
     {
     socket_state &sock_state = sst[ idx ];
@@ -781,7 +646,7 @@ int tcp_communicator_linux::do_echo ( int idx )
             {
             // Ожидаем данные с таймаутом 50 мсек.
             err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 50000L,
-                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat, 1 );
+                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
             if (err == -2)
                 {
                 //Если при подключении на модбас-сокет первый раз данные не пришли, то игнорируем(панель Weintek)
