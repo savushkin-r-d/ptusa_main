@@ -3,14 +3,12 @@
 SECONDS=0
 
 configs=(
-    "build-windows-AXCF2152-2024-LTS-Release:build-windows-AXCF2152-2024-LTS-Release"
-    "windows-VS2022-default:build-windows-VS2022-release"
+    "build-windows-AXCF2152-2024-LTS-Release build-windows-AXCF2152-2024-LTS-Release"
+    "windows-VS2022-default build-windows-VS2022-release"
 )
 
 for config in "${configs[@]}"; do
-    OLD_IFS=$IFS
-    IFS=":" read -r CFG_NAME BUILD_NAME <<< "$config"
-    IFS=$OLD_IFS
+    read -r CFG_NAME BUILD_NAME <<< "$config"
     ( cmake -D CFG_NAME:string="$CFG_NAME" -D BUILD_NAME:string="$BUILD_NAME" -P ./misc/bi.cmake ) 2>&1 | ./misc/colorize.sh
 done
 
