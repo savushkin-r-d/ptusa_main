@@ -47,9 +47,8 @@ int tech_dev_error::save_as_Lua_str( char *str )
 
         res += sprintf( str + res, "{\n" );
 
-        res += sprintf( str + res, "description=\"%s - %s (%d)\",\n",
-            simple_device->get_name(), simple_device->get_error_description(),
-            simple_device->get_error_id() );
+        res += sprintf( str + res, "description=\"%s - %s\",\n",
+            simple_device->get_name(), simple_device->get_error_description() );
 
         res += sprintf( str + res, "priority=%d,\n", P_ALARM );
         res += sprintf( str + res, "state=%d,\n", error_state );
@@ -57,11 +56,12 @@ int tech_dev_error::save_as_Lua_str( char *str )
         res += sprintf( str + res, "group=\"%s\",\n", "тревога" );
 
         res += sprintf( str + res, "id_n=%d,\n", simple_device->get_serial_n() );
+        res += sprintf( str + res, "id_object_alarm_number=%d,\n",
+            -simple_device->get_error_id() );
         res += sprintf( str + res, "id_type=%d,\n", simple_device->get_type() );
 
         res += sprintf( str + res, "suppress=%s\n",
-            alarm_params & P_IS_SUPPRESS ? "true" : "false" );
-
+            alarm_params & P_IS_SUPPRESS ? "true" : "false" );        
         res += sprintf( str + res, "},\n" );
         }
 
@@ -73,6 +73,14 @@ void tech_dev_error::evaluate( bool &is_new_state )
     // Проверка текущего состояния устройства.
     if ( simple_device->get_state() < 0 )    // Есть ошибка.
         {
+
+        if ( auto error_id = simple_device->get_error_id();
+            prev_error_id != error_id )
+            {
+            is_new_state = true;
+            prev_error_id = error_id;
+            }
+
         switch ( error_state )
             {
             case AS_ACCEPT:

@@ -107,8 +107,7 @@ int valve::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 int valve::get_state()
     {
-    if ( G_PAC_INFO()->is_emulator() )
-        return digital_io_device::get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
     switch ( get_valve_state() )
         {
@@ -248,7 +247,6 @@ int valve::get_state()
 
         case V_STOP:
             return V_STOP;
-            break;
         }
 
     return VX_UNKNOWN;
@@ -1177,50 +1175,44 @@ int valve_bottom_mix_proof::get_on_fb_value()
 //-----------------------------------------------------------------------------
 const char* io_link_valve::get_error_description( int err_id )
     {
-    if ( prev_err != err_id )
-        {
-        prev_err = err_id;
-        G_ERRORS_MANAGER->inc_errors_id();
-        }
-
     switch ( err_id )
         {
-        case 16:
+        case -116:
             return "не обнаружен магнитный индикатор на штоке клапана (#16)";
-        case 17:
+        case -117:
             return "конфигурация не соответствует требованиям автоматической "
                 "настройки (#17)";
-        case 18:
+        case -118:
             return "ошибка в пневматических соединениях - проверьте подключение "
                 "трубок или соленоидов (#18)";
-        case 19:
+        case -119:
             return "нет сигнала от датчика верхнего седла (#19)";
-        case 20:
+        case -120:
             return "клапан не достиг заданного положения в установленное время "
                 "(#20)";
-        case 21:
+        case -121:
             return "обнаружен самопроизвольный ход штока (#21)";
-        case 22:
+        case -122:
             return "не подключен датчик верхнего седла (#22)";
-        case 23:
+        case -123:
             return "не обнаружен соленоидный клапан 1 (#23)";
-        case 24:
+        case -124:
             return "не обнаружен соленоидный клапан 2 (#24)";
-        case 25:
+        case -125:
             return "не обнаружен соленоидный клапан 3 (#25)";
-        case 26:
+        case -126:
             return "активировано несколько входных сигналов соленоидных клапанов "
                 "(#26)";
-        case 27:
+        case -127:
             return "обнаружено короткое замыкание на цифровых выходах (#27)";
-        case 28:
+        case -128:
             return "процесс настройки был прерван (#28)";
-        case 29:
+        case -129:
             return "постоянное срабатывание кнопки - проверьте кнопки или "
                 "замените плату управления (#29)";
-        case 30:
+        case -130:
             return "потеряна связь с системой управления (#30)";
-        case 31:
+        case -131:
             return "сработала аварийная остановка - превышен допустимый "
                 "ход штока (#31)";
 
@@ -1360,6 +1352,18 @@ bool valve_iolink_mix_proof::get_fb_state()
 int valve_iolink_mix_proof::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
+
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    if ( in_info.err > 0 )
+        {
+        return -( 100 + in_info.err );
+        }
 
     switch ( get_valve_state() )
         {
@@ -1514,14 +1518,14 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_mix_proof::get_error_description()
     {
-    if ( auto error_id =
-        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-        error_id != io_device::IOLINKSTATE::OK )
+    auto error_id = get_error_id();
+    if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
+        error_id == -io_device::IOLINKSTATE::DEVICEERROR )
         {
-        return iol_dev.get_error_description( -error_id );
+        return iol_dev.get_error_description( error_id );
         }
 
-    if ( auto error_id = in_info.err; error_id > 0 )
+    if ( error_id >= -131 && error_id <= -116 )
         {
         return iol_valve.get_error_description( error_id );
         }

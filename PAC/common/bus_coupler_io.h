@@ -40,7 +40,8 @@ class io_device
 		enum IOLINKSTATE
 			{
 			OK,
-			NOTCONNECTED,
+
+			NOTCONNECTED = 100,
 			DEVICEERROR,
 			};
 

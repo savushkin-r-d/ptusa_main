@@ -33,11 +33,11 @@ class iolink_dev_test : public ::testing::Test
             G_PAC_INFO()->emulation_off();
             io_dev.init_and_alloc( 0, 0, 0, 1 );
             io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
-            EXPECT_EQ( dev.get_state(), -1 );
+            EXPECT_EQ( dev.get_state(), -100 );
             EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
 
             *io_dev.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
-            EXPECT_EQ( dev.get_state(), -2 );
+            EXPECT_EQ( dev.get_state(), -101 );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
 
             *io_dev.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
@@ -783,7 +783,8 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
     EXPECT_EQ( TE1.get_state(), 1 );
     test_dev_err( TE1, TE1, 1 );
 
-    TE1.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
+    TE1.set_cmd( "ST", 0,
+        -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) - 100 );
     EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
     }
 
@@ -2880,12 +2881,12 @@ TEST( valve_iolink_mix_proof, get_state )
 
     // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
     // поэтому есть ошибки.
-    V1.in_info.err = true;
-    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+    V1.in_info.err = 1;
+    EXPECT_EQ( -( 100 + V1.in_info.err ), V1.get_state() );
 
     // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
     // поэтому есть ошибка.
-    V1.in_info.err = false;
+    V1.in_info.err = 0;
     DeltaMilliSecSubHooker::set_millisec( 101UL );
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
@@ -2911,7 +2912,7 @@ TEST( valve_iolink_mix_proof, get_error_description )
     {
     struct ErrorDescCase
         {
-        uint16_t err;
+        int16_t err;
         const char* expected;
         };
 
@@ -2921,35 +2922,33 @@ TEST( valve_iolink_mix_proof, get_error_description )
         {
         {0, "обратная связь"},
 
-        {16, "не обнаружен магнитный индикатор на штоке клапана (#16)"},
-        {17, "конфигурация не соответствует требованиям автоматической "
+        {-116, "не обнаружен магнитный индикатор на штоке клапана (#16)"},
+        {-117, "конфигурация не соответствует требованиям автоматической "
             "настройки (#17)"},
-        {18, "ошибка в пневматических соединениях - проверьте подключение "
+        {-118, "ошибка в пневматических соединениях - проверьте подключение "
             "трубок или соленоидов (#18)"},
-        {19, "нет сигнала от датчика верхнего седла (#19)"},
-        {20, "клапан не достиг заданного положения в установленное время "
+        {-119, "нет сигнала от датчика верхнего седла (#19)"},
+        {-120, "клапан не достиг заданного положения в установленное время "
             "(#20)"},
-        {21, "обнаружен самопроизвольный ход штока (#21)"},
-        {22, "не подключен датчик верхнего седла (#22)"},
-        {23, "не обнаружен соленоидный клапан 1 (#23)"},
-        {24, "не обнаружен соленоидный клапан 2 (#24)"},
-        {25, "не обнаружен соленоидный клапан 3 (#25)"},
-        {26, "активировано несколько входных сигналов соленоидных клапанов "
+        {-121, "обнаружен самопроизвольный ход штока (#21)"},
+        {-122, "не подключен датчик верхнего седла (#22)"},
+        {-123, "не обнаружен соленоидный клапан 1 (#23)"},
+        {-124, "не обнаружен соленоидный клапан 2 (#24)"},
+        {-125, "не обнаружен соленоидный клапан 3 (#25)"},
+        {-126, "активировано несколько входных сигналов соленоидных клапанов "
             "(#26)"},
-        {27, "обнаружено короткое замыкание на цифровых выходах (#27)"},
-        {28, "процесс настройки был прерван (#28)"},
-        {29, "постоянное срабатывание кнопки - проверьте кнопки или "
+        {-127, "обнаружено короткое замыкание на цифровых выходах (#27)"},
+        {-128, "процесс настройки был прерван (#28)"},
+        {-129, "постоянное срабатывание кнопки - проверьте кнопки или "
             "замените плату управления (#29)"},
-        {30, "потеряна связь с системой управления (#30)"},
-        {31, "сработала аварийная остановка - превышен допустимый "
+        {-130, "потеряна связь с системой управления (#30)"},
+        {-131, "сработала аварийная остановка - превышен допустимый "
             "ход штока (#31)"},
-
-        {7, "неизвестная ошибка (#7)"}
         };
 
     for ( const auto& c : cases )
         {
-        v.set_err( c.err );
+        v.set_state( c.err );
         EXPECT_STREQ( v.get_error_description(), c.expected ) << "err=" << c.err;
         }
     }
@@ -3788,7 +3787,7 @@ TEST( counter_iolink, get_error_description )
     auto res = fqt1.get_error_description(); //Нет ошибок.
     EXPECT_STREQ( "нет ошибок", res );
 
-    fqt1.set_cmd( "ST", 0, -1 );
+    fqt1.set_cmd( "ST", 0, -100 );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "IOL-устройство не подключено", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
@@ -3796,7 +3795,7 @@ TEST( counter_iolink, get_error_description )
     EXPECT_STREQ( "IOL-устройство не подключено", res );
 
 
-    fqt1.set_cmd( "ST", 0, -2 );
+    fqt1.set_cmd( "ST", 0, -101 );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "ошибка IOL-устройства", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );

@@ -272,7 +272,8 @@ class tech_dev_error: public base_error
         bool static is_new_error;        ///< Наличие новой тревоги.
 
     private:
-        device*     simple_device; ///< Простое устройство.
+        device* simple_device;  ///< Простое устройство.
+        int prev_error_id = 0;  ///< Предыдущая ошибка.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке сложного устройства (танк,
@@ -381,11 +382,6 @@ class errors_manager
         u_int_2 get_errors_id() const
             {
             return errors_id;
-            }
-
-        void inc_errors_id()
-            {
-            ++errors_id;
             }
 
     private:

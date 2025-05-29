@@ -83,12 +83,13 @@ TEST( tech_dev_error, save_as_Lua_str )
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     auto res_str =
         R"s({
-description="V1 - обратная связь (-1)",
+description="V1 - обратная связь",
 priority=250,
 state=1,
 type=4,
 group="тревога",
 id_n=0,
+id_object_alarm_number=1,
 id_type=0,
 suppress=false
 },
@@ -104,18 +105,19 @@ suppress=false
     G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_IOLINK, "FQT1", "Test counter", "IFM" );
     auto fqt1 = G_DEVICE_MANAGER()->get_device( "FQT1" );
-    fqt1->set_cmd( "ST", 0, -1 );
+    fqt1->set_cmd( "ST", 0, -100 );
 
     G_ERRORS_MANAGER->evaluate();
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     res_str =
         R"s({
-description="FQT1 - IOL-устройство не подключено (-1)",
+description="FQT1 - IOL-устройство не подключено",
 priority=250,
 state=1,
 type=4,
 group="тревога",
 id_n=1,
+id_object_alarm_number=100,
 id_type=7,
 suppress=false
 },
@@ -127,12 +129,13 @@ suppress=false
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     res_str =
         R"s({
-description="FQT1 - IOL-устройство не подключено (-1)",
+description="FQT1 - IOL-устройство не подключено",
 priority=250,
 state=2,
 type=4,
 group="тревога",
 id_n=1,
+id_object_alarm_number=100,
 id_type=7,
 suppress=false
 },
