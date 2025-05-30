@@ -3051,6 +3051,8 @@ TEST_F( LevelSIOLinkTest, SetArticle_EmptyArticle )
 
 TEST_F( LevelSIOLinkTest, get_state )
     {
+    device->set_article( "IFM.LMT100" );
+
     EXPECT_EQ( device->get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
@@ -3061,6 +3063,8 @@ TEST_F( LevelSIOLinkTest, get_state )
 
 TEST_F( LevelSIOLinkTest, is_active )
     {
+    device->set_article( "IFM.LMT100" );
+
     EXPECT_TRUE( device->is_active() );
 
     G_PAC_INFO()->emulation_off();

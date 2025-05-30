@@ -2639,8 +2639,6 @@ level_s_iolink::level_s_iolink( const char *dev_name,
     {
     set_par_name( P_DT, 0, "P_DT" );
     set_par_name( P_ERR, 0, "P_ERR" );
-    
-    direct_set_state( current_state );
     }
 
 void level_s_iolink::evaluate_io()
@@ -2700,6 +2698,8 @@ void level_s_iolink::evaluate_io()
 
 void level_s_iolink::set_article( const char* new_article )
     {
+    direct_set_state( current_state );
+
     device::set_article( new_article );
 
     auto article = get_article();
