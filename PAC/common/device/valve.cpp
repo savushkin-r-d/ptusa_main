@@ -1173,7 +1173,7 @@ int valve_bottom_mix_proof::get_on_fb_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const char* io_link_valve::get_error_description( int err_id )
+const char* io_link_valve::get_error_description( int err_id ) const
     {
     switch ( err_id )
         {

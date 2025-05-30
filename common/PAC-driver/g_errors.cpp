@@ -7,8 +7,6 @@
 #include "PAC_err.h"
 #endif
 
-#include <fmt/core.h>
-
 #ifdef PAC
 auto_smart_ptr < errors_manager > errors_manager::instance;
 

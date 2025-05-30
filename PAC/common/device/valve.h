@@ -652,10 +652,7 @@ class io_link_valve
         /// @brief Returns a description of the error that is active.
         /// 
         /// @return A C-string containing the error description.
-        const char* get_error_description( int err_id );
-
-    private:
-        int prev_err = 0;
+        const char* get_error_description( int err_id ) const;
     };
 //-----------------------------------------------------------------------------
 #pragma pack(push,1)
