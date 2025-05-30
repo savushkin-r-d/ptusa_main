@@ -131,6 +131,8 @@ class temperature_e_iolink : public AI1
 
 			ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
 			};
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
@@ -239,6 +241,8 @@ class pressure_e_iolink : public analog_io_device
 
         void evaluate_io() override;
 
+        const char* get_error_description() override;
+
         struct PT_data
             {
             uint16_t st1 :1;
@@ -272,6 +276,8 @@ class pressure_e_iolink : public analog_io_device
 
         float v = .0f;
         int st = 0;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Автоматический выключатель.
@@ -370,6 +376,8 @@ class level_e_iolink : public level
 
         void set_string_property(const char* field, const char* value) override;
 
+        const char* get_error_description() override;
+
     private:
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
 
@@ -389,6 +397,8 @@ class level_e_iolink : public level
         float v = .0f;
 
         i_AI_device* PT_extra = nullptr;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
@@ -447,6 +457,8 @@ class concentration_e_iolink : public analog_io_device
 
         void evaluate_io() override;
 
+        const char* get_error_description() override;
+
     private:
 
 #pragma pack(push,1)
@@ -464,7 +476,6 @@ class concentration_e_iolink : public analog_io_device
 
         QT_data* info = new QT_data();
 
-    private:
         enum CONSTANTS
             {
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
@@ -473,6 +484,8 @@ class concentration_e_iolink : public analog_io_device
 
             LAST_PARAM_IDX,
             };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
@@ -982,6 +995,8 @@ class level_s_iolink : public analog_io_device
 
         void set_article( const char* new_article ) override;
 
+        const char* get_error_description() override;
+
 #ifndef PTUSA_TEST
     private:
 #endif
@@ -1032,6 +1047,8 @@ class level_s_iolink : public analog_io_device
 
             LAST_PARAM_IDX,
             };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -1352,6 +1369,8 @@ class counter_iolink : public base_counter
             };
 
         in_data in_info{ 0, 0, 0, 0, 0 };
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.
@@ -1378,7 +1397,11 @@ class signal_column_iolink : public signal_column
         void set_string_property( const char* field, const char* value ) override;
 
         void evaluate_io() override;
-    
+
+        int get_state() override;
+
+        const char* get_error_description() override;
+
     private:
         void process_DO( u_int n, DO_state state, const char* name ) override;
 
@@ -1394,7 +1417,9 @@ class signal_column_iolink : public signal_column
             };
 
         static out_data stub_out_info;
-        out_data *out_info = &stub_out_info;
+        out_data* out_info = &stub_out_info;
+
+        io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.

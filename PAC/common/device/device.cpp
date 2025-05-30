@@ -156,6 +156,21 @@ void signal_column_iolink::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
+const char* signal_column_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+//-----------------------------------------------------------------------------
+int signal_column_iolink::get_state()
+    {
+    if ( auto st = get_AI_IOLINK_state( 0 ); st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return signal_column::get_state();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int params_count, bool is_ready ) :
@@ -1630,13 +1645,11 @@ float counter_iolink::get_value()
 //-----------------------------------------------------------------------------
 const char* counter_iolink::get_error_description()
     {    
-    switch ( get_error_id() )
+    switch ( auto error_id = get_error_id() )
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-            return "IOL-устройство не подключено";
-
         case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-            return "ошибка IOL-устройства";
+            return iol_dev.get_error_description( error_id );
 
         default:
             return base_counter::get_error_description();
@@ -1791,22 +1804,7 @@ int temperature_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 const char* temperature_e_iolink::get_error_description()
     {
-    if ( auto err_id = get_error_id(); err_id < 0 )
-        {
-        switch ( err_id )
-            {
-            case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-                return "IOL-устройство не подключено";
-
-                case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-                    return "ошибка IOL-устройства";
-
-                default:
-                    return "неизвестная ошибка";
-            }
-        }
-
-    return "нет ошибок";
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2679,10 +2677,29 @@ void level_s_iolink::evaluate_io()
             st = 0;
             break;
         }
+
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
     }
 
 void level_s_iolink::set_article( const char* new_article )
     {
+    direct_set_state( current_state );
+
     device::set_article( new_article );
 
     auto article = get_article();
@@ -2758,32 +2775,28 @@ int level_s_iolink::get_state()
     if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
         devstate != io_device::IOLINKSTATE::OK )
 		{
-		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
+		return -devstate;
 		}
-
-    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
-        {
-        if ( current_state != st )
-            {
-            if ( get_delta_millisec( time ) > dt )
-                {
-                current_state = st;
-                time = get_millisec();
-                }
-            }
-        else
-            {
-            time = get_millisec();
-            }
-        }
-    else current_state = st;
 
     return current_state;
 	}
 
 bool level_s_iolink::is_active()
     {
-    return get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
+        {
+        return true;
+        }
+
+    return current_state;
+    }
+
+const char* level_s_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2930,6 +2943,11 @@ void level_e_iolink::set_string_property(const char* field, const char* value)
         {
         PT_extra = PT(value);
         }
+    }
+
+const char* level_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3117,6 +3135,11 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
 void pressure_e_iolink::evaluate_io()
     {
     evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    }
+//-----------------------------------------------------------------------------
+const char* pressure_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
@@ -3505,6 +3528,11 @@ void concentration_e_iolink::evaluate_io()
             get_value(), get_temperature(), get_state());
     G_LOG->write_log(i_log::P_NOTICE);
 #endif
+    }
+//-----------------------------------------------------------------------------
+const char* concentration_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

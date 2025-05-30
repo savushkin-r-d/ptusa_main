@@ -1176,3 +1176,10 @@ class signal_column : public device, public io_device
 
         STEP siren_step = STEP::off;
     };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с интерфейсом подключения IO-Link.
+class io_link_device
+    {        
+    public:
+        const char* get_error_description( int error_id ) const;
+    };

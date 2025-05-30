@@ -40,7 +40,8 @@ class io_device
 		enum IOLINKSTATE
 			{
 			OK,
-			NOTCONNECTED,
+
+			NOTCONNECTED = 100,
 			DEVICEERROR,
 			};
 
@@ -401,8 +402,8 @@ class io_manager
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
 
-			u_long last_init_time; ///< Время последней попытки подключиться, мсек.
-			u_long delay_time;     ///< Время ожидания до попытки подключиться, мсек.
+			u_long last_init_time = 0; ///< Время последней попытки подключиться, мсек.
+			u_long delay_time;         ///< Время ожидания до попытки подключиться, мсек.
 
 			stat_time recv_stat;  ///< Статистика работы с сокетом.
 			stat_time send_stat;  ///< Статистика работы с сокетом.
