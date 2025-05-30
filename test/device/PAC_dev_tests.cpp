@@ -33,11 +33,11 @@ class iolink_dev_test : public ::testing::Test
             G_PAC_INFO()->emulation_off();
             io_dev.init_and_alloc( 0, 0, 0, 1 );
             io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
-            EXPECT_EQ( dev.get_state(), -100 );
+            EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
             EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
 
             *io_dev.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
-            EXPECT_EQ( dev.get_state(), -101 );
+            EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
 
             *io_dev.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
