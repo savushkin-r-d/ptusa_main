@@ -108,11 +108,13 @@ class temperature_e_iolink : public AI1
     public:
         explicit temperature_e_iolink( const char *dev_name );
 
-        ~temperature_e_iolink() override;
+        ~temperature_e_iolink() override = default;
 
         float get_value() override;
 
         int get_state() override;
+
+        void evaluate_io() override;
 
         const char* get_error_description() override;
 
@@ -122,9 +124,9 @@ class temperature_e_iolink : public AI1
             int16_t v = 0;
             };
 
-        TE_data *info = new TE_data();
-		u_int start_param_idx;
-        
+        TE_data info{};
+        u_int start_param_idx;
+
 		enum CONSTANTS
 			{
 			P_ERR_T = 1,                ///< Аварийное значение температуры.

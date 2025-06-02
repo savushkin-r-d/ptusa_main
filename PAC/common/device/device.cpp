@@ -1765,28 +1765,17 @@ temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
     set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
     }
 //-----------------------------------------------------------------------------
-temperature_e_iolink::~temperature_e_iolink()
-    {
-    delete info;
-    info = nullptr;
-    }
-//-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par(P_ERR_T, start_param_idx);
+        return get_par( P_ERR_T, start_param_idx );
         }
     else
         {
-        auto data = (char*)get_AI_data(C_AI_INDEX);
-
-        int16_t tmp = data[1] + 256 * data[0];
-        memcpy(info, &tmp, 2);
-
-        return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 0.1f * info.v;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1794,12 +1783,22 @@ int temperature_e_iolink::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX ); st != io_device::IOLINKSTATE::OK )
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX );
+        st != io_device::IOLINKSTATE::OK )
         {
         return -st;
         }
 
     return 1;
+    }
+//-----------------------------------------------------------------------------
+void temperature_e_iolink::evaluate_io()
+    {
+    auto data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+    if ( !data ) return;
+
+    std::swap( data[ 0 ], data[ 1 ] );
+    memcpy( &info, data, 2 );
     }
 //-----------------------------------------------------------------------------
 const char* temperature_e_iolink::get_error_description()
