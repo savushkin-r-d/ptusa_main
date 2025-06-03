@@ -655,7 +655,6 @@ class io_link_valve
         const char* get_error_description( int err_id ) const;
     };
 //-----------------------------------------------------------------------------
-#pragma pack(push,1)
 struct aLfalaval_iol_valve_in_data
     {
     int16_t  pos;
@@ -667,8 +666,11 @@ struct aLfalaval_iol_valve_in_data
     uint8_t  unused : 3;
     uint8_t  err    : 5;
     };
+static_assert( sizeof( aLfalaval_iol_valve_in_data ) == 4,
+    "Struct aLfalaval_iol_valve_in_data must be 4 bytes size." );
 
-// Swapped low and high byte for easer processing.
+// Swapping the low and high bytes to simplify processing.
+#pragma pack(push,1)
 struct aLfalaval_iol_valve_out_data_swapped
     {
     uint8_t unused1 : 4;
@@ -678,6 +680,9 @@ struct aLfalaval_iol_valve_out_data_swapped
     bool    wink    : 1;   // Visual indication.
     };
 #pragma pack(pop)
+
+static_assert( sizeof( aLfalaval_iol_valve_out_data_swapped ) == 1,
+    "Struct aLfalaval_iol_valve_out_data_swapped must be 1 byte size." );
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve

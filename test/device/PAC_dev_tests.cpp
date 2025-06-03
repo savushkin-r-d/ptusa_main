@@ -789,7 +789,7 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_value )
 
     init_channels( TE1 );
     auto err_value = -100.f;
-    TE1.set_par( temperature_e_iolink::CONSTANTS::P_ERR_T,
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink::CONSTANTS::P_ERR_T ),
         TE1.start_param_idx, err_value );
     // Есть привязка к модулям ввода/вывода - должны получить аварийное
     // значение.
@@ -2932,6 +2932,18 @@ TEST( valve_iolink_mix_proof, get_state )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Должна быть ошибка подключения устройства от модуля IO-Link.
+    EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 class valve_iolink_mix_proof_testable : public valve_iolink_mix_proof
     {
     public:
@@ -2942,8 +2954,6 @@ class valve_iolink_mix_proof_testable : public valve_iolink_mix_proof
             in_info.err = err; 
             }
     };
-
-
 
 TEST( valve_iolink_mix_proof, get_error_description )
     {
@@ -2988,7 +2998,16 @@ TEST( valve_iolink_mix_proof, get_error_description )
         v.set_state( c.err );
         EXPECT_STREQ( v.get_error_description(), c.expected ) << "err=" << c.err;
         }
+
+    v.set_cmd( "ST", 0, -io_device::IOLINKSTATE::NOTCONNECTED );
+    auto res = v.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+
+    v.set_cmd( "ST", 0, -io_device::IOLINKSTATE::DEVICEERROR );
+    res = v.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
     }
+
 
 TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     {
@@ -3828,7 +3847,7 @@ TEST( counter_iolink, get_error_description )
     auto res = fqt1.get_error_description(); //Нет ошибок.
     EXPECT_STREQ( "нет ошибок", res );
 
-    fqt1.set_cmd( "ST", 0, -100 );
+    fqt1.set_cmd( "ST", 0, -io_device::IOLINKSTATE::NOTCONNECTED );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "IOL-устройство не подключено", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
@@ -3836,7 +3855,7 @@ TEST( counter_iolink, get_error_description )
     EXPECT_STREQ( "IOL-устройство не подключено", res );
 
 
-    fqt1.set_cmd( "ST", 0, -101 );
+    fqt1.set_cmd( "ST", 0, -io_device::IOLINKSTATE::DEVICEERROR );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "ошибка IOL-устройства", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );

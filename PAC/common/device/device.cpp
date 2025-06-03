@@ -1758,11 +1758,12 @@ float temperature_e_analog::get_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT)
+temperature_e_iolink::temperature_e_iolink( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        start_param_idx, "P_ERR_T" );
     }
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
@@ -1771,7 +1772,8 @@ float temperature_e_iolink::get_value()
 
     if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par( P_ERR_T, start_param_idx );
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+            start_param_idx );
         }
     else
         {
