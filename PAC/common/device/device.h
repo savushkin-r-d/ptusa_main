@@ -118,7 +118,10 @@ class temperature_e_iolink : public AI1
 
         const char* get_error_description() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif 
+
         struct TE_data
             {
             int16_t v = 0;

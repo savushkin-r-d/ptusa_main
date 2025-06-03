@@ -25,22 +25,28 @@ class iolink_dev_test : public ::testing::Test
             io_manager::replace_instance( prev_mngr );
             };
 
+        void init_channels( io_device& io_dev ) const
+            {
+            io_dev.init_and_alloc( 0, 0, 0, 1 );
+            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+            }
+
         void test_dev_err( device& dev, io_device& io_dev, int expected_dev_state ) const
             {
             EXPECT_STREQ( dev.get_error_description(), "нет ошибок" );
 
-
             G_PAC_INFO()->emulation_off();
-            io_dev.init_and_alloc( 0, 0, 0, 1 );
-            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+            init_channels( io_dev );
             EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
             EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
 
-            *io_dev.AI_channels.int_read_values[ 0 ] = 1;  // Bit 0 - IOLink connected.
+            // Bit 0 - IOLink connected.
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 1;
             EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
-
-            *io_dev.AI_channels.int_read_values[ 0 ] = 257;// Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            
+            // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 257;
             EXPECT_EQ( dev.get_state(), expected_dev_state );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
 
@@ -738,7 +744,7 @@ void test_temperature( AI1* TE1 )
 
     G_PAC_INFO()->emulation_off();
     TE1->init_and_alloc( 0, 0, 0, 1 );
-    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );    
+    TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
     EXPECT_EQ( TE1->get_state(), 1 );
 
     *TE1->AI_channels.int_read_values[ 0 ] = -30001;
@@ -771,10 +777,41 @@ TEST( temperature_e_analog, get_type_name )
     }
 
 
-TEST( temperature_e_iolink, get_value )
+TEST_F( iolink_dev_test, temperature_e_iolink_get_value )
     {
     temperature_e_iolink TE1( "T1" );
     EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Нет привязки к модулям ввода/вывода - должны получить 0.
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    init_channels( TE1 );
+    auto err_value = -100.f;
+    TE1.set_par( temperature_e_iolink::CONSTANTS::P_ERR_T,
+        TE1.start_param_idx, err_value );
+    // Есть привязка к модулям ввода/вывода - должны получить аварийное
+    // значение.
+    EXPECT_EQ( TE1.get_value(), err_value );
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_evaluate_io )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+
+    u_int_2 value = 257;
+    // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+    // Data pointer "int_read_values" equal "int_module_read_values".
+    *TE1.AI_channels.int_module_read_values[ 0 ] = value;
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_value(), 0.1f * value );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )

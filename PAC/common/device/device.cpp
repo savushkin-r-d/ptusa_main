@@ -1794,7 +1794,7 @@ int temperature_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 void temperature_e_iolink::evaluate_io()
     {
-    auto data = reinterpret_cast<char*>( get_AI_data( C_AI_INDEX ) );
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
     if ( !data ) return;
 
     std::swap( data[ 0 ], data[ 1 ] );
