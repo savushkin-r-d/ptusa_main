@@ -43,15 +43,18 @@ class iolink_dev_test : public ::testing::Test
 
             G_PAC_INFO()->emulation_off();
             init_channels( io_dev );
+            dev.evaluate_io();
             EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
             EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
 
             // Bit 0 - IOLink connected.
             *io_dev.AI_channels.int_module_read_values[ 0 ] = 0b1;
+            dev.evaluate_io();
             EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
             
             set_iol_state_to_OK( io_dev );
+            dev.evaluate_io();
             EXPECT_EQ( dev.get_state(), expected_dev_state );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
 
@@ -3139,10 +3142,14 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
     EXPECT_TRUE( test_dev_max.is_active() );
 
     test_dev_max.evaluate_io(); // Correct eval without I/O data.
+    EXPECT_TRUE( test_dev_max.is_active() );
 
     G_PAC_INFO()->emulation_off();
 
     init_channels( test_dev_max );
+    test_dev_max.evaluate_io();
+    EXPECT_TRUE( test_dev_max.is_active() );  // Due to IO-Link module error.
+        
     set_iol_state_to_OK( test_dev_max );
     test_dev_max.evaluate_io(); // Correct eval with I/O data.
     EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
@@ -3163,7 +3170,25 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
 TEST_F( iolink_dev_test, level_s_iolink_get_error_description )
     {
     level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
-    test_dev_err( test_dev_max, test_dev_max, 1 );
+    test_dev_err( test_dev_max, test_dev_max, 0 );
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_get_value )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    
+    EXPECT_EQ( test_dev_max.get_value(), .0f );
+    G_PAC_INFO()->emulation_off();
+
+    EXPECT_EQ( test_dev_max.get_value(), .0f );
+
+    init_channels( test_dev_max );
+    const auto VALUE = 10.f;
+    test_dev_max.set_par( level_s_iolink::CONSTANTS::P_ERR, 0, VALUE );
+    test_dev_max.evaluate_io();
+    EXPECT_EQ( test_dev_max.get_value(), VALUE );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 

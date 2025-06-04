@@ -1041,7 +1041,6 @@ class level_s_iolink : public analog_io_device
             };
 
         float v = .0f;
-        int st = 0;
 
         enum CONSTANTS
             {
