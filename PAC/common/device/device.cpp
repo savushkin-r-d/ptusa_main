@@ -2757,34 +2757,34 @@ level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
 
 float level_s_iolink::get_value()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
-	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
-		{
-		return get_par( P_ERR, 0 );
-		}
-	else
-		{
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( P_ERR, 0 );
+        }
+    else
+        {
         return v;
-		}
+        }
     }
 
 int level_s_iolink::get_state()
-	{
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
     if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
         devstate != io_device::IOLINKSTATE::OK )
-		{
-		return -devstate;
-		}
+        {
+        return -devstate;
+        }
 
     return current_state;
-	}
+    }
 
 bool level_s_iolink::is_active()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
     if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
         devstate != io_device::IOLINKSTATE::OK )

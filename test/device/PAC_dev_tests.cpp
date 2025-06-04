@@ -27,8 +27,14 @@ class iolink_dev_test : public ::testing::Test
 
         void init_channels( io_device& io_dev ) const
             {
-            io_dev.init_and_alloc( 0, 0, 0, 1 );
-            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 0, 1 );
+            io_dev.init_and_alloc( 0, 0, 0, 2 );
+            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+            }
+
+        void set_iol_state_to_OK( io_device& io_dev ) const
+            {
+            // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
             }
 
         void test_dev_err( device& dev, io_device& io_dev, int expected_dev_state ) const
@@ -41,12 +47,11 @@ class iolink_dev_test : public ::testing::Test
             EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
 
             // Bit 0 - IOLink connected.
-            *io_dev.AI_channels.int_module_read_values[ 0 ] = 1;
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 0b1;
             EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
             
-            // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
-            *io_dev.AI_channels.int_module_read_values[ 0 ] = 257;
+            set_iol_state_to_OK( io_dev );
             EXPECT_EQ( dev.get_state(), expected_dev_state );
             EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
 
@@ -803,13 +808,12 @@ TEST_F( iolink_dev_test, temperature_e_iolink_evaluate_io )
 
     G_PAC_INFO()->emulation_off();
     init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
 
-    u_int_2 value = 257;
-    // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
-    // Data pointer "int_read_values" equal "int_module_read_values".
-    *TE1.AI_channels.int_module_read_values[ 0 ] = value;
+    const u_int_2 VALUE = 257;
+    *TE1.AI_channels.int_read_values[ 0 ] = VALUE;
     TE1.evaluate_io();
-    EXPECT_EQ( TE1.get_value(), 0.1f * value );
+    EXPECT_EQ( TE1.get_value(), 0.1f * VALUE );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -3125,6 +3129,34 @@ TEST_F( LevelSIOLinkTest, is_active )
 
     G_PAC_INFO()->emulation_off();
     EXPECT_TRUE( device->is_active() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    test_dev_max.set_article( "IFM.LMT100" );
+    EXPECT_TRUE( test_dev_max.is_active() );
+
+    test_dev_max.evaluate_io(); // Correct eval without I/O data.
+
+    G_PAC_INFO()->emulation_off();
+
+    init_channels( test_dev_max );
+    set_iol_state_to_OK( test_dev_max );
+    test_dev_max.evaluate_io(); // Correct eval with I/O data.
+    EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
+
+    const auto CHECK_TIME = 100.f;
+    test_dev_max.set_par( level_s_iolink::CONSTANTS::P_DT, 0, CHECK_TIME );
+    test_dev_max.evaluate_io();
+    EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
+
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
+    test_dev_max.time -= static_cast<u_int_4>( CHECK_TIME + 1.f );
+    test_dev_max.evaluate_io();    
+    EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+
     G_PAC_INFO()->emulation_on();
     }
 
