@@ -24,9 +24,9 @@ class OPCUA_server
 
         void evaluate();
 
-        void shutdown();
+        virtual void shutdown();
 
-        UA_StatusCode init_all_and_start()
+        virtual UA_StatusCode init_all_and_start()
             {
             init();
             create_dev_objects();
@@ -74,7 +74,9 @@ class OPCUA_server
 
         UA_Server* get_server() const;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         OPCUA_server() = default;
 
         UA_Server* server = nullptr;
