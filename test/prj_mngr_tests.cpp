@@ -166,7 +166,6 @@ Usage:
     std::string debug = R"(DEBUG ON.
 Resetting params (command line parameter "rcrc").
 )";
-    std::time_t _tm = std::time( nullptr );
     std::tm tm = get_time();
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
