@@ -90,6 +90,8 @@ struct stat_time
 
 #ifdef PTUSA_TEST
 tm get_time_next_hour();
+
+tm get_fixed_time();
 #endif
 
 #endif // DTIME_H

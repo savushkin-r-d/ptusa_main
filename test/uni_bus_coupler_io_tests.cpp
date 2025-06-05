@@ -177,18 +177,6 @@ class test_uni_io_manager : public uni_io_manager
             is_set_function_code = false;
             }
 
-        static tm get_fixed_time()
-            {
-            static struct tm timeInfo_;
-            static time_t t_ = 1741737600;  // 2025-03-12 00.00.00
-#ifdef LINUX_OS
-            gmtime_r( &t_, &timeInfo_ );
-#else
-            gmtime_s( &timeInfo_, &t_ );
-#endif
-            return timeInfo_;
-            }
-
     private:
         int res = 0;
         u_char function_code;
@@ -217,7 +205,7 @@ TEST( uni_io_manager, read_inputs )
     mngr.get_node( 3 )->is_active = false;
 
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
-        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
@@ -304,7 +292,7 @@ TEST( uni_io_manager, write_outputs )
 
     // Должна быть неуспешная запись (ошибки на уровне данных). Сообщения должны быть.
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
-        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
     const std::string EXP_TIME = "2025-03-12 00.00.00 ";
@@ -354,7 +342,7 @@ TEST( uni_io_manager, read_write_data )
         2, "127.0.0.1", "A200", 1, 1, 1, 1, 1, 1 );
 
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
-        reinterpret_cast<void*>( &test_uni_io_manager::get_fixed_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 

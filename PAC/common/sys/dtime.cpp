@@ -15,4 +15,16 @@ tm get_time_next_hour()
 
     return timeInfo_;
     }
+
+tm get_fixed_time()
+    {
+    static struct tm timeInfo_;
+    static time_t t_ = 1741737600;  // 2025-03-12 00.00.00
+#ifdef LINUX_OS
+    gmtime_r( &t_, &timeInfo_ );
+#else
+    gmtime_s( &timeInfo_, &t_ );
+#endif
+    return timeInfo_;
+    }
 #endif
