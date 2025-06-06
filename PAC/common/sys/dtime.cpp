@@ -3,7 +3,7 @@
 #ifdef PTUSA_TEST
 tm get_time_next_hour()
     {
-    static struct tm timeInfo_;
+    thread_local static struct tm timeInfo_;
 #ifdef LINUX_OS
     auto t_ = time( nullptr );
     localtime_r( &t_, &timeInfo_ );
@@ -18,7 +18,7 @@ tm get_time_next_hour()
 
 tm get_fixed_time()
     {
-    static struct tm timeInfo_;
+    thread_local static struct tm timeInfo_;
     static const time_t FIXED_TIMESTAMP = 1741737600;  // 2025-03-12 00.00.00
 #ifdef LINUX_OS
     gmtime_r( &FIXED_TIMESTAMP, &timeInfo_ );
