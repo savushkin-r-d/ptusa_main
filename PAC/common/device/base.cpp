@@ -914,6 +914,8 @@ void signal_column::turn_off_green()
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_blue()
     {
+    if ( !blue_lamp_channel ) return;
+
     if ( !G_PAC_INFO()->is_emulator() )
         process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
 
@@ -946,6 +948,8 @@ void signal_column::turn_on_green()
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_blue()
     {
+    if ( !blue_lamp_channel ) return;
+
     if ( !G_PAC_INFO()->is_emulator() )
         process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
 
