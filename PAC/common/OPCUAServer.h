@@ -64,7 +64,7 @@ class OPCUA_server
             const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
             UA_DataValue* dataValue );
 
-        ~OPCUA_server();
+        virtual ~OPCUA_server();
 
         //Explicitly delete the copy constructors.
         OPCUA_server( OPCUA_server const& ) = delete;
