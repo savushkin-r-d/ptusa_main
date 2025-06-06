@@ -8,9 +8,9 @@ class MockOPCUAServer : public OPCUA_server
     public:
         MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
         MOCK_METHOD( void, shutdown, ( ), ( override ) );
+    };
 
-    } mockServer;
-
+MockOPCUAServer mockServer;
 
 OPCUA_server& get_instance()
     {
@@ -21,14 +21,14 @@ TEST( PAC_info, OPCUA_server_start_fail )
     {
     auto get_OPC_hook = subhook_new(
         reinterpret_cast<void*>( &OPCUA_server::get_instance ),
-        reinterpret_cast<void*>( &get_instance ), SUBHOOK_64BIT_OFFSET );
+        reinterpret_cast<void*>( &get_instance ),
+        SUBHOOK_64BIT_OFFSET );
     subhook_install( get_OPC_hook );
 
     // Подготовка: сервер вернёт ошибку.
     EXPECT_CALL( mockServer, init_all_and_start() )
         .WillOnce( ::testing::Return( 0xBADF00D ) );
-    EXPECT_CALL( mockServer, shutdown() )
-        .WillOnce( ::testing::Return() );
+    EXPECT_CALL( mockServer, shutdown() );
 
     // Установим начальное значение параметра.
     G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
