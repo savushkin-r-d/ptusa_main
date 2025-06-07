@@ -165,6 +165,14 @@ TEST( signal_column, turn_off_blue )
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
+    // Без описания колонны синий свет не включается.
+    test_dev.turn_on_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+
     test_dev.turn_on_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -175,8 +183,7 @@ TEST( signal_column, turn_off_blue )
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    G_PAC_INFO()->emulation_off();    
     test_dev.turn_on_blue();
     test_dev.turn_off_blue();
     G_PAC_INFO()->emulation_on();
@@ -404,6 +411,7 @@ TEST( signal_column, slow_blink_green )
 TEST( signal_column, normal_blink_blue )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
@@ -417,8 +425,7 @@ TEST( signal_column, normal_blink_blue )
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    G_PAC_INFO()->emulation_off();    
     test_dev.normal_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -433,9 +440,10 @@ TEST( signal_column, normal_blink_blue )
 TEST( signal_column, slow_blink_blue )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
-
+    
     test_dev.slow_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -447,7 +455,6 @@ TEST( signal_column, slow_blink_blue )
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.slow_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -462,6 +469,8 @@ TEST( signal_column, slow_blink_blue )
 TEST( signal_column, direct_set_state )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
