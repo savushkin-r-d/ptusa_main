@@ -6,7 +6,7 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class life_device : public device, public i_Lua_save_device
+class watchdog : public device, public i_Lua_save_device
     {
     public:
         enum class PARAM
@@ -17,10 +17,10 @@ class life_device : public device, public i_Lua_save_device
             };
 
         /// @param name - имя.
-        explicit life_device( const char* name, 
-            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_LIFEBIT );
+        explicit watchdog( const char* name, 
+            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_WATCHDOG );
 
-        ~life_device() override = default;
+        ~watchdog() override = default;
 
         void evaluate_io() override;
 
