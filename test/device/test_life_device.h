@@ -15,8 +15,8 @@ class mock_DI_device : public device
 class lifebit_test : public ::testing::Test
     {
     protected:
-        std::unique_ptr<life_device> life_bit = std::make_unique<life_device>(
-            "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFEBIT );
+        std::unique_ptr<watchdog> life_bit = std::make_unique<watchdog>(
+            "TestDevice", device::DEVICE_SUB_TYPE::DST_WATCHDOG );
         std::unique_ptr<mock_DI_device> mock_DI_dev = 
             std::make_unique<mock_DI_device>();
 
@@ -40,8 +40,8 @@ class mock_AI_device : public device
 class lifecounter_test : public ::testing::Test
     {
     protected:
-        std::unique_ptr<life_device> life_counter = std::make_unique<life_device>(
-            "TestDevice", device::DEVICE_SUB_TYPE::DST_LIFECOUNTER );
+        std::unique_ptr<watchdog> life_counter = std::make_unique<watchdog>(
+            "TestDevice", device::DEVICE_SUB_TYPE::DST_WATCHDOG );
         std::unique_ptr<mock_AI_device> mock_AI_dev = 
             std::make_unique<mock_AI_device>();
 
@@ -79,7 +79,7 @@ TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
 
     // Устанавливаем DT = 100 мс.
-    life_bit->set_par( static_cast<u_int>( life_device::PARAM::P_DT ), 0, 100 );
+    life_bit->set_par( static_cast<u_int>( watchdog::PARAM::P_DT ), 0, 100 );
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillRepeatedly( ::testing::Return( 1 ) ); // Состояние не меняется.
 
@@ -119,7 +119,7 @@ TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
     // Устанавливаем свойство "DEV" с именем устройства
     const char* device_name = "MockDevice1";
     G_DEVICE_MANAGER()->add_device(static_cast<device*>( mock_DI_dev.get() ),
-        device::DEVICE_TYPE::DT_LIFE_DEVICE );
+        device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "DEV", device_name );
 
     // Проверяем, что dev был установлен
@@ -155,7 +155,7 @@ TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
 
     // Устанавливаем DT = 100 мс.
-    life_counter->set_par( static_cast<u_int>( life_device::PARAM::P_DT ), 0, 100 );
+    life_counter->set_par( static_cast<u_int>( watchdog::PARAM::P_DT ), 0, 100 );
     EXPECT_CALL( *mock_AI_dev, get_value() )
         .WillRepeatedly( ::testing::Return( 10 ) );// Состояние не меняется.
 
@@ -170,8 +170,8 @@ TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     EXPECT_EQ( life_counter->get_state(), 1 ); // Устройство должно активироваться.
     }
 
-TEST( life_device, get_type_name )
+TEST( watchdog, get_type_name )
     {
-    life_device dev( "POU1LF1" );
+    watchdog dev( "POU1LF1" );
     EXPECT_STREQ( "Устройство проверки связи", dev.get_type_name() );
     }
