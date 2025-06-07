@@ -284,8 +284,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     //Инициализация параметров для корректной работы устройств.
     G_DEVICE_MANAGER()->init_rt_params();
-    //Получение данных из модулей ввода\вывода для корректной работы устройств.
-    G_DEVICE_MANAGER()->evaluate_io();
 
     //IV Выполнение основного скрипта ('main.plua').
     if ( G_DEBUG )

@@ -45,24 +45,30 @@ int tech_dev_error::save_as_Lua_str( char *str )
         {
         unsigned char alarm_params = err_par[ P_PARAM_N ];
 
-        res += sprintf( str + res, "{\n" );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE, "{{\n" ).size;
 
-        res += sprintf( str + res, "description=\"%s - %s (%d)\",\n",
-            simple_device->get_name(), simple_device->get_error_description(),
-            simple_device->get_error_id() );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "description=\"{} - {}\",\n",
+            simple_device->get_name(), simple_device->get_error_description() ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "priority={},\n", static_cast<int>( ALARM_CLASS_PRIORITY::P_ALARM ) ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "state={},\n", error_state ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "type={},\n", static_cast<int>( ALARM_TYPE::AT_SPECIAL ) ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "group=\"{}\",\n", "тревога" ).size;
 
-        res += sprintf( str + res, "priority=%d,\n", P_ALARM );
-        res += sprintf( str + res, "state=%d,\n", error_state );
-        res += sprintf( str + res, "type=%d,\n", AT_SPECIAL );
-        res += sprintf( str + res, "group=\"%s\",\n", "тревога" );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "id_n={},\n", simple_device->get_serial_n() ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "id_object_alarm_number={},\n", -simple_device->get_error_id() ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "id_type={},\n", simple_device->get_type() ).size;
 
-        res += sprintf( str + res, "id_n=%d,\n", simple_device->get_serial_n() );
-        res += sprintf( str + res, "id_type=%d,\n", simple_device->get_type() );
-
-        res += sprintf( str + res, "suppress=%s\n",
-            alarm_params & P_IS_SUPPRESS ? "true" : "false" );
-
-        res += sprintf( str + res, "},\n" );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "suppress={}\n", alarm_params & P_IS_SUPPRESS ? "true" : "false" ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE, "}},\n" ).size;
         }
 
     return res;
@@ -73,6 +79,14 @@ void tech_dev_error::evaluate( bool &is_new_state )
     // Проверка текущего состояния устройства.
     if ( simple_device->get_state() < 0 )    // Есть ошибка.
         {
+
+        if ( auto error_id = simple_device->get_error_id();
+            prev_error_id != error_id )
+            {
+            is_new_state = true;
+            prev_error_id = error_id;
+            }
+
         switch ( error_state )
             {
             case AS_ACCEPT:
