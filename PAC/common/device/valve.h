@@ -1118,7 +1118,7 @@ class analog_valve_iolink : public AO1
     public:
         explicit analog_valve_iolink( const char* dev_name );
 
-        ~analog_valve_iolink();
+        virtual ~analog_valve_iolink() = default;
 
         void evaluate_io();
 
@@ -1146,6 +1146,8 @@ class analog_valve_iolink : public AO1
 
         int get_state() override;
 
+        const char* get_error_description() override;
+
     private:
 #pragma pack(push,1)
         struct in_data
@@ -1166,9 +1168,10 @@ class analog_valve_iolink : public AO1
             };
 #pragma pack(pop)
 
-        in_data* in_info = new in_data;
+        in_data in_info{};
         static out_data stub_out_info;
         out_data* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
+        io_link_device iol_device;
     };

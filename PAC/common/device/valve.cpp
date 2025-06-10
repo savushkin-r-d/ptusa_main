@@ -2535,14 +2535,8 @@ void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
     {
-    in_info->closed = true;
-    in_info->opened = false;
-    }
-//-----------------------------------------------------------------------------
-analog_valve_iolink::~analog_valve_iolink()
-    {
-    delete in_info;
-    in_info = nullptr;
+    in_info.closed = true;
+    in_info.opened = false;
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()
@@ -2550,7 +2544,7 @@ void analog_valve_iolink::evaluate_io()
     out_info = (out_data*)get_AO_write_data( AO_INDEX );
 
     char* data = (char*)get_AI_data( AO_INDEX );
-    char* buff = (char*)in_info;
+    char* buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -2602,7 +2596,7 @@ int analog_valve_iolink::save_device_ex( char* buff )
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
         "NAMUR_ST={}, OPENED={:d}, CLOSED={:d}, BLINK={:d}, ",
-        +in_info->namur_state, +in_info->opened, +in_info->closed, blink ) ).size;
+        +in_info.namur_state, +in_info.opened, +in_info.closed, blink ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -2636,14 +2630,26 @@ float analog_valve_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AO1::get_value();
 
-    return in_info->position;
+    return in_info.position;
     }
 //-----------------------------------------------------------------------------
 int analog_valve_iolink::get_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return AO1::get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    return in_info->status;
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( AO1::AO_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    return in_info.status;
+    }
+//-----------------------------------------------------------------------------
+const char* analog_valve_iolink::get_error_description()
+    {
+    return iol_device.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val )
