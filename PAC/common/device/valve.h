@@ -1147,17 +1147,17 @@ class analog_valve_iolink : public AO1
         int get_state() override;
 
     private:
+#pragma pack(push,1)
         struct in_data
             {
             float position;         //Valve position in percent
             float setpoint;         //Used setpoint in percent
             uint8_t namur_state = 0;
-            uint8_t status : 6;
-            bool opened : 1;        //True = Opened, False = Not opened
             bool closed : 1;        //True = Closed, False = Not closed
+            bool opened : 1;        //True = Opened, False = Not opened            
+            uint8_t status : 6;
             };
 
-#pragma pack(push,1)
         struct out_data
             {
             float position;     //Cyclic CMD setpoint in percent
