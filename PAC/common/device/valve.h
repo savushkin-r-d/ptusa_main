@@ -655,6 +655,21 @@ class io_link_valve
         const char* get_error_description( int err_id ) const;
     };
 //-----------------------------------------------------------------------------
+/// @brief Клапан AlfaLaval IO-Link mixproof.
+class aLfalaval_iol_valve
+    {
+    public:
+        /// @brief Returns a description of the error that is active.
+        /// 
+        /// @return A C-string containing the error description or
+        /// nullptr if no error.
+        const char* get_error_description( int error_id );
+
+    private:
+        io_link_device iol_dev;
+        io_link_valve iol_valve;
+    };
+//-----------------------------------------------------------------------------
 struct aLfalaval_iol_valve_in_data
     {
     int16_t  pos;
@@ -739,8 +754,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        io_link_device iol_dev;
-        io_link_valve iol_valve;
+        aLfalaval_iol_valve aLfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -777,8 +791,9 @@ class valve_iolink_shut_off_thinktop : public valve
 
         const char* get_error_description() override;
 
-    private:
+        int get_state() override;
 
+    private:
         aLfalaval_iol_valve_in_data in_info{};
         static aLfalaval_iol_valve_out_data_swapped stub_out_info;
         aLfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
@@ -793,7 +808,7 @@ class valve_iolink_shut_off_thinktop : public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        io_link_valve iol_valve;
+        aLfalaval_iol_valve aLfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.

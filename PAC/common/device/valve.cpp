@@ -1224,6 +1224,23 @@ const char* io_link_valve::get_error_description( int err_id ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+const char* aLfalaval_iol_valve::get_error_description( int error_id )
+    {
+    if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
+        error_id == -io_device::IOLINKSTATE::DEVICEERROR )
+        {
+        return iol_dev.get_error_description( error_id );
+        }
+
+    if ( error_id >= -131 && error_id <= -116 )
+        {
+        return iol_valve.get_error_description( error_id );
+        }
+
+    return nullptr;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
@@ -1518,16 +1535,11 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_mix_proof::get_error_description()
     {
-    auto error_id = get_error_id();
-    if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
-        error_id == -io_device::IOLINKSTATE::DEVICEERROR )
+    auto error_id = get_error_id();    
+        
+    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); !res )
         {
-        return iol_dev.get_error_description( error_id );
-        }
-
-    if ( error_id >= -131 && error_id <= -116 )
-        {
-        return iol_valve.get_error_description( error_id );
+        return res;
         }
 
     return valve::get_error_description();
@@ -2224,7 +2236,33 @@ void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_shut_off_thinktop::get_error_description()
     {
-    return iol_valve.get_error_description( in_info.err );
+    auto error_id = get_error_id();
+
+    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); !res )
+        {
+        return res;
+        }
+
+    return valve::get_error_description();
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
+
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    if ( in_info.err > 0 )
+        {
+        return -( 100 + in_info.err );
+        }
+
+    return valve::get_state();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
