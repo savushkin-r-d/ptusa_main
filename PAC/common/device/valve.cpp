@@ -1535,9 +1535,9 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 const char* valve_iolink_mix_proof::get_error_description()
     {
-    auto error_id = get_error_id();    
-        
-    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); !res )
+    auto error_id = get_error_id();
+
+    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); res )
         {
         return res;
         }
@@ -2238,7 +2238,7 @@ const char* valve_iolink_shut_off_thinktop::get_error_description()
     {
     auto error_id = get_error_id();
 
-    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); !res )
+    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); res )
         {
         return res;
         }
