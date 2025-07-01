@@ -1224,7 +1224,7 @@ const char* io_link_valve::get_error_description( int err_id ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const char* aLfalaval_iol_valve::get_error_description( int error_id )
+const char* alfalaval_iol_valve::get_error_description( int error_id )
     {
     if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
         error_id == -io_device::IOLINKSTATE::DEVICEERROR )

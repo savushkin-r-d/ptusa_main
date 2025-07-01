@@ -656,7 +656,7 @@ class io_link_valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AlfaLaval IO-Link mixproof.
-class aLfalaval_iol_valve
+class alfalaval_iol_valve
     {
     public:
         /// @brief Returns a description of the error that is active.
@@ -754,7 +754,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        aLfalaval_iol_valve aLfalaval_iol_v;
+        alfalaval_iol_valve aLfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -808,7 +808,7 @@ class valve_iolink_shut_off_thinktop : public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        aLfalaval_iol_valve aLfalaval_iol_v;
+        alfalaval_iol_valve aLfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
