@@ -248,9 +248,9 @@ i_DO_AO_device* get_G( const char* dev_name )
     return G_DEVICE_MANAGER()->get_G( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* LIFE_DEVICE( const char* dev_name )
+i_DI_device* WATCHDOG( const char* dev_name )
     {
-    return G_DEVICE_MANAGER()->get_life_device( dev_name );
+    return G_DEVICE_MANAGER()->get_watchdog( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
@@ -568,9 +568,9 @@ i_DO_AO_device* device_manager::get_G( const char* dev_name )
     return get_device( device::DT_G, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_life_device( const char* dev_name )
+i_DI_device* device_manager::get_watchdog( const char* dev_name )
     {
-    return get_device( device::DT_LIFE_DEVICE, dev_name );
+    return get_device( device::DT_WATCHDOG, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1379,19 +1379,17 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
-        case device::DT_LIFE_DEVICE:
+        case device::DT_WATCHDOG:
             switch ( dev_sub_type )
                 {
-                case device::DST_LIFEBIT:
-                case device::DST_LIFECOUNTER:
-                    new_device = new life_device( dev_name, 
-                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                case device::DST_WATCHDOG:
+                    new_device = new watchdog( dev_name, device::DST_WATCHDOG );
                     break;
 
                 default:
                     if ( G_DEBUG )
                         {
-                        G_LOG->alert( "Unknown LIFE_DEVICE device subtype %d!\n",
+                        G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
                             dev_sub_type ); 
                         }
                     break;
