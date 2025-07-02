@@ -2983,7 +2983,7 @@ TEST( valve_iolink_mix_proof, get_error_description )
 
     const std::vector<ErrorDescCase> cases =
         {
-        {0, "обратная связь"},
+        {0, "нет ошибок"},
 
         {-116, "не обнаружен магнитный индикатор на штоке клапана (#16)"},
         {-117, "конфигурация не соответствует требованиям автоматической "
@@ -3036,6 +3036,15 @@ TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
         buff );
     }
 
+TEST( valve_iolink_shut_off_thinktop, get_state )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
@@ -3198,6 +3207,13 @@ TEST_F( iolink_dev_test, level_s_iolink_get_value )
     EXPECT_EQ( test_dev_max.get_value(), VALUE );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_error_description )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+    test_dev_err( V1, V1, -101 );
     }
 
 
