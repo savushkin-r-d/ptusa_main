@@ -653,6 +653,9 @@ class io_link_valve
         /// 
         /// @return A C-string containing the error description.
         const char* get_error_description( int err_id ) const;
+                
+        inline static const int ERROR_ID_FIRST = -116;
+        inline static const int ERROR_ID_LAST = -131;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AlfaLaval IO-Link mixproof.
@@ -663,7 +666,7 @@ class alfalaval_iol_valve
         /// 
         /// @return A C-string containing the error description or
         /// nullptr if no error.
-        const char* get_error_description( int error_id );
+        const char* get_error_description( int error_id ) const;
 
     private:
         io_link_device iol_dev;

@@ -1224,7 +1224,7 @@ const char* io_link_valve::get_error_description( int err_id ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-const char* alfalaval_iol_valve::get_error_description( int error_id )
+const char* alfalaval_iol_valve::get_error_description( int error_id ) const
     {
     if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
         error_id == -io_device::IOLINKSTATE::DEVICEERROR )
@@ -1232,7 +1232,8 @@ const char* alfalaval_iol_valve::get_error_description( int error_id )
         return iol_dev.get_error_description( error_id );
         }
 
-    if ( error_id >= -131 && error_id <= -116 )
+    if ( error_id >= io_link_valve::ERROR_ID_LAST &&
+        error_id <= io_link_valve::ERROR_ID_FIRST )
         {
         return iol_valve.get_error_description( error_id );
         }
