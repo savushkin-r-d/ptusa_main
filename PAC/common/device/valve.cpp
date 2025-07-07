@@ -1380,7 +1380,7 @@ int valve_iolink_mix_proof::get_state()
 
     if ( in_info.err > 0 )
         {
-        return -( 100 + in_info.err );
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
 
     switch ( get_valve_state() )
@@ -2260,7 +2260,7 @@ int valve_iolink_shut_off_thinktop::get_state()
 
     if ( in_info.err > 0 )
         {
-        return -( 100 + in_info.err );
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
 
     return valve::get_state();

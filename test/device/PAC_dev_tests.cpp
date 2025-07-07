@@ -2935,7 +2935,8 @@ TEST( valve_iolink_mix_proof, get_state )
     // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
     // поэтому есть ошибки.
     V1.in_info.err = 1;
-    EXPECT_EQ( -( 100 + V1.in_info.err ), V1.get_state() );
+    EXPECT_EQ( -( io_link_valve::ERROR_CODE_OFFSET + V1.in_info.err ),
+        V1.get_state() );
 
     // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
     // поэтому есть ошибка.

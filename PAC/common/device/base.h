@@ -641,7 +641,7 @@ class device : public i_DO_AO_device, public par_device
                 return "обратная связь";
                 }
 
-            return "нет ошибок";            
+            return "нет ошибок";
             }
 
         /// @brief Получение ошибки (активной или ранее возникшей).

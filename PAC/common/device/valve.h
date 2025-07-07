@@ -656,6 +656,8 @@ class io_link_valve
                 
         inline static const int ERROR_ID_FIRST = -116;
         inline static const int ERROR_ID_LAST = -131;
+
+        inline static const int ERROR_CODE_OFFSET = 100;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AlfaLaval IO-Link mixproof.
