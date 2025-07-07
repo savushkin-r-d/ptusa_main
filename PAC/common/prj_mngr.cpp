@@ -71,6 +71,21 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
     auto result = options.parse( argc, argv );
 
+
+    const std::string DEFAULT_SCRIPT_PATH = "./";
+    const std::string DEFAULT_SYS_PATH    = "./sys/";
+    const std::string DEFAULT_EXTRA_PATHS = "./";
+
+    if (!result.count("path"))
+        init_path(DEFAULT_SCRIPT_PATH.c_str());
+
+    if (!result.count("sys_path"))
+        init_sys_path(DEFAULT_SYS_PATH.c_str());
+
+    if (!result.count("extra_paths"))
+        init_extra_paths(DEFAULT_EXTRA_PATHS.c_str());
+
+
     if ( result.count( "help" ) || argc < 2 )
         {
         fmt::print( options.help() );
