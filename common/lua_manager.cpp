@@ -47,7 +47,6 @@ lua_manager* lua_manager::get_instance()
 int check_file( const char* file_name, char* err_str )
     {
     strcpy( err_str, "" );
-    // printf("Trying to open: \"%s\"\n", file_name);
 
     FILE *f = fopen( file_name, "r");
     if ( !f )
