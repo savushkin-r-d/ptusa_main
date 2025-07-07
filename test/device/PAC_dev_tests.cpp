@@ -3178,10 +3178,12 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
     test_dev_max.evaluate_io();
     EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
 
+    DeltaMilliSecSubHooker::set_millisec( 
+        static_cast<unsigned long>( CHECK_TIME + 1.f ) );    
     *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
-    test_dev_max.time -= static_cast<u_int_4>( CHECK_TIME + 1.f );
     test_dev_max.evaluate_io();    
     EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
