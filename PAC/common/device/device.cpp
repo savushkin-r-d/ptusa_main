@@ -163,6 +163,11 @@ const char* signal_column_iolink::get_error_description()
 //-----------------------------------------------------------------------------
 int signal_column_iolink::get_state()
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return signal_column::get_state();
+        }
+
     if ( auto st = get_AI_IOLINK_state( 0 ); st != io_device::IOLINKSTATE::OK )
         {
         return -st;

@@ -734,6 +734,18 @@ TEST( signal_column, show_idle )
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
 
+
+TEST( signal_column_iolink, get_state )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+
+    EXPECT_EQ( test_dev.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( test_dev.get_state(), 0 );
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST_F( iolink_dev_test, signal_column_iolink_get_error_description )
     {
     signal_column_iolink test_dev( "test_HL1" );
