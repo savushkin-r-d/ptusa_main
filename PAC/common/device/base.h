@@ -636,7 +636,12 @@ class device : public i_DO_AO_device, public par_device
 
         virtual const char* get_error_description()
             {
-            return "обратная связь";
+            if ( auto err_id = get_error_id(); err_id < 0 )
+                {
+                return "обратная связь";
+                }
+
+            return "нет ошибок";
             }
 
         /// @brief Получение ошибки (активной или ранее возникшей).

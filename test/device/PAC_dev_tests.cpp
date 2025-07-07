@@ -2935,7 +2935,8 @@ TEST( valve_iolink_mix_proof, get_state )
     // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
     // поэтому есть ошибки.
     V1.in_info.err = 1;
-    EXPECT_EQ( -( 100 + V1.in_info.err ), V1.get_state() );
+    EXPECT_EQ( -( io_link_valve::ERROR_CODE_OFFSET + V1.in_info.err ),
+        V1.get_state() );
 
     // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
     // поэтому есть ошибка.
@@ -2983,7 +2984,7 @@ TEST( valve_iolink_mix_proof, get_error_description )
 
     const std::vector<ErrorDescCase> cases =
         {
-        {0, "обратная связь"},
+        {0, "нет ошибок"},
 
         {-116, "не обнаружен магнитный индикатор на штоке клапана (#16)"},
         {-117, "конфигурация не соответствует требованиям автоматической "
@@ -3036,6 +3037,15 @@ TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
         buff );
     }
 
+TEST( valve_iolink_shut_off_thinktop, get_state )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
@@ -3168,10 +3178,12 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
     test_dev_max.evaluate_io();
     EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
 
+    DeltaMilliSecSubHooker::set_millisec( 
+        static_cast<unsigned long>( CHECK_TIME + 1.f ) );    
     *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
-    test_dev_max.time -= static_cast<u_int_4>( CHECK_TIME + 1.f );
     test_dev_max.evaluate_io();    
     EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
@@ -3198,6 +3210,13 @@ TEST_F( iolink_dev_test, level_s_iolink_get_value )
     EXPECT_EQ( test_dev_max.get_value(), VALUE );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_error_description )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+    test_dev_err( V1, V1, -101 );
     }
 
 
