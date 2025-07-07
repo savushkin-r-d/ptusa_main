@@ -675,7 +675,7 @@ class alfalaval_iol_valve
         io_link_valve iol_valve;
     };
 //-----------------------------------------------------------------------------
-struct aLfalaval_iol_valve_in_data
+struct alfalaval_iol_valve_in_data
     {
     int16_t  pos;
     bool     de_en  : 1;    // De-energized.
@@ -686,12 +686,12 @@ struct aLfalaval_iol_valve_in_data
     uint8_t  unused : 3;
     uint8_t  err    : 5;
     };
-static_assert( sizeof( aLfalaval_iol_valve_in_data ) == 4,
-    "Struct aLfalaval_iol_valve_in_data must be 4 bytes size." );
+static_assert( sizeof( alfalaval_iol_valve_in_data ) == 4,
+    "Struct alfalaval_iol_valve_in_data must be 4 bytes size." );
 
 // Swapping the low and high bytes to simplify processing.
 #pragma pack(push,1)
-struct aLfalaval_iol_valve_out_data_swapped
+struct alfalaval_iol_valve_out_data_swapped
     {
     uint8_t unused1 : 4;
     bool    sv1     : 1;   // Main valve activation.
@@ -701,8 +701,8 @@ struct aLfalaval_iol_valve_out_data_swapped
     };
 #pragma pack(pop)
 
-static_assert( sizeof( aLfalaval_iol_valve_out_data_swapped ) == 1,
-    "Struct aLfalaval_iol_valve_out_data_swapped must be 1 byte size." );
+static_assert( sizeof( alfalaval_iol_valve_out_data_swapped ) == 1,
+    "Struct alfalaval_iol_valve_out_data_swapped must be 1 byte size." );
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve
@@ -745,9 +745,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 #ifndef PTUSA_TEST
     private:
 #endif
-        aLfalaval_iol_valve_in_data in_info{};
-        static aLfalaval_iol_valve_out_data_swapped stub_out_info;
-        aLfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
+        alfalaval_iol_valve_in_data in_info{};
+        static alfalaval_iol_valve_out_data_swapped stub_out_info;
+        alfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -759,7 +759,7 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        alfalaval_iol_valve aLfalaval_iol_v;
+        alfalaval_iol_valve alfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -799,9 +799,9 @@ class valve_iolink_shut_off_thinktop : public valve
         int get_state() override;
 
     private:
-        aLfalaval_iol_valve_in_data in_info{};
-        static aLfalaval_iol_valve_out_data_swapped stub_out_info;
-        aLfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
+        alfalaval_iol_valve_in_data in_info{};
+        static alfalaval_iol_valve_out_data_swapped stub_out_info;
+        alfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -813,7 +813,7 @@ class valve_iolink_shut_off_thinktop : public valve
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
-        alfalaval_iol_valve aLfalaval_iol_v;
+        alfalaval_iol_valve alfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.

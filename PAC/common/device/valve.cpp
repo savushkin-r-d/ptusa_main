@@ -10,8 +10,8 @@
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
-aLfalaval_iol_valve_out_data_swapped valve_iolink_mix_proof::stub_out_info{};
-aLfalaval_iol_valve_out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
+alfalaval_iol_valve_out_data_swapped valve_iolink_mix_proof::stub_out_info{};
+alfalaval_iol_valve_out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1275,11 +1275,11 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::evaluate_io()
     {
-    out_info = (aLfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
+    out_info = (alfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (aLfalaval_iol_valve_out_data_swapped*)
+        out_info = (alfalaval_iol_valve_out_data_swapped*)
             ( (char*)out_info + extra_offset );
         }
 
@@ -1538,7 +1538,7 @@ const char* valve_iolink_mix_proof::get_error_description()
     {
     auto error_id = get_error_id();
 
-    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); res )
+    if ( auto res = alfalaval_iol_v.get_error_description( error_id ); res )
         {
         return res;
         }
@@ -2060,11 +2060,11 @@ valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::evaluate_io()
     {
-    out_info = (aLfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
+    out_info = (alfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (aLfalaval_iol_valve_out_data_swapped*)
+        out_info = (alfalaval_iol_valve_out_data_swapped*)
             ( (char*)out_info + extra_offset );
         }
 
@@ -2239,7 +2239,7 @@ const char* valve_iolink_shut_off_thinktop::get_error_description()
     {
     auto error_id = get_error_id();
 
-    if ( auto res = aLfalaval_iol_v.get_error_description( error_id ); res )
+    if ( auto res = alfalaval_iol_v.get_error_description( error_id ); res )
         {
         return res;
         }
