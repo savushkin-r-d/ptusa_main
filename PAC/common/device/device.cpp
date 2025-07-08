@@ -156,6 +156,26 @@ void signal_column_iolink::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
+const char* signal_column_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+//-----------------------------------------------------------------------------
+int signal_column_iolink::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return signal_column::get_state();
+        }
+
+    if ( auto st = get_AI_IOLINK_state( 0 ); st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return signal_column::get_state();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int params_count, bool is_ready ) :
@@ -1630,13 +1650,11 @@ float counter_iolink::get_value()
 //-----------------------------------------------------------------------------
 const char* counter_iolink::get_error_description()
     {    
-    switch ( get_error_id() )
+    switch ( auto error_id = get_error_id() )
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-            return "IOL-устройство не подключено";
-
         case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-            return "ошибка IOL-устройства";
+            return iol_dev.get_error_description( error_id );
 
         default:
             return base_counter::get_error_description();
@@ -1745,35 +1763,26 @@ float temperature_e_analog::get_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT)
+temperature_e_iolink::temperature_e_iolink( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
-    }
-//-----------------------------------------------------------------------------
-temperature_e_iolink::~temperature_e_iolink()
-    {
-    delete info;
-    info = nullptr;
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        start_param_idx, "P_ERR_T" );
     }
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par(P_ERR_T, start_param_idx);
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+            start_param_idx );
         }
     else
         {
-        auto data = (char*)get_AI_data(C_AI_INDEX);
-
-        int16_t tmp = data[1] + 256 * data[0];
-        memcpy(info, &tmp, 2);
-
-        return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 0.1f * info.v;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1781,7 +1790,8 @@ int temperature_e_iolink::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX ); st != io_device::IOLINKSTATE::OK )
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX );
+        st != io_device::IOLINKSTATE::OK )
         {
         return -st;
         }
@@ -1789,24 +1799,18 @@ int temperature_e_iolink::get_state()
     return 1;
     }
 //-----------------------------------------------------------------------------
+void temperature_e_iolink::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
+    if ( !data ) return;
+
+    std::swap( data[ 0 ], data[ 1 ] );
+    memcpy( &info, data, 2 );
+    }
+//-----------------------------------------------------------------------------
 const char* temperature_e_iolink::get_error_description()
     {
-    if ( auto err_id = get_error_id(); err_id < 0 )
-        {
-        switch ( err_id )
-            {
-            case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-                return "IOL-устройство не подключено";
-
-                case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-                    return "ошибка IOL-устройства";
-
-                default:
-                    return "неизвестная ошибка";
-            }
-        }
-
-    return "нет ошибок";
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2649,6 +2653,17 @@ void level_s_iolink::evaluate_io()
 
     if ( !data ) return;
 
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
+        {
+        v = get_par( P_ERR, 0 );
+        current_state = -devstate;
+        time = get_millisec();
+
+        return;
+        }
+
+    int st = 0;
     switch ( n_article )
         {
         case ARTICLE::IFM_LMT100:   //IFM.LMT100
@@ -2679,10 +2694,29 @@ void level_s_iolink::evaluate_io()
             st = 0;
             break;
         }
+
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
     }
 
 void level_s_iolink::set_article( const char* new_article )
     {
+    direct_set_state( current_state );
+
     device::set_article( new_article );
 
     auto article = get_article();
@@ -2739,51 +2773,28 @@ level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
 
 float level_s_iolink::get_value()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
-	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
-		{
-		return get_par( P_ERR, 0 );
-		}
-	else
-		{
-        return v;
-		}
+    return v;
     }
 
 int level_s_iolink::get_state()
-	{
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
-
-    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
-        devstate != io_device::IOLINKSTATE::OK )
-		{
-		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
-		}
-
-    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
-        {
-        if ( current_state != st )
-            {
-            if ( get_delta_millisec( time ) > dt )
-                {
-                current_state = st;
-                time = get_millisec();
-                }
-            }
-        else
-            {
-            time = get_millisec();
-            }
-        }
-    else current_state = st;
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
     return current_state;
-	}
+    }
 
 bool level_s_iolink::is_active()
     {
-    return get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    return current_state;
+    }
+
+const char* level_s_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2930,6 +2941,11 @@ void level_e_iolink::set_string_property(const char* field, const char* value)
         {
         PT_extra = PT(value);
         }
+    }
+
+const char* level_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3117,6 +3133,11 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
 void pressure_e_iolink::evaluate_io()
     {
     evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    }
+//-----------------------------------------------------------------------------
+const char* pressure_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
@@ -3505,6 +3526,11 @@ void concentration_e_iolink::evaluate_io()
             get_value(), get_temperature(), get_state());
     G_LOG->write_log(i_log::P_NOTICE);
 #endif
+    }
+//-----------------------------------------------------------------------------
+const char* concentration_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
