@@ -59,6 +59,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "r,rcrc", "Reset params" )
 #ifdef OPCUA
         ( "opc", "Start OPC UA server with program start" )
+        ("opc-r", "Start OPC UA server with program start (only read)" )
+        ("opc-rw", "Start OPC UA server with program start (read-write)" )
 #endif        
         ( "sys_path", "Sys path", cxxopts::value<std::string>() )
         ( "path", "Path", cxxopts::value<std::string>() )
@@ -118,10 +120,15 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         }
 
 #ifdef OPCUA
-    if ( result[ "opc" ].as<bool>() )
+    if ( result[ "opc-rw" ].as<bool>() )
+    {
+        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
+        G_LOG->warning( "OPC UA server is activated(read-write)." );
+    } else if( result[ "opc" ].as<bool>() || result[ "opc-r" ].as<bool>() )
         {
+        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-        G_LOG->warning( "OPC UA server is activated." );
+        G_LOG->warning( "OPC UA server is activated(only read)." );
         }
 #endif
 
