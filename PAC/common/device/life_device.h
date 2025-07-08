@@ -15,6 +15,7 @@ class watchdog : public device, public i_Lua_save_device
 
             PARAMS_COUNT
             };
+        inline static const float MAX_OUT_VALUE = 65'536;
 
         /// @param name - имя.
         explicit watchdog( const char* name, 
@@ -35,8 +36,14 @@ class watchdog : public device, public i_Lua_save_device
     private:
 #endif
 
-        device* dev = nullptr;
+        device* DI_dev = nullptr;
+        device* AI_dev = nullptr;
+        device* DO_dev = nullptr;
+        device* AO_dev = nullptr;
+
         int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
         float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
-        unsigned long start_time = get_millisec();
+        
+        unsigned long start_in_check_time = get_millisec();
+        unsigned long start_out_check_time = get_millisec();
     };

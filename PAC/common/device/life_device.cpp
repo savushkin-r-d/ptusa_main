@@ -9,37 +9,52 @@ watchdog::watchdog( const char* name, device::DEVICE_SUB_TYPE sub_type ) :device
 //-----------------------------------------------------------------------------
 void watchdog::evaluate_io()
     {
-    if ( !dev )
+    if ( !DI_dev && !AI_dev )
         {
         device::set_state( 0 );
         return;
         }
 
-
-    if ( auto st = dev->get_state(); prev_dev_state != st )
+    if ( DI_dev )
         {
-        prev_dev_state = st;
-        device::set_state( 1 );
-        start_time = get_millisec();
-        return;
+        if ( auto st = DI_dev->get_state(); prev_dev_state != st )
+            {
+            prev_dev_state = st;
+            device::set_state( 1 );
+            start_in_check_time = get_millisec();
+            }
         }
-    else if ( auto v = dev->get_value(); prev_dev_value != v )
+    if ( AI_dev )
         {
-        prev_dev_value = v;
-        device::set_state( 1 );
-        start_time = get_millisec();
-        return;
+        if ( auto v = AI_dev->get_value(); prev_dev_value != v )
+            {
+            prev_dev_value = v;
+            device::set_state( 1 );
+            start_in_check_time = get_millisec();
+            }
         }
-
     
-    if ( auto now = get_millisec(), dt = now - start_time,
+    if ( auto now = get_millisec(), dt = now - start_in_check_time,
         set_dt = static_cast<unsigned long>(
         get_par( static_cast<u_int>( PARAM::P_DT ) ) ); 
         dt > set_dt )
         {
-        start_time = now;
+        start_in_check_time = now;
         device::set_state( -1 );
         return;
+        }
+
+    if ( auto now = get_millisec(), dt = now - start_out_check_time,
+        set_dt = static_cast<unsigned long>(
+        get_par( static_cast<u_int>( PARAM::P_DT ) ) );
+        dt > set_dt )
+        {
+        start_out_check_time = now;
+        
+        if ( DO_dev ) DO_dev->set_state( !DO_dev->is_active() );
+
+        if ( AO_dev ) AO_dev->set_value( AO_dev->get_value() + 1 );
+        if ( AO_dev->get_value() > MAX_OUT_VALUE ) AO_dev->set_value( 0 );
         }
     }
 //-----------------------------------------------------------------------------
@@ -54,9 +69,21 @@ void watchdog::set_string_property( const char* field, const char* value )
 
     if ( !field ) return;
 
-    if ( strcmp( field, "DEV" ) == 0 )    // Explicitly match "DEV".
+    if ( strcmp( field, "DI_dev" ) == 0 )
         {
-        dev = G_DEVICE_MANAGER()->get_device( value );
+        DI_dev = G_DEVICE_MANAGER()->get_device( value );
+        }
+    else if ( strcmp( field, "AI_dev" ) == 0 )
+        {
+        AI_dev = G_DEVICE_MANAGER()->get_device( value );
+        }
+    else if ( strcmp( field, "DO_dev" ) == 0 )
+        {
+        DO_dev = G_DEVICE_MANAGER()->get_device( value );
+        }
+    else if ( strcmp( field, "AO_dev" ) == 0 )
+        {
+        AO_dev = G_DEVICE_MANAGER()->get_device( value );
         }
     else
         {
@@ -76,9 +103,21 @@ void watchdog::set_property( const char* field, device* value )
 
     if ( !field ) return;
 
-    if ( strcmp( field, "DEV" ) == 0 )    // Explicitly match "DEV".
+    if ( strcmp( field, "DI_dev" ) == 0 )
         {
-        dev = value;
+        DI_dev = value;
+        }
+    else if ( strcmp( field, "AI_dev" ) == 0 )
+        {
+        AI_dev = value;
+        }
+    else if ( strcmp( field, "DO_dev" ) == 0 )
+        {
+        DO_dev = value;
+        }
+    else if ( strcmp( field, "AO_dev" ) == 0 )
+        {
+        AO_dev = value;
         }
     else
         {
