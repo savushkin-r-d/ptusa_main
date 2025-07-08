@@ -120,7 +120,8 @@ Usage:
   -p, --port arg            Param port (default: 10000)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
+      --opc-r               Start OPC UA server with program start(only read)
+      --opc-wr              Start OPC UA server with program start(write-read)
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths

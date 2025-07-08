@@ -58,7 +58,6 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
 #ifdef OPCUA
-        ( "opc", "Start OPC UA server with program start" )
         ("opc-r", "Start OPC UA server with program start (only read)" )
         ("opc-rw", "Start OPC UA server with program start (read-write)" )
 #endif        
@@ -109,7 +108,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     {
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
         G_LOG->warning( "OPC UA server is activated(read-write)." );
-    } else if( result[ "opc" ].as<bool>() || result[ "opc-r" ].as<bool>() )
+    } else if( result[ "opc-r" ].as<bool>())
         {
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
