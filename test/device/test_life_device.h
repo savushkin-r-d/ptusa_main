@@ -6,16 +6,26 @@
 class mock_DI_device : public device
     {
     public:
-        mock_DI_device() : device( "MockDevice1", DEVICE_TYPE::DT_DI,
+        mock_DI_device() : device( "MockDeviceDI", DEVICE_TYPE::DT_DI,
             DEVICE_SUB_TYPE::DST_DI, 0 ) {}
 
         MOCK_METHOD( int, get_state, ( ), ( override ) );
     };
 
+class mock_AI_device : public device
+    {
+    public:
+        mock_AI_device() : device( "MockDeviceAI", DEVICE_TYPE::DT_AI,
+            DEVICE_SUB_TYPE::DST_AI, 0 ) {
+            }
+
+        MOCK_METHOD( float, get_value, ( ), ( override ) );
+    };
+
 class mock_DO_device : public device
     {
     public:
-        mock_DO_device() : device( "MockDevice2", DEVICE_TYPE::DT_DO,
+        mock_DO_device() : device( "MockDeviceDO", DEVICE_TYPE::DT_DO,
             DEVICE_SUB_TYPE::DST_DO, 0 ) {
             }
     };
@@ -23,7 +33,7 @@ class mock_DO_device : public device
 class mock_AO_device : public device
     {
     public:
-        mock_AO_device() : device( "MockDevice3", DEVICE_TYPE::DT_AO,
+        mock_AO_device() : device( "MockDeviceAO", DEVICE_TYPE::DT_AO,
             DEVICE_SUB_TYPE::DST_AO, 0 ) {
             }
     };
@@ -35,6 +45,8 @@ class lifebit_test : public ::testing::Test
             "TestDevice", device::DEVICE_SUB_TYPE::DST_WATCHDOG );
         std::unique_ptr<mock_DI_device> mock_DI_dev = 
             std::make_unique<mock_DI_device>();
+        std::unique_ptr<mock_AI_device> mock_AI_dev =
+            std::make_unique<mock_AI_device>();
 
         std::unique_ptr<mock_DO_device> mock_DO_dev =
             std::make_unique<mock_DO_device>();
@@ -49,16 +61,6 @@ class lifebit_test : public ::testing::Test
             life_bit->set_property( "DO_dev", mock_DO_dev.get() );
             life_bit->set_property( "AO_dev", mock_AO_dev.get() );
             }
-    };
-
-class mock_AI_device : public device
-    {
-    public:
-        mock_AI_device() : device( "MockDevice2", DEVICE_TYPE::DT_AI,
-            DEVICE_SUB_TYPE::DST_AI, 0 ) {
-            }
-
-        MOCK_METHOD( float, get_value, ( ), ( override ) );
     };
 
 class lifecounter_test : public ::testing::Test
@@ -150,14 +152,14 @@ TEST_F( lifebit_test, save_device )
     EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, P_T_GEN=0, P_T_ERR=0},\n", buffer.data() );
     }
 
-TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
+TEST_F( lifebit_test, SetStringProperty_Sets_DI_Device )
     {
     life_bit->set_property( "DI_dev", nullptr );
     // Проверяем, что изначально DI_dev равен nullptr
     EXPECT_EQ( life_bit->DI_dev, nullptr );
 
     // Устанавливаем свойство "DI_dev" с именем устройства
-    const char* device_name = "MockDevice1";
+    const char* device_name = "MockDeviceDI";
     G_DEVICE_MANAGER()->add_device(static_cast<device*>( mock_DI_dev.get() ),
         device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "DI_dev", device_name );
@@ -166,6 +168,61 @@ TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
     EXPECT_EQ( life_bit->DI_dev, mock_DI_dev.get() );
 
     G_DEVICE_MANAGER()->remove_device( mock_DI_dev->get_serial_n() );
+    }
+
+
+TEST_F( lifebit_test, SetStringProperty_Sets_AI_Device )
+    {
+    life_bit->set_property( "AI_dev", nullptr );
+    // Проверяем, что изначально AI_dev равен nullptr
+    EXPECT_EQ( life_bit->AI_dev, nullptr );
+
+    // Устанавливаем свойство "AI_dev" с именем устройства
+    const char* device_name = "MockDeviceAI";
+    G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_AI_dev.get() ),
+        device::DEVICE_TYPE::DT_WATCHDOG );
+    life_bit->set_string_property( "AI_dev", device_name );
+
+    // Проверяем, что DI_dev был установлен
+    EXPECT_EQ( life_bit->AI_dev, mock_AI_dev.get() );
+
+    G_DEVICE_MANAGER()->remove_device( mock_AI_dev->get_serial_n() );
+    }
+
+TEST_F( lifebit_test, SetStringProperty_Sets_DO_Device )
+    {
+    life_bit->set_property( "DO_dev", nullptr );
+    // Проверяем, что изначально DO_dev равен nullptr
+    EXPECT_EQ( life_bit->DO_dev, nullptr );
+
+    // Устанавливаем свойство "DO_dev" с именем устройства
+    const char* device_name = "MockDeviceDO";
+    G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_DO_dev.get() ),
+        device::DEVICE_TYPE::DT_WATCHDOG );
+    life_bit->set_string_property( "DO_dev", device_name );
+
+    // Проверяем, что DI_dev был установлен
+    EXPECT_EQ( life_bit->DO_dev, mock_DO_dev.get() );
+
+    G_DEVICE_MANAGER()->remove_device( mock_DO_dev->get_serial_n() );
+    }
+
+TEST_F( lifebit_test, SetStringProperty_Sets_AO_Device )
+    {
+    life_bit->set_property( "AO_dev", nullptr );
+    // Проверяем, что изначально AO_dev равен nullptr
+    EXPECT_EQ( life_bit->AO_dev, nullptr );
+
+    // Устанавливаем свойство "AO_dev" с именем устройства
+    const char* device_name = "MockDeviceAO";
+    G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_AO_dev.get() ),
+        device::DEVICE_TYPE::DT_WATCHDOG );
+    life_bit->set_string_property( "AO_dev", device_name );
+
+    // Проверяем, что AO_dev был установлен
+    EXPECT_EQ( life_bit->AO_dev, mock_AO_dev.get() );
+
+    G_DEVICE_MANAGER()->remove_device( mock_AO_dev->get_serial_n() );
     }
 
 TEST_F( lifebit_test, SetStringProperty_InvalidField_NoAction )
