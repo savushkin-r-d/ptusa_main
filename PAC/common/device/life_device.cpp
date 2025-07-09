@@ -13,7 +13,6 @@ void watchdog::evaluate_io()
     if ( !DI_dev && !AI_dev )
         {
         device::set_state( 0 );
-        return;
         }
 
     if ( DI_dev )
@@ -41,7 +40,6 @@ void watchdog::evaluate_io()
         {
         start_in_check_time = get_millisec();
         device::set_state( -1 );
-        return;
         }
 
     if ( auto set_dt = static_cast<unsigned long>(
