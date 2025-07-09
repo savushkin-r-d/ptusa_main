@@ -11,7 +11,8 @@ class watchdog : public device, public i_Lua_save_device
     public:
         enum class PARAM
             {
-            P_DT = 1,               ///< Интервал расчёта.
+            P_T_GEN = 1,    ///< Интервал генерации выходных импульсов.
+            P_T_ERR,        ///< Интервал ожидания изменения входа.
 
             PARAMS_COUNT
             };

@@ -78,8 +78,8 @@ TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     life_bit->evaluate_io();                
     EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
 
-    // Устанавливаем DT = 100 мс.
-    life_bit->set_par( static_cast<u_int>( watchdog::PARAM::P_DT ), 0, 100 );
+    // Устанавливаем P_T_ERR = 100 мс.
+    life_bit->set_par( static_cast<u_int>( watchdog::PARAM::P_T_ERR ), 0, 100 );
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillRepeatedly( ::testing::Return( 1 ) ); // Состояние не меняется.
 
@@ -107,7 +107,7 @@ TEST_F( lifebit_test, save_device )
     // Проверяем, что метод вернул корректное количество записанных байт.
     EXPECT_GT( bytes_written, 0 );
 
-    EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, P_DT=0},\n", buffer.data() );
+    EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, P_T_GEN=0, P_T_ERR=0},\n", buffer.data() );
     }
 
 TEST_F( lifebit_test, SetStringProperty_SetsDIDevice )
@@ -154,8 +154,8 @@ TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     life_counter->evaluate_io();
     EXPECT_EQ( life_counter->get_state(), 1 );// Устройство должно активироваться.
 
-    // Устанавливаем DT = 100 мс.
-    life_counter->set_par( static_cast<u_int>( watchdog::PARAM::P_DT ), 0, 100 );
+    // Устанавливаем P_T_ERR = 100 мс.
+    life_counter->set_par( static_cast<u_int>( watchdog::PARAM::P_T_ERR ), 0, 100 );
     EXPECT_CALL( *mock_AI_dev, get_value() )
         .WillRepeatedly( ::testing::Return( 10 ) );// Состояние не меняется.
 

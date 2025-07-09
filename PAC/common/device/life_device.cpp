@@ -4,7 +4,8 @@ watchdog::watchdog( const char* name, device::DEVICE_SUB_TYPE sub_type ) :device
     device::DEVICE_TYPE::DT_WATCHDOG, sub_type,
     static_cast<u_int>( PARAM::PARAMS_COUNT ) - 1 )
     {
-    set_par_name( static_cast<u_int>( PARAM::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<u_int>( PARAM::P_T_GEN ), 0, "P_T_GEN" );
+    set_par_name( static_cast<u_int>( PARAM::P_T_ERR ), 0, "P_T_ERR" );
     }
 //-----------------------------------------------------------------------------
 void watchdog::evaluate_io()
@@ -36,8 +37,8 @@ void watchdog::evaluate_io()
     
     if ( auto now = get_millisec(), dt = now - start_in_check_time,
         set_dt = static_cast<unsigned long>(
-        get_par( static_cast<u_int>( PARAM::P_DT ) ) ); 
-        dt > set_dt )
+        get_par( static_cast<u_int>( PARAM::P_T_ERR ) ) );
+        set_dt > 0 && dt > set_dt )
         {
         start_in_check_time = now;
         device::set_state( -1 );
@@ -46,15 +47,17 @@ void watchdog::evaluate_io()
 
     if ( auto now = get_millisec(), dt = now - start_out_check_time,
         set_dt = static_cast<unsigned long>(
-        get_par( static_cast<u_int>( PARAM::P_DT ) ) );
+        get_par( static_cast<u_int>( PARAM::P_T_GEN ) ) );
         dt > set_dt )
         {
         start_out_check_time = now;
         
         if ( DO_dev ) DO_dev->set_state( !DO_dev->is_active() );
-
-        if ( AO_dev ) AO_dev->set_value( AO_dev->get_value() + 1 );
-        if ( AO_dev->get_value() > MAX_OUT_VALUE ) AO_dev->set_value( 0 );
+        if ( AO_dev )
+            {
+            AO_dev->set_value( AO_dev->get_value() + 1 );
+            if ( AO_dev->get_value() > MAX_OUT_VALUE ) AO_dev->set_value( 0 );
+            }
         }
     }
 //-----------------------------------------------------------------------------
