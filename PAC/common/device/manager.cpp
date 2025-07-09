@@ -1380,22 +1380,16 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_WATCHDOG:
-            switch ( dev_sub_type )
+            if ( dev_sub_type == device::DST_WATCHDOG )
                 {
-                case device::DST_WATCHDOG:
-                    new_device = new watchdog( dev_name, device::DST_WATCHDOG );
-                    break;
-
-                default:
-                    if ( G_DEBUG )
-                        {
-                        G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
-                            dev_sub_type ); 
-                        }
-                    break;
+                new_device = new watchdog( dev_name, device::DST_WATCHDOG );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
+                    dev_sub_type );
                 }
             break;
-
 
         default:
             if ( G_DEBUG )

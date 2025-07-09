@@ -35,22 +35,20 @@ void watchdog::evaluate_io()
             }
         }
     
-    if ( auto now = get_millisec(), dt = now - start_in_check_time,
-        set_dt = static_cast<unsigned long>(
+    if ( auto set_dt = static_cast<unsigned long>(
         get_par( static_cast<u_int>( PARAM::P_T_ERR ) ) );
-        set_dt > 0 && dt > set_dt )
+        set_dt > 0 && get_delta_millisec( start_in_check_time ) > set_dt )
         {
-        start_in_check_time = now;
+        start_in_check_time = get_millisec();
         device::set_state( -1 );
         return;
         }
 
-    if ( auto now = get_millisec(), dt = now - start_out_check_time,
-        set_dt = static_cast<unsigned long>(
+    if ( auto set_dt = static_cast<unsigned long>(
         get_par( static_cast<u_int>( PARAM::P_T_GEN ) ) );
-        dt > set_dt )
+        get_delta_millisec( start_out_check_time ) > set_dt )
         {
-        start_out_check_time = now;
+        start_out_check_time = get_millisec();
         
         if ( DO_dev ) DO_dev->set_state( !DO_dev->is_active() );
         if ( AO_dev )

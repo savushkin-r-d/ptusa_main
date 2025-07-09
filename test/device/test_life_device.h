@@ -12,6 +12,22 @@ class mock_DI_device : public device
         MOCK_METHOD( int, get_state, ( ), ( override ) );
     };
 
+class mock_DO_device : public device
+    {
+    public:
+        mock_DO_device() : device( "MockDevice2", DEVICE_TYPE::DT_DO,
+            DEVICE_SUB_TYPE::DST_DO, 0 ) {
+            }
+    };
+
+class mock_AO_device : public device
+    {
+    public:
+        mock_AO_device() : device( "MockDevice3", DEVICE_TYPE::DT_AO,
+            DEVICE_SUB_TYPE::DST_AO, 0 ) {
+            }
+    };
+
 class lifebit_test : public ::testing::Test
     {
     protected:
@@ -20,10 +36,18 @@ class lifebit_test : public ::testing::Test
         std::unique_ptr<mock_DI_device> mock_DI_dev = 
             std::make_unique<mock_DI_device>();
 
+        std::unique_ptr<mock_DO_device> mock_DO_dev =
+            std::make_unique<mock_DO_device>();
+        std::unique_ptr<mock_AO_device> mock_AO_dev =
+            std::make_unique<mock_AO_device>();
+
         void SetUp() override 
             {
-            // Устанавливаем mock устройство.
+            // Устанавливаем mock устройства.
             life_bit->set_property( "DI_dev", mock_DI_dev.get() );
+
+            life_bit->set_property( "DO_dev", mock_DO_dev.get() );
+            life_bit->set_property( "AO_dev", mock_AO_dev.get() );
             }
     };
 
@@ -63,11 +87,27 @@ TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction )
 
 TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated )
     {
+    // Задаем небольшой интервал, так как время изменения выхода задано
+    // равным 0, хватит 1 мс.
+    DeltaMilliSecSubHooker::set_millisec( 1UL );
+
     EXPECT_CALL( *mock_DI_dev, get_state() )
-        .WillOnce( ::testing::Return( 1 ) ); // Состояние сигнала изменилось.
+        .WillRepeatedly( ::testing::Return( 1 ) ); // Состояние сигнала изменилось.
+
+    EXPECT_FALSE( life_bit->DO_dev->is_active() );  // Дискретный выход должен быть равным 0.
+    EXPECT_EQ( life_bit->AO_dev->get_value(), 0 );  // Аналоговый выход должен быть равным 0.
 
     life_bit->evaluate_io();
     EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
+    EXPECT_TRUE( life_bit->DO_dev->is_active() );   // Дискретный выход должен стать равным 1.
+    EXPECT_EQ( life_bit->AO_dev->get_value(), 1 );  // Аналоговый выход должен стать равным 1.
+
+    life_bit->evaluate_io();
+    EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно остаться в 1.
+    EXPECT_FALSE( life_bit->DO_dev->is_active() );   // Дискретный выход должен стать равным 0.
+    EXPECT_EQ( life_bit->AO_dev->get_value(), 2 );   // Аналоговый выход должен стать равным 2.
+
+    DeltaMilliSecSubHooker::set_default_time();    
     }
 
 TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
