@@ -38,7 +38,7 @@ class mock_AO_device : public device
             }
     };
 
-class lifebit_test : public ::testing::Test
+class watchdog_bit : public ::testing::Test
     {
     protected:
         std::unique_ptr<watchdog> life_bit = std::make_unique<watchdog>(
@@ -63,7 +63,7 @@ class lifebit_test : public ::testing::Test
             }
     };
 
-class lifecounter_test : public ::testing::Test
+class watchdog_counter : public ::testing::Test
     {
     protected:
         std::unique_ptr<watchdog> life_counter = std::make_unique<watchdog>(
@@ -78,7 +78,7 @@ class lifecounter_test : public ::testing::Test
             }
     };
 
-TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction ) 
+TEST_F( watchdog_bit, EvaluateIO_NoDiDevice_NoAction ) 
     {
     life_bit->set_property( "DI_dev", nullptr );// Убираем устройство.
     life_bit->evaluate_io();
@@ -87,7 +87,7 @@ TEST_F( lifebit_test, EvaluateIO_NoDiDevice_NoAction )
     life_bit->set_property( "DI_dev", mock_DI_dev.get() );  // Добавляем устройство.
     }
 
-TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated )
+TEST_F( watchdog_bit, EvaluateIO_StateChanged_DeviceActivated )
     {
     // Задаем небольшой интервал, так как время изменения выхода задано
     // равным 0, хватит 1 мс.
@@ -112,7 +112,7 @@ TEST_F( lifebit_test, EvaluateIO_StateChanged_DeviceActivated )
     DeltaMilliSecSubHooker::set_default_time();    
     }
 
-TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
+TEST_F( watchdog_bit, EvaluateIO_TimerExceeded_DeviceDeactivated )
     {
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние изменилось.
@@ -128,7 +128,7 @@ TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     // Эмулируем время - устанавливаем время так, чтобы таймер истек.
     life_bit->start_in_check_time -= 200;
     life_bit->evaluate_io();
-    EXPECT_EQ( life_bit->get_state(), -1 );  // Устройство должно деактивироваться
+    EXPECT_EQ( life_bit->get_state(), -1 );  // Устройство должно деактивироваться.
 
 
     EXPECT_CALL( *mock_DI_dev, get_state() )
@@ -138,12 +138,12 @@ TEST_F( lifebit_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
     EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
     }
 
-TEST_F( lifebit_test, save_device )
+TEST_F( watchdog_bit, save_device )
     {
-    // Создаем std::array для записи
+    // Создаем std::array для записи.
     std::array<char, 256> buffer = { 0 };
 
-    // Вызываем метод save_device
+    // Вызываем метод save_device.
     auto bytes_written = life_bit->save_device( buffer.data() );
 
     // Проверяем, что метод вернул корректное количество записанных байт.
@@ -152,90 +152,90 @@ TEST_F( lifebit_test, save_device )
     EXPECT_STREQ( "TestDevice={M=0, ST=0, V=0, P_T_GEN=0, P_T_ERR=0},\n", buffer.data() );
     }
 
-TEST_F( lifebit_test, SetStringProperty_Sets_DI_Device )
+TEST_F( watchdog_bit, SetStringProperty_Sets_DI_Device )
     {
     life_bit->set_property( "DI_dev", nullptr );
-    // Проверяем, что изначально DI_dev равен nullptr
+    // Проверяем, что изначально DI_dev равен nullptr.
     EXPECT_EQ( life_bit->DI_dev, nullptr );
 
-    // Устанавливаем свойство "DI_dev" с именем устройства
+    // Устанавливаем свойство "DI_dev" с именем устройства.
     const char* device_name = "MockDeviceDI";
     G_DEVICE_MANAGER()->add_device(static_cast<device*>( mock_DI_dev.get() ),
         device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "DI_dev", device_name );
 
-    // Проверяем, что DI_dev был установлен
+    // Проверяем, что DI_dev был установлен.
     EXPECT_EQ( life_bit->DI_dev, mock_DI_dev.get() );
 
     G_DEVICE_MANAGER()->remove_device( mock_DI_dev->get_serial_n() );
     }
 
 
-TEST_F( lifebit_test, SetStringProperty_Sets_AI_Device )
+TEST_F( watchdog_bit, SetStringProperty_Sets_AI_Device )
     {
     life_bit->set_property( "AI_dev", nullptr );
-    // Проверяем, что изначально AI_dev равен nullptr
+    // Проверяем, что изначально AI_dev равен nullptr.
     EXPECT_EQ( life_bit->AI_dev, nullptr );
 
-    // Устанавливаем свойство "AI_dev" с именем устройства
+    // Устанавливаем свойство "AI_dev" с именем устройства.
     const char* device_name = "MockDeviceAI";
     G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_AI_dev.get() ),
         device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "AI_dev", device_name );
 
-    // Проверяем, что DI_dev был установлен
+    // Проверяем, что AI_dev был установлен.
     EXPECT_EQ( life_bit->AI_dev, mock_AI_dev.get() );
 
     G_DEVICE_MANAGER()->remove_device( mock_AI_dev->get_serial_n() );
     }
 
-TEST_F( lifebit_test, SetStringProperty_Sets_DO_Device )
+TEST_F( watchdog_bit, SetStringProperty_Sets_DO_Device )
     {
     life_bit->set_property( "DO_dev", nullptr );
-    // Проверяем, что изначально DO_dev равен nullptr
+    // Проверяем, что изначально DO_dev равен nullptr.
     EXPECT_EQ( life_bit->DO_dev, nullptr );
 
-    // Устанавливаем свойство "DO_dev" с именем устройства
+    // Устанавливаем свойство "DO_dev" с именем устройства.
     const char* device_name = "MockDeviceDO";
     G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_DO_dev.get() ),
         device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "DO_dev", device_name );
 
-    // Проверяем, что DI_dev был установлен
+    // Проверяем, что DO_dev был установлен.
     EXPECT_EQ( life_bit->DO_dev, mock_DO_dev.get() );
 
     G_DEVICE_MANAGER()->remove_device( mock_DO_dev->get_serial_n() );
     }
 
-TEST_F( lifebit_test, SetStringProperty_Sets_AO_Device )
+TEST_F( watchdog_bit, SetStringProperty_Sets_AO_Device )
     {
     life_bit->set_property( "AO_dev", nullptr );
-    // Проверяем, что изначально AO_dev равен nullptr
+    // Проверяем, что изначально AO_dev равен nullptr.
     EXPECT_EQ( life_bit->AO_dev, nullptr );
 
-    // Устанавливаем свойство "AO_dev" с именем устройства
+    // Устанавливаем свойство "AO_dev" с именем устройства.
     const char* device_name = "MockDeviceAO";
     G_DEVICE_MANAGER()->add_device( static_cast<device*>( mock_AO_dev.get() ),
         device::DEVICE_TYPE::DT_WATCHDOG );
     life_bit->set_string_property( "AO_dev", device_name );
 
-    // Проверяем, что AO_dev был установлен
+    // Проверяем, что AO_dev был установлен.
     EXPECT_EQ( life_bit->AO_dev, mock_AO_dev.get() );
 
     G_DEVICE_MANAGER()->remove_device( mock_AO_dev->get_serial_n() );
     }
 
-TEST_F( lifebit_test, SetStringProperty_InvalidField_NoAction )
+TEST_F( watchdog_bit, SetStringProperty_InvalidField_NoAction )
     {
-    // Устанавливаем несуществующее поле
+    // Устанавливаем несуществующее поле.
     const char* invalid_field = "INVALID";
     life_bit->set_string_property( invalid_field, "SomeValue" );
 
-    // Проверяем, что DI_dev не изменился
+    // Проверяем, что DI_dev не изменился.
     EXPECT_EQ( life_bit->DI_dev, mock_DI_dev.get() );
     }
 
-TEST_F( lifebit_test, GetNameInLua_ReturnsCorrectName )
+TEST_F( watchdog_bit, GetNameInLua_ReturnsCorrectName )
     {
     const char* expected_name = "TestDevice";
     const char* lua_name = life_bit->get_name_in_Lua();
@@ -244,7 +244,7 @@ TEST_F( lifebit_test, GetNameInLua_ReturnsCorrectName )
     }
 
 
-TEST_F( lifecounter_test, EvaluateIO_TimerExceeded_DeviceDeactivated )
+TEST_F( watchdog_counter, EvaluateIO_TimerExceeded_DeviceDeactivated )
     {
     EXPECT_CALL( *mock_AI_dev, get_value() )
         .WillOnce( ::testing::Return( 10 ) ); // Состояние изменилось.
