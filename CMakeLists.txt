@@ -432,8 +432,8 @@ else()
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
   -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
-      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
+      --no_io_nodes         No communicate with I\\O nodes
+      --read_only_io_nodes  Read only from I\\O nodes
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
