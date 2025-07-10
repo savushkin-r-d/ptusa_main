@@ -3034,6 +3034,11 @@ void pressure_e_iolink::read_article( const char* article,
         n_article = ARTICLE::IFM_PM1715;
         return;
         }
+    if ( strcmp( article, "IFM.PM1717" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1717;
+        return;
+        }
 
     if ( strcmp( article, "FES.8001446" ) == 0 )
         {
@@ -3075,6 +3080,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PM1708:
         case ARTICLE::IFM_PM1709:
         case ARTICLE::IFM_PM1715:
+        case ARTICLE::IFM_PM1717:
             {
             ex_PT_data info{};
 
@@ -3096,26 +3102,27 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
     float alfa = 1;
     switch ( n_article )
         {
-        case ARTICLE::IFM_PM1708:       //  0.01, mbar
+        case ARTICLE::IFM_PM1708:   //  0.01, mbar
             alfa = 0.00001f;
             break;
 
-        case ARTICLE::IFM_PM1706:
-        case ARTICLE::IFM_PM1707:       //   0.1, mbar
-        case ARTICLE::IFM_PM1709:       //   0.1, mbar
+        case ARTICLE::IFM_PM1706:   //   0.1, mbar
+        case ARTICLE::IFM_PM1707:
+        case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1717:
             alfa = 0.0001f;
             break;
 
-        case ARTICLE::IFM_PI2715:       // 0.001, bar
-        case ARTICLE::IFM_PI2797:       //     1, mbar
+        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
+        case ARTICLE::IFM_PI2797:
 
-        case ARTICLE::IFM_PM1704:       // 0.001, bar
-        case ARTICLE::IFM_PM1705:       // 0.001, bar
-        case ARTICLE::IFM_PM1715:       // 0.001, bar
+        case ARTICLE::IFM_PM1704:
+        case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1715:
             alfa = 0.001f;
             break;
 
-        case ARTICLE::IFM_PI2794:       // 0.01, bar
+        case ARTICLE::IFM_PI2794:   // 0.01, bar
             alfa = 0.01f;
             break;
 

@@ -1509,6 +1509,11 @@ TEST( pressure_e_iolink, read_article )
     test_dev.set_article( IFM_PM1706 );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
+
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1717 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
     }
 
 TEST( pressure_e_iolink, evaluate_io )
