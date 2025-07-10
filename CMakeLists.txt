@@ -416,7 +416,10 @@ if (WIN32)
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
+      --opc-r               Start OPC UA server with program start \(only 
+                            read\)
+      --opc-rw              Start OPC UA server with program start 
+                            \(read-write\)
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
@@ -429,12 +432,15 @@ else()
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
   -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\\O nodes
-      --read_only_io_nodes  Read only from I\\O nodes
+      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
+      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
+      --opc-r               Start OPC UA server with program start \(only 
+                            read\)
+      --opc-rw              Start OPC UA server with program start 
+                            \(read-write\)
       --sys_path arg        Sys path
       --path arg            Path
       --extra_paths arg     Extra paths
