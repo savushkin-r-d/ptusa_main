@@ -281,7 +281,7 @@ TEST( watchdog, get_error_description )
     dev.set_descr( DESCR.c_str() );
     const float WAIT_TIME_MS = 1.f;
     dev.set_par( static_cast<u_int>( watchdog::PARAM::P_T_ERR ), 0, WAIT_TIME_MS );
-    dev.DI_dev = new mock_DI_device();
+    dev.DI_dev = std::make_unique<mock_DI_device>().get();
 
     DeltaMilliSecSubHooker::set_millisec(
         static_cast<unsigned long>( WAIT_TIME_MS ) + 1UL );
