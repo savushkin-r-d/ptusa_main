@@ -272,3 +272,21 @@ TEST( watchdog, get_type_name )
     watchdog dev( "POU1LF1" );
     EXPECT_STREQ( "Устройство проверки связи", dev.get_type_name() );
     }
+
+TEST( watchdog, get_error_description )
+    {
+    watchdog dev( "POU1WATCHDOG1" );
+
+    const std::string DESCR = "ПОУ №3";
+    dev.set_descr( DESCR.c_str() );
+    const float WAIT_TIME_MS = 1.f;
+    dev.set_par( static_cast<u_int>( watchdog::PARAM::P_T_ERR ), 0, WAIT_TIME_MS );
+    dev.DI_dev = new mock_DI_device();
+
+    DeltaMilliSecSubHooker::set_millisec(
+        static_cast<unsigned long>( WAIT_TIME_MS ) + 1UL );
+    dev.evaluate_io();
+    EXPECT_STREQ( dev.get_error_description(),
+        ( std::string( "ошибка связи - " ) + '\'' + DESCR + '\'' ).c_str());
+    DeltaMilliSecSubHooker::set_default_time();
+    }

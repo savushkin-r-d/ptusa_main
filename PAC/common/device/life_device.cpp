@@ -1,4 +1,7 @@
+#include <fmt/core.h>
+
 #include "life_device.h"
+
 //-----------------------------------------------------------------------------
 watchdog::watchdog( const char* name, device::DEVICE_SUB_TYPE sub_type ) :device( name,
     device::DEVICE_TYPE::DT_WATCHDOG, sub_type,
@@ -137,3 +140,18 @@ const char* watchdog::get_name_in_Lua() const
     return get_name();
     }
 //-----------------------------------------------------------------------------
+void watchdog::set_descr( const char* new_description )
+    {
+    device::set_descr( new_description );
+    error_description = fmt::format( "ошибка связи - '{}'", get_description() );
+    }
+//-----------------------------------------------------------------------------
+const char* watchdog::get_error_description()
+    {
+    if ( auto err_id = get_error_id(); err_id < 0 )
+        {
+        return error_description.c_str();        
+        }
+
+    return "нет ошибок";
+    }

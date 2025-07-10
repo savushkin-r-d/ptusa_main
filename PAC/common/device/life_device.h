@@ -33,6 +33,10 @@ class watchdog : public device, public i_Lua_save_device
 
         const char* get_name_in_Lua() const override;
 
+        const char* get_error_description() override;
+
+        void set_descr( const char* new_description ) override;
+
 #ifndef PTUSA_TEST
     private:
 #endif
@@ -47,4 +51,6 @@ class watchdog : public device, public i_Lua_save_device
         
         unsigned long start_in_check_time = get_millisec();
         unsigned long start_out_check_time = get_millisec();
+
+        std::string error_description{};
     };

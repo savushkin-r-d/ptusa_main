@@ -653,7 +653,7 @@ class device : public i_DO_AO_device, public par_device
             return prev_error_state;
             }
 
-        void set_descr( const char* new_description );
+        virtual void set_descr( const char* new_description );
 
         virtual void set_article( const char* new_article );
 
