@@ -1,6 +1,7 @@
 #include "dtime.h"
 
 #ifdef PTUSA_TEST
+
 tm get_time_next_hour()
     {
     thread_local static struct tm timeInfo_;

@@ -1,6 +1,7 @@
 #pragma once
-#include "../includes.h"
+#include <iomanip>
 
+#include "../includes.h"
 #include "device/life_device.h"
 
 class mock_DI_device : public device
@@ -277,12 +278,16 @@ TEST( watchdog, get_error_description )
     {
     watchdog dev( "POU1WATCHDOG1" );
 
+    EXPECT_STREQ( dev.get_error_description(), "нет ошибок" );
+
     const std::string DESCR = "ПОУ №3";
     dev.set_descr( DESCR.c_str() );
     const float WAIT_TIME_MS = 1.f;
     dev.set_par( static_cast<u_int>( watchdog::PARAM::P_T_ERR ), 0, WAIT_TIME_MS );
     auto DI_dev = std::make_unique<mock_DI_device>();
     dev.DI_dev = DI_dev.get();
+    EXPECT_CALL( *DI_dev.get(), get_state() )
+        .WillOnce( ::testing::Return( 0 ) ); // Состояние не изменилось.
 
     DeltaMilliSecSubHooker::set_millisec(
         static_cast<unsigned long>( WAIT_TIME_MS ) + 1UL );
@@ -290,4 +295,48 @@ TEST( watchdog, get_error_description )
     EXPECT_STREQ( dev.get_error_description(),
         ( std::string( "ошибка связи - " ) + '\'' + DESCR + '\'' ).c_str());
     DeltaMilliSecSubHooker::set_default_time();
+    }
+
+TEST( watchdog, set_property )
+    {
+    const std::string WD_NAME = "POU1LF1";
+    watchdog dev( WD_NAME.c_str() );
+
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+    const std::string WD_PROPERTY_NAME = "BAD_NAME_PROPERTY";
+    std::string out_str =
+        FIXED_TIME_STR + ' ' +
+#ifdef LINUX_OS
+        "\x1B[37m" +    // Цвет текста для Linux
+#endif
+        "DEBUG  (7) -> " + WD_NAME + "\t watchdog::set_property() - field = \"" + WD_PROPERTY_NAME + "\", val = \"nullptr\"\n" +
+#ifdef LINUX_OS
+        "\x1B[0m" +      // Сброс цвета для Linux
+#endif
+        FIXED_TIME_STR + ' ' +
+#ifdef LINUX_OS
+        "\x1B[1;31m" +    // Цвет текста для Linux
+#endif
+        "ALERT  (1) -> " + WD_NAME + "\t watchdog::set_property() - Unknown field \"" + WD_PROPERTY_NAME + "\"\n"
+#ifdef LINUX_OS
+        + "\x1B[0m"       // Сброс цвета для Linux
+#endif
+        ;
+
+    // Проверяем, что изначально DI_dev равен nullptr.
+    EXPECT_EQ( dev.DI_dev, nullptr );
+
+    testing::internal::CaptureStdout();
+    dev.set_property( WD_PROPERTY_NAME.c_str(), nullptr );
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, out_str );
+
+    // Проверяем, что после DI_dev равен nullptr.
+    EXPECT_EQ( dev.DI_dev, nullptr );
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     }

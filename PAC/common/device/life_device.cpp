@@ -99,7 +99,7 @@ void watchdog::set_property( const char* field, device* value )
     if ( G_DEBUG )
         {
         G_LOG->debug( "%s\t watchdog::set_property() - "
-            "field = %s, val = \"%s\"",
+            "field = \"%s\", val = \"%s\"",
             get_name(), field, value ? value->get_name() : "nullptr" );
         }
 
