@@ -60,9 +60,9 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 #ifdef OPCUA
         ( "opc", "Start OPC UA server with program start" )
 #endif        
-        ( "sys_path", "Sys path", cxxopts::value<std::string>() )
-        ( "path", "Path", cxxopts::value<std::string>() )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
+        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys/" ) )
+        ( "path", "Path", cxxopts::value<std::string>()->default_value( "./" ) )
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys/" ) )
         ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
@@ -70,21 +70,6 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.show_positional_help();
     options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
     auto result = options.parse( argc, argv );
-
-
-    const std::string DEFAULT_SCRIPT_PATH = "./";
-    const std::string DEFAULT_SYS_PATH    = "./sys/";
-    const std::string DEFAULT_EXTRA_PATHS = "./";
-
-    if (!result.count("path"))
-        init_path(DEFAULT_SCRIPT_PATH.c_str());
-
-    if (!result.count("sys_path"))
-        init_sys_path(DEFAULT_SYS_PATH.c_str());
-
-    if (!result.count("extra_paths"))
-        init_extra_paths(DEFAULT_EXTRA_PATHS.c_str());
-
 
     if ( result.count( "help" ) || argc < 2 )
         {
@@ -124,24 +109,11 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_LOG->warning( "OPC UA server is activated." );
         }
 #endif
-
-    if ( result.count( "sys_path" ) )
-        {
-        auto& sys_path_str = result[ "sys_path" ].as<std::string>();
-        init_sys_path( sys_path_str.c_str() );
-        }
-    if ( result.count( "path" ) )
-        {
-        auto& path_str = result[ "path" ].as<std::string>();
-        init_path( path_str.c_str() );
-        }
-    if ( result.count( "extra_paths" ) )
-        {
-        auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
-        init_extra_paths( extra_paths_str.c_str() );
-        }
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
+    sys_path = result[ "sys_path" ].as<std::string>();
+    path = result[ "path" ].as<std::string>();
+    extra_paths = result[ "extra_paths" ].as<std::string>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )

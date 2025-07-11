@@ -416,10 +416,13 @@ if (WIN32)
   -p, --port arg            Param port \(default: 10000\)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --opc-r               Start OPC UA server with program start \(only 
+                            read\)
+      --opc-rw              Start OPC UA server with program start 
+                            \(read-write\)
+      --sys_path arg        Sys path \(default: \./sys/\)
+      --path arg            Path \(default: \./\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys/\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
