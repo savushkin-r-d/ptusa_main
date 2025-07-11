@@ -2,6 +2,7 @@
 
 #ifdef WIN_OS
 #include <Windows.h>
+
 #endif // OS_WIN
 
 #include "lua_manager.h"
