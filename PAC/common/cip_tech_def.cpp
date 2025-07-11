@@ -779,6 +779,11 @@ int cipline_tech_object::evaluate()
 
 int cipline_tech_object::init_params()
     {
+    if ( number == 1 )
+        {
+        parpar->reset_to_0();
+        }
+
     tech_object::init_params();
     rt_par_float[P_R_NO_FLOW] = 2;
     rt_par_float[P_TM_R_NO_FLOW] = 20;

@@ -876,7 +876,7 @@ class cipline_tech_object: public tech_object
         int set_cmd( const char *prop, u_int idx, double val ) override;
         int set_cmd( const char *prop, u_int idx, const char* val );
         int evaluate() override;
-        int init_params();
+        int init_params() override;
 
         ////-------------------
         void RHI();
