@@ -713,7 +713,7 @@ int tech_object::lua_final_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_params()
     {
-    tech_object::init_params();
+    init_params();
 
     //Проверка на наличии функции инициализации параметров uint.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
