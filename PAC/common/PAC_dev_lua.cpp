@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu May  8 12:09:56 2025.
+** Generated automatically by tolua++-1.0.92 on Fri Jul 11 12:24:56 2025.
 */
 
 #ifndef __cplusplus
@@ -3388,9 +3388,9 @@ static int tolua_PAC_dev_G00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* function: LIFE_DEVICE */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_LIFE_DEVICE00
-static int tolua_PAC_dev_LIFE_DEVICE00(lua_State* tolua_S)
+/* function: WATCHDOG */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_WATCHDOG00
+static int tolua_PAC_dev_WATCHDOG00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -3404,14 +3404,14 @@ static int tolua_PAC_dev_LIFE_DEVICE00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  LIFE_DEVICE(dev_name);
+   i_DI_device* tolua_ret = (i_DI_device*)  WATCHDOG(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'LIFE_DEVICE'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'WATCHDOG'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15225,7 +15225,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_PDS",device::DT_PDS);
    tolua_constant(tolua_S,"DT_TS",device::DT_TS);
    tolua_constant(tolua_S,"DT_G",device::DT_G);
-   tolua_constant(tolua_S,"DT_LIFE_DEVICE",device::DT_LIFE_DEVICE);
+   tolua_constant(tolua_S,"DT_WATCHDOG",device::DT_WATCHDOG);
    tolua_constant(tolua_S,"DST_NONE",device::DST_NONE);
    tolua_constant(tolua_S,"DST_V_DO1",device::DST_V_DO1);
    tolua_constant(tolua_S,"DST_V_DO2",device::DST_V_DO2);
@@ -15328,8 +15328,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_REGULATOR_THLD",device::DST_REGULATOR_THLD);
    tolua_constant(tolua_S,"DST_G_IOL_4",device::DST_G_IOL_4);
    tolua_constant(tolua_S,"DST_G_IOL_8",device::DST_G_IOL_8);
-   tolua_constant(tolua_S,"DST_LIFEBIT",device::DST_LIFEBIT);
-   tolua_constant(tolua_S,"DST_LIFECOUNTER",device::DST_LIFECOUNTER);
+   tolua_constant(tolua_S,"DST_WATCHDOG",device::DST_WATCHDOG);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");
@@ -15420,7 +15419,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"PDS",tolua_PAC_dev_PDS00);
   tolua_function(tolua_S,"TS",tolua_PAC_dev_TS00);
   tolua_function(tolua_S,"G",tolua_PAC_dev_G00);
-  tolua_function(tolua_S,"LIFE_DEVICE",tolua_PAC_dev_LIFE_DEVICE00);
+  tolua_function(tolua_S,"WATCHDOG",tolua_PAC_dev_WATCHDOG00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","i_counter",NULL);

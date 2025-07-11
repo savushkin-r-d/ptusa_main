@@ -6,21 +6,23 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class life_device : public device, public i_Lua_save_device
+class watchdog : public device, public i_Lua_save_device
     {
     public:
         enum class PARAM
             {
-            P_DT = 1,               ///< Интервал расчёта.
+            P_T_GEN = 1,    ///< Интервал генерации выходных импульсов.
+            P_T_ERR,        ///< Интервал ожидания изменения входа.
 
             PARAMS_COUNT
             };
+        inline static const float MAX_OUT_VALUE = 65'536;
 
         /// @param name - имя.
-        explicit life_device( const char* name, 
-            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_LIFEBIT );
+        explicit watchdog( const char* name, 
+            device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_WATCHDOG );
 
-        ~life_device() override = default;
+        ~watchdog() override = default;
 
         void evaluate_io() override;
 
@@ -31,12 +33,24 @@ class life_device : public device, public i_Lua_save_device
 
         const char* get_name_in_Lua() const override;
 
+        const char* get_error_description() override;
+
+        void set_descr( const char* new_description ) override;
+
 #ifndef PTUSA_TEST
     private:
 #endif
 
-        device* dev = nullptr;
+        device* DI_dev = nullptr;
+        device* AI_dev = nullptr;
+        device* DO_dev = nullptr;
+        device* AO_dev = nullptr;
+
         int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
         float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
-        unsigned long start_time = get_millisec();
+        
+        unsigned long start_in_check_time = get_millisec();
+        unsigned long start_out_check_time = get_millisec();
+
+        std::string error_description{};
     };

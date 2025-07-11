@@ -21,6 +21,9 @@
 #include "s_types.h"
 
 #include <time.h>
+#ifdef PTUSA_TEST
+#include <string>
+#endif
 
 const long MSEC_IN_SEC = 1000;
 const int SEC_IN_MIN = 60;
@@ -92,6 +95,8 @@ struct stat_time
 tm get_time_next_hour();
 
 tm get_fixed_time();
+
+const std::string FIXED_TIME_STR = "2025-03-12 00.00.00";
 #endif
 
 #endif // DTIME_H
