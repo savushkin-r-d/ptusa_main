@@ -35,10 +35,6 @@ PAC_info::PAC_info() :
     cmd_answer[ 0 ] = 0;
     }
 //-----------------------------------------------------------------------------
-PAC_info::~PAC_info()
-    {
-    }
-//-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
     if ( restrictions_set_to_off_time &&
@@ -346,15 +342,17 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         else if ( val == 1 && prev_val == 0 )
             {
             par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
+            auto retval = G_OPCUA_SERVER.init_all_and_start();
             if ( retval != UA_STATUSCODE_GOOD )
                 {
-                G_LOG->error( "OPC UA server start failed. Returned error code %d!",
+                G_LOG->error( "OPC UA server start failed. Returned error code 0x%X!",
                     retval );
 
                 auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
-                    G_LOG->msg );
-                cmd_answer[ r.size ] = '\0';
+                    "{}", G_LOG->msg );
+                *r.out = '\0';
+
+                G_OPCUA_SERVER.shutdown();
                 return 1;
                 }
             }

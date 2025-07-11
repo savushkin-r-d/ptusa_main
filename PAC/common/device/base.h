@@ -636,7 +636,12 @@ class device : public i_DO_AO_device, public par_device
 
         virtual const char* get_error_description()
             {
-            return "обратная связь";
+            if ( auto err_id = get_error_id(); err_id < 0 )
+                {
+                return "обратная связь";
+                }
+
+            return "нет ошибок";
             }
 
         /// @brief Получение ошибки (активной или ранее возникшей).
@@ -1175,4 +1180,11 @@ class signal_column : public device, public io_device
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
         STEP siren_step = STEP::off;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с интерфейсом подключения IO-Link.
+class io_link_device
+    {        
+    public:
+        const char* get_error_description( int error_id ) const;
     };

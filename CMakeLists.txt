@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.05.22.0)
+project(ptusa_main VERSION 2025.06.10.0)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -484,6 +484,3 @@ endif()
 
 include(GoogleTest)
 gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
-
-#remove tests from add_subdirectory() added projects
-configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
