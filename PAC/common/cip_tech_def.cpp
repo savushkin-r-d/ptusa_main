@@ -460,7 +460,7 @@ int cipline_tech_object::save_device( char *buff )
 
 
     //Выбор моющих средств
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         //Список доступных щелочных растворов
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
@@ -721,7 +721,7 @@ int cipline_tech_object::evaluate()
             }
         }
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         statsbase->evaluate();
     }
@@ -781,7 +781,7 @@ int cipline_tech_object::init_params()
     {
     tech_object::init_params();
 
-    if ( number == 1 )
+    if ( number == FIRST_CIPLINE_OBJECT_NUMBER )
         {
         parpar->reset_to_0();
         if ( scparams != parpar ) scparams->reset_to_0();
@@ -1105,7 +1105,7 @@ void cipline_tech_object::initline()
     check_Lua_function( "cip_On_Resume", is_On_Resume_func );
     check_Lua_function( "cip_ConfigureLine", is_ConfigureLine_func );
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
         {
         causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
         if (causticLoadedRecipe >= 0 && causticLoadedRecipe < TMediumRecipeManager::recipePerLine)

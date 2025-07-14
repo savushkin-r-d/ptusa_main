@@ -715,7 +715,7 @@ int tech_object::lua_init_params()
     {
     init_params();
 
-    auto function_names = 
+    static const auto LUA_INIT_FUNCTIONS = 
         {
         "init_params_uint",
         "init_params_float",
@@ -724,7 +724,7 @@ int tech_object::lua_init_params()
         };
 
     auto res = 0;
-    for ( auto f_name : function_names )
+    for ( auto f_name : LUA_INIT_FUNCTIONS )
         {
         if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, f_name ) )
             {

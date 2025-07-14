@@ -541,6 +541,9 @@ class TSav
         float Q() const;
     };
 
+// Данная линия также содержит параметры станции CIP.
+constexpr int FIRST_CIPLINE_OBJECT_NUMBER = 1;
+
 class cipline_tech_object: public tech_object
     {
     protected:
