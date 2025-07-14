@@ -3,6 +3,8 @@
 #pragma warning(disable: 4244)
 #endif // WIN_OS
 
+#include <fmt/core.h>
+
 #include "cip_tech_def.h"
 #include "lua_manager.h"
 #include "utf2cp1251.h"
@@ -2624,6 +2626,10 @@ int cipline_tech_object::EvalCipInProgress()
             state = res;
             Stop(curstep);
             state = res;
+
+            set_err_msg( fmt::format( "ошибка {}", res ).c_str(),
+                0, 0, ERR_MSG_TYPES::ERR_ALARM);
+
             return res;
             }
         else
