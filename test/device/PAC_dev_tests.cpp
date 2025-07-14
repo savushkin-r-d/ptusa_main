@@ -1538,6 +1538,12 @@ TEST( pressure_e_iolink, evaluate_io )
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    test_dev.evaluate_io();
+    // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
+    // input data from the line above).
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );

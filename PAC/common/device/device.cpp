@@ -2978,6 +2978,41 @@ void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
     read_article( new_article, n_article, this );
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PM1708:   //  0.01, mbar
+            alfa = 0.00001f;
+            break;
+
+        case ARTICLE::IFM_PM1706:   //   0.1, mbar
+        case ARTICLE::IFM_PM1707:
+        case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1717:
+            alfa = 0.0001f;
+            break;
+
+        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
+        case ARTICLE::IFM_PI2797:
+
+        case ARTICLE::IFM_PM1704:
+        case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1715:
+            alfa = 0.001f;
+            break;
+
+        case ARTICLE::IFM_PI2794:   // 0.01, bar
+            alfa = 0.01f;
+            break;
+
+        case ARTICLE::FES_8001446:
+            alfa = 0.000610388818f;
+            break;
+
+        case ARTICLE::DEFAULT:
+            alfa = 1;
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
@@ -3084,9 +3119,10 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             {
             ex_PT_data info{};
 
-            std::swap( data[ 0 ], data[ 1 ] );
-            std::swap( data[ 2 ], data[ 3 ] );
+            auto data_ptr = ( (char*)&info );
             std::copy( data, data + sizeof( info ), (char*)&info );
+            std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
+            std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
 
             v = info.v;
             st = info.status;
@@ -3098,48 +3134,14 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             st = 0;
             break;
         }
-
-    float alfa = 1;
-    switch ( n_article )
-        {
-        case ARTICLE::IFM_PM1708:   //  0.01, mbar
-            alfa = 0.00001f;
-            break;
-
-        case ARTICLE::IFM_PM1706:   //   0.1, mbar
-        case ARTICLE::IFM_PM1707:
-        case ARTICLE::IFM_PM1709:
-        case ARTICLE::IFM_PM1717:
-            alfa = 0.0001f;
-            break;
-
-        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
-        case ARTICLE::IFM_PI2797:
-
-        case ARTICLE::IFM_PM1704:
-        case ARTICLE::IFM_PM1705:
-        case ARTICLE::IFM_PM1715:
-            alfa = 0.001f;
-            break;
-
-        case ARTICLE::IFM_PI2794:   // 0.01, bar
-            alfa = 0.01f;
-            break;
-
-        case ARTICLE::FES_8001446:
-            alfa = 0.000610388818f;
-            break;
-
-        case ARTICLE::DEFAULT:
-            alfa = 1;
-            break;
-        }
-    v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
-    evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    pressure_e_iolink::evaluate_io(
+        get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+
+    v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 const char* pressure_e_iolink::get_error_description()

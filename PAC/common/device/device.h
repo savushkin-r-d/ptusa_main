@@ -281,8 +281,9 @@ class pressure_e_iolink : public analog_io_device
             LAST_PARAM_IDX,
             };
 
-        float v = .0f;
+        float v = 0.0f;
         int st = 0;
+        float alfa = 1.0f;
 
         io_link_device iol_dev;
     };
