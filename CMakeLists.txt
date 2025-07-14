@@ -482,5 +482,40 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
+if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
+    add_test(T1-PLCnext-Demo lua5.1
+            -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+            -e "main_script="
+            -e "sys_path="
+            -e "path="
+            ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+
+
+    if(LINUX)
+        add_test(T1-PLCnext-Demo_valgrind valgrind
+                --error-exitcode=1
+                --num-callers=100
+                --leak-check=full
+                --verbose
+                --track-origins=yes
+                --show-leak-kinds=all
+                lua5.1
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "main_script="
+                -e "sys_path="
+                -e "path="
+                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+    endif()
+
+
+    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test
+            --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json
+            --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
+            --benchmark_counters_tabular=true
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
+
+    set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
+endif()
+
 include(GoogleTest)
 gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
