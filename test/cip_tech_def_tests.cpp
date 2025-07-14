@@ -94,7 +94,7 @@ void ClearCipDevices( )
     }
 
 
-TEST( cipline_tech_object, init_params )
+TEST( cipline_tech_object, lua_init_params )
     {
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
     lua_manager::get_instance()->set_Lua( lua_open() );
@@ -102,20 +102,20 @@ TEST( cipline_tech_object, init_params )
     const auto PAR_VALUE = 1.5f;
     cipline_tech_object::set_station_par( P_CZAD_S, PAR_VALUE );
     EXPECT_EQ( cip1.get_station_par( P_CZAD_S ), PAR_VALUE );
-    cip1.init_params();
+    cip1.lua_init_params();
     EXPECT_EQ( cip1.get_station_par( P_CZAD_S ), 0.0f );
 
     G_LUA_MANAGER->free_Lua();
     }
 
-TEST( cipline_tech_object, init_runtime_params )
+TEST( cipline_tech_object, lua_init_runtime_params )
     {
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
     lua_manager::get_instance()->set_Lua( lua_open() );
 
     // После создания объекта параметры должны иметь 0-е значения.
     EXPECT_EQ( cip1.rt_par_float[ workParameters::P_R_NO_FLOW ], 0.0f );
-    cip1.init_runtime_params();
+    cip1.lua_init_runtime_params();
     const auto PAR_VALUE = 2.f;
     // После инициализации рабочих параметров должны быть значения по умолчанию.
     EXPECT_EQ( cip1.rt_par_float[ workParameters::P_R_NO_FLOW ], PAR_VALUE );
