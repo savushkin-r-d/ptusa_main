@@ -778,7 +778,7 @@ int tech_object::lua_init_params()
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_runtime_params()
     {
-    tech_object::init_runtime_params();
+    init_runtime_params();
 
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
