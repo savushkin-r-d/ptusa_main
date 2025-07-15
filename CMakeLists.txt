@@ -483,13 +483,16 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 endif()
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
-    add_test(T1-PLCnext-Demo lua5.1
+    add_test(T1-PLCnext-Demo1 lua5.1
             -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
             ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
+    set_tests_properties(T1-PLCnext-Demo1 PROPERTIES RUN_SERIAL TRUE
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
+
 
     if(LINUX)
-        add_test(T1-PLCnext-Demo_valgrind valgrind
+        add_test(T1-PLCnext-Demo_valgrind1 valgrind
                 --error-exitcode=1
                 --num-callers=100
                 --leak-check=full
@@ -501,7 +504,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
     endif()
 
-    set_property(TEST T1-PLCnext-Demo PROPERTY RUN_SERIAL 1)
+    set_property(TEST T1-PLCnext-Demo1 PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
