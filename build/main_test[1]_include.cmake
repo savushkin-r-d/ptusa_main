@@ -1,0 +1,5 @@
+if(EXISTS "/home/runner/work/ptusa_main/ptusa_main/build/main_test[1]_tests.cmake")
+  include("/home/runner/work/ptusa_main/ptusa_main/build/main_test[1]_tests.cmake")
+else()
+  add_test(main_test_NOT_BUILT main_test_NOT_BUILT)
+endif()
