@@ -485,9 +485,6 @@ endif()
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(T1-PLCnext-Demo lua5.1
             -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-            -e "main_script=nil"
-            -e "sys_path=nil"
-            -e "path=nil"
             ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
 
@@ -501,13 +498,10 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --show-leak-kinds=all
                 lua5.1
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-                -e "main_script=nil"
-                -e "sys_path=nil"
-                -e "path=nil"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
     endif()
 
-    set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
+    set_property(TEST T1-PLCnext-Demo PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
