@@ -487,9 +487,6 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
             ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
 
-    set_tests_properties(T1-PLCnext-Demo1 PROPERTIES RUN_SERIAL TRUE
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
-
 
     if(LINUX)
         add_test(T1-PLCnext-Demo_valgrind1 valgrind
@@ -503,6 +500,12 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
     endif()
+
+    add_test(NAME testik COMMAND main_perfomance_test
+            --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json
+            --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
+            --benchmark_counters_tabular=true
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
     set_property(TEST T1-PLCnext-Demo1 PROPERTY RUN_SERIAL 1)
 endif()
