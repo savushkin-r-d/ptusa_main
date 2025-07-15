@@ -72,7 +72,7 @@ signal_column_iolink::signal_column_iolink( const char* dev_name ) :
     {
     }
 //-----------------------------------------------------------------------------
-void signal_column_iolink::set_string_property( const char* field, const char* value )
+int signal_column_iolink::set_string_property( const char* field, const char* value )
     {
     if ( G_DEBUG )
         {
@@ -107,6 +107,7 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
             siren_channel = pos - value + 1;
             }
         }
+    return 0; // Success
     }
 //-----------------------------------------------------------------------------
 void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name )
@@ -241,7 +242,7 @@ int camera::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 
-void camera::set_string_property( const char* field, const char* value )
+int camera::set_string_property( const char* field, const char* value )
     {
     if ( G_DEBUG )
         {
@@ -252,6 +253,7 @@ void camera::set_string_property( const char* field, const char* value )
         {
         ip = std::string( value );
         }
+    return 0;
     }
 
 bool camera::is_ready() const
@@ -612,9 +614,9 @@ void threshold_regulator::direct_set_value( float val )
         }
     };
 //-----------------------------------------------------------------------------
-void threshold_regulator::set_string_property( const char* field, const char* value )
+int threshold_regulator::set_string_property( const char* field, const char* value )
     {
-    if ( !field ) return;
+    if ( !field ) return 1; // Error: null field
 
     device::set_string_property( field, value );
     switch ( field[ 0 ] )
@@ -622,15 +624,15 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         //IN_VALUE
         case 'I':
             sensor = G_DEVICE_MANAGER()->get_device( value );
-            break;
+            return 0; // Success
 
         //OUT_VALUE
         case 'O':
             actuator = G_DEVICE_MANAGER()->get_device( value );
-            break;
+            return 0; // Success
 
         default:
-            break;
+            return 1; // Error: unknown property
         }
     }
 //-----------------------------------------------------------------------------
@@ -1992,7 +1994,7 @@ void wages_eth::tare()
     //в качестве нулевого).
     }
 
-void wages_eth::set_string_property( const char* field, const char* value )
+int wages_eth::set_string_property( const char* field, const char* value )
     {
     if ( !weth && strcmp( field, "IP" ) == 0 )
         {
@@ -2000,6 +2002,7 @@ void wages_eth::set_string_property( const char* field, const char* value )
         int id = 0;
         weth = new iot_wages_eth( id, value, port );
         }
+    return 0;
     }
 
 void wages_eth::direct_set_value( float new_value )
@@ -2935,12 +2938,13 @@ void level_e_iolink::evaluate_io()
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
     }
 
-void level_e_iolink::set_string_property(const char* field, const char* value)
+int level_e_iolink::set_string_property(const char* field, const char* value)
     {
     if (strcmp(field, "PT") == 0)
         {
         PT_extra = PT(value);
         }
+    return 0;
     }
 
 const char* level_e_iolink::get_error_description()
@@ -3941,7 +3945,7 @@ void motor_altivar::direct_off()
     atv->reverse = 0;
     }
 
-void motor_altivar::set_string_property(const char * field, const char * value)
+int motor_altivar::set_string_property(const char * field, const char * value)
     {
     if ( G_DEBUG )
         {

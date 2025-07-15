@@ -60,7 +60,7 @@ void watchdog::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-void watchdog::set_string_property( const char* field, const char* value )
+int watchdog::set_string_property( const char* field, const char* value )
     {
     if ( G_DEBUG )
         {

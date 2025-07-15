@@ -433,7 +433,7 @@ int PID::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void PID::set_string_property( const char* field, const char* value )
+int PID::set_string_property( const char* field, const char* value )
     {
     if ( !field ) return;
 

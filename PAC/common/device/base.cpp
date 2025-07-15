@@ -253,7 +253,7 @@ void device::set_property( const char* field, device* dev )
     // By default do nothing.
     }
 //-----------------------------------------------------------------------------
-void device::set_string_property( const char* field, const char* new_value )
+int device::set_string_property( const char* field, const char* new_value )
     {
     if ( G_DEBUG )
         {
@@ -261,6 +261,7 @@ void device::set_string_property( const char* field, const char* new_value )
             "field = %s, val = \"%s\"",
             name, field, new_value );
         }
+    return 0; // Success by default
     }
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
