@@ -460,7 +460,7 @@ int cipline_tech_object::save_device( char *buff )
 
 
     //Выбор моющих средств
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         //Список доступных щелочных растворов
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
@@ -721,7 +721,7 @@ int cipline_tech_object::evaluate()
             }
         }
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         statsbase->evaluate();
     }
@@ -780,32 +780,45 @@ int cipline_tech_object::evaluate()
 int cipline_tech_object::init_params()
     {
     tech_object::init_params();
-    rt_par_float[P_R_NO_FLOW] = 2;
-    rt_par_float[P_TM_R_NO_FLOW] = 20;
-    rt_par_float[P_TM_NO_FLOW_R] = 20;
-    rt_par_float[P_TM_NO_CONC] = 20;
-    rt_par_float[PIDP_Z] = 95;
-    rt_par_float[PIDP_k] = 2;
-    rt_par_float[PIDP_Ti] = 30;
-    rt_par_float[PIDP_Td] = (float)0.2;
-    rt_par_float[PIDP_dt] = 500;
-    rt_par_float[PIDP_dmax] = 130;
-    rt_par_float[PIDP_dmin] = 0;
-    rt_par_float[PIDP_AccelTime] = 30;
-    rt_par_float[PIDP_IsManualMode] = 0;
-    rt_par_float[PIDP_UManual] = 30;
-    rt_par_float[PIDP_Uk] = 0;
-    rt_par_float[PIDF_Z] = 15;
-    rt_par_float[PIDF_k] = (float)0.5;
-    rt_par_float[PIDF_Ti] = 10;
-    rt_par_float[PIDF_Td] = (float)0.1;
-    rt_par_float[PIDF_dt] = 1000;
-    rt_par_float[PIDF_dmax] = 40;
-    rt_par_float[PIDF_dmin] = 0;
-    rt_par_float[PIDF_AccelTime] = 2;
-    rt_par_float[PIDF_IsManualMode] = 0;
-    rt_par_float[PIDF_UManual] = 15;
-    rt_par_float[PIDF_Uk] = 0;
+
+    if ( number == FIRST_CIPLINE_OBJECT_NUMBER )
+        {
+        parpar->reset_to_0();
+        if ( scparams != parpar ) scparams->reset_to_0();
+        }
+    return 0;
+    }
+
+int cipline_tech_object::init_runtime_params()
+    {
+    tech_object::init_runtime_params();
+
+    rt_par_float[ P_R_NO_FLOW ] = 2;
+    rt_par_float[ P_TM_R_NO_FLOW ] = 20;
+    rt_par_float[ P_TM_NO_FLOW_R ] = 20;
+    rt_par_float[ P_TM_NO_CONC ] = 20;
+    rt_par_float[ PIDP_Z ] = 95;
+    rt_par_float[ PIDP_k ] = 2;
+    rt_par_float[ PIDP_Ti ] = 30;
+    rt_par_float[ PIDP_Td ] = (float)0.2;
+    rt_par_float[ PIDP_dt ] = 500;
+    rt_par_float[ PIDP_dmax ] = 130;
+    rt_par_float[ PIDP_dmin ] = 0;
+    rt_par_float[ PIDP_AccelTime ] = 30;
+    rt_par_float[ PIDP_IsManualMode ] = 0;
+    rt_par_float[ PIDP_UManual ] = 30;
+    rt_par_float[ PIDP_Uk ] = 0;
+    rt_par_float[ PIDF_Z ] = 15;
+    rt_par_float[ PIDF_k ] = (float)0.5;
+    rt_par_float[ PIDF_Ti ] = 10;
+    rt_par_float[ PIDF_Td ] = (float)0.1;
+    rt_par_float[ PIDF_dt ] = 1000;
+    rt_par_float[ PIDF_dmax ] = 40;
+    rt_par_float[ PIDF_dmin ] = 0;
+    rt_par_float[ PIDF_AccelTime ] = 2;
+    rt_par_float[ PIDF_IsManualMode ] = 0;
+    rt_par_float[ PIDF_UManual ] = 15;
+    rt_par_float[ PIDF_Uk ] = 0;
     return 0;
     }
 
@@ -1092,7 +1105,7 @@ void cipline_tech_object::initline()
     check_Lua_function( "cip_On_Resume", is_On_Resume_func );
     check_Lua_function( "cip_ConfigureLine", is_ConfigureLine_func );
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
         {
         causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
         if (causticLoadedRecipe >= 0 && causticLoadedRecipe < TMediumRecipeManager::recipePerLine)

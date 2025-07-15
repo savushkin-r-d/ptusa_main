@@ -541,6 +541,9 @@ class TSav
         float Q() const;
     };
 
+// Данная линия также содержит параметры станции CIP.
+constexpr int FIRST_CIPLINE_OBJECT_NUMBER = 1;
+
 class cipline_tech_object: public tech_object
     {
     protected:
@@ -876,7 +879,8 @@ class cipline_tech_object: public tech_object
         int set_cmd( const char *prop, u_int idx, double val ) override;
         int set_cmd( const char *prop, u_int idx, const char* val );
         int evaluate() override;
-        int init_params();
+        int init_params() override;
+        int init_runtime_params() override;
 
         ////-------------------
         void RHI();
