@@ -3010,7 +3010,7 @@ void pressure_e_iolink::set_article( const char* new_article )
             break;
 
         case ARTICLE::DEFAULT:
-            alfa = 1;
+            alfa = 1.0f;
             break;
         }
     }
