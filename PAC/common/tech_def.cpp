@@ -552,16 +552,6 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
         return 1000 + res;
         }
 
-    //TODO. Устаревшее название функции. Оставлено для совместимости.
-    //Проверка на наличии функции check_on_mode.
-    if ( auto old_function_name = "check_on_mode"; 
-        G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
-        {
-        return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
-            old_function_name, mode, show_error ? 1 : 0,
-            "int tech_object::lua_check_on_mode( u_int mode )" );
-        }
-
     //Проверка на наличии функции user_check_operation_on.
     if ( auto new_function_name = "user_check_operation_on"; 
         G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )

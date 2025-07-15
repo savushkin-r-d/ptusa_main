@@ -47,7 +47,6 @@ class PID : public device, public i_Lua_save_device
             PARAMS_COUNT
             };
 
-        /// TODO Удалить после обновления, оставлено для совместимости.
         const char* WORK_PARAMS_NAME = "RT_PAR_F";
         enum WORK_PARAM
             {
@@ -56,8 +55,6 @@ class PID : public device, public i_Lua_save_device
             };
 
         /// @param n - номер.
-        ///
-        /// TODO Удалить после обновления, оставлено для совместимости.
         PID( int n );
 
         /// @param name - имя.
