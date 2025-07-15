@@ -2627,8 +2627,8 @@ int cipline_tech_object::EvalCipInProgress()
             Stop(curstep);
             state = res;
 
-            set_err_msg( fmt::format( "ошибка {}", res ).c_str(),
-                0, 0, ERR_MSG_TYPES::ERR_ALARM);
+            set_err_msg( fmt::format( "ошибка '{}' ({})",
+                ERR_MSG.at( res ), res).c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM);
 
             return res;
             }
