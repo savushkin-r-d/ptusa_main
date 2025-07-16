@@ -60,7 +60,7 @@ void watchdog::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-void watchdog::set_string_property( const char* field, const char* value )
+int watchdog::set_string_property( const char* field, const char* value )
     {
     if ( G_DEBUG )
         {
@@ -69,7 +69,7 @@ void watchdog::set_string_property( const char* field, const char* value )
             get_name(), field, value );
         }
 
-    if ( !field ) return;
+    if ( !field ) return -1;
 
     if ( strcmp( field, "DI_dev" ) == 0 )
         {
@@ -91,7 +91,9 @@ void watchdog::set_string_property( const char* field, const char* value )
         {
         G_LOG->alert( "%s\t watchdog::set_string_property() - "
             "Unknown field \"%s\"", get_name(), field );
+        return -2;
         }
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void watchdog::set_property( const char* field, device* value )

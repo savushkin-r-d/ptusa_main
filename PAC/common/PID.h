@@ -47,19 +47,6 @@ class PID : public device, public i_Lua_save_device
             PARAMS_COUNT
             };
 
-        /// TODO Удалить после обновления, оставлено для совместимости.
-        const char* WORK_PARAMS_NAME = "RT_PAR_F";
-        enum WORK_PARAM
-            {
-            WP_Z = 1,  ///< Требуемое значение.
-            WP_U,      ///< Выход ПИД.
-            };
-
-        /// @param n - номер.
-        ///
-        /// TODO Удалить после обновления, оставлено для совместимости.
-        PID( int n );
-
         /// @param name - имя.
         PID( const char* name );
 
@@ -80,7 +67,7 @@ class PID : public device, public i_Lua_save_device
 
         int set_cmd( const char* prop, u_int idx, double val );
 
-        void set_string_property( const char* field, const char* value );
+        int set_string_property( const char* field, const char* value );
 #ifndef __GNUC__
 #pragma endregion
 #endif
@@ -154,8 +141,6 @@ class PID : public device, public i_Lua_save_device
 
         int used_par_n;
         float start_value;
-
-        bool is_old_style;
 
         device* sensor;
         device* actuator;
