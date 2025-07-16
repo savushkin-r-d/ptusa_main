@@ -2660,9 +2660,8 @@ int cipline_tech_object::EvalCipInProgress()
             auto err_msg_it = ERR_MSG.find( res );
             const char* err_msg = 
                 ( err_msg_it != ERR_MSG.end() ) ? err_msg_it->second : UNKNOWN_ERR_MSG;
-            set_err_msg( fmt::format( "ошибка '{}' ({})",
-                err_msg, res ).c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM );
-
+            std::string formatted_err_msg = fmt::format( "ошибка '{}' ({})", err_msg, res );
+            set_err_msg( formatted_err_msg.c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM );
             return res;
             }
         else

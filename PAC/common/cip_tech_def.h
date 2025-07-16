@@ -238,6 +238,7 @@ const int ERR_RET = -100;
 ///---CIP_ERROR_CODES
 
 extern const std::map<int, const char*> ERR_MSG;
+extern const char* UNKNOWN_ERR_MSG;
 
 //блокирование ошибок
 enum BLOCK_ERRORS
@@ -915,6 +916,9 @@ class cipline_tech_object: public tech_object
         int _DoseRR(int what);
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
+#ifdef PTUSA_TEST
+        virtual
+#endif
         int DoStep(int step_to_do);                                     //cip_DoStep(step)
         int GoToStep(int cur, int param);                               //cip_GoToStep(currentstep,param)
         int InitStep(int step_to_init, int not_first_call);             //cip_InitStep(steptoinit, param)

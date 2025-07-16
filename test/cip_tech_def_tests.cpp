@@ -788,3 +788,45 @@ TEST( cipline_tech_object, SCInitPumping )
 
     G_LUA_MANAGER->free_Lua();
     }
+
+class cipline_tech_object_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            lua_manager::get_instance()->set_Lua( lua_open() );
+            InitCipDevices();
+            InitStationParams();
+            }
+
+        void TearDown() override
+            {
+            ClearCipDevices();
+            G_LUA_MANAGER->free_Lua();
+            }
+
+        class cipline_tech_object_mock : public cipline_tech_object
+            {
+            public:
+                cipline_tech_object_mock()
+                    : cipline_tech_object( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+                        "CIP1", 1, 1, 200, 200, 200, 200 )
+                    {
+                    }
+
+                int DoStep( int step_to_do ) override
+                    {
+                    return -1; // mock implementation
+                    }
+            };
+
+        cipline_tech_object_mock cip1{};
+    };
+
+TEST_F( cipline_tech_object_test, EvalCipInProgress )
+    {
+    cip1.initline();
+    
+    auto res = cip1.EvalCipInProgress();
+    EXPECT_EQ( res, -1 );
+    }
