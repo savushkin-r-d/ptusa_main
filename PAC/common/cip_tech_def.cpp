@@ -34,7 +34,14 @@ const std::map<int, const char*> ERR_MSG =
     { ERR_SUPPLY_TEMP_SENSOR, "Ошибка температуры на подаче" },
     { ERR_RETURN_TEMP_SENSOR, "Ошибка температуры на возврате" },
     { ERR_CONCENTRATION_SENSOR, "Ошибка концентрации в возвратной трубе" },
-    { ERR_RET, "Линия заблокирована для ремонта" }
+
+    { ERR_NO_DESINFECTION_MEDIUM, "Нет дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_MAX_TIME, 
+        "Превышено максимальное время дозирования дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME,
+        "Недостаточное время дозирования дезинфицирующего средства" },
+
+    { ERR_RET, "Ошибка возвратного насоса" }
     };
 
 const char* const UNKNOWN_ERR_MSG = "неизвестная ошибка";
