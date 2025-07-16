@@ -238,7 +238,7 @@ const int ERR_RET = -100;
 ///---CIP_ERROR_CODES
 
 extern const std::map<int, const char*> ERR_MSG;
-extern const char* UNKNOWN_ERR_MSG;
+extern const char* const UNKNOWN_ERR_MSG;
 
 //блокирование ошибок
 enum BLOCK_ERRORS

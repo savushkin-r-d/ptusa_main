@@ -37,7 +37,7 @@ const std::map<int, const char*> ERR_MSG =
     { ERR_RET, "Линия заблокирована для ремонта" }
     };
 
-const char* UNKNOWN_ERR_MSG = "неизвестная ошибка";
+const char* const UNKNOWN_ERR_MSG = "неизвестная ошибка";
 
 TMediumRecipeManager* cipline_tech_object::causticRecipes = nullptr;
 
