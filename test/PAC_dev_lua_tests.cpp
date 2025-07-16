@@ -251,6 +251,31 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_WATCHDOG00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 1, luaL_dostring( L, "res = WATCHDOG()" ) );  //Некорректный вызов.
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_WATCHDOG, device.DST_WATCHDOG, \'WATCHDOG1\', \'Test watchdog\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "WATCHDOG1 = WATCHDOG( \'WATCHDOG1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "WATCHDOG1" );
+    auto WATCHDOG1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, WATCHDOG1 );
+    lua_remove( L, -1 );
+
+    auto dev = G_DEVICE_MANAGER()->get_device( "WATCHDOG1" );
+    EXPECT_NE( nullptr, dev );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
+
+
 TEST( toLuapp, STUB )
     {
     lua_State* L = lua_open();

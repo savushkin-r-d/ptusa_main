@@ -1031,13 +1031,13 @@ TEST( device_manager, add_io_device )
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
 
-    check_dev<i_DI_device, i_DI_device>( "POU1LIFEBIT1", device::DT_LIFE_DEVICE,
-        device::DST_LIFEBIT, LIFE_DEVICE, nullptr, "Art_1", true );
-    check_dev<i_DI_device, i_DI_device>( "POU1LIFECOUNTER1", device::DT_LIFE_DEVICE,
-        device::DST_LIFECOUNTER, LIFE_DEVICE, nullptr, "Art_1", true );
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFEBIT1", device::DT_WATCHDOG,
+        device::DST_WATCHDOG, WATCHDOG, nullptr, "Art_1", true );
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFECOUNTER1", device::DT_WATCHDOG,
+        device::DST_WATCHDOG, WATCHDOG, nullptr, "Art_1", true );
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_LIFE_DEVICE, device::DST_LIFECOUNTER + 1, "POU1LIFEBIT2",
-        "Test life_device", "Art_1" );
+        device::DT_WATCHDOG, device::DST_WATCHDOG + 1, "POU1LIFEBIT2",
+        "Test watchdog", "Art_1" );
     EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
@@ -1136,9 +1136,9 @@ TEST( device, get_type_str )
         device::DEVICE_SUB_TYPE::DST_V_VIRT, 0 );
     EXPECT_STREQ( dev2.get_type_str(), "V" );
 
-    device dev3( "DEV3", device::DEVICE_TYPE::DT_LIFE_DEVICE,
-        device::DEVICE_SUB_TYPE::DST_LIFEBIT, 0 );
-    EXPECT_STREQ( dev3.get_type_str(), "LIFE_DEVICE" );
+    device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
+    EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
     }
 
 TEST( device, save_device )
@@ -1504,19 +1504,24 @@ TEST( pressure_e_iolink, read_article )
     {
     pressure_e_iolink test_dev( "P1" );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
+    const auto IFM____ = "IFM.____";
+    test_dev.set_article( IFM____ );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
 
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
+
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1717 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
     }
 
 TEST( pressure_e_iolink, evaluate_io )
     {
     pressure_e_iolink test_dev( "P1" );
-    const auto IFM_PM1706 = "IFM.PM1706";
-    test_dev.set_article( IFM_PM1706 );
-
 
     G_PAC_INFO()->emulation_off();
     uni_io_manager mngr;
@@ -1528,11 +1533,42 @@ TEST( pressure_e_iolink, evaluate_io )
     test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
+    test_dev.evaluate_io();
+    EXPECT_EQ( test_dev.get_value(), 0.0f ); // Default value is 0.
+
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
     // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
     // input data from the line above).
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    test_dev.evaluate_io();
+    // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
+    // input data from the line above).
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+
+    const auto IFM_PM1708 = "IFM.PM1708";
+    test_dev.set_article( IFM_PM1708 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 0.255f, .01f );
+    
+    const auto IFM_PI2715 = "IFM.PI2715";
+    test_dev.set_article( IFM_PI2715 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 6.4f, .01f );
+    
+    const auto IFM_PI2794 = "IFM.PI2794";
+    test_dev.set_article( IFM_PI2794 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 64.0f, .01f );
+    
+    const auto FES_8001446 = "FES.8001446";
+    test_dev.set_article( FES_8001446 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );

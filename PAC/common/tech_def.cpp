@@ -713,72 +713,39 @@ int tech_object::lua_final_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_params()
     {
-    tech_object::init_params();
+    init_params();
 
-    //Проверка на наличии функции инициализации параметров uint.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_uint" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    static const auto LUA_INIT_FUNCTIONS = 
         {
-        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "init_params_uint", 0, "int tech_object::lua_init_params()" );
-        }
-    //Удаляем "init_params_uint" со стека.
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+        "init_params_uint",
+        "init_params_float",
+        "init_rt_params_uint",
+        "init_rt_params_float"
+        };
 
-    //Проверка на наличии функции инициализации параметров float.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_float" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto res = 0;
+    for ( auto f_name : LUA_INIT_FUNCTIONS )
         {
-        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "init_params_float", 0, "int tech_object::lua_init_params()" );
+        if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, f_name ) )
+            {
+            auto init_res = lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+                f_name, 0, fmt::format(
+                "int tech_object::lua_init_params() for function '{}'",
+                f_name ).c_str() );
+
+            if ( init_res != 0 )
+                {
+                res = init_res;
+                }
+            }
         }
-    //Удаляем "init_params_float" со стека.
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
-    //Проверка на наличии функции инициализации рабочих параметров uint.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
-        "init_rt_params_uint" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
-        {
-        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "init_rt_params_uint", 0, "int tech_object::lua_init_params()" );
-        }
-    //Удаляем "init_params_uint" со стека.
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-
-    //Проверка на наличии функции инициализации рабочих параметров float.
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
-        "init_rt_params_float" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
-        {
-        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "init_rt_params_float", 0, "int tech_object::lua_init_params()" );
-        }
-    //Удаляем "init_params_float" со стека.
-    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
-
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_runtime_params()
     {
-    tech_object::init_runtime_params();
+    init_runtime_params();
 
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
