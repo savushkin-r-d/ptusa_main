@@ -433,9 +433,9 @@ int PID::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void PID::set_string_property( const char* field, const char* value )
+int PID::set_string_property( const char* field, const char* value )
     {
-    if ( !field ) return;
+    if ( !field ) return -1;
 
     switch ( field[ 0 ] )
         {
@@ -451,13 +451,14 @@ void PID::set_string_property( const char* field, const char* value )
                 {
                 G_LOG->error( "\'%s\' - self asigment (out set to self).", get_name() );
                 actuator = nullptr;
+                return -2;
                 }
             break;
 
         default:
-            device::set_string_property( field, value );
-            break;
+            return device::set_string_property( field, value );
         }
+    return 0;
     }
 //-----------------------------------------------------------------------------
 const char* PID::get_name_in_Lua() const

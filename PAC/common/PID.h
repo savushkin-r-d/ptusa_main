@@ -80,7 +80,7 @@ class PID : public device, public i_Lua_save_device
 
         int set_cmd( const char* prop, u_int idx, double val );
 
-        void set_string_property( const char* field, const char* value );
+        int set_string_property( const char* field, const char* value );
 #ifndef __GNUC__
 #pragma endregion
 #endif

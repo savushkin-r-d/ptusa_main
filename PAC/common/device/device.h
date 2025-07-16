@@ -382,7 +382,7 @@ class level_e_iolink : public level
         void set_article( const char* new_article ) override;
         void evaluate_io() override;
 
-        void set_string_property(const char* field, const char* value) override;
+        int set_string_property(const char* field, const char* value) override;
 
         const char* get_error_description() override;
 
@@ -601,7 +601,7 @@ class wages_eth : public analog_io_device, public i_wages
 
         void tare() override;
 
-        void set_string_property( const char* field, const char* value ) override;
+        int set_string_property( const char* field, const char* value ) override;
 
         void direct_set_tcp_buff( const char* new_value, size_t size,
             int new_status );
@@ -905,7 +905,7 @@ public:
 
     void direct_off() override;
 
-    void set_string_property(const char* field, const char* value) override;
+    int set_string_property(const char* field, const char* value) override;
 
     void print() const override;
 
@@ -1401,7 +1401,7 @@ class signal_column_iolink : public signal_column
     public:
         explicit signal_column_iolink( const char* dev_name );
 
-        void set_string_property( const char* field, const char* value ) override;
+        int set_string_property( const char* field, const char* value ) override;
 
         void evaluate_io() override;
 
@@ -1448,7 +1448,7 @@ class camera : public i_camera, public device, public io_device
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        void set_string_property( const char* field, const char* value ) override;
+        int set_string_property( const char* field, const char* value ) override;
 
         int get_result( int n = 1 ) override;
 
@@ -1592,7 +1592,7 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         int save_device( char* buff ) override;
 
-        void set_string_property( const char* field, const char* value ) override;
+        int set_string_property( const char* field, const char* value ) override;
 
     private:
         enum class STATE

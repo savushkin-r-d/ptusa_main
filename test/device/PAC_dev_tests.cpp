@@ -4783,11 +4783,11 @@ TEST( threshold_regulator, set_string_property )
     auto name = "C1";
     threshold_regulator p1( name );
 
-    //TODO - refactor set_string_property() to return result.
-    p1.set_string_property( nullptr, nullptr );
-    p1.set_string_property( "IN_VALUE", "FQT1" );
-    p1.set_string_property( "OUT_VALUE", "M1" );
-    p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
+    // Test that set_string_property() now returns result codes
+    EXPECT_EQ( -1, p1.set_string_property( nullptr, nullptr ) );
+    EXPECT_EQ( 0, p1.set_string_property( "IN_VALUE", "FQT1" ) );
+    EXPECT_EQ( 0, p1.set_string_property( "OUT_VALUE", "M1" ) );
+    EXPECT_EQ( 0, p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" ) );
     }
 
 TEST( threshold_regulator, get_type_name )

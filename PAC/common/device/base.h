@@ -725,7 +725,8 @@ class device : public i_DO_AO_device, public par_device
         /// строки.
         ///
         /// Для использования в Lua.
-        virtual void set_string_property( const char* field, const char* new_value );
+        /// @return 0 при успехе, иначе код ошибки.
+        virtual int set_string_property( const char* field, const char* new_value );
 
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
         ///
