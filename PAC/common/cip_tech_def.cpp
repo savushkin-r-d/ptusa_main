@@ -3,9 +3,48 @@
 #pragma warning(disable: 4244)
 #endif // WIN_OS
 
+#include <fmt/core.h>
+
 #include "cip_tech_def.h"
 #include "lua_manager.h"
 #include "utf2cp1251.h"
+
+const std::map<int, const char*> ERR_MSG =
+    {
+    { ERR_UNKNOWN_STEP, "Неизвестный шаг" },
+    { ERR_POSSIBLE_NO_MEDIUM, "Возможно отсутствует концентрированный раствор" },
+    { ERR_NO_ACID, "Нет моющего раствора кислоты в танке" },
+    { ERR_NO_ALKALINE, "Нет моющего раствора щелочи в танке" },
+    { ERR_NO_RETURN, "Нет расхода в возвратной трубе" },
+    { ERR_NO_CONC, "Нет концентрации в возвратной трубе" },
+    { ERR_IS_CONC, "Высокая концентрация в возвратной трубе" },
+    { ERR_WRONG_RET, "Ошибка возвратного насоса" },
+    { ERR_PUMP, "Ошибка подающего насоса" },
+    { ERR_NO_FLOW, "Нет расхода на подаче" },
+    { ERR_AIR, "Нет воздуха" },
+    { ERR_OS, "Ошибка объекта CIP" },
+    { ERR_CIP_OBJECT, "Прерывание со стороны клиента" },
+    { ERR_WRONG_OS_OR_RECIPE_ERROR, "Несуществующая обратная связь ошибка в рецепте" },
+    { ERR_VALVES_ARE_IN_CONFLICT, "Конфликт клапанов в рецептах" },
+    { ERR_ACID_WASH_REQUIRED, "Требуется мойка кислотой" },
+    { ERR_LEVEL_BACHOK, "Ошибка уровня в бачке" },
+    { ERR_LEVEL_TANK_S, "Ошибка уровня танка щелочи" },
+    { ERR_LEVEL_TANK_K, "Ошибка уровня танка кислоты" },
+    { ERR_LEVEL_TANK_W, "Ошибка уровня танка вторичной воды" },
+    { ERR_SUPPLY_TEMP_SENSOR, "Ошибка температуры на подаче" },
+    { ERR_RETURN_TEMP_SENSOR, "Ошибка температуры на возврате" },
+    { ERR_CONCENTRATION_SENSOR, "Ошибка концентрации в возвратной трубе" },
+
+    { ERR_NO_DESINFECTION_MEDIUM, "Нет дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_MAX_TIME, 
+        "Превышено максимальное время дозирования дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME,
+        "Недостаточное время дозирования дезинфицирующего средства" },
+
+    { ERR_RET, "Ошибка возвратного насоса" }
+    };
+
+const char* const UNKNOWN_ERR_MSG = "неизвестная ошибка";
 
 TMediumRecipeManager* cipline_tech_object::causticRecipes = nullptr;
 
@@ -2637,6 +2676,12 @@ int cipline_tech_object::EvalCipInProgress()
             state = res;
             Stop(curstep);
             state = res;
+
+            auto err_msg_it = ERR_MSG.find( res );
+            const char* err_msg = 
+                ( err_msg_it != ERR_MSG.end() ) ? err_msg_it->second : UNKNOWN_ERR_MSG;
+            std::string formatted_err_msg = fmt::format( "ошибка '{}' ({})", err_msg, res );
+            set_err_msg( formatted_err_msg.c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM );
             return res;
             }
         else

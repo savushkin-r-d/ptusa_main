@@ -234,10 +234,16 @@ const int ERR_LEVEL_TANK_W = -38;
 const int ERR_SUPPLY_TEMP_SENSOR = -39;
 const int ERR_RETURN_TEMP_SENSOR = -40;
 const int ERR_CONCENTRATION_SENSOR = -41;
+
+const int ERR_NO_DESINFECTION_MEDIUM = -71;
+const int ERR_DESINFECTION_MEDIUM_MAX_TIME = -72;
+const int ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME = -73;
+
 const int ERR_RET = -100;
 ///---CIP_ERROR_CODES
 
-
+extern const std::map<int, const char*> ERR_MSG;
+extern const char* const UNKNOWN_ERR_MSG;
 
 //блокирование ошибок
 enum BLOCK_ERRORS
@@ -919,6 +925,9 @@ class cipline_tech_object: public tech_object
         int _DoseRR(int what);
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
+#ifdef PTUSA_TEST
+        virtual
+#endif
         int DoStep(int step_to_do);                                     //cip_DoStep(step)
         int GoToStep(int cur, int param);                               //cip_GoToStep(currentstep,param)
         int InitStep(int step_to_init, int not_first_call);             //cip_InitStep(steptoinit, param)
