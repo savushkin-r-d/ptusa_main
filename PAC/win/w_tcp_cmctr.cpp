@@ -132,20 +132,9 @@ int tcp_communicator_win::net_init()
 
     sst.push_back( master_socket_state );
 
-    //TODO. Для win версии это отключено, чтобы явно возникала ошибка при
-    //запуске двух и более экземпляров программы. Для linux надо изучить
-    //как данный параметр влияет на работу с сокетом. При необходимости
-    //реализовать проверку на максимальное ожидание запросов от сервера.
-    //
-    //const int on = 1;
-    //if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
-    //    ( char* ) &on, sizeof( on ) ) )
-    //    {
-    //    printf( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
-    //        WSA_Last_Err_Decode() );        
-    //    closesocket( master_socket );
-    //    return -5;
-    //    }
+    // Note: SO_REUSEADDR is intentionally NOT set on Windows to prevent
+    // multiple instances of the program from running simultaneously.
+    // This ensures exclusive access to the TCP port.
 
     //-Привязка сокета.
     int err = bind( master_socket, ( struct sockaddr * ) 
