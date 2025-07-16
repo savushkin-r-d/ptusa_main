@@ -1,12 +1,6 @@
 #include "PID.h"
 #include "string.h"
 //-----------------------------------------------------------------------------
-PID::PID( int n ): PID( ( "PID" + std::to_string( n ) ).c_str() )
-    {
-    is_old_style = true;
-    G_DEVICE_CMMCTR->add_device( this );
-    }
-//-----------------------------------------------------------------------------
 PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
     device::DEVICE_SUB_TYPE::DST_REGULATOR_PID, PARAMS_COUNT - 1 ),
     uk_1( 0 ),
@@ -22,7 +16,6 @@ PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
     prev_manual_mode( 0 ),
     state( STATE::OFF ),
     used_par_n( 1 ),
-    is_old_style( false ),
     start_value( 0 ),
     sensor( 0 ),
     actuator( 0 )
@@ -384,51 +377,7 @@ float PID::get_assignment()
 //-----------------------------------------------------------------------------
 int PID::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( is_old_style )
-        {
-
-        if ( 0 == strcmp( prop, WORK_PARAMS_NAME ) )
-            {
-            if ( idx == WP_Z )
-                {
-                set_value = (float)val;
-                return 0;
-                }
-
-            if ( idx == WP_U )
-                {
-                out_value = (float)val;
-                return 0;
-                }
-            }
-        if ( 0 == strcmp( prop, par->get_name() ) )
-            {
-            if ( idx > 0 && idx <= par->get_count() )
-                {
-                //Проверка выхода за диапазон допустимых значений.
-                if ( idx == P_out_min && val < MIN_OUT_VALUE )
-                    {
-                    val = MIN_OUT_VALUE;
-                    }
-                if ( idx == P_out_max && val > MAX_OUT_VALUE )
-                    {
-                    val = MAX_OUT_VALUE;
-                    }
-                if ( ( idx == P_out_min && val > ( *par )[ P_out_max ] ) ||
-                    ( idx == P_out_max && val < ( *par )[ P_out_min ] ) )
-                    {
-                    return 0;
-                    }
-
-                par->save( idx, (float)val );
-                return 0;
-                }
-            }
-        }
-    else
-        {
-        device::set_cmd( prop, idx, val );
-        }
+    device::set_cmd( prop, idx, val );
 
     return 0;
     }
@@ -479,27 +428,7 @@ int PID::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 int PID::save_device( char *buff )
     {
-    int answer_size = 0;
-    if ( is_old_style )
-        {
-        answer_size = sprintf( buff, "t.%s = \n\t{\n", get_name() );
-
-        answer_size += sprintf( buff + answer_size, "\tST=%u,\n",
-            static_cast<unsigned int>(state) );
-
-        //Параметры.
-        answer_size += par->save_device( buff + answer_size, "\t" );
-        answer_size += sprintf( buff + answer_size,
-            "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
-
-        answer_size += sprintf( buff + answer_size, "\t}\n" );
-        }
-    else
-        {
-        answer_size = device::save_device( buff, "\t" );
-        }
-
-    return answer_size;
+    return device::save_device( buff, "\t" );
     }
 //-----------------------------------------------------------------------------
 device* PID::get_actuator() const
