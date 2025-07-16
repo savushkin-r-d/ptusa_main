@@ -6,6 +6,7 @@ intermediate
 bin*
 out
 obj
+build
 cmake-build-*
 CMakeSettings.json
 nvram.txt
