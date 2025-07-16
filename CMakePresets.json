@@ -133,6 +133,18 @@
 
 
     {
+      "name": "build-windows-AXCF3152-2024-LTS-Release",
+      "displayName": "Windows AXCF3152 2024 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF3152",
+        "ARP_DEVICE_VERSION": "2024.0.9 LTS (24.0.9.163)",
+        "ARP_DEVICE_SHORT_VERSION": "2024_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
+      }
+    },
+    {
       "name": "build-windows-AXCF3152-2023-LTS-Release",
       "displayName": "Windows AXCF3152 2023 LTS Release",
       "description": "Using Windows OS",
@@ -259,6 +271,11 @@
     },
 
 
+    {
+      "name": "build-windows-AXCF3152-2024-LTS-Release",
+      "displayName": "AXCF3152 2024 LTS",
+      "configurePreset": "build-windows-AXCF3152-2024-LTS-Release"
+    },
     {
       "name": "build-windows-AXCF3152-2023-LTS-Release",
       "displayName": "AXCF3152 2023 LTS",
