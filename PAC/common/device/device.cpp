@@ -4080,14 +4080,14 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    p_data_out->enable_ch1 = true;
-    p_data_out->enable_ch2 = true;
+    p_data_out->enable_ch1 = 1;
+    p_data_out->enable_ch2 = 1;
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->enable_ch1 = false;
-    p_data_out->enable_ch2 = false;
+    p_data_out->enable_ch1 = 0;
+    p_data_out->enable_ch2 = 0;
     p_data_out->setpoint_ch1 = 0;
     p_data_out->setpoint_ch2 = 0;
     }
@@ -4132,7 +4132,7 @@ void converter_iolink_ao::evaluate_io()
 
     if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
         {
-        // Проверка состояния каналов
+        // Проверка состояния каналов (0 = OK для IO-Link устройств)
         if ( p_data_in.status_ch1 == 0 && p_data_in.status_ch2 == 0 )
             {
             st = 1; // OK
@@ -4182,7 +4182,7 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     
     if ( strcmp( prop, "ST_CH" ) == 0 )
         {
-        bool enable = static_cast<bool>( val );
+        uint8_t enable = static_cast<uint8_t>( val != 0 ? 1 : 0 );
         switch ( idx )
             {
             case 1:
