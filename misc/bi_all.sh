@@ -3,7 +3,8 @@
 SECONDS=0
 
 configs=(
-    "build-windows-AXCF2152-2024-LTS-Release build-windows-AXCF2152-2024-LTS-Release"
+    "build-windows-AXCF2152-2024-LTS-Release build-windows-AXCF2152-2024-LTS-Release"    
+    "build-windows-AXCF3152-2024-LTS-Release build-windows-AXCF3152-2024-LTS-Release"
     "windows-VS2022-default build-windows-VS2022-release"
 )
 

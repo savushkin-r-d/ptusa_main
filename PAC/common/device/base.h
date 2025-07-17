@@ -410,7 +410,7 @@ class device : public i_DO_AO_device, public par_device
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
-            DT_LIFE_DEVICE, ///< Устройство проверки связи.
+            DT_WATCHDOG, ///< Устройство проверки связи.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -610,9 +610,8 @@ class device : public i_DO_AO_device, public par_device
             DST_G_IOL_4 = 1,    ///< 4 канала.
             DST_G_IOL_8,        ///< 8 каналов.
 
-            //DT_LIFE_DEVICE
-            DST_LIFEBIT = 1,
-            DST_LIFECOUNTER,
+            //DT_WATCHDOG
+            DST_WATCHDOG = 1,
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
@@ -654,7 +653,7 @@ class device : public i_DO_AO_device, public par_device
             return prev_error_state;
             }
 
-        void set_descr( const char* new_description );
+        virtual void set_descr( const char* new_description );
 
         virtual void set_article( const char* new_article );
 
