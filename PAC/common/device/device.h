@@ -1748,6 +1748,68 @@ class power_unit : public analog_io_device
         static process_data_out stub_p_data_out;
         process_data_out* p_data_out = &stub_p_data_out;
     };
+//-----------------------------------------------------------------------------
+/// @brief Конвертер IO-Link -> AO.
+///
+/// Устройство для преобразования IO-Link сигналов в аналоговые выходы.
+class converter_iolink_ao : public analog_io_device
+    {
+    public:
+        explicit converter_iolink_ao( const char* dev_name );
+
+        void direct_on() override;
+        void direct_off() override;
+
+        float get_value() override;
+        int get_state() override;
+
+        void direct_set_value( float val ) override;
+
+        void evaluate_io() override;
+
+        int save_device_ex( char* buff ) override;
+
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
+    private:
+        float v = .0f;  // Выходное значение.
+        int st = 0;     // Состояние устройства.
+        int err = 0;    // Ошибка.
+
+        enum CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+            };
+
+#pragma pack(push, 1)
+        struct process_data_in
+            {
+            uint16_t status_ch1 : 2;        // Статус канала 1.
+            uint16_t status_ch2 : 2;        // Статус канала 2.
+            uint16_t reserved   : 12;       // Резерв.
+            
+            uint16_t output_ch1;            // Выходное значение канала 1.
+            uint16_t output_ch2;            // Выходное значение канала 2.
+            };
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+        struct process_data_out
+            {
+            uint16_t setpoint_ch1;          // Уставка канала 1.
+            uint16_t setpoint_ch2;          // Уставка канала 2.
+            
+            bool enable_ch1 : 1;            // Разрешение канала 1.
+            bool enable_ch2 : 1;            // Разрешение канала 2.
+            uint16_t reserved : 14;         // Резерв.
+            };
+#pragma pack(pop)
+
+        process_data_in p_data_in;
+        
+        static process_data_out stub_p_data_out;
+        process_data_out* p_data_out = &stub_p_data_out;
+    };
 ///
 /// Предоставляет функциональность таймера.
 class timer

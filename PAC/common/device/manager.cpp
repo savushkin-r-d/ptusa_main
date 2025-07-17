@@ -253,6 +253,11 @@ i_DI_device* WATCHDOG( const char* dev_name )
     return G_DEVICE_MANAGER()->get_watchdog( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_AO_device* Y( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_Y( dev_name );
+    }
+//-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
@@ -571,6 +576,11 @@ i_DO_AO_device* device_manager::get_G( const char* dev_name )
 i_DI_device* device_manager::get_watchdog( const char* dev_name )
     {
     return get_device( device::DT_WATCHDOG, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_Y( const char* dev_name )
+    {
+    return get_device( device::DT_Y, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1388,6 +1398,23 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 {
                 G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
                     dev_sub_type );
+                }
+            break;
+
+        case device::DT_Y:
+            switch ( dev_sub_type )
+                {
+                case device::DST_CONV_AO2:
+                    new_device = new converter_iolink_ao( dev_name );
+                    new_io_device = (converter_iolink_ao*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown Y device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
                 }
             break;
 

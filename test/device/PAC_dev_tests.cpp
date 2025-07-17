@@ -5256,6 +5256,108 @@ TEST( power_unit, set_cmd )
     }
 
 
+TEST( converter_iolink_ao, constructor )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_STREQ( Y1.get_name(), "Y1" );
+    EXPECT_EQ( Y1.get_type(), device::DT_Y );
+    EXPECT_EQ( Y1.get_sub_type(), device::DST_CONV_AO2 );
+    }
+
+TEST( converter_iolink_ao, direct_on_off )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    
+    // Test initial state
+    EXPECT_EQ( Y1.get_state(), 0 );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    
+    // Test turning on
+    Y1.direct_on();
+    // In emulation mode, state should be positive
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        EXPECT_GE( Y1.get_state(), 0 );
+        }
+    
+    // Test turning off
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    }
+
+TEST( converter_iolink_ao, set_value )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    
+    // Test setting different values
+    Y1.direct_set_value( 50.0f );
+    EXPECT_EQ( Y1.get_value(), 50.0f );
+    
+    Y1.direct_set_value( 100.0f );
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    
+    Y1.direct_set_value( 0.0f );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    }
+
+TEST( converter_iolink_ao, set_cmd )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    
+    // Test state command
+    EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
+    
+    // Test value command
+    EXPECT_EQ( Y1.set_cmd( "V", 0, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_value(), 75.5f );
+    
+    // Test channel state command
+    EXPECT_EQ( Y1.set_cmd( "ST_CH", 1, 1 ), 0 );
+    EXPECT_EQ( Y1.set_cmd( "ST_CH", 2, 0 ), 0 );
+    
+    // Test channel value command
+    EXPECT_EQ( Y1.set_cmd( "V_CH", 1, 50.0 ), 0 );
+    EXPECT_EQ( Y1.set_cmd( "V_CH", 2, 25.0 ), 0 );
+    
+    // Test unknown command
+    EXPECT_EQ( Y1.set_cmd( "UNKNOWN", 0, 1 ), 1 );
+    }
+
+TEST( converter_iolink_ao, save_device_ex )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    char buff[1000];
+    
+    Y1.direct_set_value( 42.5f );
+    int len = Y1.save_device_ex( buff );
+    
+    EXPECT_GT( len, 0 );
+    EXPECT_TRUE( strstr( buff, "ST=" ) != nullptr );
+    EXPECT_TRUE( strstr( buff, "V=" ) != nullptr );
+    }
+
+TEST( device_manager, get_Y )
+    {
+    // Cleanup before test
+    G_DEVICE_MANAGER()->clear_io_devices();
+    
+    // Add a converter device
+    auto* Y1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_Y, device::DST_CONV_AO2, "CAB1Y10", "", "IFM.DP1213" );
+    
+    EXPECT_NE( Y1, nullptr );
+    EXPECT_STREQ( Y1->get_name(), "CAB1Y10" );
+    
+    // Test accessor function
+    auto* retrieved_Y1 = Y( "CAB1Y10" );
+    EXPECT_EQ( retrieved_Y1, Y1 );
+    
+    // Test non-existent device
+    auto* non_existent = Y( "NON_EXISTENT" );
+    EXPECT_NE( non_existent, nullptr ); // Should return stub, not nullptr
+    }
+
+
 TEST( timer_manager, get_count )
     {
     const auto TIMERS_COUNT = 10;

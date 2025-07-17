@@ -24,6 +24,8 @@ power_unit::process_data_out power_unit::stub_p_data_out{};
 unsigned int power_unit::WAIT_DATA_TIME = 300;
 unsigned int power_unit::WAIT_CMD_TIME = 1000;
 
+converter_iolink_ao::process_data_out converter_iolink_ao::stub_p_data_out{};
+
 analog_valve_iolink::out_data analog_valve_iolink::stub_out_info{};
 signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
@@ -4060,6 +4062,142 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
     start_param_idx = motor_altivar::get_params_count();
     set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
     set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_Y, device::DST_CONV_AO2, 0 )
+    {
+    p_data_out = (process_data_out*)get_AO_IOLINK_data( C_AIAO_INDEX );
+    }
+
+void converter_iolink_ao::direct_on()
+    {
+    p_data_out->enable_ch1 = true;
+    p_data_out->enable_ch2 = true;
+    }
+
+void converter_iolink_ao::direct_off()
+    {
+    p_data_out->enable_ch1 = false;
+    p_data_out->enable_ch2 = false;
+    p_data_out->setpoint_ch1 = 0;
+    p_data_out->setpoint_ch2 = 0;
+    }
+
+float converter_iolink_ao::get_value()
+    {
+    return v;
+    }
+
+int converter_iolink_ao::get_state()
+    {
+    if ( err )
+        {
+        return -1;
+        }
+    
+    return st;
+    }
+
+void converter_iolink_ao::direct_set_value( float val )
+    {
+    // Конвертируем в 16-битное значение для IO-Link
+    uint16_t setpoint = static_cast<uint16_t>( val * 65535.0f / 100.0f );
+    
+    p_data_out->setpoint_ch1 = setpoint;
+    p_data_out->setpoint_ch2 = setpoint;
+    
+    v = val;
+    }
+
+void converter_iolink_ao::evaluate_io()
+    {
+    if ( get_AI_IOLINK_data( C_AIAO_INDEX ) )
+        {
+        auto data = (process_data_in*)get_AI_IOLINK_data( C_AIAO_INDEX );
+        p_data_in = *data;
+        
+        // Проверка состояния каналов
+        if ( p_data_in.status_ch1 == 0 && p_data_in.status_ch2 == 0 )
+            {
+            st = 1; // OK
+            err = 0;
+            }
+        else
+            {
+            st = 0; // Ошибка
+            err = 1;
+            }
+        }
+    else
+        {
+        st = 0;
+        err = 1;
+        }
+    }
+
+int converter_iolink_ao::save_device_ex( char* buff )
+    {
+    int res = snprintf( buff, MAX_COPY_SIZE, "ST=%d,", get_state() );
+    res += snprintf( buff + res, MAX_COPY_SIZE - res, "V=%.1f,", get_value() );
+    
+    return res;
+    }
+
+int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        if ( val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+        return 0;
+        }
+    
+    if ( strcmp( prop, "V" ) == 0 )
+        {
+        set_value( static_cast<float>( val ) );
+        return 0;
+        }
+    
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        bool enable = static_cast<bool>( val );
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->enable_ch1 = enable;
+                break;
+            case 2:
+                p_data_out->enable_ch2 = enable;
+                break;
+            }
+        return 0;
+        }
+    
+    if ( strcmp( prop, "V_CH" ) == 0 )
+        {
+        uint16_t setpoint = static_cast<uint16_t>( val * 65535.0f / 100.0f );
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->setpoint_ch1 = setpoint;
+                break;
+            case 2:
+                p_data_out->setpoint_ch2 = setpoint;
+                break;
+            }
+        return 0;
+        }
+    
+    return 1;
     }
 
 #ifdef WIN_OS
