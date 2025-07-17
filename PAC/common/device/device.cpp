@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
+#include <cstring>
 #include <fmt/core.h>
 #include <algorithm>
 
@@ -4069,7 +4070,12 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_Y, device::DST_CONV_AO2, 0 )
     {
-    p_data_out = (process_data_out*)get_AO_IOLINK_data( C_AIAO_INDEX );
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
+    
+    static_assert( sizeof( process_data_in ) == 6,
+        "Struct `process_data_in` must be the 6 bytes size." );
+    static_assert( sizeof( process_data_out ) == 6,
+        "Struct `process_data_out` must be the 6 bytes size." );
     }
 
 void converter_iolink_ao::direct_on()
@@ -4114,11 +4120,18 @@ void converter_iolink_ao::direct_set_value( float val )
 
 void converter_iolink_ao::evaluate_io()
     {
-    if ( get_AI_IOLINK_data( C_AIAO_INDEX ) )
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + sizeof( p_data_in ),
+        reinterpret_cast<std::byte*>( &p_data_in ) );
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+    if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
         {
-        auto data = (process_data_in*)get_AI_IOLINK_data( C_AIAO_INDEX );
-        p_data_in = *data;
-        
         // Проверка состояния каналов
         if ( p_data_in.status_ch1 == 0 && p_data_in.status_ch2 == 0 )
             {
