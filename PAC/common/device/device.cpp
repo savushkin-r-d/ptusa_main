@@ -4072,24 +4072,23 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     {
     memset( &p_data_in, 0, sizeof( p_data_in ) );
     
-    static_assert( sizeof( process_data_in ) == 6,
-        "Struct `process_data_in` must be the 6 bytes size." );
-    static_assert( sizeof( process_data_out ) == 6,
-        "Struct `process_data_out` must be the 6 bytes size." );
+    static_assert( sizeof( process_data_in ) == 1,
+        "Struct `process_data_in` must be the 1 byte size." );
+    static_assert( sizeof( process_data_out ) == 4,
+        "Struct `process_data_out` must be the 4 bytes size." );
     }
 
 void converter_iolink_ao::direct_on()
     {
-    p_data_out->enable_ch1 = 1;
-    p_data_out->enable_ch2 = 1;
+    // Устанавливаем каналы в активное состояние (значения остаются прежними)
+    st = 1;
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->enable_ch1 = 0;
-    p_data_out->enable_ch2 = 0;
     p_data_out->setpoint_ch1 = 0;
     p_data_out->setpoint_ch2 = 0;
+    st = 0;
     }
 
 float converter_iolink_ao::get_value()
@@ -4109,8 +4108,8 @@ int converter_iolink_ao::get_state()
 
 void converter_iolink_ao::direct_set_value( float val )
     {
-    // Конвертируем в 16-битное значение для IO-Link
-    uint16_t setpoint = static_cast<uint16_t>( val * 65535.0f / 100.0f );
+    // Конвертируем в 16-битное значение для IO-Link (диапазон 0-22000)
+    uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
     
     p_data_out->setpoint_ch1 = setpoint;
     p_data_out->setpoint_ch2 = setpoint;
@@ -4132,8 +4131,8 @@ void converter_iolink_ao::evaluate_io()
 
     if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
         {
-        // Проверка состояния каналов (0 = OK для IO-Link устройств)
-        if ( p_data_in.status_ch1 == 0 && p_data_in.status_ch2 == 0 )
+        // Проверка статуса устройства (0 = OK согласно IODD)
+        if ( p_data_in.device_status == 0 )
             {
             st = 1; // OK
             err = 0;
@@ -4182,14 +4181,18 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     
     if ( strcmp( prop, "ST_CH" ) == 0 )
         {
-        uint8_t enable = static_cast<uint8_t>( val != 0 ? 1 : 0 );
+        // В новой структуре нет отдельных enable полей,
+        // управление каналами осуществляется через значения
+        // 0 = отключен, >0 = включен
         switch ( idx )
             {
             case 1:
-                p_data_out->enable_ch1 = enable;
+                if ( val == 0 )
+                    p_data_out->setpoint_ch1 = 0;
                 break;
             case 2:
-                p_data_out->enable_ch2 = enable;
+                if ( val == 0 )
+                    p_data_out->setpoint_ch2 = 0;
                 break;
             }
         return 0;
@@ -4197,7 +4200,7 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     
     if ( strcmp( prop, "V_CH" ) == 0 )
         {
-        uint16_t setpoint = static_cast<uint16_t>( val * 65535.0f / 100.0f );
+        uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
         switch ( idx )
             {
             case 1:

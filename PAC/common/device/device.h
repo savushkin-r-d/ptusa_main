@@ -1784,20 +1784,16 @@ class converter_iolink_ao : public analog_io_device
 #pragma pack(push, 1)
         struct process_data_in
             {
-            uint16_t output_value_ch1;      // Текущее выходное значение канала 1.
-            uint16_t output_value_ch2;      // Текущее выходное значение канала 2.
-            uint8_t status_ch1;             // Статус канала 1.
-            uint8_t status_ch2;             // Статус канала 2.
+            uint8_t device_status : 4;      // Статус устройства (биты 4-7).
+            uint8_t reserved : 4;           // Зарезервированные биты (0-3).
             };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
         struct process_data_out
             {
-            uint16_t setpoint_ch1;          // Уставка канала 1.
-            uint16_t setpoint_ch2;          // Уставка канала 2.
-            uint8_t enable_ch1;             // Разрешение канала 1.
-            uint8_t enable_ch2;             // Разрешение канала 2.
+            uint16_t setpoint_ch2;          // Уставка канала 2 (биты 0-15, диапазон 0-22000).
+            uint16_t setpoint_ch1;          // Уставка канала 1 (биты 16-31, диапазон 0-22000).
             };
 #pragma pack(pop)
 
