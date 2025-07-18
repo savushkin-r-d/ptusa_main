@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <filesystem>
 
 #include <cxxopts.hpp>
 #include <fmt/core.h>
@@ -109,11 +110,45 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_LOG->warning( "OPC UA server is activated." );
         }
 #endif
-    main_script = result[ "script" ].as<std::string>();
+    namespace fs = std::filesystem;
+    fs::path absoluteP;
+    if(result[ "script" ].as<std::string>() == "main.plua") {
+        main_script = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/main.plua";
+    } else {
+        main_script = result[ "script" ].as<std::string>();
+    }
+    absoluteP = fs::absolute(main_script);
+    main_script = absoluteP.string();
+    
+    if(result[ "sys_path" ].as<std::string>() == "./sys/") {
+        sys_path = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/sys/";
+    } else {
+        sys_path = result[ "sys_path" ].as<std::string>();
+    }
+    absoluteP = fs::absolute(sys_path);
+    sys_path = absoluteP.string();
+
+    if( result[ "path" ].as<std::string>() == "./") {
+        path = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/";
+    } else {
+        path = result[ "path" ].as<std::string>();
+    }
+    absoluteP = fs::absolute(path);
+    path = absoluteP.string();
+
+    if (result[ "extra_paths" ].as<std::string>() == "./dairy-sys/") {
+        extra_paths = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/dairy-sys/";
+    } else {
+        extra_paths = result[ "extra_paths" ].as<std::string>();
+    }
+    absoluteP = fs::absolute(extra_paths);
+    extra_paths = absoluteP.string();
+
+    std::replace(path.begin(), path.end(), '\\', '/');
+    std::replace(sys_path.begin(), sys_path.end(), '\\', '/');
+    std::replace(extra_paths.begin(), extra_paths.end(), '\\', '/');
+    
     sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
-    sys_path = result[ "sys_path" ].as<std::string>();
-    path = result[ "path" ].as<std::string>();
-    extra_paths = result[ "extra_paths" ].as<std::string>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )
