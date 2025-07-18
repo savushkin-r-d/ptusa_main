@@ -117,7 +117,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     } else {
         main_script = result[ "script" ].as<std::string>();
     }
-    absoluteP = fs::absolute(main_script).lexically_normal();;
+    absoluteP = fs::absolute(main_script).lexically_normal();
     main_script = absoluteP.string();
     
     if(result[ "sys_path" ].as<std::string>() == "./sys/") {
@@ -125,7 +125,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     } else {
         sys_path = result[ "sys_path" ].as<std::string>();
     }
-    absoluteP = fs::absolute(sys_path).lexically_normal();;
+    absoluteP = fs::absolute(sys_path).lexically_normal();
     sys_path = absoluteP.string();
 
     if( result[ "path" ].as<std::string>() == "./") {
@@ -133,7 +133,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     } else {
         path = result[ "path" ].as<std::string>();
     }
-    absoluteP = fs::absolute(path).lexically_normal();;
+    absoluteP = fs::absolute(path).lexically_normal();
     path = absoluteP.string();
 
     if (result[ "extra_paths" ].as<std::string>() == "./dairy-sys/") {
@@ -141,7 +141,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     } else {
         extra_paths = result[ "extra_paths" ].as<std::string>();
     }
-    absoluteP = fs::absolute(extra_paths).lexically_normal();;
+    absoluteP = fs::absolute(extra_paths).lexically_normal();
     extra_paths = absoluteP.string();
 #if defined WIN_OS
     std::replace(path.begin(), path.end(), '\\', '/');
