@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
+#include <cstring>
 #include <fmt/core.h>
 #include <algorithm>
 
@@ -23,6 +24,8 @@ circuit_breaker::F_data_out circuit_breaker::stub_out_info{};
 power_unit::process_data_out power_unit::stub_p_data_out{};
 unsigned int power_unit::WAIT_DATA_TIME = 300;
 unsigned int power_unit::WAIT_CMD_TIME = 1000;
+
+converter_iolink_ao::process_data_out converter_iolink_ao::stub_p_data_out{};
 
 analog_valve_iolink::out_data analog_valve_iolink::stub_out_info{};
 signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
@@ -4060,6 +4063,157 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
     start_param_idx = motor_altivar::get_params_count();
     set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
     set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
+    {
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
+    
+    static_assert( sizeof( process_data_in ) == 1,
+        "Struct `process_data_in` must be the 1 byte size." );
+    static_assert( sizeof( process_data_out ) == 4,
+        "Struct `process_data_out` must be the 4 bytes size." );
+    }
+
+void converter_iolink_ao::direct_on()
+    {
+    // Устанавливаем каналы в активное состояние (значения остаются прежними)
+    st = 1;
+    }
+
+void converter_iolink_ao::direct_off()
+    {
+    p_data_out->setpoint_ch1 = 0;
+    p_data_out->setpoint_ch2 = 0;
+    st = 0;
+    }
+
+float converter_iolink_ao::get_value()
+    {
+    return v;
+    }
+
+int converter_iolink_ao::get_state()
+    {
+    if ( err )
+        {
+        return -1;
+        }
+    
+    return st;
+    }
+
+void converter_iolink_ao::direct_set_value( float val )
+    {
+    // Конвертируем в 16-битное значение для IO-Link (диапазон 0-22000)
+    uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
+    
+    p_data_out->setpoint_ch1 = setpoint;
+    p_data_out->setpoint_ch2 = setpoint;
+    
+    v = val;
+    }
+
+void converter_iolink_ao::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + sizeof( p_data_in ),
+        reinterpret_cast<std::byte*>( &p_data_in ) );
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+    if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
+        {
+        // Проверка статуса устройства (0 = OK согласно IODD)
+        if ( p_data_in.device_status == 0 )
+            {
+            st = 1; // OK
+            err = 0;
+            }
+        else
+            {
+            st = 0; // Ошибка
+            err = 1;
+            }
+        }
+    else
+        {
+        st = 0;
+        err = 1;
+        }
+    }
+
+int converter_iolink_ao::save_device_ex( char* buff )
+    {
+    int res = snprintf( buff, MAX_COPY_SIZE, "ST=%d,", get_state() );
+    res += snprintf( buff + res, MAX_COPY_SIZE - res, "V=%.1f,", get_value() );
+    
+    return res;
+    }
+
+int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        if ( val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+        return 0;
+        }
+    
+    if ( strcmp( prop, "V" ) == 0 )
+        {
+        set_value( static_cast<float>( val ) );
+        return 0;
+        }
+    
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        // В новой структуре нет отдельных enable полей,
+        // управление каналами осуществляется через значения
+        // 0 = отключен, >0 = включен
+        switch ( idx )
+            {
+            case 1:
+                if ( val == 0 )
+                    p_data_out->setpoint_ch1 = 0;
+                break;
+            case 2:
+                if ( val == 0 )
+                    p_data_out->setpoint_ch2 = 0;
+                break;
+            }
+        return 0;
+        }
+    
+    if ( strcmp( prop, "V_CH" ) == 0 )
+        {
+        uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
+        switch ( idx )
+            {
+            case 1:
+                p_data_out->setpoint_ch1 = setpoint;
+                break;
+            case 2:
+                p_data_out->setpoint_ch2 = setpoint;
+                break;
+            }
+        return 0;
+        }
+    
+    return 1;
     }
 
 #ifdef WIN_OS

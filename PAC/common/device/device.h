@@ -1748,6 +1748,60 @@ class power_unit : public analog_io_device
         static process_data_out stub_p_data_out;
         process_data_out* p_data_out = &stub_p_data_out;
     };
+//-----------------------------------------------------------------------------
+/// @brief Конвертер IO-Link -> AO.
+///
+/// Устройство для преобразования IO-Link сигналов в аналоговые выходы.
+class converter_iolink_ao : public analog_io_device
+    {
+    public:
+        explicit converter_iolink_ao( const char* dev_name );
+
+        void direct_on() override;
+        void direct_off() override;
+
+        float get_value() override;
+        int get_state() override;
+
+        void direct_set_value( float val ) override;
+
+        void evaluate_io() override;
+
+        int save_device_ex( char* buff ) override;
+
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
+    private:
+        float v = .0f;  // Выходное значение.
+        int st = 0;     // Состояние устройства.
+        int err = 0;    // Ошибка.
+
+        enum CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+            };
+
+#pragma pack(push, 1)
+        struct process_data_in
+            {
+            uint8_t device_status : 4;      // Статус устройства (биты 4-7).
+            uint8_t reserved : 4;           // Зарезервированные биты (0-3).
+            };
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+        struct process_data_out
+            {
+            uint16_t setpoint_ch2;          // Уставка канала 2 (биты 0-15, диапазон 0-22000).
+            uint16_t setpoint_ch1;          // Уставка канала 1 (биты 16-31, диапазон 0-22000).
+            };
+#pragma pack(pop)
+
+        process_data_in p_data_in;
+        
+        static process_data_out stub_p_data_out;
+        process_data_out* p_data_out = &stub_p_data_out;
+    };
 ///
 /// Предоставляет функциональность таймера.
 class timer
