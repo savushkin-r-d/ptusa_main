@@ -1,7 +1,9 @@
 #include <algorithm>
+#include <filesystem>
 
 #ifdef WIN_OS
 #include <Windows.h>
+
 #endif // OS_WIN
 
 #include "lua_manager.h"
@@ -124,6 +126,9 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     G_LOG->write_log( i_log::P_NOTICE );
     if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
         {
+        G_LOG->notice( "current working directory: \"%s\"",
+            std::filesystem::current_path().u8string().c_str() );
+
         G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
             dir, sys_dir, extra_dirs );
         }
