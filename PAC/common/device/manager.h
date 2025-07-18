@@ -216,7 +216,7 @@ i_DI_device* WATCHDOG( const char* dev_name );
 /// @param dev_name - имя конвертера.
 /// @return - устройство с заданным именем. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AO_device* Y( const char* dev_name );
+i_AO_device* EY( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
@@ -336,7 +336,7 @@ class device_manager : public i_Lua_save_device
         i_DI_device* get_watchdog( const char* dev_name );
 
         /// @brief Получение конвертера IO-Link по имени.
-        i_AO_device* get_Y( const char* dev_name );
+        i_AO_device* get_EY( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();

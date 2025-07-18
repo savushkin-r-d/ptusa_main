@@ -4068,7 +4068,7 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
-    analog_io_device( dev_name, device::DT_Y, device::DST_CONV_AO2, 0 )
+    analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
     {
     memset( &p_data_in, 0, sizeof( p_data_in ) );
     

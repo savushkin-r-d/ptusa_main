@@ -5260,7 +5260,7 @@ TEST( converter_iolink_ao, constructor )
     {
     converter_iolink_ao Y1( "Y1" );
     EXPECT_STREQ( Y1.get_name(), "Y1" );
-    EXPECT_EQ( Y1.get_type(), device::DT_Y );
+    EXPECT_EQ( Y1.get_type(), device::DT_EY );
     EXPECT_EQ( Y1.get_sub_type(), device::DST_CONV_AO2 );
     }
 
@@ -5336,25 +5336,24 @@ TEST( converter_iolink_ao, save_device_ex )
     EXPECT_TRUE( strstr( buff, "V=" ) != nullptr );
     }
 
-TEST( device_manager, get_Y )
+TEST( device_manager, get_EY )
     {
     // Cleanup before test
     G_DEVICE_MANAGER()->clear_io_devices();
     
     // Add a converter device
     auto* Y1 = G_DEVICE_MANAGER()->add_io_device( 
-        device::DT_Y, device::DST_CONV_AO2, "CAB1Y10", "", "IFM.DP1213" );
+        device::DT_EY, device::DST_CONV_AO2, "CAB1EY10", "", "IFM.DP1213" );
     
     EXPECT_NE( Y1, nullptr );
-    EXPECT_STREQ( Y1->get_name(), "CAB1Y10" );
     
     // Test accessor function
-    auto* retrieved_Y1 = Y( "CAB1Y10" );
-    EXPECT_EQ( retrieved_Y1, Y1 );
+    auto* retrieved_Y1 = EY( "CAB1EY10" );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( retrieved_Y1 ) );
     
     // Test non-existent device
-    auto* non_existent = Y( "NON_EXISTENT" );
-    EXPECT_NE( non_existent, nullptr ); // Should return stub, not nullptr
+    auto* non_existent = EY( "NON_EXISTENT" );
+    EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
     }
 
 

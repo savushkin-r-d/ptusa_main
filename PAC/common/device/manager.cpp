@@ -253,9 +253,9 @@ i_DI_device* WATCHDOG( const char* dev_name )
     return G_DEVICE_MANAGER()->get_watchdog( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* Y( const char* dev_name )
+i_AO_device* EY( const char* dev_name )
     {
-    return G_DEVICE_MANAGER()->get_Y( dev_name );
+    return G_DEVICE_MANAGER()->get_EY( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
@@ -578,9 +578,9 @@ i_DI_device* device_manager::get_watchdog( const char* dev_name )
     return get_device( device::DT_WATCHDOG, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* device_manager::get_Y( const char* dev_name )
+i_AO_device* device_manager::get_EY( const char* dev_name )
     {
-    return get_device( device::DT_Y, dev_name );
+    return get_device( device::DT_EY, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1401,7 +1401,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
-        case device::DT_Y:
+        case device::DT_EY:
             switch ( dev_sub_type )
                 {
                 case device::DST_CONV_AO2:
