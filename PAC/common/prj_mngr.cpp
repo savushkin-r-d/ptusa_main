@@ -61,9 +61,9 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 #ifdef OPCUA
         ( "opc", "Start OPC UA server with program start" )
 #endif        
-        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys/" ) )
-        ( "path", "Path", cxxopts::value<std::string>()->default_value( "./" ) )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys/" ) )
+        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys" ) )
+        ( "path", "Path", cxxopts::value<std::string>()->default_value( "." ) )
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
         ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
@@ -110,45 +110,12 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_LOG->warning( "OPC UA server is activated." );
         }
 #endif
-    namespace fs = std::filesystem;
-    fs::path absoluteP;
-    if(result[ "script" ].as<std::string>() == "main.plua") {
-        main_script = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/main.plua";
-    } else {
-        main_script = result[ "script" ].as<std::string>();
-    }
-    absoluteP = fs::absolute(main_script).lexically_normal();
-    main_script = absoluteP.string();
+    main_script = result[ "script" ].as<std::string>();
+    sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
     
-    if(result[ "sys_path" ].as<std::string>() == "./sys/") {
-        sys_path = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/sys/";
-    } else {
-        sys_path = result[ "sys_path" ].as<std::string>();
-    }
-    absoluteP = fs::absolute(sys_path).lexically_normal();
-    sys_path = absoluteP.string();
-
-    if( result[ "path" ].as<std::string>() == "./") {
-        path = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/";
-    } else {
-        path = result[ "path" ].as<std::string>();
-    }
-    absoluteP = fs::absolute(path).lexically_normal();
-    path = absoluteP.string();
-
-    if (result[ "extra_paths" ].as<std::string>() == "./dairy-sys/") {
-        extra_paths = "./../../../ptusa_main/demo_projects/T1-PLCnext-demo/dairy-sys/";
-    } else {
-        extra_paths = result[ "extra_paths" ].as<std::string>();
-    }
-    absoluteP = fs::absolute(extra_paths).lexically_normal();
-    extra_paths = absoluteP.string();
-#if defined WIN_OS
-    std::replace(path.begin(), path.end(), '\\', '/');
-    std::replace(sys_path.begin(), sys_path.end(), '\\', '/');
-    std::replace(extra_paths.begin(), extra_paths.end(), '\\', '/');
-#endif 
-
+    path = result[ "path" ].as<std::string>();
+    sys_path = result[ "sys_path" ].as<std::string>();
+    extra_paths = result[ "extra_paths" ].as<std::string>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )

@@ -417,9 +417,9 @@ if (WIN32)
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path \(default: \./sys/\)
-      --path arg            Path \(default: \./\)
-      --extra_paths arg     Extra paths \(default: \./dairy-sys/\)
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
@@ -435,9 +435,9 @@ else()
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path \(default: \./sys/\)
-      --path arg            Path \(default: \./\)
-      --extra_paths arg     Extra paths \(default: \./dairy-sys/\)
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 endif()
@@ -451,7 +451,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
-        PASS_REGULAR_EXPRESSION "Lua init returned error code 1!")
+        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
 
     add_test(T1-PLCnext-Demo lua5.1
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"

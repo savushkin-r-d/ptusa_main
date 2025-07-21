@@ -124,13 +124,32 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
     G_LOG->write_log( i_log::P_NOTICE );
-    if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
+
+    std::string dir_str( dir );
+    std::string sys_dir_str( sys_dir );
+    std::string extra_dirs_str( extra_dirs );
+    
+
+    if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
         {
         G_LOG->notice( "current working directory: \"%s\"",
             std::filesystem::current_path().u8string().c_str() );
 
         G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
-            dir, sys_dir, extra_dirs );
+            dir_str.c_str(), sys_dir_str.c_str(), extra_dirs_str.c_str() );
+
+        if ( !dir_str.empty() && dir_str.back() != '\\' && dir_str.back() != '/' )
+            {
+            dir_str += '\\';
+            }
+        if ( !sys_dir_str.empty() && sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
+            {
+            sys_dir_str += '\\';
+            }
+        if ( !extra_dirs_str.empty() && extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
+            {
+            extra_dirs_str += '\\';
+            }
         }
 
         if ( 0 == lua_state )
@@ -156,20 +175,20 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     const std::string cmd = "package.path = package.path..';";
     std::string package_path = "";
-    if ( dir[ 0 ] != '\0' )
+    if ( !dir_str.empty() )
         {
         //Добавление каталога для поиска.
-        package_path = package_path + dir + "?.lua";
+        package_path = dir_str + "?.lua";
         }
-    if ( sys_dir[ 0 ] != '\0' )
+    if ( !sys_dir_str.empty() )
         {
         //Добавление каталога с системными скриптами.
-        package_path = package_path + ";" + sys_dir + "?.lua";
+        package_path += ";" + sys_dir_str + "?.lua";
         }
-    if ( extra_dirs[ 0 ] != '\0' )
+    if ( !extra_dirs_str.empty() )
         {
         //Добавление каталога с пользовательскими скриптами.
-        package_path = package_path + ";" + extra_dirs + "?.lua";
+        package_path += ";" + extra_dirs_str + "?.lua";
         }
     if ( !package_path.empty() )
         {
@@ -191,11 +210,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         char path[ 100 ];
         if ( i < SYS_FILE_CNT )
             {
-            sprintf( path, "%s%s", sys_dir, FILES[ i ] );
+            sprintf( path, "%s%s", sys_dir_str.c_str(), FILES[ i ] );
             }
         else
             {
-            sprintf( path, "%s%s", dir, FILES[ i ] );
+            sprintf( path, "%s%s", dir_str.c_str(), FILES[ i ] );
             }
 
         res = check_file( path, err_str );
@@ -236,11 +255,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         char path[ 100 ] = "";
         if ( i < SYS_FILE_CNT )
             {
-            sprintf( path, "%s%s", sys_dir, FILES[ i ] );
+            sprintf( path, "%s%s", sys_dir_str.c_str(), FILES[i]);
             }
         else
             {
-            sprintf( path, "%s%s", dir, FILES[ i ] );
+            sprintf( path, "%s%s", dir_str.c_str(), FILES[ i ] );
             }
 
         if ( luaL_dofile( L, path ) != 0 )
