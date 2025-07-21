@@ -139,9 +139,9 @@ Usage:
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path (default: ./sys/)
+      --sys_path arg        Sys path (default: ./sys)
       --path arg            Path
-      --extra_paths arg     Extra paths (default: ./dairy-sys/)
+      --extra_paths arg     Extra paths (default: ./dairy-sys)
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 #endif // defined WIN_OS
