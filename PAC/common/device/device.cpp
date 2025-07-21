@@ -4080,7 +4080,8 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем каналы в активное состояние (значения остаются прежними)
+    // Устанавливаем канал 1 в максимальное значение (20'000)
+    p_data_out->setpoint_ch1 = 20000;
     st = 1;
     }
 
@@ -4108,13 +4109,22 @@ int converter_iolink_ao::get_state()
 
 void converter_iolink_ao::direct_set_value( float val )
     {
-    // Конвертируем в 16-битное значение для IO-Link (диапазон 0-22000)
-    uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
+    // Конвертируем канал 1: диапазон 0% - 4'000, 100% - 20'000
+    uint16_t setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
     
     p_data_out->setpoint_ch1 = setpoint;
-    p_data_out->setpoint_ch2 = setpoint;
     
     v = val;
+    }
+
+void converter_iolink_ao::set_value2( float val )
+    {
+    // Конвертируем канал 2: диапазон 0% - 0, 100% - 22'000
+    uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
+    
+    p_data_out->setpoint_ch2 = setpoint;
+    
+    v2 = val;
     }
 
 void converter_iolink_ao::evaluate_io()
@@ -4152,10 +4162,9 @@ void converter_iolink_ao::evaluate_io()
 
 int converter_iolink_ao::save_device_ex( char* buff )
     {
-    int res = snprintf( buff, MAX_COPY_SIZE, "ST=%d,", get_state() );
-    res += snprintf( buff + res, MAX_COPY_SIZE - res, "V=%.1f,", get_value() );
-    
-    return res;
+    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "ST={},V={:.1f},V2={:.1f},", 
+        get_state(), get_value(), v2 );
+    return res.size;
     }
 
 int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
@@ -4179,37 +4188,9 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
         return 0;
         }
     
-    if ( strcmp( prop, "ST_CH" ) == 0 )
+    if ( strcmp( prop, "V2" ) == 0 )
         {
-        // В новой структуре нет отдельных enable полей,
-        // управление каналами осуществляется через значения
-        // 0 = отключен, >0 = включен
-        switch ( idx )
-            {
-            case 1:
-                if ( val == 0 )
-                    p_data_out->setpoint_ch1 = 0;
-                break;
-            case 2:
-                if ( val == 0 )
-                    p_data_out->setpoint_ch2 = 0;
-                break;
-            }
-        return 0;
-        }
-    
-    if ( strcmp( prop, "V_CH" ) == 0 )
-        {
-        uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
-        switch ( idx )
-            {
-            case 1:
-                p_data_out->setpoint_ch1 = setpoint;
-                break;
-            case 2:
-                p_data_out->setpoint_ch2 = setpoint;
-                break;
-            }
+        set_value2( static_cast<float>( val ) );
         return 0;
         }
     

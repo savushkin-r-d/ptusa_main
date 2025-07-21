@@ -1764,6 +1764,7 @@ class converter_iolink_ao : public analog_io_device
         int get_state() override;
 
         void direct_set_value( float val ) override;
+        void set_value2( float val );
 
         void evaluate_io() override;
 
@@ -1772,7 +1773,8 @@ class converter_iolink_ao : public analog_io_device
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
     private:
-        float v = .0f;  // Выходное значение.
+        float v = .0f;  // Выходное значение канала 1.
+        float v2 = .0f; // Выходное значение канала 2.
         int st = 0;     // Состояние устройства.
         int err = 0;    // Ошибка.
 
