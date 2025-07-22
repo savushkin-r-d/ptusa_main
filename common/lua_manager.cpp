@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <filesystem>
 
+#include <fmt/core.h>
+
 #ifdef WIN_OS
 #include <Windows.h>
 
@@ -130,29 +132,31 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     std::string extra_dirs_str( extra_dirs );
     
 
-    if (!dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty())
-    {
-        G_LOG->notice("current working directory: \"%s\"",
-            std::filesystem::current_path().u8string().c_str());
+    if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
+        {
+        G_LOG->notice( "current working directory: \"%s\"",
+            std::filesystem::current_path().u8string().c_str() );
 
-        G_LOG->notice("path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
-            dir_str.c_str(), sys_dir_str.c_str(), extra_dirs_str.c_str());
-    }
+        G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
+            dir_str.c_str(), sys_dir_str.c_str(), extra_dirs_str.c_str() );
+        }
 
-    if (!dir_str.empty() && dir_str.back() != std::filesystem::path::preferred_separator)
-    {
+    if ( !dir_str.empty() && dir_str.back() != '\\' && dir_str.back() != '/' )
+        {
         dir_str += std::filesystem::path::preferred_separator;
-    }
-    if (!sys_dir_str.empty() && sys_dir_str.back() != std::filesystem::path::preferred_separator)
-    {
+        }
+    if ( !sys_dir_str.empty() && 
+        sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
+        {
         sys_dir_str += std::filesystem::path::preferred_separator;
-    }
-    if (!extra_dirs_str.empty() && extra_dirs_str.back() != std::filesystem::path::preferred_separator)
-    {
+        }
+    if ( !extra_dirs_str.empty() && 
+        extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
+        {
         extra_dirs_str += std::filesystem::path::preferred_separator;
-    }
+        }
 
-        if ( 0 == lua_state )
+    if ( 0 == lua_state )
         {
         //Инициализация Lua.
         L = lua_open();   // Create Lua context.
@@ -208,15 +212,9 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     for ( int i = 0; i < FILE_CNT; i++ )
         {
         char path[ 100 ];
-        if (i < SYS_FILE_CNT)
-        {
-            snprintf(path, sizeof(path), "%s%s", sys_dir_str.c_str(), FILES[i]);
-        }
-        else
-        {
-            snprintf(path, sizeof(path), "%s%s", dir_str.c_str(), FILES[i]);
-        }
-
+        std::string& path_str = i < SYS_FILE_CNT ? sys_dir_str : dir_str;
+        auto r = fmt::format_to_n( path, sizeof( path ), "{}{}", path_str, FILES[ i ] );
+        *r.out = 0;
         res = check_file( path, err_str );
 
         if ( -1 == res )
@@ -253,14 +251,10 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     for ( int i = 0; i < FILE_CNT; i++ )
         {
         char path[ 100 ] = "";
-        if (i < SYS_FILE_CNT)
-        {
-            snprintf(path, sizeof(path), "%s%s", sys_dir_str.c_str(), FILES[i]);
-        }
-        else
-        {
-            snprintf(path, sizeof(path), "%s%s", dir_str.c_str(), FILES[i]);
-        }
+        std::string& path_str = i < SYS_FILE_CNT ? sys_dir_str : dir_str;
+        auto r = fmt::format_to_n(
+            path, sizeof( path ), "{}{}", path_str, FILES[ i ] );
+        *r.out = 0;
 
         if ( luaL_dofile( L, path ) != 0 )
             {
