@@ -253,14 +253,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     for ( int i = 0; i < FILE_CNT; i++ )
         {
         char path[ 100 ] = "";
-        if ( i < SYS_FILE_CNT )
-            {
-            sprintf( path, "%s%s", sys_dir_str.c_str(), FILES[i]);
-            }
+        if (i < SYS_FILE_CNT)
+        {
+            snprintf(path, sizeof(path), "%s%s", sys_dir_str.c_str(), FILES[i]);
+        }
         else
-            {
-            sprintf( path, "%s%s", dir_str.c_str(), FILES[ i ] );
-            }
+        {
+            snprintf(path, sizeof(path), "%s%s", dir_str.c_str(), FILES[i]);
+        }
 
         if ( luaL_dofile( L, path ) != 0 )
             {
