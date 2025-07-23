@@ -3118,11 +3118,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PM1717:
             {
             ex_PT_data info{};
-
-            auto data_ptr = ( (char*)&info );
-            std::copy( data, data + sizeof( info ), (char*)&info );
-            std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
-            std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
 
             v = info.v;
             st = info.status;
