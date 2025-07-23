@@ -1528,9 +1528,14 @@ TEST( pressure_e_iolink, evaluate_io )
     mngr.init( 1 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+    mngr.init_node_AI( 0, 0, 1027843, 0 );
     test_dev.init( 0, 0, 0, 1 );
-    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
+    *test_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+    
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
     test_dev.evaluate_io();
@@ -1538,22 +1543,22 @@ TEST( pressure_e_iolink, evaluate_io )
 
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
-    // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
-    // input data from the line above).
+    // Value should calculate to 0.0257f for the IFM.PM1706 (100 as raw
+    // input data with corrected byte order).
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
 
     const auto IFM_PM1717 = "IFM.PM1717";
     test_dev.set_article( IFM_PM1717 );
     test_dev.evaluate_io();
-    // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
-    // input data from the line above).
-    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+    // Value should calculate to 0.0257f for the IFM.PM1717 (100 as raw
+    // input data with corrected byte order).
+    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
 
     const auto IFM_PM1708 = "IFM.PM1708";
     test_dev.set_article( IFM_PM1708 );
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 0.255f, .01f );
+    EXPECT_NEAR( test_dev.get_value(), 0.00257f, .01f );
     
     const auto IFM_PI2715 = "IFM.PI2715";
     test_dev.set_article( IFM_PI2715 );
