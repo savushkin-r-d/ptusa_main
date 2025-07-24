@@ -1471,22 +1471,16 @@ TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
     test_dev_err( test_dev, test_dev, 0 );
     }
 
-TEST( level_e_iolink, evaluate_io )
+TEST_F( iolink_dev_test, level_e_iolink_evaluate_io )
     {
     level_e_iolink test_dev( "L1" );
 
     G_PAC_INFO()->emulation_off();
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
-    mngr.init_node_AI( 0, 0, 1027843, 0 );
     test_dev.init( 0, 0, 0, 1 );
     test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
     
     // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid.
-    *test_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+    set_iol_state_to_OK( test_dev );
 
     *test_dev.AI_channels.int_read_values[ 0 ] = 10;
     
@@ -1511,7 +1505,7 @@ TEST( level_e_iolink, evaluate_io )
         test_dev.start_param_idx, 1.0f );
     EXPECT_EQ( test_dev.get_volume(), 8200.0f );
     
-    io_manager::replace_instance( prev_mngr );
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -1562,22 +1556,16 @@ TEST( pressure_e_iolink, read_article )
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
     }
 
-TEST( pressure_e_iolink, evaluate_io )
+TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     {
     pressure_e_iolink test_dev( "P1" );
 
     G_PAC_INFO()->emulation_off();
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
-    mngr.init_node_AI( 0, 0, 1027843, 0 );
     test_dev.init( 0, 0, 0, 1 );
     test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
     
     // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
-    *test_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+    set_iol_state_to_OK( test_dev );
     
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
@@ -1619,7 +1607,6 @@ TEST( pressure_e_iolink, evaluate_io )
     EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
     G_PAC_INFO()->emulation_on();
-    io_manager::replace_instance( prev_mngr );
     }
 
 TEST_F( iolink_dev_test, pressure_e_iolink_get_error_description )
