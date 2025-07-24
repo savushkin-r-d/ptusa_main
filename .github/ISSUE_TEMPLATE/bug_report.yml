@@ -1,3 +1,4 @@
+---
 name: 🐛 Bug Report / Отчет об ошибке
 description: Report a bug or unexpected behavior in ptusa_main
 title: "[BUG]: "
@@ -8,9 +9,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting a bug! Please fill out the sections below to help us understand and reproduce the issue.
-        
-        Спасибо за сообщение об ошибке! Пожалуйста, заполните разделы ниже, чтобы помочь нам понять и воспроизвести проблему.
+        Thank you for reporting a bug! Please fill out the sections below to
+        help us understand and reproduce the issue.
+
+        Спасибо за сообщение об ошибке! Пожалуйста, заполните разделы ниже,
+        чтобы помочь нам понять и воспроизвести проблему.
 
   - type: textarea
     id: description
@@ -38,7 +41,8 @@ body:
     id: expected
     attributes:
       label: Expected Behavior / Ожидаемое поведение
-      description: A clear and concise description of what you expected to happen.
+      description: |
+        A clear and concise description of what you expected to happen.
       placeholder: What should have happened?
     validations:
       required: true
@@ -88,7 +92,9 @@ body:
     id: lua_script
     attributes:
       label: Lua Script Context / Контекст Lua-скрипта
-      description: If the bug is related to Lua scripts, please provide relevant script snippets
+      description: |
+        If the bug is related to Lua scripts, please provide relevant script
+        snippets
       placeholder: |
         ```lua
         -- Your Lua script code here
@@ -100,7 +106,8 @@ body:
     id: logs
     attributes:
       label: Error Logs / Логи ошибок
-      description: If applicable, add error logs, stack traces, or console output
+      description: |
+        If applicable, add error logs, stack traces, or console output
       placeholder: |
         ```
         Paste your logs here
@@ -112,7 +119,9 @@ body:
     id: additional
     attributes:
       label: Additional Context / Дополнительный контекст
-      description: Add any other context about the problem here (screenshots, configuration files, etc.)
+      description: |
+        Add any other context about the problem here (screenshots,
+        configuration files, etc.)
       placeholder: Any additional information that might help...
     validations:
       required: false
@@ -123,7 +132,9 @@ body:
       label: Checklist / Контрольный список
       description: Please confirm the following
       options:
-        - label: I have searched for existing issues that might be related to this bug
+        - label: |
+            I have searched for existing issues that might be related to this
+            bug
           required: true
         - label: I have checked the documentation and troubleshooting guides
           required: true

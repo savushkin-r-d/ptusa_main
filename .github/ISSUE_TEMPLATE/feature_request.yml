@@ -1,3 +1,4 @@
+---
 name: ✨ Feature Request / Запрос функции
 description: Suggest a new feature or enhancement for ptusa_main
 title: "[FEATURE]: "
@@ -8,9 +9,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a new feature! Please fill out the sections below to help us understand your request.
-        
-        Спасибо за предложение новой функции! Пожалуйста, заполните разделы ниже, чтобы помочь нам понять ваш запрос.
+        Thank you for suggesting a new feature! Please fill out the sections
+        below to help us understand your request.
+
+        Спасибо за предложение новой функции! Пожалуйста, заполните разделы
+        ниже, чтобы помочь нам понять ваш запрос.
 
   - type: textarea
     id: summary
@@ -25,7 +28,8 @@ body:
     id: problem
     attributes:
       label: Problem Description / Описание проблемы
-      description: What problem does this feature solve? What is the current limitation?
+      description: |
+        What problem does this feature solve? What is the current limitation?
       placeholder: |
         Is your feature request related to a problem? Please describe.
         Example: I'm always frustrated when [...]
@@ -79,9 +83,11 @@ body:
     id: alternatives
     attributes:
       label: Alternative Solutions / Альтернативные решения
-      description: Describe any alternative solutions or features you've considered
+      description: |
+        Describe any alternative solutions or features you've considered
       placeholder: |
-        A clear and concise description of any alternative solutions or features you've considered.
+        A clear and concise description of any alternative solutions or
+        features you've considered.
     validations:
       required: false
 
@@ -89,7 +95,8 @@ body:
     id: implementation
     attributes:
       label: Implementation Ideas / Идеи реализации
-      description: If you have ideas about how this could be implemented, please share them
+      description: |
+        If you have ideas about how this could be implemented, please share them
       placeholder: |
         Any thoughts on implementation details, API design, etc.
         For example:
@@ -103,7 +110,9 @@ body:
     id: use_cases
     attributes:
       label: Use Cases / Варианты использования
-      description: Describe specific use cases or scenarios where this feature would be beneficial
+      description: |
+        Describe specific use cases or scenarios where this feature would be
+        beneficial
       placeholder: |
         Example scenarios:
         1. When controlling [specific equipment]...
@@ -116,7 +125,9 @@ body:
     id: compatibility
     attributes:
       label: Compatibility Considerations / Вопросы совместимости
-      description: Any thoughts on backward compatibility or platform-specific considerations?
+      description: |
+        Any thoughts on backward compatibility or platform-specific
+        considerations?
       placeholder: |
         Consider:
         - Backward compatibility with existing Lua scripts
@@ -130,7 +141,9 @@ body:
     id: additional
     attributes:
       label: Additional Context / Дополнительный контекст
-      description: Add any other context, screenshots, or references about the feature request
+      description: |
+        Add any other context, screenshots, or references about the feature
+        request
       placeholder: |
         Any additional information that might help:
         - Links to relevant documentation
@@ -145,11 +158,15 @@ body:
       label: Checklist / Контрольный список
       description: Please confirm the following
       options:
-        - label: I have searched for existing feature requests that might be similar
+        - label: |
+            I have searched for existing feature requests that might be similar
           required: true
-        - label: I have checked the documentation to ensure this feature doesn't already exist
+        - label: |
+            I have checked the documentation to ensure this feature doesn't
+            already exist
           required: true
         - label: I have considered the impact on existing functionality
           required: false
-        - label: I am willing to help test this feature when it's implemented
+        - label: |
+            I am willing to help test this feature when it's implemented
           required: false

@@ -1,3 +1,4 @@
+---
 name: 💬 General Discussion / Общее обсуждение
 description: Ask questions, start discussions, or get help with ptusa_main
 title: "[DISCUSSION]: "
@@ -8,9 +9,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Welcome! Use this template for questions, discussions, or general help with ptusa_main.
-        
-        Добро пожаловать! Используйте этот шаблон для вопросов, обсуждений или общей помощи с ptusa_main.
+        Welcome! Use this template for questions, discussions, or general help
+        with ptusa_main.
+
+        Добро пожаловать! Используйте этот шаблон для вопросов, обсуждений или
+        общей помощи с ptusa_main.
 
   - type: dropdown
     id: category
@@ -60,7 +63,9 @@ body:
     id: environment
     attributes:
       label: Environment (if relevant) / Окружение (если применимо)
-      description: If your question is related to a specific environment, please provide details
+      description: |
+        If your question is related to a specific environment, please provide
+        details
       placeholder: |
         OS: Windows/Linux
         PLCnext Controller: (if applicable)
@@ -72,17 +77,19 @@ body:
   - type: textarea
     id: code
     attributes:
-      label: Code/Configuration (if relevant) / Код/Конфигурация (если применимо)
-      description: Share any relevant code snippets, configuration files, or Lua scripts
+      label: |
+        Code/Configuration (if relevant) / Код/Конфигурация (если применимо)
+      description: |
+        Share any relevant code snippets, configuration files, or Lua scripts
       placeholder: |
         ```lua
         -- Lua script example
         ```
-        
+
         ```cpp
         // C++ code example
         ```
-        
+
         ```yaml
         # Configuration example
         ```
@@ -105,9 +112,11 @@ body:
       label: Checklist / Контрольный список
       description: Please confirm the following
       options:
-        - label: I have searched existing issues and discussions for similar topics
+        - label: |
+            I have searched existing issues and discussions for similar topics
           required: true
         - label: I have checked the documentation and README files
           required: true
-        - label: This is not a bug report (use the bug report template for bugs)
+        - label: |
+            This is not a bug report (use the bug report template for bugs)
           required: true

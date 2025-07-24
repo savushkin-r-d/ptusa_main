@@ -1,5 +1,7 @@
+---
 name: 📚 Documentation Issue / Проблема с документацией
-description: Report issues with documentation or suggest documentation improvements
+description: |
+  Report issues with documentation or suggest documentation improvements
 title: "[DOCS]: "
 labels: ["documentation"]
 assignees: []
@@ -8,9 +10,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping improve our documentation! Please describe the documentation issue or improvement.
-        
-        Спасибо за помощь в улучшении нашей документации! Пожалуйста, опишите проблему с документацией или предложение по улучшению.
+        Thank you for helping improve our documentation! Please describe the
+        documentation issue or improvement.
+
+        Спасибо за помощь в улучшении нашей документации! Пожалуйста, опишите
+        проблему с документацией или предложение по улучшению.
 
   - type: dropdown
     id: type
@@ -47,7 +51,8 @@ body:
     id: current
     attributes:
       label: Current Content / Текущее содержание
-      description: What does the documentation currently say? (copy/paste if relevant)
+      description: |
+        What does the documentation currently say? (copy/paste if relevant)
       placeholder: |
         Copy the current text or describe what's currently documented
     validations:
@@ -111,16 +116,17 @@ body:
     id: examples
     attributes:
       label: Examples / Примеры
-      description: Provide examples, code snippets, or use cases that should be included
+      description: |
+        Provide examples, code snippets, or use cases that should be included
       placeholder: |
         ```lua
         -- Example Lua code
         ```
-        
+
         ```bash
         # Example commands
         ```
-        
+
         Or describe scenarios that need documentation
     validations:
       required: false
@@ -129,7 +135,9 @@ body:
     id: related
     attributes:
       label: Related Files / Связанные файлы
-      description: Are there other documentation files that should be updated as part of this change?
+      description: |
+        Are there other documentation files that should be updated as part of
+        this change?
       placeholder: |
         List any related documentation files that might need updates:
         - README.md
