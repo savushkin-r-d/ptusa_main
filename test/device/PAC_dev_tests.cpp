@@ -1485,22 +1485,31 @@ TEST( level_e_iolink, evaluate_io )
     test_dev.init( 0, 0, 0, 1 );
     test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
     
-    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid.
     *test_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+
+    *test_dev.AI_channels.int_read_values[ 0 ] = 10;
     
-    // Set P_MAX_P parameter to 1.0 bar for level calculation
-    test_dev.set_par( 1 /*P_MAX_P*/, 0, 1.0f );
+    // Set P_MAX_P parameter to 1.0 bar for level calculation.
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx, 1.0f );
+
+    // Test parameter setting worked.
+    EXPECT_EQ( test_dev.get_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx ), 1.0f );
 
     // For now, just test that the level sensor doesn't crash and can be configured
     // The data processing for IOLink appears to need proper byte-formatted data
-    // rather than simple integer values
+    // rather than simple integer values.
     test_dev.set_article( "IFM.PM1706" );
     
-    // Basic functionality test - device should not crash when evaluate_io is called
+    // Basic functionality test - device should not crash when evaluate_io is called.
     test_dev.evaluate_io();
-    
-    // Test parameter setting worked
-    EXPECT_EQ( test_dev.get_par(1, 0), 1.0f );
+    // Test calculated value.
+    EXPECT_NEAR( test_dev.get_value(), 25.6f, .1f );
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_R,
+        test_dev.start_param_idx, 1.0f );
+    EXPECT_EQ( test_dev.get_volume(), 8200.0f );
     
     io_manager::replace_instance( prev_mngr );
     }
@@ -1578,7 +1587,7 @@ TEST( pressure_e_iolink, evaluate_io )
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
     // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
-    // input data with corrected byte order).
+    // input data from the line above).
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
@@ -1586,7 +1595,7 @@ TEST( pressure_e_iolink, evaluate_io )
     test_dev.set_article( IFM_PM1717 );
     test_dev.evaluate_io();
     // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
-    // input data with corrected byte order).
+    // input data from the line above).
     EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
     const auto IFM_PM1708 = "IFM.PM1708";

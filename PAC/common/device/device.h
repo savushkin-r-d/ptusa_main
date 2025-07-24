@@ -242,9 +242,10 @@ class pressure_e_iolink : public analog_io_device
             };
 
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
-            int& st );
+            int& st, float alfa );
         static void read_article( const char* article, ARTICLE& n_article,
             const device* dev  );
+        static float get_alfa( ARTICLE n_article );
 
         void evaluate_io() override;
 
@@ -386,10 +387,11 @@ class level_e_iolink : public level
 
         const char* get_error_description() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
 
-    private:
         enum CONSTANTS
             {
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
