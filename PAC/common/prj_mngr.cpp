@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <filesystem>
 
 #include <cxxopts.hpp>
 #include <fmt/core.h>
@@ -61,9 +62,9 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ("opc-r", "Start OPC UA server with program start (only read)" )
         ("opc-rw", "Start OPC UA server with program start (read-write)" )
 #endif        
-        ( "sys_path", "Sys path", cxxopts::value<std::string>() )
-        ( "path", "Path", cxxopts::value<std::string>() )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>() )
+        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys" ) )
+        ( "path", "Path", cxxopts::value<std::string>()->default_value( "." ) )
+        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
         ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
@@ -115,24 +116,12 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_LOG->warning( "OPC UA server is activated(only read)." );
         }
 #endif
-
-    if ( result.count( "sys_path" ) )
-        {
-        auto& sys_path_str = result[ "sys_path" ].as<std::string>();
-        init_sys_path( sys_path_str.c_str() );
-        }
-    if ( result.count( "path" ) )
-        {
-        auto& path_str = result[ "path" ].as<std::string>();
-        init_path( path_str.c_str() );
-        }
-    if ( result.count( "extra_paths" ) )
-        {
-        auto& extra_paths_str = result[ "extra_paths" ].as<std::string>();
-        init_extra_paths( extra_paths_str.c_str() );
-        }
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
+    
+    path = result[ "path" ].as<std::string>();
+    sys_path = result[ "sys_path" ].as<std::string>();
+    extra_paths = result[ "extra_paths" ].as<std::string>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io_nodes" ].as<bool>() )

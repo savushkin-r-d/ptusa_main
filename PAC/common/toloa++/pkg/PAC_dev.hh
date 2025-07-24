@@ -293,7 +293,7 @@ class device : public i_DO_AO_device
             DT_PDS,     ///< Датчик разности давления.
             DT_TS,      ///< Сигнальный датчик температуры.
             DT_G,       ///< Блок питания.
-            DT_LIFE_DEVICE, ///< Устройство проверки связи.
+            DT_WATCHDOG, ///< Устройство проверки связи.
             };
 
         /// Подтипы устройств.
@@ -488,9 +488,8 @@ class device : public i_DO_AO_device
             DST_G_IOL_4 = 1,    ///< 4 канала.
             DST_G_IOL_8,        ///< 8 каналов.
 
-            //DT_LIFE_DEVICE
-            DST_LIFEBIT = 1,
-            DST_LIFECOUNTER,
+            //DT_WATCHDOG
+            DST_WATCHDOG = 1,
             };
     };
 //-----------------------------------------------------------------------------
@@ -811,7 +810,7 @@ i_DO_AO_device* get_G @ G( const char* dev_name );
 /// @param number - номер обратной связи.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* LIFE_DEVICE( const char* dev_name );
+i_DI_device* WATCHDOG( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение устройства-заглушки.
 ///
