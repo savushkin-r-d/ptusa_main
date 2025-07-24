@@ -241,11 +241,24 @@ class pressure_e_iolink : public analog_io_device
             FES_8001446,
             };
 
+        enum PROCESSING_TYPE
+            {
+            PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
+            EX_PT_DATA_TYPE     ///< Use ex_PT_data with manual byte swapping
+            };
+
+        struct article_info
+            {
+            float scaling_factor;
+            PROCESSING_TYPE processing_type;
+            };
+
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
             int& st, float alfa );
         static void read_article( const char* article, ARTICLE& n_article,
             const device* dev  );
         static float get_alfa( ARTICLE n_article );
+        static const article_info& get_article_info( ARTICLE n_article );
 
         void evaluate_io() override;
 
