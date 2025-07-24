@@ -2933,10 +2933,6 @@ void level_e_iolink::evaluate_io()
     if ( !data ) return;
 
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
-    
-    // Apply the same scaling factor as pressure sensors
-    float alfa = pressure_e_iolink::get_scaling_factor( n_article );
-    v = alfa * v;
     }
 
 void level_e_iolink::set_string_property(const char* field, const char* value)
@@ -3126,7 +3122,7 @@ void pressure_e_iolink::read_article( const char* article,
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
-    float& v, int& st )
+    float& v, int& st, bool apply_scaling )
     {
     if ( !data ) return;
 
@@ -3167,14 +3163,19 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             st = 0;
             break;
         }
+
+    // Apply scaling factor based on article type if requested
+    if ( apply_scaling )
+        {
+        float alfa = get_scaling_factor( n_article );
+        v = alfa * v;
+        }
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
     pressure_e_iolink::evaluate_io(
         get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
-
-    v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 const char* pressure_e_iolink::get_error_description()

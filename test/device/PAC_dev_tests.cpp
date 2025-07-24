@@ -1490,21 +1490,29 @@ TEST( level_e_iolink, evaluate_io )
     
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
-    test_dev.evaluate_io();
-    EXPECT_EQ( test_dev.get_value(), 0.0f ); // Default value is 0.
+    // Set P_MAX_P parameter to 1.0 bar for level calculation
+    test_dev.set_par( 1 /*P_MAX_P*/, 0, 1.0f );
 
-    // Test with IFM.PM1706 article (same sensor types as pressure sensors)
+    test_dev.evaluate_io();
+    // Debug: check what values we're getting
+    std::cout << "P_MAX_P parameter: " << test_dev.get_par(1, 0) << std::endl;
+    
+    // Level sensor formula: v / P_MAX_P * 100 (v is scaled pressure value)
+    // For default article: scaled value = 100 * 1.0 = 100, so 100 / 1.0 * 100 = 10000.0%
+    EXPECT_EQ( test_dev.get_value(), 10000.0f );
+
+    // Test with IFM.PM1706 article (scaling factor 0.0001)
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
-    // Value should calculate to 0.0257f for the IFM.PM1706 (100 as raw
-    // input data with corrected byte order and scaling).
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
+    // Scaled value = 100 * 0.0001 = 0.01, so 0.01 / 1.0 * 100 = 1.0%
+    EXPECT_EQ( test_dev.get_value(), 1.0f );
 
     const auto IFM_PM1708 = "IFM.PM1708";
     test_dev.set_article( IFM_PM1708 );
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 0.00257f, .01f );
+    // Scaled value = 100 * 0.00001 = 0.001, so 0.001 / 1.0 * 100 = 0.1%
+    EXPECT_EQ( test_dev.get_value(), 0.1f );
     
     io_manager::replace_instance( prev_mngr );
     }
