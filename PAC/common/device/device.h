@@ -242,10 +242,9 @@ class pressure_e_iolink : public analog_io_device
             };
 
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
-            int& st, bool apply_scaling = true );
+            int& st );
         static void read_article( const char* article, ARTICLE& n_article,
             const device* dev  );
-        static float get_scaling_factor( ARTICLE n_article );
 
         void evaluate_io() override;
 
@@ -404,6 +403,7 @@ class level_e_iolink : public level
 
         int st = 0;
         float v = .0f;
+        float alfa = 1.0f;
 
         i_AI_device* PT_extra = nullptr;
 

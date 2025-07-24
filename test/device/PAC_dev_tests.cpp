@@ -1577,22 +1577,22 @@ TEST( pressure_e_iolink, evaluate_io )
 
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
-    // Value should calculate to 0.0257f for the IFM.PM1706 (100 as raw
+    // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
     // input data with corrected byte order).
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
     const auto IFM_PM1717 = "IFM.PM1717";
     test_dev.set_article( IFM_PM1717 );
     test_dev.evaluate_io();
-    // Value should calculate to 0.0257f for the IFM.PM1717 (100 as raw
+    // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
     // input data with corrected byte order).
-    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
     const auto IFM_PM1708 = "IFM.PM1708";
     test_dev.set_article( IFM_PM1708 );
     test_dev.evaluate_io();
-    EXPECT_NEAR( test_dev.get_value(), 0.00257f, .01f );
+    EXPECT_NEAR( test_dev.get_value(), 0.255f, .01f );
     
     const auto IFM_PI2715 = "IFM.PI2715";
     test_dev.set_article( IFM_PI2715 );

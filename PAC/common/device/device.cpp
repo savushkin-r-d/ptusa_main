@@ -2924,6 +2924,40 @@ void level_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
     pressure_e_iolink::read_article( new_article, n_article, this );
+
+    switch ( n_article )
+        {
+        case pressure_e_iolink::ARTICLE::IFM_PM1708:   //  0.01, mbar
+            alfa = 0.00001f;
+            break;
+
+        case pressure_e_iolink::ARTICLE::IFM_PM1706:   //   0.1, mbar
+        case pressure_e_iolink::ARTICLE::IFM_PM1707:
+        case pressure_e_iolink::ARTICLE::IFM_PM1709:
+        case pressure_e_iolink::ARTICLE::IFM_PM1717:
+            alfa = 0.0001f;
+            break;
+
+        case pressure_e_iolink::ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
+        case pressure_e_iolink::ARTICLE::IFM_PI2797:
+        case pressure_e_iolink::ARTICLE::IFM_PM1704:
+        case pressure_e_iolink::ARTICLE::IFM_PM1705:
+        case pressure_e_iolink::ARTICLE::IFM_PM1715:
+            alfa = 0.001f;
+            break;
+
+        case pressure_e_iolink::ARTICLE::IFM_PI2794:   // 0.01, bar
+            alfa = 0.01f;
+            break;
+
+        case pressure_e_iolink::ARTICLE::FES_8001446:
+            alfa = 0.000610388818f;
+            break;
+
+        case pressure_e_iolink::ARTICLE::DEFAULT:
+            alfa = 1.0f;
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 void level_e_iolink::evaluate_io()
@@ -2933,6 +2967,7 @@ void level_e_iolink::evaluate_io()
     if ( !data ) return;
 
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    v = alfa * v;
     }
 
 void level_e_iolink::set_string_property(const char* field, const char* value)
@@ -3014,39 +3049,7 @@ void pressure_e_iolink::set_article( const char* new_article )
             break;
         }
     }
-//-----------------------------------------------------------------------------
-float pressure_e_iolink::get_scaling_factor( ARTICLE n_article )
-    {
-    switch ( n_article )
-        {
-        case ARTICLE::IFM_PM1708:   //  0.01, mbar
-            return 0.00001f;
 
-        case ARTICLE::IFM_PM1706:   //   0.1, mbar
-        case ARTICLE::IFM_PM1707:
-        case ARTICLE::IFM_PM1709:
-        case ARTICLE::IFM_PM1717:
-            return 0.0001f;
-
-        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
-        case ARTICLE::IFM_PI2797:
-        case ARTICLE::IFM_PM1704:
-        case ARTICLE::IFM_PM1705:
-        case ARTICLE::IFM_PM1715:
-            return 0.001f;
-
-        case ARTICLE::IFM_PI2794:   // 0.01, bar
-            return 0.01f;
-
-        case ARTICLE::FES_8001446:
-            return 0.000610388818f;
-
-        case ARTICLE::DEFAULT:
-            return 1.0f;
-        }
-    
-    return 1.0f; // Default fallback
-    }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
     ARTICLE& n_article, const device* dev )
@@ -3122,7 +3125,7 @@ void pressure_e_iolink::read_article( const char* article,
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
-    float& v, int& st, bool apply_scaling )
+    float& v, int& st )
     {
     if ( !data ) return;
 
@@ -3151,7 +3154,10 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PM1717:
             {
             ex_PT_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+            auto data_ptr = ( (char*)&info );
+            std::copy( data, data + sizeof( info ), (char*)&info );
+            std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
+            std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
 
             v = info.v;
             st = info.status;
@@ -3163,19 +3169,14 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
             st = 0;
             break;
         }
-
-    // Apply scaling factor based on article type if requested
-    if ( apply_scaling )
-        {
-        float alfa = get_scaling_factor( n_article );
-        v = alfa * v;
-        }
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
     pressure_e_iolink::evaluate_io(
         get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+
+    v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 const char* pressure_e_iolink::get_error_description()
