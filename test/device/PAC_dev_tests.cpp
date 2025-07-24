@@ -1471,6 +1471,44 @@ TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
     test_dev_err( test_dev, test_dev, 0 );
     }
 
+TEST( level_e_iolink, evaluate_io )
+    {
+    level_e_iolink test_dev( "L1" );
+
+    G_PAC_INFO()->emulation_off();
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+    mngr.init_node_AI( 0, 0, 1027843, 0 );
+    test_dev.init( 0, 0, 0, 1 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
+    *test_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+    
+    test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
+
+    test_dev.evaluate_io();
+    EXPECT_EQ( test_dev.get_value(), 0.0f ); // Default value is 0.
+
+    // Test with IFM.PM1706 article (same sensor types as pressure sensors)
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
+    // Value should calculate to 0.0257f for the IFM.PM1706 (100 as raw
+    // input data with corrected byte order and scaling).
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 0.0257f, .01f );
+
+    const auto IFM_PM1708 = "IFM.PM1708";
+    test_dev.set_article( IFM_PM1708 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 0.00257f, .01f );
+    
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 TEST( pressure_e, pressure_e )
     {

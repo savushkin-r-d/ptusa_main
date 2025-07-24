@@ -245,6 +245,7 @@ class pressure_e_iolink : public analog_io_device
             int& st );
         static void read_article( const char* article, ARTICLE& n_article,
             const device* dev  );
+        static float get_scaling_factor( ARTICLE n_article );
 
         void evaluate_io() override;
 

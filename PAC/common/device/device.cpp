@@ -2933,6 +2933,10 @@ void level_e_iolink::evaluate_io()
     if ( !data ) return;
 
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    
+    // Apply the same scaling factor as pressure sensors
+    float alfa = pressure_e_iolink::get_scaling_factor( n_article );
+    v = alfa * v;
     }
 
 void level_e_iolink::set_string_property(const char* field, const char* value)
@@ -3013,6 +3017,39 @@ void pressure_e_iolink::set_article( const char* new_article )
             alfa = 1.0f;
             break;
         }
+    }
+//-----------------------------------------------------------------------------
+float pressure_e_iolink::get_scaling_factor( ARTICLE n_article )
+    {
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PM1708:   //  0.01, mbar
+            return 0.00001f;
+
+        case ARTICLE::IFM_PM1706:   //   0.1, mbar
+        case ARTICLE::IFM_PM1707:
+        case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1717:
+            return 0.0001f;
+
+        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
+        case ARTICLE::IFM_PI2797:
+        case ARTICLE::IFM_PM1704:
+        case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1715:
+            return 0.001f;
+
+        case ARTICLE::IFM_PI2794:   // 0.01, bar
+            return 0.01f;
+
+        case ARTICLE::FES_8001446:
+            return 0.000610388818f;
+
+        case ARTICLE::DEFAULT:
+            return 1.0f;
+        }
+    
+    return 1.0f; // Default fallback
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
