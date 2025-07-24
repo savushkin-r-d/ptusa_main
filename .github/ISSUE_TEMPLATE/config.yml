@@ -1,0 +1,13 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation / Документация
+    url: https://github.com/savushkin-r-d/ptusa_main/tree/master/docs
+    about: Read the project documentation and user manual / Прочитайте документацию проекта и руководство пользователя
+  
+  - name: 🤝 Contributing Guidelines / Руководство по участию
+    url: https://github.com/savushkin-r-d/ptusa_main/blob/master/docs/CONTRIBUTING.md
+    about: Learn how to contribute to the project / Узнайте, как внести вклад в проект
+  
+  - name: 📧 Contact Maintainers / Связаться с сопровождающими
+    url: mailto:dzimitriy@gmail.com
+    about: Contact the project maintainers directly / Свяжитесь с сопровождающими проекта напрямую

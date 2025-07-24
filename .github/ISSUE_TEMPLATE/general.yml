@@ -1,0 +1,113 @@
+name: 💬 General Discussion / Общее обсуждение
+description: Ask questions, start discussions, or get help with ptusa_main
+title: "[DISCUSSION]: "
+labels: ["question"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome! Use this template for questions, discussions, or general help with ptusa_main.
+        
+        Добро пожаловать! Используйте этот шаблон для вопросов, обсуждений или общей помощи с ptusa_main.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category / Категория
+      description: What type of discussion is this?
+      options:
+        - Question / Вопрос
+        - Help / Помощь
+        - Documentation / Документация
+        - Configuration / Конфигурация
+        - Best Practices / Лучшие практики
+        - Architecture / Архитектура
+        - PLCnext Integration / Интеграция PLCnext
+        - Lua Scripting / Lua-скрипты
+        - Build/Compilation / Сборка/Компиляция
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic / Тема
+      description: What would you like to discuss or ask about?
+      placeholder: |
+        Please describe your question or topic in detail.
+        The more context you provide, the better we can help!
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Контекст
+      description: Provide any relevant context about your situation
+      placeholder: |
+        For example:
+        - What are you trying to accomplish?
+        - What have you already tried?
+        - What is your current setup/environment?
+        - Any relevant background information
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant) / Окружение (если применимо)
+      description: If your question is related to a specific environment, please provide details
+      placeholder: |
+        OS: Windows/Linux
+        PLCnext Controller: (if applicable)
+        Toolchain version: (if applicable)
+        ptusa_main version/branch:
+    validations:
+      required: false
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code/Configuration (if relevant) / Код/Конфигурация (если применимо)
+      description: Share any relevant code snippets, configuration files, or Lua scripts
+      placeholder: |
+        ```lua
+        -- Lua script example
+        ```
+        
+        ```cpp
+        // C++ code example
+        ```
+        
+        ```yaml
+        # Configuration example
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information / Дополнительная информация
+      description: Any other information that might be helpful
+      placeholder: |
+        Links to documentation, screenshots, error messages, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / Контрольный список
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and discussions for similar topics
+          required: true
+        - label: I have checked the documentation and README files
+          required: true
+        - label: This is not a bug report (use the bug report template for bugs)
+          required: true

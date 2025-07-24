@@ -1,0 +1,155 @@
+name: ✨ Feature Request / Запрос функции
+description: Suggest a new feature or enhancement for ptusa_main
+title: "[FEATURE]: "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please fill out the sections below to help us understand your request.
+        
+        Спасибо за предложение новой функции! Пожалуйста, заполните разделы ниже, чтобы помочь нам понять ваш запрос.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary / Краткое описание функции
+      description: A brief summary of the feature you'd like to see
+      placeholder: Summarize the feature in a few sentences...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description / Описание проблемы
+      description: What problem does this feature solve? What is the current limitation?
+      placeholder: |
+        Is your feature request related to a problem? Please describe.
+        Example: I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Предлагаемое решение
+      description: Describe the solution you'd like to see implemented
+      placeholder: |
+        Describe the solution you'd like.
+        A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component / Компонент
+      description: Which component of ptusa_main would this feature affect?
+      options:
+        - Core Engine / Основной движок
+        - Lua Scripting / Lua-скрипты
+        - PLCnext Integration / Интеграция PLCnext
+        - User Interface / Пользовательский интерфейс
+        - Configuration / Конфигурация
+        - Logging / Журналирование
+        - Documentation / Документация
+        - Build System / Система сборки
+        - Testing / Тестирование
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority / Приоритет
+      description: How important is this feature to you?
+      options:
+        - Low / Низкий
+        - Medium / Средний
+        - High / Высокий
+        - Critical / Критический
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions / Альтернативные решения
+      description: Describe any alternative solutions or features you've considered
+      placeholder: |
+        A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas / Идеи реализации
+      description: If you have ideas about how this could be implemented, please share them
+      placeholder: |
+        Any thoughts on implementation details, API design, etc.
+        For example:
+        - New Lua functions
+        - Configuration parameters
+        - Code changes needed
+    validations:
+      required: false
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use Cases / Варианты использования
+      description: Describe specific use cases or scenarios where this feature would be beneficial
+      placeholder: |
+        Example scenarios:
+        1. When controlling [specific equipment]...
+        2. During [specific process]...
+        3. For [specific industry/application]...
+    validations:
+      required: false
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility Considerations / Вопросы совместимости
+      description: Any thoughts on backward compatibility or platform-specific considerations?
+      placeholder: |
+        Consider:
+        - Backward compatibility with existing Lua scripts
+        - PLCnext platform requirements
+        - Windows/Linux compatibility
+        - Performance impact
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context / Дополнительный контекст
+      description: Add any other context, screenshots, or references about the feature request
+      placeholder: |
+        Any additional information that might help:
+        - Links to relevant documentation
+        - Screenshots or mockups
+        - References to similar features in other tools
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / Контрольный список
+      description: Please confirm the following
+      options:
+        - label: I have searched for existing feature requests that might be similar
+          required: true
+        - label: I have checked the documentation to ensure this feature doesn't already exist
+          required: true
+        - label: I have considered the impact on existing functionality
+          required: false
+        - label: I am willing to help test this feature when it's implemented
+          required: false
