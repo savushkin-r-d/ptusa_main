@@ -6,9 +6,9 @@
 #include "dtime.h"
 
 extern const char* FILES[ FILE_CNT ];
-const char* bus_couplers_dis = "WARNING(4) -> Bus couplers are disabled.\n";
-const char* opc_r = "WARNING(4) -> OPC UA server is activated (only read).\n";
-const char* bus_couplers_en = "WARNING(4) -> Bus couplers are enabled.\n";
+const char* const bus_couplers_dis = "WARNING(4) -> Bus couplers are disabled.\n";
+const char* const opc_r = "WARNING(4) -> OPC UA server is activated (only read).\n";
+const char* const bus_couplers_en = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
 
