@@ -41,6 +41,8 @@ const std::map<int, const char*> ERR_MSG =
     { ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME,
         "Недостаточное время дозирования дезинфицирующего средства" },
 
+    { ERR_WATCHDOG, "Ошибка устройства контроля связи" },
+
     { ERR_RET, "Ошибка возвратного насоса" }
     };
 
@@ -235,6 +237,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_upr_sanitizer_pump = nullptr;
     dev_os_object_pause = nullptr;
     dev_upr_circulation = nullptr;
+    dev_watchdog = nullptr;
     dev_os_pump_can_run = nullptr;
     dev_os_can_continue = nullptr;
     dev_ls_ret_pump = nullptr;
@@ -1585,7 +1588,7 @@ void cipline_tech_object::_StopDev( )
     V13->off();
     V05->off();
     V06->off();
-    if (state != ERR_CIP_OBJECT && state != ERR_OS)
+    if (state != ERR_CIP_OBJECT && state != ERR_OS && state != ERR_WATCHDOG)
         {
         V07->off();
         V08->off();
@@ -3016,6 +3019,14 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
+            
+            if (dev_watchdog)
+                {
+                if (dev_watchdog->get_state() <= 0)
+                    {
+                    objready = 0;
+                    }
+                }
 
             if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
                 {
@@ -3126,6 +3137,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( )
         {
         dev_ao_temp_task->set_value(0);
         }
+    if (dev_watchdog)
+        {
+        dev_watchdog->set_state(0);
+        }
     dev_upr_circulation = nullptr;
     dev_upr_cip_in_progress = nullptr;
     dev_upr_ret = nullptr;
@@ -3159,6 +3174,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( )
     dev_ao_flow_task = nullptr;
     dev_ao_temp_task = nullptr;
     dev_upr_wash_aborted = nullptr;
+    dev_watchdog = nullptr;
 
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
@@ -3973,6 +3989,15 @@ int cipline_tech_object::InitOpolRR( int where )
 
     rt_par_float[P_ZAD_CONC] = z;
     rt_par_float[P_CONC] = 0;
+
+    //Проверка устройства контроля связи (watchdog)
+    if (dev_watchdog)
+        {
+        if (dev_watchdog->get_state() <= 0)
+            {
+            return ERR_WATCHDOG;
+            }
+        }
 
     cnt->start();
     return 0;
@@ -5800,6 +5825,8 @@ int cipline_tech_object::init_object_devices()
     if (check_DO(dev_upr_desinfection, P_SIGNAL_DESINSECTION)) return -1;
     //Циркуляция
     if (check_DO(dev_upr_circulation, P_SIGNAL_CIRCULATION)) return -1;
+    //Устройство контроля связи
+    if (check_WATCHDOG(dev_watchdog, P_WATCHDOG)) return -1;
     //Мойка окончена
     if (check_DO(dev_upr_cip_finished, P_SIGNAL_CIPEND)) return -1;
     //Мойка окончена 2
@@ -6067,6 +6094,57 @@ int cipline_tech_object::init_object_devices()
             outdev = nullptr;
             }
         return 0;
+        }
+
+    int cipline_tech_object::check_WATCHDOG(device*& outdev, int parno)
+        {
+        auto dev_no = (u_int)rt_par_float[parno];
+        char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
+        device* dev;
+        if (dev_no > 0)
+            {
+            sprintf(devname, "LINE%dWATCHDOG%d", nmr, dev_no);
+            dev = (device*)WATCHDOG(devname);
+            if (dev->get_serial_n() > 0)
+                {
+                outdev = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_WATCHDOG)
+                    {
+                    outdev = dev;
+                    }
+                else
+                    {
+                    outdev = nullptr;
+                    return -1;
+                    }
+                }
+            }
+        else
+            {
+            outdev = nullptr;
+            }
+        return 0;
+        }
+
+    int cipline_tech_object::check_device(int type, int nmr, int parno, run_time_params_float& rt_params)
+        {
+        if (rt_params[parno] < 0) return -2;
+        auto dev_no = (u_int)rt_params[parno];
+        if (dev_no == 0) return 0;
+        
+        char devname[MAX_DEV_NAME * UNICODE_MULTIPLIER] = { 0 };
+        sprintf(devname, "LINE%d%s%d", nmr, device::DEV_NAMES[type], dev_no);
+        
+        device* dev = G_DEVICE_MANAGER()->get_device(devname);
+        if (dev && dev->get_serial_n() > 0)
+            {
+            return 1;
+            }
+        return -1;
         }
 
 cipline_tech_object* cipline_tech_object::Mdls[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};

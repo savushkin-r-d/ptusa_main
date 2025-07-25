@@ -86,6 +86,9 @@ void InitCipDevices( )
     dm->add_io_device( device::DEVICE_TYPE::DT_FQT, device::DEVICE_SUB_TYPE::DST_FQT_VIRT, "LINE1FQT1", "", "" );
 
     dm->add_io_device( device::DEVICE_TYPE::DT_QT, device::DEVICE_SUB_TYPE::DST_QT_VIRT, "LINE1QT1", "", "" );
+    
+    //Watchdog device
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG, device::DEVICE_SUB_TYPE::DST_WATCHDOG, "LINE1WATCHDOG1", "", "" );
     }
 
 void ClearCipDevices( )
@@ -860,4 +863,225 @@ TEST_F( cipline_tech_object_test, EvalCipInProgress )
     
     auto res = cip1.EvalCipInProgress();
     EXPECT_EQ( res, -1 );
+    }
+
+// =========================== WATCHDOG TESTS ===========================
+
+TEST( cipline_tech_object, check_device_watchdog )
+    {
+    // Test the check_device() helper function for watchdog device validation
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Set valid watchdog parameter
+    cip1.rt_par_float[P_WATCHDOG] = 1;
+    int result = cipline_tech_object::check_device(device::DT_WATCHDOG, 1, P_WATCHDOG, cip1.rt_par_float);
+    EXPECT_EQ( 1, result ); // Should find device
+    
+    // Test with non-existent device number  
+    cip1.rt_par_float[P_WATCHDOG] = 99;
+    result = cipline_tech_object::check_device(device::DT_WATCHDOG, 1, P_WATCHDOG, cip1.rt_par_float);
+    EXPECT_EQ( -1, result ); // Should not find device
+    
+    // Test with zero device number (no device)
+    cip1.rt_par_float[P_WATCHDOG] = 0;
+    result = cipline_tech_object::check_device(device::DT_WATCHDOG, 1, P_WATCHDOG, cip1.rt_par_float);
+    EXPECT_EQ( 0, result ); // No device configured
+    
+    // Test with negative parameter (bug fix)
+    cip1.rt_par_float[P_WATCHDOG] = -1;
+    result = cipline_tech_object::check_device(device::DT_WATCHDOG, 1, P_WATCHDOG, cip1.rt_par_float);
+    EXPECT_EQ( -2, result ); // Invalid parameter
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, _CheckErr_watchdog )
+    {
+    // Test ERR_WATCHDOG error detection when watchdog device is inactive
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Initialize required devices
+    virtual_device temp_sensor_supply( "LINE1TE1", device::DT_TE, device::DST_TE_VIRT );
+    virtual_device temp_sensor_return( "LINE1TE2", device::DT_TE, device::DST_TE_VIRT );
+    virtual_device conductivity_sensor( "LINE1QT1", device::DT_QT, device::DST_QT_VIRT );
+    cip1.TP = reinterpret_cast<i_AI_device *>(&temp_sensor_supply);
+    cip1.TR = reinterpret_cast<i_AI_device *>(&temp_sensor_return);
+    cip1.Q = reinterpret_cast<i_AI_device *>(&conductivity_sensor);
+    
+    // Set up watchdog device
+    cip1.rt_par_float[P_WATCHDOG] = 1;
+    auto dm = device_manager::get_instance();
+    auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
+    ASSERT_NE(nullptr, watchdog_dev);
+    cip1.dev_watchdog = watchdog_dev;
+    
+    // Test normal operation (watchdog active)
+    watchdog_dev->set_state(1);
+    cip1.curstep = 10; // Not step 555
+    EXPECT_EQ( 0, cip1._CheckErr() );
+    
+    // Test watchdog error (watchdog inactive)
+    watchdog_dev->set_state(0);
+    EXPECT_EQ( ERR_WATCHDOG, cip1._CheckErr() );
+    
+    // Test watchdog error (watchdog negative state)
+    watchdog_dev->set_state(-1);
+    EXPECT_EQ( ERR_WATCHDOG, cip1._CheckErr() );
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, _DoStep_watchdog_objready )
+    {
+    // Test watchdog state checking in step execution logic (objready validation)
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Set up required devices
+    auto dm = device_manager::get_instance();
+    auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
+    ASSERT_NE(nullptr, watchdog_dev);
+    cip1.dev_watchdog = watchdog_dev;
+    
+    // Set resume on signal parameter
+    cip1.rt_par_float[P_RESUME_CIP_ON_SIGNAL] = 1;
+    
+    // Set initial error state that should be cleared when objready is true
+    cip1.state = ERR_CIP_OBJECT;
+    cip1.curstep = 10;
+    
+    // Test objready true with active watchdog
+    watchdog_dev->set_state(1);
+    cip1._DoStep(10);
+    EXPECT_EQ( 1, cip1.state ); // Should clear error state
+    
+    // Test objready false with inactive watchdog
+    cip1.state = ERR_CIP_OBJECT;
+    watchdog_dev->set_state(0);
+    cip1._DoStep(10);
+    EXPECT_EQ( ERR_CIP_OBJECT, cip1.state ); // Should keep error state
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, _StopDev_watchdog )
+    {
+    // Test modified stop device logic with ERR_WATCHDOG handling
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Set up watchdog device
+    auto dm = device_manager::get_instance();
+    auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
+    ASSERT_NE(nullptr, watchdog_dev);
+    cip1.dev_watchdog = watchdog_dev;
+    
+    // Test normal state - valves should be turned off
+    cip1.state = 1;
+    auto prev_V07_state = cip1.V07->get_state();
+    auto prev_V08_state = cip1.V08->get_state();
+    cip1._StopDev();
+    // V07 and V08 should be turned off in normal state
+    EXPECT_EQ( 0, cip1.V07->get_state() );
+    EXPECT_EQ( 0, cip1.V08->get_state() );
+    
+    // Test ERR_WATCHDOG state - valves should NOT be turned off
+    cip1.state = ERR_WATCHDOG;
+    cip1.V07->on(); // Turn on valve
+    cip1.V08->on(); // Turn on valve
+    cip1._StopDev();
+    // V07 and V08 should remain on due to ERR_WATCHDOG state
+    EXPECT_EQ( 1, cip1.V07->get_state() );
+    EXPECT_EQ( 1, cip1.V08->get_state() );
+    
+    // Test ERR_CIP_OBJECT state - valves should NOT be turned off
+    cip1.state = ERR_CIP_OBJECT;
+    cip1._StopDev();
+    EXPECT_EQ( 1, cip1.V07->get_state() );
+    EXPECT_EQ( 1, cip1.V08->get_state() );
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, watchdog_reset )
+    {
+    // Test proper watchdog device reset in _ResetLinesDevicesBeforeReset()
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Set up watchdog device
+    auto dm = device_manager::get_instance();
+    auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
+    ASSERT_NE(nullptr, watchdog_dev);
+    cip1.dev_watchdog = watchdog_dev;
+    
+    // Set watchdog to active state
+    watchdog_dev->set_state(1);
+    EXPECT_EQ( 1, watchdog_dev->get_state() );
+    
+    // Call reset function
+    cip1._ResetLinesDevicesBeforeReset();
+    
+    // Verify watchdog device was reset to 0
+    EXPECT_EQ( 0, watchdog_dev->get_state() );
+    
+    // Verify dev_watchdog pointer was nullified
+    EXPECT_EQ( nullptr, cip1.dev_watchdog );
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, watchdog_error_message )
+    {
+    // Test ERR_WATCHDOG constant value and Russian error message
+    EXPECT_EQ( -74, ERR_WATCHDOG );
+    
+    // Test error message exists in map
+    auto it = ERR_MSG.find(ERR_WATCHDOG);
+    ASSERT_NE( ERR_MSG.end(), it );
+    
+    // Test error message content (Russian)
+    std::string expected_msg = "Ошибка устройства контроля связи";
+    EXPECT_EQ( expected_msg, std::string(it->second) );
+    }
+
+TEST( cipline_tech_object, watchdog_init_object_devices )
+    {
+    // Test watchdog initialization in init_object_devices()
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Set watchdog parameter
+    cip1.rt_par_float[P_WATCHDOG] = 1;
+    
+    // Verify dev_watchdog is initially null
+    EXPECT_EQ( nullptr, cip1.dev_watchdog );
+    
+    // Initialize object devices
+    int result = cip1.init_object_devices();
+    EXPECT_EQ( 0, result ); // Should succeed
+    
+    // Verify watchdog device was properly initialized
+    EXPECT_NE( nullptr, cip1.dev_watchdog );
+    
+    // Verify the correct device was assigned
+    auto expected_dev = device_manager::get_instance()->get_device("LINE1WATCHDOG1");
+    EXPECT_EQ( expected_dev, cip1.dev_watchdog );
+    
+    // Test with invalid watchdog parameter
+    cip1.rt_par_float[P_WATCHDOG] = 99; // Non-existent device
+    cip1.dev_watchdog = nullptr;
+    result = cip1.init_object_devices();
+    EXPECT_EQ( -1, result ); // Should fail
+    EXPECT_EQ( nullptr, cip1.dev_watchdog );
+    
+    ClearCipDevices();
     }

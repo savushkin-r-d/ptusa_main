@@ -102,6 +102,7 @@
 #define  P_END_WASH_DELAY       38  //Длительность 555 операции(завершение мойки)
 #define  P_MIN_BULK_FOR_WATER   39  //Минимальный аналоговый уровень в танке воды, при котором считать, что его нет
 #define  P_MIN_BULK_DELTA       40  //Отклонение уровня в танке вторичной воды
+#define  P_WATCHDOG             41  //Номер устройства watchdog
 
 
 //programms of moika
@@ -238,6 +239,7 @@ const int ERR_CONCENTRATION_SENSOR = -41;
 const int ERR_NO_DESINFECTION_MEDIUM = -71;
 const int ERR_DESINFECTION_MEDIUM_MAX_TIME = -72;
 const int ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME = -73;
+const int ERR_WATCHDOG = -74;
 
 const int ERR_RET = -100;
 ///---CIP_ERROR_CODES
@@ -856,6 +858,7 @@ class cipline_tech_object: public tech_object
         device* dev_ai_pump_feedback;	        //Уровень для контроля подающего насоса
         device* dev_upr_sanitizer_pump;         //Управление насосом подачи дезинфицирующего средства
         device* dev_upr_circulation;            //Сигнал "Циркуляция"
+        device* dev_watchdog;                   //Устройство контроля связи
         device* dev_os_pump_can_run;            //Сигнал, запрещающий включение подающего насоса.
         device* dev_ls_ret_pump;                //Сигнал уровня перед возвратным насосом
         device* dev_os_cip_ready;               //Сигнал "мойка готова" от объекта
@@ -876,6 +879,7 @@ class cipline_tech_object: public tech_object
         int check_AO(device*& outdev, int parno);
         int check_LS(device*& outdev, int parno);
         int check_M(device*& outdev, int parno);
+        int check_WATCHDOG(device*& outdev, int parno);
         //----------------------------------------------
 
         static int msa_number;
@@ -981,6 +985,9 @@ class cipline_tech_object: public tech_object
         int EvalCustomStep(int what, int from, int where, int how);
        ////Вспомогательные функции
         static void DateToChar(char* buff);
+        
+        // Проверка устройства по номеру параметра
+        static int check_device(int type, int nmr, int parno, run_time_params_float& rt_params);
     };
 
 
