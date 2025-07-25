@@ -872,40 +872,44 @@ TEST( cipline_tech_object, check_device_watchdog )
     // Test the check_device() helper function for watchdog device validation
     InitCipDevices();
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
-    
+
     device* outdev;
 
+    // Test with bad device type - should not work
+    int result = cip1.check_device( outdev, P_WATCHDOG, device::C_DEVICE_TYPE_CNT );
+    EXPECT_EQ( -1, result ); // No device configured
+
     // Test with zero device number (no device) - should work without initialization
-    cip1.rt_par_float[P_WATCHDOG] = 0;
-    int result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
-    EXPECT_NE( 0, result ); // No device configured
-    
-    // Test with negative parameter - should work without initialization
-    cip1.rt_par_float[P_WATCHDOG] = -1;
+    cip1.rt_par_float[ P_WATCHDOG ] = 0;
     result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
-    EXPECT_EQ( -2, result ); // Invalid parameter
-    
+    EXPECT_EQ( 0, result ); // No device configured
+
+    // Test with negative parameter - should work without initialization
+    cip1.rt_par_float[ P_WATCHDOG ] = -1;
+    result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
+    EXPECT_EQ( 0, result ); // Invalid parameter
+
     // Now test with valid device - this might be the problematic part
-    cip1.rt_par_float[P_WATCHDOG] = 1;
+    cip1.rt_par_float[ P_WATCHDOG ] = 1;
     result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
     EXPECT_EQ( 0, result ); // Should find device
-    
+
     // Test with non-existent device number  
-    cip1.rt_par_float[P_WATCHDOG] = 99;
+    cip1.rt_par_float[ P_WATCHDOG ] = 99;
     result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
-    EXPECT_EQ( -3, result ); // Should not find device
-    
+    EXPECT_EQ( -2, result ); // Should not find device
+
     ClearCipDevices();
     }
 
-TEST( cipline_tech_object, watchdog_check_err )
+TEST( cipline_tech_object, _CheckErr_watchdog )
     {
     lua_manager::get_instance()->set_Lua( lua_open() );
 
     // Test ERR_WATCHDOG error detection when watchdog device is inactive
     InitCipDevices();
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
-    
+
     cip1.initline();
     cip1.init_object_devices();
 
@@ -916,12 +920,12 @@ TEST( cipline_tech_object, watchdog_check_err )
     cip1.init_object_devices();
     res = cip1._CheckErr();
     EXPECT_EQ( res, ERR_WATCHDOG );
-        
+
     ClearCipDevices();
     lua_manager::get_instance()->free_Lua();
     }
 
-TEST( cipline_tech_object, watchdog_reset )
+TEST( cipline_tech_object, _ResetLinesDevicesBeforeReset_watchdog )
     {
     // Test proper watchdog device reset in _ResetLinesDevicesBeforeReset()
     InitCipDevices();

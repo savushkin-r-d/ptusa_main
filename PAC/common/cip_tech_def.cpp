@@ -5863,7 +5863,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
         }
     if ( rt_par_float[ parno ] <= 0 )
         {
-        return -2;
+        return 0;
         }
 
     auto dev_no = (u_int)rt_par_float[ parno ];
@@ -5879,7 +5879,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
         return 0;
         }
 
-    return -3;
+    return -2;
     }
 
     int cipline_tech_object::check_DI(device*& outdev, int parno)
