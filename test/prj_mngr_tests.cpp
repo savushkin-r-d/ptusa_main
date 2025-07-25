@@ -184,17 +184,18 @@ Resetting params (command line parameter "rcrc").
     EXPECT_EQ( output, debug );
 
     // Включаем OPC UA.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--opc", "" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-r", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
         
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
+    debug = tmp.str() + "WARNING(4) -> OPC UA server is activated (only read).\n";
+    debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug = tmp.str() + "WARNING(4) -> OPC UA server is activated (only read).\n";
+    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
 #endif
-
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
