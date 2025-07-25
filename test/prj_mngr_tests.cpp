@@ -145,7 +145,6 @@ Usage:
                             read)
       --opc-rw              Start OPC UA server with program start 
                             (read-write)
-      --opc                 Start OPC UA server with program start
       --sys_path arg        Sys path (default: ./sys)
       --path arg            Path (default: .)
       --extra_paths arg     Extra paths (default: ./dairy-sys)
