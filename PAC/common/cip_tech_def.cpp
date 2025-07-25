@@ -5861,7 +5861,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
         {
         return -1;
         }
-    if ( rt_par_float[ parno ] < 0 )
+    if ( rt_par_float[ parno ] <= 0 )
         {
         return -2;
         }
@@ -6117,7 +6117,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
             outdev = nullptr;
             }
         return 0;
-        }       
+        }
 
 cipline_tech_object* cipline_tech_object::Mdls[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
 
