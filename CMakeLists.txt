@@ -470,13 +470,13 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
             COMMAND ${PROJECT_NAME} --opc-r)
     set_tests_properties(test_opc_read_mode PROPERTIES
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo"
-            PASS_REGULAR_EXPRESSION "OPC UA server is activated\\(only read\\)")
+            PASS_REGULAR_EXPRESSION "OPC UA server is activated \\(only read\\)")
 
     add_test(NAME test_opc_read_write_mode
             COMMAND ${PROJECT_NAME} --opc-rw)
     set_tests_properties(test_opc_read_write_mode PROPERTIES
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo"
-            PASS_REGULAR_EXPRESSION "OPC UA server is activated\\(read-write\\)")
+            PASS_REGULAR_EXPRESSION "OPC UA server is activated \\(read-write\\)")
 
     if(LINUX)
         add_test(T1-PLCnext-Demo_valgrind valgrind
