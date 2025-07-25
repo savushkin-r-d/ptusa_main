@@ -1,0 +1,23 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "ptusa_main.exe (Debug\\ptusa_main.exe)",
+      "name": "ptusa_main.exe (Debug\\ptusa_main.exe)",
+      "currentDir": "demo_projects/T1-PLCnext-Demo",
+      "args": [
+        "./main.plua",
+        "--path",
+        "./",
+        "--sys_path",
+        "./sys/",
+        "--debug",
+        "--no_io_nodes=false",
+        "--read_only_io_nodes=false"
+      ]
+    }
+  ]
+}
