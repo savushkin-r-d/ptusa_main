@@ -193,7 +193,7 @@ Resetting params (command line parameter "rcrc").
     debug = tmp.str() + "WARNING(4) -> OPC UA server is activated (only read).\n";
     debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
 #else
-    debug = tmp.str() + "WARNING(4) -> OPC UA server is activated (only read).\n";
+    debug = tmp.str() + "\x1B[33mWARNING(4) -> OPC UA server is activated (only read).\n\x1B[0m";
     debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
