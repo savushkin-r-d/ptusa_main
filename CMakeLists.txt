@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.07.16.0)
+project(ptusa_main VERSION 2025.07.16.1)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
