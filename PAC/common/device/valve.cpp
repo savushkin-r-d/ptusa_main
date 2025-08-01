@@ -1515,7 +1515,10 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-
+            if (!out_info->sv2)
+                {
+                    start_switch_time = get_millisec();
+                }
             out_info->sv2 = true;
             break;
             }
@@ -1523,7 +1526,10 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         case V_LOWER_SEAT:
             {
             direct_off();
-
+            if (!out_info->sv3)
+                {
+                    start_switch_time = get_millisec();
+                }
             out_info->sv3 = true;
             break;
             }
