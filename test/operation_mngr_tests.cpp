@@ -1410,6 +1410,74 @@ TEST( delay_on_action, evaluate_default_delay )
 	test_params_manager::removeObject();
 	}
 
+TEST( delay_on_action, evaluate_both_behaviors )
+	{
+	// This test demonstrates both the new default behavior and the preserved existing behavior
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_DELAY_ON ];
+
+	// Set system valve off delay time
+	const int SYSTEM_VALVE_OFF_DELAY_MS = 30;
+	const int CUSTOM_DELAY_MS = 60;
+	const int CUSTOM_PARAM_IDX = 3;
+	
+	G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = SYSTEM_VALVE_OFF_DELAY_MS;
+	test_tank.par_float[ CUSTOM_PARAM_IDX ] = CUSTOM_DELAY_MS;
+
+	// Test device 1: No parameter (should use system default) - subgroup 0
+	action->add_dev( &test_DO1, action::MAIN_GROUP, 0 );
+	// Test device 2: Custom parameter (should use custom delay) - subgroup 1
+	action->add_dev( &test_DO2, action::MAIN_GROUP, 1 );
+	action->set_param_idx( 1, CUSTOM_PARAM_IDX );
+	
+	action->init();
+
+	// Initially both devices should be off
+	action->evaluate();
+	EXPECT_EQ( 0, test_DO1.get_state() );
+	EXPECT_EQ( 0, test_DO2.get_state() );
+
+	// After system default delay, first device should turn on, second still off
+	sleep_ms( SYSTEM_VALVE_OFF_DELAY_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( 1, test_DO1.get_state() );  // Uses system default delay
+	EXPECT_EQ( 0, test_DO2.get_state() );  // Still waiting for custom delay
+
+	// After custom delay, second device should also turn on
+	sleep_ms( CUSTOM_DELAY_MS - SYSTEM_VALVE_OFF_DELAY_MS );
+	action->evaluate();
+	EXPECT_EQ( 1, test_DO1.get_state() );  // Still on
+	EXPECT_EQ( 1, test_DO2.get_state() );  // Now uses custom delay
+
+	action->finalize();
+	EXPECT_EQ( 0, test_DO1.get_state() );
+	EXPECT_EQ( 0, test_DO2.get_state() );
+
+	test_params_manager::removeObject();
+	}
+
 TEST( delay_off_action, evaluate )
 	{
 	char* res = 0;
