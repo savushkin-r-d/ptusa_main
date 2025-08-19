@@ -1361,6 +1361,55 @@ TEST( delay_on_action, evaluate )
 	test_params_manager::removeObject();
 	}
 
+TEST( delay_on_action, evaluate_default_delay )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_DELAY_ON ];
+
+	action->add_dev( &test_DO );
+	// Set the system valve off delay time
+	const int SYSTEM_VALVE_OFF_DELAY_MS = 50;
+	G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ] = SYSTEM_VALVE_OFF_DELAY_MS;
+	
+	// Do NOT set param_idx - this should use the default behavior
+	action->init();
+
+	// Verify the device is not turned on immediately (should wait for default delay)
+	action->evaluate();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	// After the system default delay time, the device should be turned on
+	sleep_ms( SYSTEM_VALVE_OFF_DELAY_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( 1, test_DO.get_state() );
+
+	action->finalize();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	test_params_manager::removeObject();
+	}
+
 TEST( delay_off_action, evaluate )
 	{
 	char* res = 0;
