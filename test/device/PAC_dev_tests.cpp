@@ -2356,7 +2356,14 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
     EXPECT_TRUE( V1.get_fb_state() ); //Default value.
 
     G_PAC_INFO()->emulation_off();
-    EXPECT_FALSE( V1.get_fb_state() );
+    
+    // Тест P_FB=0 (обратная связь отключена) - должна возвращать true даже при ошибках
+    V1.set_cmd( "P_FB", 0, 0 ); // Отключаем проверку обратной связи
+    EXPECT_TRUE( V1.get_fb_state() ); // Должна возвращать true при отключенной ОС
+    
+    // Тест P_FB=1 (обратная связь включена) - должна проверять IO-Link состояние
+    V1.set_cmd( "P_FB", 0, 1 ); // Включаем проверку обратной связи
+    EXPECT_FALSE( V1.get_fb_state() ); // Должна возвращать false при ошибках IO-Link
 
     G_PAC_INFO()->emulation_on();
     }
