@@ -1380,7 +1380,12 @@ int valve_iolink_mix_proof::get_state()
 
     if ( in_info.err > 0 )
         {
-        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
+        // Check if feedback is enabled before reporting AL IO-Link error
+        // If feedback is disabled, don't report internal AL errors (issue #1002)
+        if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
+            {
+            return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
+            }
         }
 
     switch ( get_valve_state() )

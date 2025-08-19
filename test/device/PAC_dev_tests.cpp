@@ -3108,6 +3108,52 @@ TEST( valve_iolink_mix_proof, get_error_description )
     EXPECT_STREQ( "ошибка IOL-устройства", res );
     }
 
+TEST( valve_iolink_mix_proof, get_state_with_feedback_disabled_and_al_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF)
+    V1.set_cmd( "P_FB", 0, 0 );
+
+    // Simulate AL IO-Link error
+    V1.set_err( 16 );  // Some internal error
+
+    // When feedback is disabled and there's an AL error, 
+    // the valve should NOT report error state according to issue #1002
+    // Current behavior: returns error state (this test will fail initially)
+    // Expected behavior: should return appropriate state without error
+    int state = V1.get_state();
+    
+    // The valve should not be in error state when feedback is disabled
+    // Currently this test will fail, demonstrating the bug
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, get_state_with_feedback_enabled_and_al_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON)
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    // Simulate AL IO-Link error
+    V1.set_err( 16 );  // Some internal error
+
+    // When feedback is enabled and there's an AL error, 
+    // the valve SHOULD report error state (normal behavior)
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -116 ) << "Expected specific error code for AL error 16";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     {
