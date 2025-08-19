@@ -37,6 +37,14 @@ i_motor* M( const char* dev_name );
 i_DI_device* LS( u_int dev_n );
 i_DI_device* LS( const char* dev_name );
 //-----------------------------------------------------------------------------
+/// @brief Получение сигнального давления по номеру.
+///
+/// @param number - номер сигнального давления.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* PS( u_int dev_n );
+i_DI_device* PS( const char* dev_name );
+//-----------------------------------------------------------------------------
 /// @brief Получение сигнального расхода по номеру.
 ///
 /// @param number - номер сигнального расхода.
@@ -256,6 +264,9 @@ class device_manager : public i_Lua_save_device
 
         /// @brief Получение уровня по номеру.
         i_DI_device* get_LS( const char* dev_name );
+
+        /// @brief Получение давления по номеру.
+        i_DI_device* get_PS( const char* dev_name );
 
         /// @brief Получение расхода по номеру.
         i_DI_device* get_FS( const char* dev_name );

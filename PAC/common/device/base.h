@@ -387,6 +387,7 @@ class device : public i_DO_AO_device, public par_device
             DT_VC,      ///< Управляемый клапан.
             DT_M,       ///< Двигатель.
             DT_LS,      ///< Уровень (есть/нет).
+            DT_PS,      ///< Давление (есть/нет).
             DT_TE,      ///< Температура.
             DT_FS,      ///< Расход (есть/нет).
             DT_GS,      ///< Датчик положения.
@@ -472,6 +473,15 @@ class device : public i_DO_AO_device, public par_device
             LS_IOLINK_MAX,      ///< IOLInk уровень. Подключение по схеме максимум.
 
             DST_LS_VIRT,        ///< Виртуальный датчик уровня.
+
+            //PS
+            DST_PS_MIN = 1,     ///< Подключение по схеме минимум.
+            DST_PS_MAX,         ///< Подключение по схеме максимум.
+
+            PS_IOLINK_MIN,      ///< IOLInk давление. Подключение по схеме минимум.
+            PS_IOLINK_MAX,      ///< IOLInk давление. Подключение по схеме максимум.
+
+            DST_PS_VIRT,        ///< Виртуальный датчик давления.
 
             //TE
             DST_TE = 1,
