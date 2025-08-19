@@ -14,6 +14,7 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     "VC",      ///< Управляемый клапан.
     "M",       ///< Двигатель.
     "LS",      ///< Уровень (есть/нет).
+    "PS",      ///< Давление (есть/нет).
     "TE",      ///< Температура.
     "FS",      ///< Расход (есть/нет).
     "GS",      ///< Датчик положения.
@@ -397,6 +398,8 @@ const char* device::get_type_name() const
 
         case DT_LS:
             return "Уровень";
+        case DT_PS:
+            return "Давление";
         case DT_TE:
             return "Температура";
         case DT_FS:

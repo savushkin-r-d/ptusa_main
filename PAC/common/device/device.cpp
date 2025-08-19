@@ -2799,6 +2799,138 @@ const char* level_s_iolink::get_error_description()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+bool pressure_s::is_active()
+    {
+    switch ( get_sub_type() )
+        {
+        case DST_PS_MIN:
+            return get_state() == 0 ? false : true;
+
+        case DST_PS_MAX:
+            return get_state() == 0 ? true : false;
+
+        default:
+            return get_state() == 0 ? false : true;
+        }
+    }
+//-----------------------------------------------------------------------------
+pressure_s::pressure_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
+    DI1( dev_name, DT_PS, sub_type, 0,
+        sub_type == DST_PS_MAX ? 1 : 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pressure_s_iolink::pressure_s_iolink( const char *dev_name,
+    device::DEVICE_SUB_TYPE sub_type ):
+    analog_io_device( dev_name, DT_PS, sub_type, LAST_PARAM_IDX - 1 ),
+    current_state( sub_type == device::PS_IOLINK_MAX ? 1 : 0 )    
+    {
+    set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR, 0, "P_ERR" );
+    
+    // Sync device state with current_state for emulator mode
+    direct_set_state( current_state );
+    }
+
+void pressure_s_iolink::evaluate_io()
+    {
+    auto data = (char*)get_AI_data( C_AI_INDEX );
+
+    if ( !data ) return;
+
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
+        {
+        v = get_par( P_ERR, 0 );
+        current_state = -devstate;
+        time = get_millisec();
+
+        return;
+        }
+
+    int st = 0;
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PV7004:
+            {
+            PS_data info{};
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+            v = (float) info.v;
+            st = info.st1;
+            break;
+            }
+
+        case ARTICLE::DEFAULT:
+            v = get_par( P_ERR, 0 );
+            st = 0;
+            break;
+        }
+
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
+    }
+
+void pressure_s_iolink::set_article( const char* new_article )
+    {
+    direct_set_state( current_state );
+
+    device::set_article( new_article );
+
+    auto article = get_article();
+    if ( strcmp( article, "IFM.PV7004" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PV7004;
+        return;
+        }
+
+    n_article = ARTICLE::DEFAULT;
+    }
+
+#ifdef PTUSA_TEST
+pressure_s_iolink::ARTICLE pressure_s_iolink::get_article_n() const
+    {
+    return n_article;
+    }
+#endif
+
+float pressure_s_iolink::get_value()
+    {
+    return v;
+    }
+
+int pressure_s_iolink::get_state()
+    {
+    return current_state;
+    }
+
+bool pressure_s_iolink::is_active()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    return current_state;
+    }
+
+const char* pressure_s_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 flow_s::flow_s( const char* dev_name ) : DI1( dev_name, DT_FS, DST_NONE,
     0 )
     {
