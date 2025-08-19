@@ -1653,6 +1653,12 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
+    // Проверяем параметр P_FB для возможности отключения ошибок устройства
+    if ( get_par( valve::P_FB, 0 ) == FB_IS_AND_OFF )
+        {
+        return true; // Обратная связь отключена - нет ошибок
+        }
+
     if ( get_AI_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
         {
         return false;
