@@ -256,8 +256,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_T_WOP, 5);
         setRecipeValue(recipeNo, RV_T_S, 80);
         setRecipeValue(recipeNo, RV_T_K, 70);
-        setRecipeValue(recipeNo, RV_T_D, 95);
-        setRecipeValue(recipeNo, RV_T_DEZSR, 20);
+        setRecipeValue(recipeNo, RV_T_D, 90);
+        setRecipeValue(recipeNo, RV_T_DEZSR, 60);
         setRecipeValue(recipeNo, RV_DOP_V_PR_OP, 200);
         setRecipeValue(recipeNo, RV_DOP_V_AFTER_S, 200);
         setRecipeValue(recipeNo, RV_DOP_V_AFTER_K, 200);
@@ -268,8 +268,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_TM_OP, 300);
         setRecipeValue(recipeNo, RV_TM_S, 600);
         setRecipeValue(recipeNo, RV_TM_K, 600);
-        setRecipeValue(recipeNo, RV_TM_S_SK, 600);
-        setRecipeValue(recipeNo, RV_TM_K_SK, 600);
+        setRecipeValue(recipeNo, RV_TM_S_SK, 500);
+        setRecipeValue(recipeNo, RV_TM_K_SK, 500);
         setRecipeValue(recipeNo, RV_TM_D, 600);
         setRecipeValue(recipeNo, RV_TM_DEZSR, 600);
         setRecipeValue(recipeNo, RV_TM_DEZSR_INJECT, 120);
@@ -290,8 +290,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_R_NO_FLOW, 2);
         setRecipeValue(recipeNo, RV_TM_R_NO_FLOW, 20);
 
-        setRecipeValue(recipeNo, RV_TM_NO_FLOW_R, 25);
-        setRecipeValue(recipeNo, RV_TM_NO_CONC, 30);
+        setRecipeValue(recipeNo, RV_TM_NO_FLOW_R, 20);
+        setRecipeValue(recipeNo, RV_TM_NO_CONC, 20);
 
         //-PID1
         setRecipeValue(recipeNo, RV_PIDP_Z, 95);
