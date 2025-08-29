@@ -245,7 +245,7 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_IS_USED, 0);
         setRecipeValue(recipeNo, RV_TO_DEFAULTS, 0);
         setRecipeValue(recipeNo, RV_V1, 200);
-        setRecipeValue(recipeNo, RV_V2, 200);
+        setRecipeValue(recipeNo, RV_V2, 250);
         setRecipeValue(recipeNo, RV_OBJ_TYPE, 1);
         setRecipeValue(recipeNo, RV_FLOW, 15);
         setRecipeValue(recipeNo, RV_PODP_CIRC, 0);
@@ -258,36 +258,36 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_T_K, 70);
         setRecipeValue(recipeNo, RV_T_D, 95);
         setRecipeValue(recipeNo, RV_T_DEZSR, 20);
-        setRecipeValue(recipeNo, RV_DOP_V_PR_OP, 200);
-        setRecipeValue(recipeNo, RV_DOP_V_AFTER_S, 200);
-        setRecipeValue(recipeNo, RV_DOP_V_AFTER_K, 200);
-        setRecipeValue(recipeNo, RV_DOP_V_OK_OP, 200);
-        setRecipeValue(recipeNo, RV_RET_STOP, 40);
-        setRecipeValue(recipeNo, RV_V_RAB_ML, 15);
-        setRecipeValue(recipeNo, RV_V_RET_DEL, 30);
-        setRecipeValue(recipeNo, RV_TM_OP, 300);
+        setRecipeValue(recipeNo, RV_DOP_V_PR_OP, 1000);
+        setRecipeValue(recipeNo, RV_DOP_V_AFTER_S, 750);
+        setRecipeValue(recipeNo, RV_DOP_V_AFTER_K, 750);
+        setRecipeValue(recipeNo, RV_DOP_V_OK_OP, 500);
+        setRecipeValue(recipeNo, RV_RET_STOP, 75);
+        setRecipeValue(recipeNo, RV_V_RAB_ML, 30);
+        setRecipeValue(recipeNo, RV_V_RET_DEL, 75);
+        setRecipeValue(recipeNo, RV_TM_OP, 600);
         setRecipeValue(recipeNo, RV_TM_S, 600);
         setRecipeValue(recipeNo, RV_TM_K, 600);
         setRecipeValue(recipeNo, RV_TM_S_SK, 600);
         setRecipeValue(recipeNo, RV_TM_K_SK, 600);
         setRecipeValue(recipeNo, RV_TM_D, 600);
         setRecipeValue(recipeNo, RV_TM_DEZSR, 600);
-        setRecipeValue(recipeNo, RV_TM_DEZSR_INJECT, 120);
+        setRecipeValue(recipeNo, RV_TM_DEZSR_INJECT, 2500);
         setRecipeValue(recipeNo, RV_N_RET, 0);
         setRecipeValue(recipeNo, RV_N_UPR, 0);
         setRecipeValue(recipeNo, RV_OS, 0);
         setRecipeValue(recipeNo, RV_OBJ_EMPTY, 0);
-        setRecipeValue(recipeNo, RV_PROGRAM_MASK, 0);
+        setRecipeValue(recipeNo, RV_PROGRAM_MASK, 5113);
         setRecipeValue(recipeNo, RV_T_RINSING_CLEAN, 5);
         setRecipeValue(recipeNo, RV_V_RINSING_CLEAN, 600);
 
-        setRecipeValue(recipeNo, RV_T_SANITIZER_RINSING, 30);
-        setRecipeValue(recipeNo, RV_V_SANITIZER_RINSING, 500);
-        setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORBACHOK, 30);
+        setRecipeValue(recipeNo, RV_T_SANITIZER_RINSING, 5);
+        setRecipeValue(recipeNo, RV_V_SANITIZER_RINSING, 600);
+        setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORBACHOK, 15);
 
         setRecipeValue(recipeNo, RV_TM_RET_IS_EMPTY, 8);
-        setRecipeValue(recipeNo, RV_V_LL_BOT, 15);
-        setRecipeValue(recipeNo, RV_R_NO_FLOW, 2);
+        setRecipeValue(recipeNo, RV_V_LL_BOT, 50);
+        setRecipeValue(recipeNo, RV_R_NO_FLOW, 5);
         setRecipeValue(recipeNo, RV_TM_R_NO_FLOW, 20);
 
         setRecipeValue(recipeNo, RV_TM_NO_FLOW_R, 25);
@@ -295,13 +295,13 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 
         //-PID1
         setRecipeValue(recipeNo, RV_PIDP_Z, 95);
-        setRecipeValue(recipeNo, RV_PIDP_k, 2);
-        setRecipeValue(recipeNo, RV_PIDP_Ti, 30);
+        setRecipeValue(recipeNo, RV_PIDP_k, (float)1.5);
+        setRecipeValue(recipeNo, RV_PIDP_Ti, 15);
         setRecipeValue(recipeNo, RV_PIDP_Td, (float)0.2);
         setRecipeValue(recipeNo, RV_PIDP_dt, 500);
         setRecipeValue(recipeNo, RV_PIDP_dmax, 130);
         setRecipeValue(recipeNo, RV_PIDP_dmin, 0);
-        setRecipeValue(recipeNo, RV_PIDP_AccelTime, 30);
+        setRecipeValue(recipeNo, RV_PIDP_AccelTime, 15);
         setRecipeValue(recipeNo, RV_PIDP_IsManualMode, 0);
         setRecipeValue(recipeNo, RV_PIDP_UManual, 30);
         setRecipeValue(recipeNo, RV_PIDP_Uk, 0);
@@ -312,14 +312,14 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_PIDF_Ti, 10);
         setRecipeValue(recipeNo, RV_PIDF_Td, (float)0.1);
         setRecipeValue(recipeNo, RV_PIDF_dt, 1000);
-        setRecipeValue(recipeNo, RV_PIDF_dmax, 40);
+        setRecipeValue(recipeNo, RV_PIDF_dmax, 66);
         setRecipeValue(recipeNo, RV_PIDF_dmin, 0);
         setRecipeValue(recipeNo, RV_PIDF_AccelTime, 2);
         setRecipeValue(recipeNo, RV_PIDF_IsManualMode, 0);
         setRecipeValue(recipeNo, RV_PIDF_UManual, 15);
         setRecipeValue(recipeNo, RV_PIDF_Uk, 0);
         //-PID2-!>
-        setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORCIP, 300);
+        setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORCIP, 120);
         setRecipeValue(recipeNo, RV_SIGNAL_MEDIUM_CHANGE, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_CAUSTIC, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_ACID, 0);
@@ -328,7 +328,7 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_SIGNAL_CIP_READY, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_OBJECT_READY, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_SANITIZER_PUMP, 0);
-        setRecipeValue(recipeNo, RV_RESUME_CIP_ON_SIGNAL, 0);
+        setRecipeValue(recipeNo, RV_RESUME_CIP_ON_SIGNAL, 1);
         setRecipeValue(recipeNo, RV_SIGNAL_PUMP_CONTROL, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_DESINSECTION, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_OBJECT_PAUSE, 0);
