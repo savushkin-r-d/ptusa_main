@@ -28,3 +28,6 @@
 [submodule "toluapp"]
 	path = deps/toluapp/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
+[submodule "deps/lunarmodules/busted"]
+	path = deps/lunarmodules/busted
+	url = https://github.com/lunarmodules/busted.git
