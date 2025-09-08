@@ -31,3 +31,6 @@
 [submodule "deps/lunarmodules/busted"]
 	path = deps/lunarmodules/busted
 	url = https://github.com/lunarmodules/busted.git
+[submodule "deps/lunarmodules/luafilesystem/luafilesystem"]
+	path = deps/lunarmodules/luafilesystem/luafilesystem
+	url = https://github.com/lunarmodules/luafilesystem.git

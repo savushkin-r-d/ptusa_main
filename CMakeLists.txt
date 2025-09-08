@@ -73,6 +73,8 @@ endif()
 
 add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 
+add_subdirectory(deps/lunarmodules/luafilesystem EXCLUDE_FROM_ALL)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -130,8 +132,6 @@ if(LINUX)
            test/perfomance/main_perfomance_test.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-    set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-
     if(ARP_DEVICE)
         execute_process(COMMAND plcncli
             generate code -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code --verbose
@@ -176,9 +176,6 @@ elseif(WIN32)
                PAC_control_projects/main_control_prg/version.rc)
     endif()
 
-
-    set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
@@ -195,7 +192,9 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua)
+set_target_properties (toluapp toluapp_lib liblua lua lfs PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
+add_dependencies(main_test lua lfs)
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
@@ -450,6 +449,9 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
         PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
+
+
+	add_test(NAME Busted-test COMMAND lua ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
 
     add_test(T1-PLCnext-Demo lua
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
