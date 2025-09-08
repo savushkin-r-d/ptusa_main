@@ -271,7 +271,7 @@ int_4 modbus_client::get_int4_cd_ab(unsigned int address)
         return 0;
 
     int_4 result;
-    ((char*)&result)[0] = tcpclient->buff[read_buff_start + 2 + address * 2]; // С
+    ((char*)&result)[0] = tcpclient->buff[read_buff_start + 2 + address * 2]; // C
     ((char*)&result)[1] = tcpclient->buff[read_buff_start + 3 + address * 2]; // D
     ((char*)&result)[2] = tcpclient->buff[read_buff_start + address * 2];     // A
     ((char*)&result)[3] = tcpclient->buff[read_buff_start + 1 + address * 2]; // B
