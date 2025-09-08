@@ -50,6 +50,8 @@
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
+
+
     {
       "name": "linux-default",
       "displayName": "Linux Release",
@@ -69,39 +71,15 @@
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
-    {
-      "name": "AXCF-default",
-      "hidden": true,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/bin/build/$env{ARP_DEVICE}_$env{ARP_DEVICE_SHORT_VERSION}",
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install",
-        "CMAKE_TOOLCHAIN_FILE": {
-          "value": "$env{PLCNEXT_SDK_ROOT}/toolchain.cmake",
-          "type": "FILEPATH"
-        },
-        "ARP_DEVICE": "$env{ARP_DEVICE}",
-        "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_VERSION}"
-      }
-    },
 
-    {
-      "name": "windows-AXCF-default",
-      "hidden": true,
-      "inherits": "AXCF-default",
-      "generator": "MinGW Makefiles",
-      "environment": {
-        "PLCNEXT_SDK_ROOT": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
-      },
-      "cacheVariables": {
-        "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/$env{ARP_SDK_PACKAGE_NAME}/usr/bin/make.exe"
-      }
-    },
+
     {
       "name": "windows-Mingw64-default",
       "generator": "MinGW Makefiles",
       "binaryDir": "${sourceDir}/bin/build/${presetName}"
     },
+
+
     {
       "name": "build-windows-AXCF1152-2022-LTS-Release",
       "displayName": "Windows AXCF1152 2022 LTS Release",
@@ -110,6 +88,32 @@
       "environment": {
         "ARP_DEVICE": "AXCF1152",
         "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.96)",
+        "ARP_DEVICE_SHORT_VERSION": "2022_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
+      }
+    },
+
+
+    {
+      "name": "build-windows-AXCF2152-2024-LTS-Release",
+      "displayName": "Windows AXCF2152 2024 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_VERSION": "2024.0.0 LTS (24.0.0.102)",
+        "ARP_DEVICE_SHORT_VERSION": "2024_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
+      }
+    },
+    {
+      "name": "build-windows-AXCF2152-2022-LTS-Release",
+      "displayName": "Windows AXCF2152 2022 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.144)",
         "ARP_DEVICE_SHORT_VERSION": "2022_0",
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
@@ -126,14 +130,40 @@
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
     },
+
+
     {
-      "name": "build-windows-AXCF2152-2022-LTS-Release",
-      "displayName": "Windows AXCF2152 2022 LTS Release",
+      "name": "build-windows-AXCF3152-2024-LTS-Release",
+      "displayName": "Windows AXCF3152 2024 LTS Release",
       "description": "Using Windows OS",
       "inherits": "windows-AXCF-default",
       "environment": {
-        "ARP_DEVICE": "AXCF2152",
-        "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.144)",
+        "ARP_DEVICE": "AXCF3152",
+        "ARP_DEVICE_VERSION": "2024.0.9 LTS (24.0.9.163)",
+        "ARP_DEVICE_SHORT_VERSION": "2024_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
+      }
+    },
+    {
+      "name": "build-windows-AXCF3152-2023-LTS-Release",
+      "displayName": "Windows AXCF3152 2023 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF3152",
+        "ARP_DEVICE_VERSION": "2023.0.2 LTS (23.0.2.56)",
+        "ARP_DEVICE_SHORT_VERSION": "2023_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
+      }
+    },
+    {
+      "name": "build-windows-AXCF3152-2022-LTS-Release",
+      "displayName": "Windows AXCF3152 2022 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF3152",
+        "ARP_DEVICE_VERSION": "2022.0.5 LTS (22.0.5.102)",
         "ARP_DEVICE_SHORT_VERSION": "2022_0",
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
@@ -150,36 +180,17 @@
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
     },
+
+
     {
-      "name": "build-windows-AXCF3152-2022-LTS-Release",
-      "displayName": "Windows AXCF3152 2022 LTS Release",
-      "description": "Using Windows OS",
-      "inherits": "windows-AXCF-default",
+      "name": "build-linux-AXCF2152-2024-LTS-Release",
+      "displayName": "Linux AXCF2152 2024.0 LTS Release",
+      "description": "Using Linux OS",
+      "inherits": "linux-AXCF-default",
       "environment": {
-        "ARP_DEVICE": "AXCF3152",
-        "ARP_DEVICE_VERSION": "2022.0.5 LTS (22.0.5.102)",
-        "ARP_DEVICE_SHORT_VERSION": "2022_0",
-        "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
-      }
-    },
-    {
-      "name": "build-windows-AXCF3152-2023-LTS-Release",
-      "displayName": "Windows AXCF3152 2023 LTS Release",
-      "description": "Using Windows OS",
-      "inherits": "windows-AXCF-default",
-      "environment": {
-        "ARP_DEVICE": "AXCF3152",
-        "ARP_DEVICE_VERSION": "2023.0.2 LTS (23.0.2.56)",
-        "ARP_DEVICE_SHORT_VERSION": "2023_0",
-        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
-      }
-    },
-    {
-      "name": "linux-AXCF-default",
-      "hidden": true,
-      "inherits": "AXCF-default",
-      "environment": {
-        "PLCNEXT_SDK_ROOT": "/opt/pxc/sdk/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_SHORT_VERSION": "2024_0",
+        "ARP_DEVICE_VERSION": "2024.0.0 LTS (24.0.0.102)"
       }
     },
     {
@@ -191,6 +202,43 @@
         "ARP_DEVICE": "AXCF2152",
         "ARP_DEVICE_SHORT_VERSION": "2020.0",
         "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_SHORT_VERSION} LTS (20.0.0.24752)"
+      }
+    },
+    {
+      "name": "linux-AXCF-default",
+      "hidden": true,
+      "inherits": "AXCF-default",
+      "environment": {
+        "PLCNEXT_SDK_ROOT": "/opt/pxc/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+      }
+    },
+
+
+    {
+      "name": "windows-AXCF-default",
+      "hidden": true,
+      "inherits": "AXCF-default",
+      "generator": "MinGW Makefiles",
+      "environment": {
+        "PLCNEXT_SDK_ROOT": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+      },
+      "cacheVariables": {
+        "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/$env{ARP_SDK_PACKAGE_NAME}/usr/bin/make.exe"
+      }
+    },
+    {
+      "name": "AXCF-default",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/bin/build/$env{ARP_DEVICE}_$env{ARP_DEVICE_SHORT_VERSION}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install",
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{PLCNEXT_SDK_ROOT}/toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        "ARP_DEVICE": "$env{ARP_DEVICE}",
+        "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_VERSION}"
       }
     }
   ],
@@ -221,15 +269,12 @@
       "configurePreset": "windows-VS2019-debug",
       "configuration": "Debug"
     },
+
+
     {
-      "name": "build-windows-AXCF3152-2021-LTS-Release",
-      "displayName": "AXCF3152 2021 LTS",
-      "configurePreset": "build-windows-AXCF3152-2021-LTS-Release"
-    },
-    {
-      "name": "build-windows-AXCF3152-2022-LTS-Release",
-      "displayName": "AXCF3152 2022 LTS",
-      "configurePreset": "build-windows-AXCF3152-2022-LTS-Release"
+      "name": "build-windows-AXCF3152-2024-LTS-Release",
+      "displayName": "AXCF3152 2024 LTS",
+      "configurePreset": "build-windows-AXCF3152-2024-LTS-Release"
     },
     {
       "name": "build-windows-AXCF3152-2023-LTS-Release",
@@ -237,9 +282,21 @@
       "configurePreset": "build-windows-AXCF3152-2023-LTS-Release"
     },
     {
-      "name": "build-windows-AXCF2152-2021-LTS-Release",
-      "displayName": "AXCF2152 2021 LTS",
-      "configurePreset": "build-windows-AXCF2152-2021-LTS-Release"
+      "name": "build-windows-AXCF3152-2022-LTS-Release",
+      "displayName": "AXCF3152 2022 LTS",
+      "configurePreset": "build-windows-AXCF3152-2022-LTS-Release"
+    },
+    {
+      "name": "build-windows-AXCF3152-2021-LTS-Release",
+      "displayName": "AXCF3152 2021 LTS",
+      "configurePreset": "build-windows-AXCF3152-2021-LTS-Release"
+    },
+
+
+    {
+      "name": "build-windows-AXCF2152-2024-LTS-Release",
+      "displayName": "AXCF2152 2024 LTS",
+      "configurePreset": "build-windows-AXCF2152-2024-LTS-Release"
     },
     {
       "name": "build-windows-AXCF2152-2022-LTS-Release",
@@ -247,15 +304,31 @@
       "configurePreset": "build-windows-AXCF2152-2022-LTS-Release"
     },
     {
+      "name": "build-windows-AXCF2152-2021-LTS-Release",
+      "displayName": "AXCF2152 2021 LTS",
+      "configurePreset": "build-windows-AXCF2152-2021-LTS-Release"
+    },
+    {
       "name": "build-linux-AXCF2152-2020-LTS-Release",
       "displayName": "AXCF2152 2020 LTS",
       "configurePreset": "build-linux-AXCF2152-2020-LTS-Release"
     },
+
+
     {
       "name": "build-windows-AXCF1152-2022-LTS-Release",
       "displayName": "AXCF1152 2022 LTS",
       "configurePreset": "build-windows-AXCF1152-2022-LTS-Release"
     },
+
+
+    {
+      "name": "build-linux-AXCF2152-2024-LTS-Release",
+      "displayName": "AXCF2152 2024 LTS [Linux]",
+      "configurePreset": "build-linux-AXCF2152-2024-LTS-Release"
+    },
+
+
     {
       "name": "build-linux-Release",
       "displayName": "Linux Release",

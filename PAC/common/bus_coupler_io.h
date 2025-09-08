@@ -40,7 +40,8 @@ class io_device
 		enum IOLINKSTATE
 			{
 			OK,
-			NOTCONNECTED,
+
+			NOTCONNECTED = 100,
 			DEVICEERROR,
 			};
 
@@ -52,6 +53,8 @@ class io_device
             OUT_OF_RANGE = 4,
 
             BAD_IO_DATA = 100,
+
+            LAST_ERR_IDX
             };
 
 #ifndef PTUSA_TEST
@@ -331,13 +334,18 @@ class io_manager
 
             enum W_CONST
                 {
-                C_MAX_WAIT_TIME = 6000,     ///< Время до установки ошибки связи с модулем, мсек.
+                C_MAX_WAIT_TIME = 6'000,    ///< Время до установки ошибки связи с модулем, мсек.
                 //Max 63 устройства PXC Axioline F.
                 C_ANALOG_BUF_SIZE = 63 * 32,///< Размер буфера аналоговых модулей.
-                C_MAX_DELAY = 60000,        ///< Макс. время задержки переподключения, мсек.
-                C_CNT_TIMEOUT_US = 100000,  ///< Время ожидания подключения от модуля, мксек.
-                C_RCV_TIMEOUT_US = 250000,  ///< Время ожидания ответа от модуля, мксек.
-                C_INITIAL_RECONNECT_DELAY = 500, ///< Изначальная задержка переподключения к узлу при ошибке связи, мсек.
+
+                C_MAX_DELAY = 60'000,       ///< Макс. время задержки переподключения, мсек.
+                C_CNT_TIMEOUT_US = 100'000, ///< Время ожидания подключения от модуля, мксек.
+
+                C_RCV_TIMEOUT_SEC = 0,      ///< Время ожидания ответа от модуля, сек.
+                C_RCV_TIMEOUT_US = 250'000, ///< Время ожидания ответа от модуля, мксек.
+
+                ///< Изначальная задержка переподключения к узлу при ошибке связи, мсек.
+                C_INITIAL_RECONNECT_DELAY = 500,
                 };
 
 			enum TYPES ///< Типы модулей.
@@ -363,7 +371,8 @@ class io_manager
 			char    ip_address[16];///< IP-адрес.
 			char    name[20];      ///< Имя.
 
-			bool is_active;          ///< Признак работающего узла.
+			bool is_active;             ///< Признак работающего узла.
+            bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
 			u_long  last_poll_time; ///< Время последнего опроса.
 			bool    is_set_err;     ///< Установлена ли ошибка связи.
@@ -393,13 +402,14 @@ class io_manager
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
 
-			u_long last_init_time; ///< Время последней попытки подключиться, мсек.
-			u_long delay_time;     ///< Время ожидания до попытки подключиться, мсек.
+			u_long last_init_time = 0; ///< Время последней попытки подключиться, мсек.
+			u_long delay_time;         ///< Время ожидания до попытки подключиться, мсек.
 
 			stat_time recv_stat;  ///< Статистика работы с сокетом.
 			stat_time send_stat;  ///< Статистика работы с сокетом.
 
-            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке связи.
+            bool flag_error_read_message = false; ///< Флаг для вывода сообщений об ошибке чтения.
+            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке записи.
 
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.

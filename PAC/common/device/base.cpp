@@ -38,6 +38,7 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     "PDS",     ///< Датчик разности давления.
     "TS",      ///< Сигнальный датчик температуры.
     "G",       ///< Блок питания.
+    "WATCHDOG",///< Устройство проверки связи.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -436,6 +437,8 @@ const char* device::get_type_name() const
             return "Камера";
         case DT_G:
             return "Блок питания";
+        case DT_WATCHDOG:
+            return "Устройство проверки связи";
 
         default:
             return "???";
@@ -739,6 +742,29 @@ int AI1::get_state()
     return 1;
     }
 //-----------------------------------------------------------------------------
+const char* AI1::get_error_description()
+    {
+    if ( auto err_id = get_error_id(); err_id < 0 )
+        {
+        switch ( err_id )
+            {
+            case -static_cast<int>( io_device::ERRORS::UNDER_RANGE ) :
+                return "ниже предела";
+
+            case -static_cast<int>( io_device::ERRORS::OVER_RANGE ) :
+                return "выше предела";
+
+            case -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) :
+                return "вне диапазона";
+
+            default:
+                return "неизвестная ошибка";
+            }
+        }
+
+    return "нет ошибок";
+    }
+//-----------------------------------------------------------------------------
 int AI1::get_params_count() const
     {
     return ADDITIONAL_PARAM_COUNT;
@@ -888,6 +914,8 @@ void signal_column::turn_off_green()
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_blue()
     {
+    if ( !blue_lamp_channel ) return;
+
     if ( !G_PAC_INFO()->is_emulator() )
         process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
 
@@ -920,6 +948,8 @@ void signal_column::turn_on_green()
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_blue()
     {
+    if ( !blue_lamp_channel ) return;
+
     if ( !G_PAC_INFO()->is_emulator() )
         process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
 
@@ -1287,3 +1317,24 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
         }
     };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+const char* io_link_device::get_error_description( int err_id ) const
+    {
+    if ( err_id < 0 )
+        {
+        switch ( err_id )
+            {
+            case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
+                return "IOL-устройство не подключено";
+
+            case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
+                return "ошибка IOL-устройства";
+
+            default:
+                return "неизвестная ошибка";
+            }
+        }
+
+    return "нет ошибок";
+    }

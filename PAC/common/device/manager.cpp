@@ -248,6 +248,11 @@ i_DO_AO_device* get_G( const char* dev_name )
     return G_DEVICE_MANAGER()->get_G( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* WATCHDOG( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_watchdog( dev_name );
+    }
+//-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
@@ -561,6 +566,11 @@ i_DI_device* device_manager::get_TS( const char* dev_name )
 i_DO_AO_device* device_manager::get_G( const char* dev_name )
     {
     return get_device( device::DT_G, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_watchdog( const char* dev_name )
+    {
+    return get_device( device::DT_WATCHDOG, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1369,6 +1379,17 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
+        case device::DT_WATCHDOG:
+            if ( dev_sub_type == device::DST_WATCHDOG )
+                {
+                new_device = new watchdog( dev_name, device::DST_WATCHDOG );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
+                    dev_sub_type );
+                }
+            break;
 
         default:
             if ( G_DEBUG )
@@ -1440,6 +1461,42 @@ int device_manager::save_device( char* buff )
     res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "\t}}\n" ) ).size;
     return res;
     }
+//-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+int device_manager::add_device( device* new_device, device::DEVICE_TYPE dev_type )
+    {
+    u_int new_dev_index = project_devices.size();
+    project_devices.push_back( new_device );
+    new_device->set_serial_n( new_dev_index );
+
+    if ( dev_type >= 0 && dev_type < device::C_DEVICE_TYPE_CNT )
+        {
+        if ( 0 == is_first_device[ dev_type ] )
+            {
+            dev_types_ranges[ dev_type ].start_pos = new_dev_index;
+            is_first_device[ dev_type ] = 1;
+            }
+        dev_types_ranges[ dev_type ].end_pos = new_dev_index;
+        }
+    else
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->debug( "Unknown device type %d!\n", dev_type );
+            }
+
+        return 1;
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+int device_manager::remove_device( u_int idx )
+    {
+    project_devices.erase( project_devices.begin() + idx );
+    return 0;
+    }
+#endif
 //-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_name )
     {

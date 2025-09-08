@@ -646,6 +646,64 @@ class valve_mini_flushing : public i_mix_proof, public valve
         int get_on_fb_value() final;
     };
 //-----------------------------------------------------------------------------
+class io_link_valve
+    {
+    public:
+        /// @brief Returns a description of the error that is active.
+        /// 
+        /// @return A C-string containing the error description.
+        const char* get_error_description( int err_id ) const;
+                
+        inline static const int ERROR_ID_FIRST = -116;
+        inline static const int ERROR_ID_LAST = -131;
+
+        inline static const int ERROR_CODE_OFFSET = 100;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан AlfaLaval IO-Link mixproof.
+class alfalaval_iol_valve
+    {
+    public:
+        /// @brief Returns a description of the error that is active.
+        /// 
+        /// @return A C-string containing the error description or
+        /// nullptr if no error.
+        const char* get_error_description( int error_id ) const;
+
+    private:
+        io_link_device iol_dev;
+        io_link_valve iol_valve;
+    };
+//-----------------------------------------------------------------------------
+struct alfalaval_iol_valve_in_data
+    {
+    int16_t  pos;
+    bool     de_en  : 1;    // De-energized.
+    bool     main   : 1;    // Main energized position.
+    bool     usl    : 1;    // Upper Seat Lift energized position.
+    bool     lsp    : 1;    // Lower Seat Push energized position.
+    bool     st     : 1;    // Current Valve state.
+    uint8_t  unused : 3;
+    uint8_t  err    : 5;
+    };
+static_assert( sizeof( alfalaval_iol_valve_in_data ) == 4,
+    "Struct alfalaval_iol_valve_in_data must be 4 bytes size." );
+
+// Swapping the low and high bytes to simplify processing.
+#pragma pack(push,1)
+struct alfalaval_iol_valve_out_data_swapped
+    {
+    uint8_t unused1 : 4;
+    bool    sv1     : 1;   // Main valve activation.
+    bool    sv2     : 1;   // Upper seat lift activation.
+    bool    sv3     : 1;   // Lower Seat Push energized position.
+    bool    wink    : 1;   // Visual indication.
+    };
+#pragma pack(pop)
+
+static_assert( sizeof( alfalaval_iol_valve_out_data_swapped ) == 1,
+    "Struct alfalaval_iol_valve_out_data_swapped must be 1 byte size." );
+//-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
 class valve_iolink_mix_proof : public i_mix_proof, public valve
     {
@@ -682,34 +740,14 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void direct_set_state( int new_state ) override;
 
+        const char* get_error_description() override;
+
 #ifndef PTUSA_TEST
     private:
 #endif
-        struct in_data
-            {
-            int16_t  pos;
-            uint16_t de_en : 1; //De-Energized
-            bool main : 1; //Main energized position
-            bool usl : 1; //Upper Seat Lift energized position
-            bool lsp : 1; //Lower Seat Push energized position
-            bool st : 1; //Current Valve state
-            uint16_t unused : 3;
-            uint16_t err : 5;
-            };
-
-        struct out_data_swapped   //Swapped low and high byte for easer processing
-            {
-            uint16_t unused1 : 4;
-            bool sv1 : 1; //Main valve activation
-            bool sv2 : 1; //Upper seat lift activation
-            bool sv3 : 1; //Lower Seat Push energized position
-            bool wink : 1; //Visual indication
-            uint16_t unused2 : 8;
-            };
-
-        in_data in_info{};
-        static out_data_swapped stub_out_info;
-        out_data_swapped* out_info = &stub_out_info;
+        alfalaval_iol_valve_in_data in_info{};
+        static alfalaval_iol_valve_out_data_swapped stub_out_info;
+        alfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -720,6 +758,8 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
             {
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
+
+        alfalaval_iol_valve alfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -728,7 +768,7 @@ class valve_iolink_shut_off_thinktop : public valve
     public:
         explicit valve_iolink_shut_off_thinktop( const char* dev_name );
 
-        ~valve_iolink_shut_off_thinktop();
+        ~valve_iolink_shut_off_thinktop() override = default;
 
         VALVE_STATE get_valve_state();
 
@@ -754,32 +794,14 @@ class valve_iolink_shut_off_thinktop : public valve
 
         void direct_set_state( int new_state ) override;
 
+        const char* get_error_description() override;
+
+        int get_state() override;
+
     private:
-        struct in_data
-            {
-            int16_t  pos;
-            uint16_t de_en : 1; //De-Energized
-            bool main : 1; //Main energized position
-            bool usl : 1; //Upper Seat Lift energized position
-            bool lsp : 1; //Lower Seat Push energized position
-            bool st : 1; //Current Valve state
-            uint16_t unused : 3;
-            uint16_t err : 5;
-            };
-
-        struct out_data_swapped   //Swapped low and high byte for easer processing
-            {
-            uint16_t unused1 : 4;
-            bool sv1 : 1; //Main valve activation
-            bool sv2 : 1; //Upper seat lift activation
-            bool sv3 : 1; //Lower Seat Push energized position
-            bool wink : 1; //Visual indication
-            uint16_t unused2 : 8;
-            };
-
-        in_data* in_info = new in_data;
-        static out_data_swapped stub_out_info;
-        out_data_swapped* out_info = &stub_out_info;
+        alfalaval_iol_valve_in_data in_info{};
+        static alfalaval_iol_valve_out_data_swapped stub_out_info;
+        alfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -790,6 +812,8 @@ class valve_iolink_shut_off_thinktop : public valve
             {
             C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
+
+        alfalaval_iol_valve alfalaval_iol_v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
@@ -1114,7 +1138,7 @@ class analog_valve_iolink : public AO1
     public:
         explicit analog_valve_iolink( const char* dev_name );
 
-        ~analog_valve_iolink();
+        virtual ~analog_valve_iolink() = default;
 
         void evaluate_io();
 
@@ -1142,18 +1166,20 @@ class analog_valve_iolink : public AO1
 
         int get_state() override;
 
+        const char* get_error_description() override;
+
     private:
+#pragma pack(push,1)
         struct in_data
             {
             float position;         //Valve position in percent
             float setpoint;         //Used setpoint in percent
             uint8_t namur_state = 0;
-            uint8_t status : 6;
-            bool opened : 1;        //True = Opened, False = Not opened
             bool closed : 1;        //True = Closed, False = Not closed
+            bool opened : 1;        //True = Opened, False = Not opened            
+            uint8_t status : 6;
             };
 
-#pragma pack(push,1)
         struct out_data
             {
             float position;     //Cyclic CMD setpoint in percent
@@ -1162,9 +1188,10 @@ class analog_valve_iolink : public AO1
             };
 #pragma pack(pop)
 
-        in_data* in_info = new in_data;
+        in_data in_info{};
         static out_data stub_out_info;
         out_data* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
+        io_link_device iol_device;
     };

@@ -3,6 +3,7 @@
 
 #include "prj_mngr_tests.h"
 #include "lua_manager.h"
+#include "dtime.h"
 
 extern const char* FILES[ FILE_CNT ];
 
@@ -120,9 +121,9 @@ Usage:
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path (default: ./sys)
+      --path arg            Path (default: .)
+      --extra_paths arg     Extra paths (default: ./dairy-sys)
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 #else
@@ -138,15 +139,22 @@ Usage:
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path (default: ./sys)
+      --path arg            Path (default: .)
+      --extra_paths arg     Extra paths (default: ./dairy-sys)
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 #endif // defined WIN_OS
 
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, help );
+
+
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
 
     // Отключаем работу с модулями ввода/вывода, сбрасываем параметры,
     // запускаем в отладочном режиме.
@@ -158,8 +166,7 @@ Usage:
     std::string debug = R"(DEBUG ON.
 Resetting params (command line parameter "rcrc").
 )";
-    std::time_t _tm = std::time( nullptr );
-    std::tm tm = *std::localtime( &_tm );
+    std::tm tm = get_time();
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 #if defined WIN_OS
@@ -240,5 +247,8 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
 
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     G_LUA_MANAGER->free_Lua();
     }

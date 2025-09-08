@@ -19,6 +19,8 @@ int uni_io_manager::net_init( io_node* node ) const
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "Не задан узел." );
         *res.out = '\0';
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 1;
         }
 
@@ -30,6 +32,8 @@ int uni_io_manager::net_init( io_node* node ) const
             "Ошибка инициализации сетевой библиотеки: {}",
             WSA_Last_Err_Decode() );
         *res.out = '\0';
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 2;
         }
 #endif // WIN_OS
@@ -142,6 +146,9 @@ int uni_io_manager::net_init( io_node* node ) const
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
+    static u_long st_time;
+    st_time = get_millisec();
+
     err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
 
     if ( err <= 0 )
@@ -223,12 +230,12 @@ int uni_io_manager::net_init( io_node* node ) const
             }
         }
 
-    if ( G_DEBUG )
-        {
-        printf( "uni_io_manager:net_init() : socket %d is successfully"
-            " connected to \"%s\":\"%s\":%d\n",
-            sock, node->name, node->ip_address, PORT );
-        }
+    static u_long connect_time = 0;
+    connect_time = get_delta_millisec( st_time );
+
+    G_LOG->debug( "uni_io_manager:net_init() : socket %d is successfully "
+        R"(connected to "%s":"%s":%d (%lu ms).)",
+        sock, node->name, node->ip_address, PORT, connect_time );
 
     node->sock = sock;
     node->state = io_node::ST_OK;
@@ -238,7 +245,10 @@ int uni_io_manager::net_init( io_node* node ) const
 //-----------------------------------------------------------------------------
 int uni_io_manager::write_outputs()
     {
-    if ( 0 == nodes_count ) return 0;
+    if ( 0 == nodes_count ) 
+        {
+        return 0;
+        }
 
     int res = 0;
 
@@ -250,6 +260,12 @@ int uni_io_manager::write_outputs()
             if ( !nd->is_active )
                 {
                 continue;
+                }
+
+            if ( nd->read_io_error_flag )
+                {
+                res = 1;
+                continue;                
                 }
 
             if ( nd->DO_cnt > 0 )
@@ -289,17 +305,28 @@ int uni_io_manager::write_outputs()
                     if ( buff[ 7 ] == 0x0F )
                         {
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
+                        nd->flag_error_write_message = false;
+                        }
+                    else
+                        {
+                        if ( !nd->flag_error_write_message )
+                            {
+                            // Есть какая-то ошибка на прикладном уровне.
+                            add_err_to_log( "Write DO", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x0F,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            res = 1;
+                            nd->flag_error_write_message = true;
+                            }
+                        continue;
                         }
                     }
-
-                // Закомментированный фрагмент - используется для отладки.
-                //else
-                //    {
-                //    if ( G_DEBUG )
-                //        {
-                //        printf("\nWrite DO: returned error...\n");
-                //        }
-                //    }
+                else
+                    {
+                    // Была какая-то сетевая ошибка.
+                    res = 1;
+                    continue;
+                    }
 
                 }// if ( nd->DO_cnt > 0 )
 
@@ -346,20 +373,24 @@ int uni_io_manager::write_outputs()
                     if ( buff[ 7 ] == 0x10 )
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+                        nd->flag_error_write_message = false;
+                        }
+                    else
+                        {
+                        if ( !nd->flag_error_write_message )
+                            {
+                            add_err_to_log( "Write AO", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x10,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            }
+                        continue;
                         }
                     }
-
-                // Закомментированный фрагмент - используется для отладки.
-                //else
-                //    {
-                //    if ( G_DEBUG )
-                //        {
-                //        printf("\nWrite AO: returned error...\n");
-                //        }
-                //    }
-
+                else
+                    {
+                    continue;
+                    }
                 }// if ( nd->AO_cnt > 0 )
-
             }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
@@ -373,6 +404,12 @@ int uni_io_manager::write_outputs()
             {
             if ( !nd->is_active )
                 {
+                continue;
+                }
+
+            if ( nd->read_io_error_flag )
+                {
+                res = 1;
                 continue;
                 }
 
@@ -394,7 +431,7 @@ int uni_io_manager::write_outputs()
                 int bit_src = 0;
 
                 do
-                {
+                    {
                     for (u_int j = 0; j < registers_count * 2; j++)
                         {
                         u_char b = 0;
@@ -472,19 +509,18 @@ int uni_io_manager::write_outputs()
                             {
                             if (!nd->flag_error_write_message)
                                 {
-                                G_LOG->error("Write AO: returned error %d", buff[7]);
+                                add_err_to_log( "Write AO", nd->name, nd->ip_address,
+                                    static_cast<int>( buff[ 7 ] ), 0x10,
+                                    static_cast<int>( buff[ 8 ] ), registers_count );
+
                                 nd->flag_error_write_message = true;
                                 }
+                            res = 1;
                             }
                         }
                     else
                         {
-                        if (!nd->flag_error_write_message)
-                            {
-                            G_LOG->error("Write AO: returned error");
-                            nd->flag_error_write_message = true;
-                            res = 1;
-                            }
+                        res = 1;
                         }
 
                     start_register += registers_count;
@@ -494,8 +530,7 @@ int uni_io_manager::write_outputs()
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
 
-                }
-                 while (start_register < nd->AO_cnt);
+                    } while (start_register < nd->AO_cnt);
 
 
                 }// if ( nd->AO_cnt > 0 )
@@ -571,14 +606,9 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
         }
 
     // Получение данных.
-#ifdef WIN_OS
-    tcp_communicator_win::recvtimeout( node->sock, buff,bytes_to_receive, 0,
-        io_node::C_RCV_TIMEOUT_US );
-#else
-    res = tcp_communicator_linux::recvtimeout( node->sock, buff,
-        bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
-        node->name, &node->recv_stat );
-#endif // WIN_OS
+    res = tcp_communicator::recvtimeout( node->sock, buff, bytes_to_receive,
+        io_node::C_RCV_TIMEOUT_SEC, io_node::C_RCV_TIMEOUT_US,
+        node->ip_address, node->name, &node->recv_stat );
 
     if ( res <= 0 ) /* read error */
         {
@@ -650,11 +680,27 @@ int uni_io_manager::write_holding_registers(io_node* node, unsigned int address,
     return -1;
     }
 
+void uni_io_manager::add_err_to_log( const char* cmd,
+    const char* node_name, const char* node_ip_address,
+    int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const
+    {
+    auto result = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        R"({}:bus coupler returned error. "{}":"{}" )"
+        "(received code={}, expected={}, received size={}, expected={}).",
+        cmd, node_name, node_ip_address, exp_fun_code, rec_fun_code, exp_size,
+        rec_size );
+    *result.out = '\0';
+    G_LOG->write_log( i_log::P_ERR );
+    };
 //-----------------------------------------------------------------------------
 int uni_io_manager::read_inputs()
     {
-    if ( 0 == nodes_count ) return 0;
+    if ( 0 == nodes_count )
+        {
+        return 0;
+        }
 
+    auto res = 0;
     for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -704,21 +750,29 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_KBUS
                         printf( "\n" );
 #endif // DEBUG_KBUS
+                        nd->read_io_error_flag = false;
+                        nd->flag_error_read_message = false;
                         }
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read DI:bus coupler returned error. Node {}.",
-                            nd->number );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
-
-                        if ( G_DEBUG )
+                        if ( !nd->flag_error_read_message )
                             {
-                            //printf("\nRead DI:I/O returned error...\n");
+                            add_err_to_log( "Read DI", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x02,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            nd->flag_error_read_message = true;
                             }
+                        nd->read_io_error_flag = true;
+                        res = 1;
+                        continue;
                         }
-                    }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    } // if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
+                else
+                    {
+                    nd->read_io_error_flag = true;
+                    res = 1;
+                    continue;
+                    }
                 }// if ( nd->DI_cnt > 0 )
 
             if ( nd->AI_cnt > 0 )
@@ -761,16 +815,29 @@ int uni_io_manager::read_inputs()
                                     break;
                                 }
                             }
-                        }
+                        nd->read_io_error_flag = false;
+                        nd->flag_error_read_message = false;
+                        } // if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                     else
                         {
-                        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                            "Read AI:bus coupler returned error. Node {} (bytes_cnt = {}, {} {} ).",
-                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                        *res.out = '\0';
-                        G_LOG->write_log( i_log::P_ERR );
+                        if ( !nd->flag_error_read_message )
+                            {
+                            add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                                static_cast<int>( buff[ 7 ] ), 0x04,
+                                static_cast<int>( buff[ 8 ] ), bytes_cnt );
+                            nd->flag_error_read_message = true;
+                            }
+                        nd->read_io_error_flag = true;
+                        res = 1;
+                        continue;
                         }
                     }
+                else
+                    {
+                    nd->read_io_error_flag = true;
+                    res = 1;
+                    continue;
+                    } // if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                 }// if ( nd->AI_cnt > 0 )
 
             }// if ( nd->type == io_node::T_750_341 || ...
@@ -782,6 +849,7 @@ int uni_io_manager::read_inputs()
 
         if ( nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
             {
+
             if ( !nd->is_active )
                 {
                 continue;
@@ -810,7 +878,7 @@ int uni_io_manager::read_inputs()
 #ifdef DEBUG_BK_MIN
                     G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
 #endif // DEBUG_BK_MIN
-                    int res = read_input_registers(nd, start_read_address + start_register, registers_count);
+                    int result = read_input_registers(nd, start_read_address + start_register, registers_count);
 
 #ifdef TEST_NODE_IO
                     printf("\n\r");
@@ -820,10 +888,9 @@ int uni_io_manager::read_inputs()
                         }
 #endif
 
-
-                    if (res >= 0)
+                    if (result >= 0)
                         {
-                        if (res)
+                        if (result)
                             {
                             for (int index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
@@ -859,14 +926,22 @@ int uni_io_manager::read_inputs()
                             }
                         else
                             {
-                            G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                                nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+                            if ( !nd->flag_error_read_message )
+                                {
+                                add_err_to_log( "Read AI", nd->name, nd->ip_address,
+                                    static_cast<int>( buff[ 7 ] ), 0x04,
+                                    static_cast<int>( buff[ 8 ] ), registers_count * 2 );
+                                nd->flag_error_read_message = true;
+                                }
+                            nd->read_io_error_flag = true;
+                            res = 1;
                             break;
                             }
                         }
                     else
                         {
-                        //node doesn't respond
+                        nd->read_io_error_flag = true;
+                        res = 1;
                         break;
                         }
                     start_register += registers_count;
@@ -875,14 +950,14 @@ int uni_io_manager::read_inputs()
                         {
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
-                    }
-                while (start_register < nd->AI_cnt);
-                }
-
+                    nd->read_io_error_flag = false;
+                    nd->flag_error_read_message = false;
+                    } while (start_register < nd->AI_cnt);
+                } // if (nd->AI_cnt > 0)
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )

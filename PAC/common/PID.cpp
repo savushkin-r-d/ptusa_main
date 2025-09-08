@@ -92,7 +92,7 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    float dt = ( *par )[ P_dt ] / MSEC_IN_SEC;
+    float set_delta_ms = ( *par )[ P_dt ];
     float dmax = ( *par )[ P_max ];
     float dmin = ( *par )[ P_min ];
 
@@ -110,9 +110,9 @@ float PID::eval( float currentValue, int deltaSign )
 
     if ( G_DEBUG )
         {
-        if ( dt == 0 )
+        if ( set_delta_ms == 0 )
             {
-            printf( "Error! PID::eval() - dt = 0!\n" );
+            printf( "Error! PID::eval() - set_delta_ms = 0!\n" );
             }
         if ( TI == 0 )
             {
@@ -120,11 +120,13 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    if ( dt == 0 ) dt = 1;
+    if ( set_delta_ms == 0 ) set_delta_ms =
+        static_cast<float>( CONSTANTS::DEFAULT_DELTA_MS );
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt * MSEC_IN_SEC )
+    if ( auto actual_delta_ms = get_delta_millisec( last_time ); actual_delta_ms > set_delta_ms )
         {
+        auto dt = static_cast<float>( actual_delta_ms ) / MSEC_IN_SEC;
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
         q2 = K * TD / dt;
@@ -143,7 +145,13 @@ float PID::eval( float currentValue, int deltaSign )
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
         if ( unsigned long delta_time = get_delta_millisec( start_time );
             delta_time < acceleration_time )
-            {
+            {            
+            if ( auto out_min = ( *par )[ P_out_min ]; start_value < out_min )
+                {
+                // Начинаем с out_min. 
+                start_value = out_min;
+                }
+
             float res = MAX_OUT_VALUE * delta_time / acceleration_time;
             if ( ( *par )[ P_is_zero_start ] )
                 {
@@ -159,7 +167,7 @@ float PID::eval( float currentValue, int deltaSign )
         //-Зона разгона.-!>
 
         last_time = get_millisec();
-        } // if ( get_millisec() - last_time > dt*1000L )
+        }
 
     //-Мягкий пуск.
     // Включили ручной режим.
@@ -190,18 +198,21 @@ float PID::eval( float currentValue, int deltaSign )
     float out_max = ( *par )[ P_out_max ];
     float out_min = ( *par )[ P_out_min ];
 
-    if ( G_DEBUG )
+
+    if ( out_min >= out_max )
         {
-        if ( out_max <= out_min )
-            {
-            printf( "Error! PID::eval() - out_max <= out_min (%f == %f)!\n",
-                out_max, out_min );
-            }
-        if ( out_max == MIN_OUT_VALUE )
-            {
-            printf( "Error! PID::eval() - out_max = %f!\n", MIN_OUT_VALUE );
-            }
+        G_LOG->warning( "PID::eval() : out_min >= out_max (%f >= %f).",
+            out_min, out_max );
+        out_min = MIN_OUT_VALUE;
+        ( *par )[ P_out_min ] = MIN_OUT_VALUE;
         }
+    if ( out_max <= MIN_OUT_VALUE )
+        {
+        G_LOG->warning( "PID::eval() : out_max <= MIN_OUT_VALUE (%f).",
+            MIN_OUT_VALUE );
+        out_max = MAX_OUT_VALUE;
+        ( *par )[ P_out_max ] = MAX_OUT_VALUE;
+        }        
 
     if ( Uk < out_min )
         {

@@ -129,6 +129,11 @@ class PID : public device, public i_Lua_save_device
             STOPPING = 10,
             };
 
+        enum class CONSTANTS
+            {
+            DEFAULT_DELTA_MS = 1'000
+            };
+
     private:
         float uk_1;
         float ek_1;

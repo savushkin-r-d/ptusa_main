@@ -1,5 +1,18 @@
 #!/bin/sh
 
-( cmake -D CFG_NAME:string="build-windows-AXCF2152-2022-LTS-Release" -D BUILD_NAME:string="build-windows-AXCF2152-2022-LTS-Release" -P ./misc/bi.cmake ) 2>&1 | ./misc/colorize.sh
-( cmake -D CFG_NAME:string="build-windows-AXCF1152-2022-LTS-Release" -D BUILD_NAME:string="build-windows-AXCF1152-2022-LTS-Release" -P ./misc/bi.cmake ) 2>&1 | ./misc/colorize.sh
-( cmake -D CFG_NAME:string="windows-VS2022-default" -D BUILD_NAME:string="build-windows-VS2022-release" -P ./misc/bi.cmake ) 2>&1 | ./misc/colorize.sh
+SECONDS=0
+
+configs=(
+    "build-windows-AXCF2152-2024-LTS-Release build-windows-AXCF2152-2024-LTS-Release"    
+    "build-windows-AXCF3152-2024-LTS-Release build-windows-AXCF3152-2024-LTS-Release"
+    "windows-VS2022-default build-windows-VS2022-release"
+)
+
+for config in "${configs[@]}"; do
+    read -r CFG_NAME BUILD_NAME <<< "$config"
+    ( cmake -D CFG_NAME:string="$CFG_NAME" -D BUILD_NAME:string="$BUILD_NAME" -P ./misc/bi.cmake ) 2>&1 | ./misc/colorize.sh
+done
+
+duration=$SECONDS
+echo -e '\033[1;36m'
+echo "$((duration / 60)) minutes and $((duration % 60)) seconds elapsed."

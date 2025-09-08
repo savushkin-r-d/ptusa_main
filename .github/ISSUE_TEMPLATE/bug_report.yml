@@ -1,0 +1,144 @@
+---
+name: 🐛 Bug Report / Отчет об ошибке
+description: Report a bug or unexpected behavior in ptusa_main
+title: "[BUG]: "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the sections below to
+        help us understand and reproduce the issue.
+
+        Спасибо за сообщение об ошибке! Пожалуйста, заполните разделы ниже,
+        чтобы помочь нам понять и воспроизвести проблему.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description / Описание ошибки
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce / Шаги для воспроизведения
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior / Ожидаемое поведение
+      description: |
+        A clear and concise description of what you expected to happen.
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior / Фактическое поведение
+      description: A clear and concise description of what actually happened.
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform / Платформа
+      description: Which platform are you using?
+      options:
+        - Windows
+        - Linux
+        - PLCnext (AXC F 2152)
+        - PLCnext (Other)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / Окружение
+      description: |
+        Please provide information about your environment:
+        - OS version
+        - Compiler version (GCC, MSVC, etc.)
+        - CMake version
+        - PLCnext toolchain version (if applicable)
+      placeholder: |
+        OS: Windows 11 / Ubuntu 22.04
+        Compiler: MSVC 2022 / GCC 11.2
+        CMake: 3.25
+        PLCnext Toolchain: 2023.0 LTS
+    validations:
+      required: true
+
+  - type: textarea
+    id: lua_script
+    attributes:
+      label: Lua Script Context / Контекст Lua-скрипта
+      description: |
+        If the bug is related to Lua scripts, please provide relevant script
+        snippets
+      placeholder: |
+        ```lua
+        -- Your Lua script code here
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs / Логи ошибок
+      description: |
+        If applicable, add error logs, stack traces, or console output
+      placeholder: |
+        ```
+        Paste your logs here
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context / Дополнительный контекст
+      description: |
+        Add any other context about the problem here (screenshots,
+        configuration files, etc.)
+      placeholder: Any additional information that might help...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / Контрольный список
+      description: Please confirm the following
+      options:
+        - label: |
+            I have searched for existing issues that might be related to this
+            bug
+          required: true
+        - label: I have checked the documentation and troubleshooting guides
+          required: true
+        - label: I can reproduce this issue consistently
+          required: false
+        - label: I am willing to help test a fix for this issue
+          required: false

@@ -8,6 +8,65 @@ using namespace ::testing;
 #include <time.h>
 
 
+class iolink_dev_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            mngr.init_node_AI( 0, 0, 1027843, 0 );
+            };
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            };
+
+        void init_channels( io_device& io_dev ) const
+            {
+            io_dev.init_and_alloc( 0, 0, 0, 2 );
+            io_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+            }
+
+        void set_iol_state_to_OK( io_device& io_dev ) const
+            {
+            // Bit 0 - IOLink connected, Bit 8 - IOLink data valid.
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 0b1'0000'0001;
+            }
+
+        void test_dev_err( device& dev, io_device& io_dev, int expected_dev_state ) const
+            {
+            EXPECT_STREQ( dev.get_error_description(), "нет ошибок" );
+
+            G_PAC_INFO()->emulation_off();
+            init_channels( io_dev );
+            dev.evaluate_io();
+            EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+            EXPECT_STREQ( dev.get_error_description(), "IOL-устройство не подключено" );
+
+            // Bit 0 - IOLink connected.
+            *io_dev.AI_channels.int_module_read_values[ 0 ] = 0b1;
+            dev.evaluate_io();
+            EXPECT_EQ( dev.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+            
+            set_iol_state_to_OK( io_dev );
+            dev.evaluate_io();
+            EXPECT_EQ( dev.get_state(), expected_dev_state );
+            EXPECT_STREQ( dev.get_error_description(), "ошибка IOL-устройства" );
+
+            G_PAC_INFO()->emulation_on();
+            }
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+
 TEST( signal_column, get_type_name )
     {
     signal_column_iolink test_dev( "test_HL1" );
@@ -106,6 +165,14 @@ TEST( signal_column, turn_off_blue )
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
+    // Без описания колонны синий свет не включается.
+    test_dev.turn_on_blue();
+    test_dev.save_device( buff, "" );
+    EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
+        "L_BLUE=0, L_SIREN=0},\n", buff );
+
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+
     test_dev.turn_on_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -116,8 +183,7 @@ TEST( signal_column, turn_off_blue )
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    G_PAC_INFO()->emulation_off();    
     test_dev.turn_on_blue();
     test_dev.turn_off_blue();
     G_PAC_INFO()->emulation_on();
@@ -345,6 +411,7 @@ TEST( signal_column, slow_blink_green )
 TEST( signal_column, normal_blink_blue )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
@@ -358,8 +425,7 @@ TEST( signal_column, normal_blink_blue )
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
-    G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+    G_PAC_INFO()->emulation_off();    
     test_dev.normal_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -374,9 +440,10 @@ TEST( signal_column, normal_blink_blue )
 TEST( signal_column, slow_blink_blue )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
-
+    
     test_dev.slow_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -388,7 +455,6 @@ TEST( signal_column, slow_blink_blue )
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
-    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.slow_blink_blue();
     test_dev.save_device( buff, "" );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
@@ -403,6 +469,8 @@ TEST( signal_column, slow_blink_blue )
 TEST( signal_column, direct_set_state )
     {
     signal_column_iolink test_dev( "test_HL1" );
+    test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
+
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
@@ -667,18 +735,30 @@ TEST( signal_column, show_idle )
     }
 
 
+TEST( signal_column_iolink, get_state )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+
+    EXPECT_EQ( test_dev.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( test_dev.get_state(), 0 );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, signal_column_iolink_get_error_description )
+    {
+    signal_column_iolink test_dev( "test_HL1" );
+    test_dev_err( test_dev, test_dev, 0 );
+    }
+
+
 TEST( valve_iol_terminal, get_state_data )
     {
     valve_iol_terminal_DO1_DI1_on v1( "V1" );
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, v1.get_valve_state() );
     }
 
-TEST( temperature_e_analog, get_value )
-    {
-    temperature_e_analog TE1( "T1" );
-    auto v = TE1.get_value();
-    EXPECT_EQ( .0f, v );
-    }
 
 void test_temperature( AI1* TE1 )
     {
@@ -687,8 +767,7 @@ void test_temperature( AI1* TE1 )
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
-    mngr.init_node_AI( 0, 0, 0, 0 );
-
+    mngr.init_node_AI( 0, 0, 491, 0 );
 
     EXPECT_EQ( TE1->get_state(), 1 );
 
@@ -697,12 +776,21 @@ void test_temperature( AI1* TE1 )
     TE1->init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
     EXPECT_EQ( TE1->get_state(), 1 );
 
-    *TE1->AI_channels.int_read_values[ 0 ] = -1000;
-    EXPECT_EQ( TE1->get_state(), -1 );
+    *TE1->AI_channels.int_read_values[ 0 ] = -30001;
+    EXPECT_EQ( TE1->get_state(), -4 );
+
+    EXPECT_STREQ( TE1->get_error_description(), "вне диапазона" );
 
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( temperature_e_analog, get_value )
+    {
+    temperature_e_analog TE1( "T1" );
+    auto v = TE1.get_value();
+    EXPECT_EQ( .0f, v );
     }
 
 TEST( temperature_e_analog, get_state )
@@ -716,6 +804,55 @@ TEST( temperature_e_analog, get_type_name )
     temperature_e_analog test_dev( "test_TE1" );
     EXPECT_STREQ( "Температура", test_dev.get_type_name() );
     }
+
+
+TEST_F( iolink_dev_test, temperature_e_iolink_get_value )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Нет привязки к модулям ввода/вывода - должны получить 0.
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    init_channels( TE1 );
+    auto err_value = -100.f;
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink::CONSTANTS::P_ERR_T ),
+        TE1.start_param_idx, err_value );
+    // Есть привязка к модулям ввода/вывода - должны получить аварийное
+    // значение.
+    EXPECT_EQ( TE1.get_value(), err_value );
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_evaluate_io )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    const u_int_2 VALUE = 257;
+    *TE1.AI_channels.int_read_values[ 0 ] = VALUE;
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_value(), 0.1f * VALUE );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
+    {
+    temperature_e_iolink TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    test_dev_err( TE1, TE1, 1 );
+
+    TE1.set_cmd( "ST", 0,
+        -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) - 100 );
+    EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
+    }
+
 
 template<typename T1 = i_DI_device, typename T2 = T1>
 void check_dev( const char* name, int type, int sub_type,
@@ -853,7 +990,9 @@ TEST( device_manager, add_io_device )
     check_dev<i_counter>( "FQT1", device::DT_FQT, device::DST_FQT, FQT, FQT );
     check_dev<i_counter>( "FQT2", device::DT_FQT, device::DST_FQT_IOLINK, FQT, FQT );
     check_dev<i_counter>( "FQT3", device::DT_FQT, device::DST_FQT_F, FQT, FQT );
+    
     check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE, TE );
+    check_dev<i_AI_device>( "TE2", device::DT_TE, device::DST_TE_IOLINK, TE, TE );
 
     check_dev<>( "PDS1", device::DT_PDS, device::DST_PDS, PDS );
     check_dev<i_DI_device, i_DI_device>( "PDS2", device::DT_PDS,
@@ -891,6 +1030,15 @@ TEST( device_manager, add_io_device )
 
     check_dev<i_DO_device>( "HA1", device::DT_HA, device::DST_HA, HA );
     check_dev<i_DO_device>( "HL1", device::DT_HL, device::DST_HL, HL );
+
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFEBIT1", device::DT_WATCHDOG,
+        device::DST_WATCHDOG, WATCHDOG, nullptr, "Art_1", true );
+    check_dev<i_DI_device, i_DI_device>( "POU1LIFECOUNTER1", device::DT_WATCHDOG,
+        device::DST_WATCHDOG, WATCHDOG, nullptr, "Art_1", true );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WATCHDOG, device::DST_WATCHDOG + 1, "POU1LIFEBIT2",
+        "Test watchdog", "Art_1" );
+    EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
@@ -984,9 +1132,13 @@ TEST( device, get_type_str )
         device::DEVICE_SUB_TYPE::DST_NONE, 0 );
     EXPECT_STREQ( dev1.get_type_str(), "NONE" );
 
-    device dev2( "DEV1", device::DEVICE_TYPE::DT_V,
+    device dev2( "DEV2", device::DEVICE_TYPE::DT_V,
         device::DEVICE_SUB_TYPE::DST_V_VIRT, 0 );
     EXPECT_STREQ( dev2.get_type_str(), "V" );
+
+    device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
+    EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
     }
 
 TEST( device, save_device )
@@ -1313,6 +1465,50 @@ TEST( level, get_volume )
     }
 
 
+TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
+    {
+    level_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
+    }
+
+TEST_F( iolink_dev_test, level_e_iolink_evaluate_io )
+    {
+    level_e_iolink test_dev( "L1" );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.init( 0, 0, 0, 1 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid.
+    set_iol_state_to_OK( test_dev );
+
+    *test_dev.AI_channels.int_read_values[ 0 ] = 10;
+    
+    // Set P_MAX_P parameter to 1.0 bar for level calculation.
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx, 1.0f );
+
+    // Test parameter setting worked.
+    EXPECT_EQ( test_dev.get_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx ), 1.0f );
+
+    // For now, just test that the level sensor doesn't crash and can be configured
+    // The data processing for IOLink appears to need proper byte-formatted data
+    // rather than simple integer values.
+    test_dev.set_article( "IFM.PM1706" );
+    
+    // Basic functionality test - device should not crash when evaluate_io is called.
+    test_dev.evaluate_io();
+    // Test calculated value.
+    EXPECT_NEAR( test_dev.get_value(), 25.6f, .1f );
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_R,
+        test_dev.start_param_idx, 1.0f );
+    EXPECT_EQ( test_dev.get_volume(), 8200.0f );
+    
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( pressure_e, pressure_e )
     {
     const int BUFF_SIZE = 200;
@@ -1345,38 +1541,78 @@ TEST( pressure_e_iolink, read_article )
     {
     pressure_e_iolink test_dev( "P1" );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
+    const auto IFM____ = "IFM.____";
+    test_dev.set_article( IFM____ );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::DEFAULT );
 
     const auto IFM_PM1706 = "IFM.PM1706";
     test_dev.set_article( IFM_PM1706 );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
+
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1717 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
     }
 
-TEST( pressure_e_iolink, evaluate_io )
+TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     {
     pressure_e_iolink test_dev( "P1" );
-    const auto IFM_PM1706 = "IFM.PM1706";
-    test_dev.set_article( IFM_PM1706 );
-
 
     G_PAC_INFO()->emulation_off();
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     test_dev.init( 0, 0, 0, 1 );
-    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
+    set_iol_state_to_OK( test_dev );
+    
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
+    test_dev.evaluate_io();
+    EXPECT_EQ( test_dev.get_value(), 0.0f ); // Default value is 0.
+
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_article( IFM_PM1706 );
     // Value should calculate to 2.55f for the IFM.PM1706 (100 as raw
     // input data from the line above).
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
 
+    const auto IFM_PM1717 = "IFM.PM1717";
+    test_dev.set_article( IFM_PM1717 );
+    test_dev.evaluate_io();
+    // Value should calculate to 2.55f for the IFM.PM1717 (100 as raw
+    // input data from the line above).
+    EXPECT_NEAR( test_dev.get_value(), 2.55f, .01f );
+
+    const auto IFM_PM1708 = "IFM.PM1708";
+    test_dev.set_article( IFM_PM1708 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 0.255f, .01f );
+    
+    const auto IFM_PI2715 = "IFM.PI2715";
+    test_dev.set_article( IFM_PI2715 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 6.4f, .01f );
+    
+    const auto IFM_PI2794 = "IFM.PI2794";
+    test_dev.set_article( IFM_PI2794 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 64.0f, .01f );
+    
+    const auto FES_8001446 = "FES.8001446";
+    test_dev.set_article( FES_8001446 );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
     G_PAC_INFO()->emulation_on();
-    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST_F( iolink_dev_test, pressure_e_iolink_get_error_description )
+    {
+    pressure_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
     }
 
 
@@ -1549,6 +1785,24 @@ TEST( concentration_e, get_type_name )
     EXPECT_STREQ( "Концентрация", test_dev.get_type_name() );
     }
 
+TEST( concentration_e, get_error_description )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_STREQ( "нет ошибок", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::UNDER_RANGE ) );
+    EXPECT_STREQ( "ниже предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OVER_RANGE ) );
+    EXPECT_STREQ( "выше предела", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::OUT_OF_RANGE ) );
+    EXPECT_STREQ( "вне диапазона", test_dev.get_error_description() );
+
+    test_dev.set_cmd( "ST", 0, -static_cast<int>( io_device::ERRORS::LAST_ERR_IDX ) );
+    EXPECT_STREQ( "неизвестная ошибка", test_dev.get_error_description() );
+    }
+
 
 TEST( concentration_e_ok, get_state )
     {
@@ -1565,6 +1819,12 @@ TEST( concentration_e_iolink, concentration_e_iolink )
 
     Q1.save_device( buff, "" );
     EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0},\n", buff );
+    }
+
+TEST_F( iolink_dev_test, concentration_e_iolink_get_error_description )
+    {
+    concentration_e_iolink test_dev( "TestDevice" );
+    test_dev_err( test_dev, test_dev, 0 );
     }
 
 
@@ -2757,18 +3017,95 @@ TEST( valve_iolink_mix_proof, get_state )
 
     // Нет обратной связи, но не прошло время проверки, но есть ошибка клапана,
     // поэтому есть ошибки.
-    V1.in_info.err = true;
-    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
+    V1.in_info.err = 1;
+    EXPECT_EQ( -( io_link_valve::ERROR_CODE_OFFSET + V1.in_info.err ),
+        V1.get_state() );
 
     // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
     // поэтому есть ошибка.
-    V1.in_info.err = false;
+    V1.in_info.err = 0;
     DeltaMilliSecSubHooker::set_millisec( 101UL );
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
 
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Должна быть ошибка подключения устройства от модуля IO-Link.
+    EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+class valve_iolink_mix_proof_testable : public valve_iolink_mix_proof
+    {
+    public:
+        using valve_iolink_mix_proof::valve_iolink_mix_proof;
+
+        void set_err( uint16_t err ) 
+            { 
+            in_info.err = err; 
+            }
+    };
+
+TEST( valve_iolink_mix_proof, get_error_description )
+    {
+    struct ErrorDescCase
+        {
+        int16_t err;
+        const char* expected;
+        };
+
+    valve_iolink_mix_proof_testable v( "V1" );
+
+    const std::vector<ErrorDescCase> cases =
+        {
+        {0, "нет ошибок"},
+
+        {-116, "не обнаружен магнитный индикатор на штоке клапана (#16)"},
+        {-117, "конфигурация не соответствует требованиям автоматической "
+            "настройки (#17)"},
+        {-118, "ошибка в пневматических соединениях - проверьте подключение "
+            "трубок или соленоидов (#18)"},
+        {-119, "нет сигнала от датчика верхнего седла (#19)"},
+        {-120, "клапан не достиг заданного положения в установленное время "
+            "(#20)"},
+        {-121, "обнаружен самопроизвольный ход штока (#21)"},
+        {-122, "не подключен датчик верхнего седла (#22)"},
+        {-123, "не обнаружен соленоидный клапан 1 (#23)"},
+        {-124, "не обнаружен соленоидный клапан 2 (#24)"},
+        {-125, "не обнаружен соленоидный клапан 3 (#25)"},
+        {-126, "активировано несколько входных сигналов соленоидных клапанов "
+            "(#26)"},
+        {-127, "обнаружено короткое замыкание на цифровых выходах (#27)"},
+        {-128, "процесс настройки был прерван (#28)"},
+        {-129, "постоянное срабатывание кнопки - проверьте кнопки или "
+            "замените плату управления (#29)"},
+        {-130, "потеряна связь с системой управления (#30)"},
+        {-131, "сработала аварийная остановка - превышен допустимый "
+            "ход штока (#31)"},
+        };
+
+    for ( const auto& c : cases )
+        {
+        v.set_state( c.err );
+        EXPECT_STREQ( v.get_error_description(), c.expected ) << "err=" << c.err;
+        }
+
+    v.set_cmd( "ST", 0, -io_device::IOLINKSTATE::NOTCONNECTED );
+    auto res = v.get_error_description();
+    EXPECT_STREQ( "IOL-устройство не подключено", res );
+
+    v.set_cmd( "ST", 0, -io_device::IOLINKSTATE::DEVICEERROR );
+    res = v.get_error_description();
+    EXPECT_STREQ( "ошибка IOL-устройства", res );
     }
 
 
@@ -2783,6 +3120,15 @@ TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
         buff );
     }
 
+TEST( valve_iolink_shut_off_thinktop, get_state )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    G_PAC_INFO()->emulation_on();
+    }
 
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
@@ -2815,25 +3161,145 @@ TEST( level_s, get_type_name )
     }
 
 
-TEST( level_s_iolink, set_article )
+class LevelSIOLinkTest : public ::testing::Test
     {
-    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
-    LS1.set_article( "IFM.LMT100" );
-    EXPECT_EQ( false, LS1.is_active() );
+    protected:
+        std::unique_ptr<level_s_iolink> device = 
+            std::make_unique<level_s_iolink>(
+            "TestDevice", device::LS_IOLINK_MAX );
+    };
+
+TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
+    {
+    struct TestCase
+        {
+        const char* article;
+        level_s_iolink::ARTICLE expected;
+        };
+
+    std::array<TestCase, 7> testCases =
+        { {
+        {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
+        {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
+        {"IFM.LMT104", level_s_iolink::ARTICLE::IFM_LMT104},
+        {"IFM.LMT105", level_s_iolink::ARTICLE::IFM_LMT105},
+        {"IFM.LMT121", level_s_iolink::ARTICLE::IFM_LMT121},
+        {"IFM.LMT202", level_s_iolink::ARTICLE::IFM_LMT202},
+        {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
+        } };
+
+    for ( const auto& testCase : testCases )
+        {
+        device->set_article( testCase.article );
+        EXPECT_EQ( device->get_article_n(), testCase.expected )
+            << "Failed for article: " << testCase.article;
+        }
     }
 
-TEST( level_s_iolink, get_state )
+TEST_F( LevelSIOLinkTest, SetArticle_UnknownArticle )
     {
-    level_s_iolink LS1( "LS1", device::LS_IOLINK_MAX );
+    const char* unknownArticle = "UNKNOWN.ARTICLE";
+    device->set_article( unknownArticle );
 
+    EXPECT_EQ( device->get_article_n(), level_s_iolink::ARTICLE::DEFAULT )
+        << "Failed for unknown article: " << unknownArticle;
+    }
 
-    EXPECT_EQ( LS1.get_state(), 0 );
+TEST_F( LevelSIOLinkTest, SetArticle_EmptyArticle )
+    {
+    const char* emptyArticle = "";
+    device->set_article( emptyArticle );
+
+    EXPECT_EQ( device->get_article_n(), level_s_iolink::ARTICLE::DEFAULT )
+        << "Failed for empty article.";
+    }
+
+TEST_F( LevelSIOLinkTest, get_state )
+    {
+    device->set_article( "IFM.LMT100" );
+
+    EXPECT_EQ( device->get_state(), 1 );
 
     G_PAC_INFO()->emulation_off();
-    EXPECT_EQ( LS1.get_state(), 0 );
-
+    EXPECT_EQ( device->get_state(), 1 );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( LevelSIOLinkTest, is_active )
+    {
+    device->set_article( "IFM.LMT100" );
+
+    EXPECT_TRUE( device->is_active() );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_TRUE( device->is_active() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    test_dev_max.set_article( "IFM.LMT100" );
+    EXPECT_TRUE( test_dev_max.is_active() );
+
+    test_dev_max.evaluate_io(); // Correct eval without I/O data.
+    EXPECT_TRUE( test_dev_max.is_active() );
+
+    G_PAC_INFO()->emulation_off();
+
+    init_channels( test_dev_max );
+    test_dev_max.evaluate_io();
+    EXPECT_TRUE( test_dev_max.is_active() );  // Due to IO-Link module error.
+        
+    set_iol_state_to_OK( test_dev_max );
+    test_dev_max.evaluate_io(); // Correct eval with I/O data.
+    EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
+
+    const auto CHECK_TIME = 100.f;
+    test_dev_max.set_par( level_s_iolink::CONSTANTS::P_DT, 0, CHECK_TIME );
+    test_dev_max.evaluate_io();
+    EXPECT_FALSE( test_dev_max.is_active() ); // Read 0 from I/O data.
+
+    DeltaMilliSecSubHooker::set_millisec( 
+        static_cast<unsigned long>( CHECK_TIME + 1.f ) );    
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
+    test_dev_max.evaluate_io();    
+    EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    DeltaMilliSecSubHooker::set_default_time();
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_get_error_description )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    test_dev_err( test_dev_max, test_dev_max, 0 );
+    }
+
+TEST_F( iolink_dev_test, level_s_iolink_get_value )
+    {
+    level_s_iolink test_dev_max( "TestDevice", device::LS_IOLINK_MAX );
+    
+    EXPECT_EQ( test_dev_max.get_value(), .0f );
+    G_PAC_INFO()->emulation_off();
+
+    EXPECT_EQ( test_dev_max.get_value(), .0f );
+
+    init_channels( test_dev_max );
+    const auto VALUE = 10.f;
+    test_dev_max.set_par( level_s_iolink::CONSTANTS::P_ERR, 0, VALUE );
+    test_dev_max.evaluate_io();
+    EXPECT_EQ( test_dev_max.get_value(), VALUE );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_error_description )
+    {
+    valve_iolink_shut_off_thinktop V1( "V1" );
+    test_dev_err( V1, V1, -101 );
     }
 
 
@@ -3117,23 +3583,28 @@ TEST( counter_f, get_state )
     fqt1.evaluate_io();
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Насос работает, но счетчик не считает.
+    //Насос работает, но счетчик не считает. Ошибки нет, так как расход
+    //нулевой - ниже минимального.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2.f );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();
-    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Устанавливаем расход - ошибка должна остаться.
-    fqt1.set_cmd( "F", 0, 1 );
+    //Устанавливаем расход - ошибки нет, так как расход ниже
+    //минимального.
+    fqt1.set_cmd( "F", 0, 1.f );
     fqt1.evaluate_io();
     fqt1.evaluate_io();
-    EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    //Расход стал ниже минимального - ошибка должна остаться.
-    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
+    //Расход стал выше минимального - ошибка должна появиться.
+    fqt1.set_cmd( "F", 0, 2.1f );    
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     fqt1.evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_PUMP_ERROR, fqt1.get_state() );
 
     //Сбрасываем ошибку.
@@ -3544,7 +4015,7 @@ TEST( counter_iolink, get_error_description )
     auto res = fqt1.get_error_description(); //Нет ошибок.
     EXPECT_STREQ( "нет ошибок", res );
 
-    fqt1.set_cmd( "ST", 0, -1 );
+    fqt1.set_cmd( "ST", 0, -io_device::IOLINKSTATE::NOTCONNECTED );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "IOL-устройство не подключено", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );
@@ -3552,7 +4023,7 @@ TEST( counter_iolink, get_error_description )
     EXPECT_STREQ( "IOL-устройство не подключено", res );
 
 
-    fqt1.set_cmd( "ST", 0, -2 );
+    fqt1.set_cmd( "ST", 0, -io_device::IOLINKSTATE::DEVICEERROR );
     res = fqt1.get_error_description();
     EXPECT_STREQ( "ошибка IOL-устройства", res );
     fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_WORK ) );

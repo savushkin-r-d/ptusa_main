@@ -2,6 +2,7 @@
 #include <cmath>
 #include <fmt/core.h>
 #include <algorithm>
+#include <unordered_map>
 
 #include "device.h"
 #include "manager.h"
@@ -154,6 +155,26 @@ void signal_column_iolink::evaluate_io()
         {
         out_info = (out_data*)get_AO_write_data( 0 );
         }
+    }
+//-----------------------------------------------------------------------------
+const char* signal_column_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+//-----------------------------------------------------------------------------
+int signal_column_iolink::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return signal_column::get_state();
+        }
+
+    if ( auto st = get_AI_IOLINK_state( 0 ); st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return signal_column::get_state();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -857,9 +878,10 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
-        fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
             "{}\t power_unit::set_cmd() - prop = {}, idx = {}, val = {}",
             get_name(), prop, idx, val );
+        *res.out = '\0';
         G_LOG->write_log( i_log::P_DEBUG );
         }
 
@@ -1227,6 +1249,13 @@ void base_counter::check_connected_pumps()
         {
         // Насос не работает.
         start_pump_working_time = 0;
+        return;
+        }
+
+    if ( auto min_flow = get_min_flow(); get_flow() < min_flow )
+        {
+        // Расход ниже минимального.
+        start_pump_working_time_flow = 0;
         return;
         }
 
@@ -1622,13 +1651,11 @@ float counter_iolink::get_value()
 //-----------------------------------------------------------------------------
 const char* counter_iolink::get_error_description()
     {    
-    switch ( get_error_id() )
+    switch ( auto error_id = get_error_id() )
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
-            return "IOL-устройство не подключено";
-
         case -static_cast<int>( io_device::IOLINKSTATE::DEVICEERROR ) :
-            return "ошибка IOL-устройства";
+            return iol_dev.get_error_description( error_id );
 
         default:
             return base_counter::get_error_description();
@@ -1704,18 +1731,6 @@ float temperature_e::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int temperature_e::get_state()
-    {
-    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
-
-    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); -1000 == v )
-        {
-        return -1;
-        }
-
-    return 1;
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
@@ -1748,52 +1763,55 @@ float temperature_e_analog::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int temperature_e_analog::get_state()
-    {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        return AI1::get_state();
-        }
-
-    if ( auto v = get_AI( C_AI_INDEX, 0, 0 ); v < 0 )
-        {
-        return -1;
-        }
-
-    return 1;
-    }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT)
+temperature_e_iolink::temperature_e_iolink( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
-    }
-//-----------------------------------------------------------------------------
-temperature_e_iolink::~temperature_e_iolink()
-    {
-    delete info;
-    info = nullptr;
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        start_param_idx, "P_ERR_T" );
     }
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par(P_ERR_T, start_param_idx);
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+            start_param_idx );
         }
     else
         {
-        auto data = (char*)get_AI_data(C_AI_INDEX);
-
-        int16_t tmp = data[1] + 256 * data[0];
-        memcpy(info, &tmp, 2);
-
-        return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 0.1f * info.v;
         }
+    }
+//-----------------------------------------------------------------------------
+int temperature_e_iolink::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX );
+        st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+void temperature_e_iolink::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
+    if ( !data ) return;
+
+    std::swap( data[ 0 ], data[ 1 ] );
+    memcpy( &info, data, 2 );
+    }
+//-----------------------------------------------------------------------------
+const char* temperature_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2636,12 +2654,25 @@ void level_s_iolink::evaluate_io()
 
     if ( !data ) return;
 
+    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
+        devstate != io_device::IOLINKSTATE::OK )
+        {
+        v = get_par( P_ERR, 0 );
+        current_state = -devstate;
+        time = get_millisec();
+
+        return;
+        }
+
+    int st = 0;
     switch ( n_article )
         {
         case ARTICLE::IFM_LMT100:   //IFM.LMT100
         case ARTICLE::IFM_LMT102:   //IFM.LMT102
         case ARTICLE::IFM_LMT104:   //IFM.LMT104
         case ARTICLE::IFM_LMT105:   //IFM.LMT105
+        case ARTICLE::IFM_LMT121:   //IFM.LMT121
+        case ARTICLE::IFM_LMT202:   //IFM.LMT202
             {
             LS_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
@@ -2664,10 +2695,29 @@ void level_s_iolink::evaluate_io()
             st = 0;
             break;
         }
+
+    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
     }
 
 void level_s_iolink::set_article( const char* new_article )
     {
+    direct_set_state( current_state );
+
     device::set_article( new_article );
 
     auto article = get_article();
@@ -2691,6 +2741,17 @@ void level_s_iolink::set_article( const char* new_article )
         n_article = ARTICLE::IFM_LMT105;
         return;
         }
+    if ( strcmp( article, "IFM.LMT121" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT121;
+        return;
+        }
+    if ( strcmp( article, "IFM.LMT202" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT202;
+        return;
+        }
+
     if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
         {
         n_article = ARTICLE::EH_FTL33;
@@ -2704,53 +2765,37 @@ void level_s_iolink::set_article( const char* new_article )
         }
     }
 
+#ifdef PTUSA_TEST
+level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
+    {
+    return n_article;
+    }
+#endif
+
 float level_s_iolink::get_value()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
-	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
-		{
-		return get_par( P_ERR, 0 );
-		}
-	else
-		{
-        return v;
-		}
+    return v;
     }
 
 int level_s_iolink::get_state()
-	{
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
-
-    if ( auto devstate = get_AI_IOLINK_state( C_AI_INDEX );
-        devstate != io_device::IOLINKSTATE::OK )
-		{
-		return get_sub_type() == device::LS_IOLINK_MAX ? 1 : 0;
-		}
-
-    if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
-        {
-        if ( current_state != st )
-            {
-            if ( get_delta_millisec( time ) > dt )
-                {
-                current_state = st;
-                time = get_millisec();
-                }
-            }
-        else
-            {
-            time = get_millisec();
-            }
-        }
-    else current_state = st;
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
     return current_state;
-	}
+    }
 
 bool level_s_iolink::is_active()
     {
-    return get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    return current_state;
+    }
+
+const char* level_s_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2880,6 +2925,7 @@ void level_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
     pressure_e_iolink::read_article( new_article, n_article, this );
+    alfa = pressure_e_iolink::get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
 void level_e_iolink::evaluate_io()
@@ -2888,15 +2934,20 @@ void level_e_iolink::evaluate_io()
 
     if ( !data ) return;
 
-    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st, alfa );
     }
-
+//-----------------------------------------------------------------------------
 void level_e_iolink::set_string_property(const char* field, const char* value)
     {
     if (strcmp(field, "PT") == 0)
         {
         PT_extra = PT(value);
         }
+    }
+//-----------------------------------------------------------------------------
+const char* level_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2928,7 +2979,8 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
 void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
-    read_article( new_article, n_article, this );
+    read_article( new_article, n_article, this );  
+    alfa = get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
@@ -2985,6 +3037,11 @@ void pressure_e_iolink::read_article( const char* article,
         n_article = ARTICLE::IFM_PM1715;
         return;
         }
+    if ( strcmp( article, "IFM.PM1717" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1717;
+        return;
+        }
 
     if ( strcmp( article, "FES.8001446" ) == 0 )
         {
@@ -2999,91 +3056,83 @@ void pressure_e_iolink::read_article( const char* article,
         }
     }
 //-----------------------------------------------------------------------------
+const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTICLE n_article )
+    {
+    static const std::unordered_map<ARTICLE, article_info> article_data = {
+        { ARTICLE::IFM_PM1708, { 0.00001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1706, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1707, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1709, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1717, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2715, { 0.001f, PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2797, { 0.001f, PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1704, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1705, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
+        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } }
+    };
+
+    auto it = article_data.find( n_article );
+    if ( it != article_data.end() )
+        {
+        return it->second;
+        }
+    
+    static const article_info default_info = { 1.0f, PT_DATA_TYPE };
+    return default_info;
+    }
+//-----------------------------------------------------------------------------
+float pressure_e_iolink::get_alfa( ARTICLE n_article )
+    {
+    return get_article_info( n_article ).scaling_factor;
+    }
+//-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
-    float& v, int& st )
+    float& v, int& st, float alfa )
     {
     if ( !data ) return;
 
-    switch ( n_article )
+    // Special handling for DEFAULT article
+    if ( n_article == ARTICLE::DEFAULT )
         {
-        case ARTICLE::IFM_PI2715:
-        case ARTICLE::IFM_PI2794:
-        case ARTICLE::IFM_PI2797:
-        case ARTICLE::FES_8001446:
-            {
-            PT_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = info.v;
-            st = 0;
-            }
-            break;
-
-        case ARTICLE::IFM_PM1704:
-        case ARTICLE::IFM_PM1705:
-        case ARTICLE::IFM_PM1706:
-        case ARTICLE::IFM_PM1707:
-        case ARTICLE::IFM_PM1708:
-        case ARTICLE::IFM_PM1709:
-        case ARTICLE::IFM_PM1715:
-            {
-            ex_PT_data info{};
-
-            std::swap( data[ 0 ], data[ 1 ] );
-            std::swap( data[ 2 ], data[ 3 ] );
-            std::copy( data, data + sizeof( info ), (char*)&info );
-
-            v = info.v;
-            st = info.status;
-            }
-            break;
-
-        case ARTICLE::DEFAULT:
-            v = 0;
-            st = 0;
-            break;
+        v = 0;
+        st = 0;
+        return;
         }
 
-    float alfa = 1;
-    switch ( n_article )
+    const auto& info = get_article_info( n_article );
+    
+    if ( info.processing_type == PT_DATA_TYPE )
         {
-        case ARTICLE::IFM_PM1708:       //  0.01, mbar
-            alfa = 0.00001f;
-            break;
-
-        case ARTICLE::IFM_PM1706:
-        case ARTICLE::IFM_PM1707:       //   0.1, mbar
-        case ARTICLE::IFM_PM1709:       //   0.1, mbar
-            alfa = 0.0001f;
-            break;
-
-        case ARTICLE::IFM_PI2715:       // 0.001, bar
-        case ARTICLE::IFM_PI2797:       //     1, mbar
-
-        case ARTICLE::IFM_PM1704:       // 0.001, bar
-        case ARTICLE::IFM_PM1705:       // 0.001, bar
-        case ARTICLE::IFM_PM1715:       // 0.001, bar
-            alfa = 0.001f;
-            break;
-
-        case ARTICLE::IFM_PI2794:       // 0.01, bar
-            alfa = 0.01f;
-            break;
-
-        case ARTICLE::FES_8001446:
-            alfa = 0.000610388818f;
-            break;
-
-        case ARTICLE::DEFAULT:
-            alfa = 1;
-            break;
+        PT_data pt_info{};
+        std::reverse_copy( data, data + sizeof( pt_info ), (char*)&pt_info );
+        v = pt_info.v;
+        st = 0;
         }
+    else // EX_PT_DATA_TYPE
+        {
+        ex_PT_data ex_info{};
+        auto data_ptr = ( (char*)&ex_info );
+        std::copy( data, data + sizeof( ex_info ), (char*)&ex_info );
+        std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
+        std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
+        v = ex_info.v;
+        st = ex_info.status;
+        }
+
     v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
-    evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    pressure_e_iolink::evaluate_io(
+        get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st, alfa );
+    }
+//-----------------------------------------------------------------------------
+const char* pressure_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
@@ -3472,6 +3521,11 @@ void concentration_e_iolink::evaluate_io()
             get_value(), get_temperature(), get_state());
     G_LOG->write_log(i_log::P_NOTICE);
 #endif
+    }
+//-----------------------------------------------------------------------------
+const char* concentration_e_iolink::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

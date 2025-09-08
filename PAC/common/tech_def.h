@@ -133,10 +133,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         /// @brief Инициализирует сохраняемые параметры значением 0.
         ///
         /// Данные нулевые значения сохраняются в энергонезависимой памяти.
-        int init_params();
+        virtual int init_params();
 
         /// @brief Инициализирует рабочие параметры значением 0.
-        int init_runtime_params();
+        virtual int init_runtime_params();
 
         /// @brief Выполнение команды.
         ///

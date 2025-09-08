@@ -21,6 +21,9 @@
 #include "s_types.h"
 
 #include <time.h>
+#ifdef PTUSA_TEST
+#include <string>
+#endif
 
 const long MSEC_IN_SEC = 1000;
 const int SEC_IN_MIN = 60;
@@ -65,8 +68,8 @@ struct stat_time
     u_long all_time;
     u_long cycles_cnt;
 
-    u_int  max_iteration_cycle_time;
-    u_int  min_iteration_cycle_time;
+    u_long  max_iteration_cycle_time;
+    u_long  min_iteration_cycle_time;
 
     int print_cycle_last_h;
 
@@ -87,4 +90,13 @@ struct stat_time
 	min_iteration_cycle_time = 10000;
 	}
     };
+
+#ifdef PTUSA_TEST
+tm get_time_next_hour();
+
+tm get_fixed_time();
+
+const std::string FIXED_TIME_STR = "2025-03-12 00.00.00";
+#endif
+
 #endif // DTIME_H

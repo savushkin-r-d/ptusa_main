@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.03.12.1)
+project(ptusa_main VERSION 2025.07.16.1)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -35,6 +35,10 @@ add_compile_definitions(TEST_SPEED MODBUS)
 
 if(MSVC)
     add_compile_options("/utf-8")
+
+    # Исключить конфликтующую библиотеку
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMTD")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:LIBCMTD")
 endif(MSVC)
 
 configure_file( version_info.in version_info.h @ONLY)
@@ -46,18 +50,19 @@ set(BUILD_SHARED_LIBS ON)
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src;${CMAKE_BINARY_DIR}/deps/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src;${CMAKE_BINARY_DIR}/deps/lua/lua)
 
 add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
+set(INSTALL_GTEST OFF)
 add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
 
-set(SUBHOOK_TESTS OFF)
 add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
 if(NOT MINGW)
+    set (BENCHMARK_ENABLE_TESTING OFF)
     add_subdirectory(deps/benchmark EXCLUDE_FROM_ALL)
 endif()
 
@@ -86,8 +91,8 @@ else()
 endif()
 
 file(GLOB test_src CONFIGURE_DEPENDS
-    	    test/*.cpp
-			test/device/*.cpp
+            test/*.cpp
+            test/device/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)
@@ -120,9 +125,9 @@ if(LINUX)
            PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
-    
+
     add_executable(main_perfomance_test ${common_src} ${linux_src}
-           test/perfomance/main_perfomance_test.cpp           
+           test/perfomance/main_perfomance_test.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
     set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -139,11 +144,13 @@ if(LINUX)
 
         file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
-		    ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/*.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
             ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
-        add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
+        add_library(PtusaPLCnextEngineer SHARED
+            ${common_src} ${linux_src} ${PLCnext_engineer_src}
+            PAC_control_projects/main_control_prg/main_cycle.cpp )
     endif()
 
 elseif(WIN32)
@@ -158,7 +165,7 @@ elseif(WIN32)
             PAC_control_projects/main_control_prg/version.rc)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
-           test/main_test.cpp           
+           test/main_test.cpp
            PAC_control_projects/main_control_prg/main_cycle.cpp
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
@@ -168,6 +175,7 @@ elseif(WIN32)
                test/perfomance/main_perfomance_test.cpp           
                PAC_control_projects/main_control_prg/version.rc)
     endif()
+
 
     set_target_properties (toluapp toluapp_lib liblua lua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -196,12 +204,12 @@ if(NOT MINGW)
 endif()
 
 if(ARP_DEVICE)
-	target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
-	target_compile_definitions(ptusa_main PUBLIC PAC_PC)
-	target_compile_definitions(libptusa_main PUBLIC PAC_PC)
-	target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)	
+    target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
+    target_compile_definitions(ptusa_main PUBLIC PAC_PC)
+    target_compile_definitions(libptusa_main PUBLIC PAC_PC)
+    target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)
 else()
-	add_compile_definitions(PAC_PC)
+    add_compile_definitions(PAC_PC)
 endif()
 
 if(ARP_DEVICE OR MINGW)
@@ -258,7 +266,7 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
-	    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
@@ -274,13 +282,13 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/toluapp/include>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua/lua>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib/zlib>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib/zlib>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/cxxopts/cxxopts/include>)
 
@@ -291,11 +299,11 @@ if(ARP_DEVICE)
 endif()
 
 set(TEST_INCLUDES
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googletest/googletest>
 
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googlemock/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
@@ -357,7 +365,7 @@ if(WIN32)
     if(NOT MINGW)
         target_link_libraries(main_perfomance_test wsock32 ws2_32)
     endif()
-    
+
 elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
 endif()
@@ -395,8 +403,8 @@ endif()
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 if (WIN32)
-	set_tests_properties( run_no_command_line_arguments 
-		PROPERTIES PASS_REGULAR_EXPRESSION 
+    set_tests_properties( run_no_command_line_arguments
+        PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
@@ -407,14 +415,14 @@ if (WIN32)
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
-	set_tests_properties( run_no_command_line_arguments 
-		PROPERTIES PASS_REGULAR_EXPRESSION 
+    set_tests_properties( run_no_command_line_arguments
+        PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
   -s, --script arg          The script file to execute \(default: main\.plua\)
@@ -425,9 +433,9 @@ else()
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 endif()
@@ -438,42 +446,43 @@ endif()
     "lua.exe")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
+    add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
+		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
+    set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
+        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
+
     add_test(T1-PLCnext-Demo lua
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
-                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
-
-
-	if(LINUX)
-	    add_test(T1-PLCnext-Demo_valgrind valgrind
-				--error-exitcode=1
-				--num-callers=100
-				--leak-check=full
-				--verbose
-				--track-origins=yes 				
-				--show-leak-kinds=all 
-				lua
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
-	endif()
+
+    if(LINUX)
+        add_test(T1-PLCnext-Demo_valgrind valgrind
+                --error-exitcode=1
+                --num-callers=100
+                --leak-check=full
+                --verbose
+                --track-origins=yes
+                --show-leak-kinds=all
+                lua
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
+                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
+                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
+                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+    endif()
 
 
-    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test 
-            --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json 
+    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test
+            --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
-	set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
+    set_property(TEST save-speed-benchmark PROPERTY RUN_SERIAL 1)
 endif()
 
 include(GoogleTest)
 gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
-
-#remove tests from add_subdirectory() added projects
-configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)

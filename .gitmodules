@@ -1,16 +1,3 @@
-[submodule "toluapp"]
-	path = deps/toluapp
-	url = https://github.com/savushkin-r-d/toluapp.git
-	branch = dev
-[submodule "lua"]
-	path = deps/lua
-	url = http://github.com/LuaDist/lua.git
-[submodule "zlib"]
-	path = deps/zlib
-	url = https://github.com/savushkin-r-d/zlib.git
-[submodule "subhook"]
-	path = deps/subhook
-	url = https://github.com/savushkin-r-d/subhook
 [submodule "googletest"]
 	path = deps/googletest
 	url = https://github.com/google/googletest
@@ -23,9 +10,21 @@
 [submodule "benchmark"]
 	path = deps/benchmark
 	url = https://github.com/google/benchmark.git
-[submodule "open62541/open62541"]
+[submodule "open62541"]
 	path = deps/open62541/open62541
 	url = https://github.com/open62541/open62541
-[submodule "cxxopts/cxxopts"]
+[submodule "cxxopts"]
 	path = deps/cxxopts/cxxopts
-	url = https://github.com/savushkin-r-d/cxxopts.git
+	url = https://github.com/jarro2783/cxxopts.git	
+[submodule "zlib"]
+	path = deps/zlib/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "subhook"]
+	path = deps/subhook/subhook
+	url = https://github.com/savushkin-r-d/subhook
+[submodule "lua"]
+	path = deps/lua/lua
+	url = http://github.com/LuaDist/lua.git
+[submodule "toluapp"]
+	path = deps/toluapp/toluapp
+	url = https://github.com/savushkin-r-d/toluapp.git

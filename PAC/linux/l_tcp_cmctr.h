@@ -56,13 +56,12 @@ class tcp_communicator_linux : public tcp_communicator
             int evaluate();
 
     private:
-            sockaddr_in ssin; 	        ///< Адрес клиента.
-            u_int       sin_len;    	///< Длина адреса.
-            int         master_socket;	///< Мастер-сокет для прослушивания.
+            sockaddr_in ssin;       ///< Адрес клиента.
+            u_int sin_len;    	    ///< Длина адреса.            
 
-            int modbus_socket;          ///< Модбас сокет.
-            int slave_socket; ///< Слейв-сокет, получаемый при подключении клиента.
-            int rc; ///< Код возврата select.
+            int modbus_socket = 0;  ///< Модбас сокет.
+            int slave_socket = 0;   ///< Слейв-сокет, получаемый при подключении клиента.
+            int rc = 0;             ///< Код возврата select.
 
             /// @brief Посылка ответных данных на сервер.
             ///
@@ -89,24 +88,6 @@ class tcp_communicator_linux : public tcp_communicator
             static int sendall (int sockfd, unsigned char *buf, int len,
                 int sec, int usec, const char* IP, const char* name,
                 stat_time *stat );
-
-            /// @brief Получение данных с таймаутом.
-            ///
-            /// @param s        - сокет.
-            /// @param buf      - буфер для записи полученных данных.
-            /// @param len      - количество считываемых байт.
-            /// @param timeout  - время ожидания, сек.
-            /// @param usec     - время ожидания, мк сек.
-            /// @param usec     - время ожидания, мк сек.
-            /// @param IP       - IP-адрес источника.
-            /// @param name     - имя источника.
-            ///
-            /// @return -1   - ошибка работы с сокетом.
-            /// @return -2   - ошибка таймаута.
-            /// @return >= 0 - размер реально считанных данных.
-            static int  recvtimeout( int s, u_char *buf, int len,
-                long int sec, long int usec, const char* IP, const char* name,
-                stat_time *stat, char first_connect = 0 );
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

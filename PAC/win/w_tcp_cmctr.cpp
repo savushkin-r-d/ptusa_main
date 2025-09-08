@@ -472,28 +472,6 @@ int tcp_communicator_win::evaluate()
     return 0;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_win::recvtimeout( u_int s, u_char *buf,
-                                      int len, int timeout, int usec )
-    {
-    // Настраиваем  file descriptor set.
-    fd_set fds;
-    FD_ZERO( &fds );
-    FD_SET( s, &fds );
-
-    // Настраиваем время на таймаут.
-    timeval rec_tv;
-    rec_tv.tv_sec = timeout;
-    rec_tv.tv_usec = usec;
-
-    // Ждем таймаута или полученных данных.
-    int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
-    if ( 0 == n ) return -2;  // timeout!
-    if ( -1 == n ) return -1; // error
-
-    // Данные должны быть здесь, поэтому делаем обычный recv().    
-    return recv( s, ( char* ) buf, len, 0 );
-    }
-//------------------------------------------------------------------------------
 int tcp_communicator_win::do_echo( int idx )
     {
     socket_state &sock_state = sst[ idx ];
@@ -547,7 +525,7 @@ int tcp_communicator_win::do_echo( int idx )
                 }
             }
 
-        shutdown( sock_state.socket, 0 );
+        shutdown( sock_state.socket, SD_BOTH );
         closesocket( sock_state.socket );
         sst.erase( sst.begin() + idx, sst.begin() + idx + 1 );
         return err;

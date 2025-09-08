@@ -14,7 +14,7 @@
 
 class PID;
 
-const size_t MAX_COPY_SIZE = 1000;
+const size_t MAX_COPY_SIZE = 2000;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
@@ -410,6 +410,7 @@ class device : public i_DO_AO_device, public par_device
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
+            DT_WATCHDOG, ///< Устройство проверки связи.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -608,6 +609,9 @@ class device : public i_DO_AO_device, public par_device
             //DT_G
             DST_G_IOL_4 = 1,    ///< 4 канала.
             DST_G_IOL_8,        ///< 8 каналов.
+
+            //DT_WATCHDOG
+            DST_WATCHDOG = 1,
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
@@ -631,7 +635,12 @@ class device : public i_DO_AO_device, public par_device
 
         virtual const char* get_error_description()
             {
-            return "обратная связь";
+            if ( auto err_id = get_error_id(); err_id < 0 )
+                {
+                return "обратная связь";
+                }
+
+            return "нет ошибок";
             }
 
         /// @brief Получение ошибки (активной или ранее возникшей).
@@ -644,7 +653,7 @@ class device : public i_DO_AO_device, public par_device
             return prev_error_state;
             }
 
-        void set_descr( const char* new_description );
+        virtual void set_descr( const char* new_description );
 
         virtual void set_article( const char* new_article );
 
@@ -937,6 +946,8 @@ class AI1 : public analog_io_device
 
         int get_state() override;
 
+        const char* get_error_description() override;
+
         virtual int get_params_count() const;
 
         float get_value() override;
@@ -1168,4 +1179,11 @@ class signal_column : public device, public io_device
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
         STEP siren_step = STEP::off;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с интерфейсом подключения IO-Link.
+class io_link_device
+    {        
+    public:
+        const char* get_error_description( int error_id ) const;
     };

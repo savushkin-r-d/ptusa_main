@@ -5,12 +5,13 @@
 
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
+#include "g_errors.h"
 
 std::vector<valve*> valve::to_switch_off;
 std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
-valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info{};
-valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
+alfalaval_iol_valve_out_data_swapped valve_iolink_mix_proof::stub_out_info{};
+alfalaval_iol_valve_out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -106,8 +107,7 @@ int valve::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 int valve::get_state()
     {
-    if ( G_PAC_INFO()->is_emulator() )
-        return digital_io_device::get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
     switch ( get_valve_state() )
         {
@@ -247,7 +247,6 @@ int valve::get_state()
 
         case V_STOP:
             return V_STOP;
-            break;
         }
 
     return VX_UNKNOWN;
@@ -1174,6 +1173,75 @@ int valve_bottom_mix_proof::get_on_fb_value()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+const char* io_link_valve::get_error_description( int err_id ) const
+    {
+    switch ( err_id )
+        {
+        case -116:
+            return "не обнаружен магнитный индикатор на штоке клапана (#16)";
+        case -117:
+            return "конфигурация не соответствует требованиям автоматической "
+                "настройки (#17)";
+        case -118:
+            return "ошибка в пневматических соединениях - проверьте подключение "
+                "трубок или соленоидов (#18)";
+        case -119:
+            return "нет сигнала от датчика верхнего седла (#19)";
+        case -120:
+            return "клапан не достиг заданного положения в установленное время "
+                "(#20)";
+        case -121:
+            return "обнаружен самопроизвольный ход штока (#21)";
+        case -122:
+            return "не подключен датчик верхнего седла (#22)";
+        case -123:
+            return "не обнаружен соленоидный клапан 1 (#23)";
+        case -124:
+            return "не обнаружен соленоидный клапан 2 (#24)";
+        case -125:
+            return "не обнаружен соленоидный клапан 3 (#25)";
+        case -126:
+            return "активировано несколько входных сигналов соленоидных клапанов "
+                "(#26)";
+        case -127:
+            return "обнаружено короткое замыкание на цифровых выходах (#27)";
+        case -128:
+            return "процесс настройки был прерван (#28)";
+        case -129:
+            return "постоянное срабатывание кнопки - проверьте кнопки или "
+                "замените плату управления (#29)";
+        case -130:
+            return "потеряна связь с системой управления (#30)";
+        case -131:
+            return "сработала аварийная остановка - превышен допустимый "
+                "ход штока (#31)";
+
+        default:
+            static thread_local std::string buf;
+            buf = fmt::format( "неизвестная ошибка (#{})", err_id );
+            return buf.c_str();
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+const char* alfalaval_iol_valve::get_error_description( int error_id ) const
+    {
+    if ( error_id == -io_device::IOLINKSTATE::NOTCONNECTED ||
+        error_id == -io_device::IOLINKSTATE::DEVICEERROR )
+        {
+        return iol_dev.get_error_description( error_id );
+        }
+
+    if ( error_id >= io_link_valve::ERROR_ID_LAST &&
+        error_id <= io_link_valve::ERROR_ID_FIRST )
+        {
+        return iol_valve.get_error_description( error_id );
+        }
+
+    return nullptr;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
@@ -1207,11 +1275,12 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::evaluate_io()
     {
-    out_info = (out_data_swapped*)get_AO_write_data(
+    out_info = (alfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        out_info = (alfalaval_iol_valve_out_data_swapped*)
+            ( (char*)out_info + extra_offset );
         }
 
     char* data = (char*)get_AI_data(
@@ -1301,6 +1370,18 @@ bool valve_iolink_mix_proof::get_fb_state()
 int valve_iolink_mix_proof::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
+
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    if ( in_info.err > 0 )
+        {
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
+        }
 
     switch ( get_valve_state() )
         {
@@ -1451,6 +1532,18 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
             direct_on();
             break;
         }
+    }
+//-----------------------------------------------------------------------------
+const char* valve_iolink_mix_proof::get_error_description()
+    {
+    auto error_id = get_error_id();
+
+    if ( auto res = alfalaval_iol_v.get_error_description( error_id ); res )
+        {
+        return res;
+        }
+
+    return valve::get_error_description();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1949,7 +2042,7 @@ void valve_iolink_gea_tvis_a15_ds::direct_set_state( int new_state )
 valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
-    in_info->err = 0;
+    in_info.err = 0;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
@@ -1959,24 +2052,25 @@ valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
         return valve::get_valve_state();
         }
 
-    if ( in_info->de_en ) return V_OFF;
-    if ( in_info->main ) return V_ON;
+    if ( in_info.de_en ) return V_OFF;
+    if ( in_info.main ) return V_ON;
 
     return V_OFF;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::evaluate_io()
     {
-    out_info = (out_data_swapped*)get_AO_write_data(
+    out_info = (alfalaval_iol_valve_out_data_swapped*)get_AO_write_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
     if ( extra_offset < 0 )
         {
-        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        out_info = (alfalaval_iol_valve_out_data_swapped*)
+            ( (char*)out_info + extra_offset );
         }
 
-    char* data = (char*)get_AI_data(
+    auto data = (char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    char* buff = (char*)in_info;
+    auto buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -1988,7 +2082,7 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
     std::swap( buff[ 2 ], buff[ 3 ] );
 
 #ifdef DEBUG_IOLINK_
-    char* tmp = (char*)in_info;
+    char* tmp = (char*)&in_info;
 
     sprintf( G_LOG->msg, "%x %x %x %x\n",
         tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
@@ -1996,8 +2090,8 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
 
     sprintf( G_LOG->msg,
         "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-        in_info->de_en, in_info->main, in_info->usl,
-        in_info->lsp, 0.1 * in_info->pos );
+        in_info.de_en, in_info.main, in_info.usl,
+        in_info.lsp, 0.1 * in_info.pos );
     G_LOG->write_log( i_log::P_NOTICE );
 #endif
     }
@@ -2019,17 +2113,11 @@ void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
 int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
-    int err = in_info->err;
+    int err = in_info.err;
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
         "BLINK={:d}, CS={:d}, ERR={}, V={:.1f}, ",
         blink, cs, err, get_value() ) ).size;
     return res;
-    }
-//-----------------------------------------------------------------------------
-valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
-    {
-    delete in_info;
-    in_info = nullptr;
     }
 //-----------------------------------------------------------------------------
 bool valve_iolink_shut_off_thinktop::get_fb_state()
@@ -2042,7 +2130,7 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
         return false;
         }
 
-    if ( in_info->err ) return false;
+    if ( in_info.err ) return false;
 
     if ( get_delta_millisec( start_switch_time ) <
         get_par( valve::P_ON_TIME, 0 ) )
@@ -2050,8 +2138,8 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
         return true;
         }
 
-    if ( !out_info->sv1 && in_info->de_en && in_info->st ) return true;
-    if ( out_info->sv1 && in_info->main && in_info->st ) return true;
+    if ( !out_info->sv1 && in_info.de_en && in_info.st ) return true;
+    if ( out_info->sv1 && in_info.main && in_info.st ) return true;
 
     return false;
     }
@@ -2060,28 +2148,28 @@ float valve_iolink_shut_off_thinktop::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_value();
 
-    return 0.1f * in_info->pos;
+    return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_off_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
-    return !out_info->sv1 && in_info->de_en && in_info->st;
+    return !out_info->sv1 && in_info.de_en && in_info.st;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::get_on_fb_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
-    return out_info->sv1 && in_info->main && in_info->st;
+    return out_info->sv1 && in_info.main && in_info.st;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_thinktop::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
-    if ( false == in_info->main )
+    if ( false == in_info.main )
         {
         start_switch_time = get_millisec();
         }
@@ -2145,6 +2233,37 @@ void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
             direct_on();
             break;
         }
+    }
+//-----------------------------------------------------------------------------
+const char* valve_iolink_shut_off_thinktop::get_error_description()
+    {
+    auto error_id = get_error_id();
+
+    if ( auto res = alfalaval_iol_v.get_error_description( error_id ); res )
+        {
+        return res;
+        }
+
+    return valve::get_error_description();
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
+
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    if ( in_info.err > 0 )
+        {
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
+        }
+
+    return valve::get_state();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2455,14 +2574,8 @@ void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
     {
-    in_info->closed = true;
-    in_info->opened = false;
-    }
-//-----------------------------------------------------------------------------
-analog_valve_iolink::~analog_valve_iolink()
-    {
-    delete in_info;
-    in_info = nullptr;
+    in_info.closed = true;
+    in_info.opened = false;
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()
@@ -2470,7 +2583,7 @@ void analog_valve_iolink::evaluate_io()
     out_info = (out_data*)get_AO_write_data( AO_INDEX );
 
     char* data = (char*)get_AI_data( AO_INDEX );
-    char* buff = (char*)in_info;
+    char* buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -2522,7 +2635,7 @@ int analog_valve_iolink::save_device_ex( char* buff )
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
         "NAMUR_ST={}, OPENED={:d}, CLOSED={:d}, BLINK={:d}, ",
-        +in_info->namur_state, +in_info->opened, +in_info->closed, blink ) ).size;
+        +in_info.namur_state, +in_info.opened, +in_info.closed, blink ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -2556,14 +2669,26 @@ float analog_valve_iolink::get_value()
     {
     if ( G_PAC_INFO()->is_emulator() ) return AO1::get_value();
 
-    return in_info->position;
+    return in_info.position;
     }
 //-----------------------------------------------------------------------------
 int analog_valve_iolink::get_state()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return AO1::get_state();
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    return in_info->status;
+    if ( auto error_id =
+        get_AI_IOLINK_state( static_cast<u_int>( AO1::AO_INDEX ) );
+        error_id != io_device::IOLINKSTATE::OK )
+        {
+        return -error_id;
+        }
+
+    return in_info.status;
+    }
+//-----------------------------------------------------------------------------
+const char* analog_valve_iolink::get_error_description()
+    {
+    return iol_device.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
 inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val )

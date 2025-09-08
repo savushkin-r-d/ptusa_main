@@ -1,13 +1,50 @@
 #include "PAC_info_tests.h"
 #include "bus_coupler_io.h"
+#include "OPCUAServer.h"
 
-using namespace ::testing;
+// Мок для G_OPCUA_SERVER
+class MockOPCUAServer : public OPCUA_server
+    {
+    public:
+        MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
+        MOCK_METHOD( void, shutdown, ( ), ( override ) );
+    };
+
+MockOPCUAServer mockServer;
+
+OPCUA_server& get_instance()
+    {
+    return mockServer;
+    }
+
+TEST( PAC_info, OPCUA_server_start_fail )
+    {
+    auto get_OPC_hook = subhook_new(
+        reinterpret_cast<void*>( &OPCUA_server::get_instance ),
+        reinterpret_cast<void*>( &get_instance ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_OPC_hook );
+
+    // Подготовка: сервер вернёт ошибку.
+    EXPECT_CALL( mockServer, init_all_and_start() )
+        .WillOnce( ::testing::Return( 0xBADF00D ) );
+    EXPECT_CALL( mockServer, shutdown() );
+
+    // Установим начальное значение параметра.
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+    // Активируем сервер (будет ошибка).
+    auto ret = G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );
+    EXPECT_EQ( ret, 1 );
+
+    subhook_remove( get_OPC_hook );
+    subhook_free( get_OPC_hook );
+    }
 
 TEST( PAC_info, set_cmd )
     {
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::RELOAD_RESTRICTIONS );
+
 #ifdef OPCUA
-    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );
     EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 0 );
