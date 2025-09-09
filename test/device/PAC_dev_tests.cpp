@@ -3032,6 +3032,38 @@ TEST( valve_iolink_mix_proof, get_state )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( valve_iolink_mix_proof, seat_switching_timing_bug )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+    
+    // Test that seat switching doesn't immediately cause VX_OFF_FB_ERR
+    // This was the original bug - immediate error without grace period
+    
+    // Test upper seat switching timing
+    V1.open_upper_seat();
+    auto state = V1.get_state();
+    
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching
+    // This validates that the timing grace period is working correctly
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) 
+        << "Upper seat should not return error immediately after switching due to timing grace period";
+    
+    // Test lower seat switching timing  
+    V1.open_lower_seat();
+    state = V1.get_state();
+    
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching
+    // This validates that the timing grace period is working correctly
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) 
+        << "Lower seat should not return error immediately after switching due to timing grace period";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
     {
     valve_iolink_mix_proof V1( "V1" );

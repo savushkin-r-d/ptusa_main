@@ -1516,6 +1516,7 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
             {
             direct_off();
 
+            start_switch_time = get_millisec();
             out_info->sv2 = true;
             break;
             }
@@ -1524,6 +1525,7 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
             {
             direct_off();
 
+            start_switch_time = get_millisec();
             out_info->sv3 = true;
             break;
             }
