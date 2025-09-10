@@ -365,7 +365,7 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
         auto [out, size] = fmt::format_to_n(
             this->name, device::CONSTANTS::C_MAX_NAME, "{}", dev_name );
         *out = '\0';
-        if ( size >= device::CONSTANTS::C_MAX_NAME )
+        if ( size > device::CONSTANTS::C_MAX_NAME )
             {
             G_LOG->critical( "Error create device '%s' - name truncated to `%s`!",
                 dev_name, this->name );
