@@ -1126,6 +1126,14 @@ TEST( device, device )
     EXPECT_STREQ( dev.get_name(), "?" );
     }
 
+TEST( device, device_too_long_name )
+    {
+    device dev( "VERY_VERY_LONG_DEVICE_NAME_MORE_THAN_30_SYMBOLS",
+        device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "VERY_VERY_LONG_DEVICE_NAME_MOR" );
+    }
+
 TEST( device, get_type_str )
     {
     device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
