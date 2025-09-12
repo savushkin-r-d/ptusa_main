@@ -787,14 +787,22 @@ TEST( cipline_tech_object, set_cmd )
 
     auto res = cip1.set_cmd( "CUR_REC", 0, "Test name" );
     EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "CUR_REC", 0, "" );
+    EXPECT_EQ( res, 0 );
     
     res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, "Test name" );
+    EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, "" );
     EXPECT_EQ( res, 0 );
 
     res = cip1.set_cmd( "ACID_PAR_NAME", 0, "Test name" );
     EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "ACID_PAR_NAME", 0, "" );
+    EXPECT_EQ( res, 0 );
 
     res = cip1.set_cmd( "NCAR", 1, "NN 2200" );
+    EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "NCAR", 1, "" );
     EXPECT_EQ( res, 0 );
 
 
