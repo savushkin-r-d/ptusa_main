@@ -656,10 +656,10 @@ TEST( cipline_tech_object, save_device )
     cip1.initline();
     InitStationParams();
 
-	// Сброс параметров рецепта к значениям по умолчанию.
-	cip1.lineRecipes->ResetRecipeToDefaults(0);
-	// Сброс рабочих параметров к значениям по умолчанию.
-	cip1.lua_init_runtime_params();
+    // Сброс параметров рецепта к значениям по умолчанию.
+    cip1.lineRecipes->ResetRecipeToDefaults(0);
+    // Сброс рабочих параметров к значениям по умолчанию.
+    cip1.lua_init_runtime_params();
     cip1.save_device( buff );
 
     std::string REF_STR0 = R"(t.CIP1 = t.CIP1 or {}
