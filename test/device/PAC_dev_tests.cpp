@@ -1126,6 +1126,14 @@ TEST( device, device )
     EXPECT_STREQ( dev.get_name(), "?" );
     }
 
+TEST( device, device_too_long_name )
+    {
+    device dev( "VERY_VERY_LONG_DEVICE_NAME_MORE_THAN_30_SYMBOLS",
+        device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "VERY_VERY_LONG_DEVICE_NAME_MOR" );
+    }
+
 TEST( device, get_type_str )
     {
     device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
@@ -3028,6 +3036,52 @@ TEST( valve_iolink_mix_proof, get_state )
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
 
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, seat_switching_timing )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+
+    // Test that seat switching doesn't immediately cause VX_OFF_FB_ERR.
+    // Test upper seat switching timing.
+    V1.open_upper_seat();
+    auto state = V1.get_state();
+
+    // Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Upper seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) << 
+        "Upper seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
+
+    // Test lower seat switching timing.  
+    V1.open_lower_seat();
+    state = V1.get_state();
+
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Lower seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) <<
+        "Lower seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
