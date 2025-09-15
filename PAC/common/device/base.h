@@ -374,7 +374,7 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_MAX_NAME = 20,
+            C_MAX_NAME = 30,
             C_MAX_DESCRIPTION = 100
             };
 
@@ -778,7 +778,7 @@ class device : public i_DO_AO_device, public par_device
 
         bool is_manual_mode = false; ///< Признак ручного режима.
 
-        char name[ C_MAX_NAME ];
+        char name[ C_MAX_NAME + 1 ];
         char* description;
 
         bool emulation = false;

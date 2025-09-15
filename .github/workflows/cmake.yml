@@ -123,6 +123,10 @@ jobs:
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
 
+    - name: Disable man-db cache (Linux only)
+      if: runner.os == 'Linux'
+      run: echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
+
     - name: Install yasm
       shell: cmake -P {0}
       run: |
