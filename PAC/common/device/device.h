@@ -241,10 +241,24 @@ class pressure_e_iolink : public analog_io_device
             FES_8001446,
             };
 
+        enum PROCESSING_TYPE
+            {
+            PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
+            EX_PT_DATA_TYPE     ///< Use ex_PT_data with manual byte swapping
+            };
+
+        struct article_info
+            {
+            float scaling_factor;
+            PROCESSING_TYPE processing_type;
+            };
+
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
-            int& st );
+            int& st, float alfa );
         static void read_article( const char* article, ARTICLE& n_article,
             const device* dev  );
+        static float get_alfa( ARTICLE n_article );
+        static const article_info& get_article_info( ARTICLE n_article );
 
         void evaluate_io() override;
 
@@ -386,10 +400,11 @@ class level_e_iolink : public level
 
         const char* get_error_description() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         pressure_e_iolink::ARTICLE n_article = pressure_e_iolink::ARTICLE::DEFAULT;
 
-    private:
         enum CONSTANTS
             {
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
@@ -403,6 +418,7 @@ class level_e_iolink : public level
 
         int st = 0;
         float v = .0f;
+        float alfa = 1.0f;
 
         i_AI_device* PT_extra = nullptr;
 

@@ -1,0 +1,174 @@
+---
+name: 📚 Documentation Issue / Проблема с документацией
+description: |
+  Report issues with documentation or suggest documentation improvements
+title: "[DOCS]: "
+labels: ["documentation"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Please describe the
+        documentation issue or improvement.
+
+        Спасибо за помощь в улучшении нашей документации! Пожалуйста, опишите
+        проблему с документацией или предложение по улучшению.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue Type / Тип проблемы
+      description: What type of documentation issue is this?
+      options:
+        - Missing Information / Отсутствующая информация
+        - Incorrect Information / Неверная информация
+        - Unclear Instructions / Неясные инструкции
+        - Outdated Content / Устаревший контент
+        - Translation Issue / Проблема с переводом
+        - Formatting Issue / Проблема с форматированием
+        - New Documentation Needed / Нужна новая документация
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Documentation Location / Расположение документации
+      description: Where is the documentation issue located?
+      placeholder: |
+        Please specify:
+        - File path (e.g., docs/README.md)
+        - Section name
+        - URL (if applicable)
+        - Line numbers (if applicable)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Content / Текущее содержание
+      description: |
+        What does the documentation currently say? (copy/paste if relevant)
+      placeholder: |
+        Copy the current text or describe what's currently documented
+    validations:
+      required: false
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: Issue Description / Описание проблемы
+      description: What is wrong or missing with the current documentation?
+      placeholder: |
+        Clearly describe:
+        - What is incorrect, unclear, or missing
+        - Why this causes confusion or problems
+        - What specific improvements are needed
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested Improvement / Предлагаемое улучшение
+      description: How should the documentation be improved?
+      placeholder: |
+        Provide:
+        - Suggested new text or corrections
+        - Better explanations or examples
+        - Additional sections that should be added
+        - Restructuring suggestions
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language / Язык
+      description: Which language version is affected?
+      options:
+        - English
+        - Russian / Русский
+        - Both / Оба
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience / Целевая аудитория
+      description: Who is the target audience for this documentation?
+      options:
+        - End Users / Конечные пользователи
+        - Developers / Разработчики
+        - System Integrators / Системные интеграторы
+        - PLCnext Users / Пользователи PLCnext
+        - Contributors / Участники
+        - All / Все
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples / Примеры
+      description: |
+        Provide examples, code snippets, or use cases that should be included
+      placeholder: |
+        ```lua
+        -- Example Lua code
+        ```
+
+        ```bash
+        # Example commands
+        ```
+
+        Or describe scenarios that need documentation
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related Files / Связанные файлы
+      description: |
+        Are there other documentation files that should be updated as part of
+        this change?
+      placeholder: |
+        List any related documentation files that might need updates:
+        - README.md
+        - docs/CONTRIBUTING.md
+        - User manual sections
+        - Code comments
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context / Дополнительный контекст
+      description: Any other context about the documentation issue
+      placeholder: |
+        - Screenshots of confusing sections
+        - Links to related discussions
+        - References to similar projects
+        - User feedback received
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / Контрольный список
+      description: Please confirm the following
+      options:
+        - label: I have searched for existing documentation issues
+          required: true
+        - label: I have reviewed the current documentation thoroughly
+          required: true
+        - label: I am willing to help review or test improved documentation
+          required: false

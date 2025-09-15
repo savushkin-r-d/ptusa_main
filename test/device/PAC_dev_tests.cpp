@@ -1126,6 +1126,14 @@ TEST( device, device )
     EXPECT_STREQ( dev.get_name(), "?" );
     }
 
+TEST( device, device_too_long_name )
+    {
+    device dev( "VERY_VERY_LONG_DEVICE_NAME_MORE_THAN_30_SYMBOLS",
+        device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "VERY_VERY_LONG_DEVICE_NAME_MOR" );
+    }
+
 TEST( device, get_type_str )
     {
     device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
@@ -1471,6 +1479,43 @@ TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
     test_dev_err( test_dev, test_dev, 0 );
     }
 
+TEST_F( iolink_dev_test, level_e_iolink_evaluate_io )
+    {
+    level_e_iolink test_dev( "L1" );
+
+    G_PAC_INFO()->emulation_off();
+    test_dev.init( 0, 0, 0, 1 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid.
+    set_iol_state_to_OK( test_dev );
+
+    *test_dev.AI_channels.int_read_values[ 0 ] = 10;
+    
+    // Set P_MAX_P parameter to 1.0 bar for level calculation.
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx, 1.0f );
+
+    // Test parameter setting worked.
+    EXPECT_EQ( test_dev.get_par( level_e_iolink::CONSTANTS::P_MAX_P,
+        test_dev.start_param_idx ), 1.0f );
+
+    // For now, just test that the level sensor doesn't crash and can be configured
+    // The data processing for IOLink appears to need proper byte-formatted data
+    // rather than simple integer values.
+    test_dev.set_article( "IFM.PM1706" );
+    
+    // Basic functionality test - device should not crash when evaluate_io is called.
+    test_dev.evaluate_io();
+    // Test calculated value.
+    EXPECT_NEAR( test_dev.get_value(), 25.6f, .1f );
+    test_dev.set_par( level_e_iolink::CONSTANTS::P_R,
+        test_dev.start_param_idx, 1.0f );
+    EXPECT_EQ( test_dev.get_volume(), 8200.0f );
+    
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST( pressure_e, pressure_e )
     {
@@ -1519,18 +1564,17 @@ TEST( pressure_e_iolink, read_article )
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
     }
 
-TEST( pressure_e_iolink, evaluate_io )
+TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     {
     pressure_e_iolink test_dev( "P1" );
 
     G_PAC_INFO()->emulation_off();
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     test_dev.init( 0, 0, 0, 1 );
-    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0 );
+    test_dev.init_channel( io_device::IO_channels::CT_AI, 0, 0, 0, 1, 1 );
+    
+    // Set IOLink state to OK - Bit 0: IOLink connected, Bit 8: IOLink data valid
+    set_iol_state_to_OK( test_dev );
+    
     test_dev.AI_channels.int_read_values[ 0 ][ 0 ] = 100;
 
     test_dev.evaluate_io();
@@ -1571,7 +1615,6 @@ TEST( pressure_e_iolink, evaluate_io )
     EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
     G_PAC_INFO()->emulation_on();
-    io_manager::replace_instance( prev_mngr );
     }
 
 TEST_F( iolink_dev_test, pressure_e_iolink_get_error_description )
@@ -2993,6 +3036,52 @@ TEST( valve_iolink_mix_proof, get_state )
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
 
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, seat_switching_timing )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+
+    // Test that seat switching doesn't immediately cause VX_OFF_FB_ERR.
+    // Test upper seat switching timing.
+    V1.open_upper_seat();
+    auto state = V1.get_state();
+
+    // Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Upper seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) << 
+        "Upper seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
+
+    // Test lower seat switching timing.  
+    V1.open_lower_seat();
+    state = V1.get_state();
+
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Lower seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) <<
+        "Lower seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }

@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fmt/core.h>
 #include <algorithm>
+#include <unordered_map>
 
 #include "device.h"
 #include "manager.h"
@@ -2927,6 +2928,7 @@ void level_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
     pressure_e_iolink::read_article( new_article, n_article, this );
+    alfa = pressure_e_iolink::get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
 void level_e_iolink::evaluate_io()
@@ -2935,9 +2937,9 @@ void level_e_iolink::evaluate_io()
 
     if ( !data ) return;
 
-    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st, alfa );
     }
-
+//-----------------------------------------------------------------------------
 void level_e_iolink::set_string_property(const char* field, const char* value)
     {
     if (strcmp(field, "PT") == 0)
@@ -2945,7 +2947,7 @@ void level_e_iolink::set_string_property(const char* field, const char* value)
         PT_extra = PT(value);
         }
     }
-
+//-----------------------------------------------------------------------------
 const char* level_e_iolink::get_error_description()
     {
     return iol_dev.get_error_description( get_error_id() );
@@ -2980,42 +2982,8 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
 void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
-    read_article( new_article, n_article, this );
-
-    switch ( n_article )
-        {
-        case ARTICLE::IFM_PM1708:   //  0.01, mbar
-            alfa = 0.00001f;
-            break;
-
-        case ARTICLE::IFM_PM1706:   //   0.1, mbar
-        case ARTICLE::IFM_PM1707:
-        case ARTICLE::IFM_PM1709:
-        case ARTICLE::IFM_PM1717:
-            alfa = 0.0001f;
-            break;
-
-        case ARTICLE::IFM_PI2715:   // 0.001, bar (1, mbar)
-        case ARTICLE::IFM_PI2797:
-
-        case ARTICLE::IFM_PM1704:
-        case ARTICLE::IFM_PM1705:
-        case ARTICLE::IFM_PM1715:
-            alfa = 0.001f;
-            break;
-
-        case ARTICLE::IFM_PI2794:   // 0.01, bar
-            alfa = 0.01f;
-            break;
-
-        case ARTICLE::FES_8001446:
-            alfa = 0.000610388818f;
-            break;
-
-        case ARTICLE::DEFAULT:
-            alfa = 1.0f;
-            break;
-        }
+    read_article( new_article, n_article, this );  
+    alfa = get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::read_article( const char* article,
@@ -3091,60 +3059,78 @@ void pressure_e_iolink::read_article( const char* article,
         }
     }
 //-----------------------------------------------------------------------------
+const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTICLE n_article )
+    {
+    static const std::unordered_map<ARTICLE, article_info> article_data = {
+        { ARTICLE::IFM_PM1708, { 0.00001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1706, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1707, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1709, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1717, { 0.0001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2715, { 0.001f, PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2797, { 0.001f, PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1704, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1705, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
+        { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
+        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } }
+    };
+
+    auto it = article_data.find( n_article );
+    if ( it != article_data.end() )
+        {
+        return it->second;
+        }
+    
+    static const article_info default_info = { 1.0f, PT_DATA_TYPE };
+    return default_info;
+    }
+//-----------------------------------------------------------------------------
+float pressure_e_iolink::get_alfa( ARTICLE n_article )
+    {
+    return get_article_info( n_article ).scaling_factor;
+    }
+//-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
-    float& v, int& st )
+    float& v, int& st, float alfa )
     {
     if ( !data ) return;
 
-    switch ( n_article )
+    // Special handling for DEFAULT article
+    if ( n_article == ARTICLE::DEFAULT )
         {
-        case ARTICLE::IFM_PI2715:
-        case ARTICLE::IFM_PI2794:
-        case ARTICLE::IFM_PI2797:
-        case ARTICLE::FES_8001446:
-            {
-            PT_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = info.v;
-            st = 0;
-            }
-            break;
-
-        case ARTICLE::IFM_PM1704:
-        case ARTICLE::IFM_PM1705:
-        case ARTICLE::IFM_PM1706:
-        case ARTICLE::IFM_PM1707:
-        case ARTICLE::IFM_PM1708:
-        case ARTICLE::IFM_PM1709:
-        case ARTICLE::IFM_PM1715:
-        case ARTICLE::IFM_PM1717:
-            {
-            ex_PT_data info{};
-
-            auto data_ptr = ( (char*)&info );
-            std::copy( data, data + sizeof( info ), (char*)&info );
-            std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
-            std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
-
-            v = info.v;
-            st = info.status;
-            }
-            break;
-
-        case ARTICLE::DEFAULT:
-            v = 0;
-            st = 0;
-            break;
+        v = 0;
+        st = 0;
+        return;
         }
+
+    const auto& info = get_article_info( n_article );
+    
+    if ( info.processing_type == PT_DATA_TYPE )
+        {
+        PT_data pt_info{};
+        std::reverse_copy( data, data + sizeof( pt_info ), (char*)&pt_info );
+        v = pt_info.v;
+        st = 0;
+        }
+    else // EX_PT_DATA_TYPE
+        {
+        ex_PT_data ex_info{};
+        auto data_ptr = ( (char*)&ex_info );
+        std::copy( data, data + sizeof( ex_info ), (char*)&ex_info );
+        std::swap( data_ptr[ 0 ], data_ptr[ 1 ] );
+        std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
+        v = ex_info.v;
+        st = ex_info.status;
+        }
+
+    v = alfa * v;
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
     pressure_e_iolink::evaluate_io(
-        get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
-
-    v = alfa * v;
+        get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st, alfa );
     }
 //-----------------------------------------------------------------------------
 const char* pressure_e_iolink::get_error_description()
