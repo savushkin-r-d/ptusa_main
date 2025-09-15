@@ -32,6 +32,7 @@ execute_process(
 string(TIMESTAMP t1 "%s")
 math(EXPR elapsed "${t1} - ${t0}")
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Configure time ${elapsed} s.")
 
 
@@ -39,6 +40,7 @@ execute_process(COMMAND
 string(TIMESTAMP t0 "%s")
 message( "") # Just new line.
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Start build...")
 
 # BUild target PtusaPLCnextEngineer only for PLCnext.
@@ -59,6 +61,7 @@ execute_process(
 string(TIMESTAMP t1 "%s")
 math(EXPR elapsed "${t1} - ${t0}")
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Build time ${elapsed} s.")
 
 
@@ -66,6 +69,7 @@ execute_process(COMMAND
 string(TIMESTAMP t0 "%s")
 message("") # Just new line.
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Start install...")
 
 execute_process(
@@ -79,7 +83,10 @@ execute_process(
 string(TIMESTAMP t1 "%s")
 math(EXPR elapsed "${t1} - ${t0}")
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Install time ${elapsed} s.")
+
 math(EXPR elapsed_total "${t1} - ${t}")
 execute_process(COMMAND
+    ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan --bold "Total time ${elapsed_total} s.")
