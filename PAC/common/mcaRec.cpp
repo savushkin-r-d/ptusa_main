@@ -277,6 +277,7 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_N_UPR, 0);
         setRecipeValue(recipeNo, RV_OS, 0);
         setRecipeValue(recipeNo, RV_OBJ_EMPTY, 0);
+        // 5113 because it's mask all modes cip without cold disinfection
         setRecipeValue(recipeNo, RV_PROGRAM_MASK, 5113);
         setRecipeValue(recipeNo, RV_T_RINSING_CLEAN, 5);
         setRecipeValue(recipeNo, RV_V_RINSING_CLEAN, 600);
