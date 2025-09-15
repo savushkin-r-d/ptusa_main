@@ -18,7 +18,7 @@ for i in "${!configs[@]}"; do
             echo "Начало сборки: $CFG_NAME"
             ${PREFIX:+$PREFIX } cmake -D CFG_NAME:string="$CFG_NAME" -D BUILD_NAME:string="$BUILD_NAME" -P ./misc/bi.cmake
             echo "Завершение сборки: $CFG_NAME"
-        } | while IFS= read -r line; do echo -e "$((i+1))> [$SHORT_NAME]  $line"; done
+        } | while IFS= read -r line; do echo "$((i+1))> [$SHORT_NAME]  $line"; done
     ) 2>&1 | ./misc/colorize.sh &
     pids+=($!)
 done
