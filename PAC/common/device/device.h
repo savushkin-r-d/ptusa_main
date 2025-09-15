@@ -1074,6 +1074,79 @@ class level_s_iolink : public analog_io_device
         io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора давления.
+class pressure_s : public DI1
+    {
+    public:
+        pressure_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
+
+        bool is_active() override;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора давления IO-Link.
+class pressure_s_iolink : public analog_io_device
+    {
+    public:
+        pressure_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
+
+        float get_value() override;
+
+        int get_state() override;
+
+        bool is_active() override;
+
+        void evaluate_io() override;
+
+        void set_article( const char* new_article ) override;
+
+        const char* get_error_description() override;
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+
+        int current_state;
+        u_int_4 time = get_millisec();
+
+        enum class ARTICLE
+            {
+            DEFAULT,
+            IFM_PV7004,
+            };
+        ARTICLE n_article = ARTICLE::DEFAULT;
+
+#ifdef PTUSA_TEST
+        ARTICLE get_article_n() const;
+#endif
+
+        struct PS_data
+            {
+            uint16_t st1 :1;
+            uint16_t st2 :1;
+            int16_t  v   :14;
+            };
+        struct rev_PS_data
+            {
+            int16_t  v   : 14;
+            uint16_t st1 : 1;
+            uint16_t st2 : 1;
+            };
+
+        float v = .0f;
+
+        enum CONSTANTS
+            {
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
+
+            P_DT,
+            P_ERR,              ///< Аварийное значение давления.
+
+            LAST_PARAM_IDX,
+            };
+
+        io_link_device iol_dev;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
 class flow_s : public DI1
     {

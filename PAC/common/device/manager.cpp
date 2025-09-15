@@ -54,6 +54,19 @@ i_DI_device* LS( const char* dev_name )
     return G_DEVICE_MANAGER()->get_LS( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* PS( u_int dev_n )
+    {
+    static char name[ device::C_MAX_NAME ] = "";
+    snprintf( name, device::C_MAX_NAME, "PS%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_PS( name );
+    }
+
+i_DI_device* PS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_PS( dev_name );
+    }
+//-----------------------------------------------------------------------------
 i_DI_device* FS( u_int dev_n )
     {
     static char name[ device::C_MAX_NAME ] = "";
@@ -413,6 +426,11 @@ i_motor* device_manager::get_M( const char* dev_name )
 i_DI_device* device_manager::get_LS( const char* dev_name )
     {
     return get_device( device::DT_LS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_PS( const char* dev_name )
+    {
+    return get_device( device::DT_PS, dev_name );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FS( const char* dev_name )
@@ -817,6 +835,36 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     if ( G_DEBUG )
                         {
                         printf( "Unknown LS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_PS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_PS_MIN:
+                case device::DST_PS_MAX:
+                    new_device = new pressure_s( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
+                    new_io_device = (pressure_s*)new_device;
+                    break;
+
+                case device::PS_IOLINK_MAX:
+                case device::PS_IOLINK_MIN:
+                    new_device = new pressure_s_iolink( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
+                    new_io_device = (pressure_s_iolink*)new_device;
+                    break;
+
+                case device::DST_PS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_PS, device::DST_PS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown PS device subtype %d!\n", dev_sub_type );
                         }
                     break;
                 }
