@@ -26,8 +26,6 @@ power_unit::process_data_out power_unit::stub_p_data_out{};
 unsigned int power_unit::WAIT_DATA_TIME = 300;
 unsigned int power_unit::WAIT_CMD_TIME = 1000;
 
-converter_iolink_ao::process_data_out converter_iolink_ao::stub_p_data_out{};
-
 analog_valve_iolink::out_data analog_valve_iolink::stub_out_info{};
 signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
@@ -4058,23 +4056,30 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     {
     memset( &p_data_in, 0, sizeof( p_data_in ) );
     
-    static_assert( sizeof( process_data_in ) == 1,
+    static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
         "Struct `process_data_in` must be the 1 byte size." );
-    static_assert( sizeof( process_data_out ) == 4,
+    static_assert( sizeof( process_data_out ) == PROCESS_DATA_OUT_SIZE,
         "Struct `process_data_out` must be the 4 bytes size." );
     }
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем канал 1 в максимальное значение (20'000)
-    p_data_out->setpoint_ch1 = 20000;
-    st = 1;
+    // Устанавливаем канал 1 в максимальное значение.
+    p_data_out->setpoint_ch1 = C_MAX_VALUE;
+	p_data_out->setpoint_ch2 = C_MAX_VALUE;
+    
+	v = 100.0f;
+	v2 = 100.0f;
+	st = 1;
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->setpoint_ch1 = 0;
-    p_data_out->setpoint_ch2 = 0;
+    p_data_out->setpoint_ch1 = C_MIN_VALUE;
+    p_data_out->setpoint_ch2 = C_MIN_VALUE;
+
+	v = 0.0f;
+	v2 = 0.0f;
     st = 0;
     }
 
@@ -4083,11 +4088,16 @@ float converter_iolink_ao::get_value()
     return v;
     }
 
+float converter_iolink_ao::get_value2() const
+	{
+	return v2;
+	}
+
 int converter_iolink_ao::get_state()
     {
     if ( err )
         {
-        return -1;
+        return -err;
         }
     
     return st;
@@ -4095,22 +4105,28 @@ int converter_iolink_ao::get_state()
 
 void converter_iolink_ao::direct_set_value( float val )
     {
-    // Конвертируем канал 1: диапазон 0% - 4'000, 100% - 20'000
+    // Конвертируем канал 1: диапазон 0% - 4'000, 100% - 20'000.
     uint16_t setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
     
-    p_data_out->setpoint_ch1 = setpoint;
-    
+    p_data_out->setpoint_ch1 = setpoint;    
     v = val;
+    calculate_state();
     }
 
 void converter_iolink_ao::set_value2( float val )
     {
-    // Конвертируем канал 2: диапазон 0% - 0, 100% - 22'000
+    // Конвертируем канал 2: диапазон 0% - 0, 100% - 22'000.
     uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
     
-    p_data_out->setpoint_ch2 = setpoint;
-    
-    v2 = val;
+    p_data_out->setpoint_ch2 = setpoint;    
+	v2 = val;
+    calculate_state();
+	}
+
+void converter_iolink_ao::calculate_state()
+    {
+    if ( v > 0.0f || v2 > 0.0f ) st = 1;
+    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
     }
 
 void converter_iolink_ao::evaluate_io()
@@ -4119,68 +4135,47 @@ void converter_iolink_ao::evaluate_io()
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
-    std::copy( data, data + sizeof( p_data_in ),
+    std::copy( data, data + PROCESS_DATA_IN_SIZE,
         reinterpret_cast<std::byte*>( &p_data_in ) );
 
     p_data_out = reinterpret_cast<process_data_out*>(
         get_AO_write_data( C_AIAO_INDEX ) );
 
-    if ( get_AI_IOLINK_state( C_AIAO_INDEX ) == io_device::IOLINKSTATE::OK )
-        {
-        // Проверка статуса устройства (0 = OK согласно IODD)
-        if ( p_data_in.device_status == 0 )
-            {
-            st = 1; // OK
-            err = 0;
-            }
-        else
-            {
-            st = 0; // Ошибка
-            err = 1;
-            }
-        }
-    else
-        {
-        st = 0;
-        err = 1;
-        }
-    }
+	if ( auto st = get_AI_IOLINK_state( C_AIAO_INDEX ); st == io_device::IOLINKSTATE::OK )
+		{
+		// Проверка статуса устройства (0 = OK согласно IODD).
+		if ( p_data_in.device_status == 0 )
+			{
+			err = 0;
+			}
+		else
+			{
+			err = p_data_in.device_status;
+			}
+		}
+	else
+		{
+		err = -st;
+		}
+	}
 
 int converter_iolink_ao::save_device_ex( char* buff )
-    {
-    auto res = fmt::format_to_n( buff, MAX_COPY_SIZE, "ST={},V={:.1f},V2={:.1f},", 
-        get_state(), get_value(), v2 );
-    return res.size;
-    }
+	{
+    auto l = analog_io_device::save_device_ex( buff );
+	auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE, "V2={:.1f}, ",
+		get_value2() );
+	return res.size + l;
+	}
 
 int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( strcmp( prop, "ST" ) == 0 )
-        {
-        if ( val )
-            {
-            on();
-            }
-        else
-            {
-            off();
-            }
-        return 0;
-        }
-    
-    if ( strcmp( prop, "V" ) == 0 )
-        {
-        set_value( static_cast<float>( val ) );
-        return 0;
-        }
-    
     if ( strcmp( prop, "V2" ) == 0 )
         {
         set_value2( static_cast<float>( val ) );
         return 0;
         }
-    
-    return 1;
+
+	return analog_io_device::set_cmd( prop, idx, val );
     }
 
 #ifdef WIN_OS
