@@ -5345,6 +5345,22 @@ TEST( power_unit, set_cmd )
     }
 
 
+TEST( analog_valve_ey, analog_valve_ey )
+    {
+    analog_valve_ey VC1( "VC1" );
+    EXPECT_STREQ( VC1.get_name(), "VC1" );
+    EXPECT_EQ( VC1.get_type(), device::DT_VC );
+    EXPECT_EQ( VC1.get_sub_type(), device::DST_VC_EY );
+    }
+
+TEST( analog_valve_ey, set_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_property( "UNKNOWN", nullptr );
+    }
+
+
 TEST( converter_iolink_ao, constructor )
     {
     converter_iolink_ao Y1( "Y1" );

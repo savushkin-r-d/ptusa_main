@@ -6,6 +6,7 @@
 
 //-----------------------------------------------------------------------------
 class valve_DO2_DI2_bistable;
+class converter_iolink_ao;
 
 /// @brief Устройство с обратными связями.
 ///
@@ -1130,6 +1131,33 @@ class analog_valve : public AO1
             C_MIN = 0,   ///< Минимальное значение.
             C_MAX = 100, ///< Максимальное значение.
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Управляемый клапан, подключаемый к конвертеру.
+class analog_valve_ey : public device
+    {
+    public:
+        explicit analog_valve_ey( const char* dev_name );
+
+        void set_property( const char* field, device* dev ) override;
+
+        void direct_on() override;
+        void direct_off() override;
+
+        void direct_set_value( float new_value ) override;
+
+        float get_value() override;
+        int get_state() override;
+
+    private:
+        enum CONSTANTS
+            {
+            FULL_CLOSED = 0,
+            FULL_OPENED = 100,
+            };
+
+        converter_iolink_ao* conv{ nullptr };
+        int ey_number{ -1 };
     };
 //-----------------------------------------------------------------------------
 /// @brief Управляемый клапан IO-Link.

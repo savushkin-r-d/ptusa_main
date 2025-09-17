@@ -753,6 +753,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VC_VIRT );
                     break;
 
+                case device::DST_VC_EY:
+                    new_device = new analog_valve_ey( dev_name );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {

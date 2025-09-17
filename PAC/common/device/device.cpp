@@ -4150,7 +4150,7 @@ void converter_iolink_ao::evaluate_io()
 			}
 		else
 			{
-			err = p_data_in.device_status;
+			err = -p_data_in.device_status;
 			}
 		}
 	else

@@ -464,6 +464,7 @@ class device : public i_DO_AO_device, public par_device
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
             DST_VC_VIRT,        ///< Виртуальный клапан.
+            DST_VC_EY,          ///< Клапан с аналоговым управлением, подключаемый к конвертеру.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.

@@ -2577,6 +2577,66 @@ void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+analog_valve_ey::analog_valve_ey( const char* dev_name ) :device( dev_name,
+    device::DEVICE_TYPE::DT_VC,
+    device::DEVICE_SUB_TYPE::DST_VC_EY, 0 )
+    {};
+//-----------------------------------------------------------------------------
+void analog_valve_ey::set_property( const char* field, device* dev )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t analog_valve_ey::set_property() - "
+            "field = \"%s\", val = \"%s\"",
+            get_name(), field, dev ? dev->get_name() : "nullptr" );
+        }
+
+    if ( strcmp( field, "converter" ) == 0 )
+        {
+        conv = reinterpret_cast<converter_iolink_ao*>( dev );
+        }
+    else
+        {
+        G_LOG->alert( "%s\t analog_valve_ey::set_property() - "
+            "Unknown field \"%s\"", get_name(), field );
+        }
+    };
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_on()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_OPENED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_off()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_CLOSED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_set_value( float new_value )
+    {
+    if ( !conv ) return;
+
+    if ( ey_number == 1 ) conv->set_value( new_value );
+    else if ( ey_number == 2 ) conv->set_value2( new_value );
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_ey::get_value()
+    {
+    if ( !conv ) return 0.0f;
+
+    if ( ey_number == 1 ) return conv->get_value();
+    else if ( ey_number == 2 ) return conv->get_value2();
+
+    return 0.0f;
+    }
+//-----------------------------------------------------------------------------
+int analog_valve_ey::get_state()
+    {
+    if ( !conv ) return -200;
+    else return conv->get_state();    
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
     {
