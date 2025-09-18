@@ -2591,7 +2591,7 @@ void analog_valve_ey::set_property( const char* field, device* dev )
             get_name(), field, dev ? dev->get_name() : "nullptr" );
         }
 
-    if ( strcmp( field, "converter" ) == 0 )
+    if ( strcmp( field, "TERMINAL" ) == 0 )
         {
         conv = reinterpret_cast<converter_iolink_ao*>( dev );
         }
