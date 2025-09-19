@@ -5539,6 +5539,24 @@ TEST( converter_iolink_ao, save_device_ex )
         "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=21.5},\n" );
     }
 
+TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_EQ( Y1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( Y1 );
+    set_iol_state_to_OK( Y1 );
+
+    const u_int_2 VALUE = 1;
+    *Y1.AI_channels.int_read_values[ 0 ] = VALUE;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( device_manager, get_EY )
     {
     // Cleanup before test
