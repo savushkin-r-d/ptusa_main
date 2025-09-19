@@ -411,6 +411,7 @@ class device : public i_DO_AO_device, public par_device
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
             DT_WATCHDOG, ///< Устройство проверки связи.
+            DT_EY,       ///< Конвертер IO-Link.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -463,6 +464,7 @@ class device : public i_DO_AO_device, public par_device
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
             DST_VC_VIRT,        ///< Виртуальный клапан.
+            DST_VC_EY,          ///< Клапан с аналоговым управлением, подключаемый к конвертеру.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -612,6 +614,9 @@ class device : public i_DO_AO_device, public par_device
 
             //DT_WATCHDOG
             DST_WATCHDOG = 1,
+
+            //DT_EY
+            DST_CONV_AO2 = 1,    ///< Конвертер IO-Link -> AO (2 канала).
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
