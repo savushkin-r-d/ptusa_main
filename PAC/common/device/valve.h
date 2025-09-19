@@ -1149,6 +1149,8 @@ class analog_valve_ey : public device
         float get_value() override;
         int get_state() override;
 
+        void set_rt_par( u_int idx, float value ) override;
+
     private:
         enum CONSTANTS
             {

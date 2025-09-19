@@ -5360,6 +5360,101 @@ TEST( analog_valve_ey, set_property )
     VC1.set_property( "UNKNOWN", nullptr );
     }
 
+TEST( analog_valve_ey, get_state_without_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    // No converter bound -> special error code.
+    EXPECT_EQ( VC1.get_state(), -200 );
+
+    // Should be no crash and no change in value.
+    VC1.direct_on();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    VC1.direct_off();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+
+    // Bind converter.
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Select channel 1 and check routing to converter value 1.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 55.5f );
+    EXPECT_FLOAT_EQ( 55.5f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 55.5f, VC1.get_value() );
+
+    // direct_on/off should route to channel 1
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+
+    // Switch to channel 2 and verify independent value path.
+    VC1.set_rt_par( 1, 2 );
+    VC1.direct_set_value( 33.3f );
+    // Channel 1 remains unchanged at last set (0.0), channel 2 reflects new value.
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 33.3f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
+
+    // direct_on/off should route to channel 2 now.
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, set_rt_par_validation )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Set valid channel first.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 12.5f );
+    EXPECT_FLOAT_EQ( 12.5f, Y1.get_value() );
+
+    // Try to set invalid channel, ey_number must remain unchanged (still 1).
+    VC1.set_rt_par( 1, 3 );
+    VC1.direct_set_value( 66.6f );
+    EXPECT_FLOAT_EQ( 66.6f, Y1.get_value() );   // Affects channel 1
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );   // Channel 2 untouched
+
+    // Another invalid channel value below range.
+    VC1.set_rt_par( 1, 0 );
+    VC1.direct_set_value( 77.7f );
+    EXPECT_FLOAT_EQ( 77.7f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    }
+
+TEST( analog_valve_ey, get_state_with_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Default state from converter.
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    // Change converter state via its API and compare.
+    Y1.direct_on();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    Y1.direct_off();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+    }
+
 
 TEST( converter_iolink_ao, constructor )
     {

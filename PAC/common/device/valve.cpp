@@ -2636,6 +2636,26 @@ int analog_valve_ey::get_state()
     else return conv->get_state();    
     }
 //-----------------------------------------------------------------------------
+void analog_valve_ey::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            if ( value < 1.0f || value > 2.0f )
+                {
+                G_LOG->error( "%s\t analog_valve_ey::set_rt_par() - "
+                    "ey_number = %f", get_name(), value );
+                }
+            else
+            ey_number = static_cast<int>( value );
+            break;
+
+        default:
+            device::set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
