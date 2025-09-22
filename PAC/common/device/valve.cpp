@@ -2647,7 +2647,9 @@ void analog_valve_ey::set_rt_par( u_int idx, float value )
                     "ey_number = %f", get_name(), value );
                 }
             else
-            ey_number = static_cast<int>( value );
+                {
+                ey_number = static_cast<int>( value );
+                }
             break;
 
         default:

@@ -1777,7 +1777,7 @@ class converter_iolink_ao : public analog_io_device
         void direct_off() override;
 
         float get_value() override;
-		float get_value2() const;
+        float get_value2() const;
         int get_state() override;
 
         void direct_set_value( float val ) override;
@@ -1792,39 +1792,39 @@ class converter_iolink_ao : public analog_io_device
     private:
         void calculate_state();
 
-		float v{};  // Выходное значение канала 1.
-		float v2{}; // Выходное значение канала 2.
-		int st{};   // Состояние устройства.
-		int err{};  // Ошибка.
+        float v{};  // Выходное значение канала 1.
+        float v2{}; // Выходное значение канала 2.
+        int st{};   // Состояние устройства.
+        int err{};  // Ошибка.
 
         enum CONSTANTS
             {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
 
-			C_MIN_VALUE = 4'000,
-			C_MAX_VALUE = 20'000
+            C_MIN_VALUE = 4'000,
+            C_MAX_VALUE = 20'000
             };
 
-		static constexpr int PROCESS_DATA_IN_SIZE{ 1 };
-		static constexpr int PROCESS_DATA_OUT_SIZE{ 4 };
+        static constexpr int PROCESS_DATA_IN_SIZE{ 1 };
+        static constexpr int PROCESS_DATA_OUT_SIZE{ 4 };
 
 #pragma pack(push, 1)
         struct process_data_in
             {
             uint8_t device_status : 4;	// Статус устройства (биты 4-7).
-			uint8_t reserved : 4;	    // Зарезервированные биты (0-3).
+            uint8_t reserved : 4;	    // Зарезервированные биты (0-3).
             };
 
         struct process_data_out
             {
-			uint16_t setpoint_ch2;	    // Уставка канала 2 (биты 0-15, диапазон 0-22000).
-			uint16_t setpoint_ch1;	    // Уставка канала 1 (биты 16-31, диапазон 0-22000).
+            uint16_t setpoint_ch2;	    // Уставка канала 2 (биты 0-15, диапазон 0-22000).
+            uint16_t setpoint_ch1;	    // Уставка канала 1 (биты 16-31, диапазон 0-22000).
             };
 #pragma pack(pop)
 
-		process_data_in p_data_in{0};
-         
-		inline static process_data_out stub_p_data_out{};
+        process_data_in p_data_in{ 0 };
+
+        inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
     };
 ///-----------------------------------------------------------------------------

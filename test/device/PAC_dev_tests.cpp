@@ -5467,33 +5467,33 @@ TEST( converter_iolink_ao, constructor )
 TEST( converter_iolink_ao, direct_on_off )
     {
     converter_iolink_ao Y1( "Y1" );
-    
+
     // Test initial state
     EXPECT_EQ( Y1.get_state(), 0 );
     EXPECT_EQ( Y1.get_value(), 0.0f );
-    
+
     // Test turning on
     Y1.direct_on();
     EXPECT_EQ( Y1.get_state(), 1 );
-	EXPECT_EQ( Y1.get_value(), 100.f );
-    
+    EXPECT_EQ( Y1.get_value(), 100.f );
+
     // Test turning off
     Y1.direct_off();
     EXPECT_EQ( Y1.get_state(), 0 );
-	EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
     }
 
 TEST( converter_iolink_ao, set_value )
     {
     converter_iolink_ao Y1( "Y1" );
-    
+
     // Test setting different values
     Y1.direct_set_value( 50.0f );
     EXPECT_EQ( Y1.get_value(), 50.0f );
-    
+
     Y1.direct_set_value( 100.0f );
     EXPECT_EQ( Y1.get_value(), 100.0f );
-    
+
     Y1.direct_set_value( 0.0f );
     EXPECT_EQ( Y1.get_value(), 0.0f );
     }
@@ -5501,17 +5501,17 @@ TEST( converter_iolink_ao, set_value )
 TEST( converter_iolink_ao, set_cmd )
     {
     converter_iolink_ao Y1( "Y1" );
-    
+
     // Test state command
     EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
-    
+
     // Test value command
     EXPECT_EQ( Y1.set_cmd( "V", 0, 75.5 ), 0 );
     EXPECT_EQ( Y1.get_value(), 75.5f );
-	EXPECT_EQ( Y1.set_cmd( "V2", 0, 75.5 ), 0 );
-	EXPECT_EQ( Y1.get_value2(), 75.5f );
-    
-    
+    EXPECT_EQ( Y1.set_cmd( "V2", 0, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_value2(), 75.5f );
+
+
     // Test unknown command
     EXPECT_EQ( Y1.set_cmd( "UNKNOWN", 0, 1 ), 1 );
     }
@@ -5519,8 +5519,8 @@ TEST( converter_iolink_ao, set_cmd )
 TEST( converter_iolink_ao, save_device_ex )
     {
     converter_iolink_ao Y1( "Y1" );
-	char buff[ 1000 ]{};
-    
+    char buff[ 1000 ]{};
+
     auto len = Y1.save_device( buff, "" );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
@@ -5529,12 +5529,12 @@ TEST( converter_iolink_ao, save_device_ex )
     Y1.set_value( 42.5f );
     len = Y1.save_device( buff, "" );
     EXPECT_GT( len, 0 );
-	EXPECT_STRCASEEQ( buff,
+    EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=0.0},\n" );
 
-	Y1.set_value2( 21.5f );
-	len = Y1.save_device( buff, "" );
-	EXPECT_GT( len, 0 );
+    Y1.set_value2( 21.5f );
+    len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=21.5},\n" );
     }
