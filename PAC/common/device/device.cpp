@@ -4106,7 +4106,7 @@ int converter_iolink_ao::get_state()
 void converter_iolink_ao::direct_set_value( float val )
     {
     // Конвертируем канал 1: диапазон 0% - 4'000, 100% - 20'000.
-    uint16_t setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
+    auto setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
 
     p_data_out->setpoint_ch1 = setpoint;
     v = val;
@@ -4116,7 +4116,7 @@ void converter_iolink_ao::direct_set_value( float val )
 void converter_iolink_ao::set_value2( float val )
     {
     // Конвертируем канал 2: диапазон 0% - 0, 100% - 22'000.
-    uint16_t setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
+    auto setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
 
     p_data_out->setpoint_ch2 = setpoint;
     v2 = val;
@@ -4141,7 +4141,8 @@ void converter_iolink_ao::evaluate_io()
     p_data_out = reinterpret_cast<process_data_out*>(
         get_AO_write_data( C_AIAO_INDEX ) );
 
-    if ( auto st = get_AI_IOLINK_state( C_AIAO_INDEX ); st == io_device::IOLINKSTATE::OK )
+    if ( auto iol_st = get_AI_IOLINK_state( C_AIAO_INDEX ); 
+        iol_st == io_device::IOLINKSTATE::OK )
         {
         // Проверка статуса устройства (0 = OK согласно IODD).
         if ( p_data_in.device_status == 0 )
@@ -4155,7 +4156,7 @@ void converter_iolink_ao::evaluate_io()
         }
     else
         {
-        err = st;
+        err = iol_st;
         }
     }
 
