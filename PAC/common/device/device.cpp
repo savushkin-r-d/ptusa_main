@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
+#include <cstring>
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
@@ -4046,6 +4047,142 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
     start_param_idx = motor_altivar::get_params_count();
     set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
     set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
+    {
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
+
+    static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
+        "Struct `process_data_in` must be the 1 byte size." );
+    static_assert( sizeof( process_data_out ) == PROCESS_DATA_OUT_SIZE,
+        "Struct `process_data_out` must be the 4 bytes size." );
+    }
+
+void converter_iolink_ao::direct_on()
+    {
+    // Устанавливаем канал 1 в максимальное значение.
+    p_data_out->setpoint_ch1 = C_MAX_VALUE;
+    p_data_out->setpoint_ch2 = C_MAX_VALUE;
+
+    v = 100.0f;
+    v2 = 100.0f;
+    st = 1;
+    }
+
+void converter_iolink_ao::direct_off()
+    {
+    p_data_out->setpoint_ch1 = C_MIN_VALUE;
+    p_data_out->setpoint_ch2 = C_MIN_VALUE;
+
+    v = 0.0f;
+    v2 = 0.0f;
+    st = 0;
+    }
+
+float converter_iolink_ao::get_value()
+    {
+    return v;
+    }
+
+float converter_iolink_ao::get_value2() const
+    {
+    return v2;
+    }
+
+int converter_iolink_ao::get_state()
+    {
+    if ( err )
+        {
+        return -err;
+        }
+
+    return st;
+    }
+
+uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
+    {
+    if ( val < 0 ) val = 0.0f;
+    else if ( val > 100 ) val = 100.0f;
+
+    // Конвертируем: диапазон 0% - 4'000, 100% - 20'000.
+    auto setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
+    auto tmp = (char*)&setpoint;
+    std::swap( tmp[ 0 ], tmp[ 1 ] );
+    return setpoint;
+    }
+
+void converter_iolink_ao::direct_set_value( float val )
+    {
+    p_data_out->setpoint_ch1 = calc_setpoint( val );
+    v = val;
+    calculate_state();
+    }
+
+void converter_iolink_ao::set_value2( float val )
+    {
+    p_data_out->setpoint_ch2 = calc_setpoint( val );
+    v2 = val;
+    calculate_state();
+    }
+
+void converter_iolink_ao::calculate_state()
+    {
+    if ( v > 0.0f || v2 > 0.0f ) st = 1;
+    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
+    }
+
+void converter_iolink_ao::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + PROCESS_DATA_IN_SIZE,
+        reinterpret_cast<std::byte*>( &p_data_in ) );
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+    if ( auto iol_st = get_AI_IOLINK_state( C_AIAO_INDEX ); 
+        iol_st == io_device::IOLINKSTATE::OK )
+        {
+        // Проверка статуса устройства (0 = OK согласно IODD).
+        if ( p_data_in.device_status == 0 )
+            {
+            err = 0;
+            }
+        else
+            {
+            err = p_data_in.device_status;
+            }
+        }
+    else
+        {
+        err = iol_st;
+        }
+    }
+
+int converter_iolink_ao::save_device_ex( char* buff )
+    {
+    auto l = analog_io_device::save_device_ex( buff );
+    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE, "V2={:.1f}, ",
+        get_value2() );
+    return res.size + l;
+    }
+
+int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "V2" ) == 0 )
+        {
+        set_value2( static_cast<float>( val ) );
+        return 0;
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
     }
 
 #ifdef WIN_OS
