@@ -1141,6 +1141,8 @@ class analog_valve_ey : public device
 
         void set_property( const char* field, device* dev ) override;
 
+        void set_string_property( const char* field, const char* new_value ) override;
+
         void direct_on() override;
         void direct_off() override;
 

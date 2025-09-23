@@ -1789,7 +1789,11 @@ class converter_iolink_ao : public analog_io_device
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+
+        uint16_t calc_setpoint( float &val ) const;
         void calculate_state();
 
         float v{};  // Выходное значение канала 1.
@@ -1811,14 +1815,14 @@ class converter_iolink_ao : public analog_io_device
 #pragma pack(push, 1)
         struct process_data_in
             {
-            uint8_t device_status : 4;	// Статус устройства (биты 4-7).
-            uint8_t reserved : 4;	    // Зарезервированные биты (0-3).
+            uint8_t device_status : 4;	// Статус устройства.
+            uint8_t reserved : 4;	    // Зарезервированные биты.
             };
 
         struct process_data_out
             {
-            uint16_t setpoint_ch2;	    // Уставка канала 2 (биты 0-15, диапазон 0-22000).
-            uint16_t setpoint_ch1;	    // Уставка канала 1 (биты 16-31, диапазон 0-22000).
+            uint16_t setpoint_ch1;      // Уставка канала 1 (диапазон 0-22000).
+            uint16_t setpoint_ch2;      // Уставка канала 2 (диапазон 0-22000).
             };
 #pragma pack(pop)
 

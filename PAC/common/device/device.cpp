@@ -4103,22 +4103,28 @@ int converter_iolink_ao::get_state()
     return st;
     }
 
+uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
+    {
+    if ( val < 0 ) val = 0.0f;
+    else if ( val > 100 ) val = 100.0f;
+
+    // Конвертируем: диапазон 0% - 4'000, 100% - 20'000.
+    auto setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
+    auto tmp = (char*)&setpoint;
+    std::swap( tmp[ 0 ], tmp[ 1 ] );
+    return setpoint;
+    }
+
 void converter_iolink_ao::direct_set_value( float val )
     {
-    // Конвертируем канал 1: диапазон 0% - 4'000, 100% - 20'000.
-    auto setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
-
-    p_data_out->setpoint_ch1 = setpoint;
+    p_data_out->setpoint_ch1 = calc_setpoint( val );
     v = val;
     calculate_state();
     }
 
 void converter_iolink_ao::set_value2( float val )
     {
-    // Конвертируем канал 2: диапазон 0% - 0, 100% - 22'000.
-    auto setpoint = static_cast<uint16_t>( val * 22000.0f / 100.0f );
-
-    p_data_out->setpoint_ch2 = setpoint;
+    p_data_out->setpoint_ch2 = calc_setpoint( val );
     v2 = val;
     calculate_state();
     }

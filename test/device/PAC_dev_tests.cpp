@@ -5468,11 +5468,11 @@ TEST( converter_iolink_ao, direct_on_off )
     {
     converter_iolink_ao Y1( "Y1" );
 
-    // Test initial state
+    // Test initial state.
     EXPECT_EQ( Y1.get_state(), 0 );
     EXPECT_EQ( Y1.get_value(), 0.0f );
 
-    // Test turning on
+    // Test turning on.
     Y1.direct_on();
     EXPECT_EQ( Y1.get_state(), 1 );
     EXPECT_EQ( Y1.get_value(), 100.f );
@@ -5487,25 +5487,45 @@ TEST( converter_iolink_ao, set_value )
     {
     converter_iolink_ao Y1( "Y1" );
 
-    // Test setting different values
-    Y1.direct_set_value( 50.0f );
-    EXPECT_EQ( Y1.get_value(), 50.0f );
+    // Test setting different values for channel 1.
+    Y1.set_value( 10.0f );
+    EXPECT_EQ( Y1.get_value(), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 57'365u );
 
-    Y1.direct_set_value( 100.0f );
+    Y1.set_value( 100.0f );
     EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
 
-    Y1.direct_set_value( 0.0f );
+    Y1.set_value( 200.0f );
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+
+    Y1.set_value( 0.0f );
     EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+
+    // Test setting different values for channel 2.
+    Y1.set_value2( 10.0f );
+    EXPECT_EQ( Y1.get_value2(), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 57'365u );
+
+    Y1.set_value2( 0.0f );
+    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
+
+    Y1.set_value2( 200.0f );
+    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
     }
 
 TEST( converter_iolink_ao, set_cmd )
     {
     converter_iolink_ao Y1( "Y1" );
 
-    // Test state command
+    // Test state command.
     EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
 
-    // Test value command
+    // Test value command.
     EXPECT_EQ( Y1.set_cmd( "V", 0, 75.5 ), 0 );
     EXPECT_EQ( Y1.get_value(), 75.5f );
     EXPECT_EQ( Y1.set_cmd( "V2", 0, 75.5 ), 0 );
@@ -5559,20 +5579,20 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
 
 TEST( device_manager, get_EY )
     {
-    // Cleanup before test
+    // Cleanup before test.
     G_DEVICE_MANAGER()->clear_io_devices();
     
-    // Add a converter device
+    // Add a converter device.
     auto* Y1 = G_DEVICE_MANAGER()->add_io_device( 
         device::DT_EY, device::DST_CONV_AO2, "CAB1EY10", "", "IFM.DP1213" );
     
     EXPECT_NE( Y1, nullptr );
     
-    // Test accessor function
+    // Test accessor function.
     auto* retrieved_Y1 = EY( "CAB1EY10" );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( retrieved_Y1 ) );
     
-    // Test non-existent device
+    // Test non-existent device.
     auto* non_existent = EY( "NON_EXISTENT" );
     EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
     }

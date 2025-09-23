@@ -3,6 +3,7 @@
 
 #include "valve.h"
 
+#include "manager.h"
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
 #include "g_errors.h"
@@ -2601,6 +2602,25 @@ void analog_valve_ey::set_property( const char* field, device* dev )
             "Unknown field \"%s\"", get_name(), field );
         }
     };
+//-----------------------------------------------------------------------------
+void analog_valve_ey::set_string_property( const char* field,
+    const char* new_value )
+    {
+    if ( !field ) return;
+
+    device::set_string_property( field, new_value );
+    switch ( field[ 0 ] )
+        {
+        //TERMINAL
+        case 'T':
+            conv = reinterpret_cast<converter_iolink_ao*>(
+                G_DEVICE_MANAGER()->get_device( new_value ) );
+            break;
+
+        default:
+            break;
+        }
+    }
 //-----------------------------------------------------------------------------
 void analog_valve_ey::direct_on()
     {
