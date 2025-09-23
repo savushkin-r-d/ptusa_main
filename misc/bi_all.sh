@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script requires GNU bash. It uses bash-specific features (arrays, etc.) and will not work with /bin/sh.
 
 SECONDS=0
 
