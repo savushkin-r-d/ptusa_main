@@ -9,7 +9,6 @@ configs=(
     "linux-default build-linux-Release linux wsl"
 )
 
-build_times=()
 tmp_dir="/tmp/bi_all_times_$$"
 mkdir -p "$tmp_dir"
 
@@ -20,9 +19,9 @@ for i in "${!configs[@]}"; do
     (
         start_time=$(date +%s)
         {
-            echo "Начало сборки: $CFG_NAME"
+            echo "Build started: $CFG_NAME"
             ${PREFIX:+$PREFIX } cmake -D CFG_NAME:string="$CFG_NAME" -D BUILD_NAME:string="$BUILD_NAME" -P ./misc/bi.cmake
-            echo "Завершение сборки: $CFG_NAME"
+            echo "Build finished: $CFG_NAME"
         } | while IFS= read -r line; do echo "$((i+1))> [$SHORT_NAME]  $line"; done
         end_time=$(date +%s)
         duration=$((end_time - start_time))
@@ -36,17 +35,17 @@ for pid in "${pids[@]}"; do
 done
 
 echo -e '\033[1;36m'
-echo "Время сборки по конфигурациям:"
+echo "Build times by configuration:"
 for i in "${!configs[@]}"; do
     config="${configs[$i]}"
     read -r CFG_NAME BUILD_NAME SHORT_NAME PREFIX <<< "$config"
     if [[ -f "$tmp_dir/build_time_$i.txt" ]]; then
         duration=$(cat "$tmp_dir/build_time_$i.txt")
-        echo "$((i+1))> [$SHORT_NAME] $CFG_NAME: $duration секунд"
+        echo "$((i+1))> [$SHORT_NAME] $CFG_NAME: $duration seconds"
         rm -f "$tmp_dir/build_time_$i.txt"
     fi
 done
 rmdir "$tmp_dir"
 
 duration=$SECONDS
-echo -e "\033[1;36mОбщее время: $duration секунд ($((duration / 60)):$((duration % 60))).\033[0m"
+printf "\033[1;36mTotal time: %d seconds (%d:%02d).\033[0m\n" "$duration" "$((duration/60))" "$((duration%60))"
