@@ -2594,7 +2594,7 @@ void analog_valve_ey::set_property( const char* field, device* dev )
 
     if ( strcmp( field, "TERMINAL" ) == 0 )
         {
-        conv = reinterpret_cast<converter_iolink_ao*>( dev );
+        conv = dynamic_cast<converter_iolink_ao*>( dev );
         }
     else
         {
@@ -2613,7 +2613,7 @@ void analog_valve_ey::set_string_property( const char* field,
         {
         //TERMINAL
         case 'T':
-            conv = reinterpret_cast<converter_iolink_ao*>(
+            conv = dynamic_cast<converter_iolink_ao*>(
                 G_DEVICE_MANAGER()->get_device( new_value ) );
             break;
 
