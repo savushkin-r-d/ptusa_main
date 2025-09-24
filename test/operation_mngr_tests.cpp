@@ -1278,6 +1278,7 @@ TEST( AI_AO_action, check )
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
     auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг", -1, -1 );
     auto operation_state = ( *operation )[ 1 ];
 	auto step = ( *operation_state )[ 1 ];
 

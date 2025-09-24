@@ -480,6 +480,7 @@ class step
             A_DELAY_ON,
             A_DELAY_OFF,
             A_JUMP_IF,
+            A_MULTIPLE_DI_DO,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
