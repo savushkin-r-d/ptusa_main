@@ -315,6 +315,20 @@ class inverted_DI_DO_action : public DI_DO_action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
+/// Множественные DI->DO (одно DO активируется при активации любого из DI).
+/// </summary>
+class multiple_DI_DO_action : public DI_DO_action
+    {
+    public:
+        multiple_DI_DO_action();
+
+        int check( char* reason, unsigned int max_len ) const override;
+
+    protected:
+        void evaluate_DO( std::vector< device* > devices ) override;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
 /// Пары AI->AO.
 /// </summary>
 class AI_AO_action : public action
