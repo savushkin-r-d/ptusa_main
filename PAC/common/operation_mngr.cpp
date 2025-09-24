@@ -929,7 +929,6 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new required_DI_action() );
     actions.push_back( new DI_DO_action() );
     actions.push_back( new inverted_DI_DO_action() );
-    actions.push_back( new multiple_DI_DO_action() );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     actions.push_back( new enable_step_by_signal() );
@@ -944,6 +943,8 @@ step::step( std::string name, operation_state *owner,
         {
         actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
         }
+    
+    actions.push_back( new multiple_DI_DO_action() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
