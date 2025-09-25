@@ -153,26 +153,19 @@ jobs:
         endif()
 
 
-    - name: Setup MSYS2 and MinGW-w64 (Windows MinGW only)
-      if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'      
-      id: msys2
-      env:
-        MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: true
-        location: c:\msys64
-        install: >-
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-pkg-config
-
+    - name: Setup MinGW-w64 (Windows MinGW only)
+      if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
+      shell: cmake -P {0}
+      run: |
+        set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64ucrt-13.0.0-r1.zip")
+        file(DOWNLOAD "${mingw_w64_url}" ./mingw64.zip SHOW_PROGRESS)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./mingw64.zip -C C:/mingw64)
+    
     - name: Check MinGW-w64 (Windows MinGW only)
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
       run: |
         which x86_64-w64-mingw32-g++
         which g++
-        echo "MSYS2 installed at: $ENV{MSYS2_LOCATION}"
 
     - name: Configure
       shell: cmake -P {0}
