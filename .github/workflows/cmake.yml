@@ -50,8 +50,8 @@ jobs:
             name: "Windows Latest MinGW",
             artifact: "Windows-MinGW.7z",
             os: windows-latest,
-            cc: "gcc",
-            cxx: "g++",
+            cc: "x86_64-w64-mingw32-gcc",
+            cxx: "x86_64-w64-mingw32-g++",
             targets: "ptusa_main libptusa_main",
             run_tests: "false"
           }
