@@ -21,7 +21,17 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
+    if: ${{ ( 
+              (github.event_name == 'push') || 
+              (github.event_name == 'schedule') || 
+              (github.event_name == 'merge_group') || 
+              ((github.event_name == 'pull_request_target') && (
+                  contains(github.event.pull_request.labels.*.name, 'safe to test') ||
+                  (github.event.pull_request.user.login == 'copilot') ||
+                  (github.actor == 'copilot')
+              )) ||
+              (github.event_name == 'workflow_dispatch')
+            ) }}
     strategy:
       fail-fast: false
       matrix:
