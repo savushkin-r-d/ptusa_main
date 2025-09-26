@@ -157,15 +157,16 @@ jobs:
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
       shell: cmake -P {0}
       run: |
+        execute_process(COMMAND which g++)
+        execute_process(COMMAND g++ -v)
+
         set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64ucrt-13.0.0-r1.zip")
         file(DOWNLOAD "${mingw_w64_url}" ./mingw64.zip SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./mingw64.zip -C C:/mingw64)
-    
-    - name: Check MinGW-w64 (Windows MinGW only)
-      if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
-      run: |
-        which x86_64-w64-mingw32-g++
-        which g++
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf ./mingw64.zip)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ./mingw64 c:/mingw64 )
+
+        execute_process(COMMAND which g++)
+        execute_process(COMMAND g++ -v)
 
     - name: Configure
       shell: cmake -P {0}
