@@ -2773,7 +2773,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_desinfection)
         {
-        if (step_to_do >= 64 && step_to_do <= 66) dev_upr_desinfection->on(); else dev_upr_desinfection->off();
+        if ( ( step_to_do >= 64 && step_to_do <= 66 ) || step_to_do == 77 ) dev_upr_desinfection->on(); else dev_upr_desinfection->off();
         }
     if (dev_upr_circulation)
         {
