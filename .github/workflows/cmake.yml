@@ -27,8 +27,24 @@ env:
 jobs:
   build:
     name: ${{ matrix.config.name }}
+    # Added: allow running for PRs if the author is @github-copilot[bot],
+    # even without the 'safe to test' label.
+    if: >-
+      ${{ github.repository == 'savushkin-r-d/ptusa_main' &&
+          (
+            github.event_name == 'push' ||
+            github.event_name == 'schedule' ||
+            github.event_name == 'merge_group' ||
+            (
+              github.event_name == 'pull_request_target' &&
+              (
+                contains(github.event.pull_request.labels.*.name, 'safe to test') ||
+                github.actor == 'github-copilot[bot]'
+              )
+            )
+          )
+      }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
