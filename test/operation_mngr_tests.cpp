@@ -1278,6 +1278,7 @@ TEST( AI_AO_action, check )
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
     auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг", -1, -1 );
     auto operation_state = ( *operation )[ 1 ];
 	auto step = ( *operation_state )[ 1 ];
 
@@ -1559,6 +1560,278 @@ TEST( inverted_DI_DO_action, evaluate )
 
 	test_DI.set_cmd( "ST", 0, 0.f );
 	EXPECT_FALSE( test_DI.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+	}
+
+
+TEST( multiple_DI_DO_action, check )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	test_DO.set_descr( "Test DO" );
+	auto action = multiple_DI_DO_action();
+	
+	// Тест с недопустимым устройством (не DI/DO)
+	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
+		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
+	test_AI.set_descr( "Test AI" );
+	action.add_dev( &test_AI );
+
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 1, res );
+	const std::string EXPECTED_STR = 
+		"в поле 'Множественные DI->DO's' устройство 'test_AI1 (Test AI)'"
+		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
+	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
+
+	action.clear_dev();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO );
+	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+	}
+
+TEST( multiple_DI_DO_action, evaluate_single_active_DI )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = multiple_DI_DO_action();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO );
+
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+
+	// Изначально все DI неактивны
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	// Активируем один DI - DO должно активироваться
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем активный DI - DO должно деактивироваться
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	}
+
+TEST( multiple_DI_DO_action, evaluate_multiple_active_DI )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI3( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = multiple_DI_DO_action();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DI3 );
+	action.add_dev( &test_DO );
+
+	// Активируем несколько DI - DO должно быть активно
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	test_DI2.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	EXPECT_FALSE( test_DI3.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем один DI - DO должно оставаться активным
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	EXPECT_FALSE( test_DI3.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем все DI - DO должно деактивироваться
+	test_DI2.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	EXPECT_FALSE( test_DI3.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	}
+
+TEST( multiple_DI_DO_action, evaluate_multiple_DO )
+	{
+	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO1.set_descr( "Test DO1" );
+	test_DO2.set_descr( "Test DO2" );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = multiple_DI_DO_action();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO1 );
+	action.add_dev( &test_DO2 );
+
+	// Активируем один DI - оба DO должны активироваться
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO1.is_active() );
+	EXPECT_TRUE( test_DO2.is_active() );
+
+	// Деактивируем DI - оба DO должны деактивироваться
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO1.is_active() );
+	EXPECT_FALSE( test_DO2.is_active() );
+	}
+
+TEST( multiple_DI_DO_action, finalize )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto action = multiple_DI_DO_action();
+	action.add_dev( &test_DI1, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_DI2, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
+
+	test_DI1.on();
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( 1, test_DI1.get_state() );
+	EXPECT_EQ( 0, test_DI2.get_state() );
+	EXPECT_EQ( 1, test_DO.get_state() );
+
+	action.finalize();
+	EXPECT_EQ( 1, test_DI1.get_state() );
+	EXPECT_EQ( 0, test_DI2.get_state() );
+	EXPECT_EQ( 0, test_DO.get_state() );
+	}
+
+TEST( multiple_DI_DO_action, check_different_device_types )
+	{
+	auto action = multiple_DI_DO_action();
+	std::string msg( MAX_STR_SIZE, '\0' );
+	
+	// Test with multiple devices in the same subgroup
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+		
+	// Put all devices in the same subgroup (0) for proper OR logic
+	action.clear_dev();
+	action.add_dev( &test_DI1, action::MAIN_GROUP, 0 );
+	action.add_dev( &test_DI2, action::MAIN_GROUP, 0 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 0 );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+
+	// Test evaluation with OR logic within the same subgroup
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	
+	// Activate one DI - DO should activate
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+	
+	// Activate second DI as well - DO should remain active
+	test_DI2.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+	
+	// Deactivate first DI, second should keep DO active
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+	}
+
+TEST( multiple_DI_DO_action, evaluate_empty_action )
+	{
+	auto action = multiple_DI_DO_action();
+	
+	// Test evaluating empty action - should not crash
+	action.evaluate();
+	
+	std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	}
+
+TEST( multiple_DI_DO_action, check_with_empty_subgroups )
+	{
+	auto action = multiple_DI_DO_action();
+	std::string msg( MAX_STR_SIZE, '\0' );
+	
+	// Create devices but don't add them to cover empty subgroup paths
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+		
+	// Add devices in a way that creates some empty subgroups
+	action.add_dev( &test_DI1, action::MAIN_GROUP, 2 );  // Skip subgroups 0,1
+	action.add_dev( &test_DO, action::MAIN_GROUP, 2 );
+	
+	// This should test the path where devs[i].empty() returns true
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+	
+	// Test evaluation with sparse subgroups  
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	
+	test_DI1.set_cmd( "ST", 0, 1.0 );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 	}
