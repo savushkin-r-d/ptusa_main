@@ -16,6 +16,13 @@ env:
   NINJA_VERSION: 1.10.1
   BUILD_TYPE: Release
   CCACHE_VERSION: 4.2.1
+  MINGW_GCC_VERSION: 15.2.0
+  MINGW_W64_VERSION: 13.0.0
+  MINGW_REV: r1
+  MINGW_ARCH: x86_64
+  MINGW_THREAD: posix
+  MINGW_EXCEPT: seh
+  MINGW_CRT: ucrt
 
 jobs:
   build:
@@ -153,20 +160,28 @@ jobs:
         endif()
 
 
-    - name: Setup MinGW-w64 (Windows MinGW only)
+    - name: Install MinGW-w64 (Windows MinGW only)
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND which g++)
-        execute_process(COMMAND g++ -v)
+        set(gcc_ver $ENV{MINGW_GCC_VERSION})
+        set(w64_ver $ENV{MINGW_W64_VERSION})
+        set(rev $ENV{MINGW_REV})
+        set(arch $ENV{MINGW_ARCH})
+        set(thread $ENV{MINGW_THREAD})
+        set(excepts $ENV{MINGW_EXCEPT})
+        set(crt $ENV{MINGW_CRT})
 
-        set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64ucrt-13.0.0-r1.zip")
+        set(release_tag "${gcc_ver}${thread}-${w64_ver}-${crt}-${rev}")
+        set(filename "winlibs-${arch}-${thread}-${excepts}-gcc-${gcc_ver}-mingw-w64${crt}-${w64_ver}-${rev}.zip")
+        set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/${release_tag}/${filename}")
         file(DOWNLOAD "${mingw_w64_url}" ./mingw64.zip SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf ./mingw64.zip)
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ./mingw64 c:/mingw64 )
 
         execute_process(COMMAND which g++)
         execute_process(COMMAND g++ -v)
+
 
     - name: Configure
       shell: cmake -P {0}
