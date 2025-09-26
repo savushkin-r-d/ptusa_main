@@ -27,8 +27,8 @@ env:
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    # Добавлено: разрешаем запуск для PR, если автор – @github-copilot[bot] / @copilot,
-    # даже без метки 'safe to test'.
+    # Added: allow running for PRs if the author is @github-copilot[bot],
+    # even without the 'safe to test' label.
     if: >-
       ${{ github.repository == 'savushkin-r-d/ptusa_main' &&
           (
@@ -39,8 +39,7 @@ jobs:
               github.event_name == 'pull_request_target' &&
               (
                 contains(github.event.pull_request.labels.*.name, 'safe to test') ||
-                github.actor == 'github-copilot[bot]' ||
-                github.actor == 'copilot'
+                github.actor == 'github-copilot[bot]'
               )
             )
           )
