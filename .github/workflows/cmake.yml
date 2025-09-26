@@ -28,17 +28,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ ( 
-              (github.event_name == 'push') || 
-              (github.event_name == 'schedule') || 
-              (github.event_name == 'merge_group') || 
-              ((github.event_name == 'pull_request_target') && (
-                  contains(github.event.pull_request.labels.*.name, 'safe to test') ||
-                  (github.event.pull_request.user.login == 'copilot') ||
-                  (github.actor == 'copilot')
-              )) ||
-              (github.event_name == 'workflow_dispatch')
-            ) }}
+    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
@@ -57,8 +47,8 @@ jobs:
             name: "Windows Latest MinGW",
             artifact: "Windows-MinGW.7z",
             os: windows-latest,
-            cc: "x86_64-w64-mingw32-gcc",
-            cxx: "x86_64-w64-mingw32-g++",
+            cc: "gcc",
+            cxx: "g++",
             targets: "ptusa_main libptusa_main",
             run_tests: "false"
           }
