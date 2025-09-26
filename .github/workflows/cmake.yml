@@ -164,6 +164,7 @@ jobs:
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
       shell: cmake -P {0}
       run: |
+        # Параметры версии вынесены в env (см. верх файла).
         set(gcc_ver $ENV{MINGW_GCC_VERSION})
         set(w64_ver $ENV{MINGW_W64_VERSION})
         set(rev $ENV{MINGW_REV})
@@ -172,14 +173,30 @@ jobs:
         set(excepts $ENV{MINGW_EXCEPT})
         set(crt $ENV{MINGW_CRT})
 
+        # Формирование имени релиза и архива.
         set(release_tag "${gcc_ver}${thread}-${w64_ver}-${crt}-${rev}")
         set(filename "winlibs-${arch}-${thread}-${excepts}-gcc-${gcc_ver}-mingw-w64${crt}-${w64_ver}-${rev}.zip")
         set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/${release_tag}/${filename}")
-        file(DOWNLOAD "${mingw_w64_url}" ./mingw64.zip SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf ./mingw64.zip)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ./mingw64 c:/mingw64 )
+        message(STATUS "Downloading: ${mingw_w64_url}")
 
-        execute_process(COMMAND which g++)
+        file(DOWNLOAD "${mingw_w64_url}" "${CMAKE_CURRENT_LIST_DIR}/mingw64.zip" SHOW_PROGRESS)
+
+        # Распаковываем напрямую в C:/ чтобы избежать промежуточного копирования.
+        # В архиве корневая папка 'mingw64', поэтому после распаковки будет c:/mingw64.
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xf "${CMAKE_CURRENT_LIST_DIR}/mingw64.zip"
+          WORKING_DIRECTORY "c:/"
+        )
+
+        # Верификация.
+        if (NOT EXISTS "c:/mingw64/bin/x86_64-w64-mingw32-gcc.exe")
+          message(FATAL_ERROR "x86_64-w64-mingw32-gcc.exe not found after extraction")
+        endif()
+
+        # Диагностика: показываем обнаруженные компиляторы в PATH и версию g++.
+        message(STATUS "Diagnostics: locating 'g++' and 'x86_64-w64-mingw32-gcc' and printing g++ version.")
+        execute_process(COMMAND where g++)
+        execute_process(COMMAND where x86_64-w64-mingw32-gcc)
         execute_process(COMMAND g++ -v)
 
 
