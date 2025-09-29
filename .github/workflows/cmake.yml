@@ -38,7 +38,7 @@ jobs:
           github.event_name == 'merge_group' ||
           (
             github.event_name == 'pull_request_target' &&
-            github.event.pull_request.head.repo.full_name != github.repository &&  # PR из форка
+            github.event.pull_request.head.repo.full_name != github.repository &&  # PR from fork
             contains(github.event.pull_request.labels.*.name, 'safe to test')
           ) ||
           (
