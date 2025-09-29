@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.07.16.1)
+project(ptusa_main VERSION 2025.09.09.2)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -372,6 +372,21 @@ elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
 endif()
 #######################################################################################
+
+
+if(MINGW OR CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # Отключить генерацию защит стека, чтобы линковщик не требовал libssp.
+    add_compile_options(-fno-stack-protector)
+
+    # Почистить все распространённые переменные линковки от -lssp
+    foreach(VAR CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS
+                CMAKE_MODULE_LINKER_FLAGS CMAKE_C_STANDARD_LIBRARIES
+                CMAKE_CXX_STANDARD_LIBRARIES)
+        if(DEFINED ${VAR})
+            string(REPLACE "-lssp" "" ${VAR} "${${VAR}}")
+        endif()
+    endforeach()
+endif()
 
 
 if(ARP_DEVICE)

@@ -1764,8 +1764,76 @@ class power_unit : public analog_io_device
         static process_data_out stub_p_data_out;
         process_data_out* p_data_out = &stub_p_data_out;
     };
+//-----------------------------------------------------------------------------
+/// @brief Конвертер IO-Link -> AO.
 ///
+/// Устройство для преобразования IO-Link сигналов в аналоговые выходы.
+class converter_iolink_ao : public analog_io_device
+    {
+    public:
+        explicit converter_iolink_ao( const char* dev_name );
+
+        void direct_on() override;
+        void direct_off() override;
+
+        float get_value() override;
+        float get_value2() const;
+        int get_state() override;
+
+        void direct_set_value( float val ) override;
+        void set_value2( float val );
+
+        void evaluate_io() override;
+
+        int save_device_ex( char* buff ) override;
+
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+
+        uint16_t calc_setpoint( float &val ) const;
+        void calculate_state();
+
+        float v{};  // Выходное значение канала 1.
+        float v2{}; // Выходное значение канала 2.
+        int st{};   // Состояние устройства.
+        int err{};  // Ошибка.
+
+        enum CONSTANTS
+            {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            C_MIN_VALUE = 4'000,
+            C_MAX_VALUE = 20'000
+            };
+
+        static constexpr int PROCESS_DATA_IN_SIZE{ 1 };
+        static constexpr int PROCESS_DATA_OUT_SIZE{ 4 };
+
+#pragma pack(push, 1)
+        struct process_data_in
+            {
+            uint8_t device_status : 4;	// Статус устройства.
+            uint8_t reserved : 4;	    // Зарезервированные биты.
+            };
+
+        struct process_data_out
+            {
+            uint16_t setpoint_ch1;      // Уставка канала 1 (диапазон 0-22000).
+            uint16_t setpoint_ch2;      // Уставка канала 2 (диапазон 0-22000).
+            };
+#pragma pack(pop)
+
+        process_data_in p_data_in{ 0 };
+
+        inline static process_data_out stub_p_data_out{};
+        process_data_out* p_data_out = &stub_p_data_out;
+    };
+///-----------------------------------------------------------------------------
 /// Предоставляет функциональность таймера.
+/// 
 class timer
     {
     public:
