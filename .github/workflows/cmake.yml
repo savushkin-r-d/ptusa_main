@@ -6,6 +6,8 @@ on:
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch:
+  pull_request:
+    branches: [ master ]
   pull_request_target:
     branches: [ master ]
     types: [ labeled ]
@@ -27,8 +29,25 @@ env:
 jobs:
   build:
     name: ${{ matrix.config.name }}
+    if: >-
+      ${{
+        github.repository == 'savushkin-r-d/ptusa_main' &&
+        (
+          github.event_name == 'push' ||
+          github.event_name == 'schedule' ||
+          github.event_name == 'merge_group' ||
+          (
+            github.event_name == 'pull_request_target' &&
+            github.event.pull_request.head.repo.full_name != github.repository &&  # PR from fork
+            contains(github.event.pull_request.labels.*.name, 'safe to test')
+          ) ||
+          (
+            github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository  # PR from branch
+          )
+        )
+      }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
