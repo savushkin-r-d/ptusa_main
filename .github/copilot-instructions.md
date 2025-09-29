@@ -17,7 +17,7 @@ git submodule update --init --recursive
 ### Key Technologies
 - **Language:** C++17 (CMake minimum version 3.13)
 - **Build System:** CMake with presets
-- **Testing:** Google Test framework (462 total tests)
+- **Testing:** Google Test framework
 - **Benchmarking:** Google Benchmark
 - **Scripting:** Lua 5.1 for control logic
 - **Platforms:** Linux (GCC) and Windows (Visual Studio)
@@ -90,15 +90,14 @@ cmake --build . -j$(nproc)
 
 ## Testing
 
-### Unit Tests (~7 seconds, 459/462 tests pass)
+### Unit Tests (~7 seconds)
 ```bash
 cd build
 ./main_test
 ```
 
 **Expected Results:**
-- Total tests: 462
-- Passing tests: 459 (99% pass rate)
+- Passing all tests
 - Failed tests: 3 (expected network-related failures)
 - Duration: ~7 seconds
 
@@ -151,7 +150,7 @@ ls -la ptusa_main main_test main_perfomance_test
 ### 2. Test Suite Validation
 ```bash
 cd build
-./main_test  # Should complete in ~7 seconds with 459/462 tests passing
+./main_test  # Should complete in ~7 seconds
 ```
 
 ### 3. Performance Regression Check
@@ -313,7 +312,7 @@ cmake --build . -j$(nproc)
 
 ### Key Statistics to Expect
 - **Build time:** ~3 minutes (full clean build)
-- **Unit tests:** 459/462 pass (~7 seconds)
+- **Unit tests:** all pass (~7 seconds)
 - **Performance tests:** ~2 seconds
 - **Total files:** ~200+ source files
 - **Lines of code:** ~50,000+ lines
