@@ -1836,6 +1836,55 @@ TEST( multiple_DI_DO_action, check_with_empty_subgroups )
 	EXPECT_TRUE( test_DO.is_active() );
 	}
 
+TEST( multiple_DI_DO_action, check_device_ordering )
+	{
+	auto action = multiple_DI_DO_action();
+	std::string msg( MAX_STR_SIZE, '\0' );
+	
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+		
+	// Test correct ordering: DI first, then DO
+	action.clear_dev();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO1 );
+	action.add_dev( &test_DO2 );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+	}
+
+TEST( multiple_DI_DO_action, check_device_ordering_error )
+	{
+	auto action = multiple_DI_DO_action();
+	std::string msg( MAX_STR_SIZE, '\0' );
+	
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	test_DI1.set_descr( "Test DI1" );
+	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO1.set_descr( "Test DO1" );
+		
+	// Test incorrect ordering: DO first, then DI (should fail)
+	action.clear_dev();
+	action.add_dev( &test_DO1 );
+	action.add_dev( &test_DI1 );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 1, res );
+	const std::string EXPECTED_STR = 
+		"в поле 'Множественные DI->DO's' устройство 'test_DI1 (Test DI1)'"
+		" расположено неправильно: DI сигналы должны быть описаны перед DO сигналами";
+	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
+	}
+
 
 TEST( AI_AO_action, finalize )
 	{

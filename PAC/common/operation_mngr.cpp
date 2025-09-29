@@ -1219,7 +1219,8 @@ int multiple_DI_DO_action::check( char* reason, unsigned int max_len ) const
             continue;
             }
 
-        // Разрешаем смешанное содержимое: DI и DO устройства в одной группе
+        // Проверяем порядок устройств: сначала DI, затем DO
+        bool found_do = false;
         for ( const auto& device_ptr : dev_group )
             {
             auto device_type = device_ptr->get_type();
@@ -1234,6 +1235,29 @@ int multiple_DI_DO_action::check( char* reason, unsigned int max_len ) const
                 {
                 auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                     R"(не является допустимым сигналом (DI, SB, GS, LS, FS, DO))";
+                auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
+                    device_ptr->get_name(), device_ptr->get_description() );
+                *out.out = '\0';
+                return 1;
+                }
+            
+            // Проверяем правильность порядка: DI сигналы должны идти перед DO
+            bool is_di_type = ( device_type == device::DT_DI ||
+                               device_type == device::DT_SB ||
+                               device_type == device::DT_GS ||
+                               device_type == device::DT_LS ||
+                               device_type == device::DT_FS );
+            bool is_do_type = ( device_type == device::DT_DO );
+            
+            if ( is_do_type )
+                {
+                found_do = true;
+                }
+            else if ( is_di_type && found_do )
+                {
+                // Найден DI сигнал после DO сигнала - ошибка порядка
+                auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                    R"(расположено неправильно: DI сигналы должны быть описаны перед DO сигналами)";
                 auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                     device_ptr->get_name(), device_ptr->get_description() );
                 *out.out = '\0';
