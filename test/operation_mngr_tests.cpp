@@ -1454,14 +1454,19 @@ TEST( DI_DO_action, check )
 
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
-	action.add_dev( &test_DO );
+	
+	// Test with invalid device type (AI instead of DI/DO)
+	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
+		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
+	test_AI.set_descr( "Test AI" );
+	action.add_dev( &test_AI );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
-		" не является входным сигналом (DI, SB, GS, LS, FS)";
+		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
+		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
 
 	const int SHORT_STR_SIZE = 50;
@@ -1470,6 +1475,7 @@ TEST( DI_DO_action, check )
 	EXPECT_STREQ( EXPECTED_STR.substr( 0, SHORT_STR_SIZE - 1 ).c_str(),
 		msg.c_str() );
 
+	// Test with valid devices (DI first, then DO)
 	action.clear_dev();
 	action.add_dev( &test_DI );
 	action.add_dev( &test_DO );
@@ -1565,7 +1571,7 @@ TEST( inverted_DI_DO_action, evaluate )
 	}
 
 
-TEST( multiple_DI_DO_action, check )
+TEST( DI_DO_action, check_multiple_devices )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -1575,7 +1581,7 @@ TEST( multiple_DI_DO_action, check )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
 	test_DO.set_descr( "Test DO" );
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	
 	// Тест с недопустимым устройством (не DI/DO)
 	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
@@ -1587,7 +1593,7 @@ TEST( multiple_DI_DO_action, check )
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Множественные DI->DO's' устройство 'test_AI1 (Test AI)'"
+		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
 		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
 
@@ -1600,7 +1606,7 @@ TEST( multiple_DI_DO_action, check )
 	EXPECT_STREQ( "", msg.c_str() );
 	}
 
-TEST( multiple_DI_DO_action, evaluate_single_active_DI )
+TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -1610,7 +1616,7 @@ TEST( multiple_DI_DO_action, evaluate_single_active_DI )
 	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
@@ -1626,7 +1632,7 @@ TEST( multiple_DI_DO_action, evaluate_single_active_DI )
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	// Активируем один DI - DO должно активироваться
+	// Активируем один DI - DO должно активироваться (OR логика)
 	test_DI1.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
@@ -1653,7 +1659,7 @@ TEST( multiple_DI_DO_action, evaluate_multiple_active_DI )
 	DI1 test_DI3( "test_DI3", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DI3 );
@@ -1698,7 +1704,7 @@ TEST( multiple_DI_DO_action, evaluate_multiple_DO )
 	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO1 );
@@ -1729,7 +1735,7 @@ TEST( multiple_DI_DO_action, finalize )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	action.add_dev( &test_DI1, action::MAIN_GROUP, 1 );
 	action.add_dev( &test_DI2, action::MAIN_GROUP, 1 );
 	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
@@ -1749,7 +1755,7 @@ TEST( multiple_DI_DO_action, finalize )
 
 TEST( multiple_DI_DO_action, check_different_device_types )
 	{
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	std::string msg( MAX_STR_SIZE, '\0' );
 	
 	// Test with multiple devices in the same subgroup
@@ -1797,7 +1803,7 @@ TEST( multiple_DI_DO_action, check_different_device_types )
 
 TEST( multiple_DI_DO_action, evaluate_empty_action )
 	{
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	
 	// Test evaluating empty action - should not crash
 	action.evaluate();
@@ -1809,7 +1815,7 @@ TEST( multiple_DI_DO_action, evaluate_empty_action )
 
 TEST( multiple_DI_DO_action, check_with_empty_subgroups )
 	{
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	std::string msg( MAX_STR_SIZE, '\0' );
 	
 	// Create devices but don't add them to cover empty subgroup paths
@@ -1838,7 +1844,7 @@ TEST( multiple_DI_DO_action, check_with_empty_subgroups )
 
 TEST( multiple_DI_DO_action, check_device_ordering )
 	{
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	std::string msg( MAX_STR_SIZE, '\0' );
 	
 	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
@@ -1863,7 +1869,7 @@ TEST( multiple_DI_DO_action, check_device_ordering )
 
 TEST( multiple_DI_DO_action, check_device_ordering_error )
 	{
-	auto action = multiple_DI_DO_action();
+	auto action = DI_DO_action();
 	std::string msg( MAX_STR_SIZE, '\0' );
 	
 	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
@@ -1880,7 +1886,7 @@ TEST( multiple_DI_DO_action, check_device_ordering_error )
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Множественные DI->DO's' устройство 'test_DI1 (Test DI1)'"
+		"в поле 'Группы DI->DO's' устройство 'test_DI1 (Test DI1)'"
 		" расположено неправильно: DI сигналы должны быть описаны перед DO сигналами";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
 	}

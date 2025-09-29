@@ -943,8 +943,6 @@ step::step( std::string name, operation_state *owner,
         {
         actions.push_back( new jump_if_action( "Переход в шаг по условию" ) );
         }
-    
-    actions.push_back( new multiple_DI_DO_action() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1092,126 +1090,6 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
         }
 
     auto &devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        if ( devs[ i ].empty() )
-            {
-            continue;
-            }
-
-        auto d_i_device = devs[ i ][ 0 ];
-        if ( d_i_device->get_type() != device::DT_DI &&
-            d_i_device->get_type() != device::DT_SB &&
-            d_i_device->get_type() != device::DT_GS &&
-            d_i_device->get_type() != device::DT_LS &&
-            d_i_device->get_type() != device::DT_FS )
-            {
-            auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
-                R"(не является входным сигналом (DI, SB, GS, LS, FS))";
-            auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
-                d_i_device->get_name(), d_i_device->get_description() );
-            *out.out = '\0';
-            return 1;
-            }
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void DI_DO_action::evaluate()
-    {
-    if ( is_empty() )
-        {
-        return;
-        }
-
-    auto &devs = devices[ MAIN_GROUP ];
-
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        if ( devs[ i ].empty() )
-            {
-            continue;
-            }
-
-        evaluate_DO( devs[ i ] );
-        }
-    }
-//-----------------------------------------------------------------------------
-void DI_DO_action::finalize()
-    {
-    if ( is_empty() )
-        {
-        return;
-        }
-
-    auto& devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        if ( devs[ i ].empty() )
-            {
-            continue;
-            }
-
-        for ( u_int j = 1; j < devs[ i ].size(); j++ )
-            {
-            devs[ i ][ j ]->off();
-            }
-        }    
-    }
-//-----------------------------------------------------------------------------
-void DI_DO_action::evaluate_DO( std::vector< device* > devices )
-    {
-    if ( devices[ 0 ]->is_active() )
-        {
-        for ( u_int j = 1; j < devices.size(); j++ )
-            {
-            devices[ j ]->on();
-            }
-        }
-    else
-        {
-        for ( u_int j = 1; j < devices.size(); j++ )
-            {
-            devices[ j ]->off();
-            }
-        }
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-inverted_DI_DO_action::inverted_DI_DO_action():
-    DI_DO_action( "Группы инвертированный DI->DO's" )
-    {
-    }
-//-----------------------------------------------------------------------------
-void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
-    {
-    int new_state = 0;
-    if ( !devices[ 0 ]->is_active() )
-        {
-        new_state = 1;
-        }
-    for ( u_int j = 1; j < devices.size(); j++ )
-        {
-        devices[ j ]->set_state( new_state );
-        }
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-multiple_DI_DO_action::multiple_DI_DO_action():
-    DI_DO_action( "Множественные DI->DO's" )
-    {
-    }
-//-----------------------------------------------------------------------------
-int multiple_DI_DO_action::check( char* reason, unsigned int max_len ) const
-    {
-    reason[ 0 ] = 0;
-    if ( is_empty() )
-        {
-        return 0;
-        }
-
-    auto &devs = devices[ MAIN_GROUP ];
     for ( const auto& dev_group : devs )
         {
         if ( dev_group.empty() )
@@ -1269,13 +1147,70 @@ int multiple_DI_DO_action::check( char* reason, unsigned int max_len ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-void multiple_DI_DO_action::evaluate_DO( std::vector< device* > devices )
+void DI_DO_action::evaluate()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    auto &devs = devices[ MAIN_GROUP ];
+
+    for ( const auto& dev_group : devs )
+        {
+        if ( dev_group.empty() )
+            {
+            continue;
+            }
+
+        evaluate_DO( dev_group );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::finalize()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( const auto& dev_group : devs )
+        {
+        if ( dev_group.empty() )
+            {
+            continue;
+            }
+
+        // Найдем количество DI устройств и выключим все DO
+        u_int di_count = 0;
+        for ( const auto& dev : dev_group )
+            {
+            if ( dev->get_type() == device::DT_DI ||
+                 dev->get_type() == device::DT_SB ||
+                 dev->get_type() == device::DT_GS ||
+                 dev->get_type() == device::DT_LS ||
+                 dev->get_type() == device::DT_FS )
+                {
+                di_count++;
+                }
+            }
+        
+        // Выключаем все DO устройства
+        for ( auto it = dev_group.begin() + di_count; it != dev_group.end(); ++it )
+            {
+            (*it)->off();
+            }
+        }    
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
     // Поиск активных DI среди всех входных устройств
     bool any_di_active = false;
     u_int di_count = 0;
     
-    // Подсчитаем количество DI устройств (все кроме последних DO)
+    // Подсчитаем количество DI устройств и проверим их активность
     for ( const auto& dev : devices )
         {
         if ( dev->get_type() == device::DT_DI ||
@@ -1303,6 +1238,45 @@ void multiple_DI_DO_action::evaluate_DO( std::vector< device* > devices )
             {
             (*it)->off();
             }
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+inverted_DI_DO_action::inverted_DI_DO_action():
+    DI_DO_action( "Группы инвертированный DI->DO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
+void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
+    {
+    // Поиск активных DI среди всех входных устройств
+    bool any_di_active = false;
+    u_int di_count = 0;
+    
+    // Подсчитаем количество DI устройств и проверим их активность
+    for ( const auto& dev : devices )
+        {
+        if ( dev->get_type() == device::DT_DI ||
+             dev->get_type() == device::DT_SB ||
+             dev->get_type() == device::DT_GS ||
+             dev->get_type() == device::DT_LS ||
+             dev->get_type() == device::DT_FS )
+            {
+            di_count++;
+            if ( dev->is_active() )
+                {
+                any_di_active = true;
+                }
+            }
+        }
+
+    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен
+    int new_state = any_di_active ? 0 : 1;
+    
+    // Управляем DO устройствами (они идут после всех DI)
+    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
+        {
+        (*it)->set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
