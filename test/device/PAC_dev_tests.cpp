@@ -3367,6 +3367,165 @@ TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_
     G_PAC_INFO()->emulation_on();
     }
 
+// Simplified comprehensive test focusing on core functionality  
+TEST_F( iolink_dev_test, valve_iolink_comprehensive_error_handling_core )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    valve_iolink_shut_off_thinktop_testable V2( "V2" );
+    
+    G_PAC_INFO()->emulation_off();
+    
+    // Test mix_proof valve
+    {
+        const char* valve_name = "mix_proof";
+        auto* valve = &V1;
+        
+        // Reset valve to clean state
+        valve->set_cmd( "P_FB", 0, 0 );
+        valve->set_err( 0 );
+        
+        // Test 1: Feedback disabled, no errors - should work normally
+        int state = valve->get_state();
+        EXPECT_GE( state, 0 ) << valve_name << ": Clean state should be non-error";
+        
+        // Test 2: Feedback disabled, AL error present - should ignore AL error
+        valve->set_err( 10 );
+        state = valve->get_state();  
+        EXPECT_GE( state, 0 ) << valve_name << ": Should ignore AL error when feedback disabled";
+        
+        // Test 3: Feedback enabled, AL error present - should report AL error
+        valve->set_cmd( "P_FB", 0, 1 );
+        state = valve->get_state();
+        EXPECT_LT( state, 0 ) << valve_name << ": Should report AL error when feedback enabled";
+        EXPECT_GT( state, -200 ) << valve_name << ": Should be in AL error range";
+        
+        // Test 4: Back to feedback disabled - should ignore errors again
+        valve->set_cmd( "P_FB", 0, 0 );
+        state = valve->get_state();
+        EXPECT_GE( state, 0 ) << valve_name << ": Should ignore AL error when feedback disabled again";
+    }
+    
+    // Test shut_off_thinktop valve
+    {
+        const char* valve_name = "shut_off_thinktop";
+        auto* valve = &V2;
+        
+        // Reset valve to clean state
+        valve->set_cmd( "P_FB", 0, 0 );
+        valve->set_err( 0 );
+        
+        // Test 1: Feedback disabled, no errors - should work normally
+        int state = valve->get_state();
+        EXPECT_GE( state, 0 ) << valve_name << ": Clean state should be non-error";
+        
+        // Test 2: Feedback disabled, AL error present - should ignore AL error
+        valve->set_err( 7 );
+        state = valve->get_state();  
+        EXPECT_GE( state, 0 ) << valve_name << ": Should ignore AL error when feedback disabled";
+        
+        // Test 3: Feedback enabled, AL error present - should report AL error
+        valve->set_cmd( "P_FB", 0, 1 );
+        state = valve->get_state();
+        EXPECT_LT( state, 0 ) << valve_name << ": Should report AL error when feedback enabled";
+        EXPECT_GT( state, -200 ) << valve_name << ": Should be in AL error range";
+        
+        // Test 4: Back to feedback disabled - should ignore errors again
+        valve->set_cmd( "P_FB", 0, 0 );
+        state = valve->get_state();
+        EXPECT_GE( state, 0 ) << valve_name << ": Should ignore AL error when feedback disabled again";
+    }
+    
+    G_PAC_INFO()->emulation_on();
+    }
+
+// Test feedback state type casting and different error values
+TEST( valve_iolink_mix_proof, feedback_state_type_casting_and_edge_cases )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Test different feedback parameter values to ensure proper type casting
+    // FB_IS_AND_OFF = 0, FB_IS_AND_ON = 1
+    
+    // Test explicit FB_IS_AND_OFF (0)
+    V1.set_cmd( "P_FB", 0, 0 ); // FB_IS_AND_OFF
+    V1.set_err( 1 ); // Minimal AL error
+    int state = V1.get_state();
+    EXPECT_GE( state, 0 ) << "Error should be ignored with explicit FB_IS_AND_OFF";
+
+    // Test explicit FB_IS_AND_ON (1)  
+    V1.set_cmd( "P_FB", 0, 1 ); // FB_IS_AND_ON
+    int error_value = 15;
+    V1.set_err( error_value );
+    state = V1.get_state();
+    EXPECT_LT( state, 0 ) << "Error should be reported with explicit FB_IS_AND_ON";
+    // Verify it's an AL error (should be negative and in the AL error range)
+    EXPECT_GT( state, -200 ) << "Should be in AL error range";
+    EXPECT_LT( state, -100 ) << "Should be in AL error range";
+
+    // Test that AL errors are properly calculated
+    V1.set_err( 31 ); // Specific AL error value
+    state = V1.get_state();
+    EXPECT_EQ( state, -131 ) << "AL error calculation: -(100 + 31)";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_shut_off_thinktop, feedback_state_type_casting_and_edge_cases )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Test different feedback parameter values to ensure proper type casting
+    
+    // Test explicit FB_IS_AND_OFF (0)
+    V1.set_cmd( "P_FB", 0, 0 ); // FB_IS_AND_OFF
+    V1.set_err( 2 ); // AL error  
+    int state = V1.get_state();
+    EXPECT_GE( state, 0 ) << "Error should be ignored with explicit FB_IS_AND_OFF";
+
+    // Test explicit FB_IS_AND_ON (1)
+    V1.set_cmd( "P_FB", 0, 1 ); // FB_IS_AND_ON
+    int error_value = 10;
+    V1.set_err( error_value );
+    state = V1.get_state();
+    EXPECT_LT( state, 0 ) << "Error should be reported with explicit FB_IS_AND_ON";
+    EXPECT_EQ( state, -(io_link_valve::ERROR_CODE_OFFSET + error_value) ) << "Correct AL error calculation";
+
+    // Test different AL error values
+    V1.set_err( 1 ); // Minimum error
+    state = V1.get_state();
+    EXPECT_EQ( state, -101 ) << "Handle minimum AL error value";
+
+    V1.set_err( 3 ); // Small error value
+    state = V1.get_state();
+    EXPECT_EQ( state, -103 ) << "Handle small AL error value";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+// Test module error states coverage
+TEST_F( iolink_dev_test, valve_module_error_states_basic )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Test with feedback enabled - should report module errors
+    V1.set_cmd( "P_FB", 0, 1 ); // Enable feedback
+    V1.evaluate_io();
+    int state = V1.get_state();
+    EXPECT_LT( state, 0 ) << "Should report module error when feedback enabled";
+
+    // Test with feedback disabled - should ignore module errors
+    V1.set_cmd( "P_FB", 0, 0 ); // Disable feedback
+    V1.evaluate_io();
+    state = V1.get_state();
+    EXPECT_GE( state, 0 ) << "Should ignore module errors when feedback disabled";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
     analog_valve_iolink V1( "V1" );
