@@ -1372,26 +1372,19 @@ int valve_iolink_mix_proof::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
+    auto feed_back_state = static_cast<io_device::IOLINKSTATE>(
+        get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-        error_id != io_device::IOLINKSTATE::OK )
+        error_id != io_device::IOLINKSTATE::OK &&
+        feed_back_state != FB_IS_AND_OFF )
         {
-        // Check if feedback is enabled before reporting module IO-Link error.
-        // If feedback is disabled, don't report module errors.
-        if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
-            {
-            return -error_id;
-            }
+        return -error_id;
         }
 
-    if ( in_info.err > 0 )
+    if ( in_info.err > 0 && feed_back_state != FB_IS_AND_OFF )
         {
-        // Check if feedback is enabled before reporting AL IO-Link error.
-        // If feedback is disabled, don't report internal AL errors.
-        if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
-            {
-            return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
-            }
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
 
     switch ( get_valve_state() )
@@ -1403,7 +1396,7 @@ int valve_iolink_mix_proof::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( feed_back_state == FB_IS_AND_OFF )
                 {
                 return VX_LOWER_SEAT_FB_OFF;
                 }
@@ -1419,7 +1412,7 @@ int valve_iolink_mix_proof::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( feed_back_state == FB_IS_AND_OFF )
                 {
                 return VX_UPPER_SEAT_FB_OFF;
                 }
@@ -2268,26 +2261,19 @@ int valve_iolink_shut_off_thinktop::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
+    auto feed_back_state = static_cast<io_device::IOLINKSTATE>(
+        get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-        error_id != io_device::IOLINKSTATE::OK )
+        error_id != io_device::IOLINKSTATE::OK &&
+        feed_back_state != FB_IS_AND_OFF )
         {
-        // Check if feedback is enabled before reporting module IO-Link error.
-        // If feedback is disabled, don't report module errors.
-        if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
-            {
-            return -error_id;
-            }
+        return -error_id;
         }
 
-    if ( in_info.err > 0 )
+    if ( in_info.err > 0 && feed_back_state != FB_IS_AND_OFF )
         {
-        // Check if feedback is enabled before reporting AL IO-Link error.
-        // If feedback is disabled, don't report internal AL errors.
-        if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
-            {
-            return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
-            }
+        return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
 
     return valve::get_state();
