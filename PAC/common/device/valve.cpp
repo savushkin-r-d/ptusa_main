@@ -1372,7 +1372,7 @@ int valve_iolink_mix_proof::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
-    auto feed_back_state = static_cast<io_device::IOLINKSTATE>(
+    auto feed_back_state = static_cast<valve::FB_STATE>(
         get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
@@ -2261,7 +2261,7 @@ int valve_iolink_shut_off_thinktop::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
-    auto feed_back_state = static_cast<io_device::IOLINKSTATE>(
+    auto feed_back_state = static_cast<valve::FB_STATE>(
         get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
