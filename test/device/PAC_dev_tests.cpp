@@ -3092,7 +3092,12 @@ TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
     G_PAC_INFO()->emulation_off();
     init_channels( V1 );
 
-    // Должна быть ошибка подключения устройства от модуля IO-Link.
+    // With feedback disabled (default P_FB=0), module errors should be ignored
+    // and valve should report feedback disabled state instead of module error
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    // Enable feedback to test that module errors are still reported when feedback is enabled
+    V1.set_cmd( "P_FB", 0, 1 );
     EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
 
     G_PAC_INFO()->emulation_on();
@@ -3285,6 +3290,90 @@ TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_enabled_and_al_err
     G_PAC_INFO()->emulation_on();
     }
 
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_disabled_and_module_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF)
+    V1.set_cmd( "P_FB", 0, 0 );
+    V1.evaluate_io();
+
+    // When feedback is disabled and there's a module error, 
+    // the valve should NOT report error state according to issue #1002
+    int state = V1.get_state();
+    
+    // The valve should not be in error state when feedback is disabled
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+    EXPECT_EQ( state, valve::VALVE_STATE_EX::VX_OFF_FB_OFF ) << "Expected feedback disabled state";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_enabled_and_module_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON)
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+
+    // When feedback is enabled and there's a module error, 
+    // the valve SHOULD report error state (normal behavior)
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -io_device::IOLINKSTATE::NOTCONNECTED ) << "Expected module error code";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_disabled_and_module_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF)
+    V1.set_cmd( "P_FB", 0, 0 );
+    V1.evaluate_io();
+
+    // When feedback is disabled and there's a module error, 
+    // the valve should NOT report error state according to issue #1002
+    int state = V1.get_state();
+    
+    // The valve should not be in error state when feedback is disabled
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+    EXPECT_EQ( state, valve::VALVE_STATE_EX::VX_OFF_FB_OFF ) << "Expected feedback disabled state";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_enabled_and_module_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON)
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+
+    // When feedback is enabled and there's a module error, 
+    // the valve SHOULD report error state (normal behavior)
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -io_device::IOLINKSTATE::NOTCONNECTED ) << "Expected module error code";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
     analog_valve_iolink V1( "V1" );
@@ -3454,7 +3543,23 @@ TEST_F( iolink_dev_test, level_s_iolink_get_value )
 TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_error_description )
     {
     valve_iolink_shut_off_thinktop V1( "V1" );
-    test_dev_err( V1, V1, -101 );
+    EXPECT_STREQ( V1.get_error_description(), "нет ошибок" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+    V1.evaluate_io();
+    
+    // With feedback disabled (default P_FB=0), module errors should be ignored
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+    EXPECT_STREQ( V1.get_error_description(), "нет ошибок" );
+
+    // Enable feedback to test that module errors are reported when feedback is enabled
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+    EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+    EXPECT_STREQ( V1.get_error_description(), "IOL-устройство не подключено" );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
