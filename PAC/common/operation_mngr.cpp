@@ -1212,17 +1212,16 @@ int multiple_DI_DO_action::check( char* reason, unsigned int max_len ) const
         }
 
     auto &devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
+    for ( const auto& dev_group : devs )
         {
-        if ( devs[ i ].empty() )
+        if ( dev_group.empty() )
             {
             continue;
             }
 
         // Разрешаем смешанное содержимое: DI и DO устройства в одной группе
-        for ( u_int j = 0; j < devs[ i ].size(); j++ )
+        for ( const auto& device_ptr : dev_group )
             {
-            auto device_ptr = devs[ i ][ j ];
             auto device_type = device_ptr->get_type();
             
             // Проверяем, что устройство является допустимым типом (DI или DO)
@@ -1253,9 +1252,8 @@ void multiple_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     u_int di_count = 0;
     
     // Подсчитаем количество DI устройств (все кроме последних DO)
-    for ( u_int i = 0; i < devices.size(); i++ )
+    for ( const auto& dev : devices )
         {
-        auto dev = devices[ i ];
         if ( dev->get_type() == device::DT_DI ||
              dev->get_type() == device::DT_SB ||
              dev->get_type() == device::DT_GS ||
@@ -1271,15 +1269,15 @@ void multiple_DI_DO_action::evaluate_DO( std::vector< device* > devices )
         }
 
     // Управляем DO устройствами (они идут после всех DI)
-    for ( u_int j = di_count; j < devices.size(); j++ )
+    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
         if ( any_di_active )
             {
-            devices[ j ]->on();
+            (*it)->on();
             }
         else
             {
-            devices[ j ]->off();
+            (*it)->off();
             }
         }
     }
