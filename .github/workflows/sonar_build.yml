@@ -9,7 +9,7 @@ on:
     branches: [ master ]
   pull_request_target:
     branches: [ master ]
-    types: [ labeled ]
+    types: [ labeled, opened, reopened, synchronize ]
   merge_group:
     types: [ checks_requested ]
 
@@ -26,7 +26,11 @@ jobs:
           (
             github.event_name == 'pull_request_target' &&
             github.event.pull_request.head.repo.full_name != github.repository &&
-            contains(github.event.pull_request.labels.*.name, 'safe to test')
+            (
+              contains(github.event.pull_request.labels.*.name, 'safe to test') ||
+              github.event.pull_request.author_association == 'MEMBER' ||
+              github.event.pull_request.author_association == 'OWNER'
+            )
           ) ||
           (
             github.event_name == 'pull_request' &&
