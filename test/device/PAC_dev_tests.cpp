@@ -1126,6 +1126,14 @@ TEST( device, device )
     EXPECT_STREQ( dev.get_name(), "?" );
     }
 
+TEST( device, device_too_long_name )
+    {
+    device dev( "VERY_VERY_LONG_DEVICE_NAME_MORE_THAN_30_SYMBOLS",
+        device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "VERY_VERY_LONG_DEVICE_NAME_MOR" );
+    }
+
 TEST( device, get_type_str )
     {
     device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
@@ -3035,6 +3043,52 @@ TEST( valve_iolink_mix_proof, get_state )
     EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, V1.get_state() );
     DeltaMilliSecSubHooker::set_default_time();
 
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, seat_switching_timing )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+
+    // Test that seat switching doesn't immediately cause VX_OFF_FB_ERR.
+    // Test upper seat switching timing.
+    V1.open_upper_seat();
+    auto state = V1.get_state();
+
+    // Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Upper seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) << 
+        "Upper seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
+
+    // Test lower seat switching timing.  
+    V1.open_lower_seat();
+    state = V1.get_state();
+
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Lower seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) <<
+        "Lower seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
@@ -5295,6 +5349,259 @@ TEST( power_unit, set_cmd )
         "ST_CH={0,0,0,0,0,0,0,0}, "
         "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
+    }
+
+
+TEST( analog_valve_ey, analog_valve_ey )
+    {
+    analog_valve_ey VC1( "VC1" );
+    EXPECT_STREQ( VC1.get_name(), "VC1" );
+    EXPECT_EQ( VC1.get_type(), device::DT_VC );
+    EXPECT_EQ( VC1.get_sub_type(), device::DST_VC_EY );
+    }
+
+TEST( analog_valve_ey, set_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_property( "UNKNOWN", nullptr );
+    }
+
+TEST( analog_valve_ey, get_state_without_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    // No converter bound -> special error code.
+    EXPECT_EQ( VC1.get_state(), -200 );
+
+    // Should be no crash and no change in value.
+    VC1.direct_on();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    VC1.direct_off();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+
+    // Bind converter.
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Select channel 1 and check routing to converter value 1.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 55.5f );
+    EXPECT_FLOAT_EQ( 55.5f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 55.5f, VC1.get_value() );
+
+    // direct_on/off should route to channel 1
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+
+    // Switch to channel 2 and verify independent value path.
+    VC1.set_rt_par( 1, 2 );
+    VC1.direct_set_value( 33.3f );
+    // Channel 1 remains unchanged at last set (0.0), channel 2 reflects new value.
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 33.3f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
+
+    // direct_on/off should route to channel 2 now.
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, set_rt_par_validation )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Set valid channel first.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 12.5f );
+    EXPECT_FLOAT_EQ( 12.5f, Y1.get_value() );
+
+    // Try to set invalid channel, ey_number must remain unchanged (still 1).
+    VC1.set_rt_par( 1, 3 );
+    VC1.direct_set_value( 66.6f );
+    EXPECT_FLOAT_EQ( 66.6f, Y1.get_value() );   // Affects channel 1
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );   // Channel 2 untouched
+
+    // Another invalid channel value below range.
+    VC1.set_rt_par( 1, 0 );
+    VC1.direct_set_value( 77.7f );
+    EXPECT_FLOAT_EQ( 77.7f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    }
+
+TEST( analog_valve_ey, get_state_with_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Default state from converter.
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    // Change converter state via its API and compare.
+    Y1.direct_on();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    Y1.direct_off();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+    }
+
+
+TEST( converter_iolink_ao, constructor )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_STREQ( Y1.get_name(), "Y1" );
+    EXPECT_EQ( Y1.get_type(), device::DT_EY );
+    EXPECT_EQ( Y1.get_sub_type(), device::DST_CONV_AO2 );
+    }
+
+TEST( converter_iolink_ao, direct_on_off )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test initial state.
+    EXPECT_EQ( Y1.get_state(), 0 );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+
+    // Test turning on.
+    Y1.direct_on();
+    EXPECT_EQ( Y1.get_state(), 1 );
+    EXPECT_EQ( Y1.get_value(), 100.f );
+
+    // Test turning off
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_state(), 0 );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    }
+
+TEST( converter_iolink_ao, set_value )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test setting different values for channel 1.
+    Y1.set_value( 10.0f );
+    EXPECT_EQ( Y1.get_value(), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 57'365u );
+
+    Y1.set_value( 100.0f );
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+
+    Y1.set_value( 200.0f );
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+
+    Y1.set_value( 0.0f );
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+
+    // Test setting different values for channel 2.
+    Y1.set_value2( 10.0f );
+    EXPECT_EQ( Y1.get_value2(), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 57'365u );
+
+    Y1.set_value2( 0.0f );
+    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
+
+    Y1.set_value2( 200.0f );
+    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+    }
+
+TEST( converter_iolink_ao, set_cmd )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test state command.
+    EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
+
+    // Test value command.
+    EXPECT_EQ( Y1.set_cmd( "V", 0, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_value(), 75.5f );
+    EXPECT_EQ( Y1.set_cmd( "V2", 0, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_value2(), 75.5f );
+
+
+    // Test unknown command
+    EXPECT_EQ( Y1.set_cmd( "UNKNOWN", 0, 1 ), 1 );
+    }
+
+TEST( converter_iolink_ao, save_device_ex )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    char buff[ 1000 ]{};
+
+    auto len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, V2=0.0},\n" );
+
+    Y1.set_value( 42.5f );
+    len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=0.0},\n" );
+
+    Y1.set_value2( 21.5f );
+    len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=21.5},\n" );
+    }
+
+TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_EQ( Y1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( Y1 );
+    set_iol_state_to_OK( Y1 );
+
+    const u_int_2 VALUE = 1;
+    *Y1.AI_channels.int_read_values[ 0 ] = VALUE;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -1 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( device_manager, get_EY )
+    {
+    // Cleanup before test.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    
+    // Add a converter device.
+    auto* Y1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_EY, device::DST_CONV_AO2, "CAB1EY10", "", "IFM.DP1213" );
+    
+    EXPECT_NE( Y1, nullptr );
+    
+    // Test accessor function.
+    auto* retrieved_Y1 = EY( "CAB1EY10" );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( retrieved_Y1 ) );
+    
+    // Test non-existent device.
+    auto* non_existent = EY( "NON_EXISTENT" );
+    EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
     }
 
 
