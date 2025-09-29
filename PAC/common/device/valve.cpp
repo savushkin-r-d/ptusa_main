@@ -1376,8 +1376,8 @@ int valve_iolink_mix_proof::get_state()
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
         error_id != io_device::IOLINKSTATE::OK )
         {
-        // Check if feedback is enabled before reporting module IO-Link error
-        // If feedback is disabled, don't report module errors (issue #1002)
+        // Check if feedback is enabled before reporting module IO-Link error.
+        // If feedback is disabled, don't report module errors.
         if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
             {
             return -error_id;
@@ -1386,8 +1386,8 @@ int valve_iolink_mix_proof::get_state()
 
     if ( in_info.err > 0 )
         {
-        // Check if feedback is enabled before reporting AL IO-Link error
-        // If feedback is disabled, don't report internal AL errors (issue #1002)
+        // Check if feedback is enabled before reporting AL IO-Link error.
+        // If feedback is disabled, don't report internal AL errors.
         if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
             {
             return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
@@ -2272,8 +2272,8 @@ int valve_iolink_shut_off_thinktop::get_state()
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
         error_id != io_device::IOLINKSTATE::OK )
         {
-        // Check if feedback is enabled before reporting module IO-Link error
-        // If feedback is disabled, don't report module errors (issue #1002)
+        // Check if feedback is enabled before reporting module IO-Link error.
+        // If feedback is disabled, don't report module errors.
         if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
             {
             return -error_id;
@@ -2282,8 +2282,8 @@ int valve_iolink_shut_off_thinktop::get_state()
 
     if ( in_info.err > 0 )
         {
-        // Check if feedback is enabled before reporting AL IO-Link error
-        // If feedback is disabled, don't report internal AL errors (issue #1002)
+        // Check if feedback is enabled before reporting AL IO-Link error.
+        // If feedback is disabled, don't report internal AL errors.
         if ( get_par( P_FB, 0 ) != FB_IS_AND_OFF )
             {
             return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
