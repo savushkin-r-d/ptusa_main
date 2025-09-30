@@ -4089,7 +4089,6 @@ float converter_iolink_ao::get_channel_value( u_int ch ) const
         {
         case 1: return v1;
         case 2: return v2;
-        
         default: return 0.0;
         }
     }
