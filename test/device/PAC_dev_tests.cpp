@@ -5378,8 +5378,15 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     analog_valve_ey VC1( "VC1" );
     converter_iolink_ao Y1( "Y1" );
 
+    EXPECT_EQ( 0u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 0u, Y1.p_data_out->setpoint_ch2 );
+
     // Bind converter.
     VC1.set_property( "TERMINAL", &Y1 );
+
+    // After binding both channels should be 4 mA.
+    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch2 );
 
     // Select channel 1 and check routing to converter value 1.
     VC1.set_rt_par( 1, 1 );
