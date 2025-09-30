@@ -3029,7 +3029,7 @@ TEST( valve_iolink_mix_proof, get_state )
     EXPECT_EQ( -( io_link_valve::ERROR_CODE_OFFSET + V1.in_info.err ),
         V1.get_state() );
 
-    // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
+    // Нет обратной связи, но прошло время проверки и есть ошибка клапана,
     // поэтому есть ошибка.
     V1.in_info.err = 0;
     DeltaMilliSecSubHooker::set_millisec( 101UL );
@@ -3095,6 +3095,15 @@ TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
     // With feedback disabled (default P_FB=0), module errors should be ignored
     // and valve should report feedback disabled state instead of module error.
     EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    V1.in_info.usl = true;
+    V1.in_info.lsp = false;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_UPPER_SEAT_FB_OFF );
+
+    V1.in_info.usl = false;
+    V1.in_info.lsp = true;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_LOWER_SEAT_FB_OFF );
+
 
     // Enable feedback to test that module errors are still reported when feedback is enabled.
     V1.set_cmd( "P_FB", 0, 1 );
