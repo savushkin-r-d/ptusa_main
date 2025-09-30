@@ -4131,7 +4131,7 @@ void converter_iolink_ao::set_channel_value( u_int ch, float val )
             p_data_out->setpoint_ch2 = new_value;
             v2 = val;
             break;
-        }    
+        }
 
     calculate_state();
     }
