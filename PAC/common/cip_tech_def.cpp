@@ -34,6 +34,7 @@ const std::map<int, const char*> ERR_MSG =
     { ERR_SUPPLY_TEMP_SENSOR, "Ошибка температуры на подаче" },
     { ERR_RETURN_TEMP_SENSOR, "Ошибка температуры на возврате" },
     { ERR_CONCENTRATION_SENSOR, "Ошибка концентрации в возвратной трубе" },
+    { ERR_WATCHDOG, "Ошибка сторожевого таймера" },
 
     { ERR_NO_DESINFECTION_MEDIUM, "Нет дезинфицирующего средства" },
     { ERR_DESINFECTION_MEDIUM_MAX_TIME, 
@@ -235,6 +236,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_upr_sanitizer_pump = nullptr;
     dev_os_object_pause = nullptr;
     dev_upr_circulation = nullptr;
+    dev_watchdog = nullptr;
     dev_os_pump_can_run = nullptr;
     dev_os_can_continue = nullptr;
     dev_ls_ret_pump = nullptr;
@@ -1585,7 +1587,7 @@ void cipline_tech_object::_StopDev( )
     V13->off();
     V05->off();
     V06->off();
-    if (state != ERR_CIP_OBJECT && state != ERR_OS)
+    if (state != ERR_CIP_OBJECT && state != ERR_OS && state != ERR_WATCHDOG )
         {
         V07->off();
         V08->off();
@@ -3016,8 +3018,15 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
+            if ( dev_watchdog )
+                {
+                if ( dev_watchdog->get_state() != ON )
+                    {
+                    objready = 0;
+                    }
+                }
 
-            if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
+            if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS || state == ERR_WATCHDOG ))
                 {
                 state = 1;
                 InitStep(curstep, 1);
@@ -3126,6 +3135,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( )
         {
         dev_ao_temp_task->set_value(0);
         }
+
     dev_upr_circulation = nullptr;
     dev_upr_cip_in_progress = nullptr;
     dev_upr_ret = nullptr;
@@ -3159,6 +3169,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( )
     dev_ao_flow_task = nullptr;
     dev_ao_temp_task = nullptr;
     dev_upr_wash_aborted = nullptr;
+    dev_watchdog = nullptr;
 
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
@@ -3410,6 +3421,13 @@ int cipline_tech_object::_CheckErr( )
         if (!dev_os_cip_ready->get_state())
             {
             return ERR_CIP_OBJECT;
+            }
+        }
+    if ( dev_watchdog )
+        {
+        if ( dev_watchdog->get_state() != ON )
+            {
+            return ERR_WATCHDOG;
             }
         }
 
@@ -5770,6 +5788,9 @@ int cipline_tech_object::init_object_devices()
         {
         printf("init_object_devices\n\r");
         }
+    // Watchdog связи.
+    if ( check_device( dev_watchdog, P_WATCHDOG, device::DEVICE_TYPE::DT_WATCHDOG ) ) return -1;
+    
     //Обратная связь
     if (check_DI(dev_os_object, P_OS)) return -1;
     //Обратная связь №2(готовность объекта к мойке)
@@ -5830,6 +5851,35 @@ int cipline_tech_object::init_object_devices()
     if (check_AO(dev_ao_temp_task, P_SIGNAL_TEMP_TASK)) return -1;
 
     return 0;
+    }
+
+int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVICE_TYPE type )
+    {
+    outdev = nullptr;
+
+    if ( type < 0 || type >= device::DEVICE_TYPE::C_DEVICE_TYPE_CNT )
+        {
+        return -1;
+        }
+    if ( rt_par_float[ parno ] <= 0 )
+        {
+        return 0;
+        }
+
+    auto dev_no = (u_int)rt_par_float[ parno ];
+    char devname[ MAX_DEV_NAME * UNICODE_MULTIPLIER ] = { 0 };
+    auto res = fmt::format_to_n( devname, 
+        MAX_DEV_NAME * UNICODE_MULTIPLIER,
+        "LINE{}{}{}", nmr, device::DEV_NAMES[ type ], dev_no );
+    *res.out = '\0';
+    auto dev = G_DEVICE_MANAGER()->get_device( devname );
+    if ( dev->get_serial_n() > 0 && dev->get_type() == type )
+        {
+        outdev = dev;
+        return 0;
+        }
+
+    return -2;
     }
 
     int cipline_tech_object::check_DI(device*& outdev, int parno)
