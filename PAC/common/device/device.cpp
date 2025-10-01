@@ -4141,7 +4141,8 @@ void converter_iolink_ao::evaluate_io()
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
-    std::reverse_copy( data, data + PROCESS_DATA_IN_SIZE,
+    const auto WORD_SIZE = 2;
+    std::reverse_copy( data, data + WORD_SIZE,
         reinterpret_cast<std::byte*>( &p_data_in ) );
 
     p_data_out = reinterpret_cast<process_data_out*>(
