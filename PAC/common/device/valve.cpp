@@ -2644,18 +2644,14 @@ void analog_valve_ey::direct_set_value( float new_value )
     {
     if ( !conv ) return;
 
-    if ( ey_number == 1 ) conv->set_value( new_value );
-    else if ( ey_number == 2 ) conv->set_value2( new_value );
+    conv->set_channel_value( ey_number, new_value );
     }
 //-----------------------------------------------------------------------------
 float analog_valve_ey::get_value()
     {
     if ( !conv ) return 0.0f;
 
-    if ( ey_number == 1 ) return conv->get_value();
-    else if ( ey_number == 2 ) return conv->get_value2();
-
-    return 0.0f;
+    return conv->get_channel_value( ey_number );
     }
 //-----------------------------------------------------------------------------
 int analog_valve_ey::get_state()
