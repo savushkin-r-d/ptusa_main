@@ -4141,7 +4141,7 @@ void converter_iolink_ao::evaluate_io()
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
-    const auto WORD_SIZE = 2;
+    const auto WORD_SIZE = sizeof( uint16_t );
     std::reverse_copy( data, data + WORD_SIZE,
         reinterpret_cast<std::byte*>( &p_data_in ) );
 
