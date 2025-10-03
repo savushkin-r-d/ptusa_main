@@ -5783,8 +5783,7 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
     init_channels( Y1 );
     set_iol_state_to_OK( Y1 );
 
-    const u_int_2 VALUE = 1;
-    *Y1.AI_channels.int_read_values[ 0 ] = VALUE;
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b1'0000'0000;
     Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -1 );
 
