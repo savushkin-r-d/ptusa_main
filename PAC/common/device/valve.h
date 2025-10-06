@@ -1155,8 +1155,11 @@ class analog_valve_ey : public device
 
         void set_rt_par( u_int idx, float value ) override;
 
+#ifndef PTUSA_TEST
     private:
-        enum CONSTANTS
+#endif // !PTUSA_TEST
+
+        enum class CONSTANTS
             {
             FULL_CLOSED = 0,
             FULL_OPENED = 100,
