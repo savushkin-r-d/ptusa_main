@@ -5802,6 +5802,26 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
     {
     converter_iolink_ao Y1( "Y1" );
     test_dev_err( Y1, Y1, 0 );
+
+    G_PAC_INFO()->emulation_off();
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b10000;
+    EXPECT_EQ( Y1.get_state(), -1 );
+    EXPECT_STREQ( Y1.get_error_description(), "требуется обслуживание" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    EXPECT_EQ( Y1.get_state(), -2 );
+    EXPECT_STREQ( Y1.get_error_description(), "не соответствует спецификации" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b110000;
+    EXPECT_EQ( Y1.get_state(), -3 );
+    EXPECT_STREQ( Y1.get_error_description(), "функциональная проверка" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b1000000;
+    EXPECT_EQ( Y1.get_state(), -3 );
+    EXPECT_STREQ( Y1.get_error_description(), "отказ" );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
