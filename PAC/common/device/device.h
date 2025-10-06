@@ -1804,7 +1804,6 @@ class converter_iolink_ao : public analog_io_device
 
         float v1{}; // Выходное значение канала 1.
         float v2{}; // Выходное значение канала 2.
-        int st{};   // Состояние устройства.
         int err{};  // Ошибка.
 
         enum CONSTANTS
