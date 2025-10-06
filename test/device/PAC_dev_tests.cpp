@@ -5568,6 +5568,27 @@ TEST( analog_valve_ey, set_property )
     VC1.set_property( "UNKNOWN", nullptr );
     }
 
+TEST( analog_valve_ey, set_string_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_string_property( nullptr, nullptr );    // No crash.
+    VC1.set_string_property( "UNKNOWN", "TEST" );   // No crash.
+    
+    // Valid property but invalid value.
+    VC1.set_string_property( "TERMINAL", "TEST" );  // No crash.
+    VC1.set_string_property( "TERMINAL", "Y1" );    // No crash, but no effect.
+
+    // Valid property and valid value.
+    G_DEVICE_MANAGER()->add_io_device(
+        device::DT_EY, device::DST_CONV_AO2, "Y1", "Test device", "Y");
+    auto Y1 = G_DEVICE_MANAGER()->get_EY( "Y1" );
+    VC1.set_string_property( "TERMINAL", "Y1" );
+    EXPECT_EQ( Y1, VC1.conv );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
 TEST( analog_valve_ey, get_state_without_converter )
     {
     analog_valve_ey VC1( "VC1" );
@@ -5592,9 +5613,9 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     // Bind converter.
     VC1.set_property( "TERMINAL", &Y1 );
 
-    // After binding both channels should be 4 mA.
-    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch1 );
-    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch2 );
+    // After binding both channels should be 4 mA (40'975).
+    EXPECT_EQ( 40'975u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 40'975, Y1.p_data_out->setpoint_ch2 );
 
     // Select channel 1 and check routing to converter value 1.
     VC1.set_rt_par( 1, 1 );
@@ -5618,15 +5639,6 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
     EXPECT_FLOAT_EQ( 33.3f, Y1.get_value2() );
     EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
-
-    // direct_on/off should route to channel 2 now.
-    VC1.direct_on();
-    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
-
-    VC1.direct_off();
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     }
 
 TEST( analog_valve_ey, set_rt_par_validation )
@@ -5691,11 +5703,15 @@ TEST( converter_iolink_ao, direct_on_off )
     Y1.direct_on();
     EXPECT_EQ( Y1.get_state(), 1 );
     EXPECT_EQ( Y1.get_value(), 100.f );
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
 
     // Test turning off
     Y1.direct_off();
     EXPECT_EQ( Y1.get_state(), 0 );
     EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
     }
 
 TEST( converter_iolink_ao, set_value )
@@ -5731,6 +5747,19 @@ TEST( converter_iolink_ao, set_value )
     Y1.set_value2( 200.0f );
     EXPECT_EQ( Y1.get_value2(), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    // Test on/off.
+    Y1.direct_on();
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
     }
 
 TEST( converter_iolink_ao, set_cmd )
@@ -5783,10 +5812,39 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
     init_channels( Y1 );
     set_iol_state_to_OK( Y1 );
 
-    const u_int_2 VALUE = 1;
-    *Y1.AI_channels.int_read_values[ 0 ] = VALUE;
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -2 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    test_dev_err( Y1, Y1, 0 );
+
+    G_PAC_INFO()->emulation_off();
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b10000;
     Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -1 );
+    EXPECT_STREQ( Y1.get_error_description(), "требуется обслуживание" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -2 );
+    EXPECT_STREQ( Y1.get_error_description(), "не соответствует спецификации" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b110000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -3 );
+    EXPECT_STREQ( Y1.get_error_description(), "функциональная проверка" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b1000000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -4 );
+    EXPECT_STREQ( Y1.get_error_description(), "отказ" );
 
     G_PAC_INFO()->emulation_on();
     }

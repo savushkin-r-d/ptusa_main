@@ -4064,23 +4064,14 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем канал 1 в максимальное значение.
-    p_data_out->setpoint_ch1 = C_MAX_VALUE;
-    p_data_out->setpoint_ch2 = C_MAX_VALUE;
-
-    v = 100.0f;
-    v2 = 100.0f;
-    analog_io_device::direct_on();
+    direct_set_value( 100 );
+    set_value2( 100 );
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->setpoint_ch1 = C_MIN_VALUE;
-    p_data_out->setpoint_ch2 = C_MIN_VALUE;
-
-    v = 0.0f;
-    v2 = 0.0f;
-    analog_io_device::direct_off();
+    direct_set_value( 0 );
+    set_value2( 0 );
     }
 
 float converter_iolink_ao::get_value()
@@ -4185,6 +4176,28 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
         }
 
     return analog_io_device::set_cmd( prop, idx, val );
+    }
+
+const char* converter_iolink_ao::get_error_description()
+    {
+    auto err_id = get_error_id();
+    switch ( err_id )
+        {
+        case -1:
+            return "требуется обслуживание";
+
+        case -2:
+            return "не соответствует спецификации";
+
+        case -3:
+            return "функциональная проверка";
+
+        case -4:
+            return "отказ";
+
+        default:
+            return iol_dev.get_error_description( err_id );
+        }    
     }
 
 #ifdef WIN_OS
