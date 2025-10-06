@@ -1816,9 +1816,9 @@ class converter_iolink_ao : public analog_io_device
 
 #pragma pack(push, 1)
         struct process_data_in
-            {
-            uint8_t device_status : 4;	// Статус устройства.
+            {            
             uint8_t reserved : 4;	    // Зарезервированные биты.
+            uint8_t device_status : 4;	// Статус устройства.
             };
 
         struct process_data_out

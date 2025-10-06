@@ -5592,9 +5592,9 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     // Bind converter.
     VC1.set_property( "TERMINAL", &Y1 );
 
-    // After binding both channels should be 4 mA.
-    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch1 );
-    EXPECT_EQ( 4'000u, Y1.p_data_out->setpoint_ch2 );
+    // After binding both channels should be 4 mA (40'975).
+    EXPECT_EQ( 40'975u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 40'975, Y1.p_data_out->setpoint_ch2 );
 
     // Select channel 1 and check routing to converter value 1.
     VC1.set_rt_par( 1, 1 );
@@ -5618,15 +5618,6 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
     EXPECT_FLOAT_EQ( 33.3f, Y1.get_value2() );
     EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
-
-    // direct_on/off should route to channel 2 now.
-    VC1.direct_on();
-    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
-
-    VC1.direct_off();
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     }
 
 TEST( analog_valve_ey, set_rt_par_validation )
@@ -5691,11 +5682,15 @@ TEST( converter_iolink_ao, direct_on_off )
     Y1.direct_on();
     EXPECT_EQ( Y1.get_state(), 1 );
     EXPECT_EQ( Y1.get_value(), 100.f );
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
 
     // Test turning off
     Y1.direct_off();
     EXPECT_EQ( Y1.get_state(), 0 );
     EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
     }
 
 TEST( converter_iolink_ao, set_value )
@@ -5731,6 +5726,19 @@ TEST( converter_iolink_ao, set_value )
     Y1.set_value2( 200.0f );
     EXPECT_EQ( Y1.get_value2(), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    // Test on/off.
+    Y1.direct_on();
+    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
     }
 
 TEST( converter_iolink_ao, set_cmd )
@@ -5783,9 +5791,9 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
     init_channels( Y1 );
     set_iol_state_to_OK( Y1 );
 
-    *Y1.AI_channels.int_read_values[ 0 ] = 0b1'0000'0000;
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
     Y1.evaluate_io();
-    EXPECT_EQ( Y1.get_state(), -1 );
+    EXPECT_EQ( Y1.get_state(), -2 );
 
     G_PAC_INFO()->emulation_on();
     }

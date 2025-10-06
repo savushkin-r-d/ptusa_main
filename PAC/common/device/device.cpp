@@ -4064,23 +4064,14 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем канал 1 в максимальное значение.
-    p_data_out->setpoint_ch1 = C_MAX_VALUE;
-    p_data_out->setpoint_ch2 = C_MAX_VALUE;
-
-    v = 100.0f;
-    v2 = 100.0f;
-    st = 1;
+    direct_set_value( 100 );
+    set_value2( 100 );
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->setpoint_ch1 = C_MIN_VALUE;
-    p_data_out->setpoint_ch2 = C_MIN_VALUE;
-
-    v = 0.0f;
-    v2 = 0.0f;
-    st = 0;
+    direct_set_value( 0 );
+    set_value2( 0 );
     }
 
 float converter_iolink_ao::get_value()
@@ -4141,8 +4132,7 @@ void converter_iolink_ao::evaluate_io()
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
 
-    const auto WORD_SIZE = sizeof( uint16_t );
-    std::reverse_copy( data, data + WORD_SIZE,
+    std::copy( data, data + PROCESS_DATA_IN_SIZE,
         reinterpret_cast<std::byte*>( &p_data_in ) );
 
     p_data_out = reinterpret_cast<process_data_out*>(
@@ -4188,7 +4178,23 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
 
 const char* converter_iolink_ao::get_error_description()
     {
-    return iol_dev.get_error_description( get_error_id() );
+    auto err = get_error_id();
+    switch ( err )
+        {
+        case -1:
+            return "требуется обслуживание";
+
+        case -2:
+            return "не соответствует спецификации";
+
+        case -3:
+            return "функциональная проверка";
+
+        case -4:
+            return "отказ";
+        }
+
+    return iol_dev.get_error_description( err );
     }
 
 #ifdef WIN_OS

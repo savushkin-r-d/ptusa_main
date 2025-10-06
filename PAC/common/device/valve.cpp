@@ -2622,7 +2622,11 @@ void analog_valve_ey::set_string_property( const char* field,
         case 'T':
             conv = dynamic_cast<converter_iolink_ao*>(
                 G_DEVICE_MANAGER()->get_device( new_value ) );
-            if ( conv ) conv->direct_off();
+            if ( conv )
+                {
+                conv->evaluate_io();
+                conv->direct_off();
+                }
             break;
 
         default:
