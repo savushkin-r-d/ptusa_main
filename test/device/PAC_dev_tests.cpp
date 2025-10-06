@@ -5620,25 +5620,34 @@ TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
     // Select channel 1 and check routing to converter value 1.
     VC1.set_rt_par( 1, 1 );
     VC1.direct_set_value( 55.5f );
-    EXPECT_FLOAT_EQ( 55.5f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 55.5f, Y1.get_channel_value( 1 ) );
     EXPECT_FLOAT_EQ( 55.5f, VC1.get_value() );
 
     // direct_on/off should route to channel 1
     VC1.direct_on();
-    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_channel_value( 1 ) );
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
 
     VC1.direct_off();
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 1 ) );
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
 
     // Switch to channel 2 and verify independent value path.
     VC1.set_rt_par( 1, 2 );
     VC1.direct_set_value( 33.3f );
     // Channel 1 remains unchanged at last set (0.0), channel 2 reflects new value.
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
-    EXPECT_FLOAT_EQ( 33.3f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 1 ) );
+    EXPECT_FLOAT_EQ( 33.3f, Y1.get_channel_value( 2 ) );
     EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
+
+    // direct_on/off should route to channel 2 now.
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_channel_value( 2 ) );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 2 ) );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     }
 
 TEST( analog_valve_ey, set_rt_par_validation )
@@ -5650,19 +5659,17 @@ TEST( analog_valve_ey, set_rt_par_validation )
     // Set valid channel first.
     VC1.set_rt_par( 1, 1 );
     VC1.direct_set_value( 12.5f );
-    EXPECT_FLOAT_EQ( 12.5f, Y1.get_value() );
+    EXPECT_FLOAT_EQ( 12.5f, Y1.get_channel_value( 1 ) );
 
     // Try to set invalid channel, ey_number must remain unchanged (still 1).
     VC1.set_rt_par( 1, 3 );
     VC1.direct_set_value( 66.6f );
-    EXPECT_FLOAT_EQ( 66.6f, Y1.get_value() );   // Affects channel 1
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );   // Channel 2 untouched
+    EXPECT_FLOAT_EQ( 66.6f, Y1.get_channel_value( 1 ) );   // Affects channel 1
 
     // Another invalid channel value below range.
     VC1.set_rt_par( 1, 0 );
     VC1.direct_set_value( 77.7f );
-    EXPECT_FLOAT_EQ( 77.7f, Y1.get_value() );
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
+    EXPECT_FLOAT_EQ( 77.7f, Y1.get_channel_value( 1 ) );
     }
 
 TEST( analog_valve_ey, get_state_with_converter )
@@ -5697,68 +5704,78 @@ TEST( converter_iolink_ao, direct_on_off )
 
     // Test initial state.
     EXPECT_EQ( Y1.get_state(), 0 );
-    EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
 
     // Test turning on.
     Y1.direct_on();
     EXPECT_EQ( Y1.get_state(), 1 );
-    EXPECT_EQ( Y1.get_value(), 100.f );
-    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 100.0f, Y1.get_value() );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
+
 
     // Test turning off
     Y1.direct_off();
     EXPECT_EQ( Y1.get_state(), 0 );
-    EXPECT_EQ( Y1.get_value(), 0.0f );
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value2() );
-    EXPECT_FLOAT_EQ( 0.0f, Y1.get_value() );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
     }
 
 TEST( converter_iolink_ao, set_value )
     {
     converter_iolink_ao Y1( "Y1" );
 
+    // Test setting values for non existing channel.
+    Y1.set_channel_value( 3, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 0u );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 0u );
+
     // Test setting different values for channel 1.
-    Y1.set_value( 10.0f );
-    EXPECT_EQ( Y1.get_value(), 10.0f );
+    Y1.set_channel_value( 1, 10.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 10.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 57'365u );
 
-    Y1.set_value( 100.0f );
-    EXPECT_EQ( Y1.get_value(), 100.0f );
+    Y1.set_channel_value( 1, 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
 
-    Y1.set_value( 200.0f );
-    EXPECT_EQ( Y1.get_value(), 100.0f );
+    Y1.set_channel_value( 1, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
 
-    Y1.set_value( 0.0f );
-    EXPECT_EQ( Y1.get_value(), 0.0f );
+    Y1.set_channel_value( 1, 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
 
     // Test setting different values for channel 2.
-    Y1.set_value2( 10.0f );
-    EXPECT_EQ( Y1.get_value2(), 10.0f );
+    Y1.set_channel_value( 2, 10.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 10.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 57'365u );
 
-    Y1.set_value2( 0.0f );
-    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    Y1.set_channel_value( 2, 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
 
-    Y1.set_value2( 200.0f );
-    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    Y1.set_channel_value( 2, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    // Test getting values for non existing channel.
+    EXPECT_EQ( Y1.get_channel_value( 3 ), 0.0f );
 
     // Test on/off.
     Y1.direct_on();
-    EXPECT_EQ( Y1.get_value(), 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
-    EXPECT_EQ( Y1.get_value2(), 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
 
     Y1.direct_off();
-    EXPECT_EQ( Y1.get_value(), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
-    EXPECT_EQ( Y1.get_value2(), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
     EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
     }
 
@@ -5770,11 +5787,11 @@ TEST( converter_iolink_ao, set_cmd )
     EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
 
     // Test value command.
-    EXPECT_EQ( Y1.set_cmd( "V", 0, 75.5 ), 0 );
-    EXPECT_EQ( Y1.get_value(), 75.5f );
-    EXPECT_EQ( Y1.set_cmd( "V2", 0, 75.5 ), 0 );
-    EXPECT_EQ( Y1.get_value2(), 75.5f );
+    EXPECT_EQ( Y1.set_cmd( "CH", 1, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 75.5f );
 
+    EXPECT_EQ( Y1.set_cmd( "CH", 2, 25.5 ), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 25.5f );
 
     // Test unknown command
     EXPECT_EQ( Y1.set_cmd( "UNKNOWN", 0, 1 ), 1 );
@@ -5788,19 +5805,19 @@ TEST( converter_iolink_ao, save_device_ex )
     auto len = Y1.save_device( buff, "" );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
-        "Y1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, V2=0.0},\n" );
+        "Y1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={0.00,0.00}},\n" );
 
-    Y1.set_value( 42.5f );
+    Y1.set_channel_value( 1, 42.5f );
     len = Y1.save_device( buff, "" );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
-        "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=0.0},\n" );
+        "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,0.00}},\n" );
 
-    Y1.set_value2( 21.5f );
+    Y1.set_channel_value( 2, 21.5f );
     len = Y1.save_device( buff, "" );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
-        "Y1={M=0, ST=1, V=42.50, E=0, M_EXP=1.0, S_DEV=0.2, V2=21.5},\n" );
+        "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,21.50}},\n" );
     }
 
 TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
