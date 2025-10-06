@@ -4064,13 +4064,13 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    direct_set_value( 100 );
-    set_value2( 100 );
+    set_channel_value( 1, 100 );
+    set_channel_value( 2, 100 );
     }
 
 void converter_iolink_ao::direct_off()
     {
-    direct_set_value( 0 );
+    set_channel_value( 1, 0 );
     set_channel_value( 2, 0 );
     }
 
@@ -4108,8 +4108,6 @@ uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
 
 void converter_iolink_ao::set_channel_value( u_int ch, float val )
     {
-    if ( get_manual_mode() ) return;
-
     auto new_value = calc_setpoint( val );
     switch ( ch )
         {
@@ -4129,8 +4127,8 @@ void converter_iolink_ao::set_channel_value( u_int ch, float val )
 
 void converter_iolink_ao::calculate_state()
     {
-    if ( v > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
-    else if ( v == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
+    if ( v1 > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v1 == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
     }
 
 void converter_iolink_ao::evaluate_io()
