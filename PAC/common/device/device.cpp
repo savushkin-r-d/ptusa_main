@@ -4137,6 +4137,8 @@ void converter_iolink_ao::calculate_state()
 
 void converter_iolink_ao::evaluate_io()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
     auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
