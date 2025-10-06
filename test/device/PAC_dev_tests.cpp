@@ -5794,7 +5794,7 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
 
 TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
     {
-    // В режиме эмуляции состояние всегда 0.
+    // In emulator mode, state is always 0.
     converter_iolink_ao Y1( "Y1" );
     EXPECT_EQ( Y1.get_state(), 0 );
     Y1.evaluate_io();
