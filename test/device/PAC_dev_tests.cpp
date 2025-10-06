@@ -5801,7 +5801,7 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
     EXPECT_EQ( Y1.get_state(), 0 );
     init_channels( Y1 );
     Y1.evaluate_io();
-    EXPECT_EQ( Y1.get_state(), 0  );
+    EXPECT_EQ( Y1.get_state(), 0 );
 
     Y1.set_cmd( "ST", 0, 1 );
     Y1.evaluate_io();
