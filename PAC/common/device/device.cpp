@@ -4070,7 +4070,7 @@ void converter_iolink_ao::direct_on()
 
     v = 100.0f;
     v2 = 100.0f;
-    st = 1;
+    analog_io_device::direct_on();
     }
 
 void converter_iolink_ao::direct_off()
@@ -4080,7 +4080,7 @@ void converter_iolink_ao::direct_off()
 
     v = 0.0f;
     v2 = 0.0f;
-    st = 0;
+    analog_io_device::direct_off();
     }
 
 float converter_iolink_ao::get_value()
@@ -4100,7 +4100,7 @@ int converter_iolink_ao::get_state()
         return -err;
         }
 
-    return st;
+    return analog_io_device::get_state();
     }
 
 uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
@@ -4131,8 +4131,8 @@ void converter_iolink_ao::set_value2( float val )
 
 void converter_iolink_ao::calculate_state()
     {
-    if ( v > 0.0f || v2 > 0.0f ) st = 1;
-    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
+    if ( v > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
     }
 
 void converter_iolink_ao::evaluate_io()
