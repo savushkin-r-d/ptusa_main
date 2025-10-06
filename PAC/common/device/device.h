@@ -1784,7 +1784,7 @@ class converter_iolink_ao : public analog_io_device
         /// @param ch Channel number (valid values: CHANNEL_1 or CHANNEL_2).
         /// @param val Value to set.
         ///
-        /// Valid channel values are 1 (CHANNEL_1) and 2 (CHANNEL_2).         
+        /// Valid channel values are 1 (CHANNEL_1) and 2 (CHANNEL_2).
         void set_channel_value( u_int ch, float val );
 
         void evaluate_io() override;
