@@ -4064,33 +4064,24 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем канал 1 в максимальное значение.
-    p_data_out->setpoint_ch1 = C_MAX_VALUE;
-    p_data_out->setpoint_ch2 = C_MAX_VALUE;
-
-    v = 100.0f;
-    v2 = 100.0f;
-    st = 1;
+    set_channel_value( 1, 100 );
+    set_channel_value( 2, 100 );
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->setpoint_ch1 = C_MIN_VALUE;
-    p_data_out->setpoint_ch2 = C_MIN_VALUE;
-
-    v = 0.0f;
-    v2 = 0.0f;
-    st = 0;
+    set_channel_value( 1, 0 );
+    set_channel_value( 2, 0 );
     }
 
-float converter_iolink_ao::get_value()
+float converter_iolink_ao::get_channel_value( u_int ch ) const
     {
-    return v;
-    }
-
-float converter_iolink_ao::get_value2() const
-    {
-    return v2;
+    switch ( ch )
+        {
+        case 1: return v1;
+        case 2: return v2;
+        default: return 0.0;
+        }
     }
 
 int converter_iolink_ao::get_state()
@@ -4100,7 +4091,7 @@ int converter_iolink_ao::get_state()
         return -err;
         }
 
-    return st;
+    return analog_io_device::get_state();
     }
 
 uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
@@ -4115,28 +4106,35 @@ uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
     return setpoint;
     }
 
-void converter_iolink_ao::direct_set_value( float val )
+void converter_iolink_ao::set_channel_value( u_int ch, float val )
     {
-    p_data_out->setpoint_ch1 = calc_setpoint( val );
-    v = val;
-    calculate_state();
-    }
+    auto new_value = calc_setpoint( val );
+    switch ( ch )
+        {
+        case 1:
+            p_data_out->setpoint_ch1 = new_value;
+            v1 = val;
+            break;
 
-void converter_iolink_ao::set_value2( float val )
-    {
-    p_data_out->setpoint_ch2 = calc_setpoint( val );
-    v2 = val;
+        case 2:
+            p_data_out->setpoint_ch2 = new_value;
+            v2 = val;
+            break;
+        }
+
     calculate_state();
     }
 
 void converter_iolink_ao::calculate_state()
     {
-    if ( v > 0.0f || v2 > 0.0f ) st = 1;
-    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
+    if ( v1 > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v1 == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
     }
 
 void converter_iolink_ao::evaluate_io()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
     auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
@@ -4169,20 +4167,43 @@ void converter_iolink_ao::evaluate_io()
 int converter_iolink_ao::save_device_ex( char* buff )
     {
     auto l = analog_io_device::save_device_ex( buff );
-    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE, "V2={:.1f}, ",
-        get_value2() );
+    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE,
+        "CH={{{:.2f},{:.2f}}}, ", v1, v2 );
+
     return res.size + l;
     }
 
 int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( strcmp( prop, "V2" ) == 0 )
+    if ( strcmp( prop, "CH" ) == 0 )
         {
-        set_value2( static_cast<float>( val ) );
+        set_channel_value( idx, static_cast<float>( val ) );
         return 0;
         }
 
     return analog_io_device::set_cmd( prop, idx, val );
+    }
+
+const char* converter_iolink_ao::get_error_description()
+    {
+    auto err_id = get_error_id();
+    switch ( err_id )
+        {
+        case -1:
+            return "требуется обслуживание";
+
+        case -2:
+            return "не соответствует спецификации";
+
+        case -3:
+            return "функциональная проверка";
+
+        case -4:
+            return "отказ";
+
+        default:
+            return iol_dev.get_error_description( err_id );
+        }    
     }
 
 #ifdef WIN_OS
