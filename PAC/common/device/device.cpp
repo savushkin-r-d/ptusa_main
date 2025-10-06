@@ -4071,7 +4071,7 @@ void converter_iolink_ao::direct_on()
 void converter_iolink_ao::direct_off()
     {
     direct_set_value( 0 );
-    set_value2( 0 );
+    set_channel_value( 2, 0 );
     }
 
 float converter_iolink_ao::get_channel_value( u_int ch ) const
