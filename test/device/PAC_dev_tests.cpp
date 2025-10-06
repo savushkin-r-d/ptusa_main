@@ -5850,6 +5850,27 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
     }
 
 
+TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
+    {
+    // In emulator mode, state is always 0.
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_EQ( Y1.get_state(), 0 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 0 );
+    init_channels( Y1 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 0 );
+
+    Y1.set_cmd( "ST", 0, 1 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 1 );
+
+    Y1.set_cmd( "ST", 0, -100 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -100 );
+    }
+
+
 TEST( device_manager, get_EY )
     {
     // Cleanup before test.

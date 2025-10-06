@@ -4091,7 +4091,7 @@ int converter_iolink_ao::get_state()
         return -err;
         }
 
-    return st;
+    return analog_io_device::get_state();
     }
 
 uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
@@ -4122,12 +4122,14 @@ void converter_iolink_ao::set_value2( float val )
 
 void converter_iolink_ao::calculate_state()
     {
-    if ( v > 0.0f || v2 > 0.0f ) st = 1;
-    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
+    if ( v > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
     }
 
 void converter_iolink_ao::evaluate_io()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
     auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
