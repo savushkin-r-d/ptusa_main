@@ -5568,6 +5568,27 @@ TEST( analog_valve_ey, set_property )
     VC1.set_property( "UNKNOWN", nullptr );
     }
 
+TEST( analog_valve_ey, set_string_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_string_property( nullptr, nullptr );    // No crash.
+    VC1.set_string_property( "UNKNOWN", "TEST" );   // No crash.
+    
+    // Valid property but invalid value.
+    VC1.set_string_property( "TERMINAL", "TEST" );  // No crash.
+    VC1.set_string_property( "TERMINAL", "Y1" );    // No crash, but no effect.
+
+    // Valid property and valid value.
+    G_DEVICE_MANAGER()->add_io_device(
+        device::DT_EY, device::DST_CONV_AO2, "Y1", "Test device", "Y");
+    auto Y1 = G_DEVICE_MANAGER()->get_EY( "Y1" );
+    VC1.set_string_property( "TERMINAL", "Y1" );
+    EXPECT_EQ( Y1, VC1.conv );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
 TEST( analog_valve_ey, get_state_without_converter )
     {
     analog_valve_ey VC1( "VC1" );
@@ -5806,19 +5827,23 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
     G_PAC_INFO()->emulation_off();
 
     *Y1.AI_channels.int_read_values[ 0 ] = 0b10000;
+    Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -1 );
     EXPECT_STREQ( Y1.get_error_description(), "требуется обслуживание" );
 
     *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -2 );
     EXPECT_STREQ( Y1.get_error_description(), "не соответствует спецификации" );
 
     *Y1.AI_channels.int_read_values[ 0 ] = 0b110000;
+    Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -3 );
     EXPECT_STREQ( Y1.get_error_description(), "функциональная проверка" );
 
     *Y1.AI_channels.int_read_values[ 0 ] = 0b1000000;
-    EXPECT_EQ( Y1.get_state(), -3 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -4 );
     EXPECT_STREQ( Y1.get_error_description(), "отказ" );
 
     G_PAC_INFO()->emulation_on();
