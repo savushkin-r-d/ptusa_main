@@ -1789,6 +1789,8 @@ class converter_iolink_ao : public analog_io_device
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
+        const char* get_error_description() override;
+
 #ifndef PTUSA_TEST
     private:
 #endif
@@ -1830,6 +1832,8 @@ class converter_iolink_ao : public analog_io_device
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
+
+        io_link_device iol_dev{};
     };
 ///-----------------------------------------------------------------------------
 /// Предоставляет функциональность таймера.

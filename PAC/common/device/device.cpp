@@ -4186,6 +4186,11 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     return analog_io_device::set_cmd( prop, idx, val );
     }
 
+const char* converter_iolink_ao::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+
 #ifdef WIN_OS
 #pragma warning(pop)
 #endif // WIN_OS

@@ -5790,6 +5790,12 @@ TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    test_dev_err( Y1, Y1, 0 );
+    }
+
 
 TEST( device_manager, get_EY )
     {
