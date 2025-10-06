@@ -4178,8 +4178,8 @@ int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
 
 const char* converter_iolink_ao::get_error_description()
     {
-    auto err = get_error_id();
-    switch ( err )
+    auto err_id = get_error_id();
+    switch ( err_id )
         {
         case -1:
             return "требуется обслуживание";
@@ -4192,9 +4192,10 @@ const char* converter_iolink_ao::get_error_description()
 
         case -4:
             return "отказ";
-        }
 
-    return iol_dev.get_error_description( err );
+        default:
+            return iol_dev.get_error_description( err_id );
+        }    
     }
 
 #ifdef WIN_OS

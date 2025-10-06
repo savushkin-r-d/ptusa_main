@@ -1159,7 +1159,7 @@ class analog_valve_ey : public device
     private:
 #endif // !PTUSA_TEST
 
-        enum CONSTANTS
+        enum class CONSTANTS
             {
             FULL_CLOSED = 0,
             FULL_OPENED = 100,
