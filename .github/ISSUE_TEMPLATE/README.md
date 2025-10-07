@@ -41,6 +41,17 @@ Use this template to report documentation issues or suggest improvements.
 
 Используйте этот шаблон для сообщения о проблемах с документацией или предложения улучшений.
 
+### 🔌 Device/Sensor Addition / Добавление устройства/датчика (`device_request.yml`)
+Use this template to request addition of new device or sensor types.
+- Device type categorization (valves, motors, sensors, etc.)
+- Interface type specification (IO-Link, Analog, Digital, etc.)
+- Hardware specifications and I/O configuration
+- Lua interface requirements
+- Control logic description
+- Use cases and implementation notes
+
+Используйте этот шаблон для запроса добавления новых типов устройств или датчиков.
+
 ## Template Features / Особенности шаблонов
 
 - **Bilingual support** / **Поддержка двух языков**: All templates include both English and Russian text

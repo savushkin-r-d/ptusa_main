@@ -1,0 +1,314 @@
+---
+name: 🔌 Device/Sensor Addition / Добавление устройства/датчика
+description: Request addition of a new device or sensor type to ptusa_main
+title: "[DEVICE]: "
+labels: ["device", "enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request addition of a new device or sensor type to
+        ptusa_main. This helps standardize device requests and ensures all
+        necessary information is provided.
+
+        Используйте этот шаблон для запроса добавления нового типа устройства
+        или датчика в ptusa_main. Это помогает стандартизировать запросы
+        устройств и гарантирует предоставление всей необходимой информации.
+
+  - type: input
+    id: device_name
+    attributes:
+      label: Device Name / Название устройства
+      description: |
+        The proposed name for the device/sensor (e.g., V_NEW_TYPE, TE_CUSTOM)
+      placeholder: "Example: V_IOLINK_CUSTOM or TE_SPECIAL"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: Device Type / Тип устройства
+      description: |
+        Select the primary device type category
+      options:
+        - V - Клапан / Valve
+        - VC - Управляемый клапан / Controlled Valve
+        - M - Двигатель / Motor
+        - LS - Уровень (есть/нет) / Level Switch
+        - TE - Температура / Temperature
+        - FS - Расход (есть/нет) / Flow Switch
+        - GS - Датчик положения / Position Sensor
+        - FQT - Счетчик / Counter
+        - LT - Уровень (значение) / Level Transmitter
+        - QT - Концентрация / Concentration
+        - HA - Аварийная звуковая сигнализация / Horn Alarm
+        - HL - Аварийная световая сигнализация / Light Alarm
+        - SB - Кнопка / Button
+        - DI - Дискретный входной сигнал / Digital Input
+        - DO - Дискретный выходной сигнал / Digital Output
+        - AI - Аналоговый входной сигнал / Analog Input
+        - AO - Аналоговый выходной сигнал / Analog Output
+        - WT - Тензорезистор / Load Cell
+        - PT - Давление (значение) / Pressure Transmitter
+        - F - Автоматический выключатель / Circuit Breaker
+        - REGULATOR - ПИД-регулятор / PID Controller
+        - HLA - Сигнальная колонна / Signal Tower
+        - CAM - Камера / Camera
+        - PDS - Датчик разности давления / Differential Pressure Sensor
+        - TS - Сигнальный датчик температуры / Temperature Signal Sensor
+        - G - Блок питания / Power Supply
+        - WATCHDOG - Устройство проверки связи / Watchdog Device
+        - EY - Конвертер IO-Link / IO-Link Converter
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: textarea
+    id: device_description
+    attributes:
+      label: Device Description / Описание устройства
+      description: |
+        Detailed description of the device/sensor functionality
+      placeholder: |
+        Describe:
+        - What the device does
+        - Its purpose in the automation system
+        - Any special characteristics
+        - Physical connections/interface
+    validations:
+      required: true
+
+  - type: dropdown
+    id: interface_type
+    attributes:
+      label: Interface Type / Тип интерфейса
+      description: How does this device connect to the system?
+      options:
+        - IO-Link
+        - Digital I/O (DI/DO)
+        - Analog I/O (AI/AO)
+        - AS-Interface
+        - Ethernet/Modbus TCP
+        - Profinet
+        - EtherCAT
+        - Serial (RS232/RS485)
+        - Virtual / Software-based
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware_specs
+    attributes:
+      label: Hardware Specifications / Технические характеристики
+      description: |
+        Provide hardware specifications if available
+      placeholder: |
+        - Manufacturer: 
+        - Model/Part Number: 
+        - Voltage/Current ratings: 
+        - Communication protocol: 
+        - Response time: 
+        - Operating conditions: 
+        - Datasheet link:
+    validations:
+      required: false
+
+  - type: textarea
+    id: io_configuration
+    attributes:
+      label: I/O Configuration / Конфигурация входов/выходов
+      description: |
+        Describe the input/output channels needed
+      placeholder: |
+        Digital Outputs (DO): 
+        Digital Inputs (DI): 
+        Analog Outputs (AO): 
+        Analog Inputs (AI): 
+        Feedback signals: 
+        
+        Example:
+        - DO1: Main control
+        - DO2: Secondary control
+        - DI1: Feedback open
+        - DI2: Feedback closed
+        - AI1: Position value
+    validations:
+      required: true
+
+  - type: textarea
+    id: parameters
+    attributes:
+      label: Device Parameters / Параметры устройства
+      description: |
+        List any configurable parameters the device should have
+      placeholder: |
+        Example parameters:
+        - P_ON_TIME: Time to open (ms)
+        - P_FB: Feedback timeout (ms)
+        - P_MIN_V: Minimum value
+        - P_MAX_V: Maximum value
+        - P_ERR_T: Error threshold
+    validations:
+      required: false
+
+  - type: textarea
+    id: similar_devices
+    attributes:
+      label: Similar Existing Devices / Похожие существующие устройства
+      description: |
+        Reference similar devices already in the system that could serve as a
+        template
+      placeholder: |
+        Example:
+        - Similar to valve_DO2_DI2 but with additional feedback
+        - Based on temperature_e but with different scaling
+        - Combination of M_FREQ and position sensor
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Target Platform / Целевая платформа
+      description: Which platforms should support this device?
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - PLCnext (AXC F 2152)
+        - PLCnext (Other)
+        - All platforms / Все платформы
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use Cases / Варианты использования
+      description: |
+        Describe specific use cases or applications for this device
+      placeholder: |
+        Where will this device be used?
+        What processes does it control?
+        Example scenarios:
+        1. Used in CIP cleaning systems for...
+        2. Required for pasteurization line to...
+        3. Needed for tank level monitoring in...
+    validations:
+      required: true
+
+  - type: textarea
+    id: lua_interface
+    attributes:
+      label: Lua Interface Requirements / Требования к Lua-интерфейсу
+      description: |
+        Describe how this device should be accessible from Lua scripts
+      placeholder: |
+        Example:
+        ```lua
+        -- Device creation
+        V('V101', 'My new valve', DST_V_NEW_TYPE)
+        
+        -- Usage
+        V('V101'):open()
+        V('V101'):close()
+        state = V('V101'):get_state()
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: control_logic
+    attributes:
+      label: Control Logic / Логика управления
+      description: |
+        Describe the control logic/behavior of the device
+      placeholder: |
+        State machine, timing requirements, safety interlocks, etc.
+        
+        Example:
+        - On command: activate DO1, wait for DI1 within P_ON_TIME
+        - Off command: deactivate DO1, check DI2
+        - Error conditions: timeout, conflicting feedback
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority / Приоритет
+      description: How urgent is this device addition?
+      options:
+        - Low / Низкий
+        - Medium / Средний
+        - High / Высокий
+        - Critical / Критический
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes / Примечания по реализации
+      description: |
+        Any additional notes for implementation
+      placeholder: |
+        - Code files that need modification
+        - Device class inheritance structure
+        - Special considerations
+        - Testing requirements
+    validations:
+      required: false
+
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Documentation / Документация
+      description: |
+        Links to datasheets, manuals, or other relevant documentation
+      placeholder: |
+        - Manufacturer datasheet: https://...
+        - Installation guide: https://...
+        - Protocol specification: https://...
+        - Application note: https://...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Additional Information / Дополнительная информация
+      description: Any other relevant information
+      placeholder: |
+        Diagrams, screenshots, example configurations, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / Контрольный список
+      description: Please confirm the following
+      options:
+        - label: |
+            I have searched for existing device types that might already support
+            this functionality
+          required: true
+        - label: |
+            I have checked the device manager code (PAC/common/device/) for
+            similar implementations
+          required: true
+        - label: |
+            I understand that device implementation requires C++ code changes and
+            testing
+          required: true
+        - label: |
+            I have provided sufficient technical details for implementation
+          required: true
+        - label: |
+            I am willing to help test this device when it's implemented
+          required: false
