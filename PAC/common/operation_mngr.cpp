@@ -1154,7 +1154,7 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    auto &devs = devices[ MAIN_GROUP ];
+    const auto &devs = devices[ MAIN_GROUP ];
 
     for ( const auto& dev_group : devs )
         {
@@ -1174,7 +1174,7 @@ void DI_DO_action::finalize()
         return;
         }
 
-    auto& devs = devices[ MAIN_GROUP ];
+    const auto& devs = devices[ MAIN_GROUP ];
     for ( const auto& dev_group : devs )
         {
         if ( dev_group.empty() )
