@@ -150,7 +150,7 @@ class action
         std::vector < std::vector< std::vector< device* > > > devices;
         std::string name;                           ///< Имя действия.
 
-        const saved_params_float *par = nullptr;    ///< Параметры действия.
+        const saved_params_float* par = nullptr;    ///< Параметры действия.
         std::vector< int >        par_idx;  ///< Индексы параметров действия.
     };
 //-----------------------------------------------------------------------------
