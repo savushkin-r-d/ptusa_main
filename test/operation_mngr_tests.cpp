@@ -1549,27 +1549,21 @@ TEST( DI_DO_action, check_multiple_devices )
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
 	
-	// Тест с недопустимым устройством (не DI/DO)
-	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
-		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
-	test_AI.set_descr( "Test AI" );
-	action.add_dev( &test_AI );
-
-	std::string msg( MAX_STR_SIZE, '\0' );
-	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
-	EXPECT_EQ( 1, res );
-	const std::string EXPECTED_STR = 
-		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
-		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
-	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
-
-	action.clear_dev();
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
-	res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
+
+    action.add_dev( &test_DI1 );
+    res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 1, res );
+    const std::string EXPECTED_STR = 
+        "в поле 'Группы DI->DO's' устройство 'test_DI1 ()' расположено "
+        "неправильно: DI сигналы должны быть описаны перед DO сигналами";
+    EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
 	}
 
 TEST( DI_DO_action, evaluate_multiple_DI_single_active )
