@@ -1776,18 +1776,24 @@ class converter_iolink_ao : public analog_io_device
         void direct_on() override;
         void direct_off() override;
 
-        float get_value() override;
-        float get_value2() const;
         int get_state() override;
 
-        void direct_set_value( float val ) override;
-        void set_value2( float val );
+        float get_channel_value( u_int ch ) const;
+
+        /// @brief Sets the value for the specified channel.
+        /// @param ch Channel number (valid values: CHANNEL_1 or CHANNEL_2).
+        /// @param val Value to set.
+        ///
+        /// Valid channel values are 1 (CHANNEL_1) and 2 (CHANNEL_2).
+        void set_channel_value( u_int ch, float val );
 
         void evaluate_io() override;
 
         int save_device_ex( char* buff ) override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
+
+        const char* get_error_description() override;
 
 #ifndef PTUSA_TEST
     private:
@@ -1796,9 +1802,8 @@ class converter_iolink_ao : public analog_io_device
         uint16_t calc_setpoint( float &val ) const;
         void calculate_state();
 
-        float v{};  // Выходное значение канала 1.
+        float v1{}; // Выходное значение канала 1.
         float v2{}; // Выходное значение канала 2.
-        int st{};   // Состояние устройства.
         int err{};  // Ошибка.
 
         enum CONSTANTS
@@ -1814,9 +1819,9 @@ class converter_iolink_ao : public analog_io_device
 
 #pragma pack(push, 1)
         struct process_data_in
-            {
-            uint8_t device_status : 4;	// Статус устройства.
+            {            
             uint8_t reserved : 4;	    // Зарезервированные биты.
+            uint8_t device_status : 4;	// Статус устройства.
             };
 
         struct process_data_out
@@ -1830,6 +1835,8 @@ class converter_iolink_ao : public analog_io_device
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
+
+        io_link_device iol_dev{};
     };
 ///-----------------------------------------------------------------------------
 /// Предоставляет функциональность таймера.

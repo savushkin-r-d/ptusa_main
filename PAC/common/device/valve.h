@@ -799,7 +799,9 @@ class valve_iolink_shut_off_thinktop : public valve
 
         int get_state() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
         alfalaval_iol_valve_in_data in_info{};
         static alfalaval_iol_valve_out_data_swapped stub_out_info;
         alfalaval_iol_valve_out_data_swapped* out_info = &stub_out_info;
@@ -1153,8 +1155,11 @@ class analog_valve_ey : public device
 
         void set_rt_par( u_int idx, float value ) override;
 
+#ifndef PTUSA_TEST
     private:
-        enum CONSTANTS
+#endif // !PTUSA_TEST
+
+        enum class CONSTANTS
             {
             FULL_CLOSED = 0,
             FULL_OPENED = 100,
