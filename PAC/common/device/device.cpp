@@ -1816,6 +1816,74 @@ const char* temperature_e_iolink::get_error_description()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+temperature_e_iolink_tm311::temperature_e_iolink_tm311( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_IOLINK_TM311, static_cast<u_int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        start_param_idx, "P_ERR_T" );
+    }
+//-----------------------------------------------------------------------------
+float temperature_e_iolink_tm311::get_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
+
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+            start_param_idx );
+        }
+    else
+        {
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 0.1f * info.temperature;
+        }
+    }
+//-----------------------------------------------------------------------------
+int temperature_e_iolink_tm311::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX );
+        st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    // Extract measured value status from bits 4-3.
+    uint8_t measured_value_status = ( info.status >> 3 ) & 0x03;
+    
+    // 0 = Bad, measured value cannot be used.
+    if ( measured_value_status == 0 )
+        {
+        return 0;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+void temperature_e_iolink_tm311::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
+    if ( !data ) return;
+
+    // Byte order: Byte 1-2 (temperature), Byte 3 (scale), Byte 4 (status).
+    // Temperature is sint16 in big-endian format.
+    std::swap( data[ 0 ], data[ 1 ] );
+    memcpy( &info.temperature, data, 2 );
+    
+    // Scale is sint8 at byte 3 (index 2).
+    memcpy( &info.scale, data + 2, 1 );
+    
+    // Status is uint8 at byte 4 (index 3).
+    memcpy( &info.status, data + 3, 1 );
+    }
+//-----------------------------------------------------------------------------
+const char* temperature_e_iolink_tm311::get_error_description()
+    {
+    return iol_dev.get_error_description( get_error_id() );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void virtual_wages::direct_off()
     {
     state = 0;

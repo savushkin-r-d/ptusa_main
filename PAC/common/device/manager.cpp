@@ -859,6 +859,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (temperature_e_analog*)new_device;
                     break;
 
+                case device::DST_TE_IOLINK_TM311:
+                    new_device = new temperature_e_iolink_tm311( dev_name );
+                    new_io_device = (temperature_e_iolink_tm311*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {

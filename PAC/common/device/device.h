@@ -140,6 +140,46 @@ class temperature_e_iolink : public AI1
         io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик температуры IO-Link Endress&Hauser TM311.
+class temperature_e_iolink_tm311 : public AI1
+    {
+    public:
+        explicit temperature_e_iolink_tm311( const char *dev_name );
+
+        ~temperature_e_iolink_tm311() override = default;
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+        const char* get_error_description() override;
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+
+        struct TM311_data
+            {
+            int16_t temperature = 0;    ///< Temperature value (with one decimal place).
+            int8_t scale = -1;          ///< Scale factor.
+            uint8_t status = 0;         ///< Status byte (measured value status and switch state).
+            };
+
+        TM311_data info{};
+        u_int start_param_idx;
+
+        enum class CONSTANTS
+            {
+            P_ERR_T = 1,                ///< Аварийное значение температуры.
+
+            ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+            };
+
+        io_link_device iol_dev;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
 class level_e : public level
     {

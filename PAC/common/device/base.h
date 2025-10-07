@@ -480,6 +480,7 @@ class device : public i_DO_AO_device, public par_device
             DST_TE_IOLINK,      ///< Температура IO-LInk без дополнительных параметров.
             DST_TE_VIRT,        ///< Виртуальная температура.
             DST_TE_ANALOG,      ///< Температура AI c заданием пределов значения.
+            DST_TE_IOLINK_TM311,///< Температура IO-Link Endress&Hauser TM311.
 
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
