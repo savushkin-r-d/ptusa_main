@@ -1817,7 +1817,7 @@ const char* temperature_e_iolink::get_error_description()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_iolink_tm311::temperature_e_iolink_tm311( const char* dev_name ) :
-    AI1( dev_name, DT_TE, DST_TE_IOLINK_TM311, static_cast<u_int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) )
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, static_cast<u_int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) )
     {
     start_param_idx = AI1::get_params_count();
     set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
@@ -1850,10 +1850,9 @@ int temperature_e_iolink_tm311::get_state()
         }
 
     // Extract measured value status from bits 4-3.
-    uint8_t measured_value_status = ( info.status >> 3 ) & 0x03;
-    
     // 0 = Bad, measured value cannot be used.
-    if ( measured_value_status == 0 )
+    if ( auto measured_value_status = ( info.status >> 3 ) & 0x03;
+        measured_value_status == 0 )
         {
         return 0;
         }

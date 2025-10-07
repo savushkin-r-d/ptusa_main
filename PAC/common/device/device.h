@@ -156,6 +156,8 @@ class temperature_e_iolink_tm311 : public AI1
 
         const char* get_error_description() override;
 
+        inline static const std::string ARTICLE = "TM311";
+
 #ifndef PTUSA_TEST
     private:
 #endif

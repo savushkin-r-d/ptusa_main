@@ -846,8 +846,16 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::DST_TE_IOLINK:
-                    new_device = new temperature_e_iolink( dev_name );
-                    new_io_device = (temperature_e_iolink*)new_device;
+                    if ( strcmp( article, temperature_e_iolink_tm311::ARTICLE.c_str() ) == 0 )
+                        {
+                        new_device = new temperature_e_iolink_tm311( dev_name );
+                        new_io_device = (temperature_e_iolink_tm311*)new_device;
+                        }
+                    else
+                        {
+                        new_device = new temperature_e_iolink( dev_name );
+                        new_io_device = (temperature_e_iolink*)new_device;
+                        }
                     break;
 
                 case device::DST_TE_VIRT:
@@ -857,11 +865,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_TE_ANALOG:
                     new_device = new temperature_e_analog( dev_name );
                     new_io_device = (temperature_e_analog*)new_device;
-                    break;
-
-                case device::DST_TE_IOLINK_TM311:
-                    new_device = new temperature_e_iolink_tm311( dev_name );
-                    new_io_device = (temperature_e_iolink_tm311*)new_device;
                     break;
 
                 default:
