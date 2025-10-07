@@ -2783,7 +2783,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                         steps_additional_rinse.count(step_to_do) ||
                         (use_circulation_on_v2_supply && steps_v2_supply.count(step_to_do))
                     ) &&
-                    (!wasflip)
+                    (!wasflip || !T[TMR_OP_TIME]->is_time_up())
                 )
             )
             {

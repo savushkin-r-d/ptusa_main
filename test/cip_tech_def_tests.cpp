@@ -623,6 +623,16 @@ TEST( cipline_tech_object, _DoStep )
     cip1._DoStep(8);
     EXPECT_EQ( true, cip1.wasflip);
     EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    // Signal should stay ON when wasflip is true but timer hasn't started/elapsed
+    cip1.curstep = 8;
+    cip1._DoStep(8);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    // Start and complete the timer to test signal turns OFF after time elapses
+    cip1.T[0]->set_countdown_time(1); // 1ms countdown
+    cip1.T[0]->start();
+    // Wait for timer to elapse
+    auto start_time = get_millisec();
+    while (get_delta_millisec(start_time) < 10) {} // Wait 10ms
     cip1.curstep = 8;
     cip1._DoStep(8);
     EXPECT_EQ( 0, cip1.dev_upr_circulation->get_state( ));
