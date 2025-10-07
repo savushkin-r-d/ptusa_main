@@ -300,6 +300,8 @@ class DI_DO_action: public action
 
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
+
+        bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
     };
 //-----------------------------------------------------------------------------
 /// <summary>

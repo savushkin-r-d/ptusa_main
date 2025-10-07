@@ -1104,12 +1104,8 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
             auto device_type = device_ptr->get_type();
             
             // Проверяем, что устройство является допустимым типом (DI или DO)
-            if ( device_type != device::DT_DI &&
-                 device_type != device::DT_SB &&
-                 device_type != device::DT_GS &&
-                 device_type != device::DT_LS &&
-                 device_type != device::DT_FS &&
-                 device_type != device::DT_DO )
+            if ( !is_di_device_type( device_type ) &&
+                device_type != device::DT_DO )
                 {
                 auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                     R"(не является допустимым сигналом (DI, SB, GS, LS, FS, DO))";
@@ -1120,12 +1116,8 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
                 }
             
             // Проверяем правильность порядка: DI сигналы должны идти перед DO
-            bool is_di_type = ( device_type == device::DT_DI ||
-                               device_type == device::DT_SB ||
-                               device_type == device::DT_GS ||
-                               device_type == device::DT_LS ||
-                               device_type == device::DT_FS );
-            bool is_do_type = ( device_type == device::DT_DO );
+            auto is_di_type = is_di_device_type( device_type );
+            auto is_do_type = device_type == device::DT_DO;
             
             if ( is_do_type )
                 {
@@ -1186,18 +1178,15 @@ void DI_DO_action::finalize()
         u_int di_count = 0;
         for ( const auto& dev : dev_group )
             {
-            if ( dev->get_type() == device::DT_DI ||
-                 dev->get_type() == device::DT_SB ||
-                 dev->get_type() == device::DT_GS ||
-                 dev->get_type() == device::DT_LS ||
-                 dev->get_type() == device::DT_FS )
+            if ( is_di_device_type( dev->get_type() ) )
                 {
                 di_count++;
                 }
             }
         
         // Выключаем все DO устройства
-        for ( auto it = dev_group.begin() + di_count; it != dev_group.end(); ++it )
+        for ( auto it = dev_group.begin() + di_count;
+            it != dev_group.end(); ++it )
             {
             (*it)->off();
             }
@@ -1213,11 +1202,7 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     // Подсчитаем количество DI устройств и проверим их активность
     for ( const auto& dev : devices )
         {
-        if ( dev->get_type() == device::DT_DI ||
-             dev->get_type() == device::DT_SB ||
-             dev->get_type() == device::DT_GS ||
-             dev->get_type() == device::DT_LS ||
-             dev->get_type() == device::DT_FS )
+        if ( is_di_device_type( dev->get_type() ) )
             {
             di_count++;
             if ( dev->is_active() )
@@ -1241,6 +1226,18 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
         }
     }
 //-----------------------------------------------------------------------------
+bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
+    {
+    if ( device_type == device::DT_DI ||
+        device_type == device::DT_SB ||
+        device_type == device::DT_GS ||
+        device_type == device::DT_LS ||
+        device_type == device::DT_FS )
+        return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 inverted_DI_DO_action::inverted_DI_DO_action():
     DI_DO_action( "Группы инвертированный DI->DO's" )
@@ -1256,11 +1253,7 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     // Подсчитаем количество DI устройств и проверим их активность
     for ( const auto& dev : devices )
         {
-        if ( dev->get_type() == device::DT_DI ||
-             dev->get_type() == device::DT_SB ||
-             dev->get_type() == device::DT_GS ||
-             dev->get_type() == device::DT_LS ||
-             dev->get_type() == device::DT_FS )
+        if ( is_di_device_type( dev->get_type() ) )
             {
             di_count++;
             if ( dev->is_active() )
