@@ -3,6 +3,7 @@
 #include "base.h"
 #include "valve.h"
 #include "life_device.h"
+#include "device.h"
 
 class dev_stub;
 //-----------------------------------------------------------------------------
@@ -208,7 +209,14 @@ i_DO_AO_device* get_G( const char* dev_name );
 /// @param number - номер обратной связи.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* LIFE_DEVICE( const char* dev_name );
+i_DI_device* WATCHDOG( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение конвертера IO-Link.
+///
+/// @param dev_name - имя конвертера.
+/// @return - устройство с заданным именем. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_AO_device* EY( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
@@ -325,7 +333,10 @@ class device_manager : public i_Lua_save_device
         i_DO_AO_device* get_G( const char* dev_name );
 
         /// @brief Получение устройства проверки связи по имени.
-        i_DI_device* get_life_device( const char* dev_name );
+        i_DI_device* get_watchdog( const char* dev_name );
+
+        /// @brief Получение конвертера IO-Link по имени.
+        i_AO_device* get_EY( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();

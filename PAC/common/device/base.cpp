@@ -38,7 +38,8 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     "PDS",     ///< Датчик разности давления.
     "TS",      ///< Сигнальный датчик температуры.
     "G",       ///< Блок питания.
-    "LIFE_DEVICE", ///< Устройство проверки связи.
+    "WATCHDOG",///< Устройство проверки связи.
+    "EY",      ///< Конвертер IO-Link.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -362,7 +363,14 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
     {
     if ( dev_name )
         {
-        strcpy( this->name, dev_name );
+        auto [out, size] = fmt::format_to_n(
+            this->name, device::CONSTANTS::C_MAX_NAME, "{}", dev_name );
+        *out = '\0';
+        if ( size > device::CONSTANTS::C_MAX_NAME )
+            {
+            G_LOG->critical( "Error create device '%s' - name truncated to `%s`!",
+                dev_name, this->name );
+            }
         }
     else
         {
@@ -370,11 +378,11 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
         }
 
     description = new char[ 1 ];
-    description[ 0 ] = 0;
+    description[ 0 ] = '\0';
 
     article = new char[ 2 ];
     article[ 0 ] = ' ';
-    article[ 1 ] = 0;
+    article[ 1 ] = '\0';
     }
 //-----------------------------------------------------------------------------
 const char* device::get_type_str() const
@@ -437,7 +445,7 @@ const char* device::get_type_name() const
             return "Камера";
         case DT_G:
             return "Блок питания";
-        case DT_LIFE_DEVICE:
+        case DT_WATCHDOG:
             return "Устройство проверки связи";
 
         default:

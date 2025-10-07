@@ -374,7 +374,7 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_MAX_NAME = 20,
+            C_MAX_NAME = 30,
             C_MAX_DESCRIPTION = 100
             };
 
@@ -410,7 +410,8 @@ class device : public i_DO_AO_device, public par_device
             DT_PDS,      ///< Датчик разности давления.
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
-            DT_LIFE_DEVICE, ///< Устройство проверки связи.
+            DT_WATCHDOG, ///< Устройство проверки связи.
+            DT_EY,       ///< Конвертер IO-Link.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -463,6 +464,7 @@ class device : public i_DO_AO_device, public par_device
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
             DST_VC_VIRT,        ///< Виртуальный клапан.
+            DST_VC_EY,          ///< Клапан с аналоговым управлением, подключаемый к конвертеру.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -610,9 +612,11 @@ class device : public i_DO_AO_device, public par_device
             DST_G_IOL_4 = 1,    ///< 4 канала.
             DST_G_IOL_8,        ///< 8 каналов.
 
-            //DT_LIFE_DEVICE
-            DST_LIFEBIT = 1,
-            DST_LIFECOUNTER,
+            //DT_WATCHDOG
+            DST_WATCHDOG = 1,
+
+            //DT_EY
+            DST_CONV_AO2 = 1,    ///< Конвертер IO-Link -> AO (2 канала).
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
@@ -654,7 +658,7 @@ class device : public i_DO_AO_device, public par_device
             return prev_error_state;
             }
 
-        void set_descr( const char* new_description );
+        virtual void set_descr( const char* new_description );
 
         virtual void set_article( const char* new_article );
 
@@ -779,7 +783,7 @@ class device : public i_DO_AO_device, public par_device
 
         bool is_manual_mode = false; ///< Признак ручного режима.
 
-        char name[ C_MAX_NAME ];
+        char name[ C_MAX_NAME + 1 ];
         char* description;
 
         bool emulation = false;

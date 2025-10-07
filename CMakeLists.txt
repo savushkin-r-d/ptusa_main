@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.06.10.0)
+project(ptusa_main VERSION 2025.09.09.3)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -374,6 +374,21 @@ endif()
 #######################################################################################
 
 
+if(MINGW OR CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # Отключить генерацию защит стека, чтобы линковщик не требовал libssp.
+    add_compile_options(-fno-stack-protector)
+
+    # Почистить все распространённые переменные линковки от -lssp
+    foreach(VAR CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS
+                CMAKE_MODULE_LINKER_FLAGS CMAKE_C_STANDARD_LIBRARIES
+                CMAKE_CXX_STANDARD_LIBRARIES)
+        if(DEFINED ${VAR})
+            string(REPLACE "-lssp" "" ${VAR} "${${VAR}}")
+        endif()
+    endforeach()
+endif()
+
+
 if(ARP_DEVICE)
     string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
     install(TARGETS ${PROJECT_NAME} libptusa_main PtusaPLCnextEngineer
@@ -417,9 +432,9 @@ if (WIN32)
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
@@ -435,9 +450,9 @@ else()
   -h, --help                Print help info
   -r, --rcrc                Reset params
       --opc                 Start OPC UA server with program start
-      --sys_path arg        Sys path
-      --path arg            Path
-      --extra_paths arg     Extra paths
+      --sys_path arg        Sys path \(default: \./sys\)
+      --path arg            Path \(default: \.\)
+      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
       --sleep_time_ms arg   Sleep time, ms \(default: 2\)
 ]] )
 endif()
@@ -448,6 +463,11 @@ endif()
     "lua.exe")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
+    add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
+    set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
+        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
+
     add_test(T1-PLCnext-Demo lua5.1
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"

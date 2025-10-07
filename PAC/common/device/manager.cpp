@@ -248,9 +248,14 @@ i_DO_AO_device* get_G( const char* dev_name )
     return G_DEVICE_MANAGER()->get_G( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* LIFE_DEVICE( const char* dev_name )
+i_DI_device* WATCHDOG( const char* dev_name )
     {
-    return G_DEVICE_MANAGER()->get_life_device( dev_name );
+    return G_DEVICE_MANAGER()->get_watchdog( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* EY( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_EY( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
@@ -568,9 +573,14 @@ i_DO_AO_device* device_manager::get_G( const char* dev_name )
     return get_device( device::DT_G, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_life_device( const char* dev_name )
+i_DI_device* device_manager::get_watchdog( const char* dev_name )
     {
-    return get_device( device::DT_LIFE_DEVICE, dev_name );
+    return get_device( device::DT_WATCHDOG, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_EY( const char* dev_name )
+    {
+    return get_device( device::DT_EY, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -741,6 +751,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::DST_VC_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VC_VIRT );
+                    break;
+
+                case device::DST_VC_EY:
+                    new_device = new analog_valve_ey( dev_name );
                     break;
 
                 default:
@@ -1379,25 +1393,34 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
-        case device::DT_LIFE_DEVICE:
+        case device::DT_WATCHDOG:
+            if ( dev_sub_type == device::DST_WATCHDOG )
+                {
+                new_device = new watchdog( dev_name, device::DST_WATCHDOG );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
+                    dev_sub_type );
+                }
+            break;
+
+        case device::DT_EY:
             switch ( dev_sub_type )
                 {
-                case device::DST_LIFEBIT:
-                case device::DST_LIFECOUNTER:
-                    new_device = new life_device( dev_name, 
-                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                case device::DST_CONV_AO2:
+                    new_device = new converter_iolink_ao( dev_name );
+                    new_io_device = (converter_iolink_ao*)new_device;
                     break;
 
                 default:
                     if ( G_DEBUG )
                         {
-                        G_LOG->alert( "Unknown LIFE_DEVICE device subtype %d!\n",
-                            dev_sub_type ); 
+                        printf( "Unknown Y device subtype %d!\n", dev_sub_type );
                         }
                     break;
                 }
             break;
-
 
         default:
             if ( G_DEBUG )

@@ -93,6 +93,37 @@ void ClearCipDevices( )
     device_manager::get_instance( )->clear_io_devices();
     }
 
+
+TEST( cipline_tech_object, lua_init_params )
+    {
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    const auto PAR_VALUE = 1.5f;
+    cipline_tech_object::set_station_par( P_CZAD_S, PAR_VALUE );
+    EXPECT_EQ( cip1.get_station_par( P_CZAD_S ), PAR_VALUE );
+    cip1.lua_init_params();
+    EXPECT_EQ( cip1.get_station_par( P_CZAD_S ), 0.0f );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, lua_init_runtime_params )
+    {
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    // После создания объекта параметры должны иметь 0-е значения.
+    EXPECT_EQ( cip1.rt_par_float[ workParameters::P_R_NO_FLOW ], 0.0f );
+    cip1.lua_init_runtime_params();
+    const auto PAR_VALUE = 2.f;
+    // После инициализации рабочих параметров должны быть значения по умолчанию.
+    EXPECT_EQ( cip1.rt_par_float[ workParameters::P_R_NO_FLOW ], PAR_VALUE );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+
 TEST( cipline_tech_object, _CheckErr )
     {
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
@@ -625,7 +656,10 @@ TEST( cipline_tech_object, save_device )
     cip1.initline();
     InitStationParams();
 
+    // Сброс параметров рецепта к значениям по умолчанию.
     cip1.lineRecipes->ResetRecipeToDefaults(0);
+    // Сброс рабочих параметров к значениям по умолчанию.
+    cip1.lua_init_runtime_params();
     cip1.save_device( buff );
 
     std::string REF_STR0 = R"(t.CIP1 = t.CIP1 or {}
@@ -673,7 +707,7 @@ t.CIP1=
 		},
 	RT_PAR_F=
 		{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, )"
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, )"
         "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 20, 20, "
         "20, 95, 2, 30, 0.20, 500, 130, 0, 30, 0, 30, 0, 15, 0.50, 10, 0.10, 1000, 40, 0, 2, 0, "
         "15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "
@@ -700,13 +734,13 @@ t.CIP1=
 		},
 	REC_PAR = 
 	{
-		0.00, 0.00, 200.00, 200.00, 1.00, 15.00, 0.00, 10.00, 30.00, 30.00, 30.00, 5.00, )"
-        "80.00, 70.00, 90.00, 60.00, 200.00, 200.00, 200.00, 200.00, 40.00, 15.00, 30.00, "
-        "300.00, 600.00, 600.00, 500.00, 500.00, 600.00, 600.00, 120.00, 0.00, 0.00, 0.00, "
-        "0.00, 0.00, 5.00, 600.00, 30.00, 500.00, 30.00, 8.00, 15.00, 2.00, 20.00, 20.00, "
-        "20.00, 95.00, 2.00, 30.00, 0.20, 500.00, 130.00, 0.00, 30.00, 0.00, 30.00, 0.00, "
-        "15.00, 0.50, 10.00, 0.10, 1000.00, 40.00, 0.00, 2.00, 0.00, 15.00, 0.00, 300.00, "
-        "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, "
+		0.00, 0.00, 200.00, 250.00, 1.00, 15.00, 0.00, 10.00, 30.00, 30.00, 30.00, 5.00, )"
+        "80.00, 70.00, 95.00, 20.00, 1000.00, 750.00, 750.00, 500.00, 75.00, 30.00, 75.00, "
+        "600.00, 600.00, 600.00, 600.00, 600.00, 600.00, 600.00, 2500.00, 0.00, 0.00, 0.00, "
+        "0.00, 5113.00, 5.00, 600.00, 5.00, 600.00, 15.00, 8.00, 50.00, 5.00, 20.00, 25.00, "
+        "30.00, 95.00, 1.50, 15.00, 0.20, 500.00, 130.00, 0.00, 15.00, 0.00, 30.00, 0.00, "
+        "15.00, 0.50, 10.00, 0.10, 1000.00, 66.00, 0.00, 2.00, 0.00, 15.00, 0.00, 120.00, "
+        "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 1.00, 0.00, 0.00, 0.00, 0.00, 0.00, "
         "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, "
         "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, "
         "0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, " R"(
@@ -756,14 +790,22 @@ TEST( cipline_tech_object, set_cmd )
 
     auto res = cip1.set_cmd( "CUR_REC", 0, "Test name" );
     EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "CUR_REC", 0, "" );
+    EXPECT_EQ( res, 0 );
     
     res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, "Test name" );
+    EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, "" );
     EXPECT_EQ( res, 0 );
 
     res = cip1.set_cmd( "ACID_PAR_NAME", 0, "Test name" );
     EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "ACID_PAR_NAME", 0, "" );
+    EXPECT_EQ( res, 0 );
 
     res = cip1.set_cmd( "NCAR", 1, "NN 2200" );
+    EXPECT_EQ( res, 0 );
+    res = cip1.set_cmd( "NCAR", 1, "" );
     EXPECT_EQ( res, 0 );
 
 
@@ -787,4 +829,46 @@ TEST( cipline_tech_object, SCInitPumping )
     EXPECT_EQ( res, 0 );
 
     G_LUA_MANAGER->free_Lua();
+    }
+
+class cipline_tech_object_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            lua_manager::get_instance()->set_Lua( lua_open() );
+            InitCipDevices();
+            InitStationParams();
+            }
+
+        void TearDown() override
+            {
+            ClearCipDevices();
+            G_LUA_MANAGER->free_Lua();
+            }
+
+        class cipline_tech_object_mock : public cipline_tech_object
+            {
+            public:
+                cipline_tech_object_mock()
+                    : cipline_tech_object( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+                        "CIP1", 1, 1, 200, 200, 200, 200 )
+                    {
+                    }
+
+                int DoStep( int step_to_do ) override
+                    {
+                    return -1; // mock implementation
+                    }
+            };
+
+        cipline_tech_object_mock cip1{};
+    };
+
+TEST_F( cipline_tech_object_test, EvalCipInProgress )
+    {
+    cip1.initline();
+    
+    auto res = cip1.EvalCipInProgress();
+    EXPECT_EQ( res, -1 );
     }

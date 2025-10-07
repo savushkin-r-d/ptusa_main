@@ -3,9 +3,48 @@
 #pragma warning(disable: 4244)
 #endif // WIN_OS
 
+#include <fmt/core.h>
+
 #include "cip_tech_def.h"
 #include "lua_manager.h"
 #include "utf2cp1251.h"
+
+const std::map<int, const char*> ERR_MSG =
+    {
+    { ERR_UNKNOWN_STEP, "Неизвестный шаг" },
+    { ERR_POSSIBLE_NO_MEDIUM, "Возможно отсутствует концентрированный раствор" },
+    { ERR_NO_ACID, "Нет моющего раствора кислоты в танке" },
+    { ERR_NO_ALKALINE, "Нет моющего раствора щелочи в танке" },
+    { ERR_NO_RETURN, "Нет расхода в возвратной трубе" },
+    { ERR_NO_CONC, "Нет концентрации в возвратной трубе" },
+    { ERR_IS_CONC, "Высокая концентрация в возвратной трубе" },
+    { ERR_WRONG_RET, "Ошибка возвратного насоса" },
+    { ERR_PUMP, "Ошибка подающего насоса" },
+    { ERR_NO_FLOW, "Нет расхода на подаче" },
+    { ERR_AIR, "Нет воздуха" },
+    { ERR_OS, "Ошибка объекта CIP" },
+    { ERR_CIP_OBJECT, "Прерывание со стороны клиента" },
+    { ERR_WRONG_OS_OR_RECIPE_ERROR, "Несуществующая обратная связь ошибка в рецепте" },
+    { ERR_VALVES_ARE_IN_CONFLICT, "Конфликт клапанов в рецептах" },
+    { ERR_ACID_WASH_REQUIRED, "Требуется мойка кислотой" },
+    { ERR_LEVEL_BACHOK, "Ошибка уровня в бачке" },
+    { ERR_LEVEL_TANK_S, "Ошибка уровня танка щелочи" },
+    { ERR_LEVEL_TANK_K, "Ошибка уровня танка кислоты" },
+    { ERR_LEVEL_TANK_W, "Ошибка уровня танка вторичной воды" },
+    { ERR_SUPPLY_TEMP_SENSOR, "Ошибка температуры на подаче" },
+    { ERR_RETURN_TEMP_SENSOR, "Ошибка температуры на возврате" },
+    { ERR_CONCENTRATION_SENSOR, "Ошибка концентрации в возвратной трубе" },
+
+    { ERR_NO_DESINFECTION_MEDIUM, "Нет дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_MAX_TIME, 
+        "Превышено максимальное время дозирования дезинфицирующего средства" },
+    { ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME,
+        "Недостаточное время дозирования дезинфицирующего средства" },
+
+    { ERR_RET, "Ошибка возвратного насоса" }
+    };
+
+const char* const UNKNOWN_ERR_MSG = "неизвестная ошибка";
 
 TMediumRecipeManager* cipline_tech_object::causticRecipes = nullptr;
 
@@ -460,7 +499,7 @@ int cipline_tech_object::save_device( char *buff )
 
 
     //Выбор моющих средств
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         //Список доступных щелочных растворов
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
@@ -721,7 +760,7 @@ int cipline_tech_object::evaluate()
             }
         }
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
     {
         statsbase->evaluate();
     }
@@ -780,32 +819,45 @@ int cipline_tech_object::evaluate()
 int cipline_tech_object::init_params()
     {
     tech_object::init_params();
-    rt_par_float[P_R_NO_FLOW] = 2;
-    rt_par_float[P_TM_R_NO_FLOW] = 20;
-    rt_par_float[P_TM_NO_FLOW_R] = 20;
-    rt_par_float[P_TM_NO_CONC] = 20;
-    rt_par_float[PIDP_Z] = 95;
-    rt_par_float[PIDP_k] = 2;
-    rt_par_float[PIDP_Ti] = 30;
-    rt_par_float[PIDP_Td] = (float)0.2;
-    rt_par_float[PIDP_dt] = 500;
-    rt_par_float[PIDP_dmax] = 130;
-    rt_par_float[PIDP_dmin] = 0;
-    rt_par_float[PIDP_AccelTime] = 30;
-    rt_par_float[PIDP_IsManualMode] = 0;
-    rt_par_float[PIDP_UManual] = 30;
-    rt_par_float[PIDP_Uk] = 0;
-    rt_par_float[PIDF_Z] = 15;
-    rt_par_float[PIDF_k] = (float)0.5;
-    rt_par_float[PIDF_Ti] = 10;
-    rt_par_float[PIDF_Td] = (float)0.1;
-    rt_par_float[PIDF_dt] = 1000;
-    rt_par_float[PIDF_dmax] = 40;
-    rt_par_float[PIDF_dmin] = 0;
-    rt_par_float[PIDF_AccelTime] = 2;
-    rt_par_float[PIDF_IsManualMode] = 0;
-    rt_par_float[PIDF_UManual] = 15;
-    rt_par_float[PIDF_Uk] = 0;
+
+    if ( number == FIRST_CIPLINE_OBJECT_NUMBER )
+        {
+        parpar->reset_to_0();
+        if ( scparams != parpar ) scparams->reset_to_0();
+        }
+    return 0;
+    }
+
+int cipline_tech_object::init_runtime_params()
+    {
+    tech_object::init_runtime_params();
+
+    rt_par_float[ P_R_NO_FLOW ] = 2;
+    rt_par_float[ P_TM_R_NO_FLOW ] = 20;
+    rt_par_float[ P_TM_NO_FLOW_R ] = 20;
+    rt_par_float[ P_TM_NO_CONC ] = 20;
+    rt_par_float[ PIDP_Z ] = 95;
+    rt_par_float[ PIDP_k ] = 2;
+    rt_par_float[ PIDP_Ti ] = 30;
+    rt_par_float[ PIDP_Td ] = (float)0.2;
+    rt_par_float[ PIDP_dt ] = 500;
+    rt_par_float[ PIDP_dmax ] = 130;
+    rt_par_float[ PIDP_dmin ] = 0;
+    rt_par_float[ PIDP_AccelTime ] = 30;
+    rt_par_float[ PIDP_IsManualMode ] = 0;
+    rt_par_float[ PIDP_UManual ] = 30;
+    rt_par_float[ PIDP_Uk ] = 0;
+    rt_par_float[ PIDF_Z ] = 15;
+    rt_par_float[ PIDF_k ] = (float)0.5;
+    rt_par_float[ PIDF_Ti ] = 10;
+    rt_par_float[ PIDF_Td ] = (float)0.1;
+    rt_par_float[ PIDF_dt ] = 1000;
+    rt_par_float[ PIDF_dmax ] = 40;
+    rt_par_float[ PIDF_dmin ] = 0;
+    rt_par_float[ PIDF_AccelTime ] = 2;
+    rt_par_float[ PIDF_IsManualMode ] = 0;
+    rt_par_float[ PIDF_UManual ] = 15;
+    rt_par_float[ PIDF_Uk ] = 0;
     return 0;
     }
 
@@ -1092,7 +1144,7 @@ void cipline_tech_object::initline()
     check_Lua_function( "cip_On_Resume", is_On_Resume_func );
     check_Lua_function( "cip_ConfigureLine", is_ConfigureLine_func );
 
-    if (nmr == 1)
+    if ( nmr == FIRST_CIPLINE_OBJECT_NUMBER )
         {
         causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
         if (causticLoadedRecipe >= 0 && causticLoadedRecipe < TMediumRecipeManager::recipePerLine)
@@ -2624,6 +2676,12 @@ int cipline_tech_object::EvalCipInProgress()
             state = res;
             Stop(curstep);
             state = res;
+
+            auto err_msg_it = ERR_MSG.find( res );
+            const char* err_msg = 
+                ( err_msg_it != ERR_MSG.end() ) ? err_msg_it->second : UNKNOWN_ERR_MSG;
+            std::string formatted_err_msg = fmt::format( "ошибка '{}' ({})", err_msg, res );
+            set_err_msg( formatted_err_msg.c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM );
             return res;
             }
         else
@@ -2715,7 +2773,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_desinfection)
         {
-        if (step_to_do >= 64 && step_to_do <= 66) dev_upr_desinfection->on(); else dev_upr_desinfection->off();
+        if ( ( step_to_do >= 64 && step_to_do <= 66 ) || step_to_do == 77 ) dev_upr_desinfection->on(); else dev_upr_desinfection->off();
         }
     if (dev_upr_circulation)
         {
