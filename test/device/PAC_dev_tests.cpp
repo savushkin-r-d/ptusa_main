@@ -853,6 +853,122 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
     EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
     }
 
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_value )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Нет привязки к модулям ввода/вывода - должны получить 0.
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    init_channels( TE1 );
+    auto err_value = -100.f;
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink_tm311::CONSTANTS::P_ERR_T ),
+        TE1.start_param_idx, err_value );
+    // Есть привязка к модулям ввода/вывода - должны получить аварийное
+    // значение.
+    EXPECT_EQ( TE1.get_value(), err_value );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_evaluate_io )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // TM311 process data: 4 bytes (sint16 temp, sint8 scale, uint8 status).
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<char*>( TE1.AI_channels.int_read_values[ 0 ] );
+    
+    // Set temperature = 257 (0x0101) in big-endian.
+    buff[ 0 ] = 0x01;
+    buff[ 1 ] = 0x01;
+    // Set scale = -1.
+    buff[ 2 ] = static_cast<char>( -1 );
+    // Set status = 0x18 (bits 4-3 = 11 = Good).
+    buff[ 3 ] = 0x18;
+    
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 0.1f * 257 );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<char*>( TE1.AI_channels.int_read_values[ 0 ] );
+
+    // Test with status = 0 (Bad measured value).
+    buff[ 0 ] = 0x01;
+    buff[ 1 ] = 0x01;
+    buff[ 2 ] = static_cast<char>( -1 );
+    buff[ 3 ] = 0x00; // status bits 4-3 = 00 (Bad).
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), 0 ); // Bad status.
+
+    // Test with status = 3 (Good measured value).
+    buff[ 3 ] = 0x18; // status bits 4-3 = 11 (Good).
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_error_description )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_STREQ( TE1.get_error_description(), "нет ошибок" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    
+    // Allocate and set valid data with Good status.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<char*>( TE1.AI_channels.int_read_values[ 0 ] );
+    buff[ 0 ] = 0x00;
+    buff[ 1 ] = 0x00;
+    buff[ 2 ] = static_cast<char>( -1 );
+    buff[ 3 ] = 0x18; // Good status (bits 4-3 = 11).
+
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+    EXPECT_STREQ( TE1.get_error_description(), "IOL-устройство не подключено" );
+
+    // Bit 0 - IOLink connected.
+    *TE1.AI_channels.int_module_read_values[ 0 ] = 0b1;
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
+    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
+    
+    set_iol_state_to_OK( TE1 );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), 1 );
+    
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 template<typename T1 = i_DI_device, typename T2 = T1>
 void check_dev( const char* name, int type, int sub_type,

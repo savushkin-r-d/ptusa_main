@@ -164,7 +164,7 @@ class temperature_e_iolink_tm311 : public AI1
             {
             int16_t temperature = 0;    ///< Temperature value (with one decimal place).
             int8_t scale = -1;          ///< Scale factor.
-            uint8_t status = 0;         ///< Status byte (measured value status and switch state).
+            uint8_t status = 0x18;      ///< Status byte (measured value status and switch state), default Good (0x18).
             };
 
         TM311_data info{};
