@@ -62,9 +62,11 @@ int tech_dev_error::save_as_Lua_str( char *str )
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "id_n={},\n", simple_device->get_serial_n() ).size;
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
-            "id_object_alarm_number={},\n", -simple_device->get_error_id() ).size;
+            "id_object_alarm_number={},\n",
+            -simple_device->get_error_id() ).size;
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
-            "id_type={},\n", simple_device->get_type() ).size;
+            "id_type={},\n",
+            static_cast<int>( simple_device->get_type() ) ).size;
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "suppress={}\n", alarm_params & P_IS_SUPPRESS ? "true" : "false" ).size;

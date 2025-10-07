@@ -150,7 +150,7 @@ class action
         std::vector < std::vector< std::vector< device* > > > devices;
         std::string name;                           ///< Имя действия.
 
-        const saved_params_float *par = nullptr;    ///< Параметры действия.
+        const saved_params_float* par = nullptr;    ///< Параметры действия.
         std::vector< int >        par_idx;  ///< Индексы параметров действия.
     };
 //-----------------------------------------------------------------------------
@@ -300,6 +300,8 @@ class DI_DO_action: public action
 
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
+
+        bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
