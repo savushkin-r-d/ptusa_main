@@ -239,6 +239,8 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2797,
 
             FES_8001446,
+
+            EH_PMP23,
             };
 
         enum PROCESSING_TYPE

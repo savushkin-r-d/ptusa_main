@@ -3050,6 +3050,12 @@ void pressure_e_iolink::read_article( const char* article,
         return;
         }
 
+    if ( strcmp( article, "E&H.PMP23" ) == 0 )
+        {
+        n_article = ARTICLE::EH_PMP23;
+        return;
+        }
+
     if ( G_DEBUG )
         {
         G_LOG->warning( "%s unknown article \"%s\"",
@@ -3071,7 +3077,8 @@ const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTI
         { ARTICLE::IFM_PM1705, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
-        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } }
+        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } },
+        { ARTICLE::EH_PMP23, { 0.00001f, EX_PT_DATA_TYPE } }
     };
 
     auto it = article_data.find( n_article );
