@@ -640,6 +640,44 @@ TEST( cipline_tech_object, _DoStep )
     ClearCipDevices( );
     G_LUA_MANAGER->free_Lua( );
     }
+
+TEST( cipline_tech_object, circulation_signal_with_can_continue )
+    {
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device circ_signal( "LINE1DO101", device::DT_DO, device::DST_DO_VIRT );
+    virtual_device can_continue_operation_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_upr_circulation = &circ_signal;
+    cip1.dev_os_can_continue = &can_continue_operation_signal;
+
+    // Test for circulation step 28 (alkaline circulation)
+    cip1.circ_temp_reached = 1; // Temperature reached
+    cip1.curstep = 28;
+    cip1._DoStep(28);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    
+    // Simulate "can continue" signal during circulation
+    can_continue_operation_signal.set_state( 1 );
+    cip1.wasflip = false; // Reset wasflip
+    cip1.curstep = 28;
+    cip1._DoStep(28);
+    
+    // Circulation signal should remain ON for circulation steps regardless of wasflip
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    
+    // Test for circulation step 48 (acid circulation)
+    cip1.curstep = 48;
+    cip1._DoStep(48);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
     
 TEST( cipline_tech_object, save_device ) 
     {
