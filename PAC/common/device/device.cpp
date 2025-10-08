@@ -2980,7 +2980,7 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
 void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
-    read_article( new_article, n_article, this );  
+    read_article( new_article, n_article, this );
     alfa = get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
@@ -3078,7 +3078,7 @@ const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTI
         { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
         { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } },
-        { ARTICLE::EH_PMP23, { 0.00001f, EX_PT_DATA_TYPE } }
+        { ARTICLE::EH_PMP23, { 0.0001f, EH_PT_DATA_TYPE } }
     };
 
     auto it = article_data.find( n_article );
@@ -3110,6 +3110,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         }
 
     const auto& info = get_article_info( n_article );
+    auto byte_data = reinterpret_cast<std::byte*>( data );
     
     if ( info.processing_type == PT_DATA_TYPE )
         {
@@ -3118,7 +3119,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = pt_info.v;
         st = 0;
         }
-    else // EX_PT_DATA_TYPE
+    else if ( info.processing_type == EX_PT_DATA_TYPE ) 
         {
         ex_PT_data ex_info{};
         auto data_ptr = ( (char*)&ex_info );
@@ -3127,6 +3128,15 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
         v = ex_info.v;
         st = ex_info.status;
+        }
+    else if ( info.processing_type == EH_PT_DATA_TYPE )
+        {
+        PMP23ProcessWordLE info{};
+        std::copy( byte_data, byte_data + sizeof( info ), info.bytes );
+        std::swap( info.bytes[ 0 ], info.bytes[ 1 ] );
+        std::swap( info.bytes[ 2 ], info.bytes[ 3 ] );
+        v = static_cast<float>( info.bits.v );
+        st = 1;
         }
 
     v = alfa * v;
