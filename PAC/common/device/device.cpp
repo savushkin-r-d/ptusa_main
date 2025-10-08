@@ -3107,12 +3107,10 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = 0;
         st = 0;
         return;
-        }
-
-    const auto& info = get_article_info( n_article );
-    auto byte_data = reinterpret_cast<std::byte*>( data );
-    
-    if ( info.processing_type == PT_DATA_TYPE )
+        }    
+   
+    if ( const auto& info = get_article_info( n_article ); 
+        info.processing_type == PT_DATA_TYPE )
         {
         PT_data pt_info{};
         std::reverse_copy( data, data + sizeof( pt_info ), (char*)&pt_info );
