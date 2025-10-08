@@ -1622,9 +1622,9 @@ TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     const auto EH_PMP23 = "E&H.PMP23";
     test_dev.set_article( EH_PMP23 );
     test_dev.evaluate_io();
-    // Value should calculate to 0.255f for the E&H.PMP23 (100 as raw
-    // input data with scaling factor 0.00001, using EX_PT_DATA_TYPE).
-    EXPECT_NEAR( test_dev.get_value(), 0.255f, .01f );
+    // Value should calculate to 1686.83f for the E&H.PMP23 (100 as raw
+    // input data from the line above).
+    EXPECT_NEAR( test_dev.get_value(), 1686.83f, .01f );
 
     G_PAC_INFO()->emulation_on();
     }
