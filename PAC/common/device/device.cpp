@@ -3131,11 +3131,13 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         }
     else if ( info.processing_type == EH_PT_DATA_TYPE )
         {
-        PMP23ProcessWordLE info{};
-        std::copy( byte_data, byte_data + sizeof( info ), info.bytes );
-        std::swap( info.bytes[ 0 ], info.bytes[ 1 ] );
-        std::swap( info.bytes[ 2 ], info.bytes[ 3 ] );
-        v = static_cast<float>( info.bits.v );
+        EH_PT_data EH_info{};
+        std::memcpy( &EH_info, data, sizeof( EH_info ) );
+
+        auto bytes = reinterpret_cast<std::byte*>( &EH_info );
+        std::swap( bytes[ 0 ], bytes[ 1 ] );
+        std::swap( bytes[ 2 ], bytes[ 3 ] );
+        v = static_cast<float>( EH_info.v );
         st = 1;
         }
 

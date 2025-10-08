@@ -300,17 +300,13 @@ class pressure_e_iolink : public analog_io_device
         // Reserved - зарезервирован, игнорируется.
         // Размер данных процесса: 4 байта.
         //
-        union PMP23ProcessWordLE
+        struct EH_PT_data
             {
-            std::byte bytes[ EH_PROCESS_DATA_IN_SIZE ];
-            struct EH_PT_data
-                {
-                int32_t v : 30;
-                int32_t unused : 1;
-                int32_t OU1 : 1;
-                } bits;
+            int32_t v : 30;
+            uint32_t unused : 1;
+            uint32_t OU1 : 1;
             };
-        static_assert( sizeof( PMP23ProcessWordLE::EH_PT_data ) == EH_PROCESS_DATA_IN_SIZE,
+        static_assert( sizeof( EH_PT_data ) == EH_PROCESS_DATA_IN_SIZE,
             "Struct `EH_PT_data` must be the 4 byte size." );
 
 #pragma pack(pop)
