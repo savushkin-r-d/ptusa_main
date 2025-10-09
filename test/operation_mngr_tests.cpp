@@ -1124,10 +1124,10 @@ TEST( operation, evaluate_stop_to_idle )
     tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
     auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
-    // Условие в состоянии STOP: при срабатывании выполняется переход операции в IDLE.
+    // Condition in STOP state: when triggered, operation transitions to IDLE.
     auto operation_stop_state = ( *test_op )[ operation::STOP ];
     auto main_step_in_stop = ( *operation_stop_state )[ -1 ];
-    auto if_action_in_stop = reinterpret_cast<jump_if_action*>(
+    auto if_action_in_stop = static_cast<jump_if_action*>(
         ( *main_step_in_stop )[ step::ACTIONS::A_JUMP_IF ] );
     if_action_in_stop->set_int_property( "next_state_n", 0, operation::IDLE );
 
@@ -1136,7 +1136,7 @@ TEST( operation, evaluate_stop_to_idle )
     test_op->stop();
     EXPECT_EQ( operation::STOP, test_op->get_state() );
 
-    // evaluate() должен обработать переход STOP -> IDLE.
+    // evaluate() should handle the STOP -> IDLE transition.
     DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
     if_action_in_stop->add_dev( &test_DI_one );
