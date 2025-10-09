@@ -1140,7 +1140,6 @@ TEST( operation, evaluate_stop_to_idle )
     DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
     if_action_in_stop->add_dev( &test_DI_one );
-    if_action_in_stop->set_int_property( "next_state_n", 0, operation::IDLE );
     test_DI_one.on();
     test_op->evaluate();
     EXPECT_EQ( operation::IDLE, test_op->get_state() );
