@@ -3,6 +3,7 @@
 
 #include "valve.h"
 
+#include "manager.h"
 #include "bus_coupler_io.h"
 #include "PAC_info.h"
 #include "g_errors.h"
@@ -1371,14 +1372,17 @@ int valve_iolink_mix_proof::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
+    auto feed_back_state = static_cast<valve::FB_STATE>(
+        get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-        error_id != io_device::IOLINKSTATE::OK )
+        error_id != io_device::IOLINKSTATE::OK &&
+        feed_back_state != FB_IS_AND_OFF )
         {
         return -error_id;
         }
 
-    if ( in_info.err > 0 )
+    if ( in_info.err > 0 && feed_back_state != FB_IS_AND_OFF )
         {
         return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
@@ -1392,7 +1396,7 @@ int valve_iolink_mix_proof::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( feed_back_state == FB_IS_AND_OFF )
                 {
                 return VX_LOWER_SEAT_FB_OFF;
                 }
@@ -1408,7 +1412,7 @@ int valve_iolink_mix_proof::get_state()
                 }
 
             //Обратная связь отключена.
-            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( feed_back_state == FB_IS_AND_OFF )
                 {
                 return VX_UPPER_SEAT_FB_OFF;
                 }
@@ -1515,7 +1519,10 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         case V_UPPER_SEAT:
             {
             direct_off();
-
+            if ( !out_info->sv2 )
+                {
+                start_switch_time = get_millisec();
+                }
             out_info->sv2 = true;
             break;
             }
@@ -1523,7 +1530,10 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
         case V_LOWER_SEAT:
             {
             direct_off();
-
+            if ( !out_info->sv3 )
+                {
+                start_switch_time = get_millisec();
+                }
             out_info->sv3 = true;
             break;
             }
@@ -2251,14 +2261,17 @@ int valve_iolink_shut_off_thinktop::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
+    auto feed_back_state = static_cast<valve::FB_STATE>(
+        get_par( P_FB, 0 ) );
     if ( auto error_id =
         get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-        error_id != io_device::IOLINKSTATE::OK )
+        error_id != io_device::IOLINKSTATE::OK &&
+        feed_back_state != FB_IS_AND_OFF )
         {
         return -error_id;
         }
 
-    if ( in_info.err > 0 )
+    if ( in_info.err > 0 && feed_back_state != FB_IS_AND_OFF )
         {
         return -( io_link_valve::ERROR_CODE_OFFSET + in_info.err );
         }
@@ -2566,6 +2579,113 @@ void valve_iol_terminal_mixproof_DO3::direct_set_state( int new_state )
 
         default:
             direct_on();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+analog_valve_ey::analog_valve_ey( const char* dev_name ) :device( dev_name,
+    device::DEVICE_TYPE::DT_VC,
+    device::DEVICE_SUB_TYPE::DST_VC_EY, 0 )
+    {};
+//-----------------------------------------------------------------------------
+void analog_valve_ey::set_property( const char* field, device* dev )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t analog_valve_ey::set_property() - "
+            "field = \"%s\", val = \"%s\"",
+            get_name(), field, dev ? dev->get_name() : "nullptr" );
+        }
+
+    if ( strcmp( field, "TERMINAL" ) == 0 )
+        {
+        conv = dynamic_cast<converter_iolink_ao*>( dev );
+        if ( conv )
+            {
+            conv->evaluate_io();
+            conv->direct_off();
+            }
+        }
+    else
+        {
+        G_LOG->alert( "%s\t analog_valve_ey::set_property() - "
+            "Unknown field \"%s\"", get_name(), field );
+        }
+    };
+//-----------------------------------------------------------------------------
+void analog_valve_ey::set_string_property( const char* field,
+    const char* new_value )
+    {
+    if ( !field ) return;
+
+    device::set_string_property( field, new_value );
+    switch ( field[ 0 ] )
+        {
+        //TERMINAL
+        case 'T':
+            conv = dynamic_cast<converter_iolink_ao*>(
+                G_DEVICE_MANAGER()->get_device( new_value ) );
+            if ( conv )
+                {
+                conv->evaluate_io();
+                conv->direct_off();
+                }
+            break;
+
+        default:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_on()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_OPENED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_off()
+    {
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_CLOSED ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::direct_set_value( float new_value )
+    {
+    if ( !conv ) return;
+
+    conv->set_channel_value( ey_number, new_value );
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_ey::get_value()
+    {
+    if ( !conv ) return 0.0f;
+
+    return conv->get_channel_value( ey_number );
+    }
+//-----------------------------------------------------------------------------
+int analog_valve_ey::get_state()
+    {
+    if ( !conv ) return -200;
+    else return conv->get_state();    
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_ey::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            if ( value < 1.0f || value > 2.0f )
+                {
+                G_LOG->error( "%s\t analog_valve_ey::set_rt_par() - "
+                    "ey_number = %f", get_name(), value );
+                }
+            else
+                {
+                ey_number = static_cast<int>( value );
+                }
+            break;
+
+        default:
+            device::set_rt_par( idx, value );
             break;
         }
     }

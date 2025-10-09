@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
+#include <cstring>
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
@@ -4046,6 +4047,163 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
     start_param_idx = motor_altivar::get_params_count();
     set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
     set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
+    {
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
+
+    static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
+        "Struct `process_data_in` must be the 1 byte size." );
+    static_assert( sizeof( process_data_out ) == PROCESS_DATA_OUT_SIZE,
+        "Struct `process_data_out` must be the 4 bytes size." );
+    }
+
+void converter_iolink_ao::direct_on()
+    {
+    set_channel_value( 1, 100 );
+    set_channel_value( 2, 100 );
+    }
+
+void converter_iolink_ao::direct_off()
+    {
+    set_channel_value( 1, 0 );
+    set_channel_value( 2, 0 );
+    }
+
+float converter_iolink_ao::get_channel_value( u_int ch ) const
+    {
+    switch ( ch )
+        {
+        case 1: return v1;
+        case 2: return v2;
+        default: return 0.0;
+        }
+    }
+
+int converter_iolink_ao::get_state()
+    {
+    if ( err )
+        {
+        return -err;
+        }
+
+    return analog_io_device::get_state();
+    }
+
+uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
+    {
+    if ( val < 0 ) val = 0.0f;
+    else if ( val > 100 ) val = 100.0f;
+
+    // Конвертируем: диапазон 0% - 4'000, 100% - 20'000.
+    auto setpoint = static_cast<uint16_t>( 4000 + val * 16000.0f / 100.0f );
+    auto tmp = (char*)&setpoint;
+    std::swap( tmp[ 0 ], tmp[ 1 ] );
+    return setpoint;
+    }
+
+void converter_iolink_ao::set_channel_value( u_int ch, float val )
+    {
+    auto new_value = calc_setpoint( val );
+    switch ( ch )
+        {
+        case 1:
+            p_data_out->setpoint_ch1 = new_value;
+            v1 = val;
+            break;
+
+        case 2:
+            p_data_out->setpoint_ch2 = new_value;
+            v2 = val;
+            break;
+        }
+
+    calculate_state();
+    }
+
+void converter_iolink_ao::calculate_state()
+    {
+    if ( v1 > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v1 == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
+    }
+
+void converter_iolink_ao::evaluate_io()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
+
+    if ( !data ) return; // Return, if data is nullptr (in debug mode).
+
+    std::copy( data, data + PROCESS_DATA_IN_SIZE,
+        reinterpret_cast<std::byte*>( &p_data_in ) );
+
+    p_data_out = reinterpret_cast<process_data_out*>(
+        get_AO_write_data( C_AIAO_INDEX ) );
+
+    if ( auto iol_st = get_AI_IOLINK_state( C_AIAO_INDEX ); 
+        iol_st == io_device::IOLINKSTATE::OK )
+        {
+        // Проверка статуса устройства (0 = OK согласно IODD).
+        if ( p_data_in.device_status == 0 )
+            {
+            err = 0;
+            }
+        else
+            {
+            err = p_data_in.device_status;
+            }
+        }
+    else
+        {
+        err = iol_st;
+        }
+    }
+
+int converter_iolink_ao::save_device_ex( char* buff )
+    {
+    auto l = analog_io_device::save_device_ex( buff );
+    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE,
+        "CH={{{:.2f},{:.2f}}}, ", v1, v2 );
+
+    return res.size + l;
+    }
+
+int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "CH" ) == 0 )
+        {
+        set_channel_value( idx, static_cast<float>( val ) );
+        return 0;
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
+    }
+
+const char* converter_iolink_ao::get_error_description()
+    {
+    auto err_id = get_error_id();
+    switch ( err_id )
+        {
+        case -1:
+            return "требуется обслуживание";
+
+        case -2:
+            return "не соответствует спецификации";
+
+        case -3:
+            return "функциональная проверка";
+
+        case -4:
+            return "отказ";
+
+        default:
+            return iol_dev.get_error_description( err_id );
+        }    
     }
 
 #ifdef WIN_OS

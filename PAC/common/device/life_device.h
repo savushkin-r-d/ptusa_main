@@ -16,7 +16,7 @@ class watchdog : public device, public i_Lua_save_device
 
             PARAMS_COUNT
             };
-        inline static const float MAX_OUT_VALUE = 65'536;
+        inline static const float MAX_OUT_VALUE = 32'767;
 
         /// @param name - имя.
         explicit watchdog( const char* name, 

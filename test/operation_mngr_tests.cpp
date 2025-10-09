@@ -1278,6 +1278,7 @@ TEST( AI_AO_action, check )
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
     auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг", -1, -1 );
     auto operation_state = ( *operation )[ 1 ];
 	auto step = ( *operation_state )[ 1 ];
 
@@ -1453,14 +1454,19 @@ TEST( DI_DO_action, check )
 
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
-	action.add_dev( &test_DO );
+	
+	// Test with invalid device type (AI instead of DI/DO)
+	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
+		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
+	test_AI.set_descr( "Test AI" );
+	action.add_dev( &test_AI );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Группы DI->DO's' устройство 'test_DO1 (Test DO)'"
-		" не является входным сигналом (DI, SB, GS, LS, FS)";
+		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
+		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
 
 	const int SHORT_STR_SIZE = 50;
@@ -1469,6 +1475,7 @@ TEST( DI_DO_action, check )
 	EXPECT_STREQ( EXPECTED_STR.substr( 0, SHORT_STR_SIZE - 1 ).c_str(),
 		msg.c_str() );
 
+	// Test with valid devices (DI first, then DO)
 	action.clear_dev();
 	action.add_dev( &test_DI );
 	action.add_dev( &test_DO );
@@ -1530,17 +1537,48 @@ TEST( DI_DO_action, finalize )
 	EXPECT_EQ( 0, test_DO.get_state() );
 	}
 
+TEST( DI_DO_action, check_multiple_devices )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-TEST( inverted_DI_DO_action, evaluate )
+	test_DO.set_descr( "Test DO" );
+	auto action = DI_DO_action();
+	
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO );
+    std::string msg( MAX_STR_SIZE, '\0' );
+	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+	EXPECT_EQ( 0, res );
+	EXPECT_STREQ( "", msg.c_str() );
+
+    action.add_dev( &test_DI1 );
+    res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 1, res );
+    const std::string EXPECTED_STR = 
+        "в поле 'Группы DI->DO's' устройство 'test_DI1 ()' расположено "
+        "неправильно: DI сигналы должны быть описаны перед DO сигналами";
+    EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
+	}
+
+TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	test_DO.set_descr( "Test DO" );
-	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-	auto action = inverted_DI_DO_action();
-	action.add_dev( &test_DI );
+	auto action = DI_DO_action();
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
 
 	std::string msg( MAX_STR_SIZE, '\0' );
@@ -1548,20 +1586,59 @@ TEST( inverted_DI_DO_action, evaluate )
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 
-	EXPECT_FALSE( test_DI.is_active() );
-	action.evaluate();
-	EXPECT_TRUE( test_DO.is_active() );
-
-	test_DI.set_cmd( "ST", 0, 1 );
-	EXPECT_TRUE( test_DI.is_active() );
+	// Изначально все DI неактивны
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	test_DI.set_cmd( "ST", 0, 0.f );
-	EXPECT_FALSE( test_DI.is_active() );
+	// Активируем один DI - DO должно активироваться (OR логика)
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем активный DI - DO должно деактивироваться
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
 	}
+
+
+TEST( inverted_DI_DO_action, evaluate )
+    {
+    DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    test_DO.set_descr( "Test DO" );
+    DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+    auto action = inverted_DI_DO_action();
+    action.add_dev( &test_DI );
+    action.add_dev( &test_DO );
+
+    std::string msg( MAX_STR_SIZE, '\0' );
+    auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 0, res );
+    EXPECT_STREQ( "", msg.c_str() );
+
+    EXPECT_FALSE( test_DI.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO.is_active() );
+
+    test_DI.set_cmd( "ST", 0, 1 );
+    EXPECT_TRUE( test_DI.is_active() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO.is_active() );
+
+    test_DI.set_cmd( "ST", 0, 0.f );
+    EXPECT_FALSE( test_DI.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO.is_active() );
+    }
 
 
 TEST( AI_AO_action, finalize )
