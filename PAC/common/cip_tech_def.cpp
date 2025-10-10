@@ -2338,7 +2338,6 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             SAV[i]->R();
             }
         is_ready_to_end = false;
-        wasflip = false;
         }
 
     pr_media=WATER;
@@ -2782,8 +2781,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     (
                         steps_additional_rinse.count(step_to_do) ||
                         (use_circulation_on_v2_supply && steps_v2_supply.count(step_to_do))
-                    ) &&
-                    (!wasflip || !T[TMR_OP_TIME]->is_time_up())
+                    ) 
                 )
             )
             {
@@ -5035,17 +5033,13 @@ int cipline_tech_object::_ToObject( int from, int where )
 
     rt_par_float[P_CONC] = c;
 
-    if (steps_additional_rinse.count(curstep) && (!wasflip))
+    if (steps_additional_rinse.count(curstep))
         {
         if (dev_os_can_continue)
             {
             if (dev_os_can_continue->get_state() == OFF)
                 {
                 return 0;
-                }
-            else
-                { 
-                wasflip = true;
                 }
             }
         }
@@ -5609,7 +5603,7 @@ int cipline_tech_object::_Circ( int what )
             }
         if (dev_os_can_continue)
             {
-            if ((dev_os_can_continue->get_state() == ON) || wasflip)
+            if (dev_os_can_continue->get_state() == ON)
                 {
                 return 1;
                 }
@@ -5621,16 +5615,6 @@ int cipline_tech_object::_Circ( int what )
         else
             {
             return 1;
-            }
-        }
-    else
-        {
-        if (dev_os_can_continue)
-            {
-            if (dev_os_can_continue->get_state() == ON)
-                {
-                wasflip = true;
-                }
             }
         }
     return 0;
