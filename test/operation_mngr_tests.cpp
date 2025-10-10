@@ -1115,6 +1115,38 @@ TEST( operation, evaluate )
     test_params_manager::removeObject();
 	}
 
+TEST( operation, evaluate_stop_to_idle )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+    // Condition in STOP state: when triggered, operation transitions to IDLE.
+    auto operation_stop_state = ( *test_op )[ operation::STOP ];
+    auto main_step_in_stop = ( *operation_stop_state )[ -1 ];
+    auto if_action_in_stop = static_cast<jump_if_action*>(
+        ( *main_step_in_stop )[ step::ACTIONS::A_JUMP_IF ] );
+    if_action_in_stop->set_int_property( "next_state_n", 0, operation::IDLE );
+
+    test_tank.set_mode( 1, 1 );
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    test_op->stop();
+    EXPECT_EQ( operation::STOP, test_op->get_state() );
+
+    // evaluate() should handle the STOP -> IDLE transition.
+    DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    if_action_in_stop->add_dev( &test_DI_one );
+    test_DI_one.on();
+    test_op->evaluate();
+    EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( operation, evaluate_PID )
 	{
 	//При переходе между шагами в пределах операции если ПИД-регулятор описан

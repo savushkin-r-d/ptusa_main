@@ -277,7 +277,11 @@ void operation::evaluate()
 
                 case state_idx::STOPPING:
                     unit->set_mode( operation_num, state_idx::STOP );
-                    break;                    
+                    break;
+
+                case state_idx::STOP:
+                    unit->set_mode( operation_num, state_idx::IDLE );
+                    break;
 
                 default:
                     //Для всех остальных состояний ничего не делаем.
