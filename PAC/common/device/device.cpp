@@ -3043,7 +3043,7 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
 void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
-    read_article( new_article, n_article, this );  
+    read_article( new_article, n_article, this );
     alfa = get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
@@ -3113,6 +3113,12 @@ void pressure_e_iolink::read_article( const char* article,
         return;
         }
 
+    if ( strcmp( article, "E&H.PMP23" ) == 0 )
+        {
+        n_article = ARTICLE::EH_PMP23;
+        return;
+        }
+
     if ( G_DEBUG )
         {
         G_LOG->warning( "%s unknown article \"%s\"",
@@ -3134,7 +3140,8 @@ const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTI
         { ARTICLE::IFM_PM1705, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
-        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } }
+        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } },
+        { ARTICLE::EH_PMP23, { 0.0001f, EH_PT_DATA_TYPE } }
     };
 
     auto it = article_data.find( n_article );
@@ -3163,18 +3170,17 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = 0;
         st = 0;
         return;
-        }
-
-    const auto& info = get_article_info( n_article );
-    
-    if ( info.processing_type == PT_DATA_TYPE )
+        }    
+   
+    if ( const auto& info = get_article_info( n_article ); 
+        info.processing_type == PT_DATA_TYPE )
         {
         PT_data pt_info{};
         std::reverse_copy( data, data + sizeof( pt_info ), (char*)&pt_info );
         v = pt_info.v;
         st = 0;
         }
-    else // EX_PT_DATA_TYPE
+    else if ( info.processing_type == EX_PT_DATA_TYPE ) 
         {
         ex_PT_data ex_info{};
         auto data_ptr = ( (char*)&ex_info );
@@ -3183,6 +3189,17 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
         v = ex_info.v;
         st = ex_info.status;
+        }
+    else if ( info.processing_type == EH_PT_DATA_TYPE )
+        {
+        EH_PT_data EH_info{};
+        std::memcpy( &EH_info, data, sizeof( EH_info ) );
+
+        auto bytes = reinterpret_cast<std::byte*>( &EH_info );
+        std::swap( bytes[ 0 ], bytes[ 1 ] );
+        std::swap( bytes[ 2 ], bytes[ 3 ] );
+        v = static_cast<float>( EH_info.v );
+        st = 1;
         }
 
     v = alfa * v;

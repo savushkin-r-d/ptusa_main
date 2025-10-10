@@ -301,12 +301,16 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2797,
 
             FES_8001446,
+
+            EH_PMP23,
             };
 
         enum PROCESSING_TYPE
             {
             PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
-            EX_PT_DATA_TYPE     ///< Use ex_PT_data with manual byte swapping
+            EX_PT_DATA_TYPE,    ///< Use ex_PT_data with byte swapping
+            
+            EH_PT_DATA_TYPE,    ///< Use EH_PT_data with byte swapping
             };
 
         struct article_info
@@ -326,6 +330,8 @@ class pressure_e_iolink : public analog_io_device
 
         const char* get_error_description() override;
 
+#pragma pack(push, 1)
+
         struct PT_data
             {
             uint16_t st1 :1;
@@ -340,6 +346,32 @@ class pressure_e_iolink : public analog_io_device
             uint16_t  status : 4;
             int16_t reserved : 8;
             };
+
+        constexpr inline static int EH_PROCESS_DATA_IN_SIZE = 4;
+
+        //| Бит( ы ) | Имя         | Тип             |
+        //|----------|-------------|-----------------|
+        //| 0..29    | PressureRaw | Int30( signed ) |
+        //| 30       | OU1         | Bool            |
+        //| 31       | Reserved    | —               |
+        //
+        // PressureRaw - необработанное (масштабируемое) измеренное значение
+        // давления. Бит 29 является знаковым.
+        // OU1 - состояние релейного (выходного) канала: 0 = разомкнуто, 1 =
+        // замкнуто (логическая «1» / ~24 V DC означает «замкнуто»).
+        // Reserved - зарезервирован, игнорируется.
+        // Размер данных процесса: 4 байта.
+        //
+        struct EH_PT_data
+            {
+            int32_t v : 30;
+            uint32_t unused : 1;
+            uint32_t OU1 : 1;
+            };
+        static_assert( sizeof( EH_PT_data ) == EH_PROCESS_DATA_IN_SIZE,
+            "Struct `EH_PT_data` must be the 4 byte size." );
+
+#pragma pack(pop)
 
 #ifdef PTUSA_TEST
         ARTICLE get_article_n() const;
