@@ -853,6 +853,189 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
     EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
     }
 
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_value )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Нет привязки к модулям ввода/вывода - должны получить 0.
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    init_channels( TE1 );
+    auto err_value = -100.f;
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink_tm311::CONSTANTS::P_ERR_T ),
+        TE1.start_param_idx, err_value );
+    // Есть привязка к модулям ввода/вывода - должны получить аварийное
+    // значение.
+    EXPECT_EQ( TE1.get_value(), err_value );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_evaluate_io )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // TM311 process data: 4 bytes.
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{};
+    
+    // Data layout in memory (before swap in evaluate_io):
+    // Byte 0: scale, Byte 1: status, Byte 2-3: temperature (big-endian, will be swapped to little-endian).
+    
+    // Test 1: Zero temperature with Bad status (status1=0, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x00, 0x00, 0x00}; // scale, status, temp_high, temp_low.
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 0.0f );
+    EXPECT_EQ( TE1.get_state(), -10 ); // Bad status.
+    }
+
+    // Test 2: Temperature 25.7°C (257 = 0x0101) with Good status (status1=3, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x18, 0x01, 0x01}; // scale, status, temp_high, temp_low.
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 25.7f );
+    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+    }
+
+    // Test 3: Negative temperature -12.3°C (-123 = 0xFF85) with Good status.
+    {
+    uint8_t data[4] = {0xFF, 0x18, 0xFF, 0x85}; // scale, status, temp_high, temp_low.
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), -12.3f );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    }
+
+    // Test 4: Temperature 100.0°C (1000 = 0x03E8) with Good status.
+    {
+    uint8_t data[4] = {0xFF, 0x18, 0x03, 0xE8}; // scale, status, temp_high, temp_low.
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 100.0f );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    }
+
+    // Test 5: Temperature 10.0°C (100 = 0x0064) with Uncertain status (status1=1).
+    {
+    uint8_t data[4] = {0xFF, 0x08, 0x00, 0x64}; // scale, status, temp_high, temp_low.
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 10.0f );
+    EXPECT_EQ( TE1.get_state(), -20 ); // Uncertain status: -10 - 1*10 - 0 = -20.
+    }
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+
+    // Data layout: Byte 0=scale, Byte 1=status, Byte 2-3=temperature.
+
+    // Test 1: Bad status (status1=0, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x00, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -10 ); // -10 - 0*10 - 0 = -10.
+    }
+
+    // Test 2: Uncertain status (status1=1, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x08, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -20 ); // -10 - 1*10 - 0 = -20.
+    }
+
+    // Test 3: Manual/Fixed status (status1=2, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x10, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -30 ); // -10 - 2*10 - 0 = -30.
+    }
+
+    // Test 4: Good status (status1=3, status2=0).
+    {
+    uint8_t data[4] = {0xFF, 0x18, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+    }
+
+    // Test 5: Good status with low limited (status1=3, status2=1).
+    {
+    uint8_t data[4] = {0xFF, 0x1A, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -41 ); // -10 - 3*10 - 1 = -41.
+    }
+
+    // Test 6: Good status with high limited (status1=3, status2=2).
+    {
+    uint8_t data[4] = {0xFF, 0x1C, 0x00, 0x00};
+    std::memcpy(TE1.AI_channels.int_read_values[0], data, 4);
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -42 ); // -10 - 3*10 - 2 = -42.
+    }
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_error_description )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_STREQ( TE1.get_error_description(), "нет ошибок" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    
+    // Allocate and set valid data with Good status.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    auto buff = reinterpret_cast<std::byte*>( TE1.AI_channels.int_read_values[ 0 ] );
+
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+    EXPECT_STREQ( TE1.get_error_description(), "IOL-устройство не подключено" );
+
+    // Bit 0 - IOLink connected.
+    *TE1.AI_channels.int_module_read_values[ 0 ] = 0b1;
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
+    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
+    
+    set_iol_state_to_OK( TE1 );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -10 );
+    
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 template<typename T1 = i_DI_device, typename T2 = T1>
 void check_dev( const char* name, int type, int sub_type,
