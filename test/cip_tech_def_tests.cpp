@@ -618,15 +618,187 @@ TEST( cipline_tech_object, _DoStep )
     cip1._DoStep(7);
     EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
     can_continue_operation_signal.set_state( 1 );
-    EXPECT_EQ( false, cip1.wasflip);
     cip1.curstep = 8;
     cip1._DoStep(8);
-    EXPECT_EQ( true, cip1.wasflip);
     EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
-    cip1.curstep = 8;
-    cip1._DoStep(8);
-    EXPECT_EQ( 0, cip1.dev_upr_circulation->get_state( ));
 
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
+
+TEST( cipline_tech_object, circulation_signal_with_can_continue )
+    {
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device circ_signal( "LINE1DO101", device::DT_DO, device::DST_DO_VIRT );
+    virtual_device can_continue_operation_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_upr_circulation = &circ_signal;
+    cip1.dev_os_can_continue = &can_continue_operation_signal;
+
+    // Test for circulation step 28 (alkaline circulation)
+    cip1.circ_temp_reached = 1; // Temperature reached
+    cip1.curstep = 28;
+    cip1._DoStep(28);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    
+    // Simulate "can continue" signal during circulation
+    can_continue_operation_signal.set_state( 1 );
+    cip1.curstep = 28;
+    cip1._DoStep(28);
+    
+    // Circulation signal should remain ON for circulation steps
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+    
+    // Test for circulation step 48 (acid circulation)
+    cip1.curstep = 48;
+    cip1._DoStep(48);
+    EXPECT_EQ( 1, cip1.dev_upr_circulation->get_state( ));
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
+
+TEST( cipline_tech_object, _ToObject_rinse_with_can_continue_signal )
+    {
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device can_continue_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_os_can_continue = &can_continue_signal;
+
+    // Test rinse step 8 - can continue OFF should return 0
+    cip1.curstep = 8;
+    can_continue_signal.set_state( 0 );
+    int result = cip1._ToObject( 0, 0 );
+    EXPECT_EQ( 0, result );
+
+    // Test rinse step 8 - can continue ON should allow operation to continue
+    can_continue_signal.set_state( 1 );
+    // Need to set up volume to not trigger return 1
+    cip1.rt_par_float[P_VRAB] = 1000000; // Large value so cnt doesn't trigger
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_NE( 1, result ); // Should not return 1 from can_continue check
+
+    // Test rinse step 37
+    cip1.curstep = 37;
+    can_continue_signal.set_state( 0 );
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_EQ( 0, result );
+
+    // Test rinse step 57
+    cip1.curstep = 57;
+    can_continue_signal.set_state( 0 );
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_EQ( 0, result );
+
+    // Test rinse step 86
+    cip1.curstep = 86;
+    can_continue_signal.set_state( 0 );
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_EQ( 0, result );
+
+    // Test non-rinse step - should not be affected by can_continue
+    cip1.curstep = 10;
+    can_continue_signal.set_state( 0 );
+    cip1.rt_par_float[P_VRAB] = 1000000;
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_NE( 1, result ); // Should not return early from can_continue check
+
+    // Test with dev_os_can_continue = NULL
+    cip1.dev_os_can_continue = nullptr;
+    cip1.curstep = 8;
+    cip1.rt_par_float[P_VRAB] = 1000000;
+    result = cip1._ToObject( 0, 0 );
+    EXPECT_NE( 1, result ); // Should continue normally without checking signal
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
+
+TEST( cipline_tech_object, _Circ_timer_behavior )
+    {
+    // This test verifies that _Circ function handles timer states correctly
+    // The main logic change (removal of wasflip) is tested via _DoStep and _ToObject tests
+    
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device can_continue_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_os_can_continue = &can_continue_signal;
+    
+    // Test that _Circ doesn't crash with different timer and signal states
+    cip1.T[TMR_OP_TIME]->set_countdown_time(100000);
+    cip1.T[TMR_OP_TIME]->start();
+    
+    // Test with can_continue ON
+    can_continue_signal.set_state( 1 );
+    int result = cip1._Circ( WATER );
+    // Should return 0 because timer is not up (operation continues)
+    EXPECT_EQ( 0, result );
+    
+    // Test with can_continue OFF  
+    can_continue_signal.set_state( 0 );
+    result = cip1._Circ( WATER );
+    // Should still return 0 because timer is not up
+    EXPECT_EQ( 0, result );
+    
+    // Test with NULL dev_os_can_continue
+    cip1.dev_os_can_continue = nullptr;
+    result = cip1._Circ( WATER );
+    // Should return 0 because timer is not up
+    EXPECT_EQ( 0, result );
+
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
+
+TEST( cipline_tech_object, _Circ_timer_expired_with_can_continue_off )
+    {
+    // Test specifically for line 5612: return 0 when timer is up and can_continue is OFF
+    // This covers the else branch (lines 5610-5613) in _Circ function
+    
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device can_continue_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_os_can_continue = &can_continue_signal;
+    
+    // Set up parameters for water circulation
+    cip1.rt_par_float[P_T_WP] = 60.0f; // Temperature setpoint
+    cip1.rt_par_float[PTM_OP] = 1; // 1 second operation time
+    cip1.rt_par_float[P_FLOW] = 100.0f;
+    
+    // Initialize circulation which sets up the timer
+    cip1._InitCirc( WATER, 11, 0 );
+    
+    // Wait for timer to expire
+    auto start = get_millisec();
+    while (get_delta_millisec(start) < 1500) {} // Wait 1.5 seconds
+    
+    // Set can_continue to OFF
+    can_continue_signal.set_state( 0 );
+    
+    // Call _Circ - should return 0 because timer is up but can_continue is OFF (line 5612)
+    int result = cip1._Circ( WATER );
+    EXPECT_EQ( 0, result );
+    
     ClearCipDevices( );
     G_LUA_MANAGER->free_Lua( );
     }
