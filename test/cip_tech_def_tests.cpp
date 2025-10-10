@@ -764,6 +764,44 @@ TEST( cipline_tech_object, _Circ_timer_behavior )
     ClearCipDevices( );
     G_LUA_MANAGER->free_Lua( );
     }
+
+TEST( cipline_tech_object, _Circ_timer_expired_with_can_continue_off )
+    {
+    // Test specifically for line 5612: return 0 when timer is up and can_continue is OFF
+    // This covers the else branch (lines 5610-5613) in _Circ function
+    
+    InitCipDevices( );
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance( )->set_Lua( lua_open( ));
+
+    cip1.initline( );
+    InitStationParams( );
+
+    virtual_device can_continue_signal( "LINE1DI101", device::DT_DI, device::DST_DI_VIRT );
+    cip1.dev_os_can_continue = &can_continue_signal;
+    
+    // Set up parameters for water circulation
+    cip1.rt_par_float[P_T_WP] = 60.0f; // Temperature setpoint
+    cip1.rt_par_float[PTM_OP] = 1; // 1 second operation time
+    cip1.rt_par_float[P_FLOW] = 100.0f;
+    
+    // Initialize circulation which sets up the timer
+    cip1._InitCirc( WATER, 11, 0 );
+    
+    // Wait for timer to expire
+    auto start = get_millisec();
+    while (get_delta_millisec(start) < 1500) {} // Wait 1.5 seconds
+    
+    // Set can_continue to OFF
+    can_continue_signal.set_state( 0 );
+    
+    // Call _Circ - should return 0 because timer is up but can_continue is OFF (line 5612)
+    int result = cip1._Circ( WATER );
+    EXPECT_EQ( 0, result );
+    
+    ClearCipDevices( );
+    G_LUA_MANAGER->free_Lua( );
+    }
     
 TEST( cipline_tech_object, save_device ) 
     {
