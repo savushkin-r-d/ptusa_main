@@ -156,18 +156,38 @@ class temperature_e_iolink_tm311 : public AI1
 
         const char* get_error_description() override;
 
-        inline static const std::string ARTICLE = "TM311";
+        inline static const std::string ARTICLE = "E&H.TM311";
 
 #ifndef PTUSA_TEST
     private:
 #endif
 
+#pragma pack(push, 1)
+
+        constexpr inline static int TM311_PROCESS_DATA_IN_SIZE = 4;
+        //| Бит( ы ) | Имя         | Тип             |
+        //|----------|-------------|-----------------|
+        //| 0        | OU1         |  Bool           |
+        //| 1-2      | Status2     |  UInt2          |
+        //| 3-4      | Status1     |  UInt2          |
+        //| 5-7      | Unused      |  -              |
+        //| 8-15     | Scale       |  Int8           |
+        //| 16-31    | Temperature |  Int16          |
+        //
         struct TM311_data
             {
-            int16_t temperature = 0;    ///< Temperature value (with one decimal place).
-            int8_t scale = -1;          ///< Scale factor.
-            uint8_t status = 0x18;      ///< Status byte (measured value status and switch state), default Good (0x18).
+            uint8_t OU1 : 1;       ///< Output 1 status bit.
+            uint8_t status2 : 2;   ///< Extra status 2 bits.
+            uint8_t status1 : 2;   ///< Status 2 bits.
+            uint8_t unused : 3;    ///< Unused bits.
+            int8_t scale{ -1 };    ///< Scale factor.
+            int16_t temperature{}; ///< Temperature value (with one decimal place).
             };
+
+#pragma pack(pop)
+
+        static_assert( sizeof( TM311_data ) == TM311_PROCESS_DATA_IN_SIZE,
+            "Struct `TM311_data` must be the 4 byte size." );
 
         TM311_data info{};
         u_int start_param_idx;

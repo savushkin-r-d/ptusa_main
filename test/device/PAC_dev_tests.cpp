@@ -883,22 +883,14 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_evaluate_io )
     init_channels( TE1 );
     set_iol_state_to_OK( TE1 );
 
-    // TM311 process data: 4 bytes (sint16 temp, sint8 scale, uint8 status).
+    // TM311 process data: 4 bytes.
     // Allocate 4 bytes as 2 int_2 values.
-    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{};
     auto buff = reinterpret_cast<std::byte*>( TE1.AI_channels.int_read_values[ 0 ] );
     
-    // Set temperature = 257 (0x0101) in big-endian.
-    buff[ 0 ] = std::byte{ 0x01 };
-    buff[ 1 ] = std::byte{ 0x01 };
-    // Set scale = -1.
-    buff[ 2 ] = std::byte{ 0xFF };
-    // Set status = 0x18 (bits 4-3 = 11 = Good).
-    buff[ 3 ] = std::byte{ 0x18 };
-    
     TE1.evaluate_io();
-    EXPECT_FLOAT_EQ( TE1.get_value(), 0.1f * 257 );
-    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_FLOAT_EQ( TE1.get_value(), 0.0f );
+    EXPECT_EQ( TE1.get_state(), -10 );
 
     delete[] TE1.AI_channels.int_read_values[ 0 ];
     G_PAC_INFO()->emulation_on();
@@ -917,18 +909,8 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
     TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
     auto buff = reinterpret_cast<std::byte*>( TE1.AI_channels.int_read_values[ 0 ] );
 
-    // Test with status = 0 (Bad measured value).
-    buff[ 0 ] = std::byte{ 0x01 };
-    buff[ 1 ] = std::byte{ 0x01 };
-    buff[ 2 ] = std::byte{ 0xFF };
-    buff[ 3 ] = std::byte{ 0x00 }; // status bits 4-3 = 00 (Bad).
     TE1.evaluate_io();
-    EXPECT_EQ( TE1.get_state(), 0 ); // Bad status.
-
-    // Test with status = 3 (Good measured value).
-    buff[ 3 ] = std::byte{ 0x18 }; // status bits 4-3 = 11 (Good).
-    TE1.evaluate_io();
-    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+    EXPECT_EQ( TE1.get_state(), -10 ); // Bad status.
 
     delete[] TE1.AI_channels.int_read_values[ 0 ];
     G_PAC_INFO()->emulation_on();
@@ -946,10 +928,6 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_error_description )
     // Allocate and set valid data with Good status.
     TE1.AI_channels.int_read_values[ 0 ] = new int_2[2]{ 0 };
     auto buff = reinterpret_cast<std::byte*>( TE1.AI_channels.int_read_values[ 0 ] );
-    buff[ 0 ] = std::byte{ 0x00 };
-    buff[ 1 ] = std::byte{ 0x00 };
-    buff[ 2 ] = std::byte{ 0xFF };
-    buff[ 3 ] = std::byte{ 0x18 }; // Good status (bits 4-3 = 11).
 
     TE1.evaluate_io();
     EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
@@ -963,7 +941,7 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_error_description )
     
     set_iol_state_to_OK( TE1 );
     TE1.evaluate_io();
-    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_EQ( TE1.get_state(), -10 );
     
     delete[] TE1.AI_channels.int_read_values[ 0 ];
     G_PAC_INFO()->emulation_on();

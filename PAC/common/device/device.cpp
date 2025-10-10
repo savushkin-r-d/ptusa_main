@@ -1849,15 +1849,17 @@ int temperature_e_iolink_tm311::get_state()
         return -st;
         }
 
-    // Extract measured value status from bits 4-3.
-    // 0 = Bad, measured value cannot be used.
-    if ( auto measured_value_status = ( info.status >> 3 ) & 0x03;
-        measured_value_status == 0 )
+    // Extract measured value status.
+    if ( info.status1 == 3 && info.status2 == 0 )
         {
-        return 0;
+        return 1;
+        }
+    else
+        {
+        return -10 - info.status1 * 10 - info.status2;
         }
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void temperature_e_iolink_tm311::evaluate_io()
@@ -1865,16 +1867,10 @@ void temperature_e_iolink_tm311::evaluate_io()
     auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
     if ( !data ) return;
 
-    // Byte order: Byte 1-2 (temperature), Byte 3 (scale), Byte 4 (status).
-    // Temperature is sint16 in big-endian format.
-    std::swap( data[ 0 ], data[ 1 ] );
-    memcpy( &info.temperature, data, 2 );
-    
-    // Scale is sint8 at byte 3 (index 2).
-    memcpy( &info.scale, data + 2, 1 );
-    
-    // Status is uint8 at byte 4 (index 3).
-    memcpy( &info.status, data + 3, 1 );
+    std::memcpy( &info, data, sizeof( TM311_data ) );
+    auto bytes = reinterpret_cast<std::byte*>( &info );
+    std::swap( bytes[ 0 ], bytes[ 1 ] );
+    std::swap( bytes[ 2 ], bytes[ 3 ] );
     }
 //-----------------------------------------------------------------------------
 const char* temperature_e_iolink_tm311::get_error_description()
