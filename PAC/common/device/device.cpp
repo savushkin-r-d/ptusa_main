@@ -1875,7 +1875,45 @@ void temperature_e_iolink_tm311::evaluate_io()
 //-----------------------------------------------------------------------------
 const char* temperature_e_iolink_tm311::get_error_description()
     {
-    return iol_dev.get_error_description( get_error_id() );
+    auto err_id = get_error_id();
+
+    if ( err_id < 0 &&
+        err_id > -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) )
+        {
+        static thread_local std::string msg;
+        msg.clear();
+
+        if ( err_id <= -10 && err_id >= -19)
+            msg =  "\'Bad\' - значение не может быть использовано";
+        else if ( err_id <= -20 && err_id >= -29 )
+            {
+            msg = "\'Uncertain\' "
+                "— значение может использоваться только ограниченно "
+                "(например, температура устройства вне диапазона)";
+            }
+        else if ( err_id <= -30 && err_id >= -39 )
+            {
+            msg = "\'Manual/Fixed\' "
+                "— значение может использоваться только ограниченно "
+                "(например, симуляция)";
+            }
+
+        if ( err_id % 10 == -1 )
+            msg += "; \'Low limited\' - значение нарушило нижний предел";
+        else if ( err_id % 10 == -2 )
+            {
+            msg += "; \'High limited\' - значение нарушило верхний предел";
+            }
+        else if ( err_id % 10 == -3 )
+            {
+            msg += ";\'Constant\' - "
+                "значение установлено как постоянное (например, симуляция)";
+            }
+
+        if ( !msg.empty() ) return msg.c_str();        
+        }
+
+    return iol_dev.get_error_description( err_id );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

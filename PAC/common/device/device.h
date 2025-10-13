@@ -165,15 +165,15 @@ class temperature_e_iolink_tm311 : public AI1
 #pragma pack(push, 1)
 
         constexpr inline static int TM311_PROCESS_DATA_IN_SIZE = 4;
-        //| Бит( ы ) | Имя         | Тип             |
-        //|----------|-------------|-----------------|
-        //| 0        | OU1         |  Bool           |
-        //| 1-2      | Status2     |  UInt2          |
-        //| 3-4      | Status1     |  UInt2          |
-        //| 5-7      | Unused      |  -              |
-        //| 8-15     | Scale       |  Int8           |
-        //| 16-31    | Temperature |  Int16          |
-        //
+        ///| Бит( ы ) | Имя         | Тип             |
+        ///|----------|-------------|-----------------|
+        ///| 0        | OU1         |  Bool           |
+        ///| 1-2      | Status2     |  UInt2          |
+        ///| 3-4      | Status1     |  UInt2          |
+        ///| 5-7      | Unused      |  -              |
+        ///| 8-15     | Scale       |  Int8           |
+        ///| 16-31    | Temperature |  Int16          |
+        ///
         struct TM311_data
             {
             uint8_t OU1 : 1;       ///< Output 1 status bit.
