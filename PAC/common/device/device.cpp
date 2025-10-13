@@ -4071,7 +4071,9 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
     {
-    memset( &p_data_in, 0, sizeof( p_data_in ) );
+#ifdef PTUSA_TEST
+    stub_p_data_out = {};
+#endif    
 
     static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
         "Struct `process_data_in` must be the 1 byte size." );

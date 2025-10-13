@@ -1863,7 +1863,7 @@ class converter_iolink_ao : public analog_io_device
             };
 #pragma pack(pop)
 
-        process_data_in p_data_in{ 0 };
+        process_data_in p_data_in{};
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
