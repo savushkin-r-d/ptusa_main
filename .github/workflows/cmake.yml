@@ -6,9 +6,11 @@ on:
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch:
+  pull_request:
+    branches: [ master ]
   pull_request_target:
     branches: [ master ]
-    types: [ labeled ]
+    types: [ labeled, opened, reopened, synchronize ]
   merge_group:
     types: [ checks_requested ]
 
@@ -16,12 +18,40 @@ env:
   NINJA_VERSION: 1.10.1
   BUILD_TYPE: Release
   CCACHE_VERSION: 4.2.1
+  MINGW_GCC_VERSION: 15.2.0
+  MINGW_W64_VERSION: 13.0.0
+  MINGW_REV: r1
+  MINGW_ARCH: x86_64
+  MINGW_THREAD: posix
+  MINGW_EXCEPT: seh
+  MINGW_CRT: ucrt
 
 jobs:
   build:
     name: ${{ matrix.config.name }}
+    if: >-
+      ${{
+        github.repository == 'savushkin-r-d/ptusa_main' &&
+        (
+          github.event_name == 'push' ||
+          github.event_name == 'schedule' ||
+          github.event_name == 'merge_group' ||
+          (
+            github.event_name == 'pull_request_target' &&
+            github.event.pull_request.head.repo.full_name != github.repository &&
+            (
+              contains(github.event.pull_request.labels.*.name, 'safe to test') ||
+              github.event.pull_request.author_association == 'MEMBER' ||
+              github.event.pull_request.author_association == 'OWNER'
+            )
+          ) ||
+          (
+            github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository
+          )
+        )
+      }}
     runs-on: ${{ matrix.config.os }}
-    if: ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || (github.event_name == 'merge_group') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +85,12 @@ jobs:
             run_tests: "true"
           }
     steps:
-    - uses: actions/checkout@v5
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
@@ -116,12 +151,16 @@ jobs:
         file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
     - name: ccache cache files
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: .ccache
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
+
+    - name: Disable man-db cache (Linux only)
+      if: runner.os == 'Linux'
+      run: echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
 
     - name: Install yasm
       shell: cmake -P {0}
@@ -137,6 +176,61 @@ jobs:
           execute_process(COMMAND sudo apt-get update)
           execute_process(COMMAND sudo apt-get install -y yasm)
         endif()
+
+
+    - name: Cache MinGW archive
+      if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: mingw_cache
+        key: mingw-archive-${{ env.MINGW_GCC_VERSION }}-${{ env.MINGW_W64_VERSION }}-${{ env.MINGW_REV }}-${{ env.MINGW_THREAD }}-${{ env.MINGW_EXCEPT }}-${{ env.MINGW_CRT }}
+
+    - name: Install MinGW-w64 (Windows MinGW only)
+      if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
+      shell: cmake -P {0}
+      run: |
+        # Параметры версии вынесены в env (см. верх файла).
+        set(gcc_ver $ENV{MINGW_GCC_VERSION})
+        set(w64_ver $ENV{MINGW_W64_VERSION})
+        set(rev     $ENV{MINGW_REV})
+        set(arch    $ENV{MINGW_ARCH})
+        set(thread  $ENV{MINGW_THREAD})
+        set(excepts $ENV{MINGW_EXCEPT})
+        set(crt     $ENV{MINGW_CRT})
+
+        # Формирование имени релиза и архива.
+        set(release_tag "${gcc_ver}${thread}-${w64_ver}-${crt}-${rev}")
+        set(filename "winlibs-${arch}-${thread}-${excepts}-gcc-${gcc_ver}-mingw-w64${crt}-${w64_ver}-${rev}.zip")
+        set(mingw_w64_url "https://github.com/brechtsanders/winlibs_mingw/releases/download/${release_tag}/${filename}")
+
+        set(zip_dir "$ENV{GITHUB_WORKSPACE}/mingw_cache")
+        file(MAKE_DIRECTORY "${zip_dir}")
+        set(zip_path "${zip_dir}/mingw64.zip")
+
+        if (EXISTS "${zip_path}")
+          message(STATUS "Using cached MinGW archive: ${zip_path}")
+        else()
+          message(STATUS "Downloading MinGW-w64: ${mingw_w64_url}")
+          file(DOWNLOAD "${mingw_w64_url}" "${zip_path}" SHOW_PROGRESS)
+        endif()
+
+        # Распаковываем напрямую в C:/ чтобы избежать промежуточного копирования.
+        # В архиве корневая папка 'mingw64', поэтому после распаковки будет c:/mingw64.
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xf "${zip_path}"
+          WORKING_DIRECTORY "c:/"
+        )
+
+        # Верификация.
+        if (NOT EXISTS "c:/mingw64/bin/x86_64-w64-mingw32-gcc.exe")
+          message(FATAL_ERROR "x86_64-w64-mingw32-gcc.exe not found after extraction.")
+        endif()
+
+        # Диагностика: показываем обнаруженные компиляторы в PATH и версию g++.
+        message(STATUS "Diagnostics: locating 'g++' and 'x86_64-w64-mingw32-gcc' and printing g++ version.")
+        execute_process(COMMAND where g++)
+        execute_process(COMMAND where x86_64-w64-mingw32-gcc)
+        execute_process(COMMAND g++ -v)
 
 
     - name: Configure
@@ -332,7 +426,7 @@ jobs:
 
     - name: Upload coverage to Codecov (Linux only)
       if: runner.os == 'Linux'
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
       with:
         fail_ci_if_error: true
         verbose: true
@@ -340,7 +434,7 @@ jobs:
 
     - name: Store benchmark result (Linux only)
       if: runner.os == 'Linux'
-      uses: benchmark-action/github-action-benchmark@v1
+      uses: benchmark-action/github-action-benchmark@4bdcce38c94cec68da58d012ac24b7b1155efe8b # v1.20.7
       with:
         name: C++ Benchmark
         tool: 'googlecpp'
@@ -367,7 +461,7 @@ jobs:
 
 
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         path: ./${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact }}
@@ -378,9 +472,14 @@ jobs:
     needs: build
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1.1.4
+      uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -392,7 +491,7 @@ jobs:
     - name: Store Release url
       run: |
         echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         path: ./upload_url
         name: upload_url
@@ -423,14 +522,19 @@ jobs:
     needs: release
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
     - name: Download artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: ${{ matrix.config.artifact }}
         path: ./
 
     - name: Download URL
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: upload_url
         path: ./
@@ -440,7 +544,7 @@ jobs:
         echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
     - name: Upload to Release
       id: upload_to_release
-      uses: actions/upload-release-asset@v1.0.2
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:

@@ -277,7 +277,11 @@ void operation::evaluate()
 
                 case state_idx::STOPPING:
                     unit->set_mode( operation_num, state_idx::STOP );
-                    break;                    
+                    break;
+
+                case state_idx::STOP:
+                    unit->set_mode( operation_num, state_idx::IDLE );
+                    break;
 
                 default:
                     //Для всех остальных состояний ничего не делаем.
@@ -1090,26 +1094,49 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
         }
 
     auto &devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
+    for ( const auto& dev_group : devs )
         {
-        if ( devs[ i ].empty() )
+        if ( dev_group.empty() )
             {
             continue;
             }
 
-        auto d_i_device = devs[ i ][ 0 ];
-        if ( d_i_device->get_type() != device::DT_DI &&
-            d_i_device->get_type() != device::DT_SB &&
-            d_i_device->get_type() != device::DT_GS &&
-            d_i_device->get_type() != device::DT_LS &&
-            d_i_device->get_type() != device::DT_FS )
+        // Проверяем порядок устройств: сначала DI, затем DO
+        bool found_do = false;
+        for ( const auto& device_ptr : dev_group )
             {
-            auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
-                R"(не является входным сигналом (DI, SB, GS, LS, FS))";
-            auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
-                d_i_device->get_name(), d_i_device->get_description() );
-            *out.out = '\0';
-            return 1;
+            auto device_type = device_ptr->get_type();
+            
+            // Проверяем, что устройство является допустимым типом (DI или DO)
+            if ( !is_di_device_type( device_type ) &&
+                device_type != device::DT_DO )
+                {
+                auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                    R"(не является допустимым сигналом (DI, SB, GS, LS, FS, DO))";
+                auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
+                    device_ptr->get_name(), device_ptr->get_description() );
+                *out.out = '\0';
+                return 1;
+                }
+            
+            // Проверяем правильность порядка: DI сигналы должны идти перед DO
+            auto is_di_type = is_di_device_type( device_type );
+            auto is_do_type = device_type == device::DT_DO;
+            
+            if ( is_do_type )
+                {
+                found_do = true;
+                }
+            else if ( is_di_type && found_do )
+                {
+                // Найден DI сигнал после DO сигнала - ошибка порядка
+                auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                    R"(расположено неправильно: DI сигналы должны быть описаны перед DO сигналами)";
+                auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
+                    device_ptr->get_name(), device_ptr->get_description() );
+                *out.out = '\0';
+                return 1;
+                }
             }
         }
 
@@ -1123,16 +1150,16 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    auto &devs = devices[ MAIN_GROUP ];
+    const auto &devs = devices[ MAIN_GROUP ];
 
-    for ( u_int i = 0; i < devs.size(); i++ )
+    for ( const auto& dev_group : devs )
         {
-        if ( devs[ i ].empty() )
+        if ( dev_group.empty() )
             {
             continue;
             }
 
-        evaluate_DO( devs[ i ] );
+        evaluate_DO( dev_group );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1143,37 +1170,76 @@ void DI_DO_action::finalize()
         return;
         }
 
-    auto& devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
+    const auto& devs = devices[ MAIN_GROUP ];
+    for ( const auto& dev_group : devs )
         {
-        if ( devs[ i ].empty() )
+        if ( dev_group.empty() )
             {
             continue;
             }
 
-        for ( u_int j = 1; j < devs[ i ].size(); j++ )
+        // Найдем количество DI устройств и выключим все DO
+        u_int di_count = 0;
+        for ( const auto& dev : dev_group )
             {
-            devs[ i ][ j ]->off();
+            if ( is_di_device_type( dev->get_type() ) )
+                {
+                di_count++;
+                }
+            }
+        
+        // Выключаем все DO устройства
+        for ( auto it = dev_group.begin() + di_count;
+            it != dev_group.end(); ++it )
+            {
+            (*it)->off();
             }
         }    
     }
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
-    if ( devices[ 0 ]->is_active() )
+    // Поиск активных DI среди всех входных устройств
+    bool any_di_active = false;
+    u_int di_count = 0;
+    
+    // Подсчитаем количество DI устройств и проверим их активность
+    for ( const auto& dev : devices )
         {
-        for ( u_int j = 1; j < devices.size(); j++ )
+        if ( is_di_device_type( dev->get_type() ) )
             {
-            devices[ j ]->on();
+            di_count++;
+            if ( dev->is_active() )
+                {
+                any_di_active = true;
+                }
             }
         }
-    else
+
+    // Управляем DO устройствами (они идут после всех DI)
+    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
-        for ( u_int j = 1; j < devices.size(); j++ )
+        if ( any_di_active )
             {
-            devices[ j ]->off();
+            (*it)->on();
+            }
+        else
+            {
+            (*it)->off();
             }
         }
+    }
+//-----------------------------------------------------------------------------
+bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
+    {
+    if ( device_type == device::DT_DI ||
+        device_type == device::DT_SB ||
+        device_type == device::DT_GS ||
+        device_type == device::DT_LS ||
+        device_type == device::DT_FS )
+        return true;
+
+    return false;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1184,14 +1250,30 @@ inverted_DI_DO_action::inverted_DI_DO_action():
 //-----------------------------------------------------------------------------
 void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
-    int new_state = 0;
-    if ( !devices[ 0 ]->is_active() )
+    // Поиск активных DI среди всех входных устройств
+    bool any_di_active = false;
+    u_int di_count = 0;
+    
+    // Подсчитаем количество DI устройств и проверим их активность
+    for ( const auto& dev : devices )
         {
-        new_state = 1;
+        if ( is_di_device_type( dev->get_type() ) )
+            {
+            di_count++;
+            if ( dev->is_active() )
+                {
+                any_di_active = true;
+                }
+            }
         }
-    for ( u_int j = 1; j < devices.size(); j++ )
+
+    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен
+    int new_state = any_di_active ? 0 : 1;
+    
+    // Управляем DO устройствами (они идут после всех DI)
+    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
-        devices[ j ]->set_state( new_state );
+        (*it)->set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
