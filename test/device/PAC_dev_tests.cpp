@@ -963,7 +963,7 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
     TE1.evaluate_io();
     EXPECT_EQ( TE1.get_state(), -10 ); // -10 - 0*10 - 0 = -10.
     EXPECT_STREQ( TE1.get_error_description(),
-        "\'Bad\' - значение не может быть использовано" );    
+        "\'Bad\' - значение не может быть использовано" );
     }
 
     // Test 2: Uncertain status (status1=1, status2=0).
@@ -1018,6 +1018,20 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
     EXPECT_STREQ( TE1.get_error_description(),
         "\'Bad\' - значение не может быть использовано"
         "; \'High limited\' - значение нарушило верхний предел" );
+    }
+
+    // Test 7: Manual/Fixed status (status1=2, status2=3).
+    {
+    std::byte data[] = { B{0xFF}, B{0x16}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -33 ); // -10 - 2*10 - 3 = -33.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Manual/Fixed\' "
+        "— значение может использоваться только ограниченно "
+        "(например, симуляция)"
+        "; \'Constant\' - "
+        "значение установлено как постоянное (например, симуляция)" );
     }
 
     delete[] TE1.AI_channels.int_read_values[ 0 ];

@@ -1906,7 +1906,7 @@ const char* temperature_e_iolink_tm311::get_error_description()
             }
         else if ( err_id % 10 == -3 )
             {
-            msg += ";\'Constant\' - "
+            msg += "; \'Constant\' - "
                 "значение установлено как постоянное (например, симуляция)";
             }
 
