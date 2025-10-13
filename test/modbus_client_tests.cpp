@@ -2,6 +2,9 @@
 #include <array>
 #include <cstring>
 
+#include "tolua++.h"
+#include "PAC_dev_lua_tests.h" // содержит TOLUA_API int tolua_PAC_dev_open(lua_State*);
+
 using namespace ::testing;
 
 class test_modbus_client : public modbus_client
@@ -141,7 +144,10 @@ TEST( modbus_client, Get_AB_CD_ReadsExpectedValue )
     const unsigned int address = 9;
 
     // Заполняем область чтения: [A, B, C, D]
-    const unsigned char A = 0x11, B = 0x22, C = 0x33, D = 0x44;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
     preset_read_area( cli, address, A, B, C, D );
 
     const int_4 expected = from_bytes( A, B, C, D );
@@ -154,7 +160,10 @@ TEST( modbus_client, Get_CD_AB_ReadsExpectedValue )
     const unsigned int address = 10;
 
     // Заполняем область чтения: [A, B, C, D]
-    const unsigned char A = 0x55, B = 0x66, C = 0x77, D = 0x88;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
     preset_read_area( cli, address, A, B, C, D );
 
     // Ожидаемое формирование: [C, D, A, B]
@@ -168,7 +177,10 @@ TEST( modbus_client, Get_DC_BA_ReadsExpectedValue )
     const unsigned int address = 11;
 
     // Заполняем область чтения: [A, B, C, D]
-    const unsigned char A = 0x9A, B = 0xBC, C = 0xDE, D = 0xF0;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
     preset_read_area( cli, address, A, B, C, D );
 
     // Ожидаемое формирование: [D, C, B, A]
@@ -182,7 +194,10 @@ TEST( modbus_client, get_int4 )
     const unsigned int address = 12;
 
     // Заполняем область чтения: [A, B, C, D]
-    const unsigned char A = 0x0A, B = 0x1B, C = 0x2C, D = 0x3D;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
     preset_read_area( cli, address, A, B, C, D );
         
     const int_4 expected = from_bytes( B, A, D, C );
@@ -195,4 +210,228 @@ TEST( modbus_client, OutOfRangeAddressReturnsZero )
     // Для read: условие выхода address*2 > buff_size - read_buff_start - sizeof(int_4)
     // buff_size=256, read_buff_start=9, sizeof(int_4)=4 => порог 243 => address >= 122
     EXPECT_EQ( cli.get_int4_dc_ba( 122 ), 0 );
+    }
+
+
+// Утилита: получить глобальную переменную Lua как целое число
+static long get_lua_global_int( lua_State* L, const char* name )
+    {
+    lua_getfield( L, LUA_GLOBALSINDEX, name );
+    long v = static_cast<long>( tolua_tonumber( L, -1, 0 ) );
+    lua_pop( L, 1 );
+    return v;
+    }
+
+TEST( modbus_client_lua, construct_and_set_int4_ab_cd )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    // Создание клиента из Lua.
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 5;
+    const int_4 val = from_bytes( 0xAA, 0xBB, 0xCC, 0xDD );
+    const auto bytes = to_bytes( val );
+
+    // Передаем addr и val в Lua.
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, static_cast<lua_Number>( val ) );
+    lua_setglobal( L, "VAL" );
+
+    // Запись AB CD и чтение обратно через get_byte с учетом смещения
+    // (см. существующие C++ тесты).
+    const char* lua_script =
+        "cli:set_int4_ab_cd(ADDR, VAL)\n"
+        "base = 4 + ADDR * 2\n"
+        "b0 = cli:get_byte(base + 0)\n"
+        "b1 = cli:get_byte(base + 1)\n"
+        "b2 = cli:get_byte(base + 2)\n"
+        "b3 = cli:get_byte(base + 3)\n";
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    EXPECT_EQ( bytes[ 0 ], get_lua_global_int( L, "b0" ) ); // A
+    EXPECT_EQ( bytes[ 1 ], get_lua_global_int( L, "b1" ) ); // B
+    EXPECT_EQ( bytes[ 2 ], get_lua_global_int( L, "b2" ) ); // C
+    EXPECT_EQ( bytes[ 3 ], get_lua_global_int( L, "b3" ) ); // D
+
+    lua_close( L );
+    }
+
+TEST( modbus_client_lua, set_int4_cd_ab )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 6;
+    const int_4 val = from_bytes( 0x10, 0x20, 0x30, 0x40 );
+    const auto bytes = to_bytes( val );
+
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, static_cast<lua_Number>( val ) );
+    lua_setglobal( L, "VAL" );
+
+    const char* lua_script =
+        "cli:set_int4_cd_ab(ADDR, VAL)\n"
+        "base = 4 + ADDR * 2\n"
+        "b0 = cli:get_byte(base + 0)\n" // C
+        "b1 = cli:get_byte(base + 1)\n" // D
+        "b2 = cli:get_byte(base + 2)\n" // A
+        "b3 = cli:get_byte(base + 3)\n"; // B
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    EXPECT_EQ( bytes[ 2 ], get_lua_global_int( L, "b0" ) ); // C
+    EXPECT_EQ( bytes[ 3 ], get_lua_global_int( L, "b1" ) ); // D
+    EXPECT_EQ( bytes[ 0 ], get_lua_global_int( L, "b2" ) ); // A
+    EXPECT_EQ( bytes[ 1 ], get_lua_global_int( L, "b3" ) ); // B
+
+    lua_close( L );
+    }
+
+TEST( modbus_client_lua, set_int4_dc_ba )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 7;
+    const int_4 val = from_bytes( 0x01, 0x02, 0x03, 0x04 );
+    const auto bytes = to_bytes( val );
+
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, static_cast<lua_Number>( val ) );
+    lua_setglobal( L, "VAL" );
+
+    const char* lua_script =
+        "cli:set_int4_dc_ba(ADDR, VAL)\n"
+        "base = 4 + ADDR * 2\n"
+        "b0 = cli:get_byte(base + 0)\n" // D
+        "b1 = cli:get_byte(base + 1)\n" // C
+        "b2 = cli:get_byte(base + 2)\n" // B
+        "b3 = cli:get_byte(base + 3)\n"; // A
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    EXPECT_EQ( bytes[ 3 ], get_lua_global_int( L, "b0" ) ); // D
+    EXPECT_EQ( bytes[ 2 ], get_lua_global_int( L, "b1" ) ); // C
+    EXPECT_EQ( bytes[ 1 ], get_lua_global_int( L, "b2" ) ); // B
+    EXPECT_EQ( bytes[ 0 ], get_lua_global_int( L, "b3" ) ); // A
+
+    lua_close( L );
+    }
+
+TEST( modbus_client_lua, get_int4_ab_cd )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 8;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
+    const int_4 expected = from_bytes( A, B, C, D );
+
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
+    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
+    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
+    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
+
+    // Преднастроим read-область через set_byte
+    // (адрес = addr*2 - kRWShift + offset).
+    const char* lua_script =
+        "base_rd = ADDR * 2 - 4\n"
+        "cli:set_byte(base_rd + 0, A)\n"
+        "cli:set_byte(base_rd + 1, B)\n"
+        "cli:set_byte(base_rd + 2, C)\n"
+        "cli:set_byte(base_rd + 3, D)\n"
+        "res = cli:get_int4_ab_cd(ADDR)\n";
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    long res = get_lua_global_int( L, "res" );
+    EXPECT_EQ( static_cast<int_4>( res ), expected );
+
+    lua_close( L );
+    }
+
+TEST( modbus_client_lua, get_int4_cd_ab )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 9;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
+    const int_4 expected = from_bytes( C, D, A, B );
+
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
+    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
+    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
+    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
+
+    const char* lua_script =
+        "base_rd = ADDR * 2 - 4\n"
+        "cli:set_byte(base_rd + 0, A)\n"
+        "cli:set_byte(base_rd + 1, B)\n"
+        "cli:set_byte(base_rd + 2, C)\n"
+        "cli:set_byte(base_rd + 3, D)\n"
+        "res = cli:get_int4_cd_ab(ADDR)\n";
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    long res = get_lua_global_int( L, "res" );
+    EXPECT_EQ( static_cast<int_4>( res ), expected );
+
+    lua_close( L );
+    }
+
+TEST( modbus_client_lua, get_int4_dc_ba )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "cli = modbus_client(1, '127.0.0.1', 502, 50)" ) );
+
+    const unsigned int addr = 10;
+    const unsigned char A = 0x11;
+    const unsigned char B = 0x22;
+    const unsigned char C = 0x33;
+    const unsigned char D = 0x44;
+    const int_4 expected = from_bytes( D, C, B, A );
+
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
+    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
+    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
+    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
+
+    const char* lua_script =
+        "base_rd = ADDR * 2 - 4\n"
+        "cli:set_byte(base_rd + 0, A)\n"
+        "cli:set_byte(base_rd + 1, B)\n"
+        "cli:set_byte(base_rd + 2, C)\n"
+        "cli:set_byte(base_rd + 3, D)\n"
+        "res = cli:get_int4_dc_ba(ADDR)\n";
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+
+    long res = get_lua_global_int( L, "res" );
+    EXPECT_EQ( static_cast<int_4>( res ), expected );
+
+    lua_close( L );
     }
