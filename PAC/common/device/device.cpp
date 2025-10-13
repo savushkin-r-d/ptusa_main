@@ -2980,7 +2980,7 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
 void pressure_e_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
-    read_article( new_article, n_article, this );  
+    read_article( new_article, n_article, this );
     alfa = get_alfa( n_article );
     }
 //-----------------------------------------------------------------------------
@@ -3050,6 +3050,12 @@ void pressure_e_iolink::read_article( const char* article,
         return;
         }
 
+    if ( strcmp( article, "E&H.PMP23" ) == 0 )
+        {
+        n_article = ARTICLE::EH_PMP23;
+        return;
+        }
+
     if ( G_DEBUG )
         {
         G_LOG->warning( "%s unknown article \"%s\"",
@@ -3071,7 +3077,8 @@ const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTI
         { ARTICLE::IFM_PM1705, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PM1715, { 0.001f, EX_PT_DATA_TYPE } },
         { ARTICLE::IFM_PI2794, { 0.01f, PT_DATA_TYPE } },
-        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } }
+        { ARTICLE::FES_8001446, { 0.000610388818f, PT_DATA_TYPE } },
+        { ARTICLE::EH_PMP23, { 0.0001f, EH_PT_DATA_TYPE } }
     };
 
     auto it = article_data.find( n_article );
@@ -3100,18 +3107,17 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = 0;
         st = 0;
         return;
-        }
-
-    const auto& info = get_article_info( n_article );
-    
-    if ( info.processing_type == PT_DATA_TYPE )
+        }    
+   
+    if ( const auto& info = get_article_info( n_article ); 
+        info.processing_type == PT_DATA_TYPE )
         {
         PT_data pt_info{};
         std::reverse_copy( data, data + sizeof( pt_info ), (char*)&pt_info );
         v = pt_info.v;
         st = 0;
         }
-    else // EX_PT_DATA_TYPE
+    else if ( info.processing_type == EX_PT_DATA_TYPE ) 
         {
         ex_PT_data ex_info{};
         auto data_ptr = ( (char*)&ex_info );
@@ -3120,6 +3126,17 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         std::swap( data_ptr[ 2 ], data_ptr[ 3 ] );
         v = ex_info.v;
         st = ex_info.status;
+        }
+    else if ( info.processing_type == EH_PT_DATA_TYPE )
+        {
+        EH_PT_data EH_info{};
+        std::memcpy( &EH_info, data, sizeof( EH_info ) );
+
+        auto bytes = reinterpret_cast<std::byte*>( &EH_info );
+        std::swap( bytes[ 0 ], bytes[ 1 ] );
+        std::swap( bytes[ 2 ], bytes[ 3 ] );
+        v = static_cast<float>( EH_info.v );
+        st = 1;
         }
 
     v = alfa * v;
@@ -4054,7 +4071,9 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
     {
-    memset( &p_data_in, 0, sizeof( p_data_in ) );
+#ifdef PTUSA_TEST
+    stub_p_data_out = {};
+#endif    
 
     static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
         "Struct `process_data_in` must be the 1 byte size." );
@@ -4064,33 +4083,24 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
 
 void converter_iolink_ao::direct_on()
     {
-    // Устанавливаем канал 1 в максимальное значение.
-    p_data_out->setpoint_ch1 = C_MAX_VALUE;
-    p_data_out->setpoint_ch2 = C_MAX_VALUE;
-
-    v = 100.0f;
-    v2 = 100.0f;
-    st = 1;
+    set_channel_value( 1, 100 );
+    set_channel_value( 2, 100 );
     }
 
 void converter_iolink_ao::direct_off()
     {
-    p_data_out->setpoint_ch1 = C_MIN_VALUE;
-    p_data_out->setpoint_ch2 = C_MIN_VALUE;
-
-    v = 0.0f;
-    v2 = 0.0f;
-    st = 0;
+    set_channel_value( 1, 0 );
+    set_channel_value( 2, 0 );
     }
 
-float converter_iolink_ao::get_value()
+float converter_iolink_ao::get_channel_value( u_int ch ) const
     {
-    return v;
-    }
-
-float converter_iolink_ao::get_value2() const
-    {
-    return v2;
+    switch ( ch )
+        {
+        case 1: return v1;
+        case 2: return v2;
+        default: return 0.0;
+        }
     }
 
 int converter_iolink_ao::get_state()
@@ -4100,7 +4110,7 @@ int converter_iolink_ao::get_state()
         return -err;
         }
 
-    return st;
+    return analog_io_device::get_state();
     }
 
 uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
@@ -4115,28 +4125,35 @@ uint16_t converter_iolink_ao::calc_setpoint( float &val ) const
     return setpoint;
     }
 
-void converter_iolink_ao::direct_set_value( float val )
+void converter_iolink_ao::set_channel_value( u_int ch, float val )
     {
-    p_data_out->setpoint_ch1 = calc_setpoint( val );
-    v = val;
-    calculate_state();
-    }
+    auto new_value = calc_setpoint( val );
+    switch ( ch )
+        {
+        case 1:
+            p_data_out->setpoint_ch1 = new_value;
+            v1 = val;
+            break;
 
-void converter_iolink_ao::set_value2( float val )
-    {
-    p_data_out->setpoint_ch2 = calc_setpoint( val );
-    v2 = val;
+        case 2:
+            p_data_out->setpoint_ch2 = new_value;
+            v2 = val;
+            break;
+        }
+
     calculate_state();
     }
 
 void converter_iolink_ao::calculate_state()
     {
-    if ( v > 0.0f || v2 > 0.0f ) st = 1;
-    else if ( v == 0.0f && v2 == 0.0f ) st = 0;
+    if ( v1 > 0.0f || v2 > 0.0f ) analog_io_device::direct_on();
+    else if ( v1 == 0.0f && v2 == 0.0f ) analog_io_device::direct_off();
     }
 
 void converter_iolink_ao::evaluate_io()
     {
+    if ( G_PAC_INFO()->is_emulator() ) return;
+
     auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AIAO_INDEX ) );
 
     if ( !data ) return; // Return, if data is nullptr (in debug mode).
@@ -4169,20 +4186,43 @@ void converter_iolink_ao::evaluate_io()
 int converter_iolink_ao::save_device_ex( char* buff )
     {
     auto l = analog_io_device::save_device_ex( buff );
-    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE, "V2={:.1f}, ",
-        get_value2() );
+    auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE,
+        "CH={{{:.2f},{:.2f}}}, ", v1, v2 );
+
     return res.size + l;
     }
 
 int converter_iolink_ao::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( strcmp( prop, "V2" ) == 0 )
+    if ( strcmp( prop, "CH" ) == 0 )
         {
-        set_value2( static_cast<float>( val ) );
+        set_channel_value( idx, static_cast<float>( val ) );
         return 0;
         }
 
     return analog_io_device::set_cmd( prop, idx, val );
+    }
+
+const char* converter_iolink_ao::get_error_description()
+    {
+    auto err_id = get_error_id();
+    switch ( err_id )
+        {
+        case -1:
+            return "требуется обслуживание";
+
+        case -2:
+            return "не соответствует спецификации";
+
+        case -3:
+            return "функциональная проверка";
+
+        case -4:
+            return "отказ";
+
+        default:
+            return iol_dev.get_error_description( err_id );
+        }    
     }
 
 #ifdef WIN_OS

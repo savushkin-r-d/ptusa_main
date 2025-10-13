@@ -239,12 +239,16 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2797,
 
             FES_8001446,
+
+            EH_PMP23,
             };
 
         enum PROCESSING_TYPE
             {
             PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
-            EX_PT_DATA_TYPE     ///< Use ex_PT_data with manual byte swapping
+            EX_PT_DATA_TYPE,    ///< Use ex_PT_data with byte swapping
+            
+            EH_PT_DATA_TYPE,    ///< Use EH_PT_data with byte swapping
             };
 
         struct article_info
@@ -264,6 +268,8 @@ class pressure_e_iolink : public analog_io_device
 
         const char* get_error_description() override;
 
+#pragma pack(push, 1)
+
         struct PT_data
             {
             uint16_t st1 :1;
@@ -278,6 +284,32 @@ class pressure_e_iolink : public analog_io_device
             uint16_t  status : 4;
             int16_t reserved : 8;
             };
+
+        constexpr inline static int EH_PROCESS_DATA_IN_SIZE = 4;
+
+        //| Бит( ы ) | Имя         | Тип             |
+        //|----------|-------------|-----------------|
+        //| 0..29    | PressureRaw | Int30( signed ) |
+        //| 30       | OU1         | Bool            |
+        //| 31       | Reserved    | —               |
+        //
+        // PressureRaw - необработанное (масштабируемое) измеренное значение
+        // давления. Бит 29 является знаковым.
+        // OU1 - состояние релейного (выходного) канала: 0 = разомкнуто, 1 =
+        // замкнуто (логическая «1» / ~24 V DC означает «замкнуто»).
+        // Reserved - зарезервирован, игнорируется.
+        // Размер данных процесса: 4 байта.
+        //
+        struct EH_PT_data
+            {
+            int32_t v : 30;
+            uint32_t unused : 1;
+            uint32_t OU1 : 1;
+            };
+        static_assert( sizeof( EH_PT_data ) == EH_PROCESS_DATA_IN_SIZE,
+            "Struct `EH_PT_data` must be the 4 byte size." );
+
+#pragma pack(pop)
 
 #ifdef PTUSA_TEST
         ARTICLE get_article_n() const;
@@ -1776,18 +1808,24 @@ class converter_iolink_ao : public analog_io_device
         void direct_on() override;
         void direct_off() override;
 
-        float get_value() override;
-        float get_value2() const;
         int get_state() override;
 
-        void direct_set_value( float val ) override;
-        void set_value2( float val );
+        float get_channel_value( u_int ch ) const;
+
+        /// @brief Sets the value for the specified channel.
+        /// @param ch Channel number (valid values: CHANNEL_1 or CHANNEL_2).
+        /// @param val Value to set.
+        ///
+        /// Valid channel values are 1 (CHANNEL_1) and 2 (CHANNEL_2).
+        void set_channel_value( u_int ch, float val );
 
         void evaluate_io() override;
 
         int save_device_ex( char* buff ) override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
+
+        const char* get_error_description() override;
 
 #ifndef PTUSA_TEST
     private:
@@ -1796,9 +1834,8 @@ class converter_iolink_ao : public analog_io_device
         uint16_t calc_setpoint( float &val ) const;
         void calculate_state();
 
-        float v{};  // Выходное значение канала 1.
+        float v1{}; // Выходное значение канала 1.
         float v2{}; // Выходное значение канала 2.
-        int st{};   // Состояние устройства.
         int err{};  // Ошибка.
 
         enum CONSTANTS
@@ -1814,9 +1851,9 @@ class converter_iolink_ao : public analog_io_device
 
 #pragma pack(push, 1)
         struct process_data_in
-            {
-            uint8_t device_status : 4;	// Статус устройства.
+            {            
             uint8_t reserved : 4;	    // Зарезервированные биты.
+            uint8_t device_status : 4;	// Статус устройства.
             };
 
         struct process_data_out
@@ -1826,10 +1863,12 @@ class converter_iolink_ao : public analog_io_device
             };
 #pragma pack(pop)
 
-        process_data_in p_data_in{ 0 };
+        process_data_in p_data_in{};
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
+
+        io_link_device iol_dev{};
     };
 ///-----------------------------------------------------------------------------
 /// Предоставляет функциональность таймера.
