@@ -2692,10 +2692,15 @@ void analog_valve_ey::set_rt_par( u_int idx, float value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
-    dev_name, DT_VC, DST_VC_IOLINK, 0 )
+    dev_name, DT_VC, DST_VC_IOLINK, 
+    static_cast<int>( PAR_CONSTANTS::ADDITIONAL_PARAMS_COUNT ) - 1 )
     {
     in_info.closed = true;
     in_info.opened = false;
+
+    auto fb_par_idx = static_cast<int>( PAR_CONSTANTS::P_FB );
+    set_par_name( fb_par_idx, 0, "P_FB" );
+    set_par( fb_par_idx, 0, 1.0f );
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()
@@ -2800,6 +2805,13 @@ int analog_valve_iolink::get_state()
         get_AI_IOLINK_state( static_cast<u_int>( AO1::AO_INDEX ) );
         error_id != io_device::IOLINKSTATE::OK )
         {
+        // Проверяем параметр P_FB для возможности отключения ошибок устройства.
+        if ( get_par(
+            static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ), 0 ) == 0 )
+            {
+            return 1; // Обратная связь отключена - нет ошибок.
+            }
+
         return -error_id;
         }
 
