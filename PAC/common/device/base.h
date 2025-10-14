@@ -59,7 +59,7 @@ class par_device
         /// @param idx - индекс параметра (с единицы).
         /// @param offset - смещение индекса.
         /// @param value - новое значение.
-        virtual void set_par( u_int idx, u_int offset, float value );
+        void set_par( u_int idx, u_int offset, float value );
 
         /// @brief Установка значения рабочего параметра.
         ///

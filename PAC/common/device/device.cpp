@@ -1816,6 +1816,107 @@ const char* temperature_e_iolink::get_error_description()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+temperature_e_iolink_tm311::temperature_e_iolink_tm311( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, static_cast<u_int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        start_param_idx, "P_ERR_T" );
+    }
+//-----------------------------------------------------------------------------
+float temperature_e_iolink_tm311::get_value()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
+
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+            start_param_idx );
+        }
+    else
+        {
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 0.1f * info.temperature;
+        }
+    }
+//-----------------------------------------------------------------------------
+int temperature_e_iolink_tm311::get_state()
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
+
+    if ( auto st = get_AI_IOLINK_state( C_AI_INDEX );
+        st != io_device::IOLINKSTATE::OK )
+        {
+        return -st;
+        }
+
+    // Extract measured value status.
+    if ( info.status1 == 3 && info.status2 == 0 )
+        {
+        return 1;
+        }
+    else
+        {
+        return -10 - info.status1 * 10 - info.status2;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void temperature_e_iolink_tm311::evaluate_io()
+    {
+    auto data = reinterpret_cast<std::byte*>( get_AI_data( C_AI_INDEX ) );
+    if ( !data ) return;
+
+    std::memcpy( &info, data, sizeof( TM311_data ) );
+    auto bytes = reinterpret_cast<std::byte*>( &info );
+    std::swap( bytes[ 0 ], bytes[ 1 ] );
+    std::swap( bytes[ 2 ], bytes[ 3 ] );
+    }
+//-----------------------------------------------------------------------------
+const char* temperature_e_iolink_tm311::get_error_description()
+    {
+    auto err_id = get_error_id();
+
+    if ( err_id < 0 &&
+        err_id > -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) )
+        {
+        static thread_local std::string msg;
+        msg.clear();
+
+        if ( err_id <= -10 && err_id >= -19)
+            msg =  "\'Bad\' - значение не может быть использовано";
+        else if ( err_id <= -20 && err_id >= -29 )
+            {
+            msg = "\'Uncertain\' "
+                "— значение может использоваться только ограниченно "
+                "(например, температура устройства вне диапазона)";
+            }
+        else if ( err_id <= -30 && err_id >= -39 )
+            {
+            msg = "\'Manual/Fixed\' "
+                "— значение может использоваться только ограниченно "
+                "(например, симуляция)";
+            }
+
+        if ( err_id % 10 == -1 )
+            msg += "; \'Low limited\' - значение нарушило нижний предел";
+        else if ( err_id % 10 == -2 )
+            {
+            msg += "; \'High limited\' - значение нарушило верхний предел";
+            }
+        else if ( err_id % 10 == -3 )
+            {
+            msg += "; \'Constant\' - "
+                "значение установлено как постоянное (например, симуляция)";
+            }
+
+        if ( !msg.empty() ) return msg.c_str();        
+        }
+
+    return iol_dev.get_error_description( err_id );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void virtual_wages::direct_off()
     {
     state = 0;
@@ -4071,7 +4172,9 @@ motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_EY, device::DST_CONV_AO2, 0 )
     {
-    memset( &p_data_in, 0, sizeof( p_data_in ) );
+#ifdef PTUSA_TEST
+    stub_p_data_out = {};
+#endif    
 
     static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
         "Struct `process_data_in` must be the 1 byte size." );

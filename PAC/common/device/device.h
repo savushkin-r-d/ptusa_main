@@ -140,6 +140,68 @@ class temperature_e_iolink : public AI1
         io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик температуры IO-Link Endress&Hauser TM311.
+class temperature_e_iolink_tm311 : public AI1
+    {
+    public:
+        explicit temperature_e_iolink_tm311( const char *dev_name );
+
+        ~temperature_e_iolink_tm311() override = default;
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+        const char* get_error_description() override;
+
+        inline static const std::string ARTICLE = "E&H.TM311";
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+
+#pragma pack(push, 1)
+
+        constexpr inline static int TM311_PROCESS_DATA_IN_SIZE = 4;
+        ///| Бит( ы ) | Имя         | Тип             |
+        ///|----------|-------------|-----------------|
+        ///| 0        | OU1         |  Bool           |
+        ///| 1-2      | Status2     |  UInt2          |
+        ///| 3-4      | Status1     |  UInt2          |
+        ///| 5-7      | Unused      |  -              |
+        ///| 8-15     | Scale       |  Int8           |
+        ///| 16-31    | Temperature |  Int16          |
+        ///
+        struct TM311_data
+            {
+            uint8_t OU1 : 1;       ///< Output 1 status bit.
+            uint8_t status2 : 2;   ///< Extra status 2 bits.
+            uint8_t status1 : 2;   ///< Status 2 bits.
+            uint8_t unused : 3;    ///< Unused bits.
+            int8_t scale{ -1 };    ///< Scale factor.
+            int16_t temperature{}; ///< Temperature value (with one decimal place).
+            };
+
+#pragma pack(pop)
+
+        static_assert( sizeof( TM311_data ) == TM311_PROCESS_DATA_IN_SIZE,
+            "Struct `TM311_data` must be the 4 byte size." );
+
+        TM311_data info{};
+        u_int start_param_idx;
+
+        enum class CONSTANTS
+            {
+            P_ERR_T = 1,                ///< Аварийное значение температуры.
+
+            ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+            };
+
+        io_link_device iol_dev;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
 class level_e : public level
     {
@@ -1863,7 +1925,7 @@ class converter_iolink_ao : public analog_io_device
             };
 #pragma pack(pop)
 
-        process_data_in p_data_in{ 0 };
+        process_data_in p_data_in{};
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;

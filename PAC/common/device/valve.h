@@ -1205,6 +1205,13 @@ class analog_valve_iolink : public AO1
 
         const char* get_error_description() override;
 
+        enum class PAR_CONSTANTS
+            {
+            P_FB = 1,
+
+            ADDITIONAL_PARAMS_COUNT, ///Количество дополнительных параметров.
+            };
+
     private:
 #pragma pack(push,1)
         struct in_data
