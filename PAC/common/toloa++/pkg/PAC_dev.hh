@@ -1924,8 +1924,10 @@ class modbus_client
     protected:
 
     public:
-        modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
-        //реализация функций протокола modbus
+        modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
+            unsigned long exchangetimeout = 50 );
+
+        // Реализация функций протокола modbus.
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
         int read_coils(unsigned int start_address, unsigned int quantity);
         int read_holding_registers(unsigned int address, unsigned int quantity);

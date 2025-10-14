@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/13/25 15:02:19.
+** Generated automatically by tolua++-1.0.92 on Tue Oct 14 10:28:00 2025.
 */
 
 #ifndef __cplusplus
@@ -12835,8 +12835,8 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
      !tolua_isusertable(tolua_S,1,"modbus_client",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isstring(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,1,&tolua_err) ||
+     !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
      !tolua_isnoobj(tolua_S,6,&tolua_err)
  )
   goto tolua_lerror;
@@ -12845,8 +12845,8 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
   const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
-  unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
-  unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
+  unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,502));
+  unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,50));
   {
    modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"modbus_client");
@@ -12871,8 +12871,8 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
      !tolua_isusertable(tolua_S,1,"modbus_client",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isstring(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,1,&tolua_err) ||
+     !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
      !tolua_isnoobj(tolua_S,6,&tolua_err)
  )
   goto tolua_lerror;
@@ -12881,8 +12881,8 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
  {
   unsigned int id = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
   const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
-  unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
-  unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,0));
+  unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,502));
+  unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,50));
   {
    modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"modbus_client");
