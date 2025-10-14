@@ -905,7 +905,7 @@ TEST( cipline_tech_object, check_device_watchdog )
     result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
     EXPECT_EQ( 0, result ); // Should find device
 
-    // Test with non-existent device number  
+    // Test with non-existent device number
     cip1.rt_par_float[ P_WATCHDOG ] = 99;
     result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
     EXPECT_EQ( -2, result ); // Should not find device
