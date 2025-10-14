@@ -2973,6 +2973,7 @@ void analog_valve::direct_on()
 void analog_valve::direct_off()
     {
     device::direct_off();
+    direct_set_value( static_cast<float>( C_MIN ) );
     }
 //-----------------------------------------------------------------------------
 void analog_valve::direct_set_state( int new_state )

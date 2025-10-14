@@ -2468,6 +2468,86 @@ TEST( analog_valve, set_cmd_st_resets_value )
     EXPECT_EQ( 0, VC1.get_state() );
     }
 
+TEST( analog_valve, io_modules_direct_on_off )
+    {
+    analog_valve VC1( "VC1" );
+
+    // Настройка менеджера ввода/вывода и AO-канала.
+    uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 0, 0, 555, 0 );
+
+    G_PAC_INFO()->emulation_off();
+    VC1.init( 0, 0, 1, 0 );
+    VC1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+
+    // По умолчанию 0%.
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_on -> 100%
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // direct_off -> 0%
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_set_value -> произвольное значение
+    VC1.direct_set_value( 37.5f );
+    EXPECT_FLOAT_EQ( 37.5f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Повторное выключение
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST( analog_valve, io_modules_set_cmd_st_resets_value )
+    {
+    analog_valve VC1( "VC1" );
+
+    // Настройка менеджера ввода/вывода и AO-канала.
+    uni_io_manager mngr;
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    mngr.init_node_AO( 0, 0, 555, 0 );
+
+    G_PAC_INFO()->emulation_off();
+    VC1.init( 0, 0, 1, 0 );
+    VC1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+
+    // Открыть клапан на 100% через set_cmd("V").
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Закрыть клапан через ST=0 -> значение должно сброситься в 0%.
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // Проверка, что ST=1 не изменяет значение, заданное ранее.
+    VC1.set_cmd( "V", 0, 55.0 );
+    VC1.set_cmd( "ST", 0, 1.0 );
+    EXPECT_EQ( 1, VC1.get_state() );
+    EXPECT_FLOAT_EQ( 55.0f, VC1.get_value() );
+
+    G_PAC_INFO()->emulation_on();
+    io_manager::replace_instance( prev_mngr );
+    }
+
 
 TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
     {
