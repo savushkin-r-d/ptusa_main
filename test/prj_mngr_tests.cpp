@@ -6,9 +6,9 @@
 #include "dtime.h"
 
 extern const char* FILES[ FILE_CNT ];
-const char* const bus_couplers_dis = "WARNING(4) -> Bus couplers are disabled.\n";
-const char* const opc_r = "WARNING(4) -> OPC UA server is activated (only read).\n";
-const char* const bus_couplers_en = "WARNING(4) -> Bus couplers are enabled.\n";
+const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
+const char* const OPC_R = "WARNING(4) -> OPC UA server is activated (only read).\n";
+const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
 
@@ -105,12 +105,12 @@ TEST( project_manager, proc_main_params )
     char argv0[] = "ptusa_main.exe";
     char argv1[] = "--help";
     const char* argv[] = { argv0, argv1 };
-        
+
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( 2, argv );
     ASSERT_EQ( 1, res );
 
-    auto help = 
+    auto help =
 #if defined WIN_OS
         R"(Main control program
 Usage:
@@ -133,7 +133,7 @@ Usage:
       --sleep_time_ms arg   Sleep time, ms (default: 2)
 )";
 #else
-            R"(Main control program
+        R"(Main control program
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
@@ -179,9 +179,9 @@ Resetting params (command line parameter "rcrc").
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 #if defined WIN_OS
-    debug += tmp.str() + bus_couplers_dis;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug += tmp.str() + "\x1B[33m"+bus_couplers_en+"\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -191,13 +191,13 @@ Resetting params (command line parameter "rcrc").
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-        
+
 #if defined WIN_OS
-    debug = tmp.str() + opc_r;
-    debug += tmp.str() + bus_couplers_dis;
+    debug = tmp.str() + OPC_R;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug = tmp.str() + "\x1B[33m"+opc_r+"\x1B[0m";
-    debug += tmp.str() + "\x1B[33m"+bus_couplers_en+"\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + OPC_R + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -209,10 +209,10 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + bus_couplers_en;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m"+bus_couplers_en+"\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -225,10 +225,10 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + bus_couplers_en;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m"+bus_couplers_en+"\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
     debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
@@ -242,9 +242,9 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + bus_couplers_en;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
 #else
-    debug = tmp.str() + "\x1B[33m"+bus_couplers_en+"\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
