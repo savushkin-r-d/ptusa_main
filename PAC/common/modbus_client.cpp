@@ -200,29 +200,132 @@ int_2 modbus_client::get_int2( unsigned int address )
 
 void modbus_client::set_int4( unsigned int address, int_4 value )
     {
-    if (address * 2 > tcpclient->buff_size - write_buff_start - sizeof(int_4))
+    if ( address * 2 > tcpclient->buff_size - write_buff_start - sizeof( int_4 ) )
         {
         return;
         }
-    tcpclient->buff[write_buff_start + address * 2]         = ((char*)&value)[1];
-    tcpclient->buff[write_buff_start + 1 + address * 2]     = ((char*)&value)[0];
-    tcpclient->buff[write_buff_start + 2 + address * 2]     = ((char*)&value)[3];
-    tcpclient->buff[write_buff_start + 3 + address * 2]     = ((char*)&value)[2];
+
+    auto bytes = reinterpret_cast<char*>( &value );
+    // BA DC byte order.
+    tcpclient->buff[ write_buff_start + address * 2 ] = bytes[ 1 ];
+    tcpclient->buff[ write_buff_start + 1 + address * 2 ] = bytes[ 0 ];
+    tcpclient->buff[ write_buff_start + 2 + address * 2 ] = bytes[ 3 ];
+    tcpclient->buff[ write_buff_start + 3 + address * 2 ] = bytes[ 2 ];
     }
 
-int_4 modbus_client::get_int4( unsigned int address )
+int_4 modbus_client::get_int4( unsigned int address ) const
     {
-    if (address * 2 > tcpclient->buff_size - read_buff_start - sizeof(int_4))
+    if ( address * 2 > tcpclient->buff_size - read_buff_start - sizeof( int_4 ) )
         {
         return 0;
         }
+
     int_4 result;
-    ((char*)&result)[0] = tcpclient->buff[read_buff_start + 1 + address * 2];
-    ((char*)&result)[1] = tcpclient->buff[read_buff_start + address * 2];
-    ((char*)&result)[2] = tcpclient->buff[read_buff_start + 3 + address * 2];
-    ((char*)&result)[3] = tcpclient->buff[read_buff_start + 2 + address * 2];
+    auto bytes = reinterpret_cast<char*>( &result );
+    // BA DC byte order.
+    bytes[ 0 ] = tcpclient->buff[ read_buff_start + 1 + address * 2 ];
+    bytes[ 1 ] = tcpclient->buff[ read_buff_start + address * 2 ];
+    bytes[ 2 ] = tcpclient->buff[ read_buff_start + 3 + address * 2 ];
+    bytes[ 3 ] = tcpclient->buff[ read_buff_start + 2 + address * 2 ];
     return result;
     }
+
+void modbus_client::set_int4_ab_cd( unsigned int address, int_4 value )
+    {
+    if ( address * 2 > tcpclient->buff_size - write_buff_start - sizeof( int_4 ) )
+        {
+        return;
+        }
+
+    auto bytes = reinterpret_cast<char*>( &value );
+    // AB CD
+    tcpclient->buff[ write_buff_start + address * 2 ] = bytes[ 0 ];         // A
+    tcpclient->buff[ write_buff_start + 1 + address * 2 ] = bytes[ 1 ];     // B
+    tcpclient->buff[ write_buff_start + 2 + address * 2 ] = bytes[ 2 ];     // C
+    tcpclient->buff[ write_buff_start + 3 + address * 2 ] = bytes[ 3 ];     // D
+    }
+
+int_4 modbus_client::get_int4_ab_cd( unsigned int address ) const
+    {
+    if ( address * 2 > tcpclient->buff_size - read_buff_start - sizeof( int_4 ) )
+        {
+        return 0;
+        }
+
+    int_4 result;
+    auto bytes = reinterpret_cast<char*>( &result );
+    // AB CD
+    bytes[ 0 ] = tcpclient->buff[ read_buff_start + address * 2 ];          // A
+    bytes[ 1 ] = tcpclient->buff[ read_buff_start + 1 + address * 2 ];      // B
+    bytes[ 2 ] = tcpclient->buff[ read_buff_start + 2 + address * 2 ];      // C
+    bytes[ 3 ] = tcpclient->buff[ read_buff_start + 3 + address * 2 ];      // D
+    return result;
+    }
+
+void modbus_client::set_int4_cd_ab( unsigned int address, int_4 value )
+    {
+    if ( address * 2 > tcpclient->buff_size - write_buff_start - sizeof( int_4 ) )
+        {
+        return;
+        }
+
+    auto bytes = reinterpret_cast<char*>( &value );
+    // CD AB
+    tcpclient->buff[ write_buff_start + address * 2 ] = bytes[ 2 ];         // C
+    tcpclient->buff[ write_buff_start + 1 + address * 2 ] = bytes[ 3 ];     // D
+    tcpclient->buff[ write_buff_start + 2 + address * 2 ] = bytes[ 0 ];     // A
+    tcpclient->buff[ write_buff_start + 3 + address * 2 ] = bytes[ 1 ];     // B
+    }
+
+int_4 modbus_client::get_int4_cd_ab( unsigned int address ) const
+    {
+    if ( address * 2 > tcpclient->buff_size - read_buff_start - sizeof( int_4 ) )
+        {
+        return 0;
+        }
+
+    int_4 result;
+    auto bytes = reinterpret_cast<char*>( &result );
+    // CD AB
+    bytes[ 0 ] = tcpclient->buff[ read_buff_start + 2 + address * 2 ];      // C
+    bytes[ 1 ] = tcpclient->buff[ read_buff_start + 3 + address * 2 ];      // D
+    bytes[ 2 ] = tcpclient->buff[ read_buff_start + address * 2 ];          // A
+    bytes[ 3 ] = tcpclient->buff[ read_buff_start + 1 + address * 2 ];      // B
+    return result;
+    }
+
+void modbus_client::set_int4_dc_ba( unsigned int address, int_4 value )
+    {
+    if ( address * 2 > tcpclient->buff_size - write_buff_start - sizeof( int_4 ) )
+        {
+        return;
+        }
+
+    auto bytes = reinterpret_cast<char*>( &value );
+    // DC BA
+    tcpclient->buff[ write_buff_start + address * 2 ] = bytes[ 3 ];         // D
+    tcpclient->buff[ write_buff_start + 1 + address * 2 ] = bytes[ 2 ];     // C
+    tcpclient->buff[ write_buff_start + 2 + address * 2 ] = bytes[ 1 ];     // B
+    tcpclient->buff[ write_buff_start + 3 + address * 2 ] = bytes[ 0 ];     // A
+    }
+
+int_4 modbus_client::get_int4_dc_ba( unsigned int address ) const
+    {
+    if ( address * 2 > tcpclient->buff_size - read_buff_start - sizeof( int_4 ) )
+        {
+        return 0;
+        }
+
+    int_4 result;
+    auto bytes = reinterpret_cast<char*>( &result );
+    // DC BA
+    bytes[ 0 ] = tcpclient->buff[ read_buff_start + 3 + address * 2 ];      // D
+    bytes[ 1 ] = tcpclient->buff[ read_buff_start + 2 + address * 2 ];      // C
+    bytes[ 2 ] = tcpclient->buff[ read_buff_start + 1 + address * 2 ];      // B
+    bytes[ 3 ] = tcpclient->buff[ read_buff_start + address * 2 ];          // A
+    return result;
+    }
+
 
 void modbus_client::set_float( unsigned int address, float value )
     {
