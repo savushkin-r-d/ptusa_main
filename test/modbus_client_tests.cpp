@@ -326,6 +326,36 @@ TEST( modbus_client_lua, set_int4_dc_ba )
     lua_close( L );
     }
 
+void test_bytes( lua_State* L, const unsigned int addr,
+    const int_4 expected,
+    const unsigned char A, const unsigned char B,
+    const unsigned char C, const unsigned char D,
+    const char * cmd /*"res = cli:get_int4_ab_cd(ADDR)\n";*/)
+    {
+    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
+    lua_setglobal( L, "ADDR" );
+    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
+    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
+    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
+    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
+
+    // Предварительно настроим read-область через set_byte
+    // (адрес = addr*2 - kRWShift + offset).
+    const char* lua_script =
+        "base_rd = ADDR * 2 - 4\n"
+        "cli:set_byte(base_rd + 0, A)\n"
+        "cli:set_byte(base_rd + 1, B)\n"
+        "cli:set_byte(base_rd + 2, C)\n"
+        "cli:set_byte(base_rd + 3, D)\n";        
+    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
+    ASSERT_EQ( 0, luaL_dostring( L, cmd ) );
+
+    long res = get_lua_global_int( L, "res" );
+    EXPECT_EQ( static_cast<int_4>( res ), expected );
+
+    lua_close( L );
+    }
+
 TEST( modbus_client_lua, get_int4_ab_cd )
     {
     lua_State* L = lua_open();
@@ -340,28 +370,8 @@ TEST( modbus_client_lua, get_int4_ab_cd )
     const unsigned char D = 0x44;
     const int_4 expected = from_bytes( A, B, C, D );
 
-    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
-    lua_setglobal( L, "ADDR" );
-    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
-    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
-    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
-    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
-
-    // Преднастроим read-область через set_byte
-    // (адрес = addr*2 - kRWShift + offset).
-    const char* lua_script =
-        "base_rd = ADDR * 2 - 4\n"
-        "cli:set_byte(base_rd + 0, A)\n"
-        "cli:set_byte(base_rd + 1, B)\n"
-        "cli:set_byte(base_rd + 2, C)\n"
-        "cli:set_byte(base_rd + 3, D)\n"
-        "res = cli:get_int4_ab_cd(ADDR)\n";
-    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
-
-    long res = get_lua_global_int( L, "res" );
-    EXPECT_EQ( static_cast<int_4>( res ), expected );
-
-    lua_close( L );
+    test_bytes( L, addr, expected, A, B, C, D,
+        "res = cli:get_int4_ab_cd(ADDR)\n" );
     }
 
 TEST( modbus_client_lua, get_int4_cd_ab )
@@ -378,26 +388,8 @@ TEST( modbus_client_lua, get_int4_cd_ab )
     const unsigned char D = 0x44;
     const int_4 expected = from_bytes( C, D, A, B );
 
-    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
-    lua_setglobal( L, "ADDR" );
-    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
-    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
-    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
-    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
-
-    const char* lua_script =
-        "base_rd = ADDR * 2 - 4\n"
-        "cli:set_byte(base_rd + 0, A)\n"
-        "cli:set_byte(base_rd + 1, B)\n"
-        "cli:set_byte(base_rd + 2, C)\n"
-        "cli:set_byte(base_rd + 3, D)\n"
-        "res = cli:get_int4_cd_ab(ADDR)\n";
-    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
-
-    long res = get_lua_global_int( L, "res" );
-    EXPECT_EQ( static_cast<int_4>( res ), expected );
-
-    lua_close( L );
+    test_bytes( L, addr, expected, A, B, C, D,
+        "res = cli:get_int4_cd_ab(ADDR)\n" );
     }
 
 TEST( modbus_client_lua, get_int4_dc_ba )
@@ -414,24 +406,6 @@ TEST( modbus_client_lua, get_int4_dc_ba )
     const unsigned char D = 0x44;
     const int_4 expected = from_bytes( D, C, B, A );
 
-    lua_pushnumber( L, static_cast<lua_Number>( addr ) );
-    lua_setglobal( L, "ADDR" );
-    lua_pushnumber( L, A ); lua_setglobal( L, "A" );
-    lua_pushnumber( L, B ); lua_setglobal( L, "B" );
-    lua_pushnumber( L, C ); lua_setglobal( L, "C" );
-    lua_pushnumber( L, D ); lua_setglobal( L, "D" );
-
-    const char* lua_script =
-        "base_rd = ADDR * 2 - 4\n"
-        "cli:set_byte(base_rd + 0, A)\n"
-        "cli:set_byte(base_rd + 1, B)\n"
-        "cli:set_byte(base_rd + 2, C)\n"
-        "cli:set_byte(base_rd + 3, D)\n"
-        "res = cli:get_int4_dc_ba(ADDR)\n";
-    ASSERT_EQ( 0, luaL_dostring( L, lua_script ) );
-
-    long res = get_lua_global_int( L, "res" );
-    EXPECT_EQ( static_cast<int_4>( res ), expected );
-
-    lua_close( L );
+    test_bytes( L, addr, expected, A, B, C, D,
+        "res = cli:get_int4_dc_ba(ADDR)\n" );
     }
