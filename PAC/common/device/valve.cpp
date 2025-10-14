@@ -2988,6 +2988,14 @@ void analog_valve::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
+void analog_valve::direct_set_value( float new_value )
+    {
+    AO1::direct_set_value( new_value );
+
+    if ( new_value > 0.0f ) device::direct_on();
+    else device::direct_off();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS::valve_AS( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     valve( true, true, dev_name, DT_V, sub_type ),

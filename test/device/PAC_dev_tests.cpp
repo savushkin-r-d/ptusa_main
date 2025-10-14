@@ -2538,11 +2538,11 @@ TEST( analog_valve, io_modules_set_cmd_st_resets_value )
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
 
-    // Проверка, что ST=1 не изменяет значение, заданное ранее.
+    // Открыть клапан через ST=1 -> значение должно сброситься в 100%.
     VC1.set_cmd( "V", 0, 55.0 );
     VC1.set_cmd( "ST", 0, 1.0 );
     EXPECT_EQ( 1, VC1.get_state() );
-    EXPECT_FLOAT_EQ( 55.0f, VC1.get_value() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
