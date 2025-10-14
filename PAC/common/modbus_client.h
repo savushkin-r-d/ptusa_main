@@ -47,7 +47,15 @@ class modbus_client
         void set_int2(unsigned int address, int_2 value);
         int_2 get_int2(unsigned int address);
         void set_int4(unsigned int address, int_4 value);
-        int_4 get_int4(unsigned int address);
+        int_4 get_int4(unsigned int address) const;
+
+        void set_int4_ab_cd(unsigned int address, int_4 value);
+        int_4 get_int4_ab_cd(unsigned int address) const;
+        void set_int4_cd_ab(unsigned int address, int_4 value);
+        int_4 get_int4_cd_ab(unsigned int address) const;
+        void set_int4_dc_ba(unsigned int address, int_4 value);
+        int_4 get_int4_dc_ba(unsigned int address) const;
+
         void set_float(unsigned int address, float value);
         float get_float(unsigned int address);
         void set_bit(unsigned int address, int value);

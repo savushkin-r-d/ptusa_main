@@ -59,7 +59,7 @@ class par_device
         /// @param idx - индекс параметра (с единицы).
         /// @param offset - смещение индекса.
         /// @param value - новое значение.
-        virtual void set_par( u_int idx, u_int offset, float value );
+        void set_par( u_int idx, u_int offset, float value );
 
         /// @brief Установка значения рабочего параметра.
         ///
@@ -709,7 +709,7 @@ class device : public i_DO_AO_device, public par_device
             }
 
         /// @brief Получение типа устройства.
-        int get_type() const
+        device::DEVICE_TYPE get_type() const
             {
             return type;
             }
