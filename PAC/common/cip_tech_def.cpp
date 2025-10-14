@@ -1754,7 +1754,9 @@ int cipline_tech_object::EvalRecipes()
     if (rt_par_float[P_SELECT_REC] > 0)
         {
         lineRecipes->LoadRecipeToParams( ( int ) rt_par_float[P_SELECT_REC] - 1,
-            2, 16, 103, &rt_par_float);
+            TRecipeManager::RecipeValues::RV_V1,
+            workParameters::PV1,
+            TRecipeManager::RecipeValues::RV_RESERV_START, &rt_par_float);
         lineRecipes->getRecipeName( ( int ) rt_par_float[P_SELECT_REC] - 1,
             loadedRecName);
         loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;

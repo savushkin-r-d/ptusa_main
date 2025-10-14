@@ -87,7 +87,7 @@ void InitCipDevices( )
 
     dm->add_io_device( device::DEVICE_TYPE::DT_QT, device::DEVICE_SUB_TYPE::DST_QT_VIRT, "LINE1QT1", "", "" );
     
-    //Watchdog device
+    //Watchdog device.
     dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG, device::DEVICE_SUB_TYPE::DST_WATCHDOG, "LINE1WATCHDOG1", "", "" );
     }
 
@@ -973,4 +973,57 @@ TEST( cipline_tech_object, watchdog_error_message )
     // Test error message content (Russian)
     std::string expected_msg = "Ошибка сторожевого таймера";
     EXPECT_EQ( expected_msg, std::string( it->second ) );
+    }
+
+TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
+    {
+    // 1) Окружение.
+    InitCipDevices(); // Добавляет LINE1WATCHDOG1 и прочие виртуальные устройства
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    // До загрузки рецепта параметр P_WATCHDOG должен быть 0.
+    EXPECT_EQ( 0.0f, cip1.rt_par_float[ P_WATCHDOG ] );
+
+    // 2) В рецепте текущей линии выставляем RV_WATCHDOG = 1 (т.е. LINE1WATCHDOG1).
+    auto* rm = cip1.lineRecipes;
+    const auto curRec = rm->getCurrentRecipe();
+    // Гарантируем базовые значения рецепта и выставляем watchdog.
+    rm->ResetRecipeToDefaults( curRec );
+    ASSERT_NE( 0, rm->GetParamsCount() ); // sanity check: рецепт доступен
+    ASSERT_EQ( 0, rm->setRecipeValue( curRec, TRecipeManager::RV_WATCHDOG, 1.0f ) );
+
+    // 3) Загружаем рецепт в рантайм‑параметры CIP.
+    cip1.rt_par_float[ P_SELECT_REC ] = curRec + 1; // нумерация рецептов в UI — с 1
+    EXPECT_EQ( 0, cip1.evaluate() );
+
+    // Проверяем, что mapping сработал: RV_WATCHDOG -> P_WATCHDOG.
+    EXPECT_EQ( 1.0f, cip1.rt_par_float[ P_WATCHDOG ] );
+
+    // 4) Инициализируем устройства объекта, dev_watchdog должен подтянуться.
+    EXPECT_EQ( 0, cip1.init_object_devices() );
+    ASSERT_NE( nullptr, cip1.dev_watchdog );
+
+    // 5) Пока watchdog «молчит», CIP должен вернуть ERR_WATCHDOG.
+    EXPECT_EQ( ERR_WATCHDOG, cip1._CheckErr() );
+
+    // 6) Дополнительно проверим, что можно «оживить» watchdog и ошибка уйдёт.
+    auto* dm = device_manager::get_instance();
+    auto* wd = dm->get_device( "LINE1WATCHDOG1" );
+    ASSERT_NE( nullptr, wd );
+    // Привяжем вход к дискретному датчику и сделаем два «толчка».
+    wd->set_string_property( "DI_dev", "LINE1LS1" );
+    auto* ls1 = dm->get_device( "LINE1LS1" );
+    ASSERT_NE( nullptr, ls1 );
+
+    ls1->set_state( 1 ); wd->evaluate_io();
+    EXPECT_EQ( 0, cip1._CheckErr() ); // ошибка пропала
+
+    ls1->set_state( 0 ); wd->evaluate_io();
+    EXPECT_EQ( 0, cip1._CheckErr() ); // всё ещё ок
+
+    // Завершение.
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
     }
