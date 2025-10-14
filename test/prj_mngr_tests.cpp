@@ -7,7 +7,8 @@
 
 extern const char* FILES[ FILE_CNT ];
 const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
-const char* const OPC_R = "WARNING(4) -> OPC UA server is activated (only read).\n";
+const char* const OPC_RO = "WARNING(4) -> OPC UA server is activated (only read).\n";
+const char* const OPC_RW = "WARNING(4) -> OPC UA server is activated (read-write).\n";
 const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
@@ -186,17 +187,33 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    // Включаем OPC UA.
+    // Включаем OPC UA в режиме чтения.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc-r", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + OPC_R;
+    debug = tmp.str() + OPC_RO;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_R + "\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    // Включаем OPC UA в режиме чтения и записи.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-rw", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_RW;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+#else
+    debug = tmp.str() + "\x1B[33m" + OPC_RW + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
