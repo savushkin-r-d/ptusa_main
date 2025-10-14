@@ -5872,8 +5872,9 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
         MAX_DEV_NAME * UNICODE_MULTIPLIER,
         "LINE{}{}{}", nmr, device::DEV_NAMES[ type ], dev_no );
     *res.out = '\0';
-    auto dev = G_DEVICE_MANAGER()->get_device( devname );
-    if ( dev->get_serial_n() > 0 && dev->get_type() == type )
+    
+    if ( auto dev = G_DEVICE_MANAGER()->get_device( devname );
+        dev && dev->get_serial_n() > 0 && dev->get_type() == type )
         {
         outdev = dev;
         return 0;
