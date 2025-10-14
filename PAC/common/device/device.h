@@ -140,6 +140,68 @@ class temperature_e_iolink : public AI1
         io_link_device iol_dev;
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик температуры IO-Link Endress&Hauser TM311.
+class temperature_e_iolink_tm311 : public AI1
+    {
+    public:
+        explicit temperature_e_iolink_tm311( const char *dev_name );
+
+        ~temperature_e_iolink_tm311() override = default;
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+        const char* get_error_description() override;
+
+        inline static const std::string ARTICLE = "E&H.TM311";
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+
+#pragma pack(push, 1)
+
+        constexpr inline static int TM311_PROCESS_DATA_IN_SIZE = 4;
+        ///| Бит( ы ) | Имя         | Тип             |
+        ///|----------|-------------|-----------------|
+        ///| 0        | OU1         |  Bool           |
+        ///| 1-2      | Status2     |  UInt2          |
+        ///| 3-4      | Status1     |  UInt2          |
+        ///| 5-7      | Unused      |  -              |
+        ///| 8-15     | Scale       |  Int8           |
+        ///| 16-31    | Temperature |  Int16          |
+        ///
+        struct TM311_data
+            {
+            uint8_t OU1 : 1;       ///< Output 1 status bit.
+            uint8_t status2 : 2;   ///< Extra status 2 bits.
+            uint8_t status1 : 2;   ///< Status 2 bits.
+            uint8_t unused : 3;    ///< Unused bits.
+            int8_t scale{ -1 };    ///< Scale factor.
+            int16_t temperature{}; ///< Temperature value (with one decimal place).
+            };
+
+#pragma pack(pop)
+
+        static_assert( sizeof( TM311_data ) == TM311_PROCESS_DATA_IN_SIZE,
+            "Struct `TM311_data` must be the 4 byte size." );
+
+        TM311_data info{};
+        u_int start_param_idx;
+
+        enum class CONSTANTS
+            {
+            P_ERR_T = 1,                ///< Аварийное значение температуры.
+
+            ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+            };
+
+        io_link_device iol_dev;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
 class level_e : public level
     {
@@ -239,12 +301,16 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2797,
 
             FES_8001446,
+
+            EH_PMP23,
             };
 
         enum PROCESSING_TYPE
             {
             PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
-            EX_PT_DATA_TYPE     ///< Use ex_PT_data with manual byte swapping
+            EX_PT_DATA_TYPE,    ///< Use ex_PT_data with byte swapping
+            
+            EH_PT_DATA_TYPE,    ///< Use EH_PT_data with byte swapping
             };
 
         struct article_info
@@ -264,6 +330,8 @@ class pressure_e_iolink : public analog_io_device
 
         const char* get_error_description() override;
 
+#pragma pack(push, 1)
+
         struct PT_data
             {
             uint16_t st1 :1;
@@ -278,6 +346,32 @@ class pressure_e_iolink : public analog_io_device
             uint16_t  status : 4;
             int16_t reserved : 8;
             };
+
+        constexpr inline static int EH_PROCESS_DATA_IN_SIZE = 4;
+
+        //| Бит( ы ) | Имя         | Тип             |
+        //|----------|-------------|-----------------|
+        //| 0..29    | PressureRaw | Int30( signed ) |
+        //| 30       | OU1         | Bool            |
+        //| 31       | Reserved    | —               |
+        //
+        // PressureRaw - необработанное (масштабируемое) измеренное значение
+        // давления. Бит 29 является знаковым.
+        // OU1 - состояние релейного (выходного) канала: 0 = разомкнуто, 1 =
+        // замкнуто (логическая «1» / ~24 V DC означает «замкнуто»).
+        // Reserved - зарезервирован, игнорируется.
+        // Размер данных процесса: 4 байта.
+        //
+        struct EH_PT_data
+            {
+            int32_t v : 30;
+            uint32_t unused : 1;
+            uint32_t OU1 : 1;
+            };
+        static_assert( sizeof( EH_PT_data ) == EH_PROCESS_DATA_IN_SIZE,
+            "Struct `EH_PT_data` must be the 4 byte size." );
+
+#pragma pack(pop)
 
 #ifdef PTUSA_TEST
         ARTICLE get_article_n() const;
@@ -1831,7 +1925,7 @@ class converter_iolink_ao : public analog_io_device
             };
 #pragma pack(pop)
 
-        process_data_in p_data_in{ 0 };
+        process_data_in p_data_in{};
 
         inline static process_data_out stub_p_data_out{};
         process_data_out* p_data_out = &stub_p_data_out;
