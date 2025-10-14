@@ -748,7 +748,7 @@ TEST( cipline_tech_object, _Circ_timer_behavior )
 
     cip1.T[ TMR_OP_TIME ]->set_countdown_time( 1 );
     cip1.T[ TMR_OP_TIME ]->start();
-    sleep_ms( 1 );
+    sleep_ms( 2 );
 
     // Test with can_continue ON.
     can_continue_signal.set_state( 1 );
