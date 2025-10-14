@@ -5788,7 +5788,7 @@ int cipline_tech_object::init_object_devices()
         {
         printf("init_object_devices\n\r");
         }
-    // Watchdog связи.
+    // Сторожевой таймер связи.
     if ( check_device( dev_watchdog, P_WATCHDOG, device::DEVICE_TYPE::DT_WATCHDOG ) ) return -1;
     
     //Обратная связь
