@@ -3599,6 +3599,7 @@ TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_
     G_PAC_INFO()->emulation_on();
     }
 
+
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
     analog_valve_iolink V1( "V1" );
@@ -3606,7 +3607,7 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff, "" );
     EXPECT_STREQ(
-        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0},\n",
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, P_FB=1},\n",
         buff );
     }
 
@@ -6089,7 +6090,6 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
     G_PAC_INFO()->emulation_on();
     }
 
-
 TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
     {
     // In emulator mode, state is always 0.
@@ -6108,6 +6108,48 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
     Y1.set_cmd( "ST", 0, -100 );
     Y1.evaluate_io();
     EXPECT_EQ( Y1.get_state(), -100 );
+    }
+
+
+TEST_F( iolink_dev_test, analog_valve_iolink_get_error_description_and_state )
+    {
+    analog_valve_iolink VC1( "VC1" );
+    // Повторно используем универсальную проверку ошибок IO-Link.
+    // Ожидаемое состояние при OK — in_info.status, по умолчанию 0.
+    test_dev_err( VC1, VC1, 0 );
+    }
+
+TEST_F( iolink_dev_test, analog_valve_iolink_get_state_respects_P_FB )
+    {
+    analog_valve_iolink VC1( "VC1" );
+
+    G_PAC_INFO()->emulation_off();
+    // Настраиваем только AI-канал для проверки IOLINK state.
+    init_channels( VC1 );
+
+    // Без подключения IO-Link и P_FB=1 (по умолчанию) —
+    // ожидаем ошибку NOTCONNECTED.
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+
+    // Отключаем обратную связь (P_FB=0) — ошибки устройства игнорируются,
+    // get_state() должен вернуть 1.
+    VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+        0, 0.0f );
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 1 );
+
+    // Подключено, но данные не валидны — при P_FB=0 также должен вернуть 1.
+    *VC1.AI_channels.int_module_read_values[ 0 ] = 0b1; // Только connected.
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 1 );
+
+    // Состояние OK — возвращаем in_info.status (по умолчанию 0).
+    set_iol_state_to_OK( VC1 );
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
