@@ -107,13 +107,14 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 #ifdef OPCUA
     if ( result[ "opc-rw" ].as<bool>() )
         {
+        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
         G_LOG->warning( "OPC UA server is activated (read-write)." );
         }
     else if( result[ "opc-r" ].as<bool>())
         {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
         G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
         G_LOG->warning( "OPC UA server is activated (only read)." );
         }
 #endif
