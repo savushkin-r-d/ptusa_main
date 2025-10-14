@@ -2453,6 +2453,21 @@ TEST( analog_valve, direct_on_and_direct_off )
     EXPECT_EQ( 0, VC1.get_state() );
     }
 
+TEST( analog_valve, set_cmd_st_resets_value )
+    {
+    analog_valve VC1( "VC1" );
+    
+    // Simulate the scenario from the issue:
+    // Open valve to 100% via set_cmd
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    
+    // Close valve via ST=0 (as happens when moving to next step)
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
 
 TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
     {

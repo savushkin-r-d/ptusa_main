@@ -2975,6 +2975,18 @@ void analog_valve::direct_off()
     device::direct_off();
     }
 //-----------------------------------------------------------------------------
+void analog_valve::direct_set_state( int new_state )
+    {
+    if ( new_state == 0 )
+        {
+        direct_off();
+        }
+    else
+        {
+        direct_on();
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS::valve_AS( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     valve( true, true, dev_name, DT_V, sub_type ),
