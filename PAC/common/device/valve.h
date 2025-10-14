@@ -1127,6 +1127,10 @@ class analog_valve : public AO1
 
         float get_max_value() const override;
 
+        void direct_on() override;
+
+        void direct_off() override;
+
     private:
         enum CONSTANTS
             {

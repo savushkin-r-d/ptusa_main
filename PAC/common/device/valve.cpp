@@ -2964,6 +2964,17 @@ float analog_valve::get_max_value() const
     return C_MAX;
     }
 //-----------------------------------------------------------------------------
+void analog_valve::direct_on()
+    {
+    device::direct_on();
+    direct_set_value( static_cast<float>( C_MAX ) );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve::direct_off()
+    {
+    device::direct_off();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS::valve_AS( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     valve( true, true, dev_name, DT_V, sub_type ),
