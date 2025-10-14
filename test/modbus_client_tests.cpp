@@ -103,7 +103,7 @@ class ModbusClientLuaTest : public ::testing::Test
         static long get_lua_global_int( lua_State* L, const char* name )
             {
             lua_getfield( L, LUA_GLOBALSINDEX, name );
-            long v = static_cast<long>( tolua_tonumber( L, -1, 0 ) );
+            auto v = static_cast<long>( tolua_tonumber( L, -1, 0 ) );
             lua_pop( L, 1 );
             return v;
             }
@@ -298,7 +298,6 @@ TEST_F( ModbusClientLuaTest, set_int4_ab_cd )
     EXPECT_EQ( kC, get_lua_global_int( L, "b2" ) );
     EXPECT_EQ( kD, get_lua_global_int( L, "b3" ) );
     }
-
 
 TEST_F( ModbusClientLuaTest, set_int4_cd_ab )
     {
