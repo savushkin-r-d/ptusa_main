@@ -1133,7 +1133,7 @@ class analog_valve : public AO1
 
         void direct_set_state( int new_state ) override;
 
-        void  direct_set_value( float new_value ) override;
+        void direct_set_value( float new_value ) override;
 
     private:
         enum CONSTANTS
