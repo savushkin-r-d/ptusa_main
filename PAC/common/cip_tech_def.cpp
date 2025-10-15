@@ -3020,12 +3020,9 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
-            if ( dev_watchdog )
+            if ( dev_watchdog && dev_watchdog->get_state() != ON )
                 {
-                if ( dev_watchdog->get_state() != ON )
-                    {
-                    objready = 0;
-                    }
+                objready = 0;
                 }
 
             if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS || state == ERR_WATCHDOG ))
@@ -3425,12 +3422,9 @@ int cipline_tech_object::_CheckErr( )
             return ERR_CIP_OBJECT;
             }
         }
-    if ( dev_watchdog )
+    if ( dev_watchdog && dev_watchdog->get_state() != ON )
         {
-        if ( dev_watchdog->get_state() != ON )
-            {
-            return ERR_WATCHDOG;
-            }
+        return ERR_WATCHDOG;
         }
 
     //проверка уровней в бачке

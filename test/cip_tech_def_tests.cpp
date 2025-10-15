@@ -995,7 +995,8 @@ TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
     ASSERT_EQ( 0, rm->setRecipeValue( curRec, TRecipeManager::RV_WATCHDOG, 1.0f ) );
 
     // 3) Загружаем рецепт в рантайм‑параметры CIP.
-    cip1.rt_par_float[ P_SELECT_REC ] = curRec + 1; // нумерация рецептов в UI — с 1
+    cip1.rt_par_float[ P_SELECT_REC ] =
+        static_cast<float>( curRec + 1 ); // Нумерация рецептов в UI — с 1.
     EXPECT_EQ( 0, cip1.evaluate() );
 
     // Проверяем, что mapping сработал: RV_WATCHDOG -> P_WATCHDOG.
