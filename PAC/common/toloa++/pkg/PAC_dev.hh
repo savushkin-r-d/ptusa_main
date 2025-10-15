@@ -812,6 +812,13 @@ i_DO_AO_device* get_G @ G( const char* dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_DI_device* WATCHDOG( const char* dev_name );
 //-----------------------------------------------------------------------------
+/// @brief Получение конвертера IO-Link.
+///
+/// @param dev_name - имя конвертера.
+/// @return - устройство с заданным именем. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_AO_device* EY( const char* dev_name );
+//-----------------------------------------------------------------------------
 /// @brief Получение устройства-заглушки.
 ///
 /// @return - виртуальное устройство.
@@ -1917,8 +1924,10 @@ class modbus_client
     protected:
 
     public:
-        modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
-        //реализация функций протокола modbus
+        modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
+            unsigned long exchangetimeout = 50 );
+
+        // Реализация функций протокола modbus.
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
         int read_coils(unsigned int start_address, unsigned int quantity);
         int read_holding_registers(unsigned int address, unsigned int quantity);
@@ -1946,6 +1955,14 @@ class modbus_client
         short get_int2(unsigned int address);
         void set_int4(unsigned int address, int value);
         int get_int4(unsigned int address);
+
+        void set_int4_ab_cd(unsigned int address, int value);
+        int get_int4_ab_cd(unsigned int address);
+        void set_int4_cd_ab(unsigned int address, int value);
+        int get_int4_cd_ab(unsigned int address);
+        void set_int4_dc_ba(unsigned int address, int value);
+        int get_int4_dc_ba(unsigned int address);
+
         void set_float(unsigned int address, float value);
         float get_float(unsigned int address);
         void set_bit(unsigned int address, int value);

@@ -7,6 +7,8 @@ using namespace ::testing;
 #include <iomanip>
 #include <time.h>
 
+using B = std::byte;
+
 
 class iolink_dev_test : public ::testing::Test
     {
@@ -853,6 +855,213 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_error_description )
     EXPECT_STREQ( TE1.get_error_description(), "неизвестная ошибка" );
     }
 
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_value )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Нет привязки к модулям ввода/вывода - должны получить 0.
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    init_channels( TE1 );
+    auto err_value = -100.f;
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink_tm311::CONSTANTS::P_ERR_T ),
+        TE1.start_param_idx, err_value );
+    // Есть привязка к модулям ввода/вывода - должны получить аварийное
+    // значение.
+    EXPECT_EQ( TE1.get_value(), err_value );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_evaluate_io )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // TM311 process data: 4 bytes.
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{};
+
+    // Data layout in memory (before swap in evaluate_io):
+    // Byte 0: scale, Byte 1: status,
+    // Byte 2-3: temperature (big-endian, will be swapped to little-endian).
+
+    // Test 1: Zero temperature with Bad status (status1=0, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x00}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 0.0f );
+    EXPECT_EQ( TE1.get_state(), -10 ); // Bad status.
+    }
+
+    // Test 2: Temperature 25.7°C (257 = 0x0101) with Good status (status1=3, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x18}, B{0x01}, B{0x01} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 25.7f );
+    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+    }
+
+    // Test 3: Negative temperature -12.3°C (-123 = 0xFF85) with Good status.
+    {
+    std::byte data[] = { B{0xFF}, B{0x18}, B{0xFF}, B{0x85} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), -12.3f );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    }
+
+    // Test 4: Temperature 100.0°C (1000 = 0x03E8) with Good status.
+    {
+    std::byte data[] = { B{0xFF}, B{0x18}, B{0x03}, B{0xE8} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 100.0f );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    }
+
+    // Test 5: Temperature 10.0°C (100 = 0x0064) with Uncertain status (status1=1).
+    {
+    std::byte data[] = { B{0xFF}, B{0x08}, B{0x00}, B{0x64} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_FLOAT_EQ( TE1.get_value(), 10.0f );
+    EXPECT_EQ( TE1.get_state(), -20 ); // Uncertain status: -10 - 1*10 - 0 = -20.
+    }
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_state )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    set_iol_state_to_OK( TE1 );
+
+    // Allocate 4 bytes as 2 int_2 values.
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    // Data layout: Byte 0=scale, Byte 1=status, Byte 2-3=temperature.
+
+    // Test 1: Bad status (status1=0, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x00}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -10 ); // -10 - 0*10 - 0 = -10.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Bad\' - значение не может быть использовано" );
+    }
+
+    // Test 2: Uncertain status (status1=1, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x08}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -20 ); // -10 - 1*10 - 0 = -20.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Uncertain\' "
+        "— значение может использоваться только ограниченно "
+        "(например, температура устройства вне диапазона)" );
+    }
+
+    // Test 3: Manual/Fixed status (status1=2, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x10}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -30 ); // -10 - 2*10 - 0 = -30.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Manual/Fixed\' "
+        "— значение может использоваться только ограниченно "
+        "(например, симуляция)" );
+    }
+
+    // Test 4: Good status (status1=3, status2=0).
+    {
+    std::byte data[] = { B{0xFF}, B{0x18}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), 1 ); // Good status.
+    }
+
+    // Test 5: Bad status with low limited (status1=0, status2=1).
+    {
+    std::byte data[] = { B{0xFF}, B{0x02}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -11 ); // -10 - 1 = -11.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Bad\' - значение не может быть использовано"
+        "; \'Low limited\' - значение нарушило нижний предел" );
+    }
+
+    // Test 6: Bad status with high limited (status1=0, status2=2).
+    {
+    std::byte data[] = { B{0xFF}, B{0x04}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -12 ); // -10 - 2 = -12.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Bad\' - значение не может быть использовано"
+        "; \'High limited\' - значение нарушило верхний предел" );
+    }
+
+    // Test 7: Manual/Fixed status (status1=2, status2=3).
+    {
+    std::byte data[] = { B{0xFF}, B{0x16}, B{0x00}, B{0x00} };
+    std::memcpy( TE1.AI_channels.int_read_values[ 0 ], data, sizeof( data ) );
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -33 ); // -10 - 2*10 - 3 = -33.
+    EXPECT_STREQ( TE1.get_error_description(),
+        "\'Manual/Fixed\' "
+        "— значение может использоваться только ограниченно "
+        "(например, симуляция)"
+        "; \'Constant\' - "
+        "значение установлено как постоянное (например, симуляция)" );
+    }
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_error_description )
+    {
+    temperature_e_iolink_tm311 TE1( "T1" );
+    EXPECT_EQ( TE1.get_state(), 1 );
+    EXPECT_STREQ( TE1.get_error_description(), "нет ошибок" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( TE1 );
+    TE1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
+
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+    EXPECT_STREQ( TE1.get_error_description(), "IOL-устройство не подключено" );
+
+    // Bit 0 - IOLink connected.
+    *TE1.AI_channels.int_module_read_values[ 0 ] = 0b1;
+    TE1.evaluate_io();
+    EXPECT_EQ( TE1.get_state(), -io_device::IOLINKSTATE::DEVICEERROR );
+    EXPECT_STREQ( TE1.get_error_description(), "ошибка IOL-устройства" );
+
+    delete[] TE1.AI_channels.int_read_values[ 0 ];
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 template<typename T1 = i_DI_device, typename T2 = T1>
 void check_dev( const char* name, int type, int sub_type,
@@ -993,6 +1202,8 @@ TEST( device_manager, add_io_device )
     
     check_dev<i_AI_device>( "TE1", device::DT_TE, device::DST_TE, TE, TE );
     check_dev<i_AI_device>( "TE2", device::DT_TE, device::DST_TE_IOLINK, TE, TE );
+    check_dev<i_AI_device>( "TE3", device::DT_TE, device::DST_TE_IOLINK,
+        TE, TE, "E&H.TM311");
 
     check_dev<>( "PDS1", device::DT_PDS, device::DST_PDS, PDS );
     check_dev<i_DI_device, i_DI_device>( "PDS2", device::DT_PDS,
@@ -1124,6 +1335,14 @@ TEST( device, device )
     device dev( nullptr, device::DEVICE_TYPE::DT_NONE,
         device::DEVICE_SUB_TYPE::DST_NONE, 0 );
     EXPECT_STREQ( dev.get_name(), "?" );
+    }
+
+TEST( device, device_too_long_name )
+    {
+    device dev( "VERY_VERY_LONG_DEVICE_NAME_MORE_THAN_30_SYMBOLS",
+        device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev.get_name(), "VERY_VERY_LONG_DEVICE_NAME_MOR" );
     }
 
 TEST( device, get_type_str )
@@ -1554,6 +1773,11 @@ TEST( pressure_e_iolink, read_article )
     test_dev.set_article( IFM_PM1717 );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1717 );
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
+
+    const auto EH_PMP23 = "E&H.PMP23";
+    test_dev.set_article( EH_PMP23 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::EH_PMP23 );
+    EXPECT_STREQ( test_dev.get_article(), EH_PMP23 );
     }
 
 TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
@@ -1605,6 +1829,13 @@ TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     test_dev.set_article( FES_8001446 );
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
+
+    const auto EH_PMP23 = "E&H.PMP23";
+    test_dev.set_article( EH_PMP23 );
+    test_dev.evaluate_io();
+    // Value should calculate to 1686.83f for the E&H.PMP23 (100 as raw
+    // input data from the line above).
+    EXPECT_NEAR( test_dev.get_value(), 1686.83f, .01f );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -2196,6 +2427,121 @@ TEST( analog_valve, get_type_name )
     {
     analog_valve test_dev( "test_VC1" );
     EXPECT_STREQ( "Управляемый клапан", test_dev.get_type_name() );
+    }
+
+TEST( analog_valve, direct_on_and_direct_off )
+    {
+    analog_valve VC1( "VC1" );
+    
+    // Test direct_on sets value to 100
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+    
+    // Test direct_off resets value to 0
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    
+    // Test direct_set_value
+    VC1.direct_set_value( 50.0f );
+    EXPECT_FLOAT_EQ( 50.0f, VC1.get_value() );
+    
+    // Test direct_off again after setting a value
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+TEST( analog_valve, set_cmd_st_resets_value )
+    {
+    analog_valve VC1( "VC1" );
+    
+    // Simulate the scenario from the issue:
+    // Open valve to 100% via set_cmd
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    
+    // Close valve via ST=0 (as happens when moving to next step)
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+class analog_valve_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+            mngr.init_node_AO( 0, 0, 555, 0 );
+
+            G_PAC_INFO()->emulation_off();
+            VC1.init( 0, 0, 1, 0 );
+            VC1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+            };
+
+        void TearDown() override
+            {
+            G_PAC_INFO()->emulation_on();
+            io_manager::replace_instance( prev_mngr );
+            };
+
+        analog_valve VC1{ "VC1" };
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+
+TEST_F( analog_valve_test, io_modules_direct_on_off )
+    {
+    // По умолчанию 0%.
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_on -> 100%
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // direct_off -> 0%
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_set_value -> произвольное значение
+    VC1.direct_set_value( 37.5f );
+    EXPECT_FLOAT_EQ( 37.5f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Повторное выключение
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+TEST_F( analog_valve_test, io_modules_set_cmd_st_resets_value )
+    {
+    // Открыть клапан на 100% через set_cmd("V").
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Закрыть клапан через ST=0 -> значение должно сброситься в 0%.
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // Открыть клапан через ST=1 -> значение должно сброситься в 100%.
+    VC1.set_cmd( "V", 0, 55.0 );
+    VC1.set_cmd( "ST", 0, 1.0 );
+    EXPECT_EQ( 1, VC1.get_state() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     }
 
 
@@ -3021,7 +3367,7 @@ TEST( valve_iolink_mix_proof, get_state )
     EXPECT_EQ( -( io_link_valve::ERROR_CODE_OFFSET + V1.in_info.err ),
         V1.get_state() );
 
-    // Нет обратной связи, но прошло время проверки и нет ошибки клапана,
+    // Нет обратной связи, но прошло время проверки и есть ошибка клапана,
     // поэтому есть ошибка.
     V1.in_info.err = 0;
     DeltaMilliSecSubHooker::set_millisec( 101UL );
@@ -3032,13 +3378,73 @@ TEST( valve_iolink_mix_proof, get_state )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( valve_iolink_mix_proof, seat_switching_timing )
+    {
+    valve_iolink_mix_proof V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    V1.set_cmd( "P_FB", 0, 1 );       // Включаем проверку обратных связей.
+    V1.set_cmd( "P_ON_TIME", 0, 100 );// Задаем время проверки обратных связей.
+
+    // Test that seat switching doesn't immediately cause VX_OFF_FB_ERR.
+    // Test upper seat switching timing.
+    V1.open_upper_seat();
+    auto state = V1.get_state();
+
+    // Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Upper seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) << 
+        "Upper seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
+
+    // Test lower seat switching timing.  
+    V1.open_lower_seat();
+    state = V1.get_state();
+
+    // The key fix: Should not return VX_OFF_FB_ERR immediately after switching.
+    // This validates that the timing grace period is working correctly.
+    EXPECT_NE( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state )
+        << "Lower seat should not return error immediately after switching"
+        " due to timing grace period";
+
+    DeltaMilliSecSubHooker::set_millisec( 101UL );
+    // Should return VX_OFF_FB_ERR after timeout.
+    state = V1.get_state();
+    EXPECT_EQ( valve::VALVE_STATE_EX::VX_OFF_FB_ERR, state ) <<
+        "Lower seat should return error after a timeout after switching";
+    DeltaMilliSecSubHooker::set_default_time();
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state )
     {
     valve_iolink_mix_proof V1( "V1" );
     G_PAC_INFO()->emulation_off();
     init_channels( V1 );
 
-    // Должна быть ошибка подключения устройства от модуля IO-Link.
+    // With feedback disabled (default P_FB=0), module errors should be ignored
+    // and valve should report feedback disabled state instead of module error.
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+
+    V1.in_info.usl = true;
+    V1.in_info.lsp = false;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_UPPER_SEAT_FB_OFF );
+
+    V1.in_info.usl = false;
+    V1.in_info.lsp = true;
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_LOWER_SEAT_FB_OFF );
+
+
+    // Enable feedback to test that module errors are still reported when feedback is enabled.
+    V1.set_cmd( "P_FB", 0, 1 );
     EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
 
     G_PAC_INFO()->emulation_on();
@@ -3108,6 +3514,59 @@ TEST( valve_iolink_mix_proof, get_error_description )
     EXPECT_STREQ( "ошибка IOL-устройства", res );
     }
 
+TEST( valve_iolink_mix_proof, get_state_with_feedback_disabled_and_al_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF).
+    V1.set_cmd( "P_FB", 0, 0 );
+
+    // Simulate AL IO-Link error.
+    V1.set_err( 16 );  // Some internal error.
+
+    // When feedback is disabled and there's an error, 
+    // the valve should NOT report error state.
+    auto state = V1.get_state();
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_mix_proof, get_state_with_feedback_enabled_and_al_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON).
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    // Simulate AL IO-Link error.
+    V1.set_err( 16 );  // Some internal error.
+
+    // When feedback is enabled and there's an AL error, 
+    // the valve SHOULD report error state (normal behavior).
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled.
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -116 ) << "Expected specific error code for AL error 16";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+class valve_iolink_shut_off_thinktop_testable : public valve_iolink_shut_off_thinktop
+    {
+    public:
+        using valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop;
+
+        void set_err( uint16_t err ) 
+            { 
+            in_info.err = err; 
+            }
+    };
+
 
 TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     {
@@ -3130,6 +3589,132 @@ TEST( valve_iolink_shut_off_thinktop, get_state )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_disabled_and_al_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF).
+    V1.set_cmd( "P_FB", 0, 0 );
+
+    // Simulate AL IO-Link error.
+    V1.set_err( 16 );  // Some internal error.
+
+    // When feedback is disabled and there's an error, 
+    // the valve should NOT report error state.
+    auto state = V1.get_state();
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled.";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_enabled_and_al_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON).
+    V1.set_cmd( "P_FB", 0, 1 );
+
+    // Simulate AL IO-Link error.
+    V1.set_err( 16 );  // Some internal error.
+
+    // When feedback is enabled and there's an AL error, 
+    // the valve SHOULD report error state (normal behavior).
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled.
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -116 ) << "Expected specific error code for AL error 16";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_disabled_and_module_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF).
+    V1.set_cmd( "P_FB", 0, 0 );
+    V1.evaluate_io();
+
+    // When feedback is disabled and there's a module error, 
+    // the valve should NOT report error state.
+    int state = V1.get_state();
+    
+    // The valve should not be in error state when feedback is disabled.
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+    EXPECT_EQ( state, valve::VALVE_STATE_EX::VX_OFF_FB_OFF ) << "Expected feedback disabled state";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_enabled_and_module_error )
+    {
+    valve_iolink_mix_proof_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON).
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+
+    // When feedback is enabled and there's a module error, 
+    // the valve SHOULD report error state (normal behavior).
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled.
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -io_device::IOLINKSTATE::NOTCONNECTED ) << "Expected module error code";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_disabled_and_module_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback disabled (P_FB = 0, which is FB_IS_AND_OFF).
+    V1.set_cmd( "P_FB", 0, 0 );
+    V1.evaluate_io();
+
+    // When feedback is disabled and there's a module error, 
+    // the valve should NOT report error state.
+    int state = V1.get_state();
+    
+    // The valve should not be in error state when feedback is disabled.
+    EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
+    EXPECT_EQ( state, valve::VALVE_STATE_EX::VX_OFF_FB_OFF ) << "Expected feedback disabled state";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_enabled_and_module_error )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+
+    // Set feedback enabled (P_FB = 1, which is FB_IS_AND_ON).
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+
+    // When feedback is enabled and there's a module error, 
+    // the valve SHOULD report error state (normal behavior).
+    int state = V1.get_state();
+    
+    // The valve should be in error state when feedback is enabled.
+    EXPECT_LT( state, 0 ) << "Valve should report error state when feedback is enabled";
+    EXPECT_EQ( state, -io_device::IOLINKSTATE::NOTCONNECTED ) << "Expected module error code";
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( analog_valve_iolink, analog_valve_iolink )
     {
     analog_valve_iolink V1( "V1" );
@@ -3137,7 +3722,7 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff, "" );
     EXPECT_STREQ(
-        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0},\n",
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, P_FB=1},\n",
         buff );
     }
 
@@ -3299,7 +3884,23 @@ TEST_F( iolink_dev_test, level_s_iolink_get_value )
 TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_error_description )
     {
     valve_iolink_shut_off_thinktop V1( "V1" );
-    test_dev_err( V1, V1, -101 );
+    EXPECT_STREQ( V1.get_error_description(), "нет ошибок" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( V1 );
+    V1.evaluate_io();
+    
+    // With feedback disabled (default P_FB=0), module errors should be ignored
+    EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+    EXPECT_STREQ( V1.get_error_description(), "нет ошибок" );
+
+    // Enable feedback to test that module errors are reported when feedback is enabled
+    V1.set_cmd( "P_FB", 0, 1 );
+    V1.evaluate_io();
+    EXPECT_EQ( V1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+    EXPECT_STREQ( V1.get_error_description(), "IOL-устройство не подключено" );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -5288,6 +5889,403 @@ TEST( power_unit, set_cmd )
         "ST_CH={0,0,0,0,0,0,0,0}, "
         "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
         str_buff );
+    }
+
+
+TEST( analog_valve_ey, analog_valve_ey )
+    {
+    analog_valve_ey VC1( "VC1" );
+    EXPECT_STREQ( VC1.get_name(), "VC1" );
+    EXPECT_EQ( VC1.get_type(), device::DT_VC );
+    EXPECT_EQ( VC1.get_sub_type(), device::DST_VC_EY );
+    }
+
+TEST( analog_valve_ey, set_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_property( "UNKNOWN", nullptr );
+    }
+
+TEST( analog_valve_ey, set_string_property )
+    {
+    analog_valve_ey VC1( "VC1" );
+
+    VC1.set_string_property( nullptr, nullptr );    // No crash.
+    VC1.set_string_property( "UNKNOWN", "TEST" );   // No crash.
+    
+    // Valid property but invalid value.
+    VC1.set_string_property( "TERMINAL", "TEST" );  // No crash.
+    VC1.set_string_property( "TERMINAL", "Y1" );    // No crash, but no effect.
+
+    // Valid property and valid value.
+    G_DEVICE_MANAGER()->add_io_device(
+        device::DT_EY, device::DST_CONV_AO2, "Y1", "Test device", "Y");
+    auto Y1 = G_DEVICE_MANAGER()->get_EY( "Y1" );
+    VC1.set_string_property( "TERMINAL", "Y1" );
+    EXPECT_EQ( Y1, VC1.conv );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
+TEST( analog_valve_ey, get_state_without_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    // No converter bound -> special error code.
+    EXPECT_EQ( VC1.get_state(), -200 );
+
+    // Should be no crash and no change in value.
+    VC1.direct_on();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    VC1.direct_off();
+    EXPECT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, direct_set_value_and_get_value_channel1_and2 )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+
+    EXPECT_EQ( 0u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 0u, Y1.p_data_out->setpoint_ch2 );
+
+    // Bind converter.
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // After binding both channels should be 4 mA (40'975).
+    EXPECT_EQ( 40'975u, Y1.p_data_out->setpoint_ch1 );
+    EXPECT_EQ( 40'975, Y1.p_data_out->setpoint_ch2 );
+
+    // Select channel 1 and check routing to converter value 1.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 55.5f );
+    EXPECT_FLOAT_EQ( 55.5f, Y1.get_channel_value( 1 ) );
+    EXPECT_FLOAT_EQ( 55.5f, VC1.get_value() );
+
+    // direct_on/off should route to channel 1
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_channel_value( 1 ) );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 1 ) );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+
+    // Switch to channel 2 and verify independent value path.
+    VC1.set_rt_par( 1, 2 );
+    VC1.direct_set_value( 33.3f );
+    // Channel 1 remains unchanged at last set (0.0), channel 2 reflects new value.
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 1 ) );
+    EXPECT_FLOAT_EQ( 33.3f, Y1.get_channel_value( 2 ) );
+    EXPECT_FLOAT_EQ( 33.3f, VC1.get_value() );
+
+    // direct_on/off should route to channel 2 now.
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, Y1.get_channel_value( 2 ) );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, Y1.get_channel_value( 2 ) );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    }
+
+TEST( analog_valve_ey, set_rt_par_validation )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Set valid channel first.
+    VC1.set_rt_par( 1, 1 );
+    VC1.direct_set_value( 12.5f );
+    EXPECT_FLOAT_EQ( 12.5f, Y1.get_channel_value( 1 ) );
+
+    // Try to set invalid channel, ey_number must remain unchanged (still 1).
+    VC1.set_rt_par( 1, 3 );
+    VC1.direct_set_value( 66.6f );
+    EXPECT_FLOAT_EQ( 66.6f, Y1.get_channel_value( 1 ) );   // Affects channel 1
+
+    // Another invalid channel value below range.
+    VC1.set_rt_par( 1, 0 );
+    VC1.direct_set_value( 77.7f );
+    EXPECT_FLOAT_EQ( 77.7f, Y1.get_channel_value( 1 ) );
+    }
+
+TEST( analog_valve_ey, get_state_with_converter )
+    {
+    analog_valve_ey VC1( "VC1" );
+    converter_iolink_ao Y1( "Y1" );
+    VC1.set_property( "TERMINAL", &Y1 );
+
+    // Default state from converter.
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    // Change converter state via its API and compare.
+    Y1.direct_on();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+
+    Y1.direct_off();
+    EXPECT_EQ( VC1.get_state(), Y1.get_state() );
+    }
+
+
+TEST( converter_iolink_ao, constructor )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_STREQ( Y1.get_name(), "Y1" );
+    EXPECT_EQ( Y1.get_type(), device::DT_EY );
+    EXPECT_EQ( Y1.get_sub_type(), device::DST_CONV_AO2 );
+    }
+
+TEST( converter_iolink_ao, direct_on_off )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test initial state.
+    EXPECT_EQ( Y1.get_state(), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+
+    // Test turning on.
+    Y1.direct_on();
+    EXPECT_EQ( Y1.get_state(), 1 );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
+
+
+    // Test turning off
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_state(), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+    }
+
+TEST( converter_iolink_ao, set_value )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test setting values for non existing channel.
+    Y1.set_channel_value( 3, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 0u );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 0u );
+
+    // Test setting different values for channel 1.
+    Y1.set_channel_value( 1, 10.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 57'365u );
+
+    Y1.set_channel_value( 1, 100.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+
+    Y1.set_channel_value( 1, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+
+    Y1.set_channel_value( 1, 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+
+    // Test setting different values for channel 2.
+    Y1.set_channel_value( 2, 10.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 10.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 57'365u );
+
+    Y1.set_channel_value( 2, 0.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
+
+    Y1.set_channel_value( 2, 200.0f );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    // Test getting values for non existing channel.
+    EXPECT_EQ( Y1.get_channel_value( 3 ), 0.0f );
+
+    // Test on/off.
+    Y1.direct_on();
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 8'270u );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 100.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 8'270u );
+
+    Y1.direct_off();
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch1, 40'975u );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 0.0f );
+    EXPECT_EQ( Y1.p_data_out->setpoint_ch2, 40'975u );
+    }
+
+TEST( converter_iolink_ao, set_cmd )
+    {
+    converter_iolink_ao Y1( "Y1" );
+
+    // Test state command.
+    EXPECT_EQ( Y1.set_cmd( "ST", 0, 1 ), 0 );
+
+    // Test value command.
+    EXPECT_EQ( Y1.set_cmd( "CH", 1, 75.5 ), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 1 ), 75.5f );
+
+    EXPECT_EQ( Y1.set_cmd( "CH", 2, 25.5 ), 0 );
+    EXPECT_EQ( Y1.get_channel_value( 2 ), 25.5f );
+
+    // Test unknown command
+    EXPECT_EQ( Y1.set_cmd( "UNKNOWN", 0, 1 ), 1 );
+    }
+
+TEST( converter_iolink_ao, save_device_ex )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    char buff[ 1000 ]{};
+
+    auto len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={0.00,0.00}},\n" );
+
+    Y1.set_channel_value( 1, 42.5f );
+    len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,0.00}},\n" );
+
+    Y1.set_channel_value( 2, 21.5f );
+    len = Y1.save_device( buff, "" );
+    EXPECT_GT( len, 0 );
+    EXPECT_STRCASEEQ( buff,
+        "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,21.50}},\n" );
+    }
+
+TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_EQ( Y1.get_value(), .0f );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( Y1 );
+    set_iol_state_to_OK( Y1 );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -2 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, converter_iolink_ao_get_error_description )
+    {
+    converter_iolink_ao Y1( "Y1" );
+    test_dev_err( Y1, Y1, 0 );
+
+    G_PAC_INFO()->emulation_off();
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b10000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -1 );
+    EXPECT_STREQ( Y1.get_error_description(), "требуется обслуживание" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b100000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -2 );
+    EXPECT_STREQ( Y1.get_error_description(), "не соответствует спецификации" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b110000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -3 );
+    EXPECT_STREQ( Y1.get_error_description(), "функциональная проверка" );
+
+    *Y1.AI_channels.int_read_values[ 0 ] = 0b1000000;
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -4 );
+    EXPECT_STREQ( Y1.get_error_description(), "отказ" );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
+    {
+    // In emulator mode, state is always 0.
+    converter_iolink_ao Y1( "Y1" );
+    EXPECT_EQ( Y1.get_state(), 0 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 0 );
+    init_channels( Y1 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 0 );
+
+    Y1.set_cmd( "ST", 0, 1 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), 1 );
+
+    Y1.set_cmd( "ST", 0, -100 );
+    Y1.evaluate_io();
+    EXPECT_EQ( Y1.get_state(), -100 );
+    }
+
+
+TEST_F( iolink_dev_test, analog_valve_iolink_get_error_description_and_state )
+    {
+    analog_valve_iolink VC1( "VC1" );
+    // Повторно используем универсальную проверку ошибок IO-Link.
+    // Ожидаемое состояние при OK — in_info.status, по умолчанию 0.
+    test_dev_err( VC1, VC1, 0 );
+    }
+
+TEST_F( iolink_dev_test, analog_valve_iolink_get_state_respects_P_FB )
+    {
+    analog_valve_iolink VC1( "VC1" );
+
+    G_PAC_INFO()->emulation_off();
+    // Настраиваем только AI-канал для проверки IOLINK state.
+    init_channels( VC1 );
+
+    // Без подключения IO-Link и P_FB=1 (по умолчанию) —
+    // ожидаем ошибку NOTCONNECTED.
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
+
+    // Отключаем обратную связь (P_FB=0) — ошибки устройства игнорируются,
+    // get_state() должен вернуть 1.
+    VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+        0, 0.0f );
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 1 );
+
+    // Подключено, но данные не валидны — при P_FB=0 также должен вернуть 1.
+    *VC1.AI_channels.int_module_read_values[ 0 ] = 0b1; // Только connected.
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 1 );
+
+    // Состояние OK — возвращаем in_info.status (по умолчанию 0).
+    set_iol_state_to_OK( VC1 );
+    VC1.evaluate_io();
+    EXPECT_EQ( VC1.get_state(), 0 );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
+TEST( device_manager, get_EY )
+    {
+    // Cleanup before test.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    
+    // Add a converter device.
+    auto* Y1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_EY, device::DST_CONV_AO2, "CAB1EY10", "", "IFM.DP1213" );
+    
+    EXPECT_NE( Y1, nullptr );
+    
+    // Test accessor function.
+    auto* retrieved_Y1 = EY( "CAB1EY10" );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( retrieved_Y1 ) );
+    
+    // Test non-existent device.
+    auto* non_existent = EY( "NON_EXISTENT" );
+    EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
     }
 
 

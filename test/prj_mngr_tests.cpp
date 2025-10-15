@@ -6,6 +6,10 @@
 #include "dtime.h"
 
 extern const char* FILES[ FILE_CNT ];
+const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
+const char* const OPC_RO = "WARNING(4) -> OPC UA server is activated (only read).\n";
+const char* const OPC_RW = "WARNING(4) -> OPC UA server is activated (read-write).\n";
+const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
 
@@ -102,12 +106,12 @@ TEST( project_manager, proc_main_params )
     char argv0[] = "ptusa_main.exe";
     char argv1[] = "--help";
     const char* argv[] = { argv0, argv1 };
-        
+
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( 2, argv );
     ASSERT_EQ( 1, res );
 
-    auto help = 
+    auto help =
 #if defined WIN_OS
         R"(Main control program
 Usage:
@@ -120,7 +124,10 @@ Usage:
   -p, --port arg            Param port (default: 10000)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
+      --opc-r               Start OPC UA server with program start (only 
+                            read)
+      --opc-rw              Start OPC UA server with program start 
+                            (read-write)
       --sys_path arg        Sys path (default: ./sys)
       --path arg            Path (default: .)
       --extra_paths arg     Extra paths (default: ./dairy-sys)
@@ -138,7 +145,10 @@ Usage:
   -p, --port arg            Param port (default: 10000)
   -h, --help                Print help info
   -r, --rcrc                Reset params
-      --opc                 Start OPC UA server with program start
+      --opc-r               Start OPC UA server with program start (only 
+                            read)
+      --opc-rw              Start OPC UA server with program start 
+                            (read-write)
       --sys_path arg        Sys path (default: ./sys)
       --path arg            Path (default: .)
       --extra_paths arg     Extra paths (default: ./dairy-sys)
@@ -170,27 +180,42 @@ Resetting params (command line parameter "rcrc").
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 #if defined WIN_OS
-    debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
-    // Включаем OPC UA.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--opc", "" };
+    // Включаем OPC UA в режиме чтения.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-r", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-        
-#if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> OPC UA server is activated.\n";
-    debug += tmp.str() + "WARNING(4) -> Bus couplers are disabled.\n";
-#else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> OPC UA server is activated.\n\x1B[0m";
-    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
-#endif
 
+#if defined WIN_OS
+    debug = tmp.str() + OPC_RO;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+#else
+    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    // Включаем OPC UA в режиме чтения и записи.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-rw", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_RW;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+#else
+    debug = tmp.str() + "\x1B[33m" + OPC_RW + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
@@ -201,10 +226,10 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -217,10 +242,10 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
     debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
@@ -234,9 +259,9 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + "WARNING(4) -> Bus couplers are enabled.\n";
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
 #else
-    debug = tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are enabled.\n\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );

@@ -253,6 +253,11 @@ i_DI_device* WATCHDOG( const char* dev_name )
     return G_DEVICE_MANAGER()->get_watchdog( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_AO_device* EY( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_EY( dev_name );
+    }
+//-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
@@ -573,6 +578,11 @@ i_DI_device* device_manager::get_watchdog( const char* dev_name )
     return get_device( device::DT_WATCHDOG, dev_name );
     }
 //-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_EY( const char* dev_name )
+    {
+    return get_device( device::DT_EY, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     const char* dev_name, const char* descr, const char* article )
     {
@@ -743,6 +753,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VC_VIRT );
                     break;
 
+                case device::DST_VC_EY:
+                    new_device = new analog_valve_ey( dev_name );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -832,8 +846,16 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::DST_TE_IOLINK:
-                    new_device = new temperature_e_iolink( dev_name );
-                    new_io_device = (temperature_e_iolink*)new_device;
+                    if ( strcmp( article, temperature_e_iolink_tm311::ARTICLE.c_str() ) == 0 )
+                        {
+                        new_device = new temperature_e_iolink_tm311( dev_name );
+                        new_io_device = (temperature_e_iolink_tm311*)new_device;
+                        }
+                    else
+                        {
+                        new_device = new temperature_e_iolink( dev_name );
+                        new_io_device = (temperature_e_iolink*)new_device;
+                        }
                     break;
 
                 case device::DST_TE_VIRT:
@@ -1388,6 +1410,23 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 {
                 G_LOG->alert( "Unknown WATCHDOG device subtype %d!\n",
                     dev_sub_type );
+                }
+            break;
+
+        case device::DT_EY:
+            switch ( dev_sub_type )
+                {
+                case device::DST_CONV_AO2:
+                    new_device = new converter_iolink_ao( dev_name );
+                    new_io_device = (converter_iolink_ao*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown Y device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
                 }
             break;
 

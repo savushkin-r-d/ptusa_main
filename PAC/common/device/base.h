@@ -59,7 +59,7 @@ class par_device
         /// @param idx - индекс параметра (с единицы).
         /// @param offset - смещение индекса.
         /// @param value - новое значение.
-        virtual void set_par( u_int idx, u_int offset, float value );
+        void set_par( u_int idx, u_int offset, float value );
 
         /// @brief Установка значения рабочего параметра.
         ///
@@ -374,7 +374,7 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_MAX_NAME = 20,
+            C_MAX_NAME = 30,
             C_MAX_DESCRIPTION = 100
             };
 
@@ -411,6 +411,7 @@ class device : public i_DO_AO_device, public par_device
             DT_TS,       ///< Сигнальный датчик температуры. 
             DT_G,        ///< Блок питания.
             DT_WATCHDOG, ///< Устройство проверки связи.
+            DT_EY,       ///< Конвертер IO-Link.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -463,6 +464,7 @@ class device : public i_DO_AO_device, public par_device
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
             DST_VC_VIRT,        ///< Виртуальный клапан.
+            DST_VC_EY,          ///< Клапан с аналоговым управлением, подключаемый к конвертеру.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -612,6 +614,9 @@ class device : public i_DO_AO_device, public par_device
 
             //DT_WATCHDOG
             DST_WATCHDOG = 1,
+
+            //DT_EY
+            DST_CONV_AO2 = 1,    ///< Конвертер IO-Link -> AO (2 канала).
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,
@@ -704,7 +709,7 @@ class device : public i_DO_AO_device, public par_device
             }
 
         /// @brief Получение типа устройства.
-        int get_type() const
+        device::DEVICE_TYPE get_type() const
             {
             return type;
             }
@@ -778,7 +783,7 @@ class device : public i_DO_AO_device, public par_device
 
         bool is_manual_mode = false; ///< Признак ручного режима.
 
-        char name[ C_MAX_NAME ];
+        char name[ C_MAX_NAME + 1 ];
         char* description;
 
         bool emulation = false;
