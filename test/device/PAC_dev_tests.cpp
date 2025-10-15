@@ -2429,6 +2429,121 @@ TEST( analog_valve, get_type_name )
     EXPECT_STREQ( "Управляемый клапан", test_dev.get_type_name() );
     }
 
+TEST( analog_valve, direct_on_and_direct_off )
+    {
+    analog_valve VC1( "VC1" );
+    
+    // Test direct_on sets value to 100
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+    
+    // Test direct_off resets value to 0
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    
+    // Test direct_set_value
+    VC1.direct_set_value( 50.0f );
+    EXPECT_FLOAT_EQ( 50.0f, VC1.get_value() );
+    
+    // Test direct_off again after setting a value
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+TEST( analog_valve, set_cmd_st_resets_value )
+    {
+    analog_valve VC1( "VC1" );
+    
+    // Simulate the scenario from the issue:
+    // Open valve to 100% via set_cmd
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    
+    // Close valve via ST=0 (as happens when moving to next step)
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+class analog_valve_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+            mngr.init_node_AO( 0, 0, 555, 0 );
+
+            G_PAC_INFO()->emulation_off();
+            VC1.init( 0, 0, 1, 0 );
+            VC1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0 );
+            };
+
+        void TearDown() override
+            {
+            G_PAC_INFO()->emulation_on();
+            io_manager::replace_instance( prev_mngr );
+            };
+
+        analog_valve VC1{ "VC1" };
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+
+TEST_F( analog_valve_test, io_modules_direct_on_off )
+    {
+    // По умолчанию 0%.
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_on -> 100%
+    VC1.direct_on();
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // direct_off -> 0%
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // direct_set_value -> произвольное значение
+    VC1.direct_set_value( 37.5f );
+    EXPECT_FLOAT_EQ( 37.5f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Повторное выключение
+    VC1.direct_off();
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+    }
+
+TEST_F( analog_valve_test, io_modules_set_cmd_st_resets_value )
+    {
+    // Открыть клапан на 100% через set_cmd("V").
+    VC1.set_cmd( "V", 0, 100.0 );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    EXPECT_EQ( 1, VC1.get_state() );
+
+    // Закрыть клапан через ST=0 -> значение должно сброситься в 0%.
+    VC1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
+    EXPECT_EQ( 0, VC1.get_state() );
+
+    // Открыть клапан через ST=1 -> значение должно сброситься в 100%.
+    VC1.set_cmd( "V", 0, 55.0 );
+    VC1.set_cmd( "ST", 0, 1.0 );
+    EXPECT_EQ( 1, VC1.get_state() );
+    EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
+    }
+
 
 TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
     {
