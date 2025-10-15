@@ -197,6 +197,9 @@ foreach(_target toluapp toluapp_lib liblua lua lfs)
         set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     endif()
 endforeach()
+if(TARGET lfs)
+     set_target_properties (lfs PROPERTIES OUTPUT_NAME lfs PREFIX "" CLEAN_DIRECT_OUTPUT 1)
+endif()
 
 add_dependencies(main_test lua lfs)
 
