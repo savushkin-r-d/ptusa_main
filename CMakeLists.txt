@@ -472,7 +472,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
         PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
 
 
-	add_test(NAME Busted-test COMMAND lua ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
+    add_test(NAME Busted-test COMMAND lua ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
 
     add_test(T1-PLCnext-Demo lua
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
