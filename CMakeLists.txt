@@ -476,14 +476,19 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
         PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
 
 
-    add_test(NAME Busted-test COMMAND lua ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
+    add_test(NAME Busted-test COMMAND lua
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
+                ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
 
-    add_test(T1-PLCnext-Demo lua
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
+    add_test( NAME T1-PLCnext-Demo COMMAND lua
+                -e "package.path = package.path..';./?.lua;${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll'"
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
 
     if(LINUX)
         add_test(T1-PLCnext-Demo_valgrind valgrind
