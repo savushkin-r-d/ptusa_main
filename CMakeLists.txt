@@ -482,10 +482,12 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
 
     add_test( NAME T1-PLCnext-Demo COMMAND lua
-                -e "package.path = package.path..';./?.lua;${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
+                -e "package.path = package.path..';./?.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/penlight/lua/?.lua'"
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.so'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )

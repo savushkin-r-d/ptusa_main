@@ -34,3 +34,6 @@
 [submodule "deps/lunarmodules/luafilesystem/luafilesystem"]
 	path = deps/lunarmodules/luafilesystem/luafilesystem
 	url = https://github.com/lunarmodules/luafilesystem.git
+[submodule "deps/lunarmodules/penlight"]
+	path = deps/lunarmodules/penlight
+	url = https://github.com/lunarmodules/Penlight.git
