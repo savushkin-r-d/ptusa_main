@@ -86,6 +86,9 @@ void InitCipDevices()
     dm->add_io_device( device::DEVICE_TYPE::DT_FQT, device::DEVICE_SUB_TYPE::DST_FQT_VIRT, "LINE1FQT1", "", "" );
 
     dm->add_io_device( device::DEVICE_TYPE::DT_QT, device::DEVICE_SUB_TYPE::DST_QT_VIRT, "LINE1QT1", "", "" );
+    
+    //Watchdog device.
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG, device::DEVICE_SUB_TYPE::DST_WATCHDOG, "LINE1WATCHDOG1", "", "" );
     }
 
 void ClearCipDevices()
@@ -1005,4 +1008,157 @@ TEST_F( cipline_tech_object_test, EvalCipInProgress )
 
     auto res = cip1.EvalCipInProgress();
     EXPECT_EQ( res, -1 );
+    }
+
+// =========================== WATCHDOG TESTS ===========================
+
+TEST( cipline_tech_object, check_device_watchdog )
+    {
+    // Test the check_device() helper function for watchdog device validation
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+
+    device* outdev;
+
+    // Test with bad device type - should not work
+    int result = cip1.check_device( outdev, P_WATCHDOG, device::C_DEVICE_TYPE_CNT );
+    EXPECT_EQ( -1, result ); // No device configured
+
+    // Test with zero device number (no device) - should work without initialization
+    cip1.rt_par_float[ P_WATCHDOG ] = 0;
+    result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
+    EXPECT_EQ( 0, result ); // No device configured
+
+    // Test with negative parameter - should work without initialization
+    cip1.rt_par_float[ P_WATCHDOG ] = -1;
+    result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
+    EXPECT_EQ( 0, result ); // Invalid parameter
+
+    // Now test with valid device - this might be the problematic part
+    cip1.rt_par_float[ P_WATCHDOG ] = 1;
+    result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
+    EXPECT_EQ( 0, result ); // Should find device
+
+    // Test with non-existent device number
+    cip1.rt_par_float[ P_WATCHDOG ] = 99;
+    result = cip1.check_device( outdev, P_WATCHDOG, device::DT_WATCHDOG );
+    EXPECT_EQ( -2, result ); // Should not find device
+
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, _CheckErr_watchdog )
+    {
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    // Test ERR_WATCHDOG error detection when watchdog device is inactive
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+
+    cip1.initline();
+    cip1.init_object_devices();
+
+    auto res = cip1._CheckErr();
+    EXPECT_EQ( res, 0 );
+
+    cip1.rt_par_float[ P_WATCHDOG ] = 1;
+    cip1.init_object_devices();
+    res = cip1._CheckErr();
+    EXPECT_EQ( res, ERR_WATCHDOG );
+
+    ClearCipDevices();
+    lua_manager::get_instance()->free_Lua();
+    }
+
+TEST( cipline_tech_object, _ResetLinesDevicesBeforeReset_watchdog )
+    {
+    // Test proper watchdog device reset in _ResetLinesDevicesBeforeReset()
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    
+    // Set up watchdog device manually
+    auto dm = device_manager::get_instance();
+    auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
+    ASSERT_NE(nullptr, watchdog_dev);
+    cip1.dev_watchdog = watchdog_dev;
+    
+    // Set watchdog to active state
+    watchdog_dev->set_state(1);
+    EXPECT_EQ( 1, watchdog_dev->get_state() );
+    
+    // Call reset function
+    cip1._ResetLinesDevicesBeforeReset();
+    
+    // Verify dev_watchdog pointer was nullified
+    EXPECT_EQ( nullptr, cip1.dev_watchdog );
+    
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, watchdog_error_message )
+    {
+    // Test ERR_WATCHDOG constant value and Russian error message
+    EXPECT_EQ( -42, ERR_WATCHDOG );
+
+    // Test error message exists in map
+    auto it = ERR_MSG.find( ERR_WATCHDOG );
+    ASSERT_NE( ERR_MSG.end(), it );
+
+    // Test error message content (Russian)
+    std::string expected_msg = "Ошибка сторожевого таймера";
+    EXPECT_EQ( expected_msg, std::string( it->second ) );
+    }
+
+TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
+    {
+    // 1) Окружение.
+    InitCipDevices(); // Добавляет LINE1WATCHDOG1 и прочие виртуальные устройства
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    // До загрузки рецепта параметр P_WATCHDOG должен быть 0.
+    EXPECT_EQ( 0.0f, cip1.rt_par_float[ P_WATCHDOG ] );
+
+    // 2) В рецепте текущей линии выставляем RV_WATCHDOG = 1 (т.е. LINE1WATCHDOG1).
+    auto* rm = cip1.lineRecipes;
+    const auto curRec = rm->getCurrentRecipe();
+    // Гарантируем базовые значения рецепта и выставляем watchdog.
+    rm->ResetRecipeToDefaults( curRec );
+    ASSERT_NE( 0, rm->GetParamsCount() ); // sanity check: рецепт доступен
+    ASSERT_EQ( 0, rm->setRecipeValue( curRec, TRecipeManager::RV_WATCHDOG, 1.0f ) );
+
+    // 3) Загружаем рецепт в рантайм‑параметры CIP.
+    cip1.rt_par_float[ P_SELECT_REC ] =
+        static_cast<float>( curRec + 1 ); // Нумерация рецептов в UI — с 1.
+    EXPECT_EQ( 0, cip1.evaluate() );
+
+    // Проверяем, что mapping сработал: RV_WATCHDOG -> P_WATCHDOG.
+    EXPECT_EQ( 1.0f, cip1.rt_par_float[ P_WATCHDOG ] );
+
+    // 4) Инициализируем устройства объекта, dev_watchdog должен подтянуться.
+    EXPECT_EQ( 0, cip1.init_object_devices() );
+    ASSERT_NE( nullptr, cip1.dev_watchdog );
+
+    // 5) Пока watchdog «молчит», CIP должен вернуть ERR_WATCHDOG.
+    EXPECT_EQ( ERR_WATCHDOG, cip1._CheckErr() );
+
+    // 6) Дополнительно проверим, что можно «оживить» watchdog и ошибка уйдёт.
+    auto* dm = device_manager::get_instance();
+    auto* wd = dm->get_device( "LINE1WATCHDOG1" );
+    ASSERT_NE( nullptr, wd );
+    // Привяжем вход к дискретному датчику и сделаем два «толчка».
+    wd->set_string_property( "DI_dev", "LINE1LS1" );
+    auto* ls1 = dm->get_device( "LINE1LS1" );
+    ASSERT_NE( nullptr, ls1 );
+
+    ls1->set_state( 1 ); wd->evaluate_io();
+    EXPECT_EQ( 0, cip1._CheckErr() ); // ошибка пропала
+
+    ls1->set_state( 0 ); wd->evaluate_io();
+    EXPECT_EQ( 0, cip1._CheckErr() ); // всё ещё ок
+
+    // Завершение.
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
     }
