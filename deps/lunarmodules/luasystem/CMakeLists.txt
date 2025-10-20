@@ -12,7 +12,13 @@ add_library(luasystem ${SOURCES})
 target_include_directories(luasystem PRIVATE luasystem/src ${LUA_INCLUDE_DIR})
 target_link_libraries(luasystem PRIVATE liblua)
 
-set_target_properties (luasystem PROPERTIES OUTPUT_NAME core PREFIX "")
+set_target_properties(luasystem PROPERTIES
+    OUTPUT_NAME core
+    PREFIX ""
+    RUNTIME_OUTPUT_DIRECTORY  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/system"
+    LIBRARY_OUTPUT_DIRECTORY  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/system"
+    ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/system")
+
 if (WIN32)
     target_compile_definitions(luasystem PRIVATE 
     _CRT_NONSTDC_NO_WARNINGS _USRDLL _WINDOWS _WINDLL)
