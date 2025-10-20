@@ -86,6 +86,7 @@ endif()
 add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/lunarmodules/luafilesystem EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -204,7 +205,8 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs libptusa_main)
+add_dependencies(main_test lua lfs luasystem libptusa_main)
+add_dependencies(lua libptusa_main)
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
@@ -246,9 +248,6 @@ target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
 
-if(TARGET lfs)
-     set_target_properties (lfs PROPERTIES OUTPUT_NAME lfs PREFIX "")
-endif()
 #######################################################################################
 
 ################# project include-paths ###############################################
@@ -490,6 +489,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/penlight/lua/?.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/luasystem/luasystem/?/init.lua'"
                 -e "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
@@ -504,7 +504,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --track-origins=yes
                 --show-leak-kinds=all
                 lua
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
