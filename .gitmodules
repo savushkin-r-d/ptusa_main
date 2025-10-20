@@ -40,3 +40,6 @@
 [submodule "deps/lunarmodules/luasystem/luasystem"]
 	path = deps/lunarmodules/luasystem/luasystem
 	url = https://github.com/lunarmodules/luasystem.git
+[submodule "deps/lunarmodules/mediator"]
+	path = deps/lunarmodules/mediator
+	url = https://github.com/Olivine-Labs/mediator_lua.git

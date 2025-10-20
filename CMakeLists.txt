@@ -490,6 +490,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/penlight/lua/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/luasystem/luasystem/?/init.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/mediator/src/?.lua'"
                 -e "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
