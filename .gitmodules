@@ -46,9 +46,6 @@
 [submodule "deps/lunarmodules/dkjson"]
 	path = deps/lunarmodules/dkjson
 	url = https://github.com/LuaDist/dkjson.git
-[submodule "deps/lunarmodules/term"]
-	path = deps/lunarmodules/term
-	url = https://github.com/hoelzro/lua-term.git
 [submodule "deps/lunarmodules/cliargs"]
 	path = deps/lunarmodules/cliargs
 	url = https://github.com/lunarmodules/lua_cliargs.git
