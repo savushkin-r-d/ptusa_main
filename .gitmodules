@@ -43,3 +43,6 @@
 [submodule "deps/lunarmodules/mediator"]
 	path = deps/lunarmodules/mediator
 	url = https://github.com/Olivine-Labs/mediator_lua.git
+[submodule "deps/lunarmodules/dkjson"]
+	path = deps/lunarmodules/dkjson
+	url = https://github.com/LuaDist/dkjson.git
