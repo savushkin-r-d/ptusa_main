@@ -49,3 +49,6 @@
 [submodule "deps/lunarmodules/cliargs"]
 	path = deps/lunarmodules/cliargs
 	url = https://github.com/lunarmodules/lua_cliargs.git
+[submodule "deps/lunarmodules/term/term"]
+	path = deps/lunarmodules/term/term
+	url = https://github.com/hoelzro/lua-term.git
