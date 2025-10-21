@@ -314,49 +314,6 @@ jobs:
         endif()
         execute_process(COMMAND ccache -s)
 
-
-    # Install Lua
-    - name: Install Lua (Linux only)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y lua5.1
-
-
-    # Install LuaRocks
-    - name: Install LuaRocks on Linux
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y luarocks
-
-    - name: Install LuaRocks on Windows
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        choco install luarocks
-
-
-
-    # Install busted
-    - name: Install busted on Linux
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo luarocks install busted
-
-    - name: Install busted on Windows
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
-        luarocks install penlight 1.13.1-1
-        luarocks install busted
-
-
     # Install valgrind
     - name: Install valgrind on Linux
       if: runner.os == 'Linux'
