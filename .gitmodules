@@ -52,3 +52,6 @@
 [submodule "deps/lunarmodules/term/term"]
 	path = deps/lunarmodules/term/term
 	url = https://github.com/hoelzro/lua-term.git
+[submodule "deps/lunarmodules/luassert/luassert"]
+	path = deps/lunarmodules/luassert/luassert
+	url = https://github.com/lunarmodules/luassert.git

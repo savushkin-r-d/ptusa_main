@@ -88,6 +88,7 @@ add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luafilesystem EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -206,7 +207,7 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs luasystem term_core libptusa_main)
+add_dependencies(main_test lua lfs luasystem term_core luassert_copy libptusa_main)
 add_dependencies(lua libptusa_main)
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
@@ -494,6 +495,8 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/mediator/src/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/term/term/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/term/term/?.lua'"
+                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua'" #luassert
+                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/dkjson/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/cliargs/src/?.lua'"
                 -e "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
