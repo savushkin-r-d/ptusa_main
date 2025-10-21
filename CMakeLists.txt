@@ -484,7 +484,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME Busted-test COMMAND lua
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua )
+                ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua)
 
     add_test( NAME T1-PLCnext-Demo COMMAND lua
                 -e "package.path = package.path..';./?.lua'"
@@ -497,12 +497,13 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/term/term/?.lua'"
                 -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua'" #luassert
                 -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua'"
+                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/say/say/src/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/dkjson/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/cliargs/src/?.lua'"
                 -e "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
     if(LINUX)
         add_test(T1-PLCnext-Demo_valgrind valgrind

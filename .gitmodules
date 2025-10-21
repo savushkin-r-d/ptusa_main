@@ -55,3 +55,6 @@
 [submodule "deps/lunarmodules/luassert/luassert"]
 	path = deps/lunarmodules/luassert/luassert
 	url = https://github.com/lunarmodules/luassert.git
+[submodule "deps/lunarmodules/say/say"]
+	path = deps/lunarmodules/say/say
+	url = https://github.com/lunarmodules/say.git
