@@ -30,7 +30,8 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     if: >-
-      ${{        
+      ${{
+        github.event_name == 'workflow_dispatch' ||        
         (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
