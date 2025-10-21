@@ -207,7 +207,7 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs luasystem term_core luassert_copy libptusa_main)
+add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
 add_dependencies(lua libptusa_main)
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
