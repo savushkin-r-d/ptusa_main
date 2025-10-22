@@ -474,13 +474,15 @@ endif()
     PROPERTY VS_DEBUGGER_COMMAND
     "lua.exe")
 
-# Общие пути для busted в Lua package.path
+# Общие пути в Lua package.path
+set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
 set(LUA_BUSTED_PATH_INIT  
-    "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'")
+    "package.path = package.path..';${LUA_MODULES_PATH}/busted/?/init.lua'")
 set(LUA_BUSTED_PATH_FILES 
-    "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'")
+    "package.path = package.path..';${LUA_MODULES_PATH}/busted/?.lua'")
 set(LUA_LIBRARY_PATH
     "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
+
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
@@ -492,22 +494,23 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME Busted-test COMMAND lua
                 -e "${LUA_BUSTED_PATH_INIT}"
                 -e "${LUA_BUSTED_PATH_FILES}"
-                ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua)
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
+                ${LUA_MODULES_PATH}/busted/busted.lua)
 
     add_test(NAME T1-PLCnext-Demo COMMAND lua
                 -e "package.path = package.path..';./?.lua'"
                 -e "${LUA_BUSTED_PATH_INIT}"
                 -e "${LUA_BUSTED_PATH_FILES}"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/penlight/lua/?.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/luasystem/luasystem/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/mediator/src/?.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/term/term/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/term/term/?.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/mediator/src/?.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?/init.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?.lua'"
                 -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua'" #luassert
                 -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/say/say/src/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/dkjson/?.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/cliargs/src/?.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/say/say/src/?/init.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/dkjson/?.lua'"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/cliargs/src/?.lua'"
                 -e "${LUA_LIBRARY_PATH}"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
