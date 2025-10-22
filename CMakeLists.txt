@@ -479,7 +479,7 @@ set(LUA_BUSTED_PATH_INIT
     "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'")
 set(LUA_BUSTED_PATH_FILES 
     "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'")
-set(LUA_LIBRARY_PATH =
+set(LUA_LIBRARY_PATH
     "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
