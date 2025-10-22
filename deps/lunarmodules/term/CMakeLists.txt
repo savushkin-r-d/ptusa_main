@@ -3,6 +3,9 @@ set(SOURCES term/core.c)
 # Create the library.
 add_library(term_core ${SOURCES})
 
+target_sources(term_core PRIVATE
+    $<$<C_COMPILER_ID:MSVC>:term_core.def>)
+
 include_directories(PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(term_core PRIVATE liblua)
 
