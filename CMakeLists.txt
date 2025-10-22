@@ -516,7 +516,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     set(LUA_EXE "${PROJECT_BINARY_DIR}/$<CONFIG>/lua")
 
     if(LINUX)
-        add_test(T1-PLCnext-Demo_valgrind valgrind
+        add_test(NAME T1-PLCnext-Demo_valgrind COMMAND valgrind
                 --error-exitcode=1
                 --num-callers=100
                 --leak-check=full
@@ -524,9 +524,9 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --track-origins=yes
                 --show-leak-kinds=all
                 "${LUA_EXE}"
-                -e ${LUA_BUSTED_PATH_INIT}
-                -e ${LUA_BUSTED_PATH_FILES}
-                -e ${LUA_LIBRARY_PATH}
+                -e "${LUA_BUSTED_PATH_INIT}"
+                -e "${LUA_BUSTED_PATH_FILES}"
+                -e "${LUA_LIBRARY_PATH}"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
