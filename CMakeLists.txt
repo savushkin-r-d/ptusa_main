@@ -474,6 +474,12 @@ endif()
     PROPERTY VS_DEBUGGER_COMMAND
     "lua.exe")
 
+# Общие пути для busted в Lua package.path
+set(LUA_BUSTED_PATH_INIT  
+    "-e package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'")
+set(LUA_BUSTED_PATH_FILES 
+    "-e package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'")
+
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
@@ -482,14 +488,14 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 
 
     add_test(NAME Busted-test COMMAND lua
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
+                ${LUA_BUSTED_PATH_INIT}
+                ${LUA_BUSTED_PATH_FILES}
                 ${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/busted.lua)
 
-    add_test( NAME T1-PLCnext-Demo COMMAND lua
+    add_test(NAME T1-PLCnext-Demo COMMAND lua
                 -e "package.path = package.path..';./?.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?/init.lua'"
-                -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'"
+                ${LUA_BUSTED_PATH_INIT}
+                ${LUA_BUSTED_PATH_FILES}
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/penlight/lua/?.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/luasystem/luasystem/?/init.lua'"
                 -e "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/mediator/src/?.lua'"
@@ -513,8 +519,10 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --verbose
                 --track-origins=yes
                 --show-leak-kinds=all
-                $<TARGET_FILE:lua>
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
+                "$<TARGET_FILE:lua>"
+                ${LUA_BUSTED_PATH_INIT}
+                ${LUA_BUSTED_PATH_FILES}
+                -e "package.cpath = package.cpath..';$<TARGET_FILE_DIR:libptusa_main>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
