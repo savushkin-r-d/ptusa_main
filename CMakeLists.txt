@@ -480,7 +480,7 @@ set(LUA_BUSTED_PATH_INIT
 set(LUA_BUSTED_PATH_FILES 
     "package.path = package.path..';${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules/busted/?.lua'")
 set(LUA_LIBRARY_PATH =
-    "package.cpath = package.cpath..';$<TARGET_FILE_DIR:libptusa_main>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
+    "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
@@ -513,7 +513,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
-    set(LUA_EXE "$<TARGET_FILE:lua>")
+    set(LUA_EXE "${PROJECT_BINARY_DIR}/$<CONFIG>/lua")
 
     if(LINUX)
         add_test(T1-PLCnext-Demo_valgrind valgrind
@@ -523,7 +523,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --verbose
                 --track-origins=yes
                 --show-leak-kinds=all
-                ${LUA_EXE}
+                "${LUA_EXE}"
                 -e ${LUA_BUSTED_PATH_INIT}
                 -e ${LUA_BUSTED_PATH_FILES}
                 -e ${LUA_LIBRARY_PATH}
