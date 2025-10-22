@@ -513,7 +513,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --verbose
                 --track-origins=yes
                 --show-leak-kinds=all
-                ${PROJECT_BINARY_DIR}/$<CONFIG>/lua
+                ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lua
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?${CMAKE_SHARED_LIBRARY_SUFFIX}'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
