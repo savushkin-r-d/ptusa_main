@@ -2412,7 +2412,7 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
         auto res = fmt::format_to_n( err_dev_name, str_len - 1,
             "превышено макс. t ({} с) шага {} \'{}\'", step_max_time,
             step_n + 1, steps[ step_n ]->get_name() );        
-        if ( res.size >= str_len )
+        if ( res.size > str_len - 1 )
             {
             // Резерв для записи сокращения вида "...'" в конце строки при
             // превышения ограничения длины.
