@@ -1,7 +1,10 @@
 set(SOURCES luafilesystem/src/lfs.c)
 
-# create the library
 add_library(lfs ${SOURCES})
+
+# Используем .def только под MSVC (Visual Studio).
+target_sources(lfs PRIVATE $<$<C_COMPILER_ID:MSVC>:luafilesystem/src/lfs.def>)
+
 target_include_directories(lfs PRIVATE luafilesystem/src src/lib ${LUA_INCLUDE_DIR})
 target_link_libraries(lfs PRIVATE liblua)
 
