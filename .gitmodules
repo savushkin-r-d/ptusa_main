@@ -28,3 +28,33 @@
 [submodule "toluapp"]
 	path = deps/toluapp/toluapp
 	url = https://github.com/savushkin-r-d/toluapp.git
+[submodule "deps/lunarmodules/busted"]
+	path = deps/lunarmodules/busted
+	url = https://github.com/lunarmodules/busted.git
+[submodule "deps/lunarmodules/luafilesystem/luafilesystem"]
+	path = deps/lunarmodules/luafilesystem/luafilesystem
+	url = https://github.com/lunarmodules/luafilesystem.git
+[submodule "deps/lunarmodules/penlight"]
+	path = deps/lunarmodules/penlight
+	url = https://github.com/lunarmodules/Penlight.git
+[submodule "deps/lunarmodules/luasystem/luasystem"]
+	path = deps/lunarmodules/luasystem/luasystem
+	url = https://github.com/lunarmodules/luasystem.git
+[submodule "deps/lunarmodules/mediator"]
+	path = deps/lunarmodules/mediator
+	url = https://github.com/Olivine-Labs/mediator_lua.git
+[submodule "deps/lunarmodules/dkjson"]
+	path = deps/lunarmodules/dkjson
+	url = https://github.com/LuaDist/dkjson.git
+[submodule "deps/lunarmodules/cliargs"]
+	path = deps/lunarmodules/cliargs
+	url = https://github.com/lunarmodules/lua_cliargs.git
+[submodule "deps/lunarmodules/term/term"]
+	path = deps/lunarmodules/term/term
+	url = https://github.com/hoelzro/lua-term.git
+[submodule "deps/lunarmodules/luassert/luassert"]
+	path = deps/lunarmodules/luassert/luassert
+	url = https://github.com/lunarmodules/luassert.git
+[submodule "deps/lunarmodules/say/say"]
+	path = deps/lunarmodules/say/say
+	url = https://github.com/lunarmodules/say.git
