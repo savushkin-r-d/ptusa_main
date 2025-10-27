@@ -558,7 +558,7 @@ TEST( operation, check_max_step_time )
 
     tech_object test_tank( "Танк1", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
 	const auto MAX_TIME_IDX = 1;
-	test_tank.par_float[ MAX_TIME_IDX ] = 1;
+	test_tank.par_float[ MAX_TIME_IDX ] = 10;
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
 	auto res = test_op->add_step( "Тестовый первый шаг", -1, -1, MAX_TIME_IDX );
@@ -566,7 +566,7 @@ TEST( operation, check_max_step_time )
 	test_op->start();
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	DeltaMilliSecSubHooker::set_millisec(1001UL);
+	DeltaMilliSecSubHooker::set_millisec(10'001UL);
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 	DeltaMilliSecSubHooker::set_default_time();
@@ -575,12 +575,12 @@ TEST( operation, check_max_step_time )
 	test_op->start();
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	DeltaMilliSecSubHooker::set_millisec(1001UL);
-    //Проверка на превышение максимльного времени шага.
+	DeltaMilliSecSubHooker::set_millisec(10'001UL);
+    //Проверка на превышение максимального времени шага.
     const unsigned int ERR_STR_SIZE = 80;
     char err_str[ ERR_STR_SIZE ] = {};
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
-    const auto RES_STR = "превышено макс. t (1 с) шага 1 'Тестовый перв...'";
+    const auto RES_STR = "превышено макс. t (10 с) шага 1 'Тестовый пер...'";
     EXPECT_STREQ( RES_STR, err_str );
         
 	test_tank.evaluate();
@@ -590,15 +590,15 @@ TEST( operation, check_max_step_time )
 	// После запуска опять в паузу из-за превышения времени второго шага,
 	// который является вспомогательным (выполняется параллельно).
 	test_tank.par_float[ MAX_TIME_IDX ] = 0;        //0 сек для первого шага.
-	test_tank.par_float[ MAX_TIME_IDX + 1 ] = 1;    //1 сек для второго шага.
-	res = test_op->add_step( "Eval #1", -1, -1, MAX_TIME_IDX + 1 );
+	test_tank.par_float[ MAX_TIME_IDX + 1 ] = 10;   //10 сек для второго шага.
+	res = test_op->add_step( "Работа рецепта", -1, -1, MAX_TIME_IDX + 1 );
 	test_op->start();
 	test_op->on_extra_step( 2 );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
-	DeltaMilliSecSubHooker::set_millisec(1001UL);
+	DeltaMilliSecSubHooker::set_millisec(10'001UL);
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
-    const auto RES_STR_EX = "превышено макс. t (1 с) шага 2 'Eval #1'";
+    const auto RES_STR_EX = "превышено макс. t (10 с) шага 2 'Работа рецепта'";
     EXPECT_STREQ( RES_STR_EX, err_str );    
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );

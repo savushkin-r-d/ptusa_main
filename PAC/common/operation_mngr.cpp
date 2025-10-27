@@ -2423,16 +2423,15 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
 
     auto make_str = [&]( unsigned int step_n, int step_max_time )
         {
-        // Резерв для записи сокращения вида "...'" в конце строки при
-        // превышения ограничения длины.
-        const unsigned int OFFSET = 4;
-
-        auto res = fmt::format_to_n( err_dev_name, str_len - 1 - OFFSET,
-            "превышено макс. t ({} с) шага {} \'{}\'", step_max_time, step_n + 1,
-            steps[ step_n ]->get_name() );
-        *res.out = '\0';
-        if ( res.size > str_len )
+        auto res = fmt::format_to_n( err_dev_name, str_len - 1,
+            "превышено макс. t ({} с) шага {} \'{}\'", step_max_time,
+            step_n + 1, steps[ step_n ]->get_name() );        
+        if ( res.size > str_len - 1 )
             {
+            // Резерв для записи сокращения вида "...'" в конце строки при
+            // превышения ограничения длины.
+            const unsigned int OFFSET = 4;
+            res.out -= OFFSET;
             // Удаляем часть некорректного utf8 символа при его наличии.
             if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 )
                 res.out--;
@@ -2441,8 +2440,8 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
             *res.out++ = '.';
             *res.out++ = '.';
             *res.out++ = '\'';
-            *res.out = '\0';
             }
+        *res.out = '\0';
         };
 
     if ( active_step_n >= 0 && (unsigned int)active_step_n < steps.size() &&
@@ -2466,7 +2465,7 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
                 steps[ a_step_n - 1 ]->get_latest_eval_time() >=
                 1000UL * extra_active_step_max_time )
                 {
-                make_str( extra_active_step_max_time, a_step_n - 1 );
+                make_str( a_step_n - 1, extra_active_step_max_time );
                 return 1;
                 }
             }
