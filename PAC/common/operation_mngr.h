@@ -690,7 +690,7 @@ class operation_state
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
         std::vector< u_long > active_steps_duration;
-        std::vector< u_long > active_steps_start_time;        
+        std::vector< u_long > active_steps_start_time;
 
         std::vector< int > saved_active_steps;
 
