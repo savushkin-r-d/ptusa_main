@@ -10,4 +10,4 @@ target_link_libraries(lfs PRIVATE liblua)
 
 target_compile_definitions(lfs PRIVATE _CRT_SECURE_NO_WARNINGS)
 
-set_target_properties (lfs PROPERTIES OUTPUT_NAME lfs PREFIX "")
+set_target_properties (lfs PROPERTIES PREFIX "")
