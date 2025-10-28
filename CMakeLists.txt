@@ -33,6 +33,10 @@ endif()
 
 add_compile_definitions(TEST_SPEED MODBUS)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>")
+
 if(MSVC)
     add_compile_options("/utf-8")
 
@@ -58,6 +62,14 @@ add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
 set(INSTALL_GTEST OFF)
 add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
+foreach(_t gtest gtest_main gmock gmock_main)
+    if(TARGET ${_t})
+        set_target_properties(${_t} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>"
+            LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>"
+            ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>")
+    endif()
+endforeach()
 
 add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
@@ -72,6 +84,11 @@ if(USE_OPCUA)
 endif()
 
 add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
+
+add_subdirectory(deps/lunarmodules/luafilesystem EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
+add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -168,13 +185,11 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
-if(NOT MINGW)
-    add_executable(main_perfomance_test ${common_src} ${win_src}
-           test/perfomance/main_perfomance_test.cpp
-           PAC_control_projects/main_control_prg/version.rc)
-endif()
-
-    set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    if(NOT MINGW)
+        add_executable(main_perfomance_test ${common_src} ${win_src}
+               test/perfomance/main_perfomance_test.cpp           
+               PAC_control_projects/main_control_prg/version.rc)
+    endif()
 
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
@@ -190,6 +205,13 @@ endif()
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     endif()
+endif()
+
+add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
+add_dependencies(lua libptusa_main)
+
+if (MSVC)   
+    set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")
 endif()
 
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
@@ -226,17 +248,12 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_link_options(main_test PUBLIC --coverage)
 endif()
 
-set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX "" CLEAN_DIRECT_OUTPUT 1)
+set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX "")
 target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
 
-set_target_properties (subhook gtest gtest_main gmock gmock_main
-                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-if(NOT MINGW)
-    set_target_properties (benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-endif()
 #######################################################################################
 
 ################# project include-paths ###############################################
@@ -355,17 +372,10 @@ endif()
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
-    target_link_libraries(libptusa_main wsock32 ws2_32)
+    target_link_libraries(libptusa_main liblua wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
     if(NOT MINGW)
         target_link_libraries(main_perfomance_test wsock32 ws2_32)
-    endif()
-
-
-    if(DEFINED ENV{LUA_DEV})
-        target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
-    else()
-        target_link_libraries(libptusa_main liblua)
     endif()
 
 elseif (LINUX)
@@ -463,38 +473,65 @@ else()
 ]] )
 endif()
 
-  set_property(
-    TARGET libptusa_main
-    PROPERTY VS_DEBUGGER_COMMAND
-    "lua.exe")
+# Общие пути в Lua package.path
+set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
+set(LUA_BUSTED_PATH_INIT_CMD  
+    "package.path = package.path..';${LUA_MODULES_PATH}/busted/?/init.lua'")
+set(LUA_BUSTED_PATH_FILES_CMD 
+    "package.path = package.path..';${LUA_MODULES_PATH}/busted/?.lua'")
+set(LUA_LIBRARIES_PATH "${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set(DEMO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo")
+set(LUA_T1_DEMO_EARGS_CMD
+    "package.path = package.path..'"
+    "./?.lua"
+    "${LUA_MODULES_PATH}/penlight/lua/?.lua"
+    "${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua"
+    "${LUA_MODULES_PATH}/mediator/src/?.lua"
+    "${LUA_MODULES_PATH}/term/term/?/init.lua"
+    "${LUA_MODULES_PATH}/term/term/?.lua"
+    "${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua" #luassert
+    "${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua"
+    "${LUA_MODULES_PATH}/say/say/src/?/init.lua"
+    "${LUA_MODULES_PATH}/dkjson/?.lua"
+    "${LUA_MODULES_PATH}/cliargs/src/?.lua'")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
+		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
         PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
 
-    add_test(T1-PLCnext-Demo lua5.1
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
-                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+
+    add_test(NAME Busted-test COMMAND lua
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
+                -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
+                ${LUA_MODULES_PATH}/busted/busted.lua)
+
+    add_test(NAME T1-PLCnext-Demo COMMAND lua
+                -e "package.path = package.path..';./?.lua'"
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
+                -e "${LUA_T1_DEMO_EARGS_CMD}"
+                -e "package.cpath = package.cpath..';${LUA_LIBRARIES_PATH}'"
+                ${DEMO_PATH}/spec/ptusa_main.lua
+            WORKING_DIRECTORY ${DEMO_PATH})
 
     if(LINUX)
-        add_test(T1-PLCnext-Demo_valgrind valgrind
+        add_test(NAME T1-PLCnext-Demo_valgrind COMMAND valgrind
                 --error-exitcode=1
                 --num-callers=100
                 --leak-check=full
                 --verbose
                 --track-origins=yes
                 --show-leak-kinds=all
-                lua5.1
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
-                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
-                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+                "$<TARGET_FILE:lua>"
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
+                -e "${LUA_T1_DEMO_EARGS_CMD}"
+                -e "package.cpath = package.cpath..';${LUA_LIBRARIES_PATH}'"
+                ${DEMO_PATH}/spec/ptusa_main.lua
+            WORKING_DIRECTORY ${DEMO_PATH})
     endif()
 
 
