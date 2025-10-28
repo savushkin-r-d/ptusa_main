@@ -31,25 +31,26 @@ jobs:
     name: ${{ matrix.config.name }}
     if: >-
       ${{
-        github.event_name == 'workflow_dispatch' ||        
-        (
+        github.repository == 'savushkin-r-d/ptusa_main' && 
+          (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
           github.event_name == 'merge_group' ||
-          (
-            github.event_name == 'pull_request_target' &&
-            github.event.pull_request.head.repo.full_name != github.repository &&
+          github.event_name == 'workflow_dispatch' || 
             (
+            github.event_name == 'pull_request_target' &&
+            github.event.pull_request.head.repo.full_name != github.repository && 
+              (
               contains(github.event.pull_request.labels.*.name, 'safe to test') ||
               github.event.pull_request.author_association == 'MEMBER' ||
               github.event.pull_request.author_association == 'OWNER'
-            )
-          ) ||
-          (
-            github.event_name == 'pull_request' &&
-            github.event.pull_request.head.repo.full_name == github.repository
+              )
+            ) || 
+              (
+              github.event_name == 'pull_request' &&
+              github.event.pull_request.head.repo.full_name == github.repository
+              )
           )
-        )
       }}
     runs-on: ${{ matrix.config.os }}
     strategy:
