@@ -210,6 +210,10 @@ endif()
 add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
 add_dependencies(lua libptusa_main)
 
+if (MSVC)   
+    set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")
+endif()
+
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
 if(NOT MINGW)
@@ -469,11 +473,6 @@ else()
 ]] )
 endif()
 
-  set_property(
-    TARGET libptusa_main
-    PROPERTY VS_DEBUGGER_COMMAND
-    "lua.exe")
-
 # Общие пути в Lua package.path
 set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
 set(LUA_BUSTED_PATH_INIT  
@@ -481,8 +480,22 @@ set(LUA_BUSTED_PATH_INIT
 set(LUA_BUSTED_PATH_FILES 
     "package.path = package.path..';${LUA_MODULES_PATH}/busted/?.lua'")
 set(LUA_LIBRARY_PATH
-    "package.cpath = package.cpath..';${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
-
+    "package.cpath = package.cpath..';\
+    ${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
+set(DEMO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo")
+set(LUA_T1_DEMO_EARGS
+    "\"package.path = package.path..'"
+    "./?.lua"
+    "${LUA_MODULES_PATH}/penlight/lua/?.lua"
+    "${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua"
+    "${LUA_MODULES_PATH}/mediator/src/?.lua"
+    "${LUA_MODULES_PATH}/term/term/?/init.lua"
+    "${LUA_MODULES_PATH}/term/term/?.lua"
+    "${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua" #luassert
+    "${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua"
+    "${LUA_MODULES_PATH}/say/say/src/?/init.lua"
+    "${LUA_MODULES_PATH}/dkjson/?.lua"
+    "${LUA_MODULES_PATH}/cliargs/src/?.lua'\"")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
@@ -501,22 +514,10 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 -e "package.path = package.path..';./?.lua'"
                 -e "${LUA_BUSTED_PATH_INIT}"
                 -e "${LUA_BUSTED_PATH_FILES}"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/mediator/src/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?.lua'"
-                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua'" #luassert
-                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/say/say/src/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/dkjson/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/cliargs/src/?.lua'"
+                -e "${LUA_T1_DEMO_EARGS}"
                 -e "${LUA_LIBRARY_PATH}"
-                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
-
-    set(LUA_EXE "${PROJECT_BINARY_DIR}/$<CONFIG>/lua")
+                ${DEMO_PATH}/spec/ptusa_main.lua
+            WORKING_DIRECTORY ${DEMO_PATH})
 
     if(LINUX)
         add_test(NAME T1-PLCnext-Demo_valgrind COMMAND valgrind
@@ -526,24 +527,13 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --verbose
                 --track-origins=yes
                 --show-leak-kinds=all
-                "${LUA_EXE}"
+                "$<TARGET_FILE:lua>"
                 -e "${LUA_BUSTED_PATH_INIT}"
                 -e "${LUA_BUSTED_PATH_FILES}"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/mediator/src/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/term/term/?.lua'"
-                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?.lua'" #luassert
-                -e "package.path = package.path..';${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/say/say/src/?/init.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/dkjson/?.lua'"
-                -e "package.path = package.path..';${LUA_MODULES_PATH}/cliargs/src/?.lua'"
-                -e "${LUA_LIBRARY_PATH}"
-                -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
-                -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
-                -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
-                ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua)
+                -e "${LUA_T1_DEMO_EARGS}"
+                -e "${LUA_LIBRARY_PATH}"                
+                ${DEMO_PATH}/spec/ptusa_main.lua
+            WORKING_DIRECTORY ${DEMO_PATH})
     endif()
 
 

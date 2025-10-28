@@ -7,7 +7,7 @@ set(SOURCES luasystem/src/bitflags.c
     luasystem/src/time.c
     luasystem/src/wcwidth.c)
 
-# create the library
+# Create the library.
 add_library(luasystem ${SOURCES})
 target_include_directories(luasystem PRIVATE luasystem/src ${LUA_INCLUDE_DIR})
 target_link_libraries(luasystem PRIVATE liblua)

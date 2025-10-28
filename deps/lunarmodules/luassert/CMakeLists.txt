@@ -1,4 +1,3 @@
-# Define the source folder and the symlink name
 set(SOURCE_FOLDER "${CMAKE_CURRENT_LIST_DIR}/luassert/src")
 set(COPY_FOLDER "${PROJECT_BINARY_DIR}/$<CONFIG>/luassert")
 
