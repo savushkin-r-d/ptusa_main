@@ -168,7 +168,6 @@ int TRecipeManager::setRecipeValue( int recNo, int valueNo, float newValue )
 int TRecipeManager::GetParamsCount()
     {
     return (blocksPerRecipe * BLOCK_SIZE - startRecipeParamsOffset) / 4;
-
     }
 
 float TRecipeManager::getValue( int valueNo )
@@ -352,6 +351,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_DONT_USE_WATER_TANK, 0); 
         setRecipeValue(recipeNo, RV_PIDP_MAX_OUT, 0);
         setRecipeValue(recipeNo, RV_PIDF_MAX_OUT, 0);
+        setRecipeValue( recipeNo, RV_WATCHDOG, 0 );        
+
         for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
             {
             setRecipeValue(recipeNo, i, 0);
