@@ -475,15 +475,13 @@ endif()
 
 # Общие пути в Lua package.path
 set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
-set(LUA_BUSTED_PATH_INIT  
+set(LUA_BUSTED_PATH_INIT_CMD  
     "package.path = package.path..';${LUA_MODULES_PATH}/busted/?/init.lua'")
-set(LUA_BUSTED_PATH_FILES 
+set(LUA_BUSTED_PATH_FILES_CMD 
     "package.path = package.path..';${LUA_MODULES_PATH}/busted/?.lua'")
-set(LUA_LIBRARY_PATH
-    "package.cpath = package.cpath..';\
-    ${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}'")
+set(LUA_LIBRARIES_PATH "${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}")
 set(DEMO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo")
-set(LUA_T1_DEMO_EARGS
+set(LUA_T1_DEMO_EARGS_CMD
     "\"package.path = package.path..'"
     "./?.lua"
     "${LUA_MODULES_PATH}/penlight/lua/?.lua"
@@ -505,17 +503,17 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 
 
     add_test(NAME Busted-test COMMAND lua
-                -e "${LUA_BUSTED_PATH_INIT}"
-                -e "${LUA_BUSTED_PATH_FILES}"
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
                 -e "package.path = package.path..';${LUA_MODULES_PATH}/penlight/lua/?.lua'"
                 ${LUA_MODULES_PATH}/busted/busted.lua)
 
     add_test(NAME T1-PLCnext-Demo COMMAND lua
                 -e "package.path = package.path..';./?.lua'"
-                -e "${LUA_BUSTED_PATH_INIT}"
-                -e "${LUA_BUSTED_PATH_FILES}"
-                -e "${LUA_T1_DEMO_EARGS}"
-                -e "${LUA_LIBRARY_PATH}"
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
+                -e "${LUA_T1_DEMO_EARGS_CMD}"
+                -e "package.cpath = package.cpath..';${LUA_LIBRARIES_PATH}'"
                 ${DEMO_PATH}/spec/ptusa_main.lua
             WORKING_DIRECTORY ${DEMO_PATH})
 
@@ -528,10 +526,10 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
                 --track-origins=yes
                 --show-leak-kinds=all
                 "$<TARGET_FILE:lua>"
-                -e "${LUA_BUSTED_PATH_INIT}"
-                -e "${LUA_BUSTED_PATH_FILES}"
-                -e "${LUA_T1_DEMO_EARGS}"
-                -e "${LUA_LIBRARY_PATH}"                
+                -e "${LUA_BUSTED_PATH_INIT_CMD}"
+                -e "${LUA_BUSTED_PATH_FILES_CMD}"
+                -e "${LUA_T1_DEMO_EARGS_CMD}"
+                -e "package.cpath = package.cpath..';${LUA_LIBRARIES_PATH}'"
                 ${DEMO_PATH}/spec/ptusa_main.lua
             WORKING_DIRECTORY ${DEMO_PATH})
     endif()
