@@ -76,7 +76,7 @@ class temperature_e : public AI1
         u_int start_param_idx;
         enum CONSTANTS
             {
-            P_ERR_T = 1,                ///< Аварийное значение температуры.
+            P_ERR = 1,                  ///< Аварийное значение температуры.
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
             };
@@ -94,7 +94,7 @@ class temperature_e_analog : public AI1
         u_int start_param_idx;
         enum CONSTANTS
             {
-            P_ERR_T = 1,    ///< Аварийное значение температуры.
+            P_ERR = 1,    ///< Аварийное значение температуры.
             P_MIN_V,        ///< Минимальное значение.
             P_MAX_V,        ///< Максимальное значение.
 
@@ -132,7 +132,7 @@ class temperature_e_iolink : public AI1
 
 		enum class CONSTANTS
 			{
-			P_ERR_T = 1,                ///< Аварийное значение температуры.
+			P_ERR = 1,                ///< Аварийное значение температуры.
 
 			ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
 			};
@@ -194,7 +194,7 @@ class temperature_e_iolink_tm311 : public AI1
 
         enum class CONSTANTS
             {
-            P_ERR_T = 1,                ///< Аварийное значение температуры.
+            P_ERR = 1,                ///< Аварийное значение температуры.
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
             };
@@ -829,7 +829,7 @@ class wages : public analog_io_device, public i_wages
             {
             P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
             P_RKP = 2,          ///< Рабочий коэффициент передачи
-            P_C0 = 3,           ///< Коррекция нуля
+            P_CZ = 3,           ///< Коррекция нуля
             P_DT = 4,           ///< Коэффициент фильтра
 
             ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.

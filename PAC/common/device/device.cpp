@@ -1713,7 +1713,7 @@ temperature_e::temperature_e( const char* dev_name ) : AI1( dev_name, DT_TE, DST
     ADDITIONAL_PARAM_COUNT )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     param_emulator( 20, 2 );    //Average room temperature.
     }
 //-----------------------------------------------------------------------------
@@ -1722,12 +1722,12 @@ float temperature_e::get_value()
     if ( G_PAC_INFO()->is_emulator() )
         {
         float v = AI1::get_value();
-        return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : v;
+        return -1000 == v ? get_par( P_ERR, start_param_idx ) : v;
         }
     else
         {
         float v = get_AI( C_AI_INDEX, 0, 0 );
-        return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
+        return -1000 == v ? get_par( P_ERR, start_param_idx ) :
             get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
         }
     }
@@ -1737,7 +1737,7 @@ temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
     set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
     param_emulator( 20, 2 );    //Average room temperature.
@@ -1753,7 +1753,7 @@ float temperature_e_analog::get_value()
     float v = get_AI( C_AI_INDEX, 0, 0 );
     if ( v < 0 )
         {
-        return get_par( P_ERR_T, start_param_idx );
+        return get_par( P_ERR, start_param_idx );
         }
     else
         {
@@ -1769,8 +1769,8 @@ temperature_e_iolink::temperature_e_iolink( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
-        start_param_idx, "P_ERR_T" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR ),
+        start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
@@ -1779,7 +1779,7 @@ float temperature_e_iolink::get_value()
 
     if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR ),
             start_param_idx );
         }
     else
@@ -1820,8 +1820,8 @@ temperature_e_iolink_tm311::temperature_e_iolink_tm311( const char* dev_name ) :
     AI1( dev_name, DT_TE, DST_TE_IOLINK, static_cast<u_int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_T ),
-        start_param_idx, "P_ERR_T" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR ),
+        start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 float temperature_e_iolink_tm311::get_value()
@@ -1830,7 +1830,7 @@ float temperature_e_iolink_tm311::get_value()
 
     if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par( static_cast<u_int>( CONSTANTS::P_ERR_T ),
+        return get_par( static_cast<u_int>( CONSTANTS::P_ERR ),
             start_param_idx );
         }
     else
@@ -2235,13 +2235,13 @@ wages::wages( const char *dev_name ) : analog_io_device(
     {
     set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
     set_par_name( P_RKP, 0, "P_RKP");
-    set_par_name( P_C0, 0, "P_CZ" );
+    set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT");
     }
 //-----------------------------------------------------------------------------
 void wages::tare()
     {
-    set_par(P_C0, 0, -weight);
+    set_par(P_CZ, 0, -weight);
     return;
     }
 //-----------------------------------------------------------------------------
@@ -2266,12 +2266,12 @@ float wages::get_weight()
             weight = ceilf(weight);
             }
         }
-    return weight + get_par(P_C0, 0);
+    return weight + get_par(P_CZ, 0);
     }
 //-----------------------------------------------------------------------------
 float wages::get_value()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return weight + get_par(P_C0, 0);
+    if ( G_PAC_INFO()->is_emulator() ) return weight + get_par(P_CZ, 0);
 
     return get_weight();
     }
