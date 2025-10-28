@@ -482,7 +482,7 @@ set(LUA_BUSTED_PATH_FILES_CMD
 set(LUA_LIBRARIES_PATH "${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}")
 set(DEMO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo")
 set(LUA_T1_DEMO_EARGS_CMD
-    "\"package.path = package.path..'"
+    "package.path = package.path..'"
     "./?.lua"
     "${LUA_MODULES_PATH}/penlight/lua/?.lua"
     "${LUA_MODULES_PATH}/luasystem/luasystem/?/init.lua"
@@ -493,7 +493,7 @@ set(LUA_T1_DEMO_EARGS_CMD
     "${PROJECT_BINARY_DIR}/$<CONFIG>/?/init.lua"
     "${LUA_MODULES_PATH}/say/say/src/?/init.lua"
     "${LUA_MODULES_PATH}/dkjson/?.lua"
-    "${LUA_MODULES_PATH}/cliargs/src/?.lua'\"")
+    "${LUA_MODULES_PATH}/cliargs/src/?.lua'")
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
