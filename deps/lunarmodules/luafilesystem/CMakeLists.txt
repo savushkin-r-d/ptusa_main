@@ -8,6 +8,6 @@ target_sources(lfs PRIVATE $<$<C_COMPILER_ID:MSVC>:luafilesystem/src/lfs.def>)
 target_include_directories(lfs PRIVATE luafilesystem/src src/lib ${LUA_INCLUDE_DIR})
 target_link_libraries(lfs PRIVATE liblua)
 
-target_compile_definitions(lfs PRIVATE _CRT_SECURE_NO_WARNINGS)
+target_compile_definitions(lfs PRIVATE $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 
-set_target_properties (lfs PROPERTIES OUTPUT_NAME lfs PREFIX "")
+set_target_properties (lfs PROPERTIES PREFIX "")
