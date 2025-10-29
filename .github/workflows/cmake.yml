@@ -31,25 +31,26 @@ jobs:
     name: ${{ matrix.config.name }}
     if: >-
       ${{
-        github.repository == 'savushkin-r-d/ptusa_main' &&
-        (
+        github.repository == 'savushkin-r-d/ptusa_main' && 
+          (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
           github.event_name == 'merge_group' ||
-          (
-            github.event_name == 'pull_request_target' &&
-            github.event.pull_request.head.repo.full_name != github.repository &&
+          github.event_name == 'workflow_dispatch' || 
             (
+            github.event_name == 'pull_request_target' &&
+            github.event.pull_request.head.repo.full_name != github.repository && 
+              (
               contains(github.event.pull_request.labels.*.name, 'safe to test') ||
               github.event.pull_request.author_association == 'MEMBER' ||
               github.event.pull_request.author_association == 'OWNER'
-            )
-          ) ||
-          (
-            github.event_name == 'pull_request' &&
-            github.event.pull_request.head.repo.full_name == github.repository
+              )
+            ) || 
+              (
+              github.event_name == 'pull_request' &&
+              github.event.pull_request.head.repo.full_name == github.repository
+              )
           )
-        )
       }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -313,49 +314,6 @@ jobs:
           message(FATAL_ERROR "Build failed")
         endif()
         execute_process(COMMAND ccache -s)
-
-
-    # Install Lua
-    - name: Install Lua (Linux only)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y lua5.1
-
-
-    # Install LuaRocks
-    - name: Install LuaRocks on Linux
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y luarocks
-
-    - name: Install LuaRocks on Windows
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        choco install luarocks
-
-
-
-    # Install busted
-    - name: Install busted on Linux
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo luarocks install busted
-
-    - name: Install busted on Windows
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: |
-        call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
-        luarocks install penlight 1.13.1-1
-        luarocks install busted
-
 
     # Install valgrind
     - name: Install valgrind on Linux
