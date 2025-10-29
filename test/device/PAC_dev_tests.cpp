@@ -5274,11 +5274,12 @@ TEST( temperature_e_iolink, save_device )
     {
     temperature_e_iolink T1( "T1" );
     const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
+    std::array <char, BUFF_SIZE> buff = { 0 };
 
-    T1.save_device( buff, "" );
+    T1.save_device( buff.data(), "");
     EXPECT_STREQ(
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, P_ERR=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, P_ERR=0},\n",
+        buff.data() );
     }
 
 
