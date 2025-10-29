@@ -4948,6 +4948,11 @@ TEST( wages, get_weight )
     EXPECT_EQ( test_dev.get_weight(), 0 );
     DeltaMilliSecSubHooker::set_default_time();
 
+    test_dev.set_cmd( "P_CZ", 0, 2.f );
+    EXPECT_EQ( test_dev.get_weight(), 2.f );
+    test_dev.tare();
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+
     io_manager::replace_instance( prev_mngr );
     }
 
