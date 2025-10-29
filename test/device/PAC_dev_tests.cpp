@@ -780,9 +780,11 @@ void test_temperature( AI1* TE1 )
 
     *TE1->AI_channels.int_read_values[ 0 ] = -30001;
     EXPECT_EQ( TE1->get_state(), -4 );
-
     EXPECT_STREQ( TE1->get_error_description(), "вне диапазона" );
 
+    const auto ERR_VALUE = -2000.0f;
+    TE1->set_cmd( "P_ERR", 1, ERR_VALUE );
+    EXPECT_EQ( TE1->get_value(), ERR_VALUE );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
@@ -5240,12 +5242,14 @@ TEST( temperature_e, save_device )
 
     T1.save_device( buff, "" );
     EXPECT_STREQ(
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
+        buff );
 
     T1.set_cmd( "E", 0, 1 );
     T1.save_device( buff, "" );
     EXPECT_STRNE(
-        "T1={M=0, ST=1, V=0, E=1, P_CZ=0, P_ERR=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=1, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
+        buff );
     }
 
 TEST( temperature_e, get_type_name )
