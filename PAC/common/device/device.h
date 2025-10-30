@@ -1754,6 +1754,11 @@ class power_unit : public analog_io_device
         /// Синхронизация выходной области на основе данных из входной области.
         void sync_pdout();
 
+        /// Декодирование 3-битного кода номинального тока в значение в амперах.
+        /// @param code 3-битный код (0-7).
+        /// @return Номинальный ток в амперах.
+        static float decode_nominal_current( uint8_t code );
+
         float v = .0f;  // Sum of output currents.
         int st = 0;     // Status - хотя бы один из каналов активен.
         int err = 0;    // DC status.

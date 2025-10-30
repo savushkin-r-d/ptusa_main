@@ -12,3 +12,4 @@ CMakeSettings.json
 nvram.txt
 
 Debug
+_codeql_build_dir/
