@@ -14,7 +14,6 @@ constexpr unsigned char kB = 0xDE;
 constexpr unsigned char kC = 0x68;
 constexpr unsigned char kD = 0xB1;
 
-
 // Вспомогательные функции для преобразования.
 static int_4 from_bytes( unsigned char b0, unsigned char b1,
     unsigned char b2, unsigned char b3 )
