@@ -179,7 +179,8 @@ plcncli.exe install sdk -d C:\CLI\sdks\AXCF2152\2022_0 \ -p pxc-glibc-x86_64-min
 Документация по поддерживаемым устройствам находится в каталоге [docs/devices](../devices/).
 
 Документированные устройства:
-- [TM311](../devices/TM311.md) - Датчик температуры Endress+Hauser TM311 IO-Link
+- [TM311](../devices/TM311.md) - Датчик температуры Endress+Hauser TM311 IO-Link (техническая документация)
+- [TM311 - Руководство пользователя](../devices/TM311_user_guide.md) - Руководство для инженеров АСУТП
 
 ### Другая документация ###
 

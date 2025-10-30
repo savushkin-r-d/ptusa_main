@@ -186,7 +186,8 @@ To run demo project you should use this command line:
 Documentation for supported devices can be found in the [docs/devices](docs/devices/) directory.
 
 Currently documented devices:
-- [TM311](docs/devices/TM311.md) - Endress+Hauser TM311 IO-Link Temperature Sensor
+- [TM311](docs/devices/TM311.md) - Endress+Hauser TM311 IO-Link Temperature Sensor (Technical Documentation)
+- [TM311 User Guide](docs/devices/TM311_user_guide.md) - User Guide for APCS Engineers (in Russian)
 
 ### Other Documentation ###
 
