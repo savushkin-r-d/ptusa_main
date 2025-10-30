@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../Release/libsubhook.a CMakeFiles/subhook.dir/subhook.c.o CMakeFiles/subhook.dir/subhook_x86.c.o CMakeFiles/subhook.dir/subhook_unix.c.o
+/usr/bin/ranlib ../../../Release/libsubhook.a
