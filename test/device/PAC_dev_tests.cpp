@@ -780,9 +780,11 @@ void test_temperature( AI1* TE1 )
 
     *TE1->AI_channels.int_read_values[ 0 ] = -30001;
     EXPECT_EQ( TE1->get_state(), -4 );
-
     EXPECT_STREQ( TE1->get_error_description(), "вне диапазона" );
 
+    const auto ERR_VALUE = -2000.0f;
+    TE1->set_cmd( "P_ERR", 1, ERR_VALUE );
+    EXPECT_EQ( TE1->get_value(), ERR_VALUE );
 
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
@@ -820,7 +822,7 @@ TEST_F( iolink_dev_test, temperature_e_iolink_get_value )
 
     init_channels( TE1 );
     auto err_value = -100.f;
-    TE1.set_par( static_cast<u_int> ( temperature_e_iolink::CONSTANTS::P_ERR_T ),
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink::CONSTANTS::P_ERR ),
         TE1.start_param_idx, err_value );
     // Есть привязка к модулям ввода/вывода - должны получить аварийное
     // значение.
@@ -867,7 +869,7 @@ TEST_F( iolink_dev_test, temperature_e_iolink_tm311_get_value )
 
     init_channels( TE1 );
     auto err_value = -100.f;
-    TE1.set_par( static_cast<u_int> ( temperature_e_iolink_tm311::CONSTANTS::P_ERR_T ),
+    TE1.set_par( static_cast<u_int> ( temperature_e_iolink_tm311::CONSTANTS::P_ERR ),
         TE1.start_param_idx, err_value );
     // Есть привязка к модулям ввода/вывода - должны получить аварийное
     // значение.
@@ -1368,7 +1370,7 @@ TEST( device, save_device )
     t1.save_device( buff, "" );
     EXPECT_STREQ( 
         "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, "
-        "P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+        "P_ERR=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
 TEST( device, set_article )
@@ -4946,6 +4948,11 @@ TEST( wages, get_weight )
     EXPECT_EQ( test_dev.get_weight(), 0 );
     DeltaMilliSecSubHooker::set_default_time();
 
+    test_dev.set_cmd( "P_CZ", 0, 2.f );
+    EXPECT_EQ( test_dev.get_weight(), 2.f );
+    test_dev.tare();
+    EXPECT_EQ( test_dev.get_weight(), 0 );
+
     io_manager::replace_instance( prev_mngr );
     }
 
@@ -5240,12 +5247,14 @@ TEST( temperature_e, save_device )
 
     T1.save_device( buff, "" );
     EXPECT_STREQ(
-        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
+        buff );
 
     T1.set_cmd( "E", 0, 1 );
     T1.save_device( buff, "" );
     EXPECT_STRNE(
-        "T1={M=0, ST=1, V=0, E=1, P_CZ=0, P_ERR_T=0},\n", buff );
+        "T1={M=0, ST=1, V=0, E=1, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
+        buff );
     }
 
 TEST( temperature_e, get_type_name )
@@ -5258,6 +5267,19 @@ TEST( temperature_e, get_state )
     {
     temperature_e TE1( "test_TE1" );
     test_temperature( &TE1 );
+    }
+
+
+TEST( temperature_e_iolink, save_device )
+    {
+    temperature_e_iolink T1( "T1" );
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff = { 0 };
+
+    T1.save_device( buff.data(), "");
+    EXPECT_STREQ(
+        "T1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, P_ERR=0},\n",
+        buff.data() );
     }
 
 
@@ -6158,6 +6180,7 @@ TEST( converter_iolink_ao, save_device_ex )
     EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,21.50}},\n" );
     }
+
 
 TEST_F( iolink_dev_test, converter_iolink_ao_evaluate_io )
     {

@@ -132,7 +132,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
     char buff[ BUFF_SIZE ] = { 0 };
     TE1->save_device( buff, "" );
     EXPECT_STREQ(
-        "TE1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR_T=0},\n",
+        "TE1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
         buff );
 
     //Некорректные параметры при вызове метода.
@@ -141,7 +141,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
     ASSERT_EQ( 0, luaL_dostring( L, "TE1:param_emulator( 50, 5 )" ) );
     TE1->save_device( buff, "" );
     EXPECT_STREQ(
-        "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR_T=0},\n",
+        "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR=0},\n",
         buff );
 
     G_DEVICE_MANAGER()->clear_io_devices();
