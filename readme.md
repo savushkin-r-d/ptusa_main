@@ -17,6 +17,7 @@ Program **``ptusa_main``** directly controls technological process.
 3. [How to build the project](#how-to-build-the-project )
 4. [Using PLCnext Technology C++ Toolchain in Windows](#using-plcnext-technology-c-toolchain-in-windows)
 5. [How to run a project](#how-to-run-a-project)
+6. [Documentation](#documentation)
 
 ## General system architecture ##
 
@@ -177,3 +178,19 @@ To run demo project you should use this command line:
 ```
 
 + Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
+
+## Documentation ##
+
+### Device Documentation ###
+
+Documentation for supported devices can be found in the [docs/devices](docs/devices/) directory.
+
+Currently documented devices:
+- [TM311](docs/devices/TM311.md) - Endress+Hauser TM311 IO-Link Temperature Sensor (Technical Documentation)
+- [TM311 User Guide](docs/devices/TM311_user_guide.md) - User Guide for APCS Engineers (in Russian)
+
+### Other Documentation ###
+
+- [Testing Strategy](docs/test/readme.md) - Information about testing approach
+- [Code Style Guide](docs/style.md) - Coding standards and conventions
+- [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute to the project
