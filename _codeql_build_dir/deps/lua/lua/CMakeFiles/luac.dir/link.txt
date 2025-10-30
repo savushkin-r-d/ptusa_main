@@ -1,1 +1,0 @@
-/home/runner/work/ptusa_main/.codeql-scratch/dbs/cpp/working/autobuild/bin/cc  -fPIC -O3 -DNDEBUG -rdynamic -Wl,--dependency-file=CMakeFiles/luac.dir/link.d CMakeFiles/luac.dir/src/luac.c.o CMakeFiles/luac.dir/src/print.c.o -o ../../../Release/luac  -Wl,-rpath,:::::::::::::: ../../../Release/libliblua_static.a -lm -Wl,-Bstatic -ldl -Wl,-Bdynamic -lcurses

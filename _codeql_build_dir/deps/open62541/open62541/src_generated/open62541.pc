@@ -1,9 +1,0 @@
-libdir=/usr/local/lib
-sharedlibdir=${libdir}
-includedir=/usr/local/include
-
-Name: open62541
-Description: open62541 is an open source C (C99) implementation of OPC UA
-Version: 1.4.13
-Libs: -L${libdir} -lopen62541 -lpthread 
-Cflags: -I${includedir} 
