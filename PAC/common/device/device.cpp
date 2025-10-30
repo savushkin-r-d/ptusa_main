@@ -775,14 +775,38 @@ void power_unit::sync_pdout()
     p_data_out->nominal_current_ch8 = p_data_in.nominal_current_ch8;
     }
 //-----------------------------------------------------------------------------
+float power_unit::decode_nominal_current( uint8_t code )
+    {
+    // Декодирование 3-битного кода номинального тока согласно спецификации IO-Link
+    // для блоков питания (например, Phoenix Contact QUINT POWER).
+    // code: 0-7 (3 бита)
+    // Возвращаемое значение: номинальный ток в амперах.
+    switch ( code )
+        {
+        case 0: return 0.0f;    // Канал отключен
+        case 1: return 2.0f;    // 2A
+        case 2: return 3.8f;    // 3.8A
+        case 3: return 4.0f;    // 4A
+        case 4: return 6.0f;    // 6A
+        case 5: return 8.0f;    // 8A
+        case 6: return 10.0f;   // 10A
+        case 7: return 0.0f;    // Зарезервировано
+        default: return 0.0f;
+        }
+    }
+//-----------------------------------------------------------------------------
 int power_unit::save_device_ex( char* buff )
     {
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE,
-        "NOMINAL_CURRENT_CH={{{},{},{},{},{},{},{},{}}}, ",
-        +p_data_in.nominal_current_ch1, +p_data_in.nominal_current_ch2,
-        +p_data_in.nominal_current_ch3, +p_data_in.nominal_current_ch4,
-        +p_data_in.nominal_current_ch5, +p_data_in.nominal_current_ch6,
-        +p_data_in.nominal_current_ch7, +p_data_in.nominal_current_ch8 );
+        "NOMINAL_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
+        decode_nominal_current( p_data_in.nominal_current_ch1 ),
+        decode_nominal_current( p_data_in.nominal_current_ch2 ),
+        decode_nominal_current( p_data_in.nominal_current_ch3 ),
+        decode_nominal_current( p_data_in.nominal_current_ch4 ),
+        decode_nominal_current( p_data_in.nominal_current_ch5 ),
+        decode_nominal_current( p_data_in.nominal_current_ch6 ),
+        decode_nominal_current( p_data_in.nominal_current_ch7 ),
+        decode_nominal_current( p_data_in.nominal_current_ch8 ) );
     auto size = static_cast<int>( res.size );
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
