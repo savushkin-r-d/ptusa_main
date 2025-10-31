@@ -490,6 +490,8 @@ TEST( operation_state, to_step )
     test_tank.par_float[ MAX_TIME_IDX ] = 1;
     test_op->add_step( "Init" );
     test_op->add_step( "Process #1", -1, -1, MAX_TIME_IDX );
+    const auto STEP1 = 1;
+    const auto STEP2 = 2;
 
     G_DEBUG = 1;
     //Корректный переход к заданному шагу.
@@ -505,10 +507,10 @@ R"("Шаг операции"
     test_op->start();
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( STR_STEP1, output );
-    EXPECT_EQ( 1, test_op->active_step() );
+    EXPECT_EQ( STEP1, test_op->active_step() );
     test_op->evaluate();
     testing::internal::CaptureStdout();
-    test_op->to_step( 2 );
+    test_op->to_step( STEP2 );
     output = testing::internal::GetCapturedStdout();
     auto STR_STEP2 =
 R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, max step time 1 s
@@ -516,10 +518,23 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
  { }
 )";
     EXPECT_EQ( STR_STEP2, output );
-    EXPECT_EQ( 2, test_op->active_step() );        
+    EXPECT_EQ( STEP2, test_op->active_step() );
     G_DEBUG = 0;
 
+    //Шаг должен отключиться через заданное время.
+    G_DEBUG = 1;
+    const auto DELAY_1000MS = 1000UL;
+    test_op->to_step( STEP1, DELAY_1000MS );
+    test_op->evaluate();
+    EXPECT_EQ( test_op->active_step(), STEP1 );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
+    DeltaMilliSecSubHooker::set_millisec( DELAY_1000MS + 1 );
+    test_op->evaluate();
+    EXPECT_EQ( test_op->active_step(), STEP1 );
+    EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
+    G_DEBUG = 0;
 
+    DeltaMilliSecSubHooker::set_default_time();
     G_LUA_MANAGER->free_Lua();
     }
 
