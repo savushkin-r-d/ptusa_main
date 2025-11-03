@@ -486,12 +486,16 @@ TEST( operation_state, to_step )
     tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
     auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
-    const auto MAX_TIME_IDX = 1;
-    test_tank.par_float[ MAX_TIME_IDX ] = 1;
-    test_op->add_step( "Init" );
-    test_op->add_step( "Process #1", -1, -1, MAX_TIME_IDX );
     const auto STEP1 = 1;
     const auto STEP2 = 2;
+    const auto STEP3 = 3;
+    const auto MAX_TIME_IDX = 1;
+    test_tank.par_float[ MAX_TIME_IDX ] = 1;
+    const auto STEP2_TIME_IDX = 2;
+    test_tank.par_float[ STEP2_TIME_IDX ] = 10;
+    test_op->add_step( "Init" );
+    test_op->add_step( "Process #1", STEP3, STEP2_TIME_IDX, MAX_TIME_IDX );
+    test_op->add_step( "Process #2" );
 
     G_DEBUG = 1;
     //Корректный переход к заданному шагу.
@@ -513,7 +517,7 @@ R"("Шаг операции"
     test_op->to_step( STEP2 );
     output = testing::internal::GetCapturedStdout();
     auto STR_STEP2 =
-R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, max step time 1 s
+R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3, max step time 1 s
 "Process #1"
  { }
 )";
@@ -521,9 +525,8 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     EXPECT_EQ( STEP2, test_op->active_step() );
     G_DEBUG = 0;
 
-    //Шаг должен отключиться через заданное время.
-    G_DEBUG = 1;
-    const auto DELAY_1000MS = 1000UL;
+    //Шаг 2 должен отключиться через заданное время.
+    const auto DELAY_1000MS = 1'000UL;
     test_op->to_step( STEP1, DELAY_1000MS );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
@@ -532,9 +535,24 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
-    G_DEBUG = 0;
-
     DeltaMilliSecSubHooker::set_default_time();
+
+    //Шаг 2 должен отключиться через заданное время и остаться активным.
+    test_op->to_step( STEP2 );
+    const auto COOPERATE_TIME_IDX = 3;
+    test_tank.par_float[ COOPERATE_TIME_IDX ] = 1'000;
+    test_op->set_step_cooperate_time_par_n( COOPERATE_TIME_IDX );
+    test_op->evaluate();
+    EXPECT_EQ( test_op->active_step(), STEP2 );
+    DeltaMilliSecSubHooker::set_millisec( 1000UL *
+        static_cast<unsigned long>( test_tank.par_float[ STEP2_TIME_IDX ] + 1 ) );
+    test_op->evaluate();
+    EXPECT_EQ( test_op->active_step(), STEP3 );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
+    test_op->evaluate();
+    EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
+    DeltaMilliSecSubHooker::set_default_time();
+
     G_LUA_MANAGER->free_Lua();
     }
 
