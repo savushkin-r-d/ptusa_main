@@ -645,9 +645,6 @@ class operation_state
         /// @brief Номера параметров максимального времени шагов.
         std::vector< int > step_max_duration_par_ns;
 
-        /// @brief Номера параметров переходного времени шагов.
-        std::vector< int > step_cooperation_par_ns;
-
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
@@ -662,7 +659,7 @@ class operation_state
 
 
         /// Номер параметра совместного времени выполнения шагов.
-        int step_cooperate_time_par_n;
+        int step_cooperate_time_par_n{ -1 };
 
     public:
         /// Добавление времени выполнения активного шага при возобновлении
