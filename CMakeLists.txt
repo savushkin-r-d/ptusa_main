@@ -90,6 +90,8 @@ add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
+add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
