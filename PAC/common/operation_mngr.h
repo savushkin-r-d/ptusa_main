@@ -627,6 +627,7 @@ class operation_state
 
         bool is_goto_next_state( int& next_state ) const;
 
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
     private:
         std::string name;
         std::vector< step* > steps;
@@ -658,6 +659,10 @@ class operation_state
 
         /// Время выполнения активного шага, для возобновления после паузы.
         u_int_4 dx_step_time;
+
+
+        /// Номер параметра совместного времени выполнения шагов.
+        int step_cooperate_time_par_n;
 
     public:
         /// Добавление времени выполнения активного шага при возобновлении
@@ -893,6 +898,11 @@ class operation
 #ifndef __GNUC__
 #pragma endregion
 #endif
+
+
+        /// @brief Установка номера параметра со временем переходного
+        /// переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
     private:
         int process_auto_switch_on();

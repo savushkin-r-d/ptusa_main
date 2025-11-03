@@ -1185,7 +1185,9 @@ class operation
             int step_duration_par_n, int step_max_duration_par_n,
             state_idx s_idx = RUN );
 
-    public:
+        /// @brief Установка номера параметра со временем переходного
+        /// переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
         state_idx get_state() const;
     };

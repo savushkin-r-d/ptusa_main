@@ -547,6 +547,11 @@ bool operation::is_active_extra_step( int step_idx ) const
     return false;
     }
 //-----------------------------------------------------------------------------
+void operation::set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
+    {
+    states[ RUN ]->set_step_cooperate_time_par_n( step_cooperate_time_par_n );
+    }
+//-----------------------------------------------------------------------------
 int operation::switch_active_extra_step( int off_step, int on_step )
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
@@ -2180,7 +2185,15 @@ void operation_state::evaluate()
                 }
             else
                 {
-                to_step( active_step_next_step_n, 0 );
+                auto step_switch_time = 0UL;
+                if ( step_cooperate_time_par_n > 0 &&
+                    owner->get_step_param( step_cooperate_time_par_n ) > 0 )
+                    {
+                    step_switch_time = (u_long)
+                        owner->get_step_param( step_cooperate_time_par_n );
+                    }
+
+                to_step( active_step_next_step_n, step_switch_time );
                 }
 
             return;
@@ -2312,9 +2325,11 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     if ( G_DEBUG )
         {        
-        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, step time {} ms, next step {})",
+        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, )"
+            R"(step time {} ms, next step {})",
             owner->owner->get_prefix(), owner->owner->get_name(),
-            n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
+            n, name.c_str(), new_step, active_step_time,
+            active_step_next_step_n );
 
         active_step_max_time = 0;
         if ( auto max_t_par_n = step_max_duration_par_ns[active_step_n];
@@ -2326,6 +2341,11 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
                 fmt::print( ", max step time {} s", active_step_max_time );
                 }
             }
+        if ( cooperative_time )
+            {
+            fmt::print( ", cooperative time {} ms", cooperative_time );
+            }
+
         fmt::println( "" );
 
         steps[ active_step_n ]->print( owner->owner->get_prefix() );
@@ -2515,6 +2535,12 @@ bool operation_state::is_goto_next_state( int& next_state ) const
     auto action = ( *mode_step )[ step::A_JUMP_IF ];
     auto to_new_state = static_cast<jump_if_action*>( action );
     return to_new_state->is_jump( next_state );
+    }
+//-----------------------------------------------------------------------------
+void operation_state::set_step_cooperate_time_par_n(
+    int step_cooperate_time_par_n )
+    {
+    this->step_cooperate_time_par_n = step_cooperate_time_par_n;
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()
