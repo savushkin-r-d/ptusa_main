@@ -2329,11 +2329,18 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     if ( G_DEBUG )
         {        
-        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, )"
-            R"(step time {} ms, next step {})",
+        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {})",
             owner->owner->get_prefix(), owner->owner->get_name(),
-            operation_number, name.c_str(), new_step, active_step_time,
-            active_step_next_step_n );
+            operation_number, name.c_str(), new_step );
+
+        if ( active_step_time > 0 )
+            {
+            fmt::print( ", step time {} ms", active_step_time );
+            }
+        if ( active_step_next_step_n > 0 )
+            {
+            fmt::print( ", next step {}", active_step_next_step_n );
+            }
 
         active_step_max_time = 0;
         if ( auto max_t_par_n = step_max_duration_par_ns[active_step_n];

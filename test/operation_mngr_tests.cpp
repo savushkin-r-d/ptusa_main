@@ -428,7 +428,7 @@ TEST( operation_state, to_step )
     auto STR_STEP1 =
 R"("Шаг операции"
  { }
-"Танк1" operation 1 "RUN" to_step() -> 1, step time 0 ms, next step -1
+"Танк1" operation 1 "RUN" to_step() -> 1
 "Init"
  { }
 )";
