@@ -2109,9 +2109,8 @@ void operation_state::evaluate()
     //Process action "enable_step_by_signal".
     size_t idx = 0;
     while ( idx < active_steps.size() )
-        {
-        size_t step_n = active_steps[ idx ] - 1;
-        if ( step_n < steps.size() )
+        {        
+        if ( size_t step_n = active_steps[ idx ] - 1; step_n < steps.size() )
             {
             steps[ step_n ]->evaluate();
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
@@ -2120,7 +2119,7 @@ void operation_state::evaluate()
                 !enable_action->is_any_group_active() &&
                 enable_action->should_turn_off() )
                 {
-                off_extra_step( step_n + 1 );
+                off_extra_step( static_cast<int>( step_n + 1 ) );
                 continue;
                 }
 
@@ -2128,23 +2127,23 @@ void operation_state::evaluate()
             auto start_t = active_steps_start_time[ idx ];
             if ( duration > 0 && get_delta_millisec( start_t ) > duration )
                 {
-                off_extra_step( step_n + 1 );
+                off_extra_step( static_cast<int>( step_n + 1 ) );
                 continue;
                 }
             }
 
         idx++;
         }
-    for ( size_t idx = 0; idx < steps.size(); idx++ )
+    for ( size_t i = 0; idx < steps.size(); i++ )
         {
-        if ( !is_active_extra_step( idx + 1 ) )
+        if ( !is_active_extra_step( i + 1 ) )
             {
-            auto step = steps[ idx ];
-            auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && enable_action->is_any_group_active() )
+            auto step = steps[ i ];            
+            if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                enable_action && enable_action->is_any_group_active() )
                 {
-                on_extra_step( idx + 1 );
+                on_extra_step( i + 1 );
                 }
             }
         }
@@ -2605,7 +2604,7 @@ void operation_state::save()
         {        
         if ( auto duration = active_steps_duration[ idx ]; duration > 0 )
             {
-            off_extra_step( idx + 1 );
+            off_extra_step( static_cast<int>( idx + 1 ) );
             }
         else
             {
