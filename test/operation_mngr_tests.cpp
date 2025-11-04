@@ -1200,6 +1200,40 @@ TEST( operation, evaluate_and_enable_step_by_signal )
     G_LUA_MANAGER->free_Lua();
     }
 
+TEST( operation, evaluate_off_last_step )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 1, 1, 1 );
+    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+    G_DEBUG = 1;
+    test_op->add_step( "Тестовый шаг 1", -1, -1 );
+    const int DELAY_TIME_S = 10;
+    const int DELAY_PARAM_IDX = 2;
+    test_tank.par_float[ DELAY_PARAM_IDX ] = DELAY_TIME_S;
+    auto step2 = test_op->add_step( "Тестовый шаг 2", -1, DELAY_PARAM_IDX );
+    const auto STEP2 = 2;
+
+    test_tank.set_mode( 1, operation::RUN );
+    test_op->to_step( STEP2 );
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    EXPECT_TRUE( step2->is_active() );
+
+    //Прошло заданное время, операция должна отключиться.
+    DeltaMilliSecSubHooker::set_millisec( 1000UL * DELAY_TIME_S + 1 );
+    test_op->evaluate();    
+    EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+    G_DEBUG = 0;
+    test_op->finalize();
+    DeltaMilliSecSubHooker::set_default_time();
+    G_LUA_MANAGER->free_Lua();
+    }
+
 
 /*
 	TEST METHOD DEFENITION:
