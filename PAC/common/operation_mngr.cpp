@@ -2113,9 +2113,9 @@ void operation_state::evaluate()
         if ( size_t step_n = active_steps[ idx ] - 1; step_n < steps.size() )
             {
             steps[ step_n ]->evaluate();
-            auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && !enable_action->is_empty() &&
+            if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                enable_action && !enable_action->is_empty() &&
                 !enable_action->is_any_group_active() &&
                 enable_action->should_turn_off() )
                 {
@@ -2136,14 +2136,14 @@ void operation_state::evaluate()
         }
     for ( size_t i = 0; i < steps.size(); i++ )
         {
-        if ( !is_active_extra_step( i + 1 ) )
+        if ( !is_active_extra_step( static_cast<int>( i ) + 1 ) )
             {
             auto step = steps[ i ];            
             if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
                 ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
                 enable_action && enable_action->is_any_group_active() )
                 {
-                on_extra_step( i + 1 );
+                on_extra_step( static_cast<int>( i ) + 1 );
                 }
             }
         }
@@ -2191,8 +2191,8 @@ void operation_state::evaluate()
                 if ( step_cooperate_time_par_n > 0 &&
                     owner->get_step_param( step_cooperate_time_par_n ) > 0 )
                     {
-                    step_switch_time = (u_long)
-                        owner->get_step_param( step_cooperate_time_par_n );
+                    step_switch_time = static_cast<u_long>
+                        ( owner->get_step_param( step_cooperate_time_par_n ) );
                     }
 
                 to_step( active_step_next_step_n, step_switch_time );
@@ -2691,7 +2691,7 @@ int operation_state::off_extra_step( int step_idx )
     if ( auto res = std::find(active_steps.begin(), active_steps.end(), step_idx); 
         res != active_steps.end() )
         {
-        auto pos = distance( active_steps.begin(), res );
+        auto pos = std::distance( active_steps.begin(), res );
         steps[ step_idx - 1 ]->finalize();
         active_steps.erase( res );
         active_steps_duration.erase( active_steps_duration.begin() + pos );
