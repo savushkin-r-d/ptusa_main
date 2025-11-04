@@ -2134,7 +2134,7 @@ void operation_state::evaluate()
 
         idx++;
         }
-    for ( size_t i = 0; idx < steps.size(); i++ )
+    for ( size_t i = 0; i < steps.size(); i++ )
         {
         if ( !is_active_extra_step( i + 1 ) )
             {
