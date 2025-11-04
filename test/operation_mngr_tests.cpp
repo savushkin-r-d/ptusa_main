@@ -450,7 +450,8 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_EQ( STEP2, test_op->active_step() );
     G_DEBUG = 0;
 
-    //Шаг 2 должен отключиться через заданное время.
+    // Шаг 2 должен отключиться через заданное время, так как переходим к 
+    // шагу 1 с задержкой.
     const auto DELAY_1000MS = 1'000UL;
     test_op->to_step( STEP1, DELAY_1000MS );
     test_op->evaluate();
@@ -462,7 +463,9 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
     DeltaMilliSecSubHooker::set_default_time();
 
-    //Шаг 2 должен отключиться через заданное время и остаться активным.
+    // Шаг 2 должен отключиться через заданное время, так как переходим к
+    // шагу 3 по времени. Так как установлен параметр для времени задержки,
+    // то шаг 2 должен быть активен данное время как дополнительный шаг.
     G_DEBUG = 1;
     test_op->to_step( STEP2 );
     const auto COOPERATE_TIME_IDX = 3;
@@ -479,6 +482,19 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
     DeltaMilliSecSubHooker::set_default_time();
     G_DEBUG = 0;
+
+    // Шаг 3 должен отключиться через заданное время, так как переходим к
+    // шагу 2 по времени.
+    test_op->to_step( STEP2, DELAY_1000MS );
+    test_op->evaluate();
+    EXPECT_EQ( test_op->active_step(), STEP2 );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP3 ) );
+
+    test_op->pause();
+    test_op->start();
+    test_op->evaluate();
+    EXPECT_FALSE( test_op->is_active_run_extra_step( STEP3 ) );
+
 
     G_LUA_MANAGER->free_Lua();
     }
