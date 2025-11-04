@@ -1158,7 +1158,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	G_LUA_MANAGER->free_Lua();
 	}
 
-TEST( operation, evaluate_and_enable_step_by_signal )
+TEST( operation, evaluate_enable_step_by_signal )
     {
     lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
@@ -1194,6 +1194,12 @@ TEST( operation, evaluate_and_enable_step_by_signal )
     test_op->evaluate();
     EXPECT_EQ( operation::RUN, test_op->get_state() );
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
+
+    //Сигнал активен, шаг должен включиться.
+    test_DI_one.on();
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
 
     test_op->finalize();
 
