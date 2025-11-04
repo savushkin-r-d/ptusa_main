@@ -627,7 +627,7 @@ class operation_state
 
         bool is_goto_next_state( int& next_state ) const;
 
-        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_number );
     private:
         std::string name;
         std::vector< step* > steps;
@@ -652,7 +652,7 @@ class operation_state
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
-        int n;              /// Номер.
+        int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
         u_int_4 dx_step_time;

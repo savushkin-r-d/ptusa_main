@@ -538,6 +538,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     DeltaMilliSecSubHooker::set_default_time();
 
     //Шаг 2 должен отключиться через заданное время и остаться активным.
+    G_DEBUG = 1;
     test_op->to_step( STEP2 );
     const auto COOPERATE_TIME_IDX = 3;
     test_tank.par_float[ COOPERATE_TIME_IDX ] = 1'000;
@@ -552,6 +553,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     test_op->evaluate();
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
     DeltaMilliSecSubHooker::set_default_time();
+    G_DEBUG = 0;
 
     G_LUA_MANAGER->free_Lua();
     }
@@ -1314,6 +1316,62 @@ TEST( operation, evaluate_from_run_to_pause )
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
+
+TEST( operation, evaluate_and_enable_step_by_signal )
+    {
+    char* res = 0;
+    mock_params_manager* par_mock = new mock_params_manager();
+    test_params_manager::replaceEntity( par_mock );
+
+    EXPECT_CALL( *par_mock, init( _ ) );
+    EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+        .Times( AtLeast( 2 ) )
+        .WillRepeatedly( Return( res ) );
+
+    par_mock->init( 0 );
+    par_mock->final_init( 0, 0, 0 );
+
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+    auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+    test_op->add_step( "Тестовый шаг 1", -1, -1 );
+    auto step2 = test_op->add_step( "Тестовый шаг 2", -1, -1 );
+    const auto STEP2 = 2;
+    auto action = reinterpret_cast<enable_step_by_signal*>( 
+        ( *step2 )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
+    DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+    test_op->start();
+    test_op->on_extra_step( STEP2 );
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
+
+    //Сигнал активен, шаг не должен отключиться.
+    action->add_dev( &test_DI_one );
+    action->set_bool_property( "should_turn_off", true );
+    test_DI_one.on();
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
+
+    //Сигнал не активен, шаг должен отключиться.
+    test_DI_one.off();
+    test_op->evaluate();
+    EXPECT_EQ( operation::RUN, test_op->get_state() );
+    EXPECT_FALSE( test_op->is_active_run_extra_step( STEP2 ) );
+
+    test_op->finalize();
+
+    G_LUA_MANAGER->free_Lua();
+    test_params_manager::removeObject();
+    }
 
 
 /*
