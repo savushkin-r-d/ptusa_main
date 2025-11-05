@@ -5917,7 +5917,7 @@ TEST( power_unit, decode_nominal_current )
     {
     // Test case from issue: verify that nominal current codes are decoded correctly
     const int BUFF_SIZE = 1000;
-    char str_buff[ BUFF_SIZE ] = { 0 };
+    std::array<char, BUFF_SIZE> str_buff = { 0 };
     power_unit G1( "G1" );
     G1.init( 0, 0, 1, 1 );
     G1.AO_channels.int_write_values[ 0 ] = new int_2[ 7 ]{ 0 };
@@ -5930,12 +5930,12 @@ TEST( power_unit, decode_nominal_current )
     // Ch4: code=3 (should show 4.0A)
     
     // Nominal current ch1=5, ch2=1
-    G1.AI_channels.int_read_values[ 0 ][ 3 ] = 0b0'0101'001;  // ch1=5, ch2=1
+    G1.AI_channels.int_read_values[ 0 ][ 3 ] = 0b00'101'001;  // ch1=5, ch2=1
     // Nominal current ch3=2, ch4=3
-    G1.AI_channels.int_read_values[ 0 ][ 3 ] |= (0b0'0010'011 << 8);  // ch3=2, ch4=3
+    G1.AI_channels.int_read_values[ 0 ][ 3 ] |= (0b00'010'011 << 8);  // ch3=2, ch4=3
     
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff.data(), "");
     
     // Verify the decoded values match expectations
     EXPECT_STREQ(
@@ -5943,7 +5943,7 @@ TEST( power_unit, decode_nominal_current )
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
         "ST_CH={0,0,0,0,0,0,0,0}, "
         "SUM_CURRENTS=0.0, VOLTAGE=0.0, OUT_POWER_90=0, ERR=0},\n",
-        str_buff );
+        str_buff.data() );
     }
 
 
