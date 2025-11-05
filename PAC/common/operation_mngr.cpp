@@ -2611,7 +2611,7 @@ void operation_state::save()
         {        
         if ( auto duration = active_steps_duration[ idx ]; duration > 0 )
             {
-            off_extra_step( static_cast<int>( active_steps[ idx ] ) );
+            off_extra_step( active_steps[ idx ] );
             }
         else
             {
