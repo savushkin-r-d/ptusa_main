@@ -67,6 +67,13 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
+    //const char* operation_state::get_name() const
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:get_name()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_STREQ( "RUN", tolua_tostring( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
     
     lua_close( L );
     }

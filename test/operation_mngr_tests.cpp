@@ -523,6 +523,16 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 0 ms, next step -1, m
     G_LUA_MANAGER->free_Lua();
     }
 
+TEST( operation_state, get_name )
+	{
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ operation::RUN ];
+	EXPECT_STREQ( "RUN", operation_state->get_name() );
+	}
+
 TEST( operation, add_step )
 	{
 	tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
