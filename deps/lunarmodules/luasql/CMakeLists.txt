@@ -25,10 +25,7 @@ function(add_luasql_driver driver)
     add_library(luasql_${driver} ${SOURCES})
 
     if(MSVC)
-        # DEF-файл под MSVC: src/<driver>.def
-        target_link_options(luasql_${driver} PRIVATE
-            /DEF:"${LUASQL_SRC_DIR}/${driver}.def"
-        )
+        set_target_properties(luasql_${driver} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
     endif()
 
     target_include_directories(luasql_${driver} PRIVATE
