@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 
 # Драйверы LuaSQL для сборки (совпадают с именами файлов ls_<driver>.c и <driver>.def)
-set(LUASQL_DRIVERS "postgres" CACHE STRING "LuaSQL drivers to build (e.g. 'odbc;sqlite3;mysql;postgres;firebird')")
+set(LUASQL_DRIVERS "odbc" CACHE STRING "LuaSQL drivers to build (e.g. 'odbc;sqlite3;mysql;postgres;firebird')")
 
 # Общие настройки путей.
 set(LUASQL_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/luasql/src")
+
+add_compile_definitions(LUASQL_VERSION_NUMBER=\"2.7.1\")
 
 # Вспомогательная функция для добавления драйвера.
 function(add_luasql_driver driver)
@@ -25,7 +27,7 @@ function(add_luasql_driver driver)
     if(MSVC)
         # DEF-файл под MSVC: src/<driver>.def
         target_link_options(luasql_${driver} PRIVATE
-            /DEF:"${LUASQL_SRC_DIR}/${driver}.def">
+            /DEF:"${LUASQL_SRC_DIR}/${driver}.def"
         )
     endif()
 
@@ -40,12 +42,7 @@ function(add_luasql_driver driver)
         if(WIN32)
             target_link_libraries(luasql_${driver} PRIVATE odbc32)
         else()
-            find_package(ODBC QUIET)
-            if(TARGET ODBC::ODBC)
-                target_link_libraries(luasql_${driver} PRIVATE ODBC::ODBC)
-            else()
-                message(WARNING "ODBC not found; skipping link to ODBC for driver '${driver}'")
-            endif()
+            target_link_libraries(luasql_${driver} PRIVATE odbc)
         endif()
     elseif(driver STREQUAL "sqlite3")
         find_package(SQLite3 QUIET)
