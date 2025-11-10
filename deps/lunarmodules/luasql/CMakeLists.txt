@@ -36,11 +36,13 @@ function(add_luasql_driver driver)
 
     # Специфичные зависимости по драйверам.
     if(driver STREQUAL "odbc")
-        if(WIN32)
-            target_link_libraries(luasql_${driver} PRIVATE odbc32)
+        find_package(ODBC QUIET)        
+        if(TARGET ODBC::ODBC)
+            target_link_libraries(luasql_${driver} PRIVATE ODBC::ODBC)
         else()
-            target_link_libraries(luasql_${driver} PRIVATE odbc)
+            message(WARNING "ODBC not found; driver '${driver}' may fail to link")
         endif()
+
     elseif(driver STREQUAL "sqlite3")
         find_package(SQLite3 QUIET)
         if(TARGET SQLite::SQLite3)
