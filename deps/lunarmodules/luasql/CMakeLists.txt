@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-# Драйверы LuaSQL для сборки (совпадают с именами файлов ls_<driver>.c и <driver>.def)
+# LuaSQL drivers to build (match the names of files ls_<driver>.c and <driver>.def)
 set(LUASQL_DRIVERS "odbc" CACHE STRING "LuaSQL drivers to build (e.g. 'odbc;sqlite3;mysql;postgres;firebird')")
 
 # Общие настройки путей.
