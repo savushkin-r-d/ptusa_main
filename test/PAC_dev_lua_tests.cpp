@@ -13,7 +13,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
 
-    //u_int operation_state::steps_count() const
+    // Test "u_int operation_state::steps_count() const".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
@@ -23,7 +23,8 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1, -1 )" ) );
     
-    // int enable_step_by_signal::set_bool_property( const char* name, bool value )
+    // Test "int enable_step_by_signal::set_bool_property( const char* name,
+    // bool value )".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_ENABLE_STEP_BY_SIGNAL ]:"
         "set_bool_property( 'should_turn_off', false )" ) );
@@ -31,14 +32,14 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
-    //int step::get_tag() const
+    // Test "int step::get_tag() const".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:get_tag()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( -1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
-    //int step::set_tag( int new_tag )
+    // Test "int step::set_tag( int new_tag )".
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager()[ 1 ][ 1 ][ 1 ]:set_tag( 20 )" ) );
     EXPECT_EQ( 0,
@@ -47,13 +48,15 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 20, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
+    // Test "unsigned int steps_count() const".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );    
 
-    //int jump_if_action::set_int_property( const char* name, unsigned int idx, int value );
+    // Test "int jump_if_action::set_int_property( const char* name,
+    // unsigned int idx, int value )".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_JUMP_IF ]:"
         "set_int_property( 'next_step_n', 0, 1 )" ) );
@@ -67,7 +70,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
-    //const char* operation::get_name() const
+    // Test "const char* operation::get_name() const".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ]:get_name()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
