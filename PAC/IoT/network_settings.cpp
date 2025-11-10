@@ -1,6 +1,7 @@
 #include "network_settings.h"
 #include "log.h"
 #include <cstring>
+#include <cstdio>
 
 // port_forward_rule implementation
 port_forward_rule::port_forward_rule(const char* dev_name, unsigned int int_port,
@@ -189,6 +190,89 @@ void network_settings_manager::evaluate()
 {
     // В будущем здесь может быть логика для мониторинга состояния портов
     // или автоматического переоткрытия портов при необходимости
+}
+
+int network_settings_manager::save_device(char* buff)
+{
+    int size = 0;
+    size += sprintf(buff + size, "NETWORK_SETTINGS = \n\t{\n");
+    
+    if (rules.size() > 0)
+    {
+        port_forward_map::iterator it;
+        for (it = rules.begin(); it != rules.end(); it++)
+        {
+            port_forward_rule* rule = it->second;
+            size += sprintf(buff + size, "\t[%u] = {device=\"%s\", ip=\"%s\", "
+                          "internal_port=%u, external_port=%u, is_open=%d},\n",
+                          it->first,
+                          rule->get_device_name(),
+                          rule->get_device_ip(),
+                          rule->get_internal_port(),
+                          rule->get_external_port(),
+                          rule->is_open() ? 1 : 0);
+        }
+    }
+    
+    size += sprintf(buff + size, "\t}\n");
+    return size;
+}
+
+const char* network_settings_manager::get_name_in_Lua() const
+{
+    return "NETWORK_SETTINGS";
+}
+
+int network_settings_manager::set_cmd(const char* prop, u_int idx, double val)
+{
+    if (strcmp(prop, "CMD") == 0)
+    {
+        switch ((COMMANDS)(int)val)
+        {
+            case CMD_OPEN_PORT:
+                if (process_command(idx, true))
+                {
+                    G_LOG->notice("Network settings: opened port for command %u via Monitor", idx);
+                    return 0;
+                }
+                else
+                {
+                    G_LOG->warning("Network settings: failed to open port for command %u", idx);
+                    return 1;
+                }
+                
+            case CMD_CLOSE_PORT:
+                if (process_command(idx, false))
+                {
+                    G_LOG->notice("Network settings: closed port for command %u via Monitor", idx);
+                    return 0;
+                }
+                else
+                {
+                    G_LOG->warning("Network settings: failed to close port for command %u", idx);
+                    return 1;
+                }
+                
+            case CMD_CLOSE_ALL_PORTS:
+                close_all_ports();
+                G_LOG->notice("Network settings: closed all ports via Monitor");
+                return 0;
+                
+            default:
+                G_LOG->warning("Network settings: unknown command %d", (int)val);
+                return 1;
+        }
+    }
+    
+    G_LOG->warning("Network settings: unknown property '%s'", prop);
+    return 1;
+}
+
+int network_settings_manager::set_cmd(const char* prop, u_int idx, const char* val)
+{
+    // Строковые команды не используются в данной реализации
+    G_LOG->warning("Network settings: string commands not supported (prop='%s', val='%s')", prop, val);
+    return 1;
 }
 
 auto_smart_ptr<network_settings_manager> network_settings_manager::instance;

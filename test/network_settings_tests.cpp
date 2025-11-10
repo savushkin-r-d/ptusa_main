@@ -184,3 +184,120 @@ TEST(NetworkSettingsManagerTest, Evaluate)
     manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
     EXPECT_NO_THROW(manager->evaluate());
 }
+
+// Тесты для set_cmd - управление через Монитор
+TEST(NetworkSettingsManagerTest, SetCmdOpenPort)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
+    
+    // Открываем порт через set_cmd
+    int result = manager->set_cmd("CMD", 10001, 
+                                   (double)network_settings_manager::CMD_OPEN_PORT);
+    EXPECT_EQ(0, result);
+    
+    port_forward_rule* rule = manager->get_rule(10001);
+    ASSERT_NE(nullptr, rule);
+    EXPECT_TRUE(rule->is_open());
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdClosePort)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
+    manager->process_command(10001, true); // Сначала открываем
+    
+    // Закрываем порт через set_cmd
+    int result = manager->set_cmd("CMD", 10001, 
+                                   (double)network_settings_manager::CMD_CLOSE_PORT);
+    EXPECT_EQ(0, result);
+    
+    port_forward_rule* rule = manager->get_rule(10001);
+    ASSERT_NE(nullptr, rule);
+    EXPECT_FALSE(rule->is_open());
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdCloseAllPorts)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
+    manager->add_port_forward_rule(11001, "A100", 1962, 11001, "192.168.1.100");
+    
+    manager->process_command(10001, true);
+    manager->process_command(11001, true);
+    
+    // Закрываем все порты через set_cmd
+    int result = manager->set_cmd("CMD", 0, 
+                                   (double)network_settings_manager::CMD_CLOSE_ALL_PORTS);
+    EXPECT_EQ(0, result);
+    
+    EXPECT_FALSE(manager->get_rule(10001)->is_open());
+    EXPECT_FALSE(manager->get_rule(11001)->is_open());
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdNonExistentPort)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    // Попытка открыть несуществующий порт
+    int result = manager->set_cmd("CMD", 99999, 
+                                   (double)network_settings_manager::CMD_OPEN_PORT);
+    EXPECT_EQ(1, result); // Должна вернуть ошибку
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdUnknownCommand)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
+    
+    // Неизвестная команда
+    int result = manager->set_cmd("CMD", 10001, 999.0);
+    EXPECT_EQ(1, result); // Должна вернуть ошибку
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdUnknownProperty)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    // Неизвестное свойство
+    int result = manager->set_cmd("UNKNOWN_PROP", 0, 1.0);
+    EXPECT_EQ(1, result); // Должна вернуть ошибку
+}
+
+TEST(NetworkSettingsManagerTest, SetCmdString)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    // Строковые команды не поддерживаются
+    int result = manager->set_cmd("CMD", 0, "test");
+    EXPECT_EQ(1, result); // Должна вернуть ошибку
+}
+
+TEST(NetworkSettingsManagerTest, SaveDevice)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    manager->add_port_forward_rule(10001, "A100", 10001, 0, "192.168.1.100");
+    manager->add_port_forward_rule(11001, "A100", 1962, 11001, "192.168.1.100");
+    manager->process_command(10001, true); // Открываем один порт
+    
+    char buffer[4096];
+    int size = manager->save_device(buffer);
+    
+    EXPECT_GT(size, 0);
+    EXPECT_NE(nullptr, strstr(buffer, "NETWORK_SETTINGS"));
+    EXPECT_NE(nullptr, strstr(buffer, "A100"));
+    EXPECT_NE(nullptr, strstr(buffer, "192.168.1.100"));
+}
+
+TEST(NetworkSettingsManagerTest, GetNameInLua)
+{
+    network_settings_manager* manager = G_NETWORK_SETTINGS_MANAGER();
+    
+    EXPECT_STREQ("NETWORK_SETTINGS", manager->get_name_in_Lua());
+}
+

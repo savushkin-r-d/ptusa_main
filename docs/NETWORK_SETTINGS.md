@@ -4,6 +4,8 @@
 
 The Network Settings Manager is a new feature that provides configurable port forwarding from internal networks to external networks for enhanced security. This implementation addresses the requirements described in issue #1095.
 
+The manager can be controlled both from Lua scripts and through the Monitor client using `set_cmd` methods, enabling remote port management operations.
+
 ## Architecture
 
 ### Core Components
@@ -257,3 +259,34 @@ This feature is part of the ptusa_main project and follows the same license term
 
 - Implementation: GitHub Copilot AI Assistant
 - Issue: #1095 - [FEATURE]: Объект сетевых настроек
+
+### From Monitor Client (Remote Control)
+
+The network settings manager can be controlled remotely through the Monitor client using `set_cmd` methods:
+
+#### Available Commands
+
+| Command | Value | Description | Parameters |
+|---------|-------|-------------|------------|
+| CMD_OPEN_PORT | 1 | Open a specific port | idx = command_id |
+| CMD_CLOSE_PORT | 2 | Close a specific port | idx = command_id |
+| CMD_CLOSE_ALL_PORTS | 3 | Close all open ports | idx = 0 (ignored) |
+
+#### Usage Examples
+
+```cpp
+// From Monitor client code
+network_settings_manager* mgr = G_NETWORK_SETTINGS_MANAGER();
+
+// Open port for command 10001 (device A100)
+mgr->set_cmd("CMD", 10001, network_settings_manager::CMD_OPEN_PORT);
+
+// Close port for command 10001
+mgr->set_cmd("CMD", 10001, network_settings_manager::CMD_CLOSE_PORT);
+
+// Close all open ports
+mgr->set_cmd("CMD", 0, network_settings_manager::CMD_CLOSE_ALL_PORTS);
+```
+
+The manager integrates with the device communication system, allowing port forwarding operations to be triggered from the remote Monitor application through standard PAC command infrastructure.
+

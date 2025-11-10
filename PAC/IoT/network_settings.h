@@ -1,6 +1,7 @@
 #pragma once
 
 #include "smart_ptr.h"
+#include "g_device.h"
 #include <map>
 #include <string>
 
@@ -53,7 +54,7 @@ typedef std::map<unsigned int, port_forward_rule*> port_forward_map;
 typedef std::pair<unsigned int, port_forward_rule*> port_forward_pair;
 
 /// @brief Менеджер сетевых настроек для управления перенаправлением портов
-class network_settings_manager
+class network_settings_manager : public i_Lua_save_device, public i_cmd_device
 {
 public:
     virtual ~network_settings_manager();
@@ -87,6 +88,22 @@ public:
     
     /// @brief Оценка состояния (вызывается в главном цикле)
     void evaluate();
+
+    // Интерфейс i_Lua_save_device
+    int save_device(char* buff) override;
+    const char* get_name_in_Lua() const override;
+    
+    // Интерфейс i_cmd_device
+    int set_cmd(const char* prop, u_int idx, double val) override;
+    int set_cmd(const char* prop, u_int idx, const char* val) override;
+    
+    /// @brief Команды для управления через Монитор
+    enum COMMANDS
+    {
+        CMD_OPEN_PORT = 1,      ///< Открыть порт (idx = command_id)
+        CMD_CLOSE_PORT = 2,     ///< Закрыть порт (idx = command_id)
+        CMD_CLOSE_ALL_PORTS = 3 ///< Закрыть все порты
+    };
 
 protected:
     network_settings_manager();
