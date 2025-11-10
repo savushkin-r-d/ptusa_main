@@ -27,7 +27,7 @@ Windows](#using-plcnext-technology-c-toolchain-in-windows)
 General system architecture of the automated process control system (**APCS**)
 is shown below:
 
-<p align="center"><img src="docs/readme_images/system_architecture_en.png"></p>
+![System architecture](./docs/readme_images/system_architecture_en.png)
 
 ## Common description ##
 
@@ -39,8 +39,7 @@ the control program.
 [Drakon](https://drakonhub.com) diagram language, made with
 [Mermaid](https://mermaid.js.org/)):
 
-<p align="center"><img
-src="docs/drakon_diagram/images/control_program_en.svg"></p>
+![Control program](./docs/drakon_diagram/images/control_program_en.svg)
 
 + Execution of the technological process:
 
@@ -66,7 +65,7 @@ flowchart TD
 
 ```
 
-<p align="center"><img src="docs/drakon_diagram/images/operation_en.svg"></p>
+![Operation execution](./docs/drakon_diagram/images/operation_en.svg)
 
 ``` mermaid
 %%{ init: {'theme': 'neutral'} }%%
@@ -102,13 +101,11 @@ flowchart TD
 
 + When operation is turned on (off) happens next:
 
-<p align="center"><img
-src="docs/readme_images/tech_object__set_mode_en.png"></p>
+![Setting mode](./docs/readme_images/tech_object__set_mode_en.png)
 
 + During the execution of command happens next:
 
-<p align="center"><img
-src="docs/readme_images/tech_object__exec_cmd_en.png"></p>
+![Execution of command](./docs/readme_images/tech_object__exec_cmd_en.png)
 
 ## How to build the project ##
 
@@ -149,7 +146,7 @@ project.
 If an error occurs after startup, then you should clear the CMake cache
 `Project -> Delete cache and perform reconfiguration`.
 
-### linux ###
+### Linux ###
 
 Eclipse IDE with CMake based project on Linux.
 
@@ -159,7 +156,7 @@ Download the latest versions from the Phoenix Contact
 [website](https://www.phoenixcontact.com/products) (for example, from the **AXC
 F 2152** area) ```PLCnext Technology C++ toolchain for Windows```(current is
 2023.0 LTS) and ```sdk for Windows 64 bit``` (current is 2022.0.4 LTS), in the
-section Downloads->Software $-$ http://www.phoenixcontact.com/qr/2404267/softw.
+section Downloads->Software $-$ <http://www.phoenixcontact.com/qr/2404267/softw>.
 
 Navigate to the folder where downloads are located (typical path
 `%userprofile%/Downloads`), unzip the archive
@@ -217,13 +214,14 @@ Documentation for supported devices can be found in the
 [docs/devices](docs/devices/) directory.
 
 Currently documented devices:
-- [TM311](docs/devices/TM311.md) - Endress+Hauser TM311 IO-Link Temperature
+
++ [TM311](docs/devices/TM311.md) - Endress+Hauser TM311 IO-Link Temperature
   Sensor (Technical Documentation)
-- [TM311 User Guide](docs/devices/TM311_user_guide.md) - User Guide for APCS
++ [TM311 User Guide](docs/devices/TM311_user_guide.md) - User Guide for APCS
   Engineers (in Russian)
 
 ### Other Documentation ###
 
-- [Testing Strategy](docs/test/readme.md) - Information about testing approach
-- [Code Style Guide](docs/style.md) - Coding standards and conventions
-- [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute to the project
++ [Testing Strategy](docs/test/readme.md) - Information about testing approach
++ [Code Style Guide](docs/style.md) - Coding standards and conventions
++ [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute to the project

@@ -29,8 +29,7 @@ Windows](#использование-набора-инструментов-plcne
 + Общая схема работы программы контроллера (в [Drakon](https://drakonhub.com)
 diagram language)
 
-<p align="center"><img src="../drakon_diagram/images/control_program.svg"
-alt="Control program"></p>
+![Control program](../drakon_diagram/images/control_program.svg)
 
 + Выполнение технологического процесса:
 
@@ -58,8 +57,7 @@ flowchart TD
 
 ```
 
-<p align="center"><img src="../drakon_diagram/images/operation.svg"
-alt="Operation"></p>
+![Operation](../drakon_diagram/images/operation.svg)
 
 ``` mermaid
 %%{ init: {'theme': 'neutral'} }%%
@@ -95,11 +93,11 @@ flowchart TD
 
 + При включении/выключении операции происходит следующее:
 
-![Clone repository](../readme_images/tech_object__set_mode.png)
+![Включение операции](../readme_images/tech_object__set_mode.png)
 
 + При выполнении команды происходит следующее:
 
-![Clone repository](../readme_images/tech_object__exec_cmd.png)
+![Выполнение команды](../readme_images/tech_object__exec_cmd.png)
 
 ## Как собрать проект ##
 
@@ -131,7 +129,7 @@ CMake tools for Windows.
 Средства C++ CMake для Windows устанавливаются с помощью:
 
 `Visual Studio Installer -> Разработка классических приложений на C++ ->
-Средства CMake C++ для Windows `
+Средства CMake C++ для Windows`
 
 Подробную информацию по установке можно получить
 [здесь](https://docs.microsoft.com/ru-ru/cpp/build/cmake-projects-in-visual-studio?view=msvc-160).
@@ -142,17 +140,17 @@ CMake tools for Windows.
 ошибка, то следует очистить кэш CMake: `Проект -> Удалить кэш и выполнить
 перенастройку`.
 
-### linux ###
+### Linux ###
 
 Eclipse IDE с проектом на базе CMake в Linux.
 
 ## Использование набора инструментов PLCnext Technology C++ для ОС Windows ##
 
 Загрузите последние версии с веб-сайта Phoenix Contact
-https://www.phoenixcontact.com/products (например, из области **AXC F 2152**)
+<https://www.phoenixcontact.com/products> (например, из области **AXC F 2152**)
 `PLCnext Technology C++ Toolchain для Windows` (текущая 2023.0 LTS) и `sdk для
 Windows 64 bit` (текущая 2022.0.4 LTS) , в разделе Загрузки->Программное
-обеспечение $-$ http://www.phoenixcontact.com/qr/2404267/softw.
+обеспечение $-$ <http://www.phoenixcontact.com/qr/2404267/softw>.
 
 Перейдите в папку, где находятся загрузки (типичный путь
 `%userprofile%/Downloads`), распакуйте архив
@@ -210,14 +208,15 @@ components](https://www.phoenixcontact.com/online/portal/pi?1dmy&urile=wcm%3apat
 [docs/devices](../devices/).
 
 Документированные устройства:
-- [TM311](../devices/TM311.md) - Датчик температуры Endress+Hauser TM311
+
++ [TM311](../devices/TM311.md) - Датчик температуры Endress+Hauser TM311
   IO-Link (техническая документация)
-- [TM311 - Руководство пользователя](../devices/TM311_user_guide.md) -
++ [TM311 - Руководство пользователя](../devices/TM311_user_guide.md) -
   Руководство для инженеров АСУТП
 
 ### Другая документация ###
 
-- [Стратегия тестирования](../test/readme.md) - Информация о подходе к
++ [Стратегия тестирования](../test/readme.md) - Информация о подходе к
   тестированию
-- [Руководство по стилю кода](../style.md) - Стандарты и соглашения по коду
-- [Руководство по участию](../CONTRIBUTING.md) - Как внести вклад в проект
++ [Руководство по стилю кода](../style.md) - Стандарты и соглашения по коду
++ [Руководство по участию](../CONTRIBUTING.md) - Как внести вклад в проект
