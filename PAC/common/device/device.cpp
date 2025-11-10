@@ -783,15 +783,15 @@ float power_unit::decode_nominal_current( uint8_t code )
     // Возвращаемое значение: номинальный ток в амперах.
     switch ( code )
         {
-        case 0: return 0.0f;    // Канал отключен
+        case 0: return 1.0f;    // 1A
         case 1: return 2.0f;    // 2A
         case 2: return 3.8f;    // 3.8A
         case 3: return 4.0f;    // 4A
         case 4: return 6.0f;    // 6A
         case 5: return 8.0f;    // 8A
         case 6: return 10.0f;   // 10A
-        case 7: return 0.0f;    // Зарезервировано
-        default: return 0.0f;
+        case 7: return 1.0f;    // Зарезервировано (по умолчанию 1A)
+        default: return 1.0f;
         }
     }
 //-----------------------------------------------------------------------------
