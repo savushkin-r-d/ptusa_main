@@ -8,7 +8,7 @@ set(LUASQL_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/luasql/src")
 
 add_compile_definitions(LUASQL_VERSION_NUMBER=\"2.7.1\")
 
-# Вспомогательная функция для добавления драйвера.
+# Helper function to add a driver.
 function(add_luasql_driver driver)
     set(src_c "${LUASQL_SRC_DIR}/ls_${driver}.c")
     if(NOT EXISTS "${src_c}")
@@ -21,7 +21,7 @@ function(add_luasql_driver driver)
         "${src_c}"
     )
 
-    # Имя цели: luasql_<driver>, выходной файл: <driver>.dll/.so без префикса.
+    # Target name: luasql_<driver>, output file: <driver>.dll/.so without prefix.
     add_library(luasql_${driver} ${SOURCES})
 
     if(MSVC)
@@ -34,7 +34,7 @@ function(add_luasql_driver driver)
     )
     target_link_libraries(luasql_${driver} PRIVATE liblua)
 
-    # Специфичные зависимости по драйверам.
+    # Driver-specific dependencies.
     if(driver STREQUAL "odbc")
         find_package(ODBC QUIET)        
         if(TARGET ODBC::ODBC)
@@ -56,7 +56,7 @@ function(add_luasql_driver driver)
             endif()
         endif()
     elseif(driver STREQUAL "mysql")
-        # Пытаемся найти клиентскую библиотеку MySQL/MariaDB.
+        # Trying to find MySQL/MariaDB client library.
         find_library(MYSQL_LIB NAMES libmysql mysqlclient mariadb)
         if(MYSQL_LIB)
             target_link_libraries(luasql_${driver} PRIVATE "${MYSQL_LIB}")
@@ -79,12 +79,12 @@ function(add_luasql_driver driver)
         endif()
     endif()
 
-    # MSVC-опции и дефайны, аналогичные Makefile.win.
+    # MSVC options and defines, similar to Makefile.win.
     target_compile_definitions(luasql_${driver} PRIVATE
         $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS;WIN32>
     )
 
-    # Имена и каталоги вывода: luasql/<driver>.dll
+    # Output names and directories: luasql/<driver>.dll
     set_target_properties(luasql_${driver} PROPERTIES
         OUTPUT_NAME "${driver}"
         PREFIX ""
@@ -94,7 +94,7 @@ function(add_luasql_driver driver)
     )
 endfunction()
 
-# Добавляем заявленные драйверы.
+# Adding declared drivers.
 foreach(d ${LUASQL_DRIVERS})
     string(TOLOWER "${d}" d_lower)
     add_luasql_driver("${d_lower}")
