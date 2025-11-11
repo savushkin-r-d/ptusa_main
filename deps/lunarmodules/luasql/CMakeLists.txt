@@ -36,7 +36,7 @@ function(add_luasql_driver driver)
 
     # Driver-specific dependencies.
     if(driver STREQUAL "odbc")
-        find_package(ODBC QUIET)        
+        find_package(ODBC QUIET)
         if(TARGET ODBC::ODBC)
             target_link_libraries(luasql_${driver} PRIVATE ODBC::ODBC)
         else()
