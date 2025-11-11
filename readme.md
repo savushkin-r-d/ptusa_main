@@ -3,7 +3,7 @@
 [![Open Hub Project Status](
     https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](
         https://www.openhub.net/p/ptusa_main/)
-[![GitHub ActionsCI](
+[![GitHub Actions CI](
     https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](
         https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
 [![codecov](
