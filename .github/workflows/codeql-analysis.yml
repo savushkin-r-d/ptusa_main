@@ -30,6 +30,7 @@ jobs:
     if: github.repository == 'savushkin-r-d/ptusa_main'
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       actions: read
       contents: read
@@ -78,10 +79,15 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y unixodbc-dev
 
-    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-    # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+    # Manual CMake configure (Release) for CodeQL to trace compilation
+    - name: Configure (CMake)
+      run: |
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSKIP_DEMO=ON
+
+    # Manual CMake build instead of CodeQL Autobuild
+    - name: Build (CMake)
+      run: |
+        cmake --build build -j"$(nproc)"
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
