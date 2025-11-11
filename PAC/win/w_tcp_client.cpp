@@ -416,7 +416,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
         }
     }
 
-int win_tcp_client::AsyncRecive()
+int win_tcp_client::AsyncReceive()
     {
     async_result = AR_BUSY;
 

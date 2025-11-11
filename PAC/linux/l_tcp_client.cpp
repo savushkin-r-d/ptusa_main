@@ -288,7 +288,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
         }
     }
 
-int linux_tcp_client::AsyncRecive()
+int linux_tcp_client::AsyncReceive()
     {
     async_result = AR_BUSY;
 
