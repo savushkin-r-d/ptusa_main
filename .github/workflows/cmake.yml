@@ -178,6 +178,9 @@ jobs:
           execute_process(COMMAND sudo apt-get install -y yasm)
         endif()
 
+    - name: Install unixodbc-dev (Linux only)
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y unixodbc-dev
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
