@@ -1,12 +1,18 @@
 # ptusa_main #
 
-[![Open Hub Project
-Status](https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](https://www.openhub.net/p/ptusa_main/)
-[![GitHub Actions
-CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
-[![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main)
+[![Open Hub Project Status](
+    https://www.openhub.net/p/ptusa_main/widgets/project_thin_badge.gif)](
+        https://www.openhub.net/p/ptusa_main/)
+[![GitHub ActionsCI](
+    https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](
+        https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
+[![codecov](
+    https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](
+        https://codecov.io/gh/savushkin-r-d/ptusa_main)
 
-[![Downloads](https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](https://github.com/savushkin-r-d/ptusa_main/releases/)
+[![Downloads](
+    https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](
+        https://github.com/savushkin-r-d/ptusa_main/releases/)
 
 Russian readme is [here](docs/russian_readme/readme.md).
 
@@ -137,8 +143,8 @@ C++ CMake tools for Windows are installed using:
 `Visual Studio Installer -> Development of classic applications in C++ -> C++
 CMake tools for Windows`
 
-Detailed installation information can be obtained
-[here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160).
+Detailed installation information can be obtained [here](
+    https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160).
 The CMake version required for the build is 3.13 and above.
 
 You should open (in Visual Studio) root directory. This you get a CMake based
