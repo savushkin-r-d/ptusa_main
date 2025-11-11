@@ -90,6 +90,8 @@ add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
+add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -208,9 +210,9 @@ elseif(WIN32)
 endif()
 
 add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
-add_dependencies(lua libptusa_main)
+add_dependencies(lua libptusa_main luasql_odbc)
 
-if (MSVC)   
+if(MSVC)
     set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")
 endif()
 

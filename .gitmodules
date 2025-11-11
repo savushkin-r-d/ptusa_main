@@ -58,3 +58,6 @@
 [submodule "deps/lunarmodules/say/say"]
 	path = deps/lunarmodules/say/say
 	url = https://github.com/lunarmodules/say.git
+[submodule "deps/lunarmodules/luasql/luasql"]
+	path = deps/lunarmodules/luasql/luasql
+	url = https://github.com/lunarmodules/luasql.git
