@@ -67,6 +67,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-
           max-size: 500M
+          cache-dir: ${{ github.workspace }}/.ccache
 
       # Disable man-db cache. Install unixodbc-dev.
       - name: Install unixodbc-dev
