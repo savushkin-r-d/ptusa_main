@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 # LuaSQL drivers to build (match the names of files ls_<driver>.c and <driver>.def)
 set(LUASQL_DRIVERS "odbc" CACHE STRING "LuaSQL drivers to build (e.g. 'odbc;sqlite3;mysql;postgres;firebird')")
 
-# Общие настройки путей.
+# Common path settings.
 set(LUASQL_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/luasql/src")
 
 add_compile_definitions(LUASQL_VERSION_NUMBER=\"2.7.1\")
@@ -56,7 +56,7 @@ function(add_luasql_driver driver)
             endif()
         endif()
     elseif(driver STREQUAL "mysql")
-        # Trying to find MySQL/MariaDB client library.
+        # Try to find MySQL/MariaDB client library.
         find_library(MYSQL_LIB NAMES libmysql mysqlclient mariadb)
         if(MYSQL_LIB)
             target_link_libraries(luasql_${driver} PRIVATE "${MYSQL_LIB}")
