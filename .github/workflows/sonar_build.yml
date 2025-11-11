@@ -60,6 +60,13 @@ jobs:
           submodules: 'recursive'
           ref: ${{ github.event.pull_request.head.sha }}
 
+      # Disable man-db cache. Install unixodbc-dev.
+      - name: Install unixodbc-dev
+        run: |
+          echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
+          sudo apt-get update
+          sudo apt-get install -y unixodbc-dev
+
       - name: Setup ccache (cache restore/save)
         uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
         with:
@@ -68,13 +75,6 @@ jobs:
             ${{ runner.os }}-ccache-
           max-size: 500M
 
-      # Disable man-db cache. Install unixodbc-dev.
-      - name: Install unixodbc-dev
-        run: |
-          echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
-          sudo apt-get update
-          sudo apt-get install -y unixodbc-dev
-          
       - name: Download and set up sonar-scanner
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux-x64.zip
