@@ -424,13 +424,13 @@ int win_tcp_client::AsyncReceive()
 
     if ( checkBuff( socket_number ) && !isNewData )
         {
-        asyncReciveTime = get_millisec();
+        asyncReceiveTime = get_millisec();
         isNewData = true;
         }
 
     int res = 0;
 
-    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && isNewData )
+    if ( get_delta_millisec( asyncReceiveTime ) >= async_timeout && isNewData )
         {
         res = recv( socket_number, buff, buff_size, 0 );
         isNewData = false;

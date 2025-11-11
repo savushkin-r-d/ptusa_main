@@ -12,7 +12,7 @@ class win_tcp_client: public tcp_client
 		timeval async_tv;
 		sockaddr_in async_sock_address;
 		unsigned int async_bytes_to_send;
-		u_long asyncReciveTime;
+		u_long asyncReceiveTime;
 		bool isNewData;
 	public:
 		int InitLib();
