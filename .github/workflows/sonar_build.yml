@@ -61,20 +61,19 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup ccache (cache restore/save)
-        uses: hendrikmuhs/ccache-action@v1.2.12
+        uses: hendrikmuhs/ccache-action@faf867a11c028c0b483fb2ae72b6fc8f7d842714 # v1.2.12
         with:
-          key: ${{ runner.os }}-ccache-${{ github.ref }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-ccache-${{ github.ref }}-
             ${{ runner.os }}-ccache-
           max-size: 500M
 
-      # Disable man-db cache. Install unixodbc-dev and ccache.
-      - name: Install unixodbc-dev and ccache
+      # Disable man-db cache. Install unixodbc-dev.
+      - name: Install unixodbc-dev
         run: |
           echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
           sudo apt-get update
-          sudo apt-get install -y unixodbc-dev ccache
+          sudo apt-get install -y unixodbc-dev
           
       - name: Download and set up sonar-scanner
         env:
