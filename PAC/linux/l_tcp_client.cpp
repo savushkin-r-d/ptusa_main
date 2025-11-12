@@ -288,7 +288,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
         }
     }
 
-int linux_tcp_client::AsyncRecive()
+int linux_tcp_client::AsyncReceive()
     {
     async_result = AR_BUSY;
 
@@ -296,13 +296,13 @@ int linux_tcp_client::AsyncRecive()
 
     if ( tcp_communicator_linux::checkBuff( socket_number ) && !newDataIsAvailable )
         {
-        asyncReciveTime = get_millisec();
+        asyncReceiveTime = get_millisec();
         newDataIsAvailable = true;
         }
 
     int res = 0;
 
-    if ( get_delta_millisec( asyncReciveTime ) >= async_timeout && newDataIsAvailable )
+    if ( get_delta_millisec( asyncReceiveTime ) >= async_timeout && newDataIsAvailable )
         {
         newDataIsAvailable = false;
         res = tcp_communicator_linux::recvtimeout( socket_number, reinterpret_cast<unsigned char*>( buff ),

@@ -704,6 +704,14 @@ TEST( operation, on_extra_step )
 	G_LUA_MANAGER->free_Lua();
 	}
 
+TEST( operation, get_name )
+	{
+	auto OP_NAME = "Test Operation";
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( OP_NAME );
+	EXPECT_STREQ( OP_NAME, test_op->get_name() );
+	}
+
 TEST( operation, evaluate )
 	{
 	lua_State* L = lua_open();

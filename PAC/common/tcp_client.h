@@ -51,7 +51,7 @@ class tcp_client
         virtual int AsyncConnect();
         virtual int AsyncSend( unsigned int bytestosend );
 
-        virtual int AsyncRecive();
+        virtual int AsyncReceive();
         unsigned int buff_size;
         virtual int get_socket();
         virtual void Disconnect() = 0;

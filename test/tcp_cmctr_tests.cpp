@@ -37,12 +37,12 @@ TEST( tcp_communicator, evaluate )
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     //Должен быть получен ответ на подключение.
-    auto size = cl.AsyncRecive();
+    auto size = cl.AsyncReceive();
     cnt = 0;
     while ( size <= 0 && cnt < 1000 )
         {
         sleep_ms( 1 );
-        size = cl.AsyncRecive();
+        size = cl.AsyncReceive();
         cnt++;
         }
     ASSERT_GT( size, 0 );
@@ -80,7 +80,7 @@ TEST( tcp_communicator, evaluate )
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     sleep_ms( 1 );
     //Для модбас клиента ответа на подключение не будет.
-    size = modbus_cl.AsyncRecive();
+    size = modbus_cl.AsyncReceive();
     ASSERT_EQ( size, 0 );
 
     modbus_cl.Disconnect();
