@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Nov 10 10:46:43 2025.
+** Generated automatically by tolua++-1.0.92 on 11/12/25 13:06:56.
 */
 
 #ifndef __cplusplus
@@ -5762,6 +5762,38 @@ static int tolua_PAC_dev_operation_add_step00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_name of class  operation */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_get_name00
+static int tolua_PAC_dev_operation_get_name00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const operation",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const operation* self = (const operation*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_name'", NULL);
+#endif
+  {
+   const char* tolua_ret = (const char*)  self->get_name();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_name'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: set_step_cooperate_time_par_n of class  operation */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_set_step_cooperate_time_par_n00
 static int tolua_PAC_dev_operation_set_step_cooperate_time_par_n00(lua_State* tolua_S)
@@ -5790,39 +5822,6 @@ static int tolua_PAC_dev_operation_set_step_cooperate_time_par_n00(lua_State* to
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_step_cooperate_time_par_n'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-
-/* method: get_name of class  operation */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_get_name00
-static int tolua_PAC_dev_operation_get_name00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"const operation",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  const operation* self = (const operation*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_name'", NULL);
-#endif
-  {
-   const char* tolua_ret = (const char*)  self->get_name();
-   tolua_pushstring(tolua_S,(const char*)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_name'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15841,8 +15840,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"switch_active_extra_step",tolua_PAC_dev_operation_switch_active_extra_step00);
    tolua_function(tolua_S,"is_active_extra_step",tolua_PAC_dev_operation_is_active_extra_step00);
    tolua_function(tolua_S,"add_step",tolua_PAC_dev_operation_add_step00);
-   tolua_function(tolua_S,"set_step_cooperate_time_par_n",tolua_PAC_dev_operation_set_step_cooperate_time_par_n00);
    tolua_function(tolua_S,"get_name",tolua_PAC_dev_operation_get_name00);
+   tolua_function(tolua_S,"set_step_cooperate_time_par_n",tolua_PAC_dev_operation_set_step_cooperate_time_par_n00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_operation_get_state00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"operation_manager","operation_manager","",NULL);
