@@ -1186,6 +1186,7 @@ class operation
             state_idx s_idx = RUN );
 
     public:
+        const char* get_name() const;
 
         state_idx get_state() const;
     };
