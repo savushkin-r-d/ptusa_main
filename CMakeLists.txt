@@ -395,7 +395,7 @@ if(ARP_DEVICE)
     install(CODE "execute_process(COMMAND plcncli
                 deploy -s \"${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer\"
                 -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\"
-                -f \"${CMAKE_BINARY_DIR}/libPtusaPLCnextEngineer.so|.\"
+                -f \"${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/libPtusaPLCnextEngineer.so|.\"
                 --verbose
             WORKING_DIRECTORY \"${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer\"
             COMMAND_ECHO STDOUT )")
