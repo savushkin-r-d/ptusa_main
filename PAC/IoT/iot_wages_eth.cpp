@@ -11,7 +11,7 @@ iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port
 
 void iot_wages_eth::evaluate()
     {
-    status = tc->AsyncRecive();
+    status = tc->AsyncReceive();
     if ( status > 0 )
     {
         convert_value();
