@@ -627,6 +627,7 @@ class operation_state
 
         bool is_goto_next_state( int& next_state ) const;
 
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_number );
     private:
         std::string name;
         std::vector< step* > steps;
@@ -651,10 +652,14 @@ class operation_state
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
-        int n;              /// Номер.
+        int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
         u_int_4 dx_step_time;
+
+
+        /// Номер параметра совместного времени выполнения шагов.
+        int step_cooperate_time_par_n{ -1 };
 
     public:
         /// Добавление времени выполнения активного шага при возобновлении
@@ -668,7 +673,7 @@ class operation_state
         void save();
         void load();
 
-        int on_extra_step( int step_idx );
+        int on_extra_step( int step_idx, u_long step_time = 0UL );
 
         int off_extra_step( int step_idx );
 
@@ -686,6 +691,8 @@ class operation_state
     private:
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
+        std::vector< u_long > active_steps_duration;
+        std::vector< u_long > active_steps_start_time;
 
         std::vector< int > saved_active_steps;
 
@@ -888,6 +895,11 @@ class operation
 #ifndef __GNUC__
 #pragma endregion
 #endif
+
+
+        /// @brief Установка номера параметра со временем переходного
+        /// переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
     private:
         int process_auto_switch_on();

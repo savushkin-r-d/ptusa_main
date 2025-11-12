@@ -547,6 +547,11 @@ bool operation::is_active_extra_step( int step_idx ) const
     return false;
     }
 //-----------------------------------------------------------------------------
+void operation::set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
+    {
+    states[ RUN ]->set_step_cooperate_time_par_n( step_cooperate_time_par_n );
+    }
+//-----------------------------------------------------------------------------
 int operation::switch_active_extra_step( int off_step, int on_step )
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
@@ -2011,7 +2016,7 @@ operation_state::operation_state( const char* name,
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка", this ),
     owner( owner ),
-    n( n ),
+    operation_number( n ),
     dx_step_time( 0 )
     {    
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
@@ -2102,33 +2107,43 @@ void operation_state::evaluate()
     mode_step->evaluate();
 
     //Process action "enable_step_by_signal".
-    for ( size_t idx = 0; idx < active_steps.size(); idx++ )
-        {
-        size_t step_n = active_steps[ idx ] - 1;
-        if ( step_n < steps.size() )
+    size_t idx = 0;
+    while ( idx < active_steps.size() )
+        {        
+        if ( size_t step_n = active_steps[ idx ] - 1; step_n < steps.size() )
             {
             steps[ step_n ]->evaluate();
-
-            auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && !enable_action->is_empty() &&
+            if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                enable_action && !enable_action->is_empty() &&
                 !enable_action->is_any_group_active() &&
                 enable_action->should_turn_off() )
                 {
-                off_extra_step( step_n + 1 );
+                off_extra_step( static_cast<int>( step_n + 1 ) );
+                continue;
+                }
+
+            auto duration = active_steps_duration[ idx ];
+            auto start_t = active_steps_start_time[ idx ];
+            if ( duration > 0 && get_delta_millisec( start_t ) > duration )
+                {
+                off_extra_step( static_cast<int>( step_n + 1 ) );
+                continue;
                 }
             }
+
+        idx++;
         }
-    for ( size_t idx = 0; idx < steps.size(); idx++ )
+    for ( size_t i = 0; i < steps.size(); i++ )
         {
-        if ( !is_active_extra_step( idx + 1 ) )
+        if ( !is_active_extra_step( static_cast<int>( i ) + 1 ) )
             {
-            auto step = steps[ idx ];
-            auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && enable_action->is_any_group_active() )
+            auto step = steps[ i ];            
+            if ( auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] ); 
+                enable_action && enable_action->is_any_group_active() )
                 {
-                on_extra_step( idx + 1 );
+                on_extra_step( static_cast<int>( i ) + 1 );
                 }
             }
         }
@@ -2154,7 +2169,7 @@ void operation_state::evaluate()
             {
             if ( -1 == active_step_next_step_n )
                 {
-                if ( n > 0 )
+                if ( operation_number > 0 )
                     {
                     int time = (int)owner->get_step_param( par_n );
                     const int MAX_BUFF_SIZE = 200;
@@ -2162,8 +2177,8 @@ void operation_state::evaluate()
                     std::snprintf( buff, MAX_BUFF_SIZE,
                         "вышло время (%u сек) последнего шага (\'%s\')",
                         time, steps[ active_step_n ]->get_name() );
-                    owner->owner->set_err_msg( buff, n, 0, i_tech_object::ERR_OFF );
-                    owner->off_mode( n );
+                    owner->owner->set_err_msg( buff, operation_number, 0, i_tech_object::ERR_OFF );
+                    owner->off_mode( operation_number );
                     }
                 else
                     {
@@ -2172,7 +2187,15 @@ void operation_state::evaluate()
                 }
             else
                 {
-                to_step( active_step_next_step_n, 0 );
+                auto step_switch_time = 0UL;
+                if ( step_cooperate_time_par_n > 0 &&
+                    owner->get_step_param( step_cooperate_time_par_n ) > 0 )
+                    {
+                    step_switch_time = static_cast<u_long>
+                        ( owner->get_step_param( step_cooperate_time_par_n ) );
+                    }
+
+                to_step( active_step_next_step_n, step_switch_time );
                 }
 
             return;
@@ -2238,6 +2261,8 @@ void operation_state::finalize()
             }
         }
     active_steps.clear();
+    active_steps_duration.clear();
+    active_steps_start_time.clear();
     }
 //-----------------------------------------------------------------------------
 step* operation_state::operator[]( int idx )
@@ -2273,15 +2298,21 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         return;
         }
 
+    auto prev_active_step_n = active_step_n;
     active_step_time        = 0;
     active_step_next_step_n = -1;
 
-    if ( active_step_n >= 0 )
-        {
-        steps[ active_step_n ]->finalize();
-        }
     active_step_n = new_step - 1;
     active_step_next_step_n = next_step_ns[ active_step_n ];
+
+    if ( prev_active_step_n >= 0 )
+        {
+        steps[ prev_active_step_n ]->finalize();
+        if ( cooperative_time > 0 )
+            {
+            on_extra_step( prev_active_step_n + 1, cooperative_time );
+            }
+        }
 
     //Время шага
     auto par_n = step_duration_par_ns[ active_step_n ];
@@ -2298,9 +2329,18 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     if ( G_DEBUG )
         {        
-        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {}, step time {} ms, next step {})",
+        fmt::print( R"({}"{}" operation {} "{}" to_step() -> {})",
             owner->owner->get_prefix(), owner->owner->get_name(),
-            n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
+            operation_number, name.c_str(), new_step );
+
+        if ( active_step_time > 0 )
+            {
+            fmt::print( ", step time {} ms", active_step_time );
+            }
+        if ( active_step_next_step_n > 0 )
+            {
+            fmt::print( ", next step {}", active_step_next_step_n );
+            }
 
         active_step_max_time = 0;
         if ( auto max_t_par_n = step_max_duration_par_ns[active_step_n];
@@ -2312,6 +2352,11 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
                 fmt::print( ", max step time {} s", active_step_max_time );
                 }
             }
+        if ( cooperative_time )
+            {
+            fmt::print( ", cooperative time {} ms", cooperative_time );
+            }
+
         fmt::println( "" );
 
         steps[ active_step_n ]->print( owner->owner->get_prefix() );
@@ -2503,6 +2548,12 @@ bool operation_state::is_goto_next_state( int& next_state ) const
     return to_new_state->is_jump( next_state );
     }
 //-----------------------------------------------------------------------------
+void operation_state::set_step_cooperate_time_par_n(
+    int step_cooperate_time_par_number )
+    {
+    step_cooperate_time_par_n = step_cooperate_time_par_number;
+    }
+//-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()
     {
     if ( active_step_n >= 0 )
@@ -2553,15 +2604,36 @@ const char* operation_state::get_name() const
 //-----------------------------------------------------------------------------
 void operation_state::save()
     {
+    // Выключаем перед сохранением все активные шаги, которые должны
+    // отключиться по времени.
+    size_t idx = 0;
+    while ( idx < active_steps.size() )
+        {        
+        if ( auto duration = active_steps_duration[ idx ]; duration > 0 )
+            {
+            off_extra_step( active_steps[ idx ] );
+            }
+        else
+            {
+            idx++;
+            }
+        }
+
     saved_active_steps.assign( active_steps.begin(), active_steps.end() );
     }
 //-----------------------------------------------------------------------------
 void operation_state::load()
     {
     active_steps.assign( saved_active_steps.begin(), saved_active_steps.end() );
+
+    // Инициализация массивов длительности и времени старта
+    // для восстановленных дополнительных шагов.
+    const auto now = get_millisec();
+    active_steps_duration.assign( active_steps.size(), 0UL );
+    active_steps_start_time.assign( active_steps.size(), now );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx )
+int operation_state::on_extra_step( int step_idx, u_long step_time /* = 0UL */ )
     {
     if ( (size_t) step_idx > steps.size() )
         {
@@ -2580,22 +2652,22 @@ int operation_state::on_extra_step( int step_idx )
     if ( std::find( active_steps.begin(), active_steps.end(),
         step_idx ) == active_steps.end() )
         {
-        active_steps.push_back( step_idx );
-
         char err_str[ 250 ];
         if ( steps[ step_idx - 1 ]->check( err_str, sizeof( err_str ) ) == 0 )
             {
+            active_steps.push_back( step_idx );
+            active_steps_duration.push_back( step_time );
+            active_steps_start_time.push_back( get_millisec() );
             steps[ step_idx - 1 ]->init();
             steps[ step_idx - 1 ]->evaluate();
 
             if ( G_DEBUG )
                 {
-                SetColor( YELLOW );
-                printf( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d.\n",
+                G_LOG->warning( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d (%lu ms).\n",
                     owner->owner->get_prefix(),
-                    owner->owner->get_name(), n, name.c_str(), step_idx );
+                    owner->owner->get_name(), operation_number, name.c_str(),
+                    step_idx, step_time );
                 steps[ step_idx - 1 ]->print( owner->owner->get_prefix() );
-                SetColor( RESET );
                 }
             }
         else
@@ -2626,15 +2698,18 @@ int operation_state::off_extra_step( int step_idx )
     if ( auto res = std::find(active_steps.begin(), active_steps.end(), step_idx); 
         res != active_steps.end() )
         {
+        auto pos = std::distance( active_steps.begin(), res );
         steps[ step_idx - 1 ]->finalize();
         active_steps.erase( res );
-
+        active_steps_duration.erase( active_steps_duration.begin() + pos );
+        active_steps_start_time.erase( active_steps_start_time.begin() + pos );        
+       
         if ( G_DEBUG )
             {
             SetColor( YELLOW );
             printf( "%s\"%s\" operation %d \"%s\" off_extra_step() -> %d.\n",
                 owner->owner->get_prefix(),
-                owner->owner->get_name(), n, name.c_str(), step_idx );
+                owner->owner->get_name(), operation_number, name.c_str(), step_idx );
             SetColor( RESET );
             }
         }
@@ -2679,7 +2754,8 @@ int operation_state::switch_active_extra_step( int off_step, int on_step )
             SetColor( YELLOW );
             printf( "%s\"%s\" operation %d \"%s\" switch_active_extra_step() %d -> %d.\n",
                 owner->owner->get_prefix(),
-                owner->owner->get_name(), n, name.c_str(), off_step, on_step );
+                owner->owner->get_name(), operation_number, name.c_str(),
+                off_step, on_step );
             steps[ on_step - 1 ]->print( owner->owner->get_prefix() );
             SetColor( RESET );
             }

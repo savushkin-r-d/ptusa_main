@@ -286,6 +286,24 @@ TEST( toLuapp, tolua_PAC_dev_WATCHDOG00 )
     }
 
 
+TEST( toLuapp, tolua_PAC_dev_operation_set_step_cooperate_time_par_n00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "oper = o1:get_modes_manager():add_operation(\'Test operation\')" ) );
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "oper:set_step_cooperate_time_par_n( 1 )" ) );
+    // Некорректный вызов - без параметра.
+    EXPECT_NE( 0, luaL_dostring( L, "oper:set_step_cooperate_time_par_n()" ) );
+
+    lua_close( L );
+    }
+
+
 TEST( toLuapp, STUB )
     {
     lua_State* L = lua_open();
