@@ -26,6 +26,7 @@
 
 #include <string>
 #include <array>
+#include <chrono>
 
 #include "dtime.h"
 
@@ -973,7 +974,7 @@ class operation_manager
 
         void reset_active_operation_or_idle_time()
             {
-            active_operation_or_idle_time = get_millisec();
+            start_time_point = std::chrono::steady_clock::now();
             }
 
         /// @brief Отладочный вывод объекта в консоль.
@@ -1003,7 +1004,8 @@ class operation_manager
         operation oper_stub{ "Операция-заглушка", this, -1 };
 
         /// @brief Время активной операции (или бездействия).
-        u_long active_operation_or_idle_time = get_millisec();
+        std::chrono::steady_clock::time_point start_time_point =
+            std::chrono::steady_clock::now();
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

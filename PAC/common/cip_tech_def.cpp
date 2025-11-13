@@ -461,8 +461,7 @@ int cipline_tech_object::save_device( char *buff )
     u_int_4 up_mins;
     u_int_4 up_secs;
 
-    up_secs = operations_manager->get_idle_time() / 1000;
-
+    up_secs = operations_manager->get_idle_time();
     up_hours = up_secs / ( 60 * 60 );
     up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
