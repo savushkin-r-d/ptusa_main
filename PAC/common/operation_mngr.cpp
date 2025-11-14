@@ -2805,7 +2805,10 @@ operation* operation_manager::operator[]( unsigned int idx )
 //-----------------------------------------------------------------------------
 unsigned long operation_manager::get_idle_time()
     {
-    return get_delta_millisec( active_operation_or_idle_time );
+    auto res = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - start_time_point );
+
+    return static_cast<unsigned long>( res.count() );
     }
 //-----------------------------------------------------------------------------
 void operation_manager::print()
