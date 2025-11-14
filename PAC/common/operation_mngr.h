@@ -429,7 +429,6 @@ class jump_if_action : public action
         
         // Информация о последнем сработавшем переходе.
         mutable size_t last_jump_idx = 0;
-        mutable bool last_jump_by_on_devices = false;
     };
 //-----------------------------------------------------------------------------
 /// <summary>

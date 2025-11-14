@@ -1886,8 +1886,6 @@ bool jump_if_action::is_jump( int& next )
         if ( res )
             {
             last_jump_idx = idx;
-            // Определяем, был ли переход из-за активности или неактивности сигнала
-            last_jump_by_on_devices = !devices[ idx ][ G_ON_DEVICES ].empty();
             return true;
             }
         }
@@ -1984,7 +1982,8 @@ std::string jump_if_action::get_jump_reason() const
 
     std::string reason;
     
-    if ( last_jump_by_on_devices && !on_devices.empty() )
+    // Если есть устройства, которые должны быть включены
+    if ( !on_devices.empty() )
         {
         // Переход по активности сигнала
         reason = "по активности сигнала ";
@@ -1994,6 +1993,7 @@ std::string jump_if_action::get_jump_reason() const
             reason += on_devices[ i ]->get_name();
             }
         }
+    // Иначе, если есть устройства, которые должны быть выключены
     else if ( !off_devices.empty() )
         {
         // Переход по неактивности сигнала
