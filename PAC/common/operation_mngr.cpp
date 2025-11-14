@@ -364,12 +364,30 @@ int operation::process_new_state_from_run( int next_state )
             break;
 
         case state_idx::PAUSE:
+            {
             // Из выполнения по сигналам операция может быть
             // поставлена на паузу.
             unit->set_mode( operation_num, state_idx::PAUSE );
-            unit->set_err_msg( "пауза по запросу",
+            
+            // Получаем детальное описание причины перехода в паузу
+            auto action = ( *states[ RUN ]->get_mode_step() )[ step::A_JUMP_IF ];
+            auto jump_action = static_cast<jump_if_action*>( action );
+            auto reason = jump_action->get_jump_reason();
+            
+            std::string msg = "пауза ";
+            if ( !reason.empty() )
+                {
+                msg += reason;
+                }
+            else
+                {
+                msg += "по запросу";
+                }
+            
+            unit->set_err_msg( msg.c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
             break;
+            }
 
         default:
             //Остальные варианты игнорируем.
@@ -1861,10 +1879,17 @@ bool jump_if_action::is_jump( int& next )
         {
         if ( idx < next_n.size() ) next = next_n[ idx ];
    
-        auto res = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
-            check( devices[ idx ][ G_OFF_DEVICES ], false );
+        auto on_devices_ok = check( devices[ idx ][ G_ON_DEVICES ], true );
+        auto off_devices_ok = check( devices[ idx ][ G_OFF_DEVICES ], false );
+        auto res = on_devices_ok && off_devices_ok;
 
-        if ( res ) return true;
+        if ( res )
+            {
+            last_jump_idx = idx;
+            // Определяем, был ли переход из-за активности или неактивности сигнала
+            last_jump_by_on_devices = !devices[ idx ][ G_ON_DEVICES ].empty();
+            return true;
+            }
         }
 
     return false;
@@ -1945,6 +1970,42 @@ void jump_if_action::print( const char* prefix, bool new_line ) const
         {
         printf( "\n" );
         }
+    }
+//-----------------------------------------------------------------------------
+std::string jump_if_action::get_jump_reason() const
+    {
+    if ( last_jump_idx >= devices.size() )
+        {
+        return "";
+        }
+
+    const auto& on_devices = devices[ last_jump_idx ][ G_ON_DEVICES ];
+    const auto& off_devices = devices[ last_jump_idx ][ G_OFF_DEVICES ];
+
+    std::string reason;
+    
+    if ( last_jump_by_on_devices && !on_devices.empty() )
+        {
+        // Переход по активности сигнала
+        reason = "по активности сигнала ";
+        for ( size_t i = 0; i < on_devices.size(); ++i )
+            {
+            if ( i > 0 ) reason += ", ";
+            reason += on_devices[ i ]->get_name();
+            }
+        }
+    else if ( !off_devices.empty() )
+        {
+        // Переход по неактивности сигнала
+        reason = "по неактивности сигнала ";
+        for ( size_t i = 0; i < off_devices.size(); ++i )
+            {
+            if ( i > 0 ) reason += ", ";
+            reason += off_devices[ i ]->get_name();
+            }
+        }
+    
+    return reason;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

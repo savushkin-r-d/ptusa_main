@@ -407,6 +407,11 @@ class jump_if_action : public action
 
         void print( const char* prefix = "", bool new_line = true ) const override;
 
+        /// @brief Получение информации о последнем сработавшем переходе.
+        ///
+        /// @return Строка с описанием устройств, вызвавших переход, или пустая строка.
+        std::string get_jump_reason() const;
+
     private:
         bool check( const std::vector< device* > &checked_devices,
             bool check_is_opened ) const;
@@ -421,6 +426,10 @@ class jump_if_action : public action
 
         // Устройства.
         std::vector < int > next_n;
+        
+        // Информация о последнем сработавшем переходе.
+        mutable size_t last_jump_idx = 0;
+        mutable bool last_jump_by_on_devices = false;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -629,6 +638,15 @@ class operation_state
         bool is_goto_next_state( int& next_state ) const;
 
         void set_step_cooperate_time_par_n( int step_cooperate_time_par_number );
+
+        /// @brief Получение шага состояния (mode_step).
+        ///
+        /// @return Указатель на mode_step.
+        step* get_mode_step() const
+            {
+            return mode_step;
+            }
+
     private:
         std::string name;
         std::vector< step* > steps;
