@@ -817,7 +817,8 @@ TEST( operation, evaluate )
 	auto main_step_in_pause = ( *operation_pause_state )[ -1 ];
 
 	int next = 0;
-	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next );
+    std::string reason = "";
+	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next, reason );
 	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next );
 
@@ -1148,7 +1149,8 @@ TEST( operation, evaluate_from_run_to_pause )
 	auto main_step_in_run = ( *operation_run_state )[ -1 ];
 
 	int next = 0;
-	auto is_goto_next_state = operation_run_state->is_goto_next_state( next );
+    std::string reason = "";
+	auto is_goto_next_state = operation_run_state->is_goto_next_state( next, reason );
 	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next );
 
@@ -1766,7 +1768,8 @@ TEST( jump_if_action, is_goto_next_step )
 		( ( *step )[ step::ACTIONS::A_JUMP_IF ] );
 
 	int next_step = 0;
-	auto is_goto_next_step = action->is_jump( next_step );
+    std::string reason = "";
+	auto is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( false, is_goto_next_step );  //Empty next state.
 	EXPECT_EQ( -1, next_step );
 
@@ -1774,10 +1777,11 @@ TEST( jump_if_action, is_goto_next_step )
 	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
 	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
 
+    reason.clear();
 	EXPECT_EQ( -1, action->get_int_property( "no_exist", 0 ) );
 	next_step = action->get_int_property( "next_step_n", 0 );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
-    is_goto_next_step = action->is_jump( next_step );
+    is_goto_next_step = action->is_jump( next_step, reason );
     //Empty device list - unconditional jump.
     EXPECT_EQ( true, is_goto_next_step );
 
@@ -1792,7 +1796,8 @@ TEST( jump_if_action, is_goto_next_step )
 
 	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
 	//перехода.
-	is_goto_next_step = action->is_jump( next_step );
+    reason.clear();
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -1800,7 +1805,8 @@ TEST( jump_if_action, is_goto_next_step )
 	test_DI_one.on();
 	test_DI_two.on();
 	test_valve.off();
-	is_goto_next_step = action->is_jump( next_step );
+    reason.clear();
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -1808,7 +1814,8 @@ TEST( jump_if_action, is_goto_next_step )
 	test_DI_one.on();
 	test_DI_two.off();
 	test_valve.off();
-	is_goto_next_step = action->is_jump( next_step );
+    reason.clear();
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -1816,8 +1823,9 @@ TEST( jump_if_action, is_goto_next_step )
 	test_DI_one.off();
 	test_DI_two.off();
 	test_valve.on();
+    reason.clear();
 	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
-	is_goto_next_step = action->is_jump( next_step );
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -1834,13 +1842,15 @@ TEST( jump_if_action, is_goto_next_step )
 
 	//По умолчанию кнопка неактивна, к новому шагу не должно быть
 	//перехода.
-	is_goto_next_step = action->is_jump( next_step );
+    reason.clear();
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_FALSE( is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем состояние кнопки, к новому шагу должен быть переход.
 	test_SB1.on();
-	is_goto_next_step = action->is_jump( next_step );
+    reason.clear();
+	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_TRUE( is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 	}
