@@ -217,7 +217,7 @@ TEST( uni_io_manager, read_inputs )
     EXPECT_EQ( res, 1 );
     const std::string EXP_TIME = "2025-03-12 00.00.00 ";
     const std::string expectedOutput =
-        EXP_TIME + ANSI_COLOR_GREEN +
+        EXP_TIME + ANSI_COLOR_RED +
         R"(ERROR  (3) -> Read DI:bus coupler returned error. "A300":"127.0.0.1" )"
         "(received code=2, expected=2, received size=0, expected=1).\n" +
         ANSI_COLOR_RESET +
