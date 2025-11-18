@@ -360,7 +360,7 @@ int operation::process_new_state_from_run( int next_state, std::string& reason )
         {
         case state_idx::STOP:
             // Из выполнения по сигналам операция может быть остановлена.
-            unit->set_err_msg( reason.c_str(),
+            unit->set_err_msg( ( "автоотключение " + reason ).c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
             unit->set_mode( operation_num, state_idx::STOP );
             break;
@@ -369,7 +369,7 @@ int operation::process_new_state_from_run( int next_state, std::string& reason )
             // Из выполнения по сигналам операция может быть
             // поставлена на паузу.
             unit->set_mode( operation_num, state_idx::PAUSE );
-            unit->set_err_msg( reason.c_str(),
+            unit->set_err_msg( ( "пауза " + reason ).c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
             break;
 
@@ -1872,7 +1872,6 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
             // Если есть устройства, которые должны быть включены.
             if ( !on_devices.empty() )
                 {
-                // Переход по активности сигнала.
                 reason += "по активности сигнала ";
                 for ( size_t i = 0; i < on_devices.size(); ++i )
                     {
@@ -1888,7 +1887,7 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
             // Если есть устройства, которые должны быть выключены.
             if ( !off_devices.empty() )
                 {
-                // Переход по неактивности сигнала
+                if ( !on_devices.empty() ) reason += "и ";
                 reason += "по неактивности сигнала ";
                 for ( size_t i = 0; i < off_devices.size(); ++i )
                     {
