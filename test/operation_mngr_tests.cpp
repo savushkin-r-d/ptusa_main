@@ -1175,7 +1175,22 @@ TEST( operation, evaluate_from_run_to_pause )
 	if_action_in_run->set_int_property( "next_state_n", 0,
 		operation::state_idx::PAUSE );
 	test_DI_one.on();
+    testing::internal::CaptureStdout();   
+    G_DEBUG = 1;
 	test_op->evaluate();
+    G_DEBUG = 0;
+    auto output = testing::internal::GetCapturedStdout();
+    auto reference_out =
+R"(BEGIN "Танк1 1" (T) set operation №1 ("Test operation") --> PAUSE.
+    "Шаг операции"
+ { }
+END "Танк1 1" set operation № 1 --> PAUSE, res = 0.
+state[ 0 ] = 1 (1)
+
+Событие -> 'Танк1 1' - авария операции 1 'Test operation' - пауза по активности сигнала 'test_DI1'.
+)";
+    EXPECT_EQ( output, reference_out );
+
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 
 		

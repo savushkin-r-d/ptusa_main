@@ -11,7 +11,10 @@
 #include "operation_mngr.h"
 #include "g_errors.h"
 
+using namespace std::literals; // Enables ""s literal.
 #include <fmt/chrono.h>
+
+class tech_object; // From `tech_def.h`.
 
 constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
 constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
@@ -245,20 +248,21 @@ void operation::evaluate()
         {
         states[ current_state ]->evaluate();
 
-        int next_state = 0;
+        int next_state_idx = 0;
         std::string reason;
-        auto res = states[ current_state ]->is_goto_next_state( next_state,
+        reason.reserve( tech_object::err_info::CONSTANTS::MAX_STR_LENGTH );
+        auto res = states[ current_state ]->is_goto_next_state( next_state_idx,
             reason );
         if ( res )
             {
             auto unit = owner->owner;
-            auto n_state = static_cast<state_idx>( next_state );
+            auto next_state = static_cast<state_idx>( next_state_idx );
             switch ( current_state )
                 {
                 case state_idx::IDLE:
-                    //Из простоя по сигналам операция может быть включена 
-                    //(перейти в состояние выполнения).
-                    process_auto_switch_on();
+                    // Из простоя по сигналам операция может быть включена 
+                    // (перейти в состояние выполнения).
+                    process_auto_switch_on( reason );
                     break;
 
                 case state_idx::RUN:
@@ -266,15 +270,15 @@ void operation::evaluate()
                     break;
 
                 case state_idx::STARTING:
-                    default_process_new_state( n_state, state_idx::RUN );
+                    default_process_new_state( next_state, state_idx::RUN );
                     break;
 
                 case state_idx::PAUSING:
-                    default_process_new_state( n_state, state_idx::PAUSE );
+                    default_process_new_state( next_state, state_idx::PAUSE );
                     break;
 
                 case state_idx::UNPAUSING:
-                    default_process_new_state( n_state, state_idx::RUN );
+                    default_process_new_state( next_state, state_idx::RUN );
                     break;
 
                 case state_idx::STOPPING:
@@ -298,7 +302,7 @@ void operation::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-int operation::process_auto_switch_on()
+int operation::process_auto_switch_on( std::string& reason )
     {
     auto unit = owner->owner;
     const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
@@ -311,7 +315,8 @@ int operation::process_auto_switch_on()
         auto result = unit->set_mode( operation_num, operation::RUN );
         if ( result == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
+            unit->set_err_msg( ( "автовключение " + reason ).c_str(),
+                operation_num, 0, WARN );
             return 0;
             }
         else
@@ -329,7 +334,8 @@ int operation::process_auto_switch_on()
 
         if ( unit->check_operation_on( operation_num, false ) == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
+            unit->set_err_msg( ( "автовключение " + reason ).c_str(),
+                operation_num, 0, WARN );
             unit->set_mode( operation_num, operation::RUN );
             return 0;
             }
@@ -360,7 +366,7 @@ int operation::process_new_state_from_run( int next_state, std::string& reason )
         {
         case state_idx::STOP:
             // Из выполнения по сигналам операция может быть остановлена.
-            unit->set_err_msg( ( "автоотключение " + reason ).c_str(),
+            unit->set_err_msg( ( "остановка " + reason ).c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
             unit->set_mode( operation_num, state_idx::STOP );
             break;
@@ -387,13 +393,14 @@ int operation::default_process_new_state( state_idx next_state, state_idx def_st
     if ( next_state == state_idx::STOP )
         {
         // По сигналам операция может быть остановлена.
-        unit->set_err_msg( "автоотключение по запросу",
+        unit->set_err_msg( "остановка по запросу",
             operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
         unit->set_mode( operation_num, state_idx::STOP );
         }
     else if ( next_state == def_state )
         {
-        // По сигналам операция может перейти в последующее состояние.
+        // По сигналам операция может перейти в последующее состояние. Сообщение
+        // не выводим.
         unit->set_mode( operation_num, def_state );
         }
 
@@ -1872,29 +1879,20 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
             // Если есть устройства, которые должны быть включены.
             if ( !on_devices.empty() )
                 {
-                reason += "по активности сигнала ";
-                for ( size_t i = 0; i < on_devices.size(); ++i )
+                reason += "по активности сигнала '"s + on_devices[ 0 ]->get_name() + "'";
+                for ( size_t i = 1; i < on_devices.size(); ++i )
                     {
-                    if ( i > 0 )
-                        {
-                        reason += ", ";
-                        }
-                    reason += "'";
-                    reason += on_devices[ i ]->get_name();
-                    reason += "'";
+                    reason += ", '"s + on_devices[ i ]->get_name() + "'";
                     }
                 }
             // Если есть устройства, которые должны быть выключены.
             if ( !off_devices.empty() )
                 {
                 if ( !on_devices.empty() ) reason += "и ";
-                reason += "по неактивности сигнала ";
-                for ( size_t i = 0; i < off_devices.size(); ++i )
+                reason += "по неактивности сигнала '"s + off_devices[ 0 ]->get_name() + "'";
+                for ( size_t i = 1; i < off_devices.size(); ++i )
                     {
-                    if ( i > 0 ) reason += ", ";
-                    reason += "'";
-                    reason += off_devices[ i ]->get_name();
-                    reason += "'";
+                    reason += ", '"s + off_devices[ i ]->get_name() + "'";
                     }
                 }
 
