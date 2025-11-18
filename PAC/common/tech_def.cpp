@@ -110,7 +110,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( "%sBEGIN \"%s %d\" (%s) set operation №%u (\"%s\") --> %s.\n",
+        printf( "%sBEGIN \"%s %d\" (%s) set operation №%u (\"%s\") --> %s.",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -122,6 +122,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx++ ] = ' ';
         white_spaces[ idx + 1 ] = 0;
         SetColor( RESET );
+        printf( "\n" );
         }
 
     int i = operation_n - 1;

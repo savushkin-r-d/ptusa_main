@@ -905,7 +905,8 @@ class operation
     private:
         int process_auto_switch_on( std::string& reason );
 
-        int process_new_state_from_run( int next_state, std::string& reason );
+        int process_new_state_from_run( int next_state,
+            const std::string& reason );
 
         /// @brief Обработка перехода по умолчанию - переход к остановке
         /// или к следующему состоянию.

@@ -359,7 +359,8 @@ int operation::process_auto_switch_on( std::string& reason )
     return 1;
     }
 //-----------------------------------------------------------------------------
-int operation::process_new_state_from_run( int next_state, std::string& reason )
+int operation::process_new_state_from_run( int next_state,
+    const std::string& reason )
     {
     auto unit = owner->owner;
     switch ( static_cast<state_idx>( next_state ) )
@@ -1865,42 +1866,46 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
         {
         return false;
         }
+    auto is_jump = false;
+    size_t idx = 0;
 
-    for ( size_t idx = 0; idx < devices.size(); idx++ )
+    for ( idx = 0; idx < devices.size(); idx++ )
         {
         if ( idx < next_n.size() ) next = next_n[ idx ];
-
-        const auto& on_devices = devices[ idx ][ G_ON_DEVICES ];
-        const auto& off_devices = devices[ idx ][ G_OFF_DEVICES ];
-        auto res = check( on_devices, true ) && check( off_devices, false );
-
-        if ( res )
+        is_jump = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
+            check( devices[ idx ][ G_OFF_DEVICES ], false );
+        if ( is_jump )
             {
-            // Если есть устройства, которые должны быть включены.
-            if ( !on_devices.empty() )
-                {
-                reason += "по активности сигнала '"s + on_devices[ 0 ]->get_name() + "'";
-                for ( size_t i = 1; i < on_devices.size(); ++i )
-                    {
-                    reason += ", '"s + on_devices[ i ]->get_name() + "'";
-                    }
-                }
-            // Если есть устройства, которые должны быть выключены.
-            if ( !off_devices.empty() )
-                {
-                if ( !on_devices.empty() ) reason += "и ";
-                reason += "по неактивности сигнала '"s + off_devices[ 0 ]->get_name() + "'";
-                for ( size_t i = 1; i < off_devices.size(); ++i )
-                    {
-                    reason += ", '"s + off_devices[ i ]->get_name() + "'";
-                    }
-                }
-
-            return true;
+            break;
             }
         }
 
-    return false;
+    if ( is_jump )
+        {
+        const auto& on_devices = devices[ idx ][ G_ON_DEVICES ];
+        const auto& off_devices = devices[ idx ][ G_OFF_DEVICES ];
+        // Если есть устройства, которые должны быть включены.
+        if ( !on_devices.empty() )
+            {
+            reason += "по активности сигнала '"s + on_devices[ 0 ]->get_name() + "'";
+            for ( size_t i = 1; i < on_devices.size(); ++i )
+                {
+                reason += ", '"s + on_devices[ i ]->get_name() + "'";
+                }
+            }
+        // Если есть устройства, которые должны быть выключены.
+        if ( !off_devices.empty() )
+            {
+            if ( !on_devices.empty() ) reason += "и ";
+            reason += "по неактивности сигнала '"s + off_devices[ 0 ]->get_name() + "'";
+            for ( size_t i = 1; i < off_devices.size(); ++i )
+                {
+                reason += ", '"s + off_devices[ i ]->get_name() + "'";
+                }
+            }
+        }
+
+    return is_jump;
     }
 //-----------------------------------------------------------------------------
 bool jump_if_action::check(
