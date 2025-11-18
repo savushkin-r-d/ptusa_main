@@ -264,32 +264,32 @@ int tech_object::set_mode( u_int operation_n, int newm )
         printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
             white_spaces, name, number, operation_n, str, res);        
 
-        SetColor( RESET );
-
         switch ( res )
             {
             case 1:
-                printf( " (is already %s).\n", newm == 0 ? "OFF" : " ON" );
+                printf( " (is already %s).", newm == 0 ? "OFF" : " ON" );
                 break;
 
             case 3:
-                printf( " (mode %d > modes count %d).\n",  operation_n, operations_count );
+                printf( " (mode %d > modes count %d).",  operation_n, operations_count );
                 break;
 
             case 4:
-                printf( " (no zero (0) mode).\n" );
+                printf( " (no zero (0) mode)." );
                 break;
 
              default:
                  if ( res > 100 )
                     {
-                    printf( " (can't on).\n" );
+                    printf( " (can't on)." );
                     break;
                     }
 
-                printf( ".\n" );
+                printf( "." );
                 break;
             }
+        SetColor( RESET );
+        printf( "\n" );
 
         for ( u_int i = 0; i < state.size(); i++ )
             {
@@ -299,6 +299,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
             printf( ")\n" );
             }
         printf( "\n" );
+
         }
 
     return res;
