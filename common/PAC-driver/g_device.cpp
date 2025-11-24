@@ -21,6 +21,9 @@ const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
 bool device_communicator::use_compression = true;
+
+// Minimum size to benefit from compression (avoid overhead for small data)
+const u_int MIN_COMPRESSION_SIZE = 128;
 //-----------------------------------------------------------------------------
 void print_str( const char *err_str, char is_need_CR )
     {
@@ -291,11 +294,8 @@ long device_communicator::write_devices_states_service(
             break;
         }
 
-
     // Skip compression for small data (compression overhead is not worth it)
     // and use faster compression level for better performance
-    const u_int MIN_COMPRESSION_SIZE = 128;  // Minimum size to benefit from compression
-    
     if ( answer_size > MIN_COMPRESSION_SIZE && use_compression )
         {
         unsigned long r = sizeof( buff );
