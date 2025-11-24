@@ -123,44 +123,48 @@ TEST( open_seat_action, evaluate )
     // шага 10 с (10'000 мс)).
     EXPECT_EQ( w_time, 2000 );
 
-    const int FLIP_INTERVAL_MS = 5;
-    const int FLIP_DURATION_MS = 2;
+    const int FLIP_INTERVAL_MS = 500;
+    const int FLIP_DURATION_MS = 200;
     G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
     G_PAC_INFO()->par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
 	reinterpret_cast<open_seat_action*>( action )->set_wait_time( FLIP_INTERVAL_MS );
 
 	action->evaluate();  // Wait
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
+	EXPECT_FALSE( test_DO1.is_active() );
+	EXPECT_FALSE( test_DO2.is_active() );
 
-	sleep_ms( FLIP_INTERVAL_MS + 1 );
+    DeltaMilliSecSubHooker::set_millisec( FLIP_INTERVAL_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_default_time();
 
 	action->evaluate(); // Upper seats
-	EXPECT_EQ( true, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
-	sleep_ms( FLIP_DURATION_MS + 1 );
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_millisec( FLIP_DURATION_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_default_time();
 
 	action->evaluate();  // Wait
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
-	sleep_ms( FLIP_INTERVAL_MS + 1 );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_millisec( FLIP_INTERVAL_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_default_time();
 
 	action->evaluate(); // Lower seats
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( true, test_DO2.is_active() );
-	sleep_ms( FLIP_DURATION_MS + 1 );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_TRUE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_millisec( FLIP_DURATION_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO1.is_active() );
-	EXPECT_EQ( false, test_DO2.is_active() );
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    DeltaMilliSecSubHooker::set_default_time();
 
 	action->finalize();
 	}
