@@ -159,7 +159,7 @@ TEST( tcp_communicator, recvtimeout )
     G_CMMCTR->evaluate();
 
     auto res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat);
+        tcp_communicator::get_master_socket(), buff, SIZE, 1, 1, "", "", &stat);
     EXPECT_EQ( res, -2 );
     //Проверяем, что время ожидания истекло.
     EXPECT_GE( stat.all_time, 1000 );
