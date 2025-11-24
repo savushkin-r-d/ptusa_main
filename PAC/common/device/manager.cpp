@@ -1554,12 +1554,14 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_
         {
         int i = ( l + u ) / 2;
 
-        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) == 0 )
+        // Store comparison result to avoid calling strcmp twice
+        int cmp = strcmp( dev_name, project_devices[ i ]->get_name() );
+        
+        if ( cmp == 0 )
             {
             return i;
             }
-
-        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) > 0 )
+        else if ( cmp > 0 )
             {
             l = i + 1;
             }
