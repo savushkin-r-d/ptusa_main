@@ -39,4 +39,9 @@ public:
         {
         DeltaMilliSecSubHooker::set_millisec( millisec );
         }
+
+    ~DeltaMilliSecSubHooker()
+        {
+        DeltaMilliSecSubHooker::set_default_time();
+        }
     };
