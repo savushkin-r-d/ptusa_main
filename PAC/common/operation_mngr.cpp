@@ -1895,7 +1895,7 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
         // Если есть устройства, которые должны быть выключены.
         if ( !off_devices.empty() )
             {
-            if ( !on_devices.empty() ) reason += "и ";
+            if ( !on_devices.empty() ) reason += " и ";
             reason += "по неактивности сигнала '"s + off_devices[ 0 ]->get_name() + "'";
             for ( size_t i = 1; i < off_devices.size(); ++i )
                 {
