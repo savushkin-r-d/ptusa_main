@@ -300,8 +300,9 @@ long device_communicator::write_devices_states_service(
         {
         unsigned long r = sizeof( buff );
         // Use Z_BEST_SPEED (1) instead of Z_DEFAULT_COMPRESSION (6) for better performance
-        // while still providing reasonable compression for network transfer
-        int res = compress2( (u_char*)buff, &r, outdata, answer_size, Z_BEST_SPEED );
+        // while still providing reasonable compression for network transfer.
+        int res = compress2( reinterpret_cast<u_char*>( buff ), &r,
+            outdata, answer_size, Z_BEST_SPEED );
 
         // Only use compressed data if it's actually smaller
         if ( res == Z_OK && r > 0 && r < answer_size )
