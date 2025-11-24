@@ -10,11 +10,10 @@
 
 #include "operation_mngr.h"
 #include "g_errors.h"
+#include "tech_def.h"
 
 using namespace std::literals; // Enables ""s literal.
 #include <fmt/chrono.h>
-
-class tech_object; // From `tech_def.h`.
 
 constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
 constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
