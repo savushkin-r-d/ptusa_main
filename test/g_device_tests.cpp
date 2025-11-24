@@ -42,7 +42,7 @@ TEST( device_communicator, write_devices_states_service )
 
     data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( '\0', out_data[ 0 ] ); // Error count starts with 0x0000
+    EXPECT_EQ( 'a', out_data[ 0 ] ); // "alarms[...]"
 
     data[ 0 ] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
