@@ -455,34 +455,47 @@ TEST( tech_object, set_mode )
         auto res = tank.set_mode( OPER_N2, operation::RUN );
         EXPECT_EQ( 3, res ); //Нет такой операции.
         auto output = testing::internal::GetCapturedStdout();
-        EXPECT_EQ( output, R"(
-BEGIN "TANK 1" (TANK1) set operation № 2 ("") --> ON.)
-Error operation_manager::operator[] idx 2 > operations count 1.
-END "TANK 1" set operation № 2 --> OFF, res = 3 (mode 2 > modes count 1).
-state[ 0 ] = 0 (0)
-
-)" + 1 );
+        EXPECT_EQ( output, 
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 2 ("") --> ON.))" ANSI_COLOR_RESET "\n"
+            R"(Error operation_manager::operator[] idx 2 > operations count 1.)" "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 2 --> OFF, res = 3 (mode 2 > modes count 1).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)\n"
+            "\n" );
 
         testing::internal::CaptureStdout();
         res = tank.set_mode( OPER_N1, operation::IDLE );        
         output = testing::internal::GetCapturedStdout();
         EXPECT_EQ( 1, res ); //Операция уже остановлена.
-        EXPECT_EQ( output, R"(
-BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> OFF.)
-END "TANK 1" set operation № 1 --> OFF, res = 1 (is already OFF).
-state[ 0 ] = 0 (0)
-
-)" + 1 );
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> OFF.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> OFF, res = 1 (is already OFF).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)" "\n"
+            "\n" );
 
         testing::internal::CaptureStdout();
         res = tank.set_mode( OPER_N1, operation::RUN );
         output = testing::internal::GetCapturedStdout();
         EXPECT_EQ( 0, res );
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> ON.))" ANSI_COLOR_RESET "\n"    
+            R"(    "Шаг операции")" "\n"
+            " { }\n"
+            R"(    "TANK" operation 1 "RUN" to_step() -> 1, next step 2)" "\n"
+            R"(    "Init")" "\n"
+            " { }\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> RUN, res = 0.)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 1 (1)" "\n"            
+            "\n" );
 
         testing::internal::CaptureStdout();
         res = tank.set_mode( OPER_N1, operation::RUN );
         output = testing::internal::GetCapturedStdout();
         EXPECT_EQ( 1, res ); //Операция уже выполняется.
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> ON.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> RUN, res = 1 (is already ON).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 1 (1)" "\n"
+            "\n" );
     
 
         G_LUA_MANAGER->free_Lua();

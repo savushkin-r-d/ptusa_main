@@ -267,7 +267,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         switch ( res )
             {
             case 1:
-                printf( " (is already %s).", newm == 0 ? "OFF" : " ON" );
+                printf( " (is already %s).", newm == 0 ? "OFF" : "ON" );
                 break;
 
             case 3:
