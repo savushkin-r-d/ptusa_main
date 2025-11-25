@@ -1186,7 +1186,7 @@ TEST( operation, evaluate_from_run_to_pause )
 
     auto output = testing::internal::GetCapturedStdout();
     auto reference_out =
-        ANSI_COLOR_GREEN R"(BEGIN "Танк1 1" (T) set operation №1 ("Test operation") --> PAUSE.)" ANSI_COLOR_RESET "\n"
+        ANSI_COLOR_GREEN R"(BEGIN "Танк1 1" (T) set operation № 1 ("Test operation") --> PAUSE.))" ANSI_COLOR_RESET "\n"
                          R"(    "Шаг операции")" "\n"
                            " { }" "\n"
         ANSI_COLOR_GREEN R"(END "Танк1 1" set operation № 1 --> PAUSE, res = 0.)" ANSI_COLOR_RESET "\n"

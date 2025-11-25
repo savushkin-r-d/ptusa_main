@@ -11,9 +11,9 @@
 #include "operation_mngr.h"
 #include "g_errors.h"
 #include "tech_def.h"
+#include <fmt/chrono.h>
 
 using namespace std::literals; // Enables ""s literal.
-#include <fmt/chrono.h>
 
 constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
 constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
@@ -301,7 +301,7 @@ void operation::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-int operation::process_auto_switch_on( std::string& reason )
+int operation::process_auto_switch_on( const std::string& reason )
     {
     auto unit = owner->owner;
     const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
@@ -320,7 +320,8 @@ int operation::process_auto_switch_on( std::string& reason )
             }
         else
             {
-            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
+            unit->set_err_msg( ( "нет автовключения " + reason ).c_str(),
+                operation_num, 0, ERR);
             start_warn = get_millisec();
             start_wait = get_millisec();
             is_first_goto_next_state = false;
@@ -343,14 +344,17 @@ int operation::process_auto_switch_on( std::string& reason )
         if ( get_delta_millisec( start_warn ) > dt )
             {
             unit->check_operation_on( operation_num );
-            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
+            unit->set_err_msg( ( "нет автовключения " + reason ).c_str(),
+                operation_num, 0, ERR);
             start_warn = get_millisec();
             }
 
-        // Прошел заданный интервал для ожидания возможности включения операции.
+        // Прошел заданный интервал для ожидания возможности включения
+        // операции.
         if ( get_delta_millisec( start_wait ) > wt )
             {
-            unit->set_err_msg( "автовключение по запросу отключено", operation_num, 0, ERR );
+            unit->set_err_msg( "автовключение по запросу отключено",
+                operation_num, 0, ERR );
             was_fail = true;
             }
         }
@@ -1883,6 +1887,14 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
         {
         const auto& on_devices = devices[ idx ][ G_ON_DEVICES ];
         const auto& off_devices = devices[ idx ][ G_OFF_DEVICES ];
+
+        // If unconditional jump (no on_devices and no off_devices),
+        // set default reason.
+        if ( on_devices.empty() && off_devices.empty() )
+            {
+            reason = "по запросу";
+            }
+
         // Если есть устройства, которые должны быть включены.
         if ( !on_devices.empty() )
             {

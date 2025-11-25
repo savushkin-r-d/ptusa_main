@@ -110,7 +110,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( "%sBEGIN \"%s %d\" (%s) set operation №%u (\"%s\") --> %s.",
+        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.))",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -261,7 +261,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         const auto str = current_op_state < operation::state_idx::STATES_MAX ?
             operation::en_state_str.at( current_op_state ) : "?";
 
-        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
+        printf( "%sEND \"%s %d\" set operation № %u --> %s, res = %d",
             white_spaces, name, number, operation_n, str, res);        
 
         switch ( res )
