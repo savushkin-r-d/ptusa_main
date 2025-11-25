@@ -2464,7 +2464,8 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
             const unsigned int OFFSET = 4;
             res.out -= OFFSET;
             // Удаляем часть некорректного utf8 символа при его наличии.
-            // UTF-8 continuation bytes are in range 0x80-0xBF.
+            // Skip backwards over any UTF-8 continuation bytes (0x80-0xBF) 
+            // to find a valid character boundary.
             while ( res.out > err_dev_name &&
                 ( static_cast<unsigned char>( *( res.out - 1 ) ) & 0xC0 ) == 0x80 )
                 {
@@ -2472,6 +2473,8 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
                 }
             // Удаляем ведущий байт многобайтовой последовательности UTF-8,
             // если он остался (0xC0-0xFF).
+            // Remove the leading byte of a UTF-8 multi-byte sequence if 
+            // present (0xC0-0xFF).
             if ( res.out > err_dev_name &&
                 static_cast<unsigned char>( *( res.out - 1 ) ) >= 0xC0 )
                 {
