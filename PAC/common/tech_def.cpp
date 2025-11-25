@@ -257,7 +257,11 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx ] = 0;
 
         SetColor( GREEN );
-        auto current_op_state = ( *operations_manager )[ operation_n ]->get_state();
+        auto current_op_state = operation::state_idx::IDLE;
+        if ( res <= 1 )
+            {
+            current_op_state = ( *operations_manager )[ operation_n ]->get_state();
+            }
         const auto str = current_op_state < operation::state_idx::STATES_MAX ?
             operation::en_state_str.at( current_op_state ) : "?";
 

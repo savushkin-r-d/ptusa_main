@@ -457,7 +457,6 @@ TEST( tech_object, set_mode )
         auto output = testing::internal::GetCapturedStdout();
         EXPECT_EQ( output, 
             ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 2 ("") --> ON.))" ANSI_COLOR_RESET "\n"
-            R"(Error operation_manager::operator[] idx 2 > operations count 1.)" "\n"
             ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 2 --> OFF, res = 3 (mode 2 > modes count 1).)" ANSI_COLOR_RESET "\n"
             "state[ 0 ] = 0 (0)\n"
             "\n" );
