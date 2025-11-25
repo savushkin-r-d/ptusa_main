@@ -275,11 +275,13 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             case 3:
-                printf( " (mode %d > modes count %d).",  operation_n, operations_count );
+                printf( " (mode %d > modes count %d).",  operation_n,
+                    operations_count );
                 break;
 
             case 4:
-                printf( " (no zero (0) mode)." );
+                printf( " (mode index must be in [1..%d], got 0).",
+                    operations_count );
                 break;
 
              default:

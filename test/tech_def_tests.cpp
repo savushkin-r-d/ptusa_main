@@ -449,12 +449,23 @@ TEST( tech_object, set_mode )
         operation_1->add_step( "Init", 2, -1 );
         operation_1->add_step( "Process #1", 3, -1 );
         operation_1->add_step( "Process #2", 2, -1 );
+        
+        G_DEBUG = 1;
 
         testing::internal::CaptureStdout();
-        G_DEBUG = 1;
-        auto res = tank.set_mode( OPER_N2, operation::RUN );
-        EXPECT_EQ( 3, res ); //Нет такой операции.
+        auto res = tank.set_mode( 0, operation::IDLE );
+        EXPECT_EQ( 4, res ); //Нет такой операции.
         auto output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( output, 
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 0 ("") --> OFF.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 0 --> OFF, res = 4 (mode index must be in [1..1], got 0).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)\n"
+            "\n" );
+
+        testing::internal::CaptureStdout();
+        res = tank.set_mode( OPER_N2, operation::RUN );
+        EXPECT_EQ( 3, res ); //Нет такой операции.
+        output = testing::internal::GetCapturedStdout();
         EXPECT_EQ( output, 
             ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 2 ("") --> ON.))" ANSI_COLOR_RESET "\n"
             ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 2 --> OFF, res = 3 (mode 2 > modes count 1).)" ANSI_COLOR_RESET "\n"
