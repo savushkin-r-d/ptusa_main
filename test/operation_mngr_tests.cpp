@@ -823,7 +823,7 @@ TEST( operation, evaluate )
 	int next = 0;
     std::string reason = "";
 	auto is_goto_next_state = operation_idle_state->is_goto_next_state( next, reason );
-	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+	EXPECT_EQ( false, is_goto_next_state );		//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next );
 
 	auto if_action_in_idle = reinterpret_cast<jump_if_action*>
@@ -1155,7 +1155,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	int next = 0;
     std::string reason = "";
 	auto is_goto_next_state = operation_run_state->is_goto_next_state( next, reason );
-	EXPECT_EQ( false, is_goto_next_state );			//Empty if_action_in_idle.
+	EXPECT_EQ( false, is_goto_next_state );		//Empty if_action_in_idle.
 	EXPECT_EQ( -1, next );
 
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
@@ -1708,8 +1708,8 @@ TEST( wash_action, print )
 	testing::internal::CaptureStdout();
 	action.print();
 	output = testing::internal::GetCapturedStdout();
-	EXPECT_EQ( "Устройства DI's DO's DEV's R_DEV's AI:"
-		" { {test_DI1} {test_DO1} {M1} {M2} {} } ; FREQ_PARAM {1}\n", output );
+	EXPECT_EQ( "Устройства DI's DO's DEV's R_DEV's AI: "
+		"{ {test_DI1} {test_DO1} {M1} {M2} {} } ; FREQ_PARAM {1}\n", output );
 	}
 
 
@@ -1802,12 +1802,18 @@ TEST( jump_if_action, is_goto_next_step )
     //Empty device list - unconditional jump.
     EXPECT_EQ( true, is_goto_next_step );
 
-    DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+    DI1 test_DI_1_1( "test_DI1_1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-    action->add_dev( &test_DI_one, 0, 0 );
-    DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+    DI1 test_DI_1_2( "test_DI1_2", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-    action->add_dev( &test_DI_two, 0, 1 );
+    action->add_dev( &test_DI_1_1, 0, 0 );
+    action->add_dev( &test_DI_1_2, 0, 0 );
+    DI1 test_DI_2_1( "test_DI2_1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    DI1 test_DI_2_2( "test_DI2_2", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    action->add_dev( &test_DI_2_1, 0, 1 );
+    action->add_dev( &test_DI_2_2, 0, 1 );
     valve_DO1 test_valve( "V3" );
     action->add_dev( &test_valve, 1, 0 );
 
@@ -1819,8 +1825,10 @@ TEST( jump_if_action, is_goto_next_step )
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем сигналы, к новому шагу не должно быть перехода.
-	test_DI_one.on();
-	test_DI_two.on();
+	test_DI_1_1.on();
+	test_DI_1_2.on();
+	test_DI_2_1.on();
+	test_DI_2_2.on();
 	test_valve.off();
     reason.clear();
 	is_goto_next_step = action->is_jump( next_step, reason );
@@ -1828,17 +1836,24 @@ TEST( jump_if_action, is_goto_next_step )
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	//Устанавливаем сигналы, к новому шагу должен быть переход.
-	test_DI_one.on();
-	test_DI_two.off();
+	test_DI_1_1.on();
+    test_DI_1_2.on();
+	test_DI_2_1.off();
+    test_DI_2_2.off();
 	test_valve.off();
     reason.clear();
 	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    EXPECT_EQ( reason, "по активности сигнала 'test_DI1_1', 'test_DI1_2' "
+        "и по неактивности сигнала 'test_DI2_1', 'test_DI2_2'" );
 
-	//Устанавливаем сигналы, к новому шагу должен быть переход.
-	test_DI_one.off();
-	test_DI_two.off();
+	//Устанавливаем сигналы (клапан V3), к новому шагу должен быть
+    // переход.
+	test_DI_1_1.off();
+	test_DI_1_2.off();
+	test_DI_2_1.off();
+	test_DI_2_2.off();
 	test_valve.on();
     reason.clear();
 	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
