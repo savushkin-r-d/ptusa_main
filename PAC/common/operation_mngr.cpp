@@ -2464,8 +2464,19 @@ int operation_state::check_max_step_time( char* err_dev_name, unsigned int str_l
             const unsigned int OFFSET = 4;
             res.out -= OFFSET;
             // Удаляем часть некорректного utf8 символа при его наличии.
-            if ( static_cast<unsigned char>( *( res.out - 1 ) ) == 0xD0 )
+            // UTF-8 continuation bytes are in range 0x80-0xBF.
+            while ( res.out > err_dev_name &&
+                ( static_cast<unsigned char>( *( res.out - 1 ) ) & 0xC0 ) == 0x80 )
+                {
                 res.out--;
+                }
+            // Удаляем ведущий байт многобайтовой последовательности UTF-8,
+            // если он остался (0xC0-0xFF).
+            if ( res.out > err_dev_name &&
+                static_cast<unsigned char>( *( res.out - 1 ) ) >= 0xC0 )
+                {
+                res.out--;
+                }
 
             *res.out++ = '.';
             *res.out++ = '.';
