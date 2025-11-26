@@ -1801,6 +1801,7 @@ TEST( jump_if_action, is_goto_next_step )
     is_goto_next_step = action->is_jump( next_step, reason );
     //Empty device list - unconditional jump.
     EXPECT_EQ( true, is_goto_next_step );
+    EXPECT_EQ( reason, "по запросу" );
 
     DI1 test_DI_1_1( "test_DI1_1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
@@ -1845,8 +1846,8 @@ TEST( jump_if_action, is_goto_next_step )
 	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
-    EXPECT_EQ( reason, "по активности сигнала 'test_DI1_1', 'test_DI1_2' "
-        "и по неактивности сигнала 'test_DI2_1', 'test_DI2_2'" );
+    EXPECT_EQ( reason, "по активности 'test_DI1_1', 'test_DI1_2' "
+        "и по неактивности 'test_DI2_1', 'test_DI2_2'" );
 
 	//Устанавливаем сигналы (клапан V3), к новому шагу должен быть
     // переход.
@@ -1860,6 +1861,7 @@ TEST( jump_if_action, is_goto_next_step )
 	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    EXPECT_EQ( reason, "по активности 'V3'" );
 
 	//Выполняем операцию, должен осуществиться переход к новому шагу.
 	operation->evaluate();
@@ -1885,4 +1887,5 @@ TEST( jump_if_action, is_goto_next_step )
 	is_goto_next_step = action->is_jump( next_step, reason );
 	EXPECT_TRUE( is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    EXPECT_EQ( reason, "по активности 'test_SB1'" );
 	}
