@@ -1864,6 +1864,7 @@ jump_if_action::jump_if_action( const char* name ) :
 //-----------------------------------------------------------------------------
 bool jump_if_action::is_jump( int& next, std::string& reason )
     {
+    reason.clear();
     next = -1;
     if ( next_n.empty() )
         {
@@ -1898,7 +1899,7 @@ bool jump_if_action::is_jump( int& next, std::string& reason )
         // Если есть устройства, которые должны быть включены.
         if ( !on_devices.empty() )
             {
-            reason += "по активности сигнала '"s + on_devices[ 0 ]->get_name() + "'";
+            reason = "по активности сигнала '"s + on_devices[ 0 ]->get_name() + "'";
             for ( size_t i = 1; i < on_devices.size(); ++i )
                 {
                 reason += ", '"s + on_devices[ i ]->get_name() + "'";
