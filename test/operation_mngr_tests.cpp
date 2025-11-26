@@ -1192,7 +1192,7 @@ TEST( operation, evaluate_from_run_to_pause )
         ANSI_COLOR_GREEN R"(END "Танк1 1" set operation № 1 --> PAUSE, res = 0.)" ANSI_COLOR_RESET "\n"
                            "state[ 0 ] = 1 (1)\n"
                            "\n"
-                         R"(Событие -> 'Танк1 1' - авария операции 1 'Test operation' - пауза по активности сигнала 'test_DI1'.)" "\n";
+                         R"(Событие -> 'Танк1 1' - авария операции 1 'Test operation' - пауза по активности 'test_DI1'.)" "\n";
 
     EXPECT_EQ( output, reference_out );
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );		
