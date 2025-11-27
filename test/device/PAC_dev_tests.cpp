@@ -1844,6 +1844,11 @@ TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     // raw input data from the line above).
     EXPECT_NEAR( test_dev.get_value(), 1686.83f, .01f );
 
+    const auto EH_PMP23_CA7N1KB3CJ = "E&H.PMP23-CA7N1KB3CJ";
+    test_dev.set_article( EH_PMP23_CA7N1KB3CJ );
+    test_dev.evaluate_io();
+    EXPECT_NEAR( test_dev.get_value(), 1686.83f, .01f );
+
     G_PAC_INFO()->emulation_on();
     }
 
