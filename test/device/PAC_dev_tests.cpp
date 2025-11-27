@@ -1776,10 +1776,15 @@ TEST( pressure_e_iolink, read_article )
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1717 );
     EXPECT_STREQ( test_dev.get_article(), IFM_PM1717 );
 
-    const auto EH_PMP23 = "E&H.PMP23";
-    test_dev.set_article( EH_PMP23 );
+    const auto EH_PMP23_CA7N2KB3CJ = "E&H.PMP23-CA7N2KB3CJ";
+    test_dev.set_article( EH_PMP23_CA7N2KB3CJ );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::EH_PMP23 );
-    EXPECT_STREQ( test_dev.get_article(), EH_PMP23 );
+    EXPECT_STREQ( test_dev.get_article(), EH_PMP23_CA7N2KB3CJ );
+
+    const auto EH_PMP23_CA7N1KB3CJ = "E&H.PMP23-CA7N1KB3CJ";
+    test_dev.set_article( EH_PMP23_CA7N1KB3CJ );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::EH_PMP23 );
+    EXPECT_STREQ( test_dev.get_article(), EH_PMP23_CA7N1KB3CJ );
     }
 
 TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
@@ -1832,11 +1837,11 @@ TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
-    const auto EH_PMP23 = "E&H.PMP23";
+    const auto EH_PMP23 = "E&H.PMP23-CA7N2KB3CJ";
     test_dev.set_article( EH_PMP23 );
     test_dev.evaluate_io();
-    // Value should calculate to 1686.83f for the E&H.PMP23 (100 as raw
-    // input data from the line above).
+    // Value should calculate to 1686.83f for the E&H.PMP23-CA7N2KB3CJ (100 as
+    // raw input data from the line above).
     EXPECT_NEAR( test_dev.get_value(), 1686.83f, .01f );
 
     G_PAC_INFO()->emulation_on();
