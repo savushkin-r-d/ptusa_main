@@ -2260,10 +2260,10 @@ void operation_state::evaluate()
     if ( int next_step = -1; if_action->is_jump( next_step, reason ) )
         {
         if ( next_step >= 0 )
-            {            
+            {
+            G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
             if ( G_DEBUG )
                 {
-                G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
                 if_action->print();
                 }
             to_step( next_step );
