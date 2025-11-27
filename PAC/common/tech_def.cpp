@@ -333,7 +333,7 @@ int tech_object::evaluate()
         auto op = ( *operations_manager )[ idx ];
         op->evaluate();
 
-        const unsigned int ERR_STR_SIZE = 80;
+        const unsigned int ERR_STR_SIZE = 150;
 
         if ( G_PAC_INFO()->par[ PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR ] == 0 &&
             op->get_state() == operation::RUN )

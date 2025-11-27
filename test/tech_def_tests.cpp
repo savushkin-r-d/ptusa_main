@@ -132,7 +132,8 @@ TEST( tech_object, evaluate )
 
     const unsigned int STEP_N3 = 3;
     const unsigned int STEP_N3_MAX_DURATION_PAR_IDX = 5;
-    operation_1->add_step( "1  Шаг с очень длинным названием #3", -1, -1,
+    operation_1->add_step( "1  Шаг с очень длинным названием, "
+        "очень-очень длинным названием #3", -1, -1,
         STEP_N3_MAX_DURATION_PAR_IDX );
     tank->par_float[ STEP_N3_MAX_DURATION_PAR_IDX ] = 1;
     operation_1->to_step( STEP_N3 );    
@@ -142,7 +143,9 @@ TEST( tech_object, evaluate )
     tank->evaluate();
     DeltaMilliSecSubHooker::set_default_time();
     auto msg =
-        R"(Событие -> 'O1 1' - авария операции 1 'Test operation' - превышено макс. t (1 с) шага 3 '1  Шаг с очень ...'.
+        R"(Событие -> 'O1 1' - авария операции 1 'Test operation' - )"
+        R"(превышено макс. t (1 с) шага 3 '1  Шаг с очень длинным названием, )"
+        R"(очень-очень длинны...'.
 FINAL ACTIVE STEP №3
 "Шаг операции"
  { }
@@ -469,7 +472,7 @@ values=
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	} }
 )";
-	EXPECT_STREQ( REF_STR1, buff );
+    EXPECT_STREQ( REF_STR1, buff );
 
-	G_LUA_MANAGER->free_Lua();
+    G_LUA_MANAGER->free_Lua();
     }
