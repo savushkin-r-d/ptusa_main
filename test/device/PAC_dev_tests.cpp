@@ -1837,8 +1837,8 @@ TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
     test_dev.evaluate_io();
     EXPECT_NEAR( test_dev.get_value(), 3.91f, .01f );
 
-    const auto EH_PMP23 = "E&H.PMP23-CA7N2KB3CJ";
-    test_dev.set_article( EH_PMP23 );
+    const auto EH_PMP23_CA7N2KB3CJ = "E&H.PMP23-CA7N2KB3CJ";
+    test_dev.set_article( EH_PMP23_CA7N2KB3CJ );
     test_dev.evaluate_io();
     // Value should calculate to 1686.83f for the E&H.PMP23-CA7N2KB3CJ (100 as
     // raw input data from the line above).
