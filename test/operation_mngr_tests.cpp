@@ -572,6 +572,42 @@ TEST( operation, check_max_step_time )
 	G_LUA_MANAGER->free_Lua();
 	}
 
+TEST( operation, check_max_step_time_utf8_truncation )
+	{
+	// Test for correct UTF-8 truncation when step name contains characters
+	// from different UTF-8 leading byte ranges (0xD0 and 0xD1).
+	// This tests the fix for the bug where long Cyrillic step names were
+	// incorrectly truncated, producing garbled output.
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Коагулятор", 1, 1, "T", 1, 0, 10, 0, 0, 0 );
+	const auto MAX_TIME_IDX = 1;
+	test_tank.par_float[ MAX_TIME_IDX ] = 100;
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Мойка" );
+
+	// Step name uses letters from both 0xD0 and 0xD1 UTF-8 leading byte ranges.
+	// "р" is 0xD1 0x80, while "о", "п" are 0xD0 0xBE, 0xD0 0xBF respectively.
+	auto res = test_op->add_step( "Попытка опорожнения коагулятора", -1, -1, MAX_TIME_IDX );
+	EXPECT_NE( res, nullptr );
+	test_op->start();
+	test_tank.evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	DeltaMilliSecSubHooker::set_millisec( 100'001UL );
+
+	const unsigned int ERR_STR_SIZE = 80;
+	char err_str[ ERR_STR_SIZE ] = {};
+	test_op->check_max_step_time( err_str, ERR_STR_SIZE );
+	// The truncated message should end with valid UTF-8, not garbled characters.
+	// With proper UTF-8 handling, truncation should produce:
+	const auto RES_STR = "превышено макс. t (100 с) шага 1 'Попытка опо...'";
+	EXPECT_STREQ( RES_STR, err_str );
+
+	DeltaMilliSecSubHooker::set_default_time();
+	G_LUA_MANAGER->free_Lua();
+	}
+
 TEST( operation, operator_at )
 	{
 	char* res = 0;
