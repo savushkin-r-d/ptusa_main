@@ -26,32 +26,30 @@ TEST( device_communicator, write_devices_states_service )
     device_communicator::write_devices_states_service(0, data, out_data);
     EXPECT_EQ('\0', out_data[0]);
 
-    // After optimization, small data (< 128 bytes) is not compressed
-    // So we expect uncompressed data instead of zlib header 'x' (0x78)
     data[ 0 ] = device_communicator::CMD_GET_INFO_ON_CONNECT;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( 'p', out_data[ 0 ] ); // "protocol_version = ..."
+    EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_GET_DEVICES;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( '\0', out_data[ 0 ] ); // g_devices_request_id starts with 0x0000
+    EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_GET_DEVICES_STATES;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( '\0', out_data[ 0 ] ); // g_devices_request_id starts with 0x0000
+    EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( 'a', out_data[ 0 ] ); // "alarms[...]"
+    EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
     device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( '\0', out_data[ 0 ] ); // Empty command result
+    EXPECT_EQ( 'x', out_data[ 0 ] );
 
     unsigned char recman_data[IN_BUFF_SIZE] = " __RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
     recman_data[0] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
     device_communicator::write_devices_states_service(cmd_size, recman_data, out_data);
-    EXPECT_EQ('\x1', out_data[0]); // Command result: 1 = success
+    EXPECT_EQ('x', out_data[0]);
 
     G_LUA_MANAGER->free_Lua();
     }

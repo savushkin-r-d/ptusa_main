@@ -21,9 +21,6 @@ const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
 bool device_communicator::use_compression = true;
-
-// Minimum size to benefit from compression (avoid overhead for small data)
-const u_int MIN_COMPRESSION_SIZE = 128;
 //-----------------------------------------------------------------------------
 void print_str( const char *err_str, char is_need_CR )
     {
@@ -294,31 +291,24 @@ long device_communicator::write_devices_states_service(
             break;
         }
 
-    // Skip compression for small data (compression overhead is not worth it)
-    // and use faster compression level for better performance
-    if ( answer_size > MIN_COMPRESSION_SIZE && use_compression )
+
+    if ( answer_size > 0 && use_compression )
         {
         unsigned long r = sizeof( buff );
-        // Use Z_BEST_SPEED (1) instead of Z_DEFAULT_COMPRESSION (6) for better performance
-        // while still providing reasonable compression for network transfer.
-        int res = compress2( reinterpret_cast<u_char*>( buff ), &r,
-            outdata, answer_size, Z_BEST_SPEED );
+        int res = compress( (u_char*)buff, &r, outdata, answer_size );
 
-        // Only use compressed data if it's actually smaller
-        if ( res == Z_OK && r > 0 && r < answer_size )
+        if ( res == Z_OK && r > 0 )
             {
             memcpy( outdata, buff, r );
             answer_size = r;
             }
-        else if ( res != Z_OK )
+        else
             {
-            // Compression failed - return error indicator
             outdata[ 0 ] = 0;
             outdata[ 1 ] = 0; //Возвращаем 0.
 
             answer_size = 2;
             }
-        // If compressed size >= original size, keep original data (no copy needed)
         }
 
     return answer_size;
