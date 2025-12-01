@@ -3175,7 +3175,8 @@ void pressure_e_iolink::read_article( const char* article,
         return;
         }
 
-    if ( strcmp( article, "E&H.PMP23" ) == 0 )
+    if ( strcmp( article, "E&H.PMP23-CA7N2KB3CJ" ) == 0 ||
+        strcmp( article, "E&H.PMP23-CA7N1KB3CJ" ) == 0 )
         {
         n_article = ARTICLE::EH_PMP23;
         return;
