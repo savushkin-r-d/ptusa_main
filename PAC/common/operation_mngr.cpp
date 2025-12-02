@@ -10,8 +10,10 @@
 
 #include "operation_mngr.h"
 #include "g_errors.h"
-
+#include "tech_def.h"
 #include <fmt/chrono.h>
+
+using namespace std::literals; // Enables ""s literal.
 
 constexpr std::array <const char* const, operation::STATES_MAX> operation::state_str;
 constexpr std::array <const char* const, operation::STATES_MAX> operation::en_state_str;
@@ -245,34 +247,37 @@ void operation::evaluate()
         {
         states[ current_state ]->evaluate();
 
-        int next_state = 0;
-        auto res = states[ current_state ]->is_goto_next_state( next_state );
+        int next_state_idx = 0;
+        std::string reason;
+        reason.reserve( tech_object::err_info::CONSTANTS::MAX_STR_LENGTH );
+        auto res = states[ current_state ]->is_goto_next_state( next_state_idx,
+            reason );
         if ( res )
             {
             auto unit = owner->owner;
-            auto n_state = static_cast<state_idx>( next_state );
+            auto next_state = static_cast<state_idx>( next_state_idx );
             switch ( current_state )
                 {
                 case state_idx::IDLE:
-                    //Из простоя по сигналам операция может быть включена 
-                    //(перейти в состояние выполнения).
-                    process_auto_switch_on();
+                    // Из простоя по сигналам операция может быть включена 
+                    // (перейти в состояние выполнения).
+                    process_auto_switch_on( reason );
                     break;
 
                 case state_idx::RUN:
-                    process_new_state_from_run( next_state );
+                    process_new_state_from_run( next_state, reason );
                     break;
 
                 case state_idx::STARTING:
-                    default_process_new_state( n_state, state_idx::RUN );
+                    default_process_new_state( next_state, state_idx::RUN );
                     break;
 
                 case state_idx::PAUSING:
-                    default_process_new_state( n_state, state_idx::PAUSE );
+                    default_process_new_state( next_state, state_idx::PAUSE );
                     break;
 
                 case state_idx::UNPAUSING:
-                    default_process_new_state( n_state, state_idx::RUN );
+                    default_process_new_state( next_state, state_idx::RUN );
                     break;
 
                 case state_idx::STOPPING:
@@ -296,7 +301,7 @@ void operation::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-int operation::process_auto_switch_on()
+int operation::process_auto_switch_on( const std::string& reason )
     {
     auto unit = owner->owner;
     const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
@@ -309,12 +314,14 @@ int operation::process_auto_switch_on()
         auto result = unit->set_mode( operation_num, operation::RUN );
         if ( result == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
+            unit->set_err_msg( ( "автовключение " + reason ).c_str(),
+                operation_num, 0, WARN );
             return 0;
             }
         else
             {
-            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
+            unit->set_err_msg( ( "нет автовключения " + reason ).c_str(),
+                operation_num, 0, ERR);
             start_warn = get_millisec();
             start_wait = get_millisec();
             is_first_goto_next_state = false;
@@ -327,7 +334,8 @@ int operation::process_auto_switch_on()
 
         if ( unit->check_operation_on( operation_num, false ) == 0 )
             {
-            unit->set_err_msg( "автовключение по запросу", operation_num, 0, WARN );
+            unit->set_err_msg( ( "автовключение " + reason ).c_str(),
+                operation_num, 0, WARN );
             unit->set_mode( operation_num, operation::RUN );
             return 0;
             }
@@ -336,14 +344,17 @@ int operation::process_auto_switch_on()
         if ( get_delta_millisec( start_warn ) > dt )
             {
             unit->check_operation_on( operation_num );
-            unit->set_err_msg( "нет автовключения по запросу", operation_num, 0, ERR );
+            unit->set_err_msg( ( "нет автовключения " + reason ).c_str(),
+                operation_num, 0, ERR);
             start_warn = get_millisec();
             }
 
-        // Прошел заданный интервал для ожидания возможности включения операции.
+        // Прошел заданный интервал для ожидания возможности включения
+        // операции.
         if ( get_delta_millisec( start_wait ) > wt )
             {
-            unit->set_err_msg( "автовключение по запросу отключено", operation_num, 0, ERR );
+            unit->set_err_msg( "автовключение по запросу отключено",
+                operation_num, 0, ERR );
             was_fail = true;
             }
         }
@@ -351,14 +362,15 @@ int operation::process_auto_switch_on()
     return 1;
     }
 //-----------------------------------------------------------------------------
-int operation::process_new_state_from_run( int next_state )
+int operation::process_new_state_from_run( int next_state,
+    const std::string& reason )
     {
     auto unit = owner->owner;
     switch ( static_cast<state_idx>( next_state ) )
         {
         case state_idx::STOP:
             // Из выполнения по сигналам операция может быть остановлена.
-            unit->set_err_msg( "автоотключение по запросу",
+            unit->set_err_msg( ( "остановка " + reason ).c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
             unit->set_mode( operation_num, state_idx::STOP );
             break;
@@ -367,7 +379,7 @@ int operation::process_new_state_from_run( int next_state )
             // Из выполнения по сигналам операция может быть
             // поставлена на паузу.
             unit->set_mode( operation_num, state_idx::PAUSE );
-            unit->set_err_msg( "пауза по запросу",
+            unit->set_err_msg( ( "пауза " + reason ).c_str(),
                 operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_TO_FAIL_STATE );
             break;
 
@@ -385,13 +397,14 @@ int operation::default_process_new_state( state_idx next_state, state_idx def_st
     if ( next_state == state_idx::STOP )
         {
         // По сигналам операция может быть остановлена.
-        unit->set_err_msg( "автоотключение по запросу",
+        unit->set_err_msg( "остановка по запросу",
             operation_num, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
         unit->set_mode( operation_num, state_idx::STOP );
         }
     else if ( next_state == def_state )
         {
-        // По сигналам операция может перейти в последующее состояние.
+        // По сигналам операция может перейти в последующее состояние. Сообщение
+        // не выводим.
         unit->set_mode( operation_num, def_state );
         }
 
@@ -1849,25 +1862,62 @@ jump_if_action::jump_if_action( const char* name ) :
     {
     }
 //-----------------------------------------------------------------------------
-bool jump_if_action::is_jump( int& next )
+bool jump_if_action::is_jump( int& next, std::string& reason )
     {
+    reason.clear();
     next = -1;
     if ( next_n.empty() )
         {
         return false;
         }
+    auto is_jump = false;
+    size_t idx = 0;
 
-    for ( size_t idx = 0; idx < devices.size(); idx++ )
+    for ( idx = 0; idx < devices.size(); idx++ )
         {
         if ( idx < next_n.size() ) next = next_n[ idx ];
-   
-        auto res = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
+        is_jump = check( devices[ idx ][ G_ON_DEVICES ], true ) &&
             check( devices[ idx ][ G_OFF_DEVICES ], false );
-
-        if ( res ) return true;
+        if ( is_jump )
+            {
+            break;
+            }
         }
 
-    return false;
+    if ( is_jump )
+        {
+        const auto& on_devices = devices[ idx ][ G_ON_DEVICES ];
+        const auto& off_devices = devices[ idx ][ G_OFF_DEVICES ];
+
+        // If unconditional jump (no on_devices and no off_devices),
+        // set default reason.
+        if ( on_devices.empty() && off_devices.empty() )
+            {
+            reason = "по запросу";
+            }
+
+        // Если есть устройства, которые должны быть включены.
+        if ( !on_devices.empty() )
+            {
+            reason = "по активности '"s + on_devices[ 0 ]->get_name() + "'";
+            for ( size_t i = 1; i < on_devices.size(); ++i )
+                {
+                reason += ", '"s + on_devices[ i ]->get_name() + "'";
+                }
+            }
+        // Если есть устройства, которые должны быть выключены.
+        if ( !off_devices.empty() )
+            {
+            if ( !on_devices.empty() ) reason += " и ";
+            reason += "по неактивности '"s + off_devices[ 0 ]->get_name() + "'";
+            for ( size_t i = 1; i < off_devices.size(); ++i )
+                {
+                reason += ", '"s + off_devices[ i ]->get_name() + "'";
+                }
+            }
+        }
+
+    return is_jump;
     }
 //-----------------------------------------------------------------------------
 bool jump_if_action::check(
@@ -2206,13 +2256,14 @@ void operation_state::evaluate()
     auto active_step = steps[ active_step_n ];
     auto action = ( *active_step )[ step::A_JUMP_IF ];
     auto if_action = static_cast<jump_if_action*>( action );
-    if ( int next_step = -1; if_action->is_jump( next_step ) )
+    auto reason = std::string();
+    if ( int next_step = -1; if_action->is_jump( next_step, reason ) )
         {
         if ( next_step >= 0 )
             {
+            G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
             if ( G_DEBUG )
                 {
-                printf( "Переход к новому шагу. " );
                 if_action->print();
                 }
             to_step( next_step );
@@ -2555,11 +2606,12 @@ bool operation_state::is_empty() const
     return true;
     }
 //-----------------------------------------------------------------------------
-bool operation_state::is_goto_next_state( int& next_state ) const
+bool operation_state::is_goto_next_state( int& next_state,
+    std::string& reason ) const
     {
     auto action = ( *mode_step )[ step::A_JUMP_IF ];
     auto to_new_state = static_cast<jump_if_action*>( action );
-    return to_new_state->is_jump( next_state );
+    return to_new_state->is_jump( next_state, reason );
     }
 //-----------------------------------------------------------------------------
 void operation_state::set_step_cooperate_time_par_n(

@@ -110,7 +110,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( "%sBEGIN \"%s %d\" (%s) set operation №%u (\"%s\") --> %s.\n",
+        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.))",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -122,6 +122,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx++ ] = ' ';
         white_spaces[ idx + 1 ] = 0;
         SetColor( RESET );
+        printf( "\n" );
         }
 
     int i = operation_n - 1;
@@ -256,39 +257,45 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx ] = 0;
 
         SetColor( GREEN );
-        auto current_op_state = ( *operations_manager )[ operation_n ]->get_state();
+        auto current_op_state = operation::state_idx::IDLE;
+        if ( res <= 1 )
+            {
+            current_op_state = ( *operations_manager )[ operation_n ]->get_state();
+            }
         const auto str = current_op_state < operation::state_idx::STATES_MAX ?
             operation::en_state_str.at( current_op_state ) : "?";
 
-        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
+        printf( "%sEND \"%s %d\" set operation № %u --> %s, res = %d",
             white_spaces, name, number, operation_n, str, res);        
-
-        SetColor( RESET );
 
         switch ( res )
             {
             case 1:
-                printf( " (is already %s).\n", newm == 0 ? "OFF" : " ON" );
+                printf( " (is already %s).", newm == 0 ? "OFF" : "ON" );
                 break;
 
             case 3:
-                printf( " (mode %d > modes count %d).\n",  operation_n, operations_count );
+                printf( " (mode %d > modes count %d).",  operation_n,
+                    operations_count );
                 break;
 
             case 4:
-                printf( " (no zero (0) mode).\n" );
+                printf( " (mode index must be in [1..%d], got 0).",
+                    operations_count );
                 break;
 
              default:
                  if ( res > 100 )
                     {
-                    printf( " (can't on).\n" );
+                    printf( " (can't on)." );
                     break;
                     }
 
-                printf( ".\n" );
+                printf( "." );
                 break;
             }
+        SetColor( RESET );
+        printf( "\n" );
 
         for ( u_int i = 0; i < state.size(); i++ )
             {
@@ -298,6 +305,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
             printf( ")\n" );
             }
         printf( "\n" );
+
         }
 
     return res;

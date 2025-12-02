@@ -396,7 +396,7 @@ class jump_if_action : public action
     public:
         explicit jump_if_action( const char* name );
 
-        bool is_jump( int &next );
+        bool is_jump( int &next, std::string &reason );
 
         int set_int_property( const char* name, size_t idx, int value ) override;
 
@@ -626,7 +626,7 @@ class operation_state
         /// @return false Нет устройств, над которыми что-то делается.
         bool is_empty() const;
 
-        bool is_goto_next_state( int& next_state ) const;
+        bool is_goto_next_state( int& next_state, std::string& reason ) const;
 
         void set_step_cooperate_time_par_n( int step_cooperate_time_par_number );
     private:
@@ -903,9 +903,10 @@ class operation
         void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
     private:
-        int process_auto_switch_on();
+        int process_auto_switch_on( const std::string& reason );
 
-        int process_new_state_from_run( int next_state );
+        int process_new_state_from_run( int next_state,
+            const std::string& reason );
 
         /// @brief Обработка перехода по умолчанию - переход к остановке
         /// или к следующему состоянию.
