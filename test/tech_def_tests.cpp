@@ -132,7 +132,8 @@ TEST( tech_object, evaluate )
 
     const unsigned int STEP_N3 = 3;
     const unsigned int STEP_N3_MAX_DURATION_PAR_IDX = 5;
-    operation_1->add_step( "1  Шаг с очень длинным названием #3", -1, -1,
+    operation_1->add_step( "1  Шаг с очень длинным названием, "
+        "очень-очень длинным названием #3", -1, -1,
         STEP_N3_MAX_DURATION_PAR_IDX );
     tank->par_float[ STEP_N3_MAX_DURATION_PAR_IDX ] = 1;
     operation_1->to_step( STEP_N3 );    
@@ -142,7 +143,9 @@ TEST( tech_object, evaluate )
     tank->evaluate();
     DeltaMilliSecSubHooker::set_default_time();
     auto msg =
-        R"(Событие -> 'O1 1' - авария операции 1 'Test operation' - превышено макс. t (1 с) шага 3 '1  Шаг с очень ...'.
+        R"(Событие -> 'O1 1' - авария операции 1 'Test operation' - )"
+        R"(превышено макс. t (1 с) шага 3 '1  Шаг с очень длинным названием, )"
+        R"(очень-очень длинны...'.
 FINAL ACTIVE STEP №3
 "Шаг операции"
  { }
@@ -433,6 +436,84 @@ t.TANK1=
 	G_LUA_MANAGER->free_Lua();
     }
 
+TEST( tech_object, set_mode )
+        {
+        lua_State* L = lua_open();
+        ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+        G_LUA_MANAGER->set_Lua( L );
+
+        tech_object tank( "TANK", 1, 1, "TANK1", 1, 1, 10, 10, 10, 10 );
+        tank.get_modes_manager()->add_operation( "Test operation" );
+  
+        constexpr auto OPER_N1 = 1u;
+        constexpr auto OPER_N2 = 2u;
+        auto operation_1 = ( *tank.get_modes_manager() )[ OPER_N1 ];
+
+        operation_1->add_step( "Init", 2, -1 );
+        operation_1->add_step( "Process #1", 3, -1 );
+        operation_1->add_step( "Process #2", 2, -1 );
+        
+        G_DEBUG = 1;
+
+        testing::internal::CaptureStdout();
+        auto res = tank.set_mode( 0, operation::IDLE );
+        EXPECT_EQ( 4, res ); //Нет такой операции.
+        auto output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( output, 
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 0 ("") --> OFF.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 0 --> OFF, res = 4 (mode index must be in [1..1], got 0).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)\n"
+            "\n" );
+
+        testing::internal::CaptureStdout();
+        res = tank.set_mode( OPER_N2, operation::RUN );
+        EXPECT_EQ( 3, res ); //Нет такой операции.
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( output, 
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 2 ("") --> ON.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 2 --> OFF, res = 3 (mode 2 > modes count 1).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)\n"
+            "\n" );
+
+        testing::internal::CaptureStdout();
+        res = tank.set_mode( OPER_N1, operation::IDLE );        
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( 1, res ); //Операция уже остановлена.
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> OFF.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> OFF, res = 1 (is already OFF).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 0 (0)" "\n"
+            "\n" );
+
+        testing::internal::CaptureStdout();
+        res = tank.set_mode( OPER_N1, operation::RUN );
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( 0, res );
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> ON.))" ANSI_COLOR_RESET "\n"    
+            R"(    "Шаг операции")" "\n"
+            " { }\n"
+            R"(    "TANK" operation 1 "RUN" to_step() -> 1, next step 2)" "\n"
+            R"(    "Init")" "\n"
+            " { }\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> RUN, res = 0.)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 1 (1)" "\n"            
+            "\n" );
+
+        testing::internal::CaptureStdout();
+        res = tank.set_mode( OPER_N1, operation::RUN );
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_EQ( 1, res ); //Операция уже выполняется.
+        EXPECT_EQ( output,
+            ANSI_COLOR_GREEN R"(BEGIN "TANK 1" (TANK1) set operation № 1 ("Test operation") --> ON.))" ANSI_COLOR_RESET "\n"
+            ANSI_COLOR_GREEN R"(END "TANK 1" set operation № 1 --> RUN, res = 1 (is already ON).)" ANSI_COLOR_RESET "\n"
+            "state[ 0 ] = 1 (1)" "\n"
+            "\n" );
+    
+
+        G_LUA_MANAGER->free_Lua();
+        }
+
 TEST( tech_object_manager, save_params_as_Lua_str )
     {
 	lua_State* L = lua_open();
@@ -469,7 +550,7 @@ values=
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	} }
 )";
-	EXPECT_STREQ( REF_STR1, buff );
+    EXPECT_STREQ( REF_STR1, buff );
 
-	G_LUA_MANAGER->free_Lua();
+    G_LUA_MANAGER->free_Lua();
     }

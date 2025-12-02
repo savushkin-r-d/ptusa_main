@@ -390,13 +390,15 @@ ParamsRecipe &ParamsRecipeStorage::getActiveRecipeRef( )
 
 void ParamsRecipeStorage::serialize( )
     {
-    std::string filename = std::string( "recipes_" ) + std::to_string( mId ) + ".serialized";
+    // Use fmt::format for efficient string construction without temporary objects
+    std::string filename = fmt::format( "recipes_{}.serialized", mId );
     serialize( filename );
     }
 
 void ParamsRecipeStorage::deserialize( )
     {
-    std::string filename = std::string( "recipes_" ) + std::to_string( mId ) + ".serialized";
+    // Use fmt::format for efficient string construction without temporary objects
+    std::string filename = fmt::format( "recipes_{}.serialized", mId );
     deserialize( filename );
     }
 
@@ -471,7 +473,8 @@ void ParamsRecipeAdapter::serialize( const std::string &filename )
 
 void ParamsRecipeAdapter::serialize( )
     {
-    serialize( std::string( "paramsadapter_" ) + std::to_string( mId ) + ".serialized" );
+    // Use fmt::format for efficient string construction without temporary objects
+    serialize( fmt::format( "paramsadapter_{}.serialized", mId ) );
     }
 
 void ParamsRecipeAdapter::deserialize( const std::string &filename )
@@ -504,7 +507,8 @@ void ParamsRecipeAdapter::deserialize( const std::string &filename )
 
 void ParamsRecipeAdapter::deserialize( )
     {
-    deserialize( std::string( "paramsadapter_" ) + std::to_string( mId ) + ".serialized" );
+    // Use fmt::format for efficient string construction without temporary objects
+    deserialize( fmt::format( "paramsadapter_{}.serialized", mId ) );
     }
 
 int ParamsRecipeAdapter::getActiveState( ) const

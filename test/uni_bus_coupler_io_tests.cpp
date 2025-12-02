@@ -217,24 +217,14 @@ TEST( uni_io_manager, read_inputs )
     EXPECT_EQ( res, 1 );
     const std::string EXP_TIME = "2025-03-12 00.00.00 ";
     const std::string expectedOutput =
-        EXP_TIME +
-#if defined LINUX_OS
-        "\x1B[31m" +
-#endif
+        EXP_TIME + ANSI_COLOR_RED +
         R"(ERROR  (3) -> Read DI:bus coupler returned error. "A300":"127.0.0.1" )"
         "(received code=2, expected=2, received size=0, expected=1).\n" +
-#if defined LINUX_OS
-        "\x1B[0m" +
-#endif
-        EXP_TIME +
-#if defined LINUX_OS        
-        "\x1B[31m" +
-#endif
+        ANSI_COLOR_RESET +
+        EXP_TIME + ANSI_COLOR_RED +
         R"(ERROR  (3) -> Read AI:bus coupler returned error. "A100":"127.0.0.1" )"
-        "(received code=4, expected=4, received size=31, expected=2).\n"
-#if defined LINUX_OS
-        + "\x1B[0m"
-#endif
+        "(received code=4, expected=4, received size=31, expected=2).\n" +
+        ANSI_COLOR_RESET
         ;
     auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, expectedOutput );

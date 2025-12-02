@@ -217,9 +217,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         /// @return 1 - надо проверять.
         virtual int is_check_mode( int mode ) const;
 
-        struct  err_info
+        struct err_info
             {
-            enum CONSTATS
+            enum CONSTANTS
                 {
                 MAX_STR_LENGTH = 600,
                 };
