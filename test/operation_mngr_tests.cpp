@@ -744,6 +744,44 @@ TEST( operation, on_extra_step )
 	G_LUA_MANAGER->free_Lua();
 	}
 
+TEST( operation, on_extra_step_debug_output )
+	{
+	// Test that on_extra_step outputs to stdout (console) when G_DEBUG is enabled,
+	// not to the system message log. This verifies the fix for issue #1126.
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	test_op->add_step( "Init", -1, -1 );
+	test_op->add_step( "Extra step", -1, -1 );
+
+	auto const MAIN_STEP = 1;
+	auto const EXTRA_STEP = 2;
+
+	// Start operation without debug to set up initial state
+	G_DEBUG = 0;
+	test_op->start( MAIN_STEP );
+
+	// Enable debug and capture stdout to verify on_extra_step outputs to console
+	G_DEBUG = 1;
+	testing::internal::CaptureStdout();
+	test_op->on_extra_step( EXTRA_STEP );
+	auto output = testing::internal::GetCapturedStdout();
+
+	// Verify output contains the expected debug message pattern
+	EXPECT_NE( output.find( "on_extra_step()" ), std::string::npos );
+	EXPECT_NE( output.find( "-> " + std::to_string( EXTRA_STEP ) ), std::string::npos );
+	// Verify the output contains yellow color escape sequence (YELLOW from l_console.h)
+	EXPECT_NE( output.find( YELLOW ), std::string::npos );
+
+	// Clean up
+	G_DEBUG = 0;
+	test_op->finalize();
+	G_LUA_MANAGER->free_Lua();
+	}
+
 TEST( operation, get_name )
 	{
 	auto OP_NAME = "Test Operation";
