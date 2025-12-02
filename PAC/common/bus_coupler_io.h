@@ -362,8 +362,12 @@ class io_manager
 			enum STATES           ///< Cостояния работы с узлом.
 				{
 				ST_NO_CONNECT = 0,
-				ST_OK,
+				ST_OK = 1,
+				ST_PP_MODE = 2,
 				};
+
+			/// Bit 4 of Status Register (7996) indicates Plug-and-play mode.
+			static constexpr u_int_2 STATUS_REG_PP_MODE_BIT = 0x0010;
 
 			io_node::STATES  state;          ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
@@ -410,6 +414,13 @@ class io_manager
 
             bool flag_error_read_message = false; ///< Флаг для вывода сообщений об ошибке чтения.
             bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке записи.
+
+            u_int_2 status_register = 0; ///< Status register (7996) for Phoenix BK ETH.
+
+            /// @brief Get the display state of the node.
+            /// @return 1 - node connected and OK, -1 - node enabled but no connection, 
+            ///         2 - node in PP mode.
+            int get_display_state() const;
 
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.

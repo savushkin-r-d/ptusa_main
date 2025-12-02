@@ -1343,6 +1343,27 @@ void io_manager::io_node::print_log()
     G_LOG->write_log(i_log::P_DEBUG);
     }
 //-----------------------------------------------------------------------------
+int io_manager::io_node::get_display_state() const
+    {
+    if ( !is_active )
+        {
+        return ST_NO_CONNECT;
+        }
+
+    if ( state != ST_OK )
+        {
+        return -1;  // Node enabled but no connection.
+        }
+
+    // Check PP mode bit in status register for Phoenix BK ETH nodes.
+    if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_PP_MODE_BIT ) )
+        {
+        return ST_PP_MODE;
+        }
+
+    return ST_OK;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER()
     {

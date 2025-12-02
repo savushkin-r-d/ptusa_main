@@ -44,6 +44,7 @@ class uni_io_manager : public io_manager
             BUFF_SIZE = 262,
             PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
             PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
+            PHOENIX_STATUS_REGISTER_ADDRESS = 7996,
             };
 
         u_char buff[ BUFF_SIZE ] = { 0 };

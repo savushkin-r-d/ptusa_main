@@ -954,6 +954,23 @@ int uni_io_manager::read_inputs()
                     nd->flag_error_read_message = false;
                     } while (start_register < nd->AI_cnt);
                 } // if (nd->AI_cnt > 0)
+
+            // Read Status Register (7996) for PP mode detection.
+            if ( !nd->read_io_error_flag )
+                {
+                int result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
+                if ( result > 0 )
+                    {
+                    nd->status_register = static_cast<u_int_2>(
+                        256 * resultbuff[ 0 ] + resultbuff[ 1 ] );
+                    }
+                else
+                    {
+                    // Reset status register on read failure, don't set error flag
+                    // to not disrupt normal operation if register is not available.
+                    nd->status_register = 0;
+                    }
+                }
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 

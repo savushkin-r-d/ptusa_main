@@ -45,3 +45,71 @@ TEST( io_manager, print )
 	stat( tmp_name, &st );
 	EXPECT_GT( st.st_size, 0 );
 	}
+
+TEST( io_node, get_display_state_not_active )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = false;
+	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_not_connected )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;
+	EXPECT_EQ( -1, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_connected_ok )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = 0;  // No PP mode.
+	EXPECT_EQ( io_manager::io_node::ST_OK, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_pp_mode )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;  // PP mode active.
+	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_non_phoenix_node )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::WAGO_750_XXX_ETHERNET, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;  // PP mode bit set but not Phoenix.
+	// Non-Phoenix nodes should return ST_OK even if PP mode bit is set.
+	EXPECT_EQ( io_manager::io_node::ST_OK, node->get_display_state() );
+	}
