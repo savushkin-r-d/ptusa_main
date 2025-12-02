@@ -968,6 +968,10 @@ int uni_io_manager::read_inputs()
                     {
                     // Reset status register on read failure, don't set error flag
                     // to not disrupt normal operation if register is not available.
+#ifdef DEBUG_BK
+                    G_LOG->debug( "Failed to read status register (7996) for node \"%s\".",
+                        nd->name );
+#endif // DEBUG_BK
                     nd->status_register = 0;
                     }
                 }

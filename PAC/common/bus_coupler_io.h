@@ -415,7 +415,9 @@ class io_manager
             bool flag_error_read_message = false; ///< Флаг для вывода сообщений об ошибке чтения.
             bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке записи.
 
-            u_int_2 status_register = 0; ///< Status register (7996) for Phoenix BK ETH.
+            /// Status register (7996) for Phoenix BK ETH nodes.
+            /// Used to detect PP (Plug-and-Play) mode. Remains 0 for other node types.
+            u_int_2 status_register = 0;
 
             /// @brief Get the display state of the node.
             /// @return 1 - node connected and OK, -1 - node enabled but no connection, 
