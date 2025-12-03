@@ -760,9 +760,18 @@ TEST( operation, on_extra_step_debug_output )
 	auto const MAIN_STEP = 1;
 	auto const EXTRA_STEP = 2;
 
-	// Start operation without debug to set up initial state
+	// Start operation and test with debug disabled - no output should be produced
 	G_DEBUG = 0;
 	test_op->start( MAIN_STEP );
+	testing::internal::CaptureStdout();
+	test_op->on_extra_step( EXTRA_STEP );
+	auto output_no_debug = testing::internal::GetCapturedStdout();
+	// With G_DEBUG = 0, no debug output should be printed
+	EXPECT_TRUE( output_no_debug.empty() || 
+		output_no_debug.find( "on_extra_step()" ) == std::string::npos );
+
+	// Turn off the extra step for re-testing
+	test_op->off_extra_step( EXTRA_STEP );
 
 	// Enable debug and capture stdout to verify on_extra_step outputs to console
 	G_DEBUG = 1;
@@ -775,6 +784,8 @@ TEST( operation, on_extra_step_debug_output )
 	EXPECT_NE( output.find( "-> " + std::to_string( EXTRA_STEP ) ), std::string::npos );
 	// Verify the output contains yellow color escape sequence (YELLOW from l_console.h)
 	EXPECT_NE( output.find( YELLOW ), std::string::npos );
+	// Verify the output also contains the RESET color code
+	EXPECT_NE( output.find( RESET ), std::string::npos );
 
 	// Clean up
 	G_DEBUG = 0;
