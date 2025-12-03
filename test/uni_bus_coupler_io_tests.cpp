@@ -373,6 +373,19 @@ class MockUniIoManager : public uni_io_manager
             const char*, int, int, int, int ), ( const, override ) );
         // Переопределяем e_communicate, чтобы не было реального обмена
         MOCK_METHOD( int, e_communicate, ( io_node*, int, int ), ( override ) );
+
+        // Expose read_input_registers for testing
+        int public_read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station = 0 )
+            {
+            return read_input_registers( node, address, quantity, station );
+            }
+
+        // Expose resultbuff for testing
+        u_char* get_resultbuff()
+            {
+            return resultbuff;
+            }
     };
 
 class UniBusCouplerIoTest : public ::testing::Test
@@ -437,4 +450,79 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
     EXPECT_EQ( res, 1 );
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, "" ); //Здесь уже не должно быть сообщения.
+    }
+
+// Test that status register field exists and can be set/read for different node types
+TEST( io_node, status_register_only_for_phoenix )
+    {
+    io_manager::get_instance()->init( 2 );
+    
+    // Add Phoenix BK ETH node
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+    
+    // Add WAGO node  
+    io_manager::get_instance()->add_node( 1,
+        io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
+        "A200", 0, 0, 0, 0, 0, 0 );
+
+    auto phoenix_node = io_manager::get_instance()->get_node( 0 );
+    auto wago_node = io_manager::get_instance()->get_node( 1 );
+    
+    // Set same status register for both
+    phoenix_node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+    wago_node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+    
+    phoenix_node->is_active = true;
+    phoenix_node->state = io_manager::io_node::ST_OK;
+    wago_node->is_active = true;
+    wago_node->state = io_manager::io_node::ST_OK;
+    
+    // Only Phoenix should report PP mode
+    EXPECT_EQ( phoenix_node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( wago_node->get_display_state(), io_manager::io_node::ST_OK );
+    }
+
+// Test status register field initialization  
+TEST( io_node, status_register_initialized_to_zero )
+    {
+    io_manager::get_instance()->init( 1 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+
+    auto node = io_manager::get_instance()->get_node( 0 );
+    
+    // Status register should be initialized to 0
+    EXPECT_EQ( node->status_register, 0 );
+    }
+
+// Test PP mode bit detection with various register values
+TEST( io_node, pp_mode_bit_detection )
+    {
+    io_manager::get_instance()->init( 1 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+
+    auto node = io_manager::get_instance()->get_node( 0 );
+    node->is_active = true;
+    node->state = io_manager::io_node::ST_OK;
+    
+    // Test various register values
+    node->status_register = 0x0000;  // No bits set
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
+    
+    node->status_register = 0x0010;  // Only PP mode bit
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    node->status_register = 0x00FF;  // PP mode + other lower bits
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    node->status_register = 0xFF10;  // PP mode + other bits
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    node->status_register = 0xFFEF;  // All bits except PP mode
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     }
