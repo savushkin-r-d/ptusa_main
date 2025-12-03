@@ -767,8 +767,7 @@ TEST( operation, on_extra_step_debug_output )
 	test_op->on_extra_step( EXTRA_STEP );
 	auto output_no_debug = testing::internal::GetCapturedStdout();
 	// With G_DEBUG = 0, no debug output should be printed
-	EXPECT_TRUE( output_no_debug.empty() || 
-		output_no_debug.find( "on_extra_step()" ) == std::string::npos );
+	EXPECT_TRUE( output_no_debug.empty() );
 
 	// Turn off the extra step for re-testing
 	test_op->off_extra_step( EXTRA_STEP );
@@ -780,12 +779,11 @@ TEST( operation, on_extra_step_debug_output )
 	auto output = testing::internal::GetCapturedStdout();
 
 	// Verify output contains the expected debug message pattern
-	EXPECT_NE( output.find( "on_extra_step()" ), std::string::npos );
-	EXPECT_NE( output.find( "-> " + std::to_string( EXTRA_STEP ) ), std::string::npos );
-	// Verify the output contains yellow color escape sequence (YELLOW from l_console.h)
-	EXPECT_NE( output.find( YELLOW ), std::string::npos );
-	// Verify the output also contains the RESET color code
-	EXPECT_NE( output.find( RESET ), std::string::npos );
+    auto reference_out = 
+    ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2 (0 ms).)" ANSI_COLOR_RESET "\n"
+                      R"("Extra step")" "\n"
+                      " { }\n";
+	EXPECT_EQ( output, reference_out );
 
 	// Clean up
 	G_DEBUG = 0;
