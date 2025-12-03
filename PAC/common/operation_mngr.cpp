@@ -2730,7 +2730,7 @@ int operation_state::on_extra_step( int step_idx, u_long step_time /* = 0UL */ )
             if ( G_DEBUG )
                 {
                 SetColor( YELLOW );
-                printf( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d (%lu ms).",
+                printf( R"(%s"%s" operation %d "%s" on_extra_step() -> %d (%lu ms).)",
                     owner->owner->get_prefix(),
                     owner->owner->get_name(), operation_number, name.c_str(),
                     step_idx, step_time );

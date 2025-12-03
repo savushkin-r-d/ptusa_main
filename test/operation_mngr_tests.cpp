@@ -780,9 +780,9 @@ TEST( operation, on_extra_step_debug_output )
 
 	// Verify output contains the expected debug message pattern
     auto reference_out = 
-    ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2 (0 ms).)" ANSI_COLOR_RESET "\n"
-                      R"("Extra step")" "\n"
-                      " { }\n";
+        ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2 (0 ms).)" ANSI_COLOR_RESET "\n"
+                          R"("Extra step")" /*Название шага*/ "\n"
+                          " { }\n";
 	EXPECT_EQ( output, reference_out );
 
 	// Clean up
