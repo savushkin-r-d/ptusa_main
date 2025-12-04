@@ -956,29 +956,36 @@ int uni_io_manager::read_inputs()
                 } // if (nd->AI_cnt > 0)
 
             // Read Status Register (7996) for PP mode detection.
-            if ( !nd->read_io_error_flag )
-                {
-                int result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
-                if ( result > 0 )
-                    {
-                    nd->status_register = static_cast<u_int_2>(
-                        BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
-                    }
-                else
-                    {
-                    // Reset status register on read failure, don't set error flag
-                    // to not disrupt normal operation if register is not available.
-#ifdef DEBUG_BK
-                    G_LOG->debug( "Failed to read status register (7996) for node \"%s\".",
-                        nd->name );
-#endif // DEBUG_BK
-                    nd->status_register = 0;
-                    }
-                }
+            read_phoenix_status_register( nd );
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return res;
+    }
+//-----------------------------------------------------------------------------
+void uni_io_manager::read_phoenix_status_register( io_node* nd )
+    {
+    if ( nd->read_io_error_flag )
+        {
+        return;
+        }
+
+    int result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
+    if ( result > 0 )
+        {
+        nd->status_register = static_cast<u_int_2>(
+            BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
+        }
+    else
+        {
+        // Reset status register on read failure, don't set error flag
+        // to not disrupt normal operation if register is not available.
+#ifdef DEBUG_BK
+        G_LOG->debug( "Failed to read status register (7996) for node \"%s\".",
+            nd->name );
+#endif // DEBUG_BK
+        nd->status_register = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )

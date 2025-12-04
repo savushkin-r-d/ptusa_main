@@ -157,7 +157,7 @@ int PAC_info::save_device( char* buff )
         "\tNODEST = \n\t{{\n\t" ).size;
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        const io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
             "{}, ", wn->get_display_state() ).size;
         }

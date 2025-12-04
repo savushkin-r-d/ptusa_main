@@ -81,6 +81,11 @@ class uni_io_manager : public io_manager
             const char* node_name, const char* node_ip_address,
             int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const;
 
+        /// @brief Read status register for Phoenix BK ETH nodes.
+        ///
+        /// @param nd - node to read status register from.
+        void read_phoenix_status_register( io_node* nd );
+
     public:
         int read_inputs() override;
         int write_outputs() override;
