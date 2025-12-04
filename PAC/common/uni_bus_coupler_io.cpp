@@ -962,7 +962,7 @@ int uni_io_manager::read_inputs()
                 if ( result > 0 )
                     {
                     nd->status_register = static_cast<u_int_2>(
-                        256 * resultbuff[ 0 ] + resultbuff[ 1 ] );
+                        BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
                     }
                 else
                     {

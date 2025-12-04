@@ -364,6 +364,7 @@ class io_manager
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
 				ST_PP_MODE = 2,
+				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
 
 			/// Bit 4 of Status Register (7996) indicates Plug-and-play mode.

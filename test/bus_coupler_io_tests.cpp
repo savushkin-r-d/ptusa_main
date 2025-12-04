@@ -68,7 +68,7 @@ TEST( io_node, get_display_state_not_connected )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_NO_CONNECT;
-	EXPECT_EQ( -1, node->get_display_state() );
+	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
 	}
 
 TEST( io_node, get_display_state_connected_ok )

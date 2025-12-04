@@ -1352,7 +1352,7 @@ int io_manager::io_node::get_display_state() const
 
     if ( state != ST_OK )
         {
-        return -1;  // Node enabled but no connection.
+        return ST_ERROR;
         }
 
     // Check PP mode bit in status register for Phoenix BK ETH nodes.
