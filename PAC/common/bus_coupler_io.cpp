@@ -1355,8 +1355,8 @@ int io_manager::io_node::get_display_state() const
         return ST_ERROR;
         }
 
-    // Check PP mode bit in status register for Phoenix BK ETH nodes.
-    if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_PP_MODE_BIT ) )
+    // Check error/PP mode bits (0-5) in status register for Phoenix BK ETH nodes.
+    if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_ERROR_MASK ) )
         {
         return ST_PP_MODE;
         }

@@ -95,7 +95,7 @@ TEST( io_node, get_display_state_pp_mode )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
-	node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;  // PP mode active.
+	node->status_register = 0x0010;  // Bit 4: PP mode active.
 	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, node->get_display_state() );
 	}
 
@@ -109,8 +109,8 @@ TEST( io_node, get_display_state_non_phoenix_node )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
-	node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;  // PP mode bit set but not Phoenix.
-	// Non-Phoenix nodes should return ST_OK even if PP mode bit is set.
+	node->status_register = 0x003F;  // Error bits set but not Phoenix.
+	// Non-Phoenix nodes should return ST_OK even if error bits are set.
 	EXPECT_EQ( io_manager::io_node::ST_OK, node->get_display_state() );
 	}
 
@@ -125,7 +125,7 @@ TEST( io_node, get_display_state_pp_mode_with_other_bits )
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
 	// PP mode bit set along with other bits
-	node->status_register = 0x1234 | io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+	node->status_register = 0x1234 | 0x0010;
 	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, node->get_display_state() );
 	}
 
@@ -139,7 +139,7 @@ TEST( io_node, get_display_state_phoenix_not_active )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = false;
 	node->state = io_manager::io_node::ST_OK;
-	node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+	node->status_register = 0x0010;
 	// Not active should return ST_NO_CONNECT regardless of other states
 	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
 	}
@@ -163,13 +163,13 @@ TEST( io_node, get_display_state_all_node_types )
 		io_manager::io_node::WAGO_750_820x, 3, "127.0.0.1",
 		"A300", 0, 0, 0, 0, 0, 0 );
 
-	// All nodes active, connected, with PP bit set
+	// All nodes active, connected, with error bits set
 	for ( int i = 0; i < 3; i++ )
 		{
 		auto node = io_manager::get_instance()->get_node( i );
 		node->is_active = true;
 		node->state = io_manager::io_node::ST_OK;
-		node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+		node->status_register = 0x0010;  // Bit 4 set
 		}
 	
 	// Only Phoenix should report PP mode

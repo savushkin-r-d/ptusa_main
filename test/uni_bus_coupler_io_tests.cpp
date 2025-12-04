@@ -471,8 +471,8 @@ TEST( io_node, status_register_only_for_phoenix )
     auto wago_node = io_manager::get_instance()->get_node( 1 );
     
     // Set same status register for both
-    phoenix_node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
-    wago_node->status_register = io_manager::io_node::STATUS_REG_PP_MODE_BIT;
+    phoenix_node->status_register = 0x0010;  // Bit 4 set
+    wago_node->status_register = 0x0010;  // Bit 4 set
     
     phoenix_node->is_active = true;
     phoenix_node->state = io_manager::io_node::ST_OK;
@@ -498,8 +498,8 @@ TEST( io_node, status_register_initialized_to_zero )
     EXPECT_EQ( node->status_register, 0 );
     }
 
-// Test PP mode bit detection with various register values
-TEST( io_node, pp_mode_bit_detection )
+// Test error bits 0-5 detection with various register values
+TEST( io_node, error_bits_detection )
     {
     io_manager::get_instance()->init( 1 );
     io_manager::get_instance()->add_node( 0,
@@ -510,19 +510,38 @@ TEST( io_node, pp_mode_bit_detection )
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
     
-    // Test various register values
-    node->status_register = 0x0000;  // No bits set
+    // Test no error bits set
+    node->status_register = 0x0000;
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     
-    node->status_register = 0x0010;  // Only PP mode bit
+    // Test each individual error bit (0-5)
+    node->status_register = 0x0001;  // Bit 0: Error occurred
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
     
-    node->status_register = 0x00FF;  // PP mode + other lower bits
+    node->status_register = 0x0002;  // Bit 1: Net Fail
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
     
-    node->status_register = 0xFF10;  // PP mode + other bits
+    node->status_register = 0x0004;  // Bit 2: Config mismatch
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
     
-    node->status_register = 0xFFEF;  // All bits except PP mode
+    node->status_register = 0x0008;  // Bit 3: Startup fault
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    node->status_register = 0x0010;  // Bit 4: PP mode
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    node->status_register = 0x0020;  // Bit 5: Startup not completed
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    // Test multiple error bits
+    node->status_register = 0x003F;  // All error bits 0-5
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    // Test error bits with higher bits set
+    node->status_register = 0xFF10;  // Bit 4 + other high bits
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    
+    // Test no error bits but other bits set
+    node->status_register = 0xFFC0;  // All bits except 0-5
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     }

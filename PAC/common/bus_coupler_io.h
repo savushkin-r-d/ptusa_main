@@ -367,8 +367,9 @@ class io_manager
 				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
 
-			/// Bit 4 of Status Register (7996) indicates Plug-and-play mode.
-			static constexpr u_int_2 STATUS_REG_PP_MODE_BIT = 0x0010;
+			/// Bits 0-5 of Status Register (7996) indicate error/PP mode conditions.
+			/// When any of these bits are set, the node is in error/PP mode state.
+			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;  // Bits 0-5
 
 			io_node::STATES  state;          ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
