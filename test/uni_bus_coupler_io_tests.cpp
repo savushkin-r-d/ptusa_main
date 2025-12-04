@@ -584,7 +584,7 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     
     // The read_phoenix_status_register logic would be:
     // Get resultbuff pointer and convert bytes
-    u_char* rbuff = mngr.get_resultbuff();
+    const u_char* rbuff = mngr.get_resultbuff();
     if ( result > 0 )
         {
         node->status_register = static_cast<u_int_2>(
@@ -654,8 +654,8 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     class TestUniIoManager : public uni_io_manager
         {
         public:
-            u_int_2 test_high_byte = 0;
-            u_int_2 test_low_byte = 0;
+            u_char test_high_byte = 0;
+            u_char test_low_byte = 0;
             
             int e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive ) override
                 {
@@ -684,7 +684,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     mngr.test_low_byte = 0x34;
     int result = mngr.read_input_registers( node, 7996, 1 );
     EXPECT_GT( result, 0 );
-    u_char* rbuff = mngr.get_resultbuff();
+    const u_char* rbuff = mngr.get_resultbuff();
     node->status_register = static_cast<u_int_2>( 256 * rbuff[ 0 ] + rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x1234 );
     
