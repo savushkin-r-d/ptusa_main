@@ -99,6 +99,10 @@ TEST( PAC_info, save_device )
             "\t{\n"
             "\t1, \n"
             "\t},\n"
+            "\tNODEST = \n"
+            "\t{\n"
+            "\t-1, \n"
+            "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
             "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"        
             "\t}\n";
