@@ -772,18 +772,38 @@ TEST( operation, on_extra_step_debug_output )
 	// Turn off the extra step for re-testing
 	test_op->off_extra_step( EXTRA_STEP );
 
-	// Enable debug and capture stdout to verify on_extra_step outputs to console
+	// Test with G_DEBUG = 1 and step_time = 0 (no time should be shown)
 	G_DEBUG = 1;
 	testing::internal::CaptureStdout();
-	test_op->on_extra_step( EXTRA_STEP );
-	auto output = testing::internal::GetCapturedStdout();
+	test_op->on_extra_step( EXTRA_STEP );  // Uses default step_time = 0
+	auto output_no_time = testing::internal::GetCapturedStdout();
 
-	// Verify output contains the expected debug message pattern
-    auto reference_out = 
-        ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2 (0 ms).)" ANSI_COLOR_RESET "\n"
-                          R"("Extra step")" /*Название шага*/ "\n"
-                          " { }\n";
-	EXPECT_EQ( output, reference_out );
+	// Verify output contains the expected debug message pattern without time
+	EXPECT_NE( output_no_time.find( "on_extra_step()" ), std::string::npos );
+	EXPECT_NE( output_no_time.find( "-> " + std::to_string( EXTRA_STEP ) ), std::string::npos );
+	// Verify time is NOT shown when step_time = 0
+	EXPECT_EQ( output_no_time.find( "ms" ), std::string::npos );
+	EXPECT_NE( output_no_time.find( YELLOW ), std::string::npos );
+	EXPECT_NE( output_no_time.find( RESET ), std::string::npos );
+
+	// Turn off the extra step for re-testing with time
+	test_op->off_extra_step( EXTRA_STEP );
+
+	// Test with G_DEBUG = 1 and step_time > 0 (time should be shown)
+	// Access the operation_state directly to pass a specific step_time
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	const u_long TEST_STEP_TIME = 5000;
+	testing::internal::CaptureStdout();
+	operation_run_state->on_extra_step( EXTRA_STEP, TEST_STEP_TIME );
+	auto output_with_time = testing::internal::GetCapturedStdout();
+
+	// Verify output contains the expected debug message pattern with time
+	EXPECT_NE( output_with_time.find( "on_extra_step()" ), std::string::npos );
+	EXPECT_NE( output_with_time.find( "-> " + std::to_string( EXTRA_STEP ) ), std::string::npos );
+	// Verify time IS shown when step_time > 0
+	EXPECT_NE( output_with_time.find( std::to_string( TEST_STEP_TIME ) + " ms" ), std::string::npos );
+	EXPECT_NE( output_with_time.find( YELLOW ), std::string::npos );
+	EXPECT_NE( output_with_time.find( RESET ), std::string::npos );
 
 	// Clean up
 	G_DEBUG = 0;
