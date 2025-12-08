@@ -245,7 +245,7 @@ The project uses GitHub Actions for continuous integration:
 
 ## Code Style and Standards
 
-- If possible, limit sentence length to 80 characters per line
+- If possible, limit line length to 80 characters
 
 ### C++ Standards
 - C++17 features encouraged
@@ -265,8 +265,8 @@ The project uses GitHub Actions for continuous integration:
 - Document complex automation sequences
 
 ### Documentation and Comments
-- Limit sentence length to 80 symbols per line
-- End comment line with a period
+- Limit line length to 80 characters
+- End all comment lines (single-line, multi-line, and block) with a period.
 
 ## Advanced Usage
 
