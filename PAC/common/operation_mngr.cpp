@@ -2361,7 +2361,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         steps[ prev_active_step_n ]->finalize();
         if ( cooperative_time > 0 )
             {
-            on_extra_step( prev_active_step_n + 1, cooperative_time );
+            on_extra_step( prev_active_step_n + 1, cooperative_time, true );
             }
         }
 
@@ -2699,7 +2699,13 @@ void operation_state::load()
     active_steps_start_time.assign( active_steps.size(), now );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx, u_long step_time /* = 0UL */ )
+int operation_state::on_extra_step( int step_idx )
+    {
+    return on_extra_step( step_idx, 0, false );
+    }
+//-----------------------------------------------------------------------------
+int operation_state::on_extra_step( int step_idx, u_long step_time,
+    bool is_print_time )
     {
     if ( (size_t) step_idx > steps.size() )
         {
@@ -2732,7 +2738,7 @@ int operation_state::on_extra_step( int step_idx, u_long step_time /* = 0UL */ )
             printf( R"(%s"%s" operation %d "%s" on_extra_step() -> %d)",
                 i_tech_object::get_prefix(), owner->owner->get_name(),
                 operation_number, name.c_str(), step_idx );
-            if ( step_time > 0 )
+            if ( is_print_time )
                 {
                 printf( " (%lu ms)", step_time );
                 }

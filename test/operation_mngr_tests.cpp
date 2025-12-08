@@ -793,7 +793,7 @@ TEST( operation, on_extra_step_debug_output )
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	const u_long TEST_STEP_TIME = 5000;
 	testing::internal::CaptureStdout();
-	operation_run_state->on_extra_step( EXTRA_STEP, TEST_STEP_TIME );
+	operation_run_state->on_extra_step( EXTRA_STEP, TEST_STEP_TIME, true );
 	auto output_with_time = testing::internal::GetCapturedStdout();
 
 	// Verify output contains the expected debug message pattern with time.
