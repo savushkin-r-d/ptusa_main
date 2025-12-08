@@ -124,7 +124,7 @@ TEST( io_node, get_display_state_pp_mode_with_other_bits )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
-	// PP mode bit set along with other bits
+	// PP mode bit set along with other bits.
 	node->status_register = 0x1234 | 0x0010;
 	EXPECT_EQ( io_manager::io_node::ST_WARNING, node->get_display_state() );
 	}
@@ -164,7 +164,7 @@ TEST( io_node, get_display_state_all_node_types )
 		io_manager::io_node::WAGO_750_820x, 3, "127.0.0.1",
 		"A300", 0, 0, 0, 0, 0, 0 );
 
-	// All nodes active, connected, with error bits set
+	// All nodes active, connected, with error bits set.
 	for ( int i = 0; i < 3; i++ )
 		{
 		auto node = io_manager::get_instance()->get_node( i );
@@ -173,7 +173,7 @@ TEST( io_node, get_display_state_all_node_types )
 		node->status_register = 0x0010;  // Bit 4 set
 		}
 	
-	// Only Phoenix should report PP mode
+	// Only Phoenix should report PP mode.
 	EXPECT_EQ( io_manager::io_node::ST_WARNING, 
 		io_manager::get_instance()->get_node( 0 )->get_display_state() );
 	EXPECT_EQ( io_manager::io_node::ST_OK, 

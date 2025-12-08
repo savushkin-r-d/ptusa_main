@@ -375,14 +375,14 @@ class MockUniIoManager : public uni_io_manager
         // обмена.
         MOCK_METHOD( int, e_communicate, ( io_node*, int, int ), ( override ) );
 
-        // Expose read_input_registers for testing
+        // Expose read_input_registers for testing.
         int public_read_input_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station = 0 )
             {
             return read_input_registers( node, address, quantity, station );
             }
 
-        // Expose resultbuff for testing
+        // Expose resultbuff for testing.
         u_char* get_resultbuff()
             {
             return resultbuff;
@@ -458,12 +458,12 @@ TEST( io_node, status_register_only_for_phoenix )
     {
     io_manager::get_instance()->init( 2 );
     
-    // Add Phoenix BK ETH node
+    // Add Phoenix BK ETH node.
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
         "A100", 0, 0, 0, 0, 0, 0 );
     
-    // Add WAGO node  
+    // Add WAGO node.
     io_manager::get_instance()->add_node( 1,
         io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
         "A200", 0, 0, 0, 0, 0, 0 );
@@ -472,8 +472,8 @@ TEST( io_node, status_register_only_for_phoenix )
     auto wago_node = io_manager::get_instance()->get_node( 1 );
     
     // Set same status register for both.
-    phoenix_node->status_register = 0x0010;  // Bit 4 set
-    wago_node->status_register = 0x0010;  // Bit 4 set
+    phoenix_node->status_register = 0x0010;  // Bit 4 set.
+    wago_node->status_register = 0x0010;  // Bit 4 set.
     
     phoenix_node->is_active = true;
     phoenix_node->state = io_manager::io_node::ST_OK;
@@ -515,35 +515,35 @@ TEST( io_node, error_bits_detection )
     node->status_register = 0x0000;
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     
-    // Test each individual error bit (0-5)
-    node->status_register = 0x0001;  // Bit 0: Error occurred
+    // Test each individual error bit (0-5).
+    node->status_register = 0x0001;  // Bit 0: Error occurred.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    node->status_register = 0x0002;  // Bit 1: Net Fail
+    node->status_register = 0x0002;  // Bit 1: Net Fail.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    node->status_register = 0x0004;  // Bit 2: Config mismatch
+    node->status_register = 0x0004;  // Bit 2: Config mismatch.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    node->status_register = 0x0008;  // Bit 3: Startup fault
+    node->status_register = 0x0008;  // Bit 3: Startup fault.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    node->status_register = 0x0010;  // Bit 4: PP mode
+    node->status_register = 0x0010;  // Bit 4: PP mode.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    node->status_register = 0x0020;  // Bit 5: Startup not completed
+    node->status_register = 0x0020;  // Bit 5: Startup not completed.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test multiple error bits.
     node->status_register = 0x003F;  // All error bits 0-5.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    // Test error bits with higher bits set
-    node->status_register = 0xFF10;  // Bit 4 + other high bits
+    // Test error bits with higher bits set.
+    node->status_register = 0xFF10;  // Bit 4 + other high bits.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test no error bits but other bits set.
-    node->status_register = 0xFFC0;  // All bits except 0-5
+    node->status_register = 0xFFC0;  // All bits except 0-5.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     }
 
@@ -553,15 +553,15 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     class TestUniIoManager : public uni_io_manager
         {
         public:
-            // Override e_communicate to simulate successful Modbus response
+            // Override e_communicate to simulate successful Modbus response.
             int e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive ) override
                 {
-                // Simulate successful response for reading 1 register (2 bytes)
-                buff[7] = 0x04;  // Function code
+                // Simulate successful response for reading 1 register (2 bytes).
+                buff[7] = 0x04;  // Function code.
                 buff[8] = 2;     // Byte count.
                 buff[9] = 0x00;  // High byte of register value.
-                buff[10] = 0x12; // Low byte of register value (0x0012 = bits 1 and 4)
-                return 0;  // Success
+                buff[10] = 0x12; // Low byte of register value (0x0012 = bits 1 and 4).
+                return 0;  // Success.
                 }
             
             u_char* get_resultbuff() { return resultbuff; }
@@ -585,7 +585,7 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     EXPECT_GT( result, 0 );  // Should succeed.
     
     // The read_phoenix_status_register logic would be:
-    // Get resultbuff pointer and convert bytes
+    // Get resultbuff pointer and convert bytes.
     const u_char* rbuff = mngr.get_resultbuff();
     if ( result > 0 )
         {
@@ -606,7 +606,7 @@ TEST( uni_io_manager, read_phoenix_status_register_failure )
             int e_communicate( io_node* node, int bytes_to_send,
                 int bytes_to_receive ) override
                 {
-                return -1;  // Communication failure
+                return -1;  // Communication failure.
                 }
         };
     
@@ -619,10 +619,10 @@ TEST( uni_io_manager, read_phoenix_status_register_failure )
     node->read_io_error_flag = false;
     node->status_register = 0x00FF;  // Set to non-zero initially
     
-    // Try to read - should fail
+    // Try to read - should fail.
     int result = mngr.read_input_registers( node,
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
-    EXPECT_LE( result, 0 );  // Should fail
+    EXPECT_LE( result, 0 );  // Should fail.
     
     // The read_phoenix_status_register logic on failure:
     if ( result <= 0 )
@@ -642,7 +642,7 @@ TEST( uni_io_manager, read_phoenix_status_register_error_flag_set )
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
     
     auto node = mngr.get_node( 0 );
-    node->read_io_error_flag = true;  // Error flag is set
+    node->read_io_error_flag = true;  // Error flag is set.
     u_int_2 initial_value = 0x00AB;
     node->status_register = initial_value;
     
@@ -684,7 +684,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
     
-    // Test 1: High byte = 0x12, Low byte = 0x34 -> 0x1234
+    // Test 1: High byte = 0x12, Low byte = 0x34 -> 0x1234.
     mngr.test_high_byte = 0x12;
     mngr.test_low_byte = 0x34;
     int result = mngr.read_input_registers( node,
@@ -695,7 +695,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x1234 );
     
-    // Test 2: High byte = 0x00, Low byte = 0x3F (all error bits) -> 0x003F
+    // Test 2: High byte = 0x00, Low byte = 0x3F (all error bits) -> 0x003F.
     mngr.test_high_byte = 0x00;
     mngr.test_low_byte = 0x3F;
     result = mngr.read_input_registers( node,
@@ -707,7 +707,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     EXPECT_EQ( node->status_register, 0x003F );
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
-    // Test 3: High byte = 0xFF, Low byte = 0xFF -> 0xFFFF
+    // Test 3: High byte = 0xFF, Low byte = 0xFF -> 0xFFFF.
     mngr.test_high_byte = 0xFF;
     mngr.test_low_byte = 0xFF;
     result = mngr.read_input_registers( node,
@@ -718,7 +718,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0xFFFF );
     
-    // Test 4: All zeros -> 0x0000
+    // Test 4: All zeros -> 0x0000.
     mngr.test_high_byte = 0x00;
     mngr.test_low_byte = 0x00;
     result = mngr.read_input_registers( node,
