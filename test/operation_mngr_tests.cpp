@@ -744,6 +744,72 @@ TEST( operation, on_extra_step )
 	G_LUA_MANAGER->free_Lua();
 	}
 
+TEST( operation, on_extra_step_debug_output )
+	{
+	// Test that on_extra_step outputs to stdout (console) when G_DEBUG is enabled,
+	// not to the system message log. This verifies the fix for issue #1126.
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+	test_op->add_step( "Init", -1, -1 );
+	test_op->add_step( "Extra step", -1, -1 );
+
+	auto const MAIN_STEP = 1;
+	auto const EXTRA_STEP = 2;
+
+	// Start operation and test with debug disabled - no output should be produced
+	G_DEBUG = 0;
+	test_op->start( MAIN_STEP );
+	testing::internal::CaptureStdout();
+	test_op->on_extra_step( EXTRA_STEP );
+	auto output_no_debug = testing::internal::GetCapturedStdout();
+	// With G_DEBUG = 0, no debug output should be printed
+	EXPECT_TRUE( output_no_debug.empty() );
+
+	// Turn off the extra step for re-testing
+	test_op->off_extra_step( EXTRA_STEP );
+
+	// Test with G_DEBUG = 1 and step_time = 0 (no time should be shown)
+	G_DEBUG = 1;
+	testing::internal::CaptureStdout();
+	test_op->on_extra_step( EXTRA_STEP );  // Uses default step_time = 0
+	auto output_no_time = testing::internal::GetCapturedStdout();
+
+    // Verify output contains the expected debug message pattern.
+    auto reference_out_no_time =
+        ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2.)" ANSI_COLOR_RESET "\n"
+        R"("Extra step")" /*Название шага*/ "\n"
+        " { }\n";
+    EXPECT_EQ( output_no_time, reference_out_no_time );
+
+	// Turn off the extra step for re-testing with time
+	test_op->off_extra_step( EXTRA_STEP );
+
+	// Test with G_DEBUG = 1 and step_time > 0 (time should be shown)
+	// Access the operation_state directly to pass a specific step_time
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	const u_long TEST_STEP_TIME = 5000;
+	testing::internal::CaptureStdout();
+	operation_run_state->on_extra_step( EXTRA_STEP, TEST_STEP_TIME, true );
+	auto output_with_time = testing::internal::GetCapturedStdout();
+
+	// Verify output contains the expected debug message pattern with time.
+    auto reference_out_with_time =
+        ANSI_COLOR_YELLOW R"("Танк1" operation 1 "RUN" on_extra_step() -> 2 (5000 ms).)" ANSI_COLOR_RESET "\n"
+        R"("Extra step")" /*Название шага*/ "\n"
+        " { }\n";
+    EXPECT_EQ( output_with_time, reference_out_with_time );
+
+
+	// Clean up
+	G_DEBUG = 0;
+	test_op->finalize();
+	G_LUA_MANAGER->free_Lua();
+	}
+
 TEST( operation, get_name )
 	{
 	auto OP_NAME = "Test Operation";
