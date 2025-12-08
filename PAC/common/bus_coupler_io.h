@@ -367,9 +367,11 @@ class io_manager
 				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
 
-			/// Bits 0-5 of Status Register (7996) indicate error/PP mode conditions.
-			/// When any of these bits are set, the node is in error/PP mode state.
-			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;  // Bits 0-5
+			/// Bits 0-5 of Status Register (7996) indicate error/PP mode
+			/// conditions.
+			/// When any of these bits are set, the node is in error/PP
+			/// mode state.
+			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;  // Bits 0-5.
 
 			io_node::STATES  state;          ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
@@ -422,8 +424,8 @@ class io_manager
             u_int_2 status_register = 0;
 
             /// @brief Get the display state of the node.
-            /// @return 1 - node connected and OK, -1 - node enabled but no connection, 
-            ///         2 - node in PP mode.
+            /// @return 1 - node connected and OK, -1 - node enabled
+            ///         but no connection, 2 - node in PP mode.
             int get_display_state() const;
 
             private:

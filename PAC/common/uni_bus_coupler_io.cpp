@@ -981,8 +981,8 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         // Reset status register on read failure, don't set error flag
         // to not disrupt normal operation if register is not available.
 #ifdef DEBUG_BK
-        G_LOG->debug( "Failed to read status register (%d) for node \"%s\".",
-            PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
+        G_LOG->debug( "Failed to read status register (%d) for node "
+            "\"%s\".", PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
 #endif // DEBUG_BK
         nd->status_register = 0;
         }

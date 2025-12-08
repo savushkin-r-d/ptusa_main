@@ -140,7 +140,8 @@ TEST( io_node, get_display_state_phoenix_not_active )
 	node->is_active = false;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0x0010;
-	// Not active should return ST_NO_CONNECT regardless of other states
+	// Not active should return ST_NO_CONNECT regardless of other
+	// states.
 	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
 	}
 
