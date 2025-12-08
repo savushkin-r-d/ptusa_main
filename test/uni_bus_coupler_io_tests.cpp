@@ -496,11 +496,11 @@ TEST( io_node, status_register_initialized_to_zero )
 
     auto node = io_manager::get_instance()->get_node( 0 );
     
-    // Status register should be initialized to 0
+    // Status register should be initialized to 0.
     EXPECT_EQ( node->status_register, 0 );
     }
 
-// Test error bits 0-5 detection with various register values
+// Test error bits 0-5 detection with various register values.
 TEST( io_node, error_bits_detection )
     {
     io_manager::get_instance()->init( 1 );
@@ -624,14 +624,14 @@ TEST( uni_io_manager, read_phoenix_status_register_failure )
     
     auto node = mngr.get_node( 0 );
     node->read_io_error_flag = false;
-    node->status_register = 0x00FF;  // Set to non-zero initially
+    node->status_register = 0x00FF;  // Set to non-zero initially.
     
     // Try to read - should fail.
     int result = mngr.read_input_registers( node,
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
     EXPECT_LE( result, 0 );  // Should fail.
     
-    // The read_phoenix_status_register logic on failure:
+    // The read_phoenix_status_register logic on failure.
     if ( result <= 0 )
         {
         node->status_register = 0;
@@ -656,12 +656,12 @@ TEST( uni_io_manager, read_phoenix_status_register_error_flag_set )
     
     // When read_io_error_flag is set, read_phoenix_status_register
     // should return early and not attempt to read the register. The
-    // status_register value should remain unchanged. We verify this
-    // by checking that status_register remains unchanged.
+    // status_register value should remain unchanged. We verify this by
+    // checking that status_register remains unchanged.
     EXPECT_EQ( node->status_register, initial_value );
     }
 
-// Test byte-order conversion with various values
+// Test byte-order conversion with various values.
 TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     {
     class TestUniIoManager : public uni_io_manager
