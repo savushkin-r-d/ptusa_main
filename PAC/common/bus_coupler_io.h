@@ -367,11 +367,10 @@ class io_manager
 				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
 
-			/// Bits 0-5 of Status Register (7996) indicate error/PP mode
-			/// conditions.
-			/// When any of these bits are set, the node is in error/PP
-			/// mode state.
-			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;  // Bits 0-5.
+			/// Bits 0-5 of Status Register (7996) indicate error/PP
+			/// mode conditions. When any of these bits are set, the
+			/// node is in error/PP mode state.
+			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
 
 			io_node::STATES  state;          ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
@@ -421,8 +420,8 @@ class io_manager
 
             /// Status register (7996) for Phoenix BK ETH nodes.
             /// Used to detect error/warning conditions (bits 0-5),
-            /// including PP mode, startup failures, net failures, etc.
-            /// Remains 0 for other node types.
+            /// including PP mode, startup failures, net failures,
+            /// etc. Remains 0 for other node types.
             u_int_2 status_register = 0;
 
             /// @brief Get the display state of the node.

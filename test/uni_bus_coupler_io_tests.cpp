@@ -553,14 +553,18 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     class TestUniIoManager : public uni_io_manager
         {
         public:
-            // Override e_communicate to simulate successful Modbus response.
-            int e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive ) override
+            // Override e_communicate to simulate successful Modbus
+            // response.
+            int e_communicate( io_node* node, int bytes_to_send,
+                int bytes_to_receive ) override
                 {
-                // Simulate successful response for reading 1 register (2 bytes).
+                // Simulate successful response for reading 1 register
+                // (2 bytes).
                 buff[7] = 0x04;  // Function code.
                 buff[8] = 2;     // Byte count.
                 buff[9] = 0x00;  // High byte of register value.
-                buff[10] = 0x12; // Low byte of register value (0x0012 = bits 1 and 4).
+                // Low byte of register value (0x0012 = bits 1 and 4).
+                buff[10] = 0x12;
                 return 0;  // Success.
                 }
             
@@ -578,8 +582,9 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
     
-    // Simulate calling read_inputs which calls read_phoenix_status_register
-    // For testing, we'll directly test the logic
+    // Simulate calling read_inputs which calls
+    // read_phoenix_status_register. For testing, we'll directly
+    // test the logic.
     int result = mngr.read_input_registers( node,
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
     EXPECT_GT( result, 0 );  // Should succeed.
@@ -590,7 +595,8 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
     if ( result > 0 )
         {
         node->status_register = static_cast<u_int_2>(
-            uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
+            uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
+            rbuff[ 1 ] );
         }
     
     EXPECT_EQ( node->status_register, 0x0012 );
@@ -646,9 +652,10 @@ TEST( uni_io_manager, read_phoenix_status_register_error_flag_set )
     u_int_2 initial_value = 0x00AB;
     node->status_register = initial_value;
     
-    // When read_io_error_flag is set, read_phoenix_status_register should return early
-    // and not attempt to read the register. The status_register value should remain unchanged.
-    // We verify this by checking that status_register remains unchanged
+    // When read_io_error_flag is set, read_phoenix_status_register
+    // should return early and not attempt to read the register. The
+    // status_register value should remain unchanged. We verify this
+    // by checking that status_register remains unchanged.
     EXPECT_EQ( node->status_register, initial_value );
     }
 
@@ -692,10 +699,12 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     EXPECT_GT( result, 0 );
     const u_char* rbuff = mngr.get_resultbuff();
     node->status_register = static_cast<u_int_2>(
-        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
+        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
+        rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x1234 );
     
-    // Test 2: High byte = 0x00, Low byte = 0x3F (all error bits) -> 0x003F.
+    // Test 2: High byte = 0x00, Low byte = 0x3F (all error
+    // bits) -> 0x003F.
     mngr.test_high_byte = 0x00;
     mngr.test_low_byte = 0x3F;
     result = mngr.read_input_registers( node,
@@ -703,9 +712,11 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     EXPECT_GT( result, 0 );
     rbuff = mngr.get_resultbuff();
     node->status_register = static_cast<u_int_2>(
-        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
+        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
+        rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x003F );
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
+    EXPECT_EQ( node->get_display_state(),
+        io_manager::io_node::ST_WARNING );
     
     // Test 3: High byte = 0xFF, Low byte = 0xFF -> 0xFFFF.
     mngr.test_high_byte = 0xFF;
@@ -715,7 +726,8 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     EXPECT_GT( result, 0 );
     rbuff = mngr.get_resultbuff();
     node->status_register = static_cast<u_int_2>(
-        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
+        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
+        rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0xFFFF );
     
     // Test 4: All zeros -> 0x0000.
@@ -725,8 +737,9 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
     EXPECT_GT( result, 0 );
     rbuff = mngr.get_resultbuff();
-    node->status_register = static_cast<u_int_2>( 
-        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
+    node->status_register = static_cast<u_int_2>(
+        uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
+        rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x0000 );
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
     }
