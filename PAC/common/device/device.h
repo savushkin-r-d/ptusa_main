@@ -1624,7 +1624,7 @@ class camera_DI3 : public camera_DI2
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
-class dev_stub : public i_counter, public valve, public i_wages,
+class dev_stub final : public i_counter, public valve, public i_wages,
     public camera, public signal_column
     {
     public:

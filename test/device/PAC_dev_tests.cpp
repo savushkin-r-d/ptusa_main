@@ -1305,6 +1305,7 @@ TEST( device_manager, evaluate_io )
     G_ERRORS_MANAGER->clear();
     }
 
+
 TEST( dev_stub, is_active )
     {
     EXPECT_FALSE( STUB()->is_active() );
@@ -1331,6 +1332,17 @@ TEST( dev_stub, get_abs_quantity )
     EXPECT_EQ( 0, STUB()->get_abs_quantity() );
     }
 
+TEST( dev_stub, get_value )
+    {
+    EXPECT_EQ( STUB()->get_value(), 0.f );
+    }
+
+TEST( dev_stub, direct_set_value )
+    {
+    // Ничего не происходит.
+    STUB()->direct_set_value( 10.0f );
+    EXPECT_EQ( STUB()->get_value(), 0.f );
+    }
 
 TEST( device, device )
     {
