@@ -480,7 +480,7 @@ TEST( io_node, status_register_only_for_phoenix )
     wago_node->state = io_manager::io_node::ST_OK;
     
     // Only Phoenix should report PP mode
-    EXPECT_EQ( phoenix_node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( phoenix_node->get_display_state(), io_manager::io_node::ST_WARNING );
     EXPECT_EQ( wago_node->get_display_state(), io_manager::io_node::ST_OK );
     }
 
@@ -516,30 +516,30 @@ TEST( io_node, error_bits_detection )
     
     // Test each individual error bit (0-5)
     node->status_register = 0x0001;  // Bit 0: Error occurred
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     node->status_register = 0x0002;  // Bit 1: Net Fail
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     node->status_register = 0x0004;  // Bit 2: Config mismatch
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     node->status_register = 0x0008;  // Bit 3: Startup fault
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     node->status_register = 0x0010;  // Bit 4: PP mode
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     node->status_register = 0x0020;  // Bit 5: Startup not completed
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test multiple error bits
     node->status_register = 0x003F;  // All error bits 0-5
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test error bits with higher bits set
     node->status_register = 0xFF10;  // Bit 4 + other high bits
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test no error bits but other bits set
     node->status_register = 0xFFC0;  // All bits except 0-5
@@ -593,7 +593,7 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
         }
     
     EXPECT_EQ( node->status_register, 0x0012 );
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     }
 
 // Test read_phoenix_status_register - communication failure
@@ -704,7 +704,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     node->status_register = static_cast<u_int_2>(
         uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] + rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x003F );
-    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_PP_MODE );
+    EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
     
     // Test 3: High byte = 0xFF, Low byte = 0xFF -> 0xFFFF
     mngr.test_high_byte = 0xFF;

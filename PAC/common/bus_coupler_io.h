@@ -363,7 +363,7 @@ class io_manager
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
-				ST_PP_MODE = 2,
+				ST_WARNING = 2,  ///< Node has error/warning (Status Register bits 0-5 set).
 				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
 

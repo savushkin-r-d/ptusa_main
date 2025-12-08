@@ -96,7 +96,7 @@ TEST( io_node, get_display_state_pp_mode )
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0x0010;  // Bit 4: PP mode active.
-	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, node->get_display_state() );
+	EXPECT_EQ( io_manager::io_node::ST_WARNING, node->get_display_state() );
 	}
 
 TEST( io_node, get_display_state_non_phoenix_node )
@@ -126,7 +126,7 @@ TEST( io_node, get_display_state_pp_mode_with_other_bits )
 	node->state = io_manager::io_node::ST_OK;
 	// PP mode bit set along with other bits
 	node->status_register = 0x1234 | 0x0010;
-	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, node->get_display_state() );
+	EXPECT_EQ( io_manager::io_node::ST_WARNING, node->get_display_state() );
 	}
 
 TEST( io_node, get_display_state_phoenix_not_active )
@@ -173,7 +173,7 @@ TEST( io_node, get_display_state_all_node_types )
 		}
 	
 	// Only Phoenix should report PP mode
-	EXPECT_EQ( io_manager::io_node::ST_PP_MODE, 
+	EXPECT_EQ( io_manager::io_node::ST_WARNING, 
 		io_manager::get_instance()->get_node( 0 )->get_display_state() );
 	EXPECT_EQ( io_manager::io_node::ST_OK, 
 		io_manager::get_instance()->get_node( 1 )->get_display_state() );
