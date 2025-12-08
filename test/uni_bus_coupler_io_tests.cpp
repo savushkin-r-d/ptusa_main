@@ -453,7 +453,8 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
     EXPECT_EQ( output, "" ); //Здесь уже не должно быть сообщения.
     }
 
-// Test that status register field exists and can be set/read for different node types
+// Test that status register field exists and can be set/read for
+// different node types.
 TEST( io_node, status_register_only_for_phoenix )
     {
     io_manager::get_instance()->init( 2 );
@@ -639,7 +640,8 @@ TEST( uni_io_manager, read_phoenix_status_register_failure )
     EXPECT_EQ( node->status_register, 0 );
     }
 
-// Test read_phoenix_status_register - early return when error flag is set
+// Test read_phoenix_status_register - early return when error flag
+// is set.
 TEST( uni_io_manager, read_phoenix_status_register_error_flag_set )
     {
     uni_io_manager mngr;
