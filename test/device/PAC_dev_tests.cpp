@@ -1311,38 +1311,118 @@ TEST( dev_stub, is_active )
     EXPECT_FALSE( STUB()->is_active() );
     }
 
-TEST( dev_stub, get_pump_dt )
-    {
-    EXPECT_EQ( .0f, STUB()->get_pump_dt() );
-    }
-
-TEST( dev_stub, get_min_flow )
-    {
-    EXPECT_EQ( .0f, STUB()->get_min_flow() );
-    }
-
-TEST( dev_stub, pause_daily )
-    {
-    STUB()->pause_daily();
-    STUB()->start_daily();
-    }
-
-TEST( dev_stub, get_abs_quantity )
-    {
-    EXPECT_EQ( 0, STUB()->get_abs_quantity() );
-    }
-
 TEST( dev_stub, get_value )
     {
-    EXPECT_EQ( STUB()->get_value(), 0.f );
+    EXPECT_EQ( STUB()->get_value(), 0.0f );
     }
 
 TEST( dev_stub, direct_set_value )
     {
     // Ничего не происходит.
     STUB()->direct_set_value( 10.0f );
-    EXPECT_EQ( STUB()->get_value(), 0.f );
+    EXPECT_EQ( STUB()->get_value(), 0.0f );
     }
+
+TEST( dev_stub, direct_set_state )
+    {
+    // Ничего не происходит.
+    STUB()->direct_set_state( 1 );
+    EXPECT_EQ( STUB()->get_state(), 0 );
+    }
+
+TEST( dev_stub, direct_on )
+    {
+    // Ничего не происходит.
+    STUB()->direct_on();
+    EXPECT_EQ( STUB()->get_state(), 0 );
+    }
+
+TEST( dev_stub, get_valve_state )
+    {
+    EXPECT_EQ( STUB()->get_valve_state(), valve::VALVE_STATE::V_OFF );
+    }
+
+TEST( dev_stub, print )
+    {
+    testing::internal::CaptureStdout();
+    STUB()->print();
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, "STUB" );
+    }
+
+TEST( dev_stub, pause )
+    {
+    // Ничего не происходит.
+    STUB()->pause();
+    }
+
+TEST( dev_stub, start )
+    {
+    // Ничего не происходит.
+    STUB()->start();
+    }
+
+TEST( dev_stub, reset )
+    {
+    // Ничего не происходит.
+    STUB()->reset();
+    }
+
+TEST( dev_stub, abs_reset )
+    {
+    // Ничего не происходит.
+    STUB()->abs_reset();
+    }
+
+TEST( dev_stub, get_quantity )
+    {
+    EXPECT_EQ( STUB()->get_quantity(), 0u );
+    }
+
+TEST( dev_stub, get_abs_quantity )
+    {
+    EXPECT_EQ( STUB()->get_abs_quantity(), 0u );
+    }
+
+TEST( dev_stub, get_flow )
+    {
+    EXPECT_EQ( STUB()->get_flow(), 0.0f );
+    }
+
+TEST( dev_stub, get_pump_dt )
+    {
+    EXPECT_EQ( STUB()->get_pump_dt(), 0u );
+    }
+
+TEST( dev_stub, get_min_flow )
+    {
+    EXPECT_EQ( STUB()->get_min_flow(), 0.0f );
+    }
+
+TEST( dev_stub, pause_daily )
+    {
+    // Ничего не происходит.
+    STUB()->pause_daily();
+    }
+
+TEST( dev_stub, start_daily )
+    {
+    // Ничего не происходит.
+    STUB()->start_daily();
+    }
+
+TEST( dev_stub, tare )
+    {
+    // Ничего не происходит.
+    STUB()->tare();
+    }
+
+TEST( dev_stub, process_DO )
+    {
+    // Ничего не происходит.
+    STUB()->process_DO( 0, signal_column::DO_state::OFF, "DO1" );
+    }
+
 
 TEST( device, device )
     {

@@ -746,7 +746,7 @@ class device : public i_DO_AO_device, public par_device
             return is_manual_mode;
             }
 
-        char* get_article() const
+        const char* get_article() const
             {
             return article;
             }
@@ -779,12 +779,12 @@ class device : public i_DO_AO_device, public par_device
         DEVICE_TYPE     type;        ///< Тип устройства.
         DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
 
-        char* article;               ///< Артикул изделия.
+        char* article = new char[ 2 ] {" "}; ///< Артикул изделия.
 
         bool is_manual_mode = false; ///< Признак ручного режима.
 
         char name[ C_MAX_NAME + 1 ];
-        char* description;
+        char* description = new char[ 1 ] {""};
 
         bool emulation = false;
         analog_emulator emulator;
