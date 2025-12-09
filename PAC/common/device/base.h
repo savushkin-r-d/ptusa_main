@@ -779,12 +779,12 @@ class device : public i_DO_AO_device, public par_device
         DEVICE_TYPE     type;        ///< Тип устройства.
         DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
 
-        char* article = new char[ 2 ] {" "}; ///< Артикул изделия.
+        char* article;               ///< Артикул изделия.
 
         bool is_manual_mode = false; ///< Признак ручного режима.
 
         char name[ C_MAX_NAME + 1 ];
-        char* description = new char[ 1 ] {""};
+        char* description;
 
         bool emulation = false;
         analog_emulator emulator;

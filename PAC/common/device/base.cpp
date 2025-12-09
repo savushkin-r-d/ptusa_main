@@ -376,6 +376,13 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
         {
         strcpy( this->name, "?" );
         }
+
+    description = new char[ 1 ];
+    description[ 0 ] = '\0';
+
+    article = new char[ 2 ];
+    article[ 0 ] = ' ';
+    article[ 1 ] = '\0';    
     }
 //-----------------------------------------------------------------------------
 const char* device::get_type_str() const
