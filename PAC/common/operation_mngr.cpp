@@ -937,21 +937,20 @@ void checked_devices_action::finalize()
 void checked_devices_action::init()
     {
     // Запускаем счётчики при старте шага.
-    for ( auto& group : devices )
+    for ( const auto& group : devices )
         {
-        for ( auto& subgroup : group )
+        for ( const auto& subgroup : group )
             {
-            for ( auto dev : subgroup )
+            std::for_each( subgroup.begin(), subgroup.end(), []( device* dev )
                 {
                 if ( dev->get_type() == device::DEVICE_TYPE::DT_FQT )
                     {
-                    auto cnt = dynamic_cast<i_counter*>( dev );
-                    if ( cnt )
+                    if ( auto cnt = dynamic_cast<i_counter*>( dev ) )
                         {
                         cnt->start();
                         }
                     }
-                }
+                } );
             }
         }
     }
@@ -2759,8 +2758,8 @@ int operation_state::on_extra_step( int step_idx, u_long step_time,
             if ( !G_DEBUG ) return 0;
             SetColor( YELLOW );
             printf( R"(%s"%s" operation %d "%s" on_extra_step() -> %d)",
-                i_tech_object::get_prefix(), owner->owner->get_name(),
-                operation_number, name.c_str(), step_idx );
+                owner->owner->get_prefix(),
+                owner->owner->get_name(), operation_number, name.c_str(), step_idx );
             if ( is_print_time )
                 {
                 printf( " (%lu ms)", step_time );
