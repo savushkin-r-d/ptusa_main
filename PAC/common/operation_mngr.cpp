@@ -933,6 +933,29 @@ void checked_devices_action::finalize()
     // При завершении ничего не делаем.
     }
 //-----------------------------------------------------------------------------
+/// @brief Инициализация действия.
+void checked_devices_action::init()
+    {
+    // Запускаем счётчики при старте шага.
+    for ( auto& group : devices )
+        {
+        for ( auto& subgroup : group )
+            {
+            for ( auto dev : subgroup )
+                {
+                if ( dev->get_type() == device::DEVICE_TYPE::DT_FQT )
+                    {
+                    auto cnt = dynamic_cast<i_counter*>( dev );
+                    if ( cnt )
+                        {
+                        cnt->start();
+                        }
+                    }
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 step::step( std::string name, operation_state *owner,
     bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
