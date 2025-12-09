@@ -1439,11 +1439,11 @@ TEST( checked_devices_action, finalize )
 TEST( checked_devices_action, init )
     {
     counter_f FQT1( "FQT1" );
-    DO1 DO1( "DO1", device::DEVICE_TYPE::DT_DO,
+    DO1 test_DO( "DO1", device::DEVICE_TYPE::DT_DO,
         device::DEVICE_SUB_TYPE::DST_DO_VIRT );
     auto action = checked_devices_action();
     action.add_dev( &FQT1 );
-    action.add_dev( &DO1 );
+    action.add_dev( &test_DO );
 
     FQT1.pause();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_PAUSE ),
