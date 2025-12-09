@@ -674,7 +674,8 @@ class operation_state
         void save();
         void load();
 
-        int on_extra_step( int step_idx, u_long step_time = 0UL );
+        int on_extra_step( int step_idx );
+        int on_extra_step( int step_idx, u_long step_time, bool is_print_time );
 
         int off_extra_step( int step_idx );
 
