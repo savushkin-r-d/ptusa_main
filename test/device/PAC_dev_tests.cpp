@@ -6371,52 +6371,52 @@ TEST( device_manager, get_EY )
 
 
 TEST( node_dev, basic_functionality )
-	{
-	// Очистка перед тестом.
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
+    {
+    // Очистка перед тестом.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
 
-	// Инициализация io_manager с одним узлом.
-	G_IO_MANAGER()->init( 1 );
-	G_IO_MANAGER()->add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-		1, "192.168.1.100", "A100", 0, 0, 0, 0, 0, 0 );
+    // Инициализация io_manager с одним узлом.
+    G_IO_MANAGER()->init( 1 );
+    G_IO_MANAGER()->add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "192.168.1.100", "A100", 0, 0, 0, 0, 0, 0 );
 
-	// Добавление устройства node_dev.
-	auto* dev = G_DEVICE_MANAGER()->add_io_device(
-		device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
+    // Добавление устройства node_dev.
+    auto* dev = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
 
-	ASSERT_NE( dev, nullptr );
+    ASSERT_NE( dev, nullptr );
 
-	// Получение указателя на node_dev для доступа к специфическим методам.
-	node_dev* node = dynamic_cast<node_dev*>(
-		G_DEVICE_MANAGER()->get_device( "NODE1" ) );
-	ASSERT_NE( node, nullptr );
+    // Получение указателя на node_dev для доступа к специфическим методам.
+    node_dev* node = dynamic_cast<node_dev*>(
+        G_DEVICE_MANAGER()->get_device( "NODE1" ) );
+    ASSERT_NE( node, nullptr );
 
-	// Установка индекса узла.
-	node->set_par( static_cast<u_int>( node_dev::PARAM::P_NODE_IDX ), 0, 0 );
+    // Установка индекса узла.
+    node->set_par( static_cast<u_int>( node_dev::PARAM::P_NODE_IDX ), 0, 0 );
 
-	// Проверка получения IP-адреса.
-	EXPECT_STREQ( node->get_ip(), "192.168.1.100" );
+    // Проверка получения IP-адреса.
+    EXPECT_STREQ( node->get_ip(), "192.168.1.100" );
 
-	// Установка значений свойств.
-	node->set_property_value( node_dev::PROPERTIES::ST, 1 );
-	node->set_property_value( node_dev::PROPERTIES::WEB, 1 );
-	node->set_property_value( node_dev::PROPERTIES::STARTUP, 0 );
-	node->set_property_value( node_dev::PROPERTIES::CMD, 5 );
+    // Установка значений свойств.
+    node->set_property_value( node_dev::PROPERTIES::ST, 1 );
+    node->set_property_value( node_dev::PROPERTIES::WEB, 1 );
+    node->set_property_value( node_dev::PROPERTIES::STARTUP, 0 );
+    node->set_property_value( node_dev::PROPERTIES::CMD, 5 );
 
-	// Проверка получения значений свойств.
-	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::ST ), 1 );
-	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::WEB ), 1 );
-	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::STARTUP ), 0 );
-	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::CMD ), 5 );
+    // Проверка получения значений свойств.
+    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::ST ), 1 );
+    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::WEB ), 1 );
+    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::STARTUP ), 0 );
+    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::CMD ), 5 );
 
-	// Проверка evaluate_io().
-	node->evaluate_io();
+    // Проверка evaluate_io().
+    node->evaluate_io();
 
-	// Очистка после теста.
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	}
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    }
 
 
 TEST( timer_manager, get_count )
