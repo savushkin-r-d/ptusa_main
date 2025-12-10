@@ -6377,8 +6377,10 @@ TEST( node_dev, basic_functionality )
     G_ERRORS_MANAGER->clear();
 
     // Инициализация io_manager с одним узлом.
-    G_IO_MANAGER()->init( 1 );
-    G_IO_MANAGER()->add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "192.168.1.100", "A100", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
@@ -6416,6 +6418,7 @@ TEST( node_dev, basic_functionality )
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
+    io_manager::replace_instance( prev_mngr );
     }
 
 
