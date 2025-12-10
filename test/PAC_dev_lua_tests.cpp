@@ -22,12 +22,12 @@ TEST( toLuapp, tolua_PAC_dev_open )
 
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1, -1 )" ) );
-    
+
     // Test "int enable_step_by_signal::set_bool_property( const char* name,
     // bool value )".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_ENABLE_STEP_BY_SIGNAL ]:"
-        "set_bool_property( 'should_turn_off', false )" ) );
+            "set_bool_property( 'should_turn_off', false )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
@@ -53,19 +53,19 @@ TEST( toLuapp, tolua_PAC_dev_open )
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
-    lua_remove( L, -1 );    
+    lua_remove( L, -1 );
 
     // Test "int jump_if_action::set_int_property( const char* name,
     // unsigned int idx, int value )".
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_JUMP_IF ]:"
-        "set_int_property( 'next_step_n', 0, 1 )" ) );
+            "set_int_property( 'next_step_n', 0, 1 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_JUMP_IF ]:"
-        "set_int_property( 'no_such_property', 0, 1 )" ) );
+            "set_int_property( 'no_such_property', 0, 1 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
@@ -77,7 +77,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_STREQ( "Test operation", tolua_tostring( L, -1, 0 ) );
     lua_remove( L, -1 );
 
-    
+
     lua_close( L );
     }
 
@@ -126,17 +126,17 @@ TEST( toLuapp, tolua_PAC_dev_C00 )
 
 TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
     {
-    lua_State* L = lua_open();    
+    lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-    ASSERT_EQ( 0, luaL_dostring( L, 
+    ASSERT_EQ( 0, luaL_dostring( L,
         "G_DEVICE_MANAGER():add_io_device( 4, 1, \'TE1\', \'Test device\', \'\' )" ) );
     ASSERT_EQ( 0, luaL_dostring( L,
         "TE1 = G_DEVICE_MANAGER():get_device( 4, \'TE1\')" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "TE1" );
     auto TE1 = static_cast<device*>( tolua_touserdata( L, -1, nullptr ) );
     EXPECT_NE( nullptr, TE1 );
-    lua_remove( L, -1 );    
+    lua_remove( L, -1 );
 
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
@@ -179,7 +179,7 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
 
     auto st = WT1->get_state();
     //Некорректный вызов - отсуствует self.
-    ASSERT_NE( 0, luaL_dostring( L, "res = WT1.get_state()" ) );    
+    ASSERT_NE( 0, luaL_dostring( L, "res = WT1.get_state()" ) );
     //Корректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "res = WT1:get_state()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
@@ -337,848 +337,859 @@ TEST( toLuapp, STUB )
     }
 
 TEST( toLuapp, tolua_PAC_dev_AI00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = AI()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = AI()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "AI1" );
-	auto AI1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, AI1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "AI1" );
+    auto AI1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, AI1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_AO00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = AO()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = AO()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_AO, device.DST_AO, \'AO1\', \'Test AO\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "AO1 = AO( \'AO1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "AO1" );
-	auto AO1 = static_cast<i_AO_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, AO1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_AO, device.DST_AO, \'AO1\', \'Test AO\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "AO1 = AO( \'AO1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "AO1" );
+    auto AO1 = static_cast<i_AO_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, AO1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_DI00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = DI()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = DI()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "DI1" );
-	auto DI1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, DI1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "DI1" );
+    auto DI1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, DI1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_DO00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = DO()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = DO()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DO, device.DST_DO, \'DO1\', \'Test DO\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1 = DO( \'DO1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "DO1" );
-	auto DO1 = static_cast<i_DO_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, DO1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_DO, device.DST_DO, \'DO1\', \'Test DO\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1 = DO( \'DO1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "DO1" );
+    auto DO1 = static_cast<i_DO_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, DO1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_V00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = V()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = V()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_V, device.DST_V_DO1, \'V1\', \'Test valve\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "V1 = V( \'V1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "V1" );
-	auto V1 = static_cast<valve*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, V1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_V, device.DST_V_DO1, \'V1\', \'Test valve\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "V1 = V( \'V1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "V1" );
+    auto V1 = static_cast<valve*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, V1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_VC00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = VC()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = VC()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_VC, device.DST_VC, \'VC1\', \'Test VC\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "VC1 = VC( \'VC1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "VC1" );
-	auto VC1 = static_cast<i_AO_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, VC1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_VC, device.DST_VC, \'VC1\', \'Test VC\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "VC1 = VC( \'VC1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "VC1" );
+    auto VC1 = static_cast<i_AO_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, VC1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_M00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = M()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = M()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_M, device.DST_M, \'M1\', \'Test motor\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "M1 = M( \'M1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "M1" );
-	auto M1 = static_cast<i_motor*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, M1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_M, device.DST_M, \'M1\', \'Test motor\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "M1 = M( \'M1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "M1" );
+    auto M1 = static_cast<i_motor*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, M1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_LS00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = LS()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = LS()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_LS, device.DST_LS_MIN, \'LS1\', \'Test LS\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "LS1 = LS( \'LS1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "LS1" );
-	auto LS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, LS1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_LS, device.DST_LS_MIN, \'LS1\', \'Test LS\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "LS1 = LS( \'LS1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "LS1" );
+    auto LS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, LS1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_FS00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = FS()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = FS()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_FS, device.DST_FS, \'FS1\', \'Test FS\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "FS1 = FS( \'FS1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "FS1" );
-	auto FS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, FS1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FS, device.DST_FS, \'FS1\', \'Test FS\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FS1 = FS( \'FS1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FS1" );
+    auto FS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, FS1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_TE00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = TE()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = TE()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_TE, device.DST_TE, \'TE1\', \'Test TE\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "TE1 = TE( \'TE1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "TE1" );
-	auto TE1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, TE1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_TE, device.DST_TE, \'TE1\', \'Test TE\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "TE1 = TE( \'TE1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "TE1" );
+    auto TE1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, TE1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_LT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = LT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = LT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_LT, device.DST_LT, \'LT1\', \'Test LT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "LT1 = LT( \'LT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "LT1" );
-	auto LT1 = static_cast<level*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, LT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_LT, device.DST_LT, \'LT1\', \'Test LT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "LT1 = LT( \'LT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "LT1" );
+    auto LT1 = static_cast<level*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, LT1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_GS00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = GS()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = GS()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_GS, device.DST_GS, \'GS1\', \'Test GS\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "GS1 = GS( \'GS1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "GS1" );
-	auto GS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, GS1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_GS, device.DST_GS, \'GS1\', \'Test GS\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "GS1 = GS( \'GS1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "GS1" );
+    auto GS1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, GS1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_HA00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = HA()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = HA()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_HA, device.DST_HA, \'HA1\', \'Test HA\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "HA1 = HA( \'HA1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "HA1" );
-	auto HA1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, HA1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_HA, device.DST_HA, \'HA1\', \'Test HA\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "HA1 = HA( \'HA1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "HA1" );
+    auto HA1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, HA1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_HL00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = HL()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = HL()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_HL, device.DST_HL, \'HL1\', \'Test HL\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "HL1 = HL( \'HL1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "HL1" );
-	auto HL1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, HL1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_HL, device.DST_HL, \'HL1\', \'Test HL\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "HL1 = HL( \'HL1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "HL1" );
+    auto HL1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, HL1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_HLA00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = HLA()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = HLA()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_HLA, device.DST_HLA, \'HLA1\', \'Test HLA\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "HLA1 = HLA( \'HLA1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "HLA1" );
-	auto HLA1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, HLA1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_HLA, device.DST_HLA, \'HLA1\', \'Test HLA\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "HLA1 = HLA( \'HLA1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "HLA1" );
+    auto HLA1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, HLA1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_SB00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = SB()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = SB()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_SB, device.DST_SB, \'SB1\', \'Test SB\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "SB1 = SB( \'SB1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "SB1" );
-	auto SB1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, SB1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_SB, device.DST_SB, \'SB1\', \'Test SB\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "SB1 = SB( \'SB1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "SB1" );
+    auto SB1 = static_cast<i_DI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, SB1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_FQT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = FQT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = FQT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_FQT, device.DST_FQT, \'FQT1\', \'Test FQT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
-	auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, FQT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT, \'FQT1\', \'Test FQT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<i_counter*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_QT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = QT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = QT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_QT, device.DST_QT, \'QT1\', \'Test QT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "QT1 = QT( \'QT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "QT1" );
-	auto QT1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, QT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_QT, device.DST_QT, \'QT1\', \'Test QT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "QT1 = QT( \'QT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "QT1" );
+    auto QT1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, QT1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_PT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = PT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = PT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_PT, device.DST_PT, \'PT1\', \'Test PT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "PT1 = PT( \'PT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "PT1" );
-	auto PT1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, PT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_PT, device.DST_PT, \'PT1\', \'Test PT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "PT1 = PT( \'PT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "PT1" );
+    auto PT1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, PT1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_F00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = F()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = F()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_F, device.DST_F, \'F1\', \'Test F\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "F1 = F( \'F1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "F1" );
-	auto F1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, F1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_F, device.DST_F, \'F1\', \'Test F\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "F1 = F( \'F1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "F1" );
+    auto F1 = static_cast<i_AI_device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, F1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_EY00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = EY()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = EY()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L, "EY1 = EY( \'EY1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "EY1" );
-	auto EY1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, EY1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L, "EY1 = EY( \'EY1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "EY1" );
+    auto EY1 = static_cast<signal_column*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, EY1 );
+    lua_remove( L, -1 );
 
-	lua_close( L );
-	}
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_virtual_FQT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = virtual_FQT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = virtual_FQT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L, "vFQT1 = virtual_FQT( \'vFQT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "vFQT1" );
-	auto vFQT1 = static_cast<virtual_counter*>(
-		tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, vFQT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L, "vFQT1 = virtual_FQT( \'vFQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "vFQT1" );
+    auto vFQT1 = static_cast<virtual_counter*>(
+        tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, vFQT1 );
+    lua_remove( L, -1 );
 
-	lua_close( L );
-	}
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_DEVICE00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметров.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = DEVICE()" ) );
+    // Некорректный вызов без параметров.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = DEVICE()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DI, device.DST_DI, \'DI1\', \'Test device\', \'\' )" ) );
-	// DEVICE принимает только номер устройства как параметр.
-	ASSERT_EQ( 0, luaL_dostring( L, "dev1 = DEVICE( 0 )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "dev1" );
-	auto dev1 = static_cast<device*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, dev1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_DI, device.DST_DI, \'DI1\', \'Test device\', \'\' )" ) );
+    // DEVICE принимает только номер устройства как параметр.
+    ASSERT_EQ( 0, luaL_dostring( L, "dev1 = DEVICE( 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dev1" );
+    auto dev1 = static_cast<device*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, dev1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_DI_device_get_state00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
 
-	// Тест get_state.
-	ASSERT_EQ( 0, luaL_dostring( L, "state = DI1:get_state()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "state" );
-	auto state = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0, state );
+    // Тест get_state.
+    ASSERT_EQ( 0, luaL_dostring( L, "state = DI1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "state" );
+    auto state = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0, state );
 
-	// Некорректный вызов без self.
-	ASSERT_NE( 0, luaL_dostring( L, "res = DI1.get_state()" ) );
+    // Некорректный вызов без self.
+    ASSERT_NE( 0, luaL_dostring( L, "res = DI1.get_state()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_DI_device_is_active00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_DI, device.DST_DI, \'DI1\', \'Test DI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "DI1 = DI( \'DI1\' )" ) );
 
-	// Тест is_active.
-	ASSERT_EQ( 0, luaL_dostring( L, "active = DI1:is_active()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "active" );
-	auto active = tolua_toboolean( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0, active );
+    // Тест is_active.
+    ASSERT_EQ( 0, luaL_dostring( L, "active = DI1:is_active()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "active" );
+    auto active = tolua_toboolean( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0, active );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_DO_device_on_off00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DO, device.DST_DO, \'DO1\', \'Test DO\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1 = DO( \'DO1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        R"(device.DT_DO, device.DST_DO, 'DO1', 'Test DO', '' ))" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, R"(DO1 = DO( 'DO1' ))" ) );
 
-	// Тест on.
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1:on()" ) );
+    // Тест on.
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1:on()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto state = lua_tonumber( L, -1 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 1, state );
 
-	// Тест off.
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1:off()" ) );
+    // Тест off.
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1:off()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    state = lua_tonumber( L, -1 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0, state );
 
-	// Тест instant_off.
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1:instant_off()" ) );
+    // Тест instant_off.
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1:instant_off()" ) );
 
-	// Тест direct_off (псевдоним для instant_off).
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1:direct_off()" ) );
+    // Тест direct_off (псевдоним для instant_off).
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1:direct_off()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_DO_device_set_state00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		R"(device.DT_DO, device.DST_DO, 'DO1', 'Test DO', '' ))" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, R"(DO1 = DO( 'DO1' ))" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        R"(device.DT_DO, device.DST_DO, 'DO1', 'Test DO', '' ))" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, R"(DO1 = DO( 'DO1' ))" ) );
 
     ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     auto state = tolua_tonumber( L, -1, 0 );
     lua_pop( L, 1 );
-    EXPECT_EQ( state, 0 );
+    EXPECT_EQ( 0, state );
 
-	// Тест set_state.
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1:set_state( 1 )" ) );
+    // Тест set_state.
+    ASSERT_EQ( 0, luaL_dostring( L, "DO1:set_state( 1 )" ) );
     ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     state = tolua_tonumber( L, -1, 0 );
     lua_pop( L, 1 );
-    EXPECT_EQ( state, 1 );
+    EXPECT_EQ( 1, state );
 
-	// Некорректный вызов без параметра.
-	ASSERT_NE( 0, luaL_dostring( L, "DO1:set_state()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_NE( 0, luaL_dostring( L, "DO1:set_state()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_AI_device_get_value00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
 
-	// Тест get_value.
-	ASSERT_EQ( 0, luaL_dostring( L, "val = AI1:get_value()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "val" );
-	auto val = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0.0f, val );
+    // Тест get_value.
+    ASSERT_EQ( 0, luaL_dostring( L, "val = AI1:get_value()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "val" );
+    auto val = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0.0f, val );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_AI_device_get_state00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_AI, device.DST_AI, \'AI1\', \'Test AI\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "AI1 = AI( \'AI1\' )" ) );
 
-	// Тест get_state.
-	ASSERT_EQ( 0, luaL_dostring( L, "state = AI1:get_state()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "state" );
-	auto state = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 1, state );
+    // Тест get_state.
+    ASSERT_EQ( 0, luaL_dostring( L, "state = AI1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "state" );
+    auto state = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 1, state );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_AO_device_set_value00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_AO, device.DST_AO, \'AO1\', \'Test AO\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "AO1 = AO( \'AO1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_AO, device.DST_AO, \'AO1\', \'Test AO\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "AO1 = AO( \'AO1\' )" ) );
 
-	// Тест set_value.
-	ASSERT_EQ( 0, luaL_dostring( L, "AO1:set_value( 10.5 )" ) );
+    // Тест set_value.
+    ASSERT_EQ( 0, luaL_dostring( L, "AO1:set_value( 10.5 )" ) );
 
-	// Тест off.
-	ASSERT_EQ( 0, luaL_dostring( L, "AO1:off()" ) );
+    // Тест off.
+    ASSERT_EQ( 0, luaL_dostring( L, "AO1:off()" ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_NE( 0, luaL_dostring( L, "AO1:set_value()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_NE( 0, luaL_dostring( L, "AO1:set_value()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_i_counter_methods00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_FQT, device.DST_FQT, \'FQT1\', \'Test FQT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT, \'FQT1\', \'Test FQT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT( \'FQT1\' )" ) );
 
-	// Тест pause.
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause()" ) );
+    // Тест pause.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:pause()" ) );
 
-	// Тест start.
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start()" ) );
+    // Тест start.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start()" ) );
 
-	// Тест reset.
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1:reset()" ) );
+    // Тест reset.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:reset()" ) );
 
-	// Тест restart.
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1:restart()" ) );
+    // Тест restart.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:restart()" ) );
 
-	// Тест get_quantity.
-	ASSERT_EQ( 0, luaL_dostring( L, "qty = FQT1:get_quantity()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "qty" );
-	auto qty = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0, qty );
+    // Тест get_quantity.
+    ASSERT_EQ( 0, luaL_dostring( L, "qty = FQT1:get_quantity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "qty" );
+    auto qty = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0, qty );
 
-	// Тест get_flow.
-	ASSERT_EQ( 0, luaL_dostring( L, "flow = FQT1:get_flow()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "flow" );
-	auto flow = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0.0f, flow );
+    // Тест get_flow.
+    ASSERT_EQ( 0, luaL_dostring( L, "flow = FQT1:get_flow()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "flow" );
+    auto flow = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0.0f, flow );
 
-	// Тест get_state.
-	ASSERT_EQ( 0, luaL_dostring( L, "state = FQT1:get_state()" ) );
+    // Тест get_state.
+    ASSERT_EQ( 0, luaL_dostring( L, "state = FQT1:get_state()" ) );
 
-	// Тест get_abs_quantity.
-	ASSERT_EQ( 0, luaL_dostring( L, "abs = FQT1:get_abs_quantity()" ) );
+    // Тест get_abs_quantity.
+    ASSERT_EQ( 0, luaL_dostring( L, "abs = FQT1:get_abs_quantity()" ) );
 
-	// Тест abs_reset.
-	ASSERT_EQ( 0, luaL_dostring( L, "FQT1:abs_reset()" ) );
+    // Тест abs_reset.
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:abs_reset()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_valve_methods00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_V, device.DST_V_DO1, \'V1\', \'Test valve\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "V1 = V( \'V1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_V, device.DST_V_DO1, \'V1\', \'Test valve\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "V1 = V( \'V1\' )" ) );
 
-	// Тест is_opened.
-	ASSERT_EQ( 0, luaL_dostring( L, "opened = V1:is_opened()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "opened" );
-	auto opened = tolua_toboolean( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0, opened );
+    // Тест is_opened.
+    ASSERT_EQ( 0, luaL_dostring( L, "opened = V1:is_opened()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "opened" );
+    auto opened = tolua_toboolean( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0, opened );
 
-	// Тест is_closed - клапан не закрыт, так как нет обратной связи.
-	ASSERT_EQ( 0, luaL_dostring( L, "closed = V1:is_closed()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "closed" );
-	auto closed = tolua_toboolean( L, -1, 0 );
-	lua_pop( L, 1 );
-	// Без сигнала обратной связи клапан считается незакрытым.
-	EXPECT_EQ( 0, closed );
+    // Тест is_closed - клапан не закрыт, так как нет обратной связи.
+    ASSERT_EQ( 0, luaL_dostring( L, "closed = V1:is_closed()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "closed" );
+    auto closed = tolua_toboolean( L, -1, 0 );
+    lua_pop( L, 1 );
+    // Без сигнала обратной связи клапан считается незакрытым.
+    EXPECT_EQ( 0, closed );
 
-	// Тест on.
-	ASSERT_EQ( 0, luaL_dostring( L, "V1:on()" ) );
+    // Тест on.
+    ASSERT_EQ( 0, luaL_dostring( L, "V1:on()" ) );
 
-	// Тест off.
-	ASSERT_EQ( 0, luaL_dostring( L, "V1:off()" ) );
+    // Тест off.
+    ASSERT_EQ( 0, luaL_dostring( L, "V1:off()" ) );
 
-	// Тест instant_off.
-	ASSERT_EQ( 0, luaL_dostring( L, "V1:instant_off()" ) );
+    // Тест instant_off.
+    ASSERT_EQ( 0, luaL_dostring( L, "V1:instant_off()" ) );
 
-	// Тест get_on_fb_value.
-	ASSERT_EQ( 0, luaL_dostring( L, "fb_on = V1:get_on_fb_value()" ) );
+    // Тест get_on_fb_value.
+    ASSERT_EQ( 0, luaL_dostring( L, "fb_on = V1:get_on_fb_value()" ) );
 
-	// Тест get_off_fb_value.
-	ASSERT_EQ( 0, luaL_dostring( L, "fb_off = V1:get_off_fb_value()" ) );
+    // Тест get_off_fb_value.
+    ASSERT_EQ( 0, luaL_dostring( L, "fb_off = V1:get_off_fb_value()" ) );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    valve::clear_switching_off_queue();
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_level_get_volume00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_LT, device.DST_LT, \'LT1\', \'Test LT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "LT1 = LT( \'LT1\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_LT, device.DST_LT, \'LT1\', \'Test LT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "LT1 = LT( \'LT1\' )" ) );
 
-	// Тест get_volume.
-	ASSERT_EQ( 0, luaL_dostring( L, "vol = LT1:get_volume()" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "vol" );
-	auto vol = tolua_tonumber( L, -1, 0 );
-	lua_pop( L, 1 );
-	EXPECT_EQ( 0.0f, vol );
+    // Тест get_volume.
+    ASSERT_EQ( 0, luaL_dostring( L, "vol = LT1:get_volume()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "vol" );
+    auto vol = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( 0.0f, vol );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_virtual_counter_methods00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L, "vFQT1 = virtual_FQT( \'vFQT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "vFQT1" );
-	auto vFQT1 = static_cast<virtual_counter*>(
-		tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, vFQT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L, "vFQT1 = virtual_FQT( \'vFQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "vFQT1" );
+    auto vFQT1 = static_cast<virtual_counter*>(
+        tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, vFQT1 );
+    lua_remove( L, -1 );
 
-	// Тест reset.
-	ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:reset()" ) );
+    // Тест reset.
+    ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:reset()" ) );
 
-	// Тест get_quantity.
-	ASSERT_EQ( 0, luaL_dostring( L, "qty = vFQT1:get_quantity()" ) );
+    // Тест get_quantity.
+    ASSERT_EQ( 0, luaL_dostring( L, "qty = vFQT1:get_quantity()" ) );
 
-	// Тест get_flow.
-	ASSERT_EQ( 0, luaL_dostring( L, "flow = vFQT1:get_flow()" ) );
+    // Тест get_flow.
+    ASSERT_EQ( 0, luaL_dostring( L, "flow = vFQT1:get_flow()" ) );
 
-	// Тест get_state.
-	ASSERT_EQ( 0, luaL_dostring( L, "state = vFQT1:get_state()" ) );
+    // Тест get_state.
+    ASSERT_EQ( 0, luaL_dostring( L, "state = vFQT1:get_state()" ) );
 
-	// Тест get_abs_quantity.
-	ASSERT_EQ( 0, luaL_dostring( L, "abs = vFQT1:get_abs_quantity()" ) );
+    // Тест get_abs_quantity.
+    ASSERT_EQ( 0, luaL_dostring( L, "abs = vFQT1:get_abs_quantity()" ) );
 
-	// Тест abs_reset.
-	ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:abs_reset()" ) );
+    // Тест abs_reset.
+    ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:abs_reset()" ) );
 
-	// Тест eval - 3 параметра: read_value, abs_read_value, read_flow.
-	ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:eval( 10, 100, 1.5 )" ) );
+    // Тест eval - 3 параметра: read_value, abs_read_value, read_flow.
+    ASSERT_EQ( 0, luaL_dostring( L, "vFQT1:eval( 10, 100, 1.5 )" ) );
 
-	lua_close( L );
-	}
+    lua_close( L );
+    }
 
 TEST( toLuapp, tolua_PAC_dev_WT00 )
-	{
-	lua_State* L = lua_open();
-	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-	// Некорректный вызов без параметра.
-	ASSERT_EQ( 1, luaL_dostring( L, "res = WT()" ) );
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = WT()" ) );
 
-	ASSERT_EQ( 0, luaL_dostring( L,
-		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_WT, device.DST_WT_ETH, \'WT1\', \'Test WT\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "WT1 = WT( \'WT1\' )" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
-	auto WT1 = static_cast<i_wages*>( tolua_touserdata( L, -1, nullptr ) );
-	EXPECT_NE( nullptr, WT1 );
-	lua_remove( L, -1 );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_WT, device.DST_WT_ETH, \'WT1\', \'Test WT\', \'\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "WT1 = WT( \'WT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "WT1" );
+    auto WT1 = static_cast<i_wages*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, WT1 );
+    lua_remove( L, -1 );
 
-	G_DEVICE_MANAGER()->clear_io_devices();
-	G_ERRORS_MANAGER->clear();
-	lua_close( L );
-	}
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    lua_close( L );
+    }
