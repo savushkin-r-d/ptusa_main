@@ -1253,6 +1253,17 @@ TEST( device_manager, add_io_device )
         "Test watchdog", "Art_1" );
     EXPECT_EQ( nullptr, res );
 
+    // Проверка устройства управления узлом сетевых настроек.
+    auto* node1 = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "NODE1",
+        "Test node device", "" );
+    EXPECT_NE( nullptr, node1 );
+    // Тестирование несуществующего подтипа.
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE + 1, "NODE2",
+        "Test invalid node", "" );
+    EXPECT_EQ( nullptr, res );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     valve::clear_v_bistable();
@@ -1360,6 +1371,10 @@ TEST( device, get_type_str )
     device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
         device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
     EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
+
+    device dev4( "DEV4", device::DEVICE_TYPE::DT_NODE,
+        device::DEVICE_SUB_TYPE::DST_NODE, 0 );
+    EXPECT_STREQ( dev4.get_type_str(), "NODE" );
     }
 
 TEST( device, save_device )
@@ -6353,6 +6368,55 @@ TEST( device_manager, get_EY )
     auto* non_existent = EY( "NON_EXISTENT" );
     EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
     }
+
+
+TEST( node_dev, basic_functionality )
+	{
+	// Очистка перед тестом.
+	G_DEVICE_MANAGER()->clear_io_devices();
+	G_ERRORS_MANAGER->clear();
+
+	// Инициализация io_manager с одним узлом.
+	G_IO_MANAGER()->init( 1 );
+	G_IO_MANAGER()->add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+		1, "192.168.1.100", "A100", 0, 0, 0, 0, 0, 0 );
+
+	// Добавление устройства node_dev.
+	auto* dev = G_DEVICE_MANAGER()->add_io_device(
+		device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
+
+	ASSERT_NE( dev, nullptr );
+
+	// Получение указателя на node_dev для доступа к специфическим методам.
+	node_dev* node = dynamic_cast<node_dev*>(
+		G_DEVICE_MANAGER()->get_device( "NODE1" ) );
+	ASSERT_NE( node, nullptr );
+
+	// Установка индекса узла.
+	node->set_par( static_cast<u_int>( node_dev::PARAM::P_NODE_IDX ), 0, 0 );
+
+	// Проверка получения IP-адреса.
+	EXPECT_STREQ( node->get_ip(), "192.168.1.100" );
+
+	// Установка значений свойств.
+	node->set_property_value( node_dev::PROPERTIES::ST, 1 );
+	node->set_property_value( node_dev::PROPERTIES::WEB, 1 );
+	node->set_property_value( node_dev::PROPERTIES::STARTUP, 0 );
+	node->set_property_value( node_dev::PROPERTIES::CMD, 5 );
+
+	// Проверка получения значений свойств.
+	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::ST ), 1 );
+	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::WEB ), 1 );
+	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::STARTUP ), 0 );
+	EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::CMD ), 5 );
+
+	// Проверка evaluate_io().
+	node->evaluate_io();
+
+	// Очистка после теста.
+	G_DEVICE_MANAGER()->clear_io_devices();
+	G_ERRORS_MANAGER->clear();
+	}
 
 
 TEST( timer_manager, get_count )
