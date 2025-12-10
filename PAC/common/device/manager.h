@@ -3,6 +3,7 @@
 #include "base.h"
 #include "valve.h"
 #include "life_device.h"
+#include "node_dev.h"
 #include "device.h"
 
 class dev_stub;
