@@ -1182,3 +1182,182 @@ TEST( toLuapp, tolua_PAC_dev_WT00 )
 	G_ERRORS_MANAGER->clear();
 	lua_close( L );
 	}
+
+TEST( toLuapp, tolua_PAC_dev_signal_column_methods00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	ASSERT_EQ( 0, luaL_dostring( L,
+		"G_DEVICE_MANAGER():add_io_device( "
+		"device.DT_HL, device.DST_HL, \'HL1\', \'Test HL\', \'\' )" ) );
+	ASSERT_EQ( 0, luaL_dostring( L, "HL1 = HL( \'HL1\' )" ) );
+
+	// Тест on.
+	ASSERT_EQ( 0, luaL_dostring( L, "HL1:on()" ) );
+
+	// Тест off.
+	ASSERT_EQ( 0, luaL_dostring( L, "HL1:off()" ) );
+
+	// Тест set_state.
+	ASSERT_EQ( 0, luaL_dostring( L, "HL1:set_state( 1 )" ) );
+
+	G_DEVICE_MANAGER()->clear_io_devices();
+	G_ERRORS_MANAGER->clear();
+	lua_close( L );
+	}
+
+TEST( toLuapp, tolua_PAC_dev_i_motor_methods00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	ASSERT_EQ( 0, luaL_dostring( L,
+		"G_DEVICE_MANAGER():add_io_device( "
+		"device.DT_M, device.DST_M, \'M1\', \'Test motor\', \'\' )" ) );
+	ASSERT_EQ( 0, luaL_dostring( L, "M1 = M( \'M1\' )" ) );
+
+	// Тест reverse.
+	ASSERT_EQ( 0, luaL_dostring( L, "M1:reverse()" ) );
+
+	// Тест get_linear_speed.
+	ASSERT_EQ( 0, luaL_dostring( L, "speed = M1:get_linear_speed()" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "speed" );
+	auto speed = tolua_tonumber( L, -1, 0 );
+	lua_pop( L, 1 );
+	EXPECT_EQ( 0.0f, speed );
+
+	// Тест get_amperage.
+	ASSERT_EQ( 0, luaL_dostring( L, "amp = M1:get_amperage()" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "amp" );
+	auto amp = tolua_tonumber( L, -1, 0 );
+	lua_pop( L, 1 );
+	EXPECT_EQ( 0.0f, amp );
+
+	G_DEVICE_MANAGER()->clear_io_devices();
+	G_ERRORS_MANAGER->clear();
+	lua_close( L );
+	}
+
+TEST( toLuapp, tolua_PAC_dev_PID_controller00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	// Тест создания PID контроллера.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid = PID( 1 )" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "pid" );
+	auto pid = tolua_touserdata( L, -1, nullptr );
+	EXPECT_NE( nullptr, pid );
+	lua_remove( L, -1 );
+
+	// Тест on.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:on()" ) );
+
+	// Тест off.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:off()" ) );
+
+	// Тест reset.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:reset()" ) );
+
+	// Тест set - принимает 1 параметр.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:set( 50.0 )" ) );
+
+	// Тест eval - принимает current_value и опц. delta_sign.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:eval( 30.0 )" ) );
+
+	// Тест get_state.
+	ASSERT_EQ( 0, luaL_dostring( L, "state = pid:get_state()" ) );
+
+	// Тест set_cmd.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:set_cmd( \'cmd\', 0, 1.0 )" ) );
+
+	// Тест print.
+	ASSERT_EQ( 0, luaL_dostring( L, "pid:print()" ) );
+
+	lua_close( L );
+	}
+
+TEST( toLuapp, tolua_PAC_dev_timer_functions00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	// Тест создания таймера.
+	ASSERT_EQ( 0, luaL_dostring( L, "t = timer()" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "t" );
+	auto t = tolua_touserdata( L, -1, nullptr );
+	EXPECT_NE( nullptr, t );
+	lua_remove( L, -1 );
+
+	// Тест start.
+	ASSERT_EQ( 0, luaL_dostring( L, "t:start()" ) );
+
+	// Тест reset.
+	ASSERT_EQ( 0, luaL_dostring( L, "t:reset()" ) );
+
+	// Тест pause.
+	ASSERT_EQ( 0, luaL_dostring( L, "t:pause()" ) );
+
+	// Тест is_time_up.
+	ASSERT_EQ( 0, luaL_dostring( L, "up = t:is_time_up()" ) );
+
+	// Тест get_work_time.
+	ASSERT_EQ( 0, luaL_dostring( L, "wt = t:get_work_time()" ) );
+
+	// Тест set_countdown_time.
+	ASSERT_EQ( 0, luaL_dostring( L, "t:set_countdown_time( 5000 )" ) );
+
+	// Тест get_countdown_time.
+	ASSERT_EQ( 0, luaL_dostring( L, "ct = t:get_countdown_time()" ) );
+
+	// Тест get_state.
+	ASSERT_EQ( 0, luaL_dostring( L, "state = t:get_state()" ) );
+
+	lua_close( L );
+	}
+
+TEST( toLuapp, tolua_PAC_dev_G_DEVICE_MANAGER00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	// Тест получения G_DEVICE_MANAGER.
+	ASSERT_EQ( 0, luaL_dostring( L, "dm = G_DEVICE_MANAGER()" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "dm" );
+	auto dm = tolua_touserdata( L, -1, nullptr );
+	EXPECT_NE( nullptr, dm );
+	lua_remove( L, -1 );
+
+	// Тест add_io_device через manager.
+	ASSERT_EQ( 0, luaL_dostring( L,
+		"dm:add_io_device( device.DT_DI, device.DST_DI, "
+		"\'DI_TEST\', \'Test device\', \'\' )" ) );
+
+	// Тест get_device.
+	ASSERT_EQ( 0, luaL_dostring( L,
+		"dev = dm:get_device( device.DT_DI, \'DI_TEST\' )" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "dev" );
+	auto dev = tolua_touserdata( L, -1, nullptr );
+	EXPECT_NE( nullptr, dev );
+	lua_remove( L, -1 );
+
+	G_DEVICE_MANAGER()->clear_io_devices();
+	G_ERRORS_MANAGER->clear();
+	lua_close( L );
+	}
+
+TEST( toLuapp, tolua_PAC_dev_G_IO_MANAGER00 )
+	{
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+	// Тест получения G_IO_MANAGER.
+	ASSERT_EQ( 0, luaL_dostring( L, "iom = G_IO_MANAGER()" ) );
+	lua_getfield( L, LUA_GLOBALSINDEX, "iom" );
+	auto iom = tolua_touserdata( L, -1, nullptr );
+	EXPECT_NE( nullptr, iom );
+	lua_remove( L, -1 );
+
+	lua_close( L );
+	}
