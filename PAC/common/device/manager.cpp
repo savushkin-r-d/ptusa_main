@@ -1430,6 +1430,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
+        case device::DT_NODE:
+            if ( dev_sub_type == device::DST_NODE )
+                {
+                new_device = new node_dev( dev_name, device::DST_NODE );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown NODE device subtype %d!\n",
+                    dev_sub_type );
+                }
+            break;
+
         default:
             if ( G_DEBUG )
                 {
