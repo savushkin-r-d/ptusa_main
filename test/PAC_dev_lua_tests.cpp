@@ -915,11 +915,22 @@ TEST( toLuapp, tolua_PAC_dev_i_DO_device_set_state00 )
 
 	ASSERT_EQ( 0, luaL_dostring( L,
 		"G_DEVICE_MANAGER():add_io_device( "
-		"device.DT_DO, device.DST_DO, \'DO1\', \'Test DO\', \'\' )" ) );
-	ASSERT_EQ( 0, luaL_dostring( L, "DO1 = DO( \'DO1\' )" ) );
+		R"(device.DT_DO, device.DST_DO, 'DO1', 'Test DO', '' ))" ) );
+	ASSERT_EQ( 0, luaL_dostring( L, R"(DO1 = DO( 'DO1' ))" ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto state = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( state, 0 );
 
 	// Тест set_state.
 	ASSERT_EQ( 0, luaL_dostring( L, "DO1:set_state( 1 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = DO1:get_state()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    state = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    EXPECT_EQ( state, 1 );
 
 	// Некорректный вызов без параметра.
 	ASSERT_NE( 0, luaL_dostring( L, "DO1:set_state()" ) );
