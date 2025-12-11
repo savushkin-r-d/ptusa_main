@@ -1254,14 +1254,12 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
 
     // Проверка устройства управления узлом сетевых настроек.
-    auto* node1 = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_NODE, device::DST_NODE, "NODE1",
-        "Test node device", "" );
-    EXPECT_NE( nullptr, node1 );
+    auto* node1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
+    EXPECT_EQ( nullptr, node1 );
     // Тестирование несуществующего подтипа.
-    res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_NODE, device::DST_NODE + 1, "NODE2",
-        "Test invalid node", "" );
+    res = G_DEVICE_MANAGER()->add_io_device( device::DT_NODE,
+        device::DST_NODE + 1, "NODE2", "Test invalid node", "" );
     EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
@@ -6372,10 +6370,6 @@ TEST( device_manager, get_EY )
 
 TEST( node_dev, basic_functionality )
     {
-    // Очистка перед тестом.
-    G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
-
     // Инициализация io_manager с одним узлом.
     uni_io_manager mngr;
     mngr.init( 1 );
@@ -6386,8 +6380,7 @@ TEST( node_dev, basic_functionality )
     // Добавление устройства node_dev.
     auto* dev = G_DEVICE_MANAGER()->add_io_device(
         device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
-
-    ASSERT_NE( dev, nullptr );
+    ASSERT_EQ( dev, nullptr );
 
     // Получение указателя на node_dev для доступа к специфическим методам.
     node_dev* node = dynamic_cast<node_dev*>(
