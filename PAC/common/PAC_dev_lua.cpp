@@ -15527,6 +15527,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_TS",device::DT_TS);
    tolua_constant(tolua_S,"DT_G",device::DT_G);
    tolua_constant(tolua_S,"DT_WATCHDOG",device::DT_WATCHDOG);
+   tolua_constant(tolua_S,"DT_EY",device::DT_EY);
+   tolua_constant(tolua_S,"DT_NODE",device::DT_NODE);
    tolua_constant(tolua_S,"DST_NONE",device::DST_NONE);
    tolua_constant(tolua_S,"DST_V_DO1",device::DST_V_DO1);
    tolua_constant(tolua_S,"DST_V_DO2",device::DST_V_DO2);
@@ -15630,6 +15632,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_G_IOL_4",device::DST_G_IOL_4);
    tolua_constant(tolua_S,"DST_G_IOL_8",device::DST_G_IOL_8);
    tolua_constant(tolua_S,"DST_WATCHDOG",device::DST_WATCHDOG);
+   tolua_constant(tolua_S,"DST_CONV_AO2",device::DST_CONV_AO2);
+   tolua_constant(tolua_S,"DST_NODE",device::DST_NODE);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");
