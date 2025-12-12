@@ -382,8 +382,9 @@ TEST( operation_state, check_devices_extra_step )
 	test_op->add_step( "Тестовый шаг", -1, -1 );
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto extra_step = operation_run_state->add_step( "Extra_Step" );
-	auto a1 = reinterpret_cast<on_action*>(
+	auto a1 = dynamic_cast<on_action*>(
 		( *extra_step )[ step::ACTIONS::A_ON ] );
+    ASSERT_NE( a1, nullptr );
 
 	virtual_valve v1( "TEST1_V1" );
 	tech_dev_error err_v1( &v1 );
@@ -418,10 +419,12 @@ TEST( operation_state, check_devices_multiple_extra_steps )
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto extra_step_1 = operation_run_state->add_step( "Extra_Step_1" );
 	auto extra_step_2 = operation_run_state->add_step( "Extra_Step_2" );
-	auto a1 = reinterpret_cast<on_action*>(
-		( *extra_step_1 )[ step::ACTIONS::A_ON ] );
-	auto a2 = reinterpret_cast<on_action*>(
+	auto a1 = dynamic_cast<on_action*>( 
+        ( *extra_step_1 )[ step::ACTIONS::A_ON ] );
+    ASSERT_NE( a1, nullptr );
+	auto a2 = dynamic_cast<on_action*>(
 		( *extra_step_2 )[ step::ACTIONS::A_ON ] );
+    ASSERT_NE( a2, nullptr );
 
 	virtual_valve v1( "TEST1_V1" );
 	tech_dev_error err_v1( &v1 );
