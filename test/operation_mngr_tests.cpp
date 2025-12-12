@@ -372,6 +372,41 @@ TEST( operation_state, check_devices )
 	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
 	}
 
+TEST( operation_state, check_devices_extra_step )
+	{
+	// Тест проверяет, что устройства дополнительных шагов проверяются.
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto test_op = ( *operation_mngr )[ 1 ];
+	test_op->add_step( "Тестовый шаг", -1, -1 );
+	auto operation_run_state = ( *test_op )[ operation::RUN ];
+	auto extra_step = operation_run_state->add_step( "Extra_Step" );
+	auto a1 = reinterpret_cast<on_action*>(
+		( *extra_step )[ step::ACTIONS::A_ON ] );
+
+	virtual_valve v1( "TEST1_V1" );
+	tech_dev_error err_v1( &v1 );
+	a1->add_dev( &v1 );
+	const auto MAX_SIZE = 20;
+	std::string buff( MAX_SIZE, '\0' );
+	auto MAIN_STEP = 1;
+	auto EXTRA_STEP_NUM = 2;
+
+	// Запускаем операцию с основным шагом 1.
+	test_op->start( MAIN_STEP );
+	// Включаем шаг 2 как дополнительный.
+	test_op->on_extra_step( EXTRA_STEP_NUM );
+	// Проверяем что шаг 2 активен как дополнительный.
+	EXPECT_TRUE( test_op->is_active_run_extra_step( EXTRA_STEP_NUM ) );
+	// Устройство переводим в состояние аварии.
+	v1.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
+	// Проверка устройств должна обнаружить ошибку в дополнительном шаге.
+	auto r = operation_run_state->check_devices( &buff[ 0 ], MAX_SIZE );
+	EXPECT_NE( 0, r );
+	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
+	}
+
 TEST( operation_state, to_next_step )
 	{
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
