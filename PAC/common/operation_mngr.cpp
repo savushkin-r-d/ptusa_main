@@ -2517,6 +2517,20 @@ int operation_state::check_devices( char* err_dev_name, unsigned int str_len )
             }
         }
 
+    // Проверка устройств в дополнительных активных шагах.
+    for ( auto step_idx : active_steps )
+        {
+        if ( step_idx > 0 && ( unsigned int ) step_idx <= steps.size() )
+            {
+            res = steps[ step_idx - 1 ]->check_devices( err_dev_name, str_len );
+
+            if ( res )
+                {
+                return 1;
+                }
+            }
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
