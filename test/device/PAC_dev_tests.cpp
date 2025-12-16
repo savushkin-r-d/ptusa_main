@@ -6383,7 +6383,7 @@ TEST( node_dev, basic_functionality )
     ASSERT_EQ( io_dev, nullptr );
 
     // Получение указателя на @node_dev для доступа к специфическим методам.
-    node_dev* node = dynamic_cast<node_dev*>(
+    auto node = dynamic_cast<node_dev*>( 
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
     node->set_io_node( nd );
