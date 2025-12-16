@@ -6375,7 +6375,7 @@ TEST( node_dev, basic_functionality )
     mngr.init( 1 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "192.168.1.100", "A100", 0, 0, 0, 0, 0, 0 );
+        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
     auto* dev = G_DEVICE_MANAGER()->add_io_device(
@@ -6391,7 +6391,7 @@ TEST( node_dev, basic_functionality )
     node->set_par( static_cast<u_int>( node_dev::PARAM::P_NODE_IDX ), 0, 0 );
 
     // Проверка получения IP-адреса.
-    EXPECT_STREQ( node->get_ip(), "192.168.1.100" );
+    EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
 
     // Установка значений свойств.
     node->set_property_value( node_dev::PROPERTIES::ST, 1 );
