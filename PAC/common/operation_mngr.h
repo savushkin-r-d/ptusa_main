@@ -350,12 +350,18 @@ class required_DI_action: public action
 /// <summary>
 /// Проверка устройств во время выполнения шага.
 /// </summary>
-class checked_devices_action : public action
+class checked_devices_action final : public action
     {
     public:
         checked_devices_action();
 
         void finalize() override;
+
+        /// @brief Инициализация действия.
+        ///
+        /// Если в устройствах присутствуют счётчики, то для них выполняем 
+        /// вначале метод `start()` для запуска счёта (после паузы или аварии).
+        void init() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
