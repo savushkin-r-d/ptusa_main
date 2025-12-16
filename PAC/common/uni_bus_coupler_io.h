@@ -44,6 +44,8 @@ class uni_io_manager : public io_manager
             BUFF_SIZE = 262,
             PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
             PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
+            PHOENIX_STATUS_REGISTER_ADDRESS = 7996,
+            BYTE_SHIFT_MULTIPLIER = 256,
             };
 
         u_char buff[ BUFF_SIZE ] = { 0 };
@@ -78,6 +80,11 @@ class uni_io_manager : public io_manager
         virtual void add_err_to_log( const char* cmd,
             const char* node_name, const char* node_ip_address,
             int exp_fun_code, int rec_fun_code, int exp_size, int rec_size ) const;
+
+        /// @brief Read status register for Phoenix BK ETH nodes.
+        ///
+        /// @param nd - node to read status register from.
+        void read_phoenix_status_register( io_node* nd );
 
     public:
         int read_inputs() override;

@@ -154,6 +154,16 @@ int PAC_info::save_device( char* buff )
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tNODEST = \n\t{{\n\t" ).size;
+    for ( unsigned int i = 0; i < nc; i++ )
+        {
+        const io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+            "{}, ", wn->get_display_state() ).size;
+        }
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;

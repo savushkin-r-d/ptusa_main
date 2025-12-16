@@ -31,16 +31,16 @@ ptusa_main/
 ├── PAC_control_projects/    # Control project templates
 ├── common/                  # Shared utilities and libraries
 ├── demo_projects/           # Demo applications and examples
-│   └── T1-PLCnext-Demo/    # Main demo project
+│   └── T1-PLCnext-Demo/     # Main demo project
 ├── deps/                    # Third-party dependencies (submodules)
 ├── docs/                    # Documentation and diagrams
 ├── test/                    # Unit tests and test infrastructure
-│   ├── device/             # Device-specific tests
-│   ├── dll/                # DLL tests
-│   └── perfomance/         # Performance benchmarks
-├── CMakeLists.txt          # Main CMake configuration
-├── CMakePresets.json       # CMake presets for different platforms
-└── readme.md               # Project documentation
+│   ├── device/              # Device-specific tests
+│   ├── dll/                 # DLL tests
+│   └── performance/         # Performance benchmarks
+├── CMakeLists.txt           # Main CMake configuration
+├── CMakePresets.json        # CMake presets for different platforms
+└── readme.md                # Project documentation
 ```
 
 ## Build Commands and Timing Expectations
@@ -51,7 +51,7 @@ ptusa_main/
 - **Test commands:** 5+ minutes (actual: ~7 seconds)
 - **Performance benchmarks:** 3+ minutes (actual: ~2 seconds)
 
-### Standard Build Process
+### Standard Build Process (CLI)
 
 1. **Initialize submodules** (CRITICAL - must be first):
 ```bash
@@ -74,7 +74,7 @@ cmake --build . -j$(nproc)
 - `ptusa_main` - Main executable
 - `libptusa_main` - Static library
 - `main_test` - Unit test suite
-- `main_perfomance_test` - Performance benchmarks
+- `main_performance_test` - Performance benchmarks
 
 ### Platform-Specific Notes
 
@@ -104,7 +104,7 @@ cd build
 ### Performance Benchmarks (~2 seconds)
 ```bash
 cd build
-./main_perfomance_test
+./main_performance_test
 ```
 
 ## Demo Project Execution
@@ -144,7 +144,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j$(nproc)  # ~3 minutes
 
 # Verify build
-ls -la ptusa_main main_test main_perfomance_test
+ls -la ptusa_main main_test main_performance_test
 ```
 
 ### 2. Test Suite Validation
@@ -156,7 +156,7 @@ cd build
 ### 3. Performance Regression Check
 ```bash
 cd build
-./main_perfomance_test  # Should complete in ~2 seconds
+./main_performance_test  # Should complete in ~2 seconds
 ```
 
 ### 4. Demo Application Test
@@ -207,7 +207,7 @@ git submodule update --init --recursive
 3. Build and test with demo project after changes
 
 ### Performance Analysis
-1. Use built-in benchmarks: `./main_perfomance_test`
+1. Use built-in benchmarks: `./main_performance_test`
 2. Profile with standard tools (gprof, perf, etc.)
 3. Memory analysis with valgrind
 
@@ -245,6 +245,8 @@ The project uses GitHub Actions for continuous integration:
 
 ## Code Style and Standards
 
+- If possible, limit line length to 80 characters
+
 ### C++ Standards
 - C++17 features encouraged
 - Follow existing naming conventions
@@ -261,6 +263,10 @@ The project uses GitHub Actions for continuous integration:
 - Lua 5.1 compatibility required
 - Follow project-specific control logic patterns
 - Document complex automation sequences
+
+### Documentation and Comments
+- Limit line length to 80 characters
+- End all comment lines (single-line, multi-line, and block) with a period.
 
 ## Advanced Usage
 
@@ -302,7 +308,7 @@ cmake --build . -j$(nproc)
 ./main_test
 
 # 4. Performance (allow 3+ minutes timeout, actual ~2 seconds)
-./main_perfomance_test
+./main_performance_test
 
 # 5. Demo
 ./ptusa_main --path ../demo_projects/T1-PLCnext-Demo/ \
