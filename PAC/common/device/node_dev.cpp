@@ -40,7 +40,7 @@ int node_dev::save_device_ex( char* buff )
     auto res_n = fmt::format_to_n( buff, MAX_COPY_SIZE,
         "WEB = {}, STARTUP = {}, IP = '{}', ",
         web_value, startup_value, get_ip() );
-    return res_n.size;
+    return static_cast<int>( res_n.size );
     }
 //-----------------------------------------------------------------------------
 const char* node_dev::get_name_in_Lua() const
