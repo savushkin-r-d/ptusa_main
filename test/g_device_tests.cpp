@@ -20,6 +20,7 @@ TEST( device_communicator, write_devices_states_service )
 
     tcp_communicator::init_instance( "Тест", "Test" );
 
+    G_DEVICE_CMMCTR->clear_devices();
     device_communicator::switch_on_compression();
 
     data[0] = device_communicator::CMD_GET_INFO_ON_CONNECT;
