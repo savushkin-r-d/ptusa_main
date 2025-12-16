@@ -1511,7 +1511,8 @@ TEST( AI_AO_action, check )
 
 TEST( checked_devices_action, finalize )
 	{
-	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	auto action = checked_devices_action();
 	action.add_dev( &test_DO );
 	
@@ -1523,6 +1524,29 @@ TEST( checked_devices_action, finalize )
 	action.finalize();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
+
+TEST( checked_devices_action, init )
+    {
+    counter_f FQT1( "FQT1" );
+    DO1 test_DO( "DO1", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    auto action = checked_devices_action();
+    action.add_dev( &FQT1 );
+    action.add_dev( &test_DO );
+
+    FQT1.pause();
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_PAUSE ),
+        FQT1.get_state() );
+
+    action.init();
+    action.evaluate();
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
+        FQT1.get_state() );
+
+    action.finalize();
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
+        FQT1.get_state() );
+    }
 
 
 TEST( delay_on_action, evaluate )
