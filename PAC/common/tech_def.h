@@ -313,7 +313,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
             return operations_manager;
             }
 
-        virtual int save_device( char *buff );
+        virtual int save_device( char *buff, const char* prefix = "" );
 
         virtual int set_cmd( const char *prop, u_int idx, double val );
 

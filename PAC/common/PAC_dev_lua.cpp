@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/12/25 13:06:56.
+** Generated automatically by tolua++-1.0.92 on Tue Dec 16 15:33:07 2025.
 */
 
 #ifndef __cplusplus
@@ -89,29 +89,30 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"siren_lights_manager");
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
- tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"io_manager::io_node");
+ tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"virtual_counter");
  tolua_usertype(tolua_S,"errors_manager");
  tolua_usertype(tolua_S,"tech_object_manager");
- tolua_usertype(tolua_S,"run_time_params_u_int_4");
+ tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"camera");
- tolua_usertype(tolua_S,"i_Lua_save_device");
- tolua_usertype(tolua_S,"dev_stub");
+ tolua_usertype(tolua_S,"PAC_info");
  tolua_usertype(tolua_S,"profibus_slave");
+ tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"cipline_tech_object");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"MSAPID");
  tolua_usertype(tolua_S,"tm");
+ tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"i_camera");
  tolua_usertype(tolua_S,"i_log");
- tolua_usertype(tolua_S,"PAC_info");
+ tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"ParamsRecipeStorage");
  tolua_usertype(tolua_S,"ParamsRecipeManager");
  tolua_usertype(tolua_S,"io_manager");
@@ -7595,10 +7596,11 @@ static int tolua_PAC_dev_io_manager_add_node00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
 #endif
   {
-   self->add_node(index,ntype,address,IP_address,name,DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
+   io_manager::io_node* tolua_ret = (io_manager::io_node*)  self->add_node(index,ntype,address,IP_address,name,DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"io_manager::io_node");
   }
  }
- return 0;
+ return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'add_node'.",&tolua_err);
@@ -15527,8 +15529,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_TS",device::DT_TS);
    tolua_constant(tolua_S,"DT_G",device::DT_G);
    tolua_constant(tolua_S,"DT_WATCHDOG",device::DT_WATCHDOG);
-   tolua_constant(tolua_S,"DT_EY",device::DT_EY);
-   tolua_constant(tolua_S,"DT_NODE",device::DT_NODE);
    tolua_constant(tolua_S,"DST_NONE",device::DST_NONE);
    tolua_constant(tolua_S,"DST_V_DO1",device::DST_V_DO1);
    tolua_constant(tolua_S,"DST_V_DO2",device::DST_V_DO2);
@@ -15632,8 +15632,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DST_G_IOL_4",device::DST_G_IOL_4);
    tolua_constant(tolua_S,"DST_G_IOL_8",device::DST_G_IOL_8);
    tolua_constant(tolua_S,"DST_WATCHDOG",device::DST_WATCHDOG);
-   tolua_constant(tolua_S,"DST_CONV_AO2",device::DST_CONV_AO2);
-   tolua_constant(tolua_S,"DST_NODE",device::DST_NODE);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");

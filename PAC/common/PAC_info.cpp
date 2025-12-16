@@ -90,7 +90,7 @@ void PAC_info::reset_params()
     par.save_all();
     }
 //-----------------------------------------------------------------------------
-int PAC_info::save_device( char* buff )
+int PAC_info::save_device( char* buff, const char* prefix )
     {
     int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.SYSTEM = \n\t{{\n" ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,

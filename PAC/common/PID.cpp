@@ -476,7 +476,7 @@ int PID::save_device_ex( char* buff )
     return answer_size;
     }
 //-----------------------------------------------------------------------------
-int PID::save_device( char *buff )
+int PID::save_device( char *buff, const char* prefix = "" )
     {
     int answer_size = 0;
     if ( is_old_style )

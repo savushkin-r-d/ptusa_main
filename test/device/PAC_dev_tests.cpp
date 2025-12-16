@@ -5411,7 +5411,7 @@ TEST( threshold_regulator, set_cmd )
 
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
+        "C1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
 
     //Set a property that does not exist.
     auto res = p1.set_cmd( "NO_SUCH_PROPERTY", 0, 1 );
@@ -5427,7 +5427,7 @@ TEST( threshold_regulator, set_cmd )
     p1.on();
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
+        "C1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
     }
 
 TEST( threshold_regulator, set_state )
@@ -6374,39 +6374,32 @@ TEST( node_dev, basic_functionality )
     uni_io_manager mngr;
     mngr.init( 1 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
-    auto* dev = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
-    ASSERT_EQ( dev, nullptr );
+    auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "A100", "Test node device", "" );
+    ASSERT_EQ( io_dev, nullptr );
 
-    // Получение указателя на node_dev для доступа к специфическим методам.
+    // Получение указателя на @node_dev для доступа к специфическим методам.
     node_dev* node = dynamic_cast<node_dev*>(
-        G_DEVICE_MANAGER()->get_device( "NODE1" ) );
+        G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
-
-    // Установка индекса узла.
-    node->set_par( static_cast<u_int>( node_dev::PARAM::P_NODE_IDX ), 0, 0 );
+    node->set_io_node( nd );
 
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
 
-    // Установка значений свойств.
-    node->set_property_value( node_dev::PROPERTIES::ST, 1 );
-    node->set_property_value( node_dev::PROPERTIES::WEB, 1 );
-    node->set_property_value( node_dev::PROPERTIES::STARTUP, 0 );
-    node->set_property_value( node_dev::PROPERTIES::CMD, 5 );
-
-    // Проверка получения значений свойств.
-    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::ST ), 1 );
-    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::WEB ), 1 );
-    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::STARTUP ), 0 );
-    EXPECT_EQ( node->get_property_value( node_dev::PROPERTIES::CMD ), 5 );
-
     // Проверка evaluate_io().
     node->evaluate_io();
+
+    // Сохранение устройства.
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff { '\0' };
+    node->save_device( buff.data(), "" );
+    EXPECT_STREQ( buff.data(), 
+        "A100={M=0, ST=-1, V=0, WEB = 0, STARTUP = 0, IP = '127.0.0.1'},\n" );
 
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
