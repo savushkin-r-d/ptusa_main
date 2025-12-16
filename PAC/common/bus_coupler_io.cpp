@@ -1024,6 +1024,7 @@ void io_manager::init( int new_nodes_count )
 
     if ( nodes_count )
         {
+        nodes_count = new_nodes_count;
         nodes = new io_node*[ nodes_count ];
         for ( u_int i = 0; i < nodes_count; i++ )
             {
@@ -1217,7 +1218,7 @@ u_int io_manager::get_nodes_count()
 	return nodes_count;
 	}
 //-----------------------------------------------------------------------------
-void io_manager::add_node( u_int index, int ntype, int address,
+io_manager::io_node* io_manager::add_node( u_int index, int ntype, int address,
     const char* IP_address, const char *name,
     int DO_cnt, int DI_cnt,
     int AO_cnt, int AO_size, int AI_cnt, int AI_size )
@@ -1226,7 +1227,11 @@ void io_manager::add_node( u_int index, int ntype, int address,
         {
         nodes[ index ] = new io_node( ntype, address, IP_address, name, DO_cnt,
             DI_cnt, AO_cnt, AO_size, AI_cnt, AI_size );
+
+        return nodes[ index ];
         }
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
 void io_manager::init_node_AO( u_int node_index, u_int AO_index,

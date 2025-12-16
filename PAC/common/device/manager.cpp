@@ -1433,7 +1433,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_NODE:
             if ( dev_sub_type == device::DST_NODE )
                 {
-                new_device = new node_dev( dev_name, device::DST_NODE );
+                new_device = new node_dev( dev_name );
                 }
             else
                 {

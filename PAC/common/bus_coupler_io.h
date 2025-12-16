@@ -453,14 +453,15 @@ class io_manager
         /// @brief Установка числа модулей.
         ///
         /// Вызывается из Lua.
-        void init( int nodes_count );
+        void init( int new_nodes_count );
 
         /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
-        void add_node( u_int index, int ntype, int address, const char* IP_address,
-            const char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-            int AI_cnt, int AI_size );
+        io_manager::io_node* add_node( u_int index, int ntype, int address,
+            const char* IP_address, const char *name,
+            int DO_cnt, int DI_cnt,
+            int AO_cnt, int AO_size, int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
         ///
