@@ -153,3 +153,17 @@ TEST( PID, eval )
     EXPECT_GT( res, MIN_VALUE );
     DeltaMilliSecSubHooker::set_default_time();
     }
+
+TEST( PID, save_device )
+    {
+    PID test_PID( "PID1" );    
+    const int BUFF_SIZE = 400;
+    std::array <char, BUFF_SIZE> buff{ '\0' };
+
+    test_PID.save_device( buff.data(), "\t" );
+    EXPECT_STREQ( buff.data(),
+        "\tPID1={M=0, ST=0, V=0, Z=0.00, P_k=0, P_Ti=0, P_Td=0, P_dt=0, "
+        "P_max=0, P_min=0, P_acceleration_time=0, P_is_manual_mode=0, "
+        "P_U_manual=0, P_k2=0, P_Ti2=0, P_Td2=0, P_out_max=0, P_out_min=0, "
+        "P_is_reverse=0, P_is_zero_start=0},\n" );
+    }

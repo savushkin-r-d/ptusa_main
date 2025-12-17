@@ -487,7 +487,7 @@ int PID::save_device( char *buff, const char* prefix = "" )
             static_cast<unsigned int>(state) );
 
         //Параметры.
-        answer_size += par->save_device( buff + answer_size, "\t" );
+        answer_size += par->save_device( buff + answer_size, prefix );
         answer_size += sprintf( buff + answer_size,
             "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
 
@@ -495,7 +495,7 @@ int PID::save_device( char *buff, const char* prefix = "" )
         }
     else
         {
-        answer_size = device::save_device( buff, "\t" );
+        answer_size = device::save_device( buff, prefix );
         }
 
     return answer_size;
