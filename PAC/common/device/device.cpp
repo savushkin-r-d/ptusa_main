@@ -1551,6 +1551,16 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
         "P_ERR_MIN_FLOW" );    
     };
 //-----------------------------------------------------------------------------
+counter_iolink::counter_iolink( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
+    base_counter( dev_name, sub_type,
+        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
+        "P_ERR_MIN_FLOW" );
+    };
+//-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
     if ( auto data = (char*)get_AI_data( 0 ); data )
@@ -1685,6 +1695,34 @@ const char* counter_iolink::get_error_description()
         default:
             return base_counter::get_error_description();
         }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_iolink_sm4000::counter_iolink_sm4000( const char* dev_name ) :
+    counter_iolink( dev_name, device::DST_FQT_IOLINK_SM4000 )
+    {
+    // Parent protected constructor already initializes everything correctly.
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink_sm4000::get_flow()
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
+        + in_info.flow * 0.001f;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink_sm4000::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            in_info.flow = static_cast<int16_t>( val * 1000 );
+            break;
+
+        default:
+            return counter_iolink::set_cmd( prop, idx, val );
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

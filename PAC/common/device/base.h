@@ -515,6 +515,7 @@ class device : public i_DO_AO_device, public par_device
             ///< Резерв.
             DST_FQT_VIRT = 4,   ///Виртуальный cчетчик (без привязки к модулям).
             DST_FQT_IOLINK,     /// Счетчик IO-Link.
+            DST_FQT_IOLINK_SM4000, /// Счетчик IO-Link IFM SM4000.
 
             //QT
             DST_QT = 1,   ///< Концентратомер.

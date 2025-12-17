@@ -459,6 +459,9 @@ i_counter* device_manager::get_FQT( const char* dev_name )
             case device::DST_FQT_IOLINK:
                 return (counter_iolink*)res_ctr;
 
+            case device::DST_FQT_IOLINK_SM4000:
+                return (counter_iolink_sm4000*)res_ctr;
+
             default:
                 break;
             }
@@ -918,6 +921,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_FQT_IOLINK:
                     new_device = new counter_iolink( dev_name );
                     new_io_device = (counter_iolink*)new_device;
+                    break;
+
+                case device::DST_FQT_IOLINK_SM4000:
+                    new_device = new counter_iolink_sm4000( dev_name );
+                    new_io_device = (counter_iolink_sm4000*)new_device;
                     break;
 
                 default:

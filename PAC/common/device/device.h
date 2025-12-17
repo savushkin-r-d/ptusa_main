@@ -1460,7 +1460,9 @@ class counter_iolink : public base_counter
 
         const char* get_error_description() override;
 
-    private:
+    protected:
+        counter_iolink( const char* dev_name, DEVICE_SUB_TYPE sub_type );
+
         enum class CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
@@ -1487,7 +1489,19 @@ class counter_iolink : public base_counter
 
         in_data in_info{ 0, 0, 0, 0, 0 };
 
+    private:
         io_link_device iol_dev;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Счетчик IO-Link IFM SM4000.
+class counter_iolink_sm4000 : public counter_iolink
+    {
+    public:
+        explicit counter_iolink_sm4000( const char* dev_name );
+
+        float get_flow() override;
+
+        int set_cmd( const char* prop, u_int idx, double val ) override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.
