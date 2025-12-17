@@ -1393,3 +1393,20 @@ TEST( toLuapp, tolua_PAC_dev_G_IO_MANAGER00 )
 
     lua_close( L );
     }
+
+TEST( toLuapp, tolua_PAC_dev_io_manager_add_node00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    G_IO_MANAGER()->init( 1 );
+    ASSERT_EQ( 0, luaL_dostring( L, "node = G_IO_MANAGER():add_node("
+        "0, 200, 1, '127.0.0.1', 'A100', 0, 0, 0, 0, 0, 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "node" );
+    auto node = static_cast<node_dev*>( tolua_touserdata( L, -1, nullptr ) );
+    EXPECT_NE( nullptr, node );
+    lua_remove( L, -1 );
+
+    G_IO_MANAGER()->clear_nodes();
+    lua_close( L );
+    }

@@ -474,9 +474,11 @@ class io_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
+		virtual void disconnect(io_node *node) = 0;
 
-
+#ifdef PTUSA_TEST
+        void clear_nodes();
+#endif
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

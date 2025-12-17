@@ -1194,10 +1194,23 @@ void io_manager::init_node_AI( u_int node_index, u_int AI_index,
         nodes[ node_index ]->AI_offsets[ AI_index ] = offset;
         }
     }
-void io_manager::disconnect(io_node * node)
-	{
-	return;
-	}
+//-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
+void io_manager::clear_nodes()
+    {
+    if ( nodes_count && nodes )
+        {
+        for ( u_int i = 0; i < nodes_count; i++ )
+            {
+            delete nodes[ i ];
+            }
+
+        delete[] nodes;
+        nodes = nullptr;
+        nodes_count = 0;
+        }
+    }
+#endif
 //-----------------------------------------------------------------------------
 void io_manager::print() const
     {
