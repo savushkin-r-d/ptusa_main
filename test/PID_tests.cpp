@@ -156,7 +156,7 @@ TEST( PID, eval )
 
 TEST( PID, save_device )
     {
-    PID test_PID( "PID1" );    
+    PID test_PID( "PID1" );
     const int BUFF_SIZE = 400;
     std::array <char, BUFF_SIZE> buff{ '\0' };
 
@@ -166,4 +166,19 @@ TEST( PID, save_device )
         "P_max=0, P_min=0, P_acceleration_time=0, P_is_manual_mode=0, "
         "P_U_manual=0, P_k2=0, P_Ti2=0, P_Td2=0, P_out_max=0, P_out_min=0, "
         "P_is_reverse=0, P_is_zero_start=0},\n" );
+
+    // Создание регулятора по номеру (совместимость с МСА).
+    PID test_PID_old( 1 );
+
+    test_PID_old.save_device( buff.data(), "\t" );
+    EXPECT_STREQ( buff.data(),
+        "t.PID1 = \n"
+        "\t{\n"
+        "\tST=0,\n"
+        "\tS_PAR_F=\n"
+        "\t\t{\n"
+        "\t\t0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \n"
+        "\t\t},\n"
+        "RT_PAR_F = { 0.00, 0.00 }\n"
+        "\t}\n" );
     }
