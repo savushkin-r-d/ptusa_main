@@ -1502,6 +1502,9 @@ class counter_iolink_sm4000 : public counter_iolink
         float get_flow() override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
+
+        static constexpr float FLOW_GRADIENT = 0.001f;
+        static constexpr int FLOW_MULTIPLIER = 1000;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.

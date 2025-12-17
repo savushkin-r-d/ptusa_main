@@ -1707,7 +1707,7 @@ counter_iolink_sm4000::counter_iolink_sm4000( const char* dev_name ) :
 float counter_iolink_sm4000::get_flow()
     {
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
-        + in_info.flow * 0.001f;
+        + in_info.flow * FLOW_GRADIENT;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink_sm4000::set_cmd( const char* prop, u_int idx, double val )
@@ -1715,7 +1715,7 @@ int counter_iolink_sm4000::set_cmd( const char* prop, u_int idx, double val )
     switch ( prop[ 0 ] )
         {
         case 'F':
-            in_info.flow = static_cast<int16_t>( val * 1000 );
+            in_info.flow = static_cast<int16_t>( val * FLOW_MULTIPLIER );
             break;
 
         default:

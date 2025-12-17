@@ -4951,7 +4951,7 @@ TEST( counter_iolink_sm4000, evaluate_io )
     std::swap( buff[ 7 ], buff[ 6 ] );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
-    EXPECT_EQ( 22 * 0.001f, fqt1.get_flow() );
+    EXPECT_EQ( 22 * counter_iolink_sm4000::FLOW_GRADIENT, fqt1.get_flow() );
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
     }
 
