@@ -1691,36 +1691,32 @@ void counter_iolink::set_article( const char* new_article )
     {
     device::set_article( new_article );
 
-    auto article = get_article();
-    if ( strcmp( article, "IFM.SM6100" ) == 0 )
+    if ( strcmp( new_article, "IFM.SM6100" ) == 0 )
         {
-        n_article = ARTICLE::IFM_SM6100;
+        n_article = IFM_SM6100;
         return;
         }
-    if ( strcmp( article, "IFM.SM4000" ) == 0 )
+    if ( strcmp( new_article, "IFM.SM4000" ) == 0 )
         {
-        n_article = ARTICLE::IFM_SM4000;
+        n_article = IFM_SM4000;
         return;
         }
 
-    if ( G_DEBUG )
-        {
-        G_LOG->warning( "%s unknown article \"%s\"",
-            get_name(), new_article );
-        }
+    G_LOG->warning( "%s unknown article \"%s\"",
+        get_name(), new_article );
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow_gradient() const
     {
     switch ( n_article )
         {
-        case ARTICLE::IFM_SM6100:
+        case IFM_SM6100:
             return 0.01f;
 
-        case ARTICLE::IFM_SM4000:
+        case IFM_SM4000:
             return 0.001f;
 
-        case ARTICLE::DEFAULT:
+        case DEFAULT:
         default:
             return 0.01f; // Default to SM6100 gradient.
         }
