@@ -1,4 +1,7 @@
 # ptusa_main #
+> [!TIP]
+> English version is [here](../../readme.md).\
+> Беларускі варыянт знаходзіцца [тут](../belorussian_readme/readmeBY.md).
 
 Программа **``ptusa_main``** непосредственно управляет технологическим
 процессом.
