@@ -452,7 +452,7 @@ u_int_4 dev_stub::get_serial_n() const
 //-----------------------------------------------------------------------------
 void dev_stub::print() const
     {
-    printf( "virtual device" );
+    printf( "STUB" );
     }
 //-----------------------------------------------------------------------------
 void dev_stub::pause()
