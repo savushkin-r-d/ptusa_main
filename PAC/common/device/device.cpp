@@ -1551,16 +1551,6 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
         "P_ERR_MIN_FLOW" );    
     };
 //-----------------------------------------------------------------------------
-counter_iolink::counter_iolink( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-    base_counter( dev_name, sub_type,
-        static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
-    {
-    set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
-    set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
-    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
-        "P_ERR_MIN_FLOW" );
-    };
-//-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
     if ( auto data = (char*)get_AI_data( 0 ); data )
@@ -1638,7 +1628,7 @@ float counter_iolink::get_max_raw_value() const
 float counter_iolink::get_flow()
     {
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
-        + in_info.flow * 0.01f;
+        + in_info.flow * get_flow_gradient();
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::save_device_ex( char* buff )
@@ -1655,7 +1645,7 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     switch ( prop[ 0 ] )
         {
         case 'F':
-            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            in_info.flow = static_cast<int16_t>( val / get_flow_gradient() );
             break;
 
         case 'T':
@@ -1697,32 +1687,43 @@ const char* counter_iolink::get_error_description()
         }
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-counter_iolink_sm4000::counter_iolink_sm4000( const char* dev_name ) :
-    counter_iolink( dev_name, device::DST_FQT_IOLINK_SM4000 )
+void counter_iolink::set_article( const char* new_article )
     {
-    // Parent protected constructor already initializes everything correctly.
-    }
-//-----------------------------------------------------------------------------
-float counter_iolink_sm4000::get_flow()
-    {
-    return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
-        + in_info.flow * FLOW_GRADIENT;
-    }
-//-----------------------------------------------------------------------------
-int counter_iolink_sm4000::set_cmd( const char* prop, u_int idx, double val )
-    {
-    switch ( prop[ 0 ] )
-        {
-        case 'F':
-            in_info.flow = static_cast<int16_t>( val * FLOW_MULTIPLIER );
-            break;
+    device::set_article( new_article );
 
-        default:
-            return counter_iolink::set_cmd( prop, idx, val );
+    auto article = get_article();
+    if ( strcmp( article, "IFM.SM6100" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM6100;
+        return;
+        }
+    if ( strcmp( article, "IFM.SM4000" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM4000;
+        return;
         }
 
-    return 0;
+    if ( G_DEBUG )
+        {
+        G_LOG->warning( "%s unknown article \"%s\"",
+            get_name(), new_article );
+        }
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow_gradient() const
+    {
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_SM6100:
+            return 0.01f;
+
+        case ARTICLE::IFM_SM4000:
+            return 0.001f;
+
+        case ARTICLE::DEFAULT:
+        default:
+            return 0.01f; // Default to SM6100 gradient.
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

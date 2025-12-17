@@ -4890,69 +4890,44 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
-TEST( counter_iolink_sm4000, set_cmd )
+TEST( counter_iolink, article_sm6100 )
     {
-    counter_iolink_sm4000 fqt1( "FQT1" );
-    const int BUFF_SIZE = 200;
-    char buff[ BUFF_SIZE ] = { 0 };
-
-    EXPECT_EQ( 0, fqt1.get_quantity() );
-    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
-    EXPECT_EQ( 0, fqt1.get_value() );
-    EXPECT_EQ( 0, fqt1.get_temperature() );
-    EXPECT_EQ( 0, fqt1.get_flow() );
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-
-    fqt1.set_cmd( "V", 0, 50 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50.f, fqt1.get_value() );
-
-    fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 100, fqt1.get_abs_quantity() );
-
+    counter_iolink fqt1( "FQT1" );
+    fqt1.set_article( "IFM.SM6100" );
+    
+    // Test flow gradient for SM6100 (0.01).
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
-
-    fqt1.set_cmd( "T", 0, 1.1 );
-    EXPECT_EQ( 1.1f, fqt1.get_temperature() );
-
-    fqt1.save_device( buff, "" );
-    EXPECT_STREQ(
-        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, DAY_T1=0, PREV_DAY_T1=0, "
-        "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
-        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
-
-    fqt1.set_cmd( "ST", 0, 0 );
-    EXPECT_EQ( (int)i_counter::STATES::S_STOP, fqt1.get_state() );
-
-    fqt1.set_cmd( "ST", 0, 1 );
-    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
-    }
-
-TEST( counter_iolink_sm4000, evaluate_io )
-    {
-    counter_iolink_sm4000 fqt1( "FQT1" );
+    
+    // Test with raw value.
     fqt1.init( 0, 0, 0, 1 );
     fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
     auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
-
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 11.11f;
-    std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
-    std::swap( buff[ 2 ], buff[ 1 ] );
+    
+    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
+    std::swap( buff[ 5 ], buff[ 4 ] );
     fqt1.evaluate_io();
-    EXPECT_EQ( 0, fqt1.get_quantity() );//First read.
+    EXPECT_EQ( 1000 * 0.01f, fqt1.get_flow() );
+    }
 
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 22.22f;
-    std::swap( buff[ 0 ], buff[ 3 ] );
-    std::swap( buff[ 2 ], buff[ 1 ] );
-    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 22 );
-    fqt1.AI_channels.int_read_values[ 0 ][ 3 ] = static_cast<int_2>( 33 << 2 );
-    std::swap( buff[ 5 ], buff[ 4 ] );  //Reverse byte order to get correct int16.
-    std::swap( buff[ 7 ], buff[ 6 ] );
+TEST( counter_iolink, article_sm4000 )
+    {
+    counter_iolink fqt1( "FQT1" );
+    fqt1.set_article( "IFM.SM4000" );
+    
+    // Test flow gradient for SM4000 (0.001).
+    fqt1.set_cmd( "F", 0, 9.9 );
+    EXPECT_EQ( 9.9f, fqt1.get_flow() );
+    
+    // Test with raw value.
+    fqt1.init( 0, 0, 0, 1 );
+    fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
+    
+    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
+    std::swap( buff[ 5 ], buff[ 4 ] );
     fqt1.evaluate_io();
-    EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
-    EXPECT_EQ( 22 * counter_iolink_sm4000::FLOW_GRADIENT, fqt1.get_flow() );
-    EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
+    EXPECT_EQ( 1000 * 0.001f, fqt1.get_flow() );
     }
 
 
