@@ -32,16 +32,11 @@ void node_dev::evaluate_io()
 //-----------------------------------------------------------------------------
 int node_dev::save_device( char* buff, const char* prefix )
 	{
-    return device::save_device( buff, prefix );
-	}
-//-----------------------------------------------------------------------------
-int node_dev::save_device_ex( char* buff )
-    {
     auto res_n = fmt::format_to_n( buff, MAX_COPY_SIZE,
-        "WEB={}, STARTUP={}, IP='{}', ",
-        web_value, startup_value, get_ip() );
+        "{}{}={{ST={}, WEB={}, STARTUP={}, IP='{}'}},\n",
+        prefix, get_name(), get_state(), web_value, startup_value, get_ip() );
     return static_cast<int>( res_n.size );
-    }
+	}
 //-----------------------------------------------------------------------------
 const char* node_dev::get_name_in_Lua() const
 	{

@@ -29,8 +29,6 @@ class node_dev : public device, public i_Lua_save_device
 
         int save_device( char* buff, const char* prefix ) override;
 
-        int save_device_ex( char* buff ) override;
-
 		const char* get_name_in_Lua() const override;
 
 		/// @brief Получение IP-адреса узла.
