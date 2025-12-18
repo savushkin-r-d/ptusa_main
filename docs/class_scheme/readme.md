@@ -56,6 +56,8 @@ flowchart BT
     wages[wages]-->analog_io_device
     wages_RS232[wages_RS232]-->analog_io_device
     wages_eth[wages_eth]-->analog_io_device
+    wages_pxc_axl[wages_pxc_axl]-->analog_io_device
+    power_unit[power_unit]-->analog_io_device
 ```
 
 ## Class valve scheme ##
@@ -80,4 +82,5 @@ flowchart RL
     valve_mini_flushing[valve_mini_flushing]-->valve
     valve_mix_proof[valve_mix_proof]-->valve
     virtual_valve[virtual_valve]-->valve
+    valve_iolink_gea_tvis_a15[valve_iolink_gea_tvis_a15]-->valve
 ```
