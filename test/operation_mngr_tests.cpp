@@ -1844,27 +1844,27 @@ TEST( DI_DO_action, evaluate_AND_logic_all_active )
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
 
-	// Изначально все DI неактивны - DO должно быть неактивно
+	// Initially all DI inactive - DO should be inactive.
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	// Активируем только один DI - DO должно оставаться неактивным (AND)
+	// Activate only one DI - DO should remain inactive (AND logic).
 	test_DI1.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	// Активируем оба DI - DO должно активироваться
+	// Activate both DI - DO should activate.
 	test_DI2.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_TRUE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 
-	// Деактивируем один DI - DO должно деактивироваться
+	// Deactivate one DI - DO should deactivate.
 	test_DI1.set_cmd( "ST", 0, 0.0 );
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_TRUE( test_DI2.is_active() );
@@ -1888,34 +1888,34 @@ TEST( DI_DO_action, evaluate_OR_logic_default )
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
 
-	// Изначально все DI неактивны - DO должно быть неактивно
+	// Initially all DI inactive - DO should be inactive.
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	// Активируем один DI - DO должно активироваться (OR логика)
+	// Activate one DI - DO should activate (OR logic).
 	test_DI1.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 
-	// Активируем оба DI - DO остается активным
+	// Activate both DI - DO remains active.
 	test_DI2.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_TRUE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 
-	// Деактивируем один DI - DO остается активным (второй DI активен)
+	// Deactivate one DI - DO remains active (second DI still active).
 	test_DI1.set_cmd( "ST", 0, 0.0 );
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_TRUE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 
-	// Деактивируем оба DI - DO должно деактивироваться
+	// Deactivate both DI - DO should deactivate.
 	test_DI2.set_cmd( "ST", 0, 0.0 );
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
