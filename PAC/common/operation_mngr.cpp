@@ -1261,7 +1261,9 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
             }
         }
 
-    // Если нет DI устройств, то все считаем неактивными
+    // Если нет DI устройств, то все считаем неактивными.
+    // When there are no DI devices, both AND and OR logic should result
+    // in inactive DO devices (any_di_active and all_di_active are false).
     if ( di_count == 0 )
         {
         all_di_active = false;
