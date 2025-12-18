@@ -1241,6 +1241,7 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
     // Поиск активных DI среди всех входных устройств
     bool any_di_active = false;
+    bool all_di_active = true;
     u_int di_count = 0;
     
     // Подсчитаем количество DI устройств и проверим их активность
@@ -1253,13 +1254,34 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
                 {
                 any_di_active = true;
                 }
+            else
+                {
+                all_di_active = false;
+                }
             }
+        }
+
+    // Если нет DI устройств, то все считаем неактивными
+    if ( di_count == 0 )
+        {
+        all_di_active = false;
+        }
+
+    // Определяем состояние DO в зависимости от типа логики
+    bool should_activate_do = false;
+    if ( logic_type == LOGIC_TYPE::AND )
+        {
+        should_activate_do = all_di_active;
+        }
+    else // LOGIC_TYPE::OR
+        {
+        should_activate_do = any_di_active;
         }
 
     // Управляем DO устройствами (они идут после всех DI)
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
-        if ( any_di_active )
+        if ( should_activate_do )
             {
             (*it)->on();
             }
@@ -1280,6 +1302,16 @@ bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
         return true;
 
     return false;
+    }
+//-----------------------------------------------------------------------------
+int DI_DO_action::set_bool_property( const char* prop_name, bool value )
+    {
+    if ( strcmp( prop_name, "logic_type" ) == 0 )
+        {
+        logic_type = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
+        return 0;
+        }
+    return action::set_bool_property( prop_name, value );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

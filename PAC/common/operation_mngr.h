@@ -299,10 +299,20 @@ class DI_DO_action: public action
 
         void finalize() override;
 
+        int set_bool_property( const char* prop_name, bool value ) override;
+
     protected:
+        enum class LOGIC_TYPE
+            {
+            OR = 0,  // Default: any DI active turns on DO.
+            AND = 1  // All DI must be active to turn on DO.
+            };
+
         virtual void evaluate_DO( std::vector< device* > devices );
 
         bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
+
+        LOGIC_TYPE logic_type = LOGIC_TYPE::OR;
     };
 //-----------------------------------------------------------------------------
 /// <summary>

@@ -1811,6 +1811,119 @@ TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	}
 
 
+TEST( DI_DO_action, set_bool_property_logic_type )
+	{
+	auto action = DI_DO_action();
+	
+	// Test setting to AND logic
+	auto res = action.set_bool_property( "logic_type", true );
+	EXPECT_EQ( 0, res );
+	
+	// Test setting to OR logic
+	res = action.set_bool_property( "logic_type", false );
+	EXPECT_EQ( 0, res );
+	
+	// Test unknown property
+	res = action.set_bool_property( "unknown_property", false );
+	EXPECT_EQ( 0, res );
+	}
+
+TEST( DI_DO_action, evaluate_AND_logic_all_active )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = DI_DO_action();
+	action.set_bool_property( "logic_type", true ); // Set to AND logic
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO );
+
+	// Изначально все DI неактивны - DO должно быть неактивно
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	// Активируем только один DI - DO должно оставаться неактивным (AND)
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	// Активируем оба DI - DO должно активироваться
+	test_DI2.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем один DI - DO должно деактивироваться
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	}
+
+TEST( DI_DO_action, evaluate_OR_logic_default )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	test_DO.set_descr( "Test DO" );
+	DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	auto action = DI_DO_action();
+	// Default is OR logic, no need to set explicitly
+	action.add_dev( &test_DI1 );
+	action.add_dev( &test_DI2 );
+	action.add_dev( &test_DO );
+
+	// Изначально все DI неактивны - DO должно быть неактивно
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+
+	// Активируем один DI - DO должно активироваться (OR логика)
+	test_DI1.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Активируем оба DI - DO остается активным
+	test_DI2.set_cmd( "ST", 0, 1.0 );
+	EXPECT_TRUE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем один DI - DO остается активным (второй DI активен)
+	test_DI1.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_TRUE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_TRUE( test_DO.is_active() );
+
+	// Деактивируем оба DI - DO должно деактивироваться
+	test_DI2.set_cmd( "ST", 0, 0.0 );
+	EXPECT_FALSE( test_DI1.is_active() );
+	EXPECT_FALSE( test_DI2.is_active() );
+	action.evaluate();
+	EXPECT_FALSE( test_DO.is_active() );
+	}
+
+
 TEST( inverted_DI_DO_action, evaluate )
     {
     DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
