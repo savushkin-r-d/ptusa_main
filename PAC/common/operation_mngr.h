@@ -297,6 +297,16 @@ class DI_DO_action: public action
 
         void finalize() override;
 
+        /// @brief Установка булевого свойства для группы DI->DO.
+        ///
+        /// Используется для конфигурирования логики обработки сигналов DI
+        /// (типа логики OR/AND) при управлении соответствующими DO.
+        ///
+        /// @param [in] prop_name Имя свойства, которое необходимо установить.
+        /// @param [in] value     Значение свойства.
+        ///
+        /// @return Результат установки свойства (0 при успешной установке,
+        ///         отрицательное значение при ошибке).
         int set_bool_property( const char* prop_name, bool value ) override;
 
         bool is_di_device_type( device::DEVICE_TYPE device_type ) const;

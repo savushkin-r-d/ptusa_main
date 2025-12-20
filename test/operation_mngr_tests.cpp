@@ -1658,7 +1658,7 @@ TEST( DI_DO_action, check )
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
 	
-	// Test with invalid device type (AI instead of DI/DO)
+	// Test with invalid device type (AI instead of DI/DO).
 	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
 		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
 	test_AI.set_descr( "Test AI" );
@@ -1678,7 +1678,7 @@ TEST( DI_DO_action, check )
 	EXPECT_STREQ( EXPECTED_STR.substr( 0, SHORT_STR_SIZE - 1 ).c_str(),
 		msg.c_str() );
 
-	// Test with valid devices (DI first, then DO)
+	// Test with valid devices (DI first, then DO).
 	action.clear_dev();
 	action.add_dev( &test_DI );
 	action.add_dev( &test_DO );
@@ -1717,6 +1717,15 @@ TEST( DI_DO_action, evaluate )
 	EXPECT_FALSE( test_DI.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
+
+    // Test with only one DO.
+    action.clear_dev();
+    action.add_dev( &test_DO );
+    res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 0, res );
+    EXPECT_STREQ( "", msg.c_str() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO.is_active() );
 	}
 
 TEST( DI_DO_action, finalize )
@@ -1839,7 +1848,7 @@ TEST( DI_DO_action, evaluate_AND_logic_all_active )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
 	auto action = DI_DO_action();
-	action.set_bool_property( "logic_type", true ); // Set to AND logic
+	action.set_bool_property( "logic_type", true ); // Set to AND logic.
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
@@ -1883,7 +1892,7 @@ TEST( DI_DO_action, evaluate_OR_logic_default )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
 	auto action = DI_DO_action();
-	// Default is OR logic, no need to set explicitly
+	// Default is OR logic, no need to set explicitly.
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );

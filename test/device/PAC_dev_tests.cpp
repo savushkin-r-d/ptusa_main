@@ -4236,6 +4236,18 @@ TEST( camera, get_type_name )
     EXPECT_STREQ( "Камера", test_dev.get_type_name() );
     }
 
+TEST( camera, set_string_property )
+    {
+    camera test_dev( "test_CAM1", device::DST_CAM_DO1_DI1 );
+    EXPECT_EQ( "", test_dev.ip );
+
+    test_dev.set_string_property( "IP", "" );
+    EXPECT_EQ( "", test_dev.ip );
+
+    test_dev.set_string_property( "IP", "127.0.0.1" );
+    EXPECT_EQ( "127.0.0.1", test_dev.ip );
+    }
+
 
 TEST( counter_f, get_state )
     {
