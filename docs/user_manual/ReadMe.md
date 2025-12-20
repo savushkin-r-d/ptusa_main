@@ -21,13 +21,13 @@ $$ μ ={\sum x \over n}$$
 Математическое ожидание ${μ}$ находится на пике графика. На оси $x$ находятся все значения температуры, ось $y$ показывает вероятность того, что наша случайная величина будет иметь заданную температуру.
 
 <p align="center">
-<img align="center" src="../readme_images/m_expec.png"> </p>
+<img align="center" src="../readme_images/m_expec.png" alt='img'> </p>
 <p align="center"> Математическое ожидание </p>
 
 Вероятность $p$ можно вычислить, посчитав площадь графика в конкретном интервале. Площадь всего графика равна 1.
 
 <p align="center">
-<img align="center" src="../readme_images/square.png"> </p>
+<img align="center" src="../readme_images/square.png" alt='img'> </p>
 
 Дисперсия - разброс значений случайной величины относительно математического ожидания. Дисперсию можно вычислить по формуле ниже:
 
@@ -42,10 +42,10 @@ $$ \sigma ={\sqrt D} $$
 $$ \sigma ={\sqrt {0.695} \approx 0.833667} °C$$
 
 <p align="center">
-<img align="center" src="../readme_images/st_dev.png"> </p>
+<img align="center" src="../readme_images/st_dev.png" alt='img'> </p>
 <p align="center"> Стандартное отклонение </p>
 
-Т. е. чем больше $\sigma$, тем «шире» график.
+Т.е. чем больше $\sigma$, тем «шире» график.
 
 ## Реализация ##
 
