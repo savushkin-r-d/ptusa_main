@@ -350,12 +350,18 @@ class required_DI_action: public action
 /// <summary>
 /// Проверка устройств во время выполнения шага.
 /// </summary>
-class checked_devices_action : public action
+class checked_devices_action final : public action
     {
     public:
         checked_devices_action();
 
         void finalize() override;
+
+        /// @brief Инициализация действия.
+        ///
+        /// Если в устройствах присутствуют счётчики, то для них выполняем 
+        /// вначале метод `start()` для запуска счёта (после паузы или аварии).
+        void init() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -674,7 +680,8 @@ class operation_state
         void save();
         void load();
 
-        int on_extra_step( int step_idx, u_long step_time = 0UL );
+        int on_extra_step( int step_idx );
+        int on_extra_step( int step_idx, u_long step_time, bool is_print_time );
 
         int off_extra_step( int step_idx );
 

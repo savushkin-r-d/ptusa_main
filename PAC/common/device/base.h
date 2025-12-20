@@ -746,7 +746,7 @@ class device : public i_DO_AO_device, public par_device
             return is_manual_mode;
             }
 
-        char* get_article() const
+        const char* get_article() const
             {
             return article;
             }
