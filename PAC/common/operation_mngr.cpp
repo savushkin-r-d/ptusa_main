@@ -1222,7 +1222,7 @@ void DI_DO_action::finalize()
             continue;
             }
 
-        // Найдем количество DI устройств и выключим все DO
+        // Найдем количество DI устройств и выключим все DO.
         u_int di_count = 0;
         for ( const auto& dev : dev_group )
             {
@@ -1232,7 +1232,7 @@ void DI_DO_action::finalize()
                 }
             }
         
-        // Выключаем все DO устройства
+        // Выключаем все DO устройства.
         for ( auto it = dev_group.begin() + di_count;
             it != dev_group.end(); ++it )
             {
@@ -1243,12 +1243,12 @@ void DI_DO_action::finalize()
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
-    // Поиск активных DI среди всех входных устройств
-    bool any_di_active = false;
-    bool all_di_active = true;
-    u_int di_count = 0;
+    // Поиск активных DI среди всех входных устройств.
+    auto any_di_active = false;
+    auto all_di_active = true;
+    auto di_count = 0u;
     
-    // Подсчитаем количество DI устройств и проверим их активность
+    // Подсчитаем количество DI устройств и проверим их активность.
     for ( const auto& dev : devices )
         {
         if ( is_di_device_type( dev->get_type() ) )
@@ -1266,15 +1266,13 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
         }
 
     // Если нет DI устройств, то все считаем неактивными.
-    // When there are no DI devices, both AND and OR logic should result
-    // in inactive DO devices (any_di_active and all_di_active are false).
     if ( di_count == 0 )
         {
         all_di_active = false;
         }
 
-    // Определяем состояние DO в зависимости от типа логики
-    bool should_activate_do = false;
+    // Определяем состояние DO в зависимости от типа логики.
+    auto should_activate_do = false;
     if ( logic_type == LOGIC_TYPE::AND )
         {
         should_activate_do = all_di_active;
@@ -1284,7 +1282,7 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
         should_activate_do = any_di_active;
         }
 
-    // Управляем DO устройствами (они идут после всех DI)
+    // Управляем DO устройствами (они идут после всех DI).
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
         if ( should_activate_do )
@@ -1334,7 +1332,7 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     bool any_di_active = false;
     u_int di_count = 0;
     
-    // Подсчитаем количество DI устройств и проверим их активность
+    // Подсчитаем количество DI устройств и проверим их активность.
     for ( const auto& dev : devices )
         {
         if ( is_di_device_type( dev->get_type() ) )
@@ -1347,10 +1345,10 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
             }
         }
 
-    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен
+    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен.
     int new_state = any_di_active ? 0 : 1;
     
-    // Управляем DO устройствами (они идут после всех DI)
+    // Управляем DO устройствами (они идут после всех DI).
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
         (*it)->set_state( new_state );

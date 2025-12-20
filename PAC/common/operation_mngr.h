@@ -299,16 +299,16 @@ class DI_DO_action: public action
 
         int set_bool_property( const char* prop_name, bool value ) override;
 
-    protected:
+        bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
+
+    private:
         enum class LOGIC_TYPE
             {
             OR = 0,  // Default: any DI active turns on DO.
             AND = 1  // All DI must be active to turn on DO.
             };
 
-        virtual void evaluate_DO( std::vector< device* > devices );
-
-        bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
+        virtual void evaluate_DO( std::vector< device* > devices );        
 
         LOGIC_TYPE logic_type = LOGIC_TYPE::OR;
     };
@@ -321,7 +321,7 @@ class inverted_DI_DO_action : public DI_DO_action
     public:
         inverted_DI_DO_action();
 
-    protected:
+    private:
         void evaluate_DO( std::vector< device* > devices ) override;
     };
 //-----------------------------------------------------------------------------
