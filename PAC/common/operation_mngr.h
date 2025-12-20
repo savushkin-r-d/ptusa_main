@@ -308,7 +308,7 @@ class DI_DO_action: public action
             AND = 1  // All DI must be active to turn on DO.
             };
 
-        virtual void evaluate_DO( std::vector< device* > devices );        
+        virtual void evaluate_DO( std::vector< device* > devices );
 
         LOGIC_TYPE logic_type = LOGIC_TYPE::OR;
     };

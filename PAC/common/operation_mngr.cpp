@@ -2005,8 +2005,8 @@ int jump_if_action::set_int_property( const char* prop_name, size_t idx,
     int value )
     {
     action::set_int_property( prop_name, idx, value );
-    if ( strcmp( prop_name, "next_step_n" ) == 0 || //Для перехода к новому шагу.
-        strcmp( prop_name, "next_state_n" ) == 0 )  //Для перехода к новому состоянию.
+    if ( strcmp( prop_name, "next_step_n" ) == 0 || // К новому шагу.
+        strcmp( prop_name, "next_state_n" ) == 0 )  // К новому состоянию.
         {
         while ( idx >= next_n.size() )
             {
