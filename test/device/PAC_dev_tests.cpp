@@ -1101,7 +1101,6 @@ void check_dev( const char* name, int type, int sub_type,
 TEST( device_manager, add_io_device )
     {
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
 
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
@@ -1255,7 +1254,6 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     valve::clear_v_bistable();
     }
 
@@ -1271,8 +1269,6 @@ TEST( device_manager, clear_io_devices )
     G_DEVICE_MANAGER()->clear_io_devices();
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
-
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_device )
@@ -1286,7 +1282,6 @@ TEST( device_manager, get_device )
         G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_name_in_Lua )
@@ -1303,7 +1298,6 @@ TEST( device_manager, evaluate_io )
     G_DEVICE_MANAGER()->evaluate_io();
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 
@@ -1820,6 +1814,27 @@ TEST_F( iolink_dev_test, level_e_iolink_evaluate_io )
     EXPECT_EQ( test_dev.get_volume(), 8200.0f );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_e_iolink_set_string_property )
+    {
+    level_e_iolink test_dev( "TestDevice" );
+
+    EXPECT_EQ( test_dev.PT_extra, nullptr );
+    test_dev.set_string_property( "PT", "" );
+    ASSERT_EQ( STUB(), dynamic_cast<dev_stub*>( test_dev.PT_extra ) );
+
+    auto PT_name = std::string( "PT1" );
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PT, device::DST_PT_VIRT, PT_name.c_str(), "Test sensor", "PT" );
+    ASSERT_EQ( nullptr, res );
+    const auto PT1 = PT( PT_name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( PT1 ) );
+    test_dev.set_string_property( "PT", "PT1" );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( test_dev.PT_extra ) );
+    ASSERT_EQ( PT1, test_dev.PT_extra );
+    
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 
@@ -5481,7 +5496,6 @@ TEST( threshold_regulator, set_value )
     EXPECT_EQ( 1, M1->get_state() );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( threshold_regulator, set_cmd )

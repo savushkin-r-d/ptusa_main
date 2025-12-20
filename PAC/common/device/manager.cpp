@@ -1480,6 +1480,8 @@ void device_manager::clear_io_devices()
         }
 
     project_devices.clear();
+
+    G_ERRORS_MANAGER->clear();
     }
 //-----------------------------------------------------------------------------
 int device_manager::init_params()

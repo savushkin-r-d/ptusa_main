@@ -144,6 +144,5 @@ suppress=false
     EXPECT_STREQ( buff.data(), res_str );
 
 
-    G_ERRORS_MANAGER->clear();
     G_DEVICE_MANAGER()->clear_io_devices();
     }
