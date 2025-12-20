@@ -1789,20 +1789,20 @@ TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	EXPECT_EQ( 0, res );
 	EXPECT_STREQ( "", msg.c_str() );
 
-	// Изначально все DI неактивны
+	// Изначально все DI неактивны.
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_FALSE( test_DO.is_active() );
 
-	// Активируем один DI - DO должно активироваться (OR логика)
+	// Активируем один DI - DO должно активироваться (OR логика).
 	test_DI1.set_cmd( "ST", 0, 1.0 );
 	EXPECT_TRUE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
 	action.evaluate();
 	EXPECT_TRUE( test_DO.is_active() );
 
-	// Деактивируем активный DI - DO должно деактивироваться
+	// Деактивируем активный DI - DO должно деактивироваться.
 	test_DI1.set_cmd( "ST", 0, 0.0 );
 	EXPECT_FALSE( test_DI1.is_active() );
 	EXPECT_FALSE( test_DI2.is_active() );
@@ -1815,17 +1815,17 @@ TEST( DI_DO_action, set_bool_property_logic_type )
 	{
 	auto action = DI_DO_action();
 	
-	// Test setting to AND logic
+	// Test setting to AND logic.
 	auto res = action.set_bool_property( "logic_type", true );
 	EXPECT_EQ( 0, res );
 	
-	// Test setting to OR logic
+	// Test setting to OR logic.
 	res = action.set_bool_property( "logic_type", false );
 	EXPECT_EQ( 0, res );
 	
-	// Test unknown property
+	// Test unknown property.
 	res = action.set_bool_property( "unknown_property", false );
-	EXPECT_EQ( 0, res );
+	EXPECT_EQ( 1, res );
 	}
 
 TEST( DI_DO_action, evaluate_AND_logic_all_active )

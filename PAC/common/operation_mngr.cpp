@@ -740,13 +740,17 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     devices[ group ][ subgroup ].push_back( dev );
     }
 //-----------------------------------------------------------------------------
-int action::set_int_property( const char* name, size_t idx, int value )
+int action::set_bool_property( const char* prop_name, bool value )
     {
-    if ( G_DEBUG )
-        {
-        G_LOG->info( "\"%s\" set int property \"%s\"[%zu] to \"%d\"",
-            this->name.c_str(), name, idx, value );
-        }
+    G_LOG->debug( R"("%s" set bool property "%s" to %d)",
+        name.c_str(), prop_name, value );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int action::set_int_property( const char* prop_name, size_t idx, int value )
+    {
+    G_LOG->debug( R"("%s" set int property "%s"[%zu] to %d)",
+        name.c_str(), prop_name, idx, value );
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -1308,12 +1312,14 @@ bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
 //-----------------------------------------------------------------------------
 int DI_DO_action::set_bool_property( const char* prop_name, bool value )
     {
+    action::set_bool_property( prop_name, value );
     if ( strcmp( prop_name, "logic_type" ) == 0 )
         {
         logic_type = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
         return 0;
         }
-    return action::set_bool_property( prop_name, value );
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1997,11 +2003,12 @@ bool jump_if_action::check(
     return true;
     };
 //-----------------------------------------------------------------------------
-int jump_if_action::set_int_property( const char* name, size_t idx, int value )
+int jump_if_action::set_int_property( const char* prop_name, size_t idx,
+    int value )
     {
-    action::set_int_property( name, idx, value );
-    if ( strcmp( name, "next_step_n" ) == 0 || //Для перехода к новому шагу.
-        strcmp( name, "next_state_n" ) == 0 )  //Для перехода к новому состоянию.
+    action::set_int_property( prop_name, idx, value );
+    if ( strcmp( prop_name, "next_step_n" ) == 0 || //Для перехода к новому шагу.
+        strcmp( prop_name, "next_state_n" ) == 0 )  //Для перехода к новому состоянию.
         {
         while ( idx >= next_n.size() )
             {
@@ -2016,16 +2023,16 @@ int jump_if_action::set_int_property( const char* name, size_t idx, int value )
         if ( G_DEBUG )
             {
             G_LOG->warning( "\"%s\" unknown property \"%s\"",
-                this->name.c_str(), name );
+                name.c_str(), prop_name );
             }
         }
 
     return 1;
     };
 //-----------------------------------------------------------------------------
-int jump_if_action::get_int_property( const char* name, size_t idx )
+int jump_if_action::get_int_property( const char* prop_name, size_t idx )
     {
-    if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
+    if ( strcmp( prop_name, "next_step_n" ) == 0 && idx < next_n.size() )
         {
         return next_n[ idx ];
         }
@@ -2056,7 +2063,7 @@ void jump_if_action::print( const char* prefix, bool new_line ) const
 //-----------------------------------------------------------------------------
 enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
     {
-    };
+    }
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::is_any_group_active() const
     {
@@ -2081,7 +2088,7 @@ bool enable_step_by_signal::is_any_group_active() const
         }
 
     return false;
-    };
+    }
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::should_turn_off() const
     {    
@@ -2091,11 +2098,13 @@ bool enable_step_by_signal::should_turn_off() const
         }
 
     return turn_off_flag;
-    };
+    }
 //-----------------------------------------------------------------------------
-int enable_step_by_signal::set_bool_property( const char* name, bool value )
+int enable_step_by_signal::set_bool_property( const char* prop_name, bool value )
     {
-    if ( strcmp( name, "should_turn_off" ) == 0 )
+    action::set_bool_property( prop_name, value );
+
+    if ( strcmp( prop_name, "should_turn_off" ) == 0 )
         {
         turn_off_flag = value;
         }
@@ -2104,13 +2113,13 @@ int enable_step_by_signal::set_bool_property( const char* name, bool value )
         if ( G_DEBUG )
             {
             G_LOG->warning( "\"%s\" unknown property \"%s\"",
-                this->name.c_str(), name);
+                name.c_str(), prop_name );
             }
         return 1;
         }
 
     return 0;
-    };
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,

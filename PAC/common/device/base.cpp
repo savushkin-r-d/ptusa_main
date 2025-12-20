@@ -256,12 +256,8 @@ void device::set_property( const char* field, device* dev )
 //-----------------------------------------------------------------------------
 void device::set_string_property( const char* field, const char* new_value )
     {
-    if ( G_DEBUG )
-        {
-        G_LOG->debug( "%s\t device::set_string_property() - "
-            "field = %s, val = \"%s\"",
-            name, field, new_value );
-        }
+    G_LOG->debug( R"(%s (%s) set string property "%s" to "%s")",
+        name, get_type_str(), field, new_value );
     }
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
