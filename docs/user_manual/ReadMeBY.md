@@ -65,7 +65,7 @@ $$ \sigma ={\sqrt {0.695} \approx 0.833667} °C$$
 
 ## Рэалізацыя ##
 
-Файлы с рэалізацыей ```analog_emulator.h``` і ```analog_emulator.cpp```
+Файлы з рэалізацыей ```analog_emulator.h``` і ```analog_emulator.cpp```
 знаходзяца у каталогу ```ptusa_main/Pac/common```. У класе
 ```analog_emulator``` вызначаны метады ```get_st_deviation()```,
 ```get_m_expec()``` вяртаюць значэння стандартнага адхілення і матэматычнага
