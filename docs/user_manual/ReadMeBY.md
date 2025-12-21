@@ -32,7 +32,7 @@ $$ μ ={\sum x \over n}$$
 што нашая выпадковая велічыня будзе мець зададзеную тэмпературу.
 
 <p align="center">
-<img align="center" src="../readme_images/m_expec.png"> </p>
+<img align="center" src="../readme_images/m_expec.png" alt=""> </p>
 <p align="center"> Матэматычнае чаканне </p>
 
 Верагоднасць $p$ можна вылічыць, палічыўшы плошчу графіка ў канкрэтным
