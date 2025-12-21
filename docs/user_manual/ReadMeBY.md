@@ -39,7 +39,7 @@ $$ μ ={\sum x \over n}$$
 інтэрвале. Плошча ўсяго графіка роўна 1.
 
 <p align="center">
-<img align="center" src="../readme_images/square.png" alt=""> </p>
+<img align="center" src="../readme_images/square.png" alt="Ілюстрацыя плошчы пад графікам"> </p>
 
 Дысперсія - роскід значэнняў выпадковай велічыні адносна матэматычнага
 чакання. Дысперсію можна вылічыць па формуле ніжэй:
