@@ -1417,12 +1417,12 @@ open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
-void open_seat_action::set_wait_time( int wait_time )
+void open_seat_action::set_wait_time( u_long wait_time )
     {
     this->wait_time = wait_time;
     }
 
-int open_seat_action::get_wait_time()
+u_long open_seat_action::get_wait_time()
     {
     return wait_time;
     }

@@ -237,8 +237,8 @@ class open_seat_action: public action
         void finalize() override;
 
 #ifdef PTUSA_TEST
-        void set_wait_time( int wait_time );
-        int get_wait_time();
+        void set_wait_time( u_long wait_time );
+        u_long get_wait_time();
 #endif
 
         /// @brief Добавление устройства к действию.
@@ -265,7 +265,7 @@ class open_seat_action: public action
 
         u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
-        u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
+        u_long wait_time;       ///< Время ожидания перед промыванием седел.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
