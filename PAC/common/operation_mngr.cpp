@@ -1055,7 +1055,7 @@ u_long step::get_latest_eval_time() const
     return get_delta_millisec( start_time );
     }
 //-----------------------------------------------------------------------------
-void step::set_start_time( u_int_4 start_time )
+void step::set_start_time( u_long start_time )
     {
     this->start_time = start_time;
     }
@@ -1115,7 +1115,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void step::set_dx_time( u_int_4 dx_time )
+void step::set_dx_time( u_long dx_time )
     {
     this->dx_time = dx_time;
     }

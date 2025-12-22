@@ -271,7 +271,7 @@ class open_seat_action: public action
         std::vector< std::vector< device* > > wash_upper_seat_devices;
         std::vector< std::vector< device* > > wash_lower_seat_devices;
 
-        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+        u_long start_cycle_time;  ///< Время старта цикла (ожидания или промывки).
 
         bool is_mode;             ///< Является ли шагом операции.
         operation_state* owner;
@@ -508,7 +508,7 @@ class step
         u_long get_latest_eval_time() const;
 
         /// Установление времени начала шага.
-        void set_start_time( u_int_4 start_time );
+        void set_start_time( u_long start_time );
 
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
@@ -533,19 +533,19 @@ class step
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
-        u_int_4 start_time;             ///< Время старта шага.
+        u_long start_time;              ///< Время старта шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
 
         bool active;
-        u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
+        u_long dx_time;                 ///< Время шага, отработанное до паузы.
 
         int tag = -1;   ///< Тег (индекс связанного объекта).
 
     public:
         /// Добавление времени для возобновления после паузы.
-        void set_dx_time( u_int_4 dx_time );
+        void set_dx_time( u_long dx_time );
 
         ///< Получение тега (индекс связанного объекта).
         int get_tag() const
@@ -655,14 +655,14 @@ class operation_state
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
-        u_int_4 start_time; ///< Время начала операции.
+        u_long start_time;  ///< Время начала операции.
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
         int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
-        u_int_4 dx_step_time;
+        u_long dx_step_time;
 
 
         /// Номер параметра совместного времени выполнения шагов.
