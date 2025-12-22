@@ -4902,7 +4902,7 @@ static void test_counter_iolink_article( const char* article, float gradient )
     // Test with raw value.
     fqt.init( 0, 0, 0, 1 );
     fqt.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
-    auto buff = reinterpret_cast<char*>( fqt.AI_channels.int_read_values[ 0 ] );
+    auto buff = reinterpret_cast<std::byte*>( fqt.AI_channels.int_read_values[ 0 ] );
 
     // Initialize with zero data.
     *reinterpret_cast<float*>( fqt.AI_channels.int_read_values[ 0 ] ) = 0.0f;

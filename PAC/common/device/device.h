@@ -1462,7 +1462,7 @@ class counter_iolink : public base_counter
 
         void set_article( const char* new_article ) override;
 
-        enum ARTICLE
+        enum class ARTICLE
             {
             DEFAULT,
             IFM_SM6100,
@@ -1470,7 +1470,7 @@ class counter_iolink : public base_counter
             };
 
     private:
-        ARTICLE n_article = DEFAULT;
+        ARTICLE n_article = ARTICLE::DEFAULT;
 
         float get_flow_gradient() const;
         enum class CONSTANTS

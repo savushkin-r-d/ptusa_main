@@ -1693,12 +1693,12 @@ void counter_iolink::set_article( const char* new_article )
 
     if ( strcmp( new_article, "IFM.SM6100" ) == 0 )
         {
-        n_article = IFM_SM6100;
+        n_article = ARTICLE::IFM_SM6100;
         return;
         }
     if ( strcmp( new_article, "IFM.SM4000" ) == 0 )
         {
-        n_article = IFM_SM4000;
+        n_article = ARTICLE::IFM_SM4000;
         return;
         }
 
@@ -1710,13 +1710,13 @@ float counter_iolink::get_flow_gradient() const
     {
     switch ( n_article )
         {
-        case IFM_SM6100:
+        case ARTICLE::IFM_SM6100:
             return 0.01f;
 
-        case IFM_SM4000:
+        case ARTICLE::IFM_SM4000:
             return 0.001f;
 
-        case DEFAULT:
+        case ARTICLE::DEFAULT:
         default:
             return 0.01f; // Default to SM6100 gradient.
         }
