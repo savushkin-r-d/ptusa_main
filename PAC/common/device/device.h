@@ -1460,7 +1460,19 @@ class counter_iolink : public base_counter
 
         const char* get_error_description() override;
 
+        void set_article( const char* new_article ) override;
+
+        enum class ARTICLE
+            {
+            DEFAULT,
+            IFM_SM6100,
+            IFM_SM4000,
+            };
+
     private:
+        ARTICLE n_article = ARTICLE::DEFAULT;
+
+        float get_flow_gradient() const;
         enum class CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.

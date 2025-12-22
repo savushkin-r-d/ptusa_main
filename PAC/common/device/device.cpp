@@ -1628,7 +1628,7 @@ float counter_iolink::get_max_raw_value() const
 float counter_iolink::get_flow()
     {
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
-        + in_info.flow * 0.01f;
+        + in_info.flow * get_flow_gradient();
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::save_device_ex( char* buff )
@@ -1645,7 +1645,7 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     switch ( prop[ 0 ] )
         {
         case 'F':
-            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            in_info.flow = static_cast<int16_t>( val / get_flow_gradient() );
             break;
 
         case 'T':
@@ -1684,6 +1684,41 @@ const char* counter_iolink::get_error_description()
 
         default:
             return base_counter::get_error_description();
+        }
+    }
+//-----------------------------------------------------------------------------
+void counter_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+
+    if ( strcmp( new_article, "IFM.SM6100" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM6100;
+        return;
+        }
+    if ( strcmp( new_article, "IFM.SM4000" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM4000;
+        return;
+        }
+
+    G_LOG->warning( "%s unknown article \"%s\"",
+        get_name(), new_article );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow_gradient() const
+    {
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_SM6100:
+            return 0.01f;
+
+        case ARTICLE::IFM_SM4000:
+            return 0.001f;
+
+        case ARTICLE::DEFAULT:
+        default:
+            return 0.01f; // Default to SM6100 gradient.
         }
     }
 //-----------------------------------------------------------------------------
