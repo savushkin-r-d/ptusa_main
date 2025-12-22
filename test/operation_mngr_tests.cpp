@@ -281,28 +281,29 @@ TEST( step, set_tag )
 	EXPECT_EQ( new_tag, st1.get_tag() );
 	}
 
-// Tests for time overflow fix (issue with u_int_4 -> u_long conversion)
-// These tests verify that time variables can handle values > 2^32 ms (49.7 days)
+// Tests for time overflow fix (issue with u_int_4 -> u_long conversion).
+// These tests verify that time variables can handle values > 2^32 ms (49.7 days).
 TEST( step, time_overflow_no_truncation )
 	{
-	// Test that step can handle time values beyond 32-bit limit
-	// Simulating ~50 days in milliseconds (> 2^32 = 4,294,967,295)
+	// Test that step can handle time values beyond 32-bit limit.
+	// Simulating ~50 days in milliseconds (> 2^32 = 4,294,967,295).
 	step st1( "test_step_time_overflow", 0 );
 	
-	// Value that would overflow u_int_4 (32-bit): 50 days in ms
-	u_long time_50_days = 50UL * 24 * 60 * 60 * 1000; // 4,320,000,000 ms
-	
-	// This should not truncate with u_long
-	st1.set_start_time( time_50_days );
 	st1.init();
 	
-	// Simulate 1 hour passing
+	// Value that would overflow u_int_4 (32-bit): 50 days in ms.
+	u_long time_50_days = 50UL * 24 * 60 * 60 * 1000; // 4,320,000,000 ms.
+	
+	// This should not truncate with u_long and must be set after init().
+	st1.set_start_time( time_50_days );
+	
+	// Simulate a small time delta (1 ms).
 	sleep_ms( 1 );
 	
-	// Get evaluation time - should be small (milliseconds), not huge
+	// Get evaluation time - should be small (milliseconds), not huge.
 	u_long eval_time = st1.get_eval_time();
 	
-	// Verify time is reasonable (< 1 second, not billions of ms)
+	// Verify time is reasonable (< 1 second, not billions of ms).
 	EXPECT_LT( eval_time, 1000UL );
 	EXPECT_GT( eval_time, 0UL );
 	
@@ -311,20 +312,19 @@ TEST( step, time_overflow_no_truncation )
 
 TEST( step, set_dx_time_large_values )
 	{
-	// Test that dx_time can store large values without truncation
+	// Test that dx_time can store large values without truncation.
 	step st1( "test_step_dx_time", 0 );
 	
-	// Set a large dx_time value (e.g., 30 days in ms)
-	u_long dx_time_30_days = 30UL * 24 * 60 * 60 * 1000; // 2,592,000,000 ms
+	// Set a large dx_time value (e.g., 30 days in ms).
+	u_long dx_time_30_days = 30UL * 24 * 60 * 60 * 1000; // 2,592,000,000 ms.
 	
-	st1.set_dx_time( dx_time_30_days );
-	st1.set_start_time( get_millisec() );
 	st1.init();
+	st1.set_dx_time( dx_time_30_days );
 	
-	// Verify eval time includes the large dx_time
+	// Verify eval time includes the large dx_time.
 	u_long eval_time = st1.get_eval_time();
 	
-	// Should be at least the dx_time value
+	// Should be at least the dx_time value.
 	EXPECT_GE( eval_time, dx_time_30_days );
 	
 	st1.finalize();
@@ -332,7 +332,7 @@ TEST( step, set_dx_time_large_values )
 
 TEST( operation_state, time_overflow_no_truncation )
 	{
-	// Test that operation_state handles large time values correctly
+	// Test that operation_state handles large time values correctly.
 	lua_State* L = lua_open();
 	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 	G_LUA_MANAGER->set_Lua( L );
@@ -343,14 +343,14 @@ TEST( operation_state, time_overflow_no_truncation )
 	
 	auto test_step = op_state->add_step( "TestStep", -1, -1 );
 	
-	// Simulate time value beyond 32-bit limit
-	u_long large_time = 60UL * 24 * 60 * 60 * 1000; // 60 days in ms
-	test_step->set_start_time( large_time );
+	// Simulate time value beyond 32-bit limit.
+	u_long large_time = 60UL * 24 * 60 * 60 * 1000; // 60 days in ms.
 	
 	op_state->init();
+	test_step->set_start_time( large_time );
 	sleep_ms( 1 );
 	
-	// Verify evaluation time is reasonable
+	// Verify evaluation time is reasonable.
 	u_long step_eval_time = op_state->active_step_evaluation_time();
 	EXPECT_LT( step_eval_time, 1000UL );
 	EXPECT_GT( step_eval_time, 0UL );
@@ -362,7 +362,7 @@ TEST( operation_state, time_overflow_no_truncation )
 #ifdef PTUSA_TEST
 TEST( open_seat_action, wait_time_large_values )
 	{
-	// Test that wait_time (now u_long) can handle large values
+	// Test that wait_time (now u_long) can handle large values.
 	tech_object test_tank( "TestTank", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
 	operation_manager* modes_mngr = test_tank.get_modes_manager();
 	auto test_op = modes_mngr->add_operation( "TestOp" );
@@ -372,12 +372,12 @@ TEST( open_seat_action, wait_time_large_values )
 	open_seat_action* seat_action = 
 		dynamic_cast< open_seat_action* >( ( *test_step )[ step::A_UPPER_SEATS_ON ] );
 	
-	// Set a large wait_time value (e.g., 40 days in ms)
-	u_long wait_time_40_days = 40UL * 24 * 60 * 60 * 1000; // 3,456,000,000 ms
+	// Set a large wait_time value (e.g., 40 days in ms).
+	u_long wait_time_40_days = 40UL * 24 * 60 * 60 * 1000; // 3,456,000,000 ms.
 	
 	seat_action->set_wait_time( wait_time_40_days );
 	
-	// Verify it can be retrieved without truncation
+	// Verify it can be retrieved without truncation.
 	u_long retrieved_wait_time = seat_action->get_wait_time();
 	EXPECT_EQ( wait_time_40_days, retrieved_wait_time );
 	}
