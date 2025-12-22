@@ -291,15 +291,13 @@ TEST( step, time_overflow_no_truncation )
 	
 	st1.init();
 	
-	// Get current time and add offset to simulate time far in future.
-	// This tests that u_long can store values > 2^32 without truncation.
-	u_long current_time = get_millisec();
-	u_long time_offset = 50UL * 24 * 60 * 60 * 1000; // 50 days in ms.
-	u_long future_time = current_time + time_offset;
+	// Create a time value that exceeds 32-bit limit.
+	// We use a value slightly above UINT_MAX to ensure we're testing overflow.
+	u_long large_time = static_cast<u_long>(UINT_MAX) + 1000000UL;
 	
-	// Verify the future time value can be stored without truncation.
+	// Verify the large time value can be stored without truncation.
 	// With u_int_4 this would truncate, with u_long it stores correctly.
-	st1.set_start_time( future_time );
+	st1.set_start_time( large_time );
 	
 	// Simulate a small time delta (1 ms).
 	sleep_ms( 1 );
@@ -309,7 +307,7 @@ TEST( step, time_overflow_no_truncation )
 	
 	// The evaluation should handle the wraparound correctly.
 	// We're mainly testing that the type can store large values.
-	EXPECT_TRUE( future_time > UINT_MAX ); // Verify we're testing beyond 32-bit.
+	EXPECT_GT( large_time, static_cast<u_long>(UINT_MAX) ); // Verify we're testing beyond 32-bit.
 	
 	st1.finalize();
 	}
@@ -352,16 +350,15 @@ TEST( operation_state, time_overflow_no_truncation )
 	
 	op_state->init();
 	
-	// Get current time and add large offset to test beyond 32-bit limit.
-	u_long current_time = get_millisec();
-	u_long time_offset = 60UL * 24 * 60 * 60 * 1000; // 60 days in ms.
-	u_long future_time = current_time + time_offset;
+	// Create a time value that exceeds 32-bit limit.
+	// We use a value above UINT_MAX to ensure we're testing overflow.
+	u_long large_time = static_cast<u_long>(UINT_MAX) + 5000000UL;
 	
 	// Verify we're testing beyond 32-bit capacity.
-	EXPECT_GT( future_time, UINT_MAX );
+	EXPECT_GT( large_time, static_cast<u_long>(UINT_MAX) );
 	
 	// Set the large time value - with u_long this works, with u_int_4 it would truncate.
-	test_step->set_start_time( future_time );
+	test_step->set_start_time( large_time );
 	
 	op_state->finalize();
 	G_LUA_MANAGER->free_Lua();
