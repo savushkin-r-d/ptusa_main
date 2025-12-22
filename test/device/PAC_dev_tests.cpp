@@ -4890,70 +4890,47 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
-TEST( counter_iolink, article_sm6100 )
+static void test_counter_iolink_article( const char* article, float gradient )
     {
-    counter_iolink fqt1( "FQT1" );
-    fqt1.set_article( "IFM.SM6100" );
-    
-    // Test flow gradient for SM6100 (0.01).
-    fqt1.set_cmd( "F", 0, 9.9 );
-    EXPECT_NEAR( 9.9f, fqt1.get_flow(), 0.01f );
-    
-    // Test with raw value.
-    fqt1.init( 0, 0, 0, 1 );
-    fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
-    auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
-    
-    // Initialize with zero data.
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 0.0f;
-    std::swap( buff[ 0 ], buff[ 3 ] );
-    std::swap( buff[ 2 ], buff[ 1 ] );
-    fqt1.evaluate_io();
-    
-    // Set flow raw value.
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 0.0f;
-    std::swap( buff[ 0 ], buff[ 3 ] );
-    std::swap( buff[ 2 ], buff[ 1 ] );
-    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
-    std::swap( buff[ 5 ], buff[ 4 ] );
-    fqt1.evaluate_io();
-    EXPECT_NEAR( 1000 * 0.01f, fqt1.get_flow(), 0.01f );
+    counter_iolink fqt( "FQT1" );
+    fqt.set_article( article );
 
-    delete[] fqt1.AI_channels.int_read_values[ 0 ];
-    fqt1.AI_channels.int_read_values[ 0 ] = nullptr;
+    // Test flow gradient for the specified article.
+    fqt.set_cmd( "F", 0, 9.9 );
+    EXPECT_NEAR( 9.9f, fqt.get_flow(), 0.01f );
+
+    // Test with raw value.
+    fqt.init( 0, 0, 0, 1 );
+    fqt.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
+    auto buff = reinterpret_cast<char*>( fqt.AI_channels.int_read_values[ 0 ] );
+
+    // Initialize with zero data.
+    *reinterpret_cast<float*>( fqt.AI_channels.int_read_values[ 0 ] ) = 0.0f;
+    std::swap( buff[ 0 ], buff[ 3 ] );
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    fqt.evaluate_io();
+
+    // Set flow raw value.
+    *reinterpret_cast<float*>( fqt.AI_channels.int_read_values[ 0 ] ) = 0.0f;
+    std::swap( buff[ 0 ], buff[ 3 ] );
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    fqt.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
+    std::swap( buff[ 5 ], buff[ 4 ] );
+    fqt.evaluate_io();
+    EXPECT_NEAR( 1000 * gradient, fqt.get_flow(), 0.01f );
+
+    delete[] fqt.AI_channels.int_read_values[ 0 ];
+    fqt.AI_channels.int_read_values[ 0 ] = nullptr;
     }
 
 TEST( counter_iolink, article_sm4000 )
     {
-    counter_iolink fqt1( "FQT1" );
-    fqt1.set_article( "IFM.SM4000" );
-    
-    // Test flow gradient for SM4000 (0.001).
-    fqt1.set_cmd( "F", 0, 9.9 );
-    EXPECT_NEAR( 9.9f, fqt1.get_flow(), 0.01f );
-    
-    // Test with raw value.
-    fqt1.init( 0, 0, 0, 1 );
-    fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
-    auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
-    
-    // Initialize with zero data.
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 0.0f;
-    std::swap( buff[ 0 ], buff[ 3 ] );
-    std::swap( buff[ 2 ], buff[ 1 ] );
-    fqt1.evaluate_io();
-    
-    // Set flow raw value.
-    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 0.0f;
-    std::swap( buff[ 0 ], buff[ 3 ] );
-    std::swap( buff[ 2 ], buff[ 1 ] );
-    fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
-    std::swap( buff[ 5 ], buff[ 4 ] );
-    fqt1.evaluate_io();
-    EXPECT_NEAR( 1000 * 0.001f, fqt1.get_flow(), 0.01f );
+    test_counter_iolink_article( "IFM.SM4000", 0.001f );
+    }
 
-    delete[] fqt1.AI_channels.int_read_values[ 0 ];
-    fqt1.AI_channels.int_read_values[ 0 ] = nullptr;
+TEST( counter_iolink, article_sm6100 )
+    {
+    test_counter_iolink_article( "IFM.SM6100", 0.01f );
     }
 
 
