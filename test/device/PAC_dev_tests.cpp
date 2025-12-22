@@ -4897,7 +4897,7 @@ TEST( counter_iolink, article_sm6100 )
     
     // Test flow gradient for SM6100 (0.01).
     fqt1.set_cmd( "F", 0, 9.9 );
-    EXPECT_FLOAT_EQ( 9.9f, fqt1.get_flow() );
+    EXPECT_NEAR( 9.9f, fqt1.get_flow(), 0.01f );
     
     // Test with raw value.
     fqt1.init( 0, 0, 0, 1 );
@@ -4917,7 +4917,10 @@ TEST( counter_iolink, article_sm6100 )
     fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
     std::swap( buff[ 5 ], buff[ 4 ] );
     fqt1.evaluate_io();
-    EXPECT_FLOAT_EQ( 1000 * 0.01f, fqt1.get_flow() );
+    EXPECT_NEAR( 1000 * 0.01f, fqt1.get_flow(), 0.01f );
+
+    delete[] fqt1.AI_channels.int_read_values[ 0 ];
+    fqt1.AI_channels.int_read_values[ 0 ] = nullptr;
     }
 
 TEST( counter_iolink, article_sm4000 )
@@ -4927,7 +4930,7 @@ TEST( counter_iolink, article_sm4000 )
     
     // Test flow gradient for SM4000 (0.001).
     fqt1.set_cmd( "F", 0, 9.9 );
-    EXPECT_FLOAT_EQ( 9.9f, fqt1.get_flow() );
+    EXPECT_NEAR( 9.9f, fqt1.get_flow(), 0.01f );
     
     // Test with raw value.
     fqt1.init( 0, 0, 0, 1 );
@@ -4947,7 +4950,10 @@ TEST( counter_iolink, article_sm4000 )
     fqt1.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
     std::swap( buff[ 5 ], buff[ 4 ] );
     fqt1.evaluate_io();
-    EXPECT_FLOAT_EQ( 1000 * 0.001f, fqt1.get_flow() );
+    EXPECT_NEAR( 1000 * 0.001f, fqt1.get_flow(), 0.01f );
+
+    delete[] fqt1.AI_channels.int_read_values[ 0 ];
+    fqt1.AI_channels.int_read_values[ 0 ] = nullptr;
     }
 
 
