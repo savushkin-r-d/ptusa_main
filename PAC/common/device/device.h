@@ -1577,6 +1577,11 @@ class camera : public i_camera, public device, public io_device
         /// @brief Получение состояние готовности.
         virtual bool is_ready() const;
 
+#ifndef PTUSA_TEST      
+    private:
+#endif
+        std::string ip;
+
     protected:
         bool is_cam_ready;
         int result = 0;
@@ -1589,9 +1594,6 @@ class camera : public i_camera, public device, public io_device
             INDEX_DI_READY,
             INDEX_DI_RES_2,
             };
-
-    private:
-        std::string ip;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.

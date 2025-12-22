@@ -76,10 +76,7 @@ signal_column_iolink::signal_column_iolink( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 void signal_column_iolink::set_string_property( const char* field, const char* value )
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if ( strcmp( field, "SIGNALS_SEQUENCE" ) == 0 )
         {
@@ -245,10 +242,7 @@ int camera::set_cmd( const char* prop, u_int idx, double val )
 
 void camera::set_string_property( const char* field, const char* value )
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if ( strcmp( field, "IP" ) == 0 )
         {
@@ -616,9 +610,9 @@ void threshold_regulator::direct_set_value( float val )
 //-----------------------------------------------------------------------------
 void threshold_regulator::set_string_property( const char* field, const char* value )
     {
+    device::set_string_property( field, value );
     if ( !field ) return;
 
-    device::set_string_property( field, value );
     switch ( field[ 0 ] )
         {
         //IN_VALUE
@@ -2156,6 +2150,8 @@ void wages_eth::tare()
 
 void wages_eth::set_string_property( const char* field, const char* value )
     {
+    device::set_string_property( field, value );
+
     if ( !weth && strcmp( field, "IP" ) == 0 )
         {
         int port = 1001;
@@ -3098,11 +3094,13 @@ void level_e_iolink::evaluate_io()
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st, alfa );
     }
 //-----------------------------------------------------------------------------
-void level_e_iolink::set_string_property(const char* field, const char* value)
+void level_e_iolink::set_string_property( const char* field, const char* value )
     {
-    if (strcmp(field, "PT") == 0)
+    device::set_string_property( field, value );
+
+    if ( strcmp( field, "PT" ) == 0 )
         {
-        PT_extra = PT(value);
+        PT_extra = PT( value );
         }
     }
 //-----------------------------------------------------------------------------
@@ -4117,10 +4115,7 @@ void motor_altivar::direct_off()
 
 void motor_altivar::set_string_property(const char * field, const char * value)
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if (strcmp(field, "IP") == 0)
         {

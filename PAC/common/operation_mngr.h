@@ -122,10 +122,7 @@ class action
         ///
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
-        virtual int set_bool_property( const char* prop_name, bool value )
-            {
-            return 0;
-            }
+        virtual int set_bool_property( const char* prop_name, bool value );
 
         /// @brief Задание числового свойства (настраивается пользователем
         /// при описании проекта).
@@ -133,7 +130,8 @@ class action
         /// @param [in] name Название свойства.
         /// @idx [in] index Индекс свойства.
         /// @param [in] value Значение свойства.
-        virtual int set_int_property( const char* name, size_t idx, int value );
+        virtual int set_int_property( const char* prop_name, size_t idx,
+            int value );
 
         enum CONSTANTS
             {
@@ -299,10 +297,30 @@ class DI_DO_action: public action
 
         void finalize() override;
 
-    protected:
-        virtual void evaluate_DO( std::vector< device* > devices );
+        /// @brief Установка булевого свойства для группы DI->DO.
+        ///
+        /// Используется для конфигурирования логики обработки сигналов DI
+        /// (типа логики OR/AND) при управлении соответствующими DO.
+        ///
+        /// @param [in] prop_name Имя свойства, которое необходимо установить.
+        /// @param [in] value     Значение свойства.
+        ///
+        /// @return Результат установки свойства (0 при успешной установке,
+        ///         отрицательное значение при ошибке).
+        int set_bool_property( const char* prop_name, bool value ) override;
 
         bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
+
+    private:
+        enum class LOGIC_TYPE
+            {
+            OR = 0,  // Default: any DI active turns on DO.
+            AND = 1  // All DI must be active to turn on DO.
+            };
+
+        virtual void evaluate_DO( std::vector< device* > devices );
+
+        LOGIC_TYPE logic_type = LOGIC_TYPE::OR;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -313,7 +331,7 @@ class inverted_DI_DO_action : public DI_DO_action
     public:
         inverted_DI_DO_action();
 
-    protected:
+    private:
         void evaluate_DO( std::vector< device* > devices ) override;
     };
 //-----------------------------------------------------------------------------
@@ -404,14 +422,16 @@ class jump_if_action : public action
 
         bool is_jump( int &next, std::string &reason );
 
-        int set_int_property( const char* name, size_t idx, int value ) override;
+        int set_int_property( const char* prop_name, size_t idx,
+            int value ) override;
 
-        int get_int_property( const char* name, size_t idx ) ;
+        int get_int_property( const char* prop_name, size_t idx ) ;
 
         /// @brief Завершения действия.
         void finalize() override;
 
-        void print( const char* prefix = "", bool new_line = true ) const override;
+        void print( const char* prefix = "",
+            bool new_line = true ) const override;
 
     private:
         bool check( const std::vector< device* > &checked_devices,
@@ -442,7 +462,7 @@ class enable_step_by_signal : public action
 
         bool should_turn_off() const;
 
-        int set_bool_property( const char* name, bool value ) override;
+        int set_bool_property( const char* prop_name, bool value ) override;
 
     private:
         bool turn_off_flag = true;

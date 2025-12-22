@@ -740,13 +740,17 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     devices[ group ][ subgroup ].push_back( dev );
     }
 //-----------------------------------------------------------------------------
-int action::set_int_property( const char* name, size_t idx, int value )
+int action::set_bool_property( const char* prop_name, bool value )
     {
-    if ( G_DEBUG )
-        {
-        G_LOG->info( "\"%s\" set int property \"%s\"[%zu] to \"%d\"",
-            this->name.c_str(), name, idx, value );
-        }
+    G_LOG->debug( R"("%s" set bool property "%s" to %d)",
+        name.c_str(), prop_name, value );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int action::set_int_property( const char* prop_name, size_t idx, int value )
+    {
+    G_LOG->debug( R"("%s" set int property "%s"[%zu] to %d)",
+        name.c_str(), prop_name, idx, value );
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -1218,7 +1222,7 @@ void DI_DO_action::finalize()
             continue;
             }
 
-        // Найдем количество DI устройств и выключим все DO
+        // Найдем количество DI устройств и выключим все DO.
         u_int di_count = 0;
         for ( const auto& dev : dev_group )
             {
@@ -1228,7 +1232,7 @@ void DI_DO_action::finalize()
                 }
             }
         
-        // Выключаем все DO устройства
+        // Выключаем все DO устройства.
         for ( auto it = dev_group.begin() + di_count;
             it != dev_group.end(); ++it )
             {
@@ -1239,11 +1243,12 @@ void DI_DO_action::finalize()
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
-    // Поиск активных DI среди всех входных устройств
-    bool any_di_active = false;
-    u_int di_count = 0;
+    // Поиск активных DI среди всех входных устройств.
+    auto any_di_active = false;
+    auto all_di_active = true;
+    auto di_count = 0u;
     
-    // Подсчитаем количество DI устройств и проверим их активность
+    // Подсчитаем количество DI устройств и проверим их активность.
     for ( const auto& dev : devices )
         {
         if ( is_di_device_type( dev->get_type() ) )
@@ -1253,13 +1258,34 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
                 {
                 any_di_active = true;
                 }
+            else
+                {
+                all_di_active = false;
+                }
             }
         }
 
-    // Управляем DO устройствами (они идут после всех DI)
+    // Если нет DI устройств, то все считаем неактивными.
+    if ( di_count == 0 )
+        {
+        all_di_active = false;
+        }
+
+    // Определяем состояние DO в зависимости от типа логики.
+    auto should_activate_do = false;
+    if ( logic_type == LOGIC_TYPE::AND )
+        {
+        should_activate_do = all_di_active;
+        }
+    else // LOGIC_TYPE::OR
+        {
+        should_activate_do = any_di_active;
+        }
+
+    // Управляем DO устройствами (они идут после всех DI).
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
-        if ( any_di_active )
+        if ( should_activate_do )
             {
             (*it)->on();
             }
@@ -1282,6 +1308,18 @@ bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
     return false;
     }
 //-----------------------------------------------------------------------------
+int DI_DO_action::set_bool_property( const char* prop_name, bool value )
+    {
+    action::set_bool_property( prop_name, value );
+    if ( strcmp( prop_name, "logic_type" ) == 0 )
+        {
+        logic_type = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
+        return 0;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 inverted_DI_DO_action::inverted_DI_DO_action():
     DI_DO_action( "Группы инвертированный DI->DO's" )
@@ -1294,7 +1332,7 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     bool any_di_active = false;
     u_int di_count = 0;
     
-    // Подсчитаем количество DI устройств и проверим их активность
+    // Подсчитаем количество DI устройств и проверим их активность.
     for ( const auto& dev : devices )
         {
         if ( is_di_device_type( dev->get_type() ) )
@@ -1307,10 +1345,10 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
             }
         }
 
-    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен
+    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен.
     int new_state = any_di_active ? 0 : 1;
     
-    // Управляем DO устройствами (они идут после всех DI)
+    // Управляем DO устройствами (они идут после всех DI).
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
         (*it)->set_state( new_state );
@@ -1963,11 +2001,12 @@ bool jump_if_action::check(
     return true;
     };
 //-----------------------------------------------------------------------------
-int jump_if_action::set_int_property( const char* name, size_t idx, int value )
+int jump_if_action::set_int_property( const char* prop_name, size_t idx,
+    int value )
     {
-    action::set_int_property( name, idx, value );
-    if ( strcmp( name, "next_step_n" ) == 0 || //Для перехода к новому шагу.
-        strcmp( name, "next_state_n" ) == 0 )  //Для перехода к новому состоянию.
+    action::set_int_property( prop_name, idx, value );
+    if ( strcmp( prop_name, "next_step_n" ) == 0 || // К новому шагу.
+        strcmp( prop_name, "next_state_n" ) == 0 )  // К новому состоянию.
         {
         while ( idx >= next_n.size() )
             {
@@ -1982,16 +2021,16 @@ int jump_if_action::set_int_property( const char* name, size_t idx, int value )
         if ( G_DEBUG )
             {
             G_LOG->warning( "\"%s\" unknown property \"%s\"",
-                this->name.c_str(), name );
+                name.c_str(), prop_name );
             }
         }
 
     return 1;
     };
 //-----------------------------------------------------------------------------
-int jump_if_action::get_int_property( const char* name, size_t idx )
+int jump_if_action::get_int_property( const char* prop_name, size_t idx )
     {
-    if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
+    if ( strcmp( prop_name, "next_step_n" ) == 0 && idx < next_n.size() )
         {
         return next_n[ idx ];
         }
@@ -2022,7 +2061,7 @@ void jump_if_action::print( const char* prefix, bool new_line ) const
 //-----------------------------------------------------------------------------
 enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
     {
-    };
+    }
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::is_any_group_active() const
     {
@@ -2047,7 +2086,7 @@ bool enable_step_by_signal::is_any_group_active() const
         }
 
     return false;
-    };
+    }
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::should_turn_off() const
     {    
@@ -2057,11 +2096,13 @@ bool enable_step_by_signal::should_turn_off() const
         }
 
     return turn_off_flag;
-    };
+    }
 //-----------------------------------------------------------------------------
-int enable_step_by_signal::set_bool_property( const char* name, bool value )
+int enable_step_by_signal::set_bool_property( const char* prop_name, bool value )
     {
-    if ( strcmp( name, "should_turn_off" ) == 0 )
+    action::set_bool_property( prop_name, value );
+
+    if ( strcmp( prop_name, "should_turn_off" ) == 0 )
         {
         turn_off_flag = value;
         }
@@ -2070,13 +2111,13 @@ int enable_step_by_signal::set_bool_property( const char* name, bool value )
         if ( G_DEBUG )
             {
             G_LOG->warning( "\"%s\" unknown property \"%s\"",
-                this->name.c_str(), name);
+                name.c_str(), prop_name );
             }
         return 1;
         }
 
     return 0;
-    };
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
