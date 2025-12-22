@@ -14,7 +14,11 @@
     https://img.shields.io/github/downloads/savushkin-r-d/ptusa_main/total.svg)](
         https://github.com/savushkin-r-d/ptusa_main/releases/)
 
-Russian readme is [here](docs/russian_readme/readme.md).
+
+> [!TIP]
+> Русский вариант находится [здесь](./docs/russian_readme/readme.md).\
+> Беларускі варыянт знаходзіцца [тут](./docs/belorussian_readme/readmeBY.md).
+
 
 Program **``ptusa_main``** directly controls technological process.
 
