@@ -632,7 +632,7 @@ int siren_lights_manager::init( device *red, device *yellow, device *green,
     return 0;
     }
 //-----------------------------------------------------------------------------
-int siren_lights_manager::save_device( char *buff )
+int siren_lights_manager::save_device( char *buff, const char* prefix )
     {
     int answer_size = sprintf( buff,
         "t.%s = \n"

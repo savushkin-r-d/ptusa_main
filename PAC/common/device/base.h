@@ -367,7 +367,7 @@ class device : public i_DO_AO_device, public par_device
         /// @param prefix - префикс перед строкой скрипта (обычно символ
         /// табуляции - для визуального форматирования текста).
         /// @param buff [out] - буфер записи строки.
-        int save_device( char* buff, const char* prefix ) override;
+        int save_device( char* buff, const char* prefix = "" ) override;
 
         /// @brief Расчет состояния на основе текущих данных от I/O.
         virtual void evaluate_io();
@@ -412,6 +412,7 @@ class device : public i_DO_AO_device, public par_device
             DT_G,        ///< Блок питания.
             DT_WATCHDOG, ///< Устройство проверки связи.
             DT_EY,       ///< Конвертер IO-Link.
+            DT_NODE,     ///< Узел сетевых настроек.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -617,6 +618,9 @@ class device : public i_DO_AO_device, public par_device
 
             //DT_EY
             DST_CONV_AO2 = 1,    ///< Конвертер IO-Link -> AO (2 канала).
+
+            //DT_NODE
+            DST_NODE = 1,        ///< Узел сетевых настроек.
             };
 
         device( const char* dev_name, device::DEVICE_TYPE type,

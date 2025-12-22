@@ -24,7 +24,7 @@ ParamsRecipeManager *ParamsRecipeManager::getInstance( )
     return sInstance;
     }
 
-int ParamsRecipeManager::save_device( char *buff )
+int ParamsRecipeManager::save_device( char *buff, const char* prefix )
     {
     int size = ( int ) fmt::format_to_n( buff, MAX_COPY_SIZE, "t.RECMAN = \n\t{{" ).size;
     for ( auto rm: recAdapters )
