@@ -27,6 +27,7 @@
 #include <string>
 #include <array>
 #include <chrono>
+#include <cstdint>
 
 #include "dtime.h"
 
@@ -179,7 +180,7 @@ class delay_on_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint64_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -221,7 +222,7 @@ class delay_off_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint64_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -237,8 +238,8 @@ class open_seat_action: public action
         void finalize() override;
 
 #ifdef PTUSA_TEST
-        void set_wait_time( u_long wait_time );
-        u_long get_wait_time();
+        void set_wait_time( uint64_t wait_time );
+        uint64_t get_wait_time();
 #endif
 
         /// @brief Добавление устройства к действию.
@@ -265,13 +266,13 @@ class open_seat_action: public action
 
         u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
-        u_long wait_time;       ///< Время ожидания перед промыванием седел.
+        uint64_t wait_time;       ///< Время ожидания перед промыванием седел.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
         std::vector< std::vector< device* > > wash_lower_seat_devices;
 
-        u_long start_cycle_time;  ///< Время старта цикла (ожидания или промывки).
+        uint64_t start_cycle_time;  ///< Время старта цикла (ожидания или промывки).
 
         bool is_mode;             ///< Является ли шагом операции.
         operation_state* owner;
@@ -502,13 +503,13 @@ class step
         void finalize();
 
         /// Получение времени выполнения шага.
-        u_long get_eval_time() const;
+        uint64_t get_eval_time() const;
 
         /// Получение времени выполнения шага со времени последней паузы/запуска.
-        u_long get_latest_eval_time() const;
+        uint64_t get_latest_eval_time() const;
 
         /// Установление времени начала шага.
-        void set_start_time( u_long start_time );
+        void set_start_time( uint64_t start_time );
 
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
@@ -533,19 +534,19 @@ class step
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
-        u_long start_time;              ///< Время старта шага.
+        uint64_t start_time;              ///< Время старта шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
 
         bool active;
-        u_long dx_time;                 ///< Время шага, отработанное до паузы.
+        uint64_t dx_time;                 ///< Время шага, отработанное до паузы.
 
         int tag = -1;   ///< Тег (индекс связанного объекта).
 
     public:
         /// Добавление времени для возобновления после паузы.
-        void set_dx_time( u_long dx_time );
+        void set_dx_time( uint64_t dx_time );
 
         ///< Получение тега (индекс связанного объекта).
         int get_tag() const
@@ -599,7 +600,7 @@ class operation_state
         ///
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
-        void to_step( u_int new_step, u_long cooperative_time = 0 );
+        void to_step( u_int new_step, uint64_t cooperative_time = 0 );
 
         /// @brief Переход к следующему шагу.
         void to_next_step();
@@ -607,10 +608,10 @@ class operation_state
         /// @brief Отключить текущий активный шаг.
         void turn_off_active_step();
 
-        u_long evaluation_time();
+        uint64_t evaluation_time();
 
-        u_long active_step_evaluation_time() const;
-        u_long get_active_step_set_time() const;
+        uint64_t active_step_evaluation_time() const;
+        uint64_t get_active_step_set_time() const;
 
         u_int active_step() const;
         u_int steps_count() const;
@@ -655,14 +656,14 @@ class operation_state
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
-        u_long start_time;  ///< Время начала операции.
+        uint64_t start_time;  ///< Время начала операции.
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
         int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
-        u_long dx_step_time;
+        uint64_t dx_step_time;
 
 
         /// Номер параметра совместного времени выполнения шагов.
@@ -681,7 +682,7 @@ class operation_state
         void load();
 
         int on_extra_step( int step_idx );
-        int on_extra_step( int step_idx, u_long step_time, bool is_print_time );
+        int on_extra_step( int step_idx, uint64_t step_time, bool is_print_time );
 
         int off_extra_step( int step_idx );
 
@@ -699,8 +700,8 @@ class operation_state
     private:
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
-        std::vector< u_long > active_steps_duration;
-        std::vector< u_long > active_steps_start_time;
+        std::vector< uint64_t > active_steps_duration;
+        std::vector< uint64_t > active_steps_start_time;
 
         std::vector< int > saved_active_steps;
 
@@ -725,7 +726,7 @@ class operation
 
         int check_on_run_state( char* reason, unsigned int max_len ) const;
 
-        u_long evaluation_time();
+        uint64_t evaluation_time();
 
         void evaluate();
 
@@ -745,8 +746,8 @@ class operation
 
         void print( const char* prefix /*= "" */ ) const;
 
-        u_long active_step_evaluation_time() const;
-        u_long get_active_step_set_time() const;
+        uint64_t active_step_evaluation_time() const;
+        uint64_t get_active_step_set_time() const;
 
         /// @brief Переход к заданному  шагу.
         ///
