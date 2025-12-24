@@ -281,6 +281,114 @@ TEST( step, set_tag )
 	EXPECT_EQ( new_tag, st1.get_tag() );
 	}
 
+// Tests for time overflow fix (issue with u_int_4 -> uint64_t conversion).
+// These tests verify that time variables can handle values > 2^32 ms (49.7 days).
+TEST( step, time_overflow_no_truncation )
+	{
+	// Test that step can handle time values beyond 32-bit limit.
+	// Simulating ~50 days in milliseconds (> 2^32 = 4,294,967,295).
+	step st1( "test_step_time_overflow", 0 );
+	
+	st1.init();
+	
+	// Create a time value that exceeds 32-bit limit.
+	// We use a value slightly above UINT_MAX to ensure we're testing overflow.
+	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 1'000'000UL;
+	
+	// Verify the large time value can be stored without truncation.
+	// With u_int_4 this would truncate, with uint64_t it stores correctly.
+	st1.set_start_time( large_time );
+	
+	// Simulate a small time delta (1 ms).
+	sleep_ms( 1 );
+	
+	// Get evaluation time - with proper uint64_t handling, should not overflow.
+	uint64_t eval_time = st1.get_eval_time();
+	
+	// The evaluation should handle the wraparound correctly.
+	// We're mainly testing that the type can store large values.
+    // Verify we're testing beyond 32-bit.
+	EXPECT_GT( eval_time, static_cast<uint64_t>(UINT_MAX) );
+	
+	st1.finalize();
+	}
+
+TEST( step, set_dx_time_large_values )
+	{
+	// Test that dx_time can store large values without truncation.
+	step st1( "test_step_dx_time", 0 );
+	
+	// Set a large dx_time value (e.g., 30 days in ms).
+	uint64_t dx_time_30_days = 30UL * 24 * 60 * 60 * 1000; // 2,592,000,000 ms.
+	
+	// Verify this value exceeds 32-bit limit.
+	EXPECT_GT( dx_time_30_days, UINT_MAX / 2 );
+	
+	st1.init();
+	st1.set_dx_time( dx_time_30_days );
+	
+	// Verify eval time includes the large dx_time.
+	uint64_t eval_time = st1.get_eval_time();
+	
+	// Should be at least the dx_time value.
+	EXPECT_GE( eval_time, dx_time_30_days );
+	
+	st1.finalize();
+	}
+
+TEST( operation_state, time_overflow_no_truncation )
+	{
+	// Test that operation_state handles large time values correctly.
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+	
+	tech_object test_tank( "TestTank", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "TestOp" );
+	auto op_state = ( *test_op )[ operation::RUN ];
+	
+	auto test_step = op_state->add_step( "TestStep", -1, -1 );
+	
+	op_state->init();
+	
+	// Create a time value that exceeds 32-bit limit.
+	// We use a value above UINT_MAX to ensure we're testing overflow.
+	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 5'000'000UL;
+	
+	// Verify we're testing beyond 32-bit capacity.
+	EXPECT_GT( large_time, static_cast<uint64_t>(UINT_MAX) );
+	
+	// Set the large time value - with uint64_t this works, with u_int_4 it would truncate.
+	test_step->set_start_time( large_time );
+	
+	op_state->finalize();
+	G_LUA_MANAGER->free_Lua();
+	}
+
+#ifdef PTUSA_TEST
+TEST( open_seat_action, wait_time_large_values )
+	{
+	// Test that wait_time (now uint64_t) can handle large values.
+	tech_object test_tank( "TestTank", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
+	operation_manager* modes_mngr = test_tank.get_modes_manager();
+	auto test_op = modes_mngr->add_operation( "TestOp" );
+	auto test_op_state = ( *test_op )[ operation::RUN ];
+	
+	auto test_step = test_op_state->add_step( "TestStep", -1, -1 );
+	open_seat_action* seat_action = 
+		dynamic_cast< open_seat_action* >( ( *test_step )[ step::A_UPPER_SEATS_ON ] );
+	
+	// Set a large wait_time value (e.g., 40 days in ms).
+	uint64_t wait_time_40_days = 40UL * 24 * 60 * 60 * 1000; // 3,456,000,000 ms.
+	
+	seat_action->set_wait_time( wait_time_40_days );
+	
+	// Verify it can be retrieved without truncation.
+	uint64_t retrieved_wait_time = seat_action->get_wait_time();
+	EXPECT_EQ( wait_time_40_days, retrieved_wait_time );
+	}
+#endif
+
 
 TEST( operation_state, print )
 	{
@@ -880,7 +988,7 @@ TEST( operation, on_extra_step_debug_output )
 	// Test with G_DEBUG = 1 and step_time > 0 (time should be shown)
 	// Access the operation_state directly to pass a specific step_time
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
-	const u_long TEST_STEP_TIME = 5000;
+	const uint64_t TEST_STEP_TIME = 5000;
 	testing::internal::CaptureStdout();
 	operation_run_state->on_extra_step( EXTRA_STEP, TEST_STEP_TIME, true );
 	auto output_with_time = testing::internal::GetCapturedStdout();

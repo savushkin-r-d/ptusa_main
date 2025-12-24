@@ -12,7 +12,7 @@ const subhook_t GTESTS_DELTA_MILLISEC_SUBHOOK = subhook_new(
     reinterpret_cast<void*>( &subhook_for_get_delta_millisec ),
     SUBHOOK_64BIT_OFFSET );
 
-unsigned long subhook_for_get_delta_millisec(unsigned long)
+uint64_t subhook_for_get_delta_millisec( uint64_t )
 {
     return DeltaMilliSecSubHooker::get_millisec();
 }

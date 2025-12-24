@@ -226,7 +226,7 @@ int operation::check_on_run_state( char* reason, unsigned int max_len ) const
     return states[ RUN ]->check_on( reason, max_len );
     }
 //-----------------------------------------------------------------------------
-u_long operation::evaluation_time()
+uint64_t operation::evaluation_time()
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
@@ -467,7 +467,7 @@ void operation::print( const char* prefix /*= "" */) const
         }
     }
 //-----------------------------------------------------------------------------
-u_long operation::active_step_evaluation_time() const
+uint64_t operation::active_step_evaluation_time() const
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
@@ -477,7 +477,7 @@ u_long operation::active_step_evaluation_time() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_long operation::get_active_step_set_time() const
+uint64_t operation::get_active_step_set_time() const
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
@@ -1049,17 +1049,17 @@ void step::finalize()
     active = false;
     }
 //-----------------------------------------------------------------------------
-u_long step::get_eval_time() const
+uint64_t step::get_eval_time() const
     {
     return get_delta_millisec( start_time ) + dx_time;
     }
 //-----------------------------------------------------------------------------
-u_long step::get_latest_eval_time() const
+uint64_t step::get_latest_eval_time() const
     {
     return get_delta_millisec( start_time );
     }
 //-----------------------------------------------------------------------------
-void step::set_start_time( u_int_4 start_time )
+void step::set_start_time( uint64_t start_time )
     {
     this->start_time = start_time;
     }
@@ -1119,7 +1119,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void step::set_dx_time( u_int_4 dx_time )
+void step::set_dx_time( uint64_t dx_time )
     {
     this->dx_time = dx_time;
     }
@@ -1455,12 +1455,12 @@ open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     }
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
-void open_seat_action::set_wait_time( int wait_time )
+void open_seat_action::set_wait_time( uint64_t wait_time )
     {
     this->wait_time = wait_time;
     }
 
-int open_seat_action::get_wait_time()
+uint64_t open_seat_action::get_wait_time()
     {
     return wait_time;
     }
@@ -2400,7 +2400,7 @@ step* operation_state::operator[]( int idx )
     return &step_stub;
     }
 //-----------------------------------------------------------------------------
-void operation_state::to_step( u_int new_step, u_long cooperative_time )
+void operation_state::to_step( u_int new_step, uint64_t cooperative_time )
     {
     if ( new_step > steps.size() || new_step <= 0 )
         {
@@ -2705,12 +2705,12 @@ void operation_state::add_dx_step_time()
         }
     }
 //-----------------------------------------------------------------------------
-u_long operation_state::evaluation_time()
+uint64_t operation_state::evaluation_time()
     {
     return get_delta_millisec( start_time );
     }
 //-----------------------------------------------------------------------------
-u_long operation_state::active_step_evaluation_time() const
+uint64_t operation_state::active_step_evaluation_time() const
     {
     if ( active_step_n >= 0 )
         {
@@ -2720,7 +2720,7 @@ u_long operation_state::active_step_evaluation_time() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_long operation_state::get_active_step_set_time() const
+uint64_t operation_state::get_active_step_set_time() const
     {
     if ( active_step_n >= 0 )
         {
@@ -2781,7 +2781,7 @@ int operation_state::on_extra_step( int step_idx )
     return on_extra_step( step_idx, 0, false );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx, u_long step_time,
+int operation_state::on_extra_step( int step_idx, uint64_t step_time,
     bool is_print_time )
     {
     if ( (size_t) step_idx > steps.size() )

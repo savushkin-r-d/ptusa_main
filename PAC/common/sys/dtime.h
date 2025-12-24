@@ -24,6 +24,7 @@
 #ifdef PTUSA_TEST
 #include <string>
 #endif
+#include <stdint.h>
 
 const long MSEC_IN_SEC = 1000;
 const int SEC_IN_MIN = 60;
@@ -47,7 +48,7 @@ u_long get_millisec();
 ///
 /// @param time1     - начальное время.
 /// @return Разность времени в миллисекундах.
-u_long get_delta_millisec( u_long time1 );
+uint64_t get_delta_millisec( uint64_t time1 );
 //-----------------------------------------------------------------------------
 /// @brief Ожидание заданное время.
 ///
