@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "console.h"
 
@@ -30,14 +31,14 @@ unsigned long get_sec()
     return now;
     }
 //-----------------------------------------------------------------------------
-unsigned long get_delta_millisec( unsigned long time1 )
+uint64_t get_delta_millisec( uint64_t time1 )
     {
-    unsigned long now = get_millisec();
+    uint64_t now = get_millisec();
     if (now < time1)
     {
         now += 2UL;
     }
-    return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
+    return now >= time1 ? now - time1 : UINT64_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
 void sleep_ms( unsigned int ms )
