@@ -293,7 +293,7 @@ TEST( step, time_overflow_no_truncation )
 	
 	// Create a time value that exceeds 32-bit limit.
 	// We use a value slightly above UINT_MAX to ensure we're testing overflow.
-	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 1000000UL;
+	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 1'000'000UL;
 	
 	// Verify the large time value can be stored without truncation.
 	// With u_int_4 this would truncate, with uint64_t it stores correctly.
@@ -307,7 +307,8 @@ TEST( step, time_overflow_no_truncation )
 	
 	// The evaluation should handle the wraparound correctly.
 	// We're mainly testing that the type can store large values.
-	EXPECT_GT( large_time, static_cast<uint64_t>(UINT_MAX) ); // Verify we're testing beyond 32-bit.
+    // Verify we're testing beyond 32-bit.
+	EXPECT_GT( eval_time, static_cast<uint64_t>(UINT_MAX) );
 	
 	st1.finalize();
 	}
@@ -352,7 +353,7 @@ TEST( operation_state, time_overflow_no_truncation )
 	
 	// Create a time value that exceeds 32-bit limit.
 	// We use a value above UINT_MAX to ensure we're testing overflow.
-	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 5000000UL;
+	uint64_t large_time = static_cast<uint64_t>(UINT_MAX) + 5'000'000UL;
 	
 	// Verify we're testing beyond 32-bit capacity.
 	EXPECT_GT( large_time, static_cast<uint64_t>(UINT_MAX) );

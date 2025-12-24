@@ -6,6 +6,7 @@
 #include <time.h>
 #include <sys\timeb.h>
 #include <limits.h>
+#include <stdint.h>
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 unsigned long get_millisec()
@@ -30,11 +31,11 @@ unsigned long get_sec()
     return ( unsigned long )ltime;
     }
 //-----------------------------------------------------------------------------
-unsigned long get_delta_millisec( unsigned long time1 )
+uint64_t get_delta_millisec( uint64_t time1 )
     {
-    unsigned long now = get_millisec();
+    uint64_t now = get_millisec();
 
-    return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
+    return now >= time1 ? now - time1 : _UI64_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
 void sleep_ms( u_int ms )

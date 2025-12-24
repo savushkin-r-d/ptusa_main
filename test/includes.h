@@ -6,9 +6,9 @@
 #include <vector>
 #include <limits.h>
 
-unsigned long subhook_for_get_delta_millisec( unsigned long );
+uint64_t subhook_for_get_delta_millisec( uint64_t );
 
-unsigned long get_delta_millisec( unsigned long time1 );
+uint64_t get_delta_millisec( uint64_t time1 );
 
 extern const subhook_t  GTESTS_DELTA_MILLISEC_SUBHOOK;
 
