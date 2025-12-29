@@ -46,7 +46,7 @@ long device_communicator::write_devices_states_service(
     u_int answer_size = 0;
 
 #ifdef DEBUG_DEV_CMCTR
-    u_long start_time = get_millisec();
+    uint32_t start_time = get_millisec();
 #endif // DEBUG_DEV_CMCTR
 
     u_int param_size = 0;
@@ -202,7 +202,7 @@ long device_communicator::write_devices_states_service(
                 errors_id++;
                 }
 
-            static u_long start_time = get_millisec();
+            static uint32_t start_time = get_millisec();
             answer_size += err_size;
             if ( err_size == 0 &&                   //Нет критических ошибок.
                 get_delta_millisec( start_time ) > 5000 )

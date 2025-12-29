@@ -55,7 +55,7 @@ class tcp_communicator_win : public tcp_communicator
             /// @param skt - сокет.
             int do_echo( int skt );
             
-            u_long glob_last_transfer_time;  ///< Время последней успешной передачи данных.
+            uint32_t glob_last_transfer_time;  ///< Время последней успешной передачи данных.
 
             timeval tv;                      ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
             fd_set rfds;                     ///< Набор дескрипторов сокетных файлов для чтения.

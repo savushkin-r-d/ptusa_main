@@ -40,7 +40,7 @@ int linux_tcp_client::Communicate(unsigned int bytestosend)
 linux_tcp_client::linux_tcp_client(const char* client_ip,
     unsigned int client_port, unsigned int client_id,
     unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/,
-    unsigned long send_receive_timeout /*= 100*/) :
+    uint32_t send_receive_timeout /*= 100*/) :
     tcp_client(client_ip, client_port, client_id, alarm_subclass,
         exchange_buf_size, send_receive_timeout)
     {

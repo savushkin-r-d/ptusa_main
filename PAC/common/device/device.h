@@ -798,8 +798,8 @@ class wages_pxc_axl : public analog_io_device, public i_wages
         float w = .0f;
         int st = 0;
 
-        unsigned long tare_time = 0;
-        unsigned long reset_tare_time = 0;
+        uint32_t tare_time = 0;
+        uint32_t reset_tare_time = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
@@ -823,7 +823,7 @@ class wages : public analog_io_device, public i_wages
 
     private:
         float weight = 0.f;
-        unsigned long filter_time = get_millisec();
+        uint32_t filter_time = get_millisec();
 
         enum CONSTANTS
             {
@@ -989,7 +989,7 @@ class motor : public i_motor, public io_device
             AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
             };
 
-        u_long start_switch_time = get_millisec();
+        uint32_t start_switch_time = get_millisec();
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1063,7 +1063,7 @@ private:
         AO_INDEX = 0,           ///< Индекс канала аналогового выхода.
     };
 
-    u_long start_switch_time = get_millisec();
+    uint32_t start_switch_time = get_millisec();
 };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
@@ -1783,7 +1783,7 @@ class power_unit : public analog_io_device
             };
         
         bool is_processing_cmd = false;
-        unsigned long cmd_time = 0;
+        uint32_t cmd_time = 0;
 
 #pragma pack(push, 1)
         struct process_data_in
@@ -2003,17 +2003,17 @@ class timer
         /// @brief Получение времени работы таймера.
         ///
         /// @return - время работы таймера.
-        u_long  get_work_time() const;
+        uint32_t  get_work_time() const;
 
         /// @brief Установка задания таймера.
         ///
         /// @param new_countdown_time - задание.
-        void set_countdown_time( u_long new_countdown_time );
+        void set_countdown_time( uint32_t new_countdown_time );
 
         /// @brief Получение задания таймера.
         ///
         /// @return - задание таймера.
-        u_long  get_countdown_time() const;
+        uint32_t  get_countdown_time() const;
 
         /// @brief Получение состояния таймера.
         ///
@@ -2021,11 +2021,11 @@ class timer
         STATE get_state() const;
 
     private:
-        u_long  last_time = 0;          ///< Время, когда таймер был запущен/остановлен.
-        u_long  work_time = 0;          ///< Время работы таймера.
+        uint32_t  last_time = 0;          ///< Время, когда таймер был запущен/остановлен.
+        uint32_t  work_time = 0;          ///< Время работы таймера.
 
         STATE   state = STATE::S_STOP;  ///< Состояние.
-        u_long  countdown_time = 0;     ///< Задание таймера.
+        uint32_t  countdown_time = 0;     ///< Задание таймера.
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

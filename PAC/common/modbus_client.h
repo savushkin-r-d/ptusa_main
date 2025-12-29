@@ -17,7 +17,7 @@ class modbus_client
         void init_frame(unsigned int address, unsigned int value, unsigned int seventh_byte);
 
     public:
-        modbus_client(unsigned int id, const char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
+        modbus_client(unsigned int id, const char* ip, unsigned int port = 502, uint32_t exchangetimeout = 50);
         int get_id();
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);

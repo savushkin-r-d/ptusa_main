@@ -146,7 +146,7 @@ int uni_io_manager::net_init( io_node* node ) const
     tv.tv_sec = 0;
     tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
-    static u_long st_time;
+    static uint32_t st_time;
     st_time = get_millisec();
 
     err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );

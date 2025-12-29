@@ -22,7 +22,7 @@ PAC_critical_errors_manager::PAC_critical_errors_manager(
 void PAC_critical_errors_manager::show_errors() const
     {
     static u_char show_step = 0;
-    static u_long start_time = get_millisec();
+    static uint32_t start_time = get_millisec();
 
     if ( !errors.empty() )    // Есть ошибки.
         {

@@ -543,7 +543,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
     rec_tv.tv_usec = usec;
 
     //Network performance info.
-    static u_long st_time;
+    static uint32_t st_time;
     static u_int select_wait_time;
     st_time = get_millisec();
 

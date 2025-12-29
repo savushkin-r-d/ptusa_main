@@ -8730,7 +8730,7 @@ static int tolua_PAC_dev_get_millisec00(lua_State* tolua_S)
 #endif
  {
   {
-   unsigned long tolua_ret = (unsigned long)  get_millisec();
+   uint32_t tolua_ret = (uint32_t)  get_millisec();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

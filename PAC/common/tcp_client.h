@@ -25,17 +25,17 @@ class tcp_client
             ACS_CONNECTING = -1,
         };
 
-        unsigned long async_timeout;
-        unsigned long async_queued;
-        unsigned long async_last_connect_try;
-        unsigned long connectTimeout;
-        unsigned long reconnectTimeout;
-        unsigned long maxreconnectTimeout;
+        uint32_t async_timeout;
+        uint32_t async_queued;
+        uint32_t async_last_connect_try;
+        uint32_t connectTimeout;
+        uint32_t reconnectTimeout;
+        uint32_t maxreconnectTimeout;
         char* ip;
     protected:
         unsigned int port;
         int socket_number;
-        unsigned long timeout;
+        uint32_t timeout;
         int connectedstate;
         int id;
         unsigned char subclass;
@@ -43,7 +43,7 @@ class tcp_client
         int async_result;
     public:
         static tcp_client* Create( const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass,
-            unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100 );
+            unsigned int exchange_buf_size = 256, uint32_t send_receive_timeout = 100 );
 
         virtual int Communicate( unsigned int bytestosend );
 
@@ -60,7 +60,7 @@ class tcp_client
 		virtual int get_connected_state();
         int set_async_result(int ar);
         char* buff;
-        tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
+        tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, uint32_t send_receive_timeout = 100);
         virtual ~tcp_client();
     };
 #endif // tcp_client_h__

@@ -3850,7 +3850,7 @@ bool timer::is_time_up() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_long timer::get_work_time() const
+uint32_t timer::get_work_time() const
     {
     if ( STATE::S_WORK == state )
         {
@@ -3862,13 +3862,13 @@ u_long timer::get_work_time() const
         }
     }
 //-----------------------------------------------------------------------------
-void timer::set_countdown_time( u_long new_countdown_time )
+void timer::set_countdown_time( uint32_t new_countdown_time )
     {
     if ( G_DEBUG )
         {
         if ( 0 == new_countdown_time )
             {
-            printf( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
+            printf( "Error void timer::set_countdown_time( uint32_t time ), time = %u!\n",
                 new_countdown_time );
             }
         }
@@ -3876,7 +3876,7 @@ void timer::set_countdown_time( u_long new_countdown_time )
     countdown_time = new_countdown_time;
     }
 //-----------------------------------------------------------------------------
-u_long timer::get_countdown_time() const
+uint32_t timer::get_countdown_time() const
     {
     return countdown_time;
     }

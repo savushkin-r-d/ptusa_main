@@ -2,7 +2,7 @@
 #include "console.h"
 #include "PAC_err.h"
 
-modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout )
+modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout )
     {
     if ( G_DEBUG )
         {

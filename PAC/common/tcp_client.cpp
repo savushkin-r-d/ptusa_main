@@ -11,7 +11,7 @@
 #endif
 
 
-tcp_client::tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
+tcp_client::tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, uint32_t send_receive_timeout /*= 100*/ )
     {
     ip = new char[16];
     strcpy(ip, client_ip);
@@ -41,7 +41,7 @@ tcp_client::~tcp_client()
     buff = nullptr;
     }
 
-tcp_client* tcp_client::Create( const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
+tcp_client* tcp_client::Create( const char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, uint32_t send_receive_timeout /*= 100*/ )
     {
 #if defined WIN_OS
     return new win_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);
