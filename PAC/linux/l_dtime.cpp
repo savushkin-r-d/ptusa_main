@@ -12,10 +12,10 @@ uint32_t get_millisec()
     {
     auto now = std::chrono::steady_clock::now();
     auto duration = now.time_since_epoch();
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         duration ).count();
     
-    return static_cast<uint32_t>( millis );
+    return static_cast<uint32_t>( ms );
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
