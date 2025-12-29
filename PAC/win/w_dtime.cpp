@@ -9,7 +9,7 @@
 #include <chrono>
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-unsigned long get_millisec()
+uint32_t get_millisec()
     {
     static auto start_time = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
@@ -17,7 +17,7 @@ unsigned long get_millisec()
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
         duration ).count();
     
-    return static_cast<unsigned long>( millis );
+    return static_cast<uint32_t>( millis );
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
@@ -28,9 +28,9 @@ unsigned long get_sec()
     return ( unsigned long )ltime;
     }
 //-----------------------------------------------------------------------------
-unsigned long get_delta_millisec( unsigned long time1 )
+uint32_t get_delta_millisec( uint32_t time1 )
     {
-    unsigned long now = get_millisec();
+    uint32_t now = get_millisec();
 
     return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
     }

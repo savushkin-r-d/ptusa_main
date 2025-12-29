@@ -5,25 +5,26 @@
 #include <subhook.h>
 #include <vector>
 #include <limits.h>
+#include <cstdint>
 
-unsigned long subhook_for_get_delta_millisec( unsigned long );
+uint32_t subhook_for_get_delta_millisec( uint32_t );
 
-unsigned long get_delta_millisec( unsigned long time1 );
+uint32_t get_delta_millisec( uint32_t time1 );
 
 extern const subhook_t  GTESTS_DELTA_MILLISEC_SUBHOOK;
 
 class DeltaMilliSecSubHooker
     {
-    inline static unsigned long millitime;
+    inline static uint32_t millitime;
 
     public:
 
-        static unsigned long get_millisec()
+        static uint32_t get_millisec()
             {
             return millitime;
             }
 
-        static void set_millisec( unsigned long millisec )
+        static void set_millisec( uint32_t millisec )
             {
             millitime = millisec;
             subhook_install( GTESTS_DELTA_MILLISEC_SUBHOOK );
@@ -35,7 +36,7 @@ class DeltaMilliSecSubHooker
             subhook_remove( GTESTS_DELTA_MILLISEC_SUBHOOK );
             }
 
-        explicit DeltaMilliSecSubHooker( unsigned long millisec )
+        explicit DeltaMilliSecSubHooker( uint32_t millisec )
             {
             DeltaMilliSecSubHooker::set_millisec( millisec );
             }

@@ -20,6 +20,7 @@
 
 #include "s_types.h"
 
+#include <cstdint>
 #include <time.h>
 #ifdef PTUSA_TEST
 #include <string>
@@ -41,13 +42,13 @@ u_long get_sec();
 /// вычисления разности времени использовать @ref get_delta_millisec.
 ///
 /// @return Время с момента запуска программы в миллисекундах.
-u_long get_millisec();
+uint32_t get_millisec();
 //-----------------------------------------------------------------------------
 /// @brief Получение разности времени в миллисекундах.
 ///
 /// @param time1     - начальное время.
 /// @return Разность времени в миллисекундах.
-u_long get_delta_millisec( u_long time1 );
+uint32_t get_delta_millisec( uint32_t time1 );
 //-----------------------------------------------------------------------------
 /// @brief Ожидание заданное время.
 ///
@@ -65,11 +66,11 @@ extern struct tm get_time();
 
 struct stat_time
     {
-    u_long all_time;
-    u_long cycles_cnt;
+    uint32_t all_time;
+    uint32_t cycles_cnt;
 
-    u_long  max_iteration_cycle_time;
-    u_long  min_iteration_cycle_time;
+    uint32_t  max_iteration_cycle_time;
+    uint32_t  min_iteration_cycle_time;
 
     int print_cycle_last_h;
 

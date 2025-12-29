@@ -8,14 +8,14 @@
 #include "console.h"
 
 //-----------------------------------------------------------------------------
-unsigned long get_millisec()
+uint32_t get_millisec()
     {
     auto now = std::chrono::steady_clock::now();
     auto duration = now.time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
         duration ).count();
     
-    return static_cast<unsigned long>( millis );
+    return static_cast<uint32_t>( millis );
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
@@ -26,9 +26,9 @@ unsigned long get_sec()
     return now;
     }
 //-----------------------------------------------------------------------------
-unsigned long get_delta_millisec( unsigned long time1 )
+uint32_t get_delta_millisec( uint32_t time1 )
     {
-    unsigned long now = get_millisec();
+    uint32_t now = get_millisec();
     if (now < time1)
     {
         now += 2UL;
