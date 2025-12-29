@@ -3,22 +3,19 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <chrono>
 
 #include "console.h"
 
 //-----------------------------------------------------------------------------
 unsigned long get_millisec()
     {
-    timespec start_tv = {0, 0};
-#ifdef PAC_WAGO_750_860
-    clock_gettime( CLOCK_REALTIME, &start_tv );
-#else
-    clock_gettime( CLOCK_MONOTONIC, &start_tv );
-#endif
-
-    unsigned long now = 1000UL * start_tv.tv_sec + start_tv.tv_nsec / 1000000UL;
-
-    return now;
+    auto now = std::chrono::steady_clock::now();
+    auto duration = now.time_since_epoch();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+        duration ).count();
+    
+    return static_cast<unsigned long>( millis );
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()

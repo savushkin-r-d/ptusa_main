@@ -6,20 +6,17 @@
 #include <time.h>
 #include <sys\timeb.h>
 #include <limits.h>
+#include <chrono>
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 unsigned long get_millisec()
     {
-    struct _timeb tstruct;
-    _ftime_s( &tstruct );
-
-    static time_t first_time = 0;
-    if ( 0 == first_time )
-        {
-        first_time = tstruct.time;
-        }
-
-    return ( unsigned long ) ( tstruct.time - first_time ) * 1000 + tstruct.millitm;
+    auto now = std::chrono::steady_clock::now();
+    auto duration = now.time_since_epoch();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+        duration ).count();
+    
+    return static_cast<unsigned long>( millis );
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
