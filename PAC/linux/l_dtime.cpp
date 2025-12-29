@@ -10,8 +10,9 @@
 //-----------------------------------------------------------------------------
 unsigned long get_millisec()
     {
+    static auto start_time = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
-    auto duration = now.time_since_epoch();
+    auto duration = now - start_time;
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
         duration ).count();
     
