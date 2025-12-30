@@ -60,7 +60,7 @@ void PAC_info::eval()
         up_secs = up_msec / 1000 % 60;
 
         sprintf( up_time_str,
-            "%" PRIu32 " дн. %02" PRIu32 ":%02" PRIu32 ":%02"  PRIu32,
+            "%" PRIu32 " дн. %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32,
             up_days, up_hours, up_mins, up_secs );
         }
     }
