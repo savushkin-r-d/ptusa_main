@@ -62,7 +62,7 @@ int linux_tcp_client::Connect()
     if (socket_number < 0)
         {
         G_LOG->error( "Network device : s%d->\"%s\" error creating socket : "
-            "timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+            "timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
         return 0;
         }
 
@@ -70,7 +70,7 @@ int linux_tcp_client::Connect()
         sizeof(C_ON)))
         {
         G_LOG->error( "Network device : s%d->\"%s\" error setting socket "
-            "params : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+            "params : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
         close(socket_number);
         return 0;
         }
@@ -81,7 +81,7 @@ int linux_tcp_client::Connect()
     if (res != 0)
         {
         G_LOG->error( "Network device : s%d->\"%s\" error setting nonblock "
-            "mode : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+            "mode : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
         close(socket_number);
         socket_number = 0;
         return 0;
@@ -109,7 +109,7 @@ int linux_tcp_client::Connect()
     if (res <= 0)
         {
         G_LOG->error( "Network device : s%d->\"%s\" error in connect : "
-            "timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+            "timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
         close(socket_number);
         socket_number = 0;
         return 0;
@@ -124,7 +124,7 @@ int linux_tcp_client::Connect()
             < 0 || error != 0)
             {
             G_LOG->error( "Network device : s%d->\"%s\" error in connect : "
-                "timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                "timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
             close(socket_number);
             socket_number = 0;
             return 0;
@@ -151,7 +151,7 @@ int linux_tcp_client::AsyncConnect()
                 if (socket_number < 0)
                     {
                     G_LOG->error( "Network device : s%d->\"%s\" error creating "
-                        "socket : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                        "socket : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                     return 0;
                     }
 
@@ -159,7 +159,7 @@ int linux_tcp_client::AsyncConnect()
                     sizeof(C_ON)))
                     {
                     G_LOG->error( "Network device : s%d->\"%s\" error setting "
-                        "socket params : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                        "socket params : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                     close(socket_number);
                     socket_number = 0;
                     return 0;
@@ -171,7 +171,7 @@ int linux_tcp_client::AsyncConnect()
                 if (res != 0)
                     {
                     G_LOG->error( "Network device : s%d->\"%s\" error setting "
-                        "nonblock mode : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                        "nonblock mode : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                     close(socket_number);
                     socket_number = 0;
                     return 0;
@@ -206,7 +206,7 @@ int linux_tcp_client::AsyncConnect()
                 if (get_delta_millisec(async_startconnnect) > timeout)
                 {
                     G_LOG->error( "Network device : s%d->\"%s\" disconnected "
-                        "on timeout : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                        "on timeout : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                     shutdown(socket_number, SHUT_RDWR);
                     close(socket_number);
                     socket_number = 0;
@@ -223,7 +223,7 @@ int linux_tcp_client::AsyncConnect()
             if (res < 0)
             {
                 G_LOG->error( "Network device : s%d->\"%s\" connect error : "
-                    "timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                    "timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                 shutdown(socket_number, SHUT_RDWR);
                 close(socket_number);
                 socket_number = 0;
@@ -241,7 +241,7 @@ int linux_tcp_client::AsyncConnect()
                      < 0 || error != 0)
                      {
                      G_LOG->error( "Network device : s%d->\"%s\" error in "
-                         "connect(select) : timeout (%"PRIu32" ms).", id, ip, connectTimeout );
+                         "connect(select) : timeout (%" PRIu32 " ms).", id, ip, connectTimeout );
                      shutdown(socket_number, SHUT_RDWR);
                      close(socket_number);
                      socket_number = 0;
@@ -280,7 +280,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
         async_result = AR_SOCKETERROR;
         Disconnect();
         G_LOG->error( "Network device : s%d->\"%s\" error on send - "
-            "disconnect : timeout (%"PRIu32" ms).", socket_number, ip, connectTimeout );
+            "disconnect : timeout (%" PRIu32 " ms).", socket_number, ip, connectTimeout );
         return 0;
         }
     else

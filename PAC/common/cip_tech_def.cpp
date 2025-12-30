@@ -457,17 +457,14 @@ int cipline_tech_object::save_device( char *buff )
 
     //Время простоя.
     char up_time_str [ 50 ];
-    u_int_4 up_hours;
-    u_int_4 up_mins;
-    u_int_4 up_secs;
 
-    up_secs = operations_manager->get_idle_time();
-    up_hours = up_secs / ( 60 * 60 );
-    up_mins = up_secs / 60 % 60 ;
+    auto up_secs = operations_manager->get_idle_time();
+    auto up_hours = up_secs / ( 60 * 60 );
+    auto up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
 
     sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
-        ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
+        up_hours, up_mins, up_secs );
     answer_size += sprintf( buff + answer_size, "%s", up_time_str );
 
     //Параметры.
