@@ -6,14 +6,6 @@
 #include "console.h"
 
 //-----------------------------------------------------------------------------
-unsigned long get_sec()
-    {
-    timespec start_tv = {0,0};
-    clock_gettime( 0, &start_tv );
-    unsigned long now = start_tv.tv_sec + (start_tv.tv_nsec - start_tv.tv_nsec % 100000000L) / 1000000000UL;
-    return now;
-    }
-//-----------------------------------------------------------------------------
 void sleep_ms( unsigned int ms )
     {
     usleep( 1000 * ms );

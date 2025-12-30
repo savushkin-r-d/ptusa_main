@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/30/25 08:23:20.
+** Generated automatically by tolua++-1.0.92 on Tue Dec 30 10:16:40 2025.
 */
 
 #ifndef __cplusplus
@@ -8703,7 +8703,7 @@ static int tolua_PAC_dev_get_sec00(lua_State* tolua_S)
 #endif
  {
   {
-   unsigned long tolua_ret = (unsigned long)  get_sec();
+   unsigned int tolua_ret = (unsigned int)  get_sec();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

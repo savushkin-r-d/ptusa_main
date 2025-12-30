@@ -34,12 +34,13 @@ const int SEC_IN_MIN = 60;
 /// @return Текущее время.
 /// @warning Время возвращается в секундах с 01.01.1970, в 2038 произойдет
 /// переполнение.
-u_long get_sec();
+uint32_t get_sec();
 //-----------------------------------------------------------------------------
 /// @brief Получение времени в миллисекундах.
 ///
-/// Так как за 4 дня происходит переполнение и отсчет продолжается с 0, то для
-/// вычисления разности времени использовать @ref get_delta_millisec.
+/// Так как примерно за 49.7 дней (2^32 мс) происходит переполнение и отсчет
+/// продолжается с 0, то для вычисления разности времени использовать
+/// @ref get_delta_millisec.
 ///
 /// @return Время с момента запуска программы в миллисекундах.
 uint32_t get_millisec();
@@ -75,21 +76,21 @@ struct stat_time
     int print_cycle_last_h;
 
     stat_time() : all_time( 0 ), cycles_cnt( 1 ), max_iteration_cycle_time( 0 ),
-	    min_iteration_cycle_time( 10000 )
-	{
+        min_iteration_cycle_time( 10000 )
+        {
         time_t t_ = time( 0 );
-        struct tm *timeInfo_ = localtime( &t_ );
+        struct tm* timeInfo_ = localtime( &t_ );
 
         print_cycle_last_h = timeInfo_->tm_hour;
-	}
+        }
 
     void clear()
-	{
-	all_time = 0;
-	cycles_cnt = 1;
-	max_iteration_cycle_time = 0;
-	min_iteration_cycle_time = 10000;
-	}
+        {
+        all_time = 0;
+        cycles_cnt = 1;
+        max_iteration_cycle_time = 0;
+        min_iteration_cycle_time = 10000;
+        }
     };
 
 #ifdef PTUSA_TEST

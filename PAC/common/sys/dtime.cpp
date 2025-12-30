@@ -32,6 +32,14 @@ tm get_fixed_time()
     }
 #endif
 //-----------------------------------------------------------------------------
+uint32_t get_sec()
+    {
+    auto now = std::chrono::steady_clock::now();
+    auto duration = now.time_since_epoch();
+    auto s = std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
+    return static_cast<uint32_t>( s );
+    }
+//-----------------------------------------------------------------------------
 uint32_t get_millisec()
     {
     auto now = std::chrono::steady_clock::now();
@@ -45,5 +53,7 @@ uint32_t get_millisec()
 uint32_t get_delta_millisec( uint32_t time1 )
     {
     uint32_t now = get_millisec();
-    return now >= time1 ? now - time1 : UINT32_MAX - time1 + now;
+    // Unsigned integer subtraction in C++ handles wraparound correctly via
+    // modular arithmetic.
+    return now - time1;
     }
