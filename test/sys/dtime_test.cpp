@@ -7,15 +7,16 @@ uint32_t mock_get_millisec()
 
 TEST( sys, get_delta_millisec )
     {
-    auto hook_get_millisec = subhook_new( static_cast<void*>( &get_millisec ),
-        static_cast<void*>( &mock_get_millisec ), SUBHOOK_64BIT_OFFSET );
-    subhook_install( hook_get_millisec );
+    auto hook_get_millisec = subhook_new( reinterpret_cast<void*>( &get_millisec ),
+        reinterpret_cast<void*>( &mock_get_millisec ), SUBHOOK_64BIT_OFFSET );
+    auto res = subhook_install( hook_get_millisec );
+    ASSERT_EQ( res, 0 );
 
-    auto res = get_delta_millisec( UINT32_MAX );
-    ASSERT_EQ( res, 1 );
+    auto dt = get_delta_millisec( UINT32_MAX );
+    EXPECT_EQ( dt, 1 );
 
-    res = get_delta_millisec( 1 );
-    ASSERT_EQ( res, UINT32_MAX );
+    dt = get_delta_millisec( 1 );
+    EXPECT_EQ( dt, UINT32_MAX );
 
     subhook_remove( hook_get_millisec );
     subhook_free( hook_get_millisec );
