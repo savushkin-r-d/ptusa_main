@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "l_tcp_cmctr.h"
 #include "PAC_err.h"
@@ -502,15 +503,15 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
         //Once per hour writes performance info.
         if (stat->print_cycle_last_h != timeInfo_->tm_hour)
             {
-            u_int t =
+            auto t =
                 G_PAC_INFO()->par[PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME];
 
             stat->print_cycle_last_h = timeInfo_->tm_hour;
 
-            u_long avg_time = stat->all_time / stat->cycles_cnt;
+            auto avg_time = stat->all_time / stat->cycles_cnt;
             sprintf( G_LOG->msg,
                 R"(Network performance : send : s%d->"%s":"%s" )"
-                "avg = %u, min = %u, max = %u, tresh = %u (ms).",
+                "avg = %" PRIu32 ", min = %" PRIu32 ", max = %" PRIu32 ", tresh = %u (ms).",
                 sockfd, name, IP,
                 avg_time, stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
@@ -520,7 +521,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
                 {
                 sprintf( G_LOG->msg,
                     R"(Network performance : send : s%d->"%s":"%s" )"
-                    "avg %lu > tresh %u (ms).",
+                    "avg %" PRIu32 " > tresh %u (ms).",
                     sockfd, name, IP, avg_time, t );
                 G_LOG->write_log( i_log::P_ALERT );
                 }
@@ -544,7 +545,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
 
     //Network performance info.
     static uint32_t st_time;
-    static u_int select_wait_time;
+    static uint32_t select_wait_time;
     st_time = get_millisec();
 
     int res = 0;

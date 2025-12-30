@@ -469,9 +469,7 @@ class siren_lights_manager: public i_Lua_save_device
         int is_red_built_in_blink;
 
         unsigned int  critical_error_n; // Номер текущей критической ошибки.
-        unsigned long st_time;
-
-        unsigned long start_time;
+        uint32_t st_time;
 
         /// Единственный экземпляр класса.
         static auto_smart_ptr< siren_lights_manager > instance;

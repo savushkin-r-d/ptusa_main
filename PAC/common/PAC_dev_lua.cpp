@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Dec 30 10:16:40 2025.
+** Generated automatically by tolua++-1.0.92 on Tue Dec 30 15:47:20 2025.
 */
 
 #ifndef __cplusplus

@@ -527,8 +527,8 @@ void siren_lights_manager::eval()
         else
             {
             static int step = 0;
-            static unsigned long start_blink_time = 0;
-            static unsigned long start_wait_time = 0;
+            static uint32_t start_blink_time = 0;
+            static uint32_t start_wait_time = 0;
 
             switch ( step )
                 {
@@ -661,7 +661,7 @@ int siren_lights_manager::set_cmd( const char *prop, u_int idx, const char *val 
 //-----------------------------------------------------------------------------
 siren_lights_manager::siren_lights_manager() : par( run_time_params_u_int_4( 1 ) ),
     green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
-    is_red_built_in_blink( 0 ), critical_error_n( 0 ), start_time( 0 )
+    is_red_built_in_blink( 0 ), critical_error_n( 0 )
     {
     par[ P_MANUAL_MODE ] = 0;
 

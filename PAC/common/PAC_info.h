@@ -118,13 +118,13 @@ class PAC_info: public i_Lua_save_device
             C_MAX_STR_LENGTH = 50,
             };
 
-        u_int_4 up_days;
-        u_int_4 up_hours;
-        u_int_4 up_mins;
-        u_int_4 up_secs;
+        uint32_t up_days;
+        uint32_t up_hours;
+        uint32_t up_mins;
+        uint32_t up_secs;
 
-        u_int_4 up_msec;
-        u_int_4 last_check_time;
+        uint32_t up_msec;
+        uint32_t last_check_time;
 
         u_int_4 reset_type;
 
@@ -133,9 +133,9 @@ class PAC_info: public i_Lua_save_device
         int  cmd;
         char cmd_answer[ 200 ];
 
-        u_int_4 restrictions_set_to_off_time;
+        uint32_t restrictions_set_to_off_time;
 
-        u_long cycle_time = 0;
+        uint32_t cycle_time = 0;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();

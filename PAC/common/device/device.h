@@ -914,7 +914,7 @@ class DI1 : public digital_io_device
 
     private:
         int current_state;
-        u_int_4 time = 0;
+        uint32_t time = 0;
 
         enum CONSTANTS
             {
@@ -1120,7 +1120,7 @@ class level_s_iolink : public analog_io_device
 #endif
 
         int current_state;
-        u_int_4 time = get_millisec();
+        uint32_t time = get_millisec();
 
         enum class ARTICLE
             {
@@ -1339,10 +1339,10 @@ class base_counter: public i_counter, public device, public io_device
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
-        u_int_4 start_pump_working_time = 0;
+        uint32_t start_pump_working_time = 0;
         u_int_4 counter_prev_value = 0;
 
-        u_int_4 start_pump_working_time_flow = 0;
+        uint32_t start_pump_working_time_flow = 0;
         u_int_4 counter_prev_value_flow = 0;
 
         std::vector < device* > motors;
@@ -1607,7 +1607,7 @@ class camera_DI2 : public camera
         void evaluate_io() override;
 
     protected:
-        u_int start_switch_time = get_millisec();
+        uint32_t start_switch_time = get_millisec();
 
     private:
         enum class PARAMS

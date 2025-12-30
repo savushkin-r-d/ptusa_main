@@ -99,9 +99,9 @@ int eval( lua_State* L )
         }
 
 #ifdef TEST_SPEED
-    static u_long st_time;
-    static u_long all_time = 0;
-    static u_long cycles_cnt = 0;
+    static uint32_t st_time;
+    static uint32_t all_time = 0;
+    static uint32_t cycles_cnt = 0;
 
     st_time = get_millisec();
     cycles_cnt++;

@@ -263,13 +263,13 @@ class open_seat_action: public action
 
         u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
-        u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
+        uint32_t wait_time;      ///< Время ожидания перед промыванием седел.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
         std::vector< std::vector< device* > > wash_lower_seat_devices;
 
-        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+        uint32_t start_cycle_time; ///< Время старта цикла (ожидания или промывки).
 
         bool is_mode;             ///< Является ли шагом операции.
         operation_state* owner;
@@ -553,7 +553,7 @@ class step
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
-        u_int_4 start_time;             ///< Время старта шага.
+        uint32_t start_time;             ///< Время старта шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
@@ -675,14 +675,14 @@ class operation_state
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
-        u_int_4 start_time; ///< Время начала операции.
+        uint32_t start_time; ///< Время начала операции.
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
         int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
-        u_int_4 dx_step_time;
+        uint32_t dx_step_time;
 
 
         /// Номер параметра совместного времени выполнения шагов.
@@ -958,8 +958,8 @@ class operation
 
         u_int run_time = 0;  /// Время выполнения операции (состояние run).
 
-        u_long start_warn = 0;
-        u_long start_wait = 0;
+        uint32_t start_warn = 0;
+        uint32_t start_wait = 0;
         bool is_first_goto_next_state = true;
         bool was_fail = false;
     };

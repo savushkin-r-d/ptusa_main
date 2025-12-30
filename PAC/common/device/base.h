@@ -1172,8 +1172,8 @@ class signal_column : public device, public io_device
         struct state_info
             {
             STEP step = STEP::off;
-            unsigned long start_blink_time = 0;
-            unsigned long start_wait_time = 0;
+            uint32_t start_blink_time = 0;
+            uint32_t start_wait_time = 0;
             };
 
         state_info green;
