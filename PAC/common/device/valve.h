@@ -556,9 +556,9 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 #pragma region Выключение мини клапана с задержкой.
 #endif
     private:
-        uint32_t start_off_time;  //Время начала открытия клапана.
+        uint32_t start_off_time;    //Время начала открытия клапана.
 
-        int is_closing_mini;    //Мини клапан в режиме закрытия
+        int is_closing_mini;        //Мини клапан в режиме закрытия.
 
     public:
         /// @brief Определение завершения отключения клапана с задержкой.
