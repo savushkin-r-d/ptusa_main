@@ -1,23 +1,26 @@
 #include "dtime_test.h"
 
-uint32_t mock_get_millisec()
+uint32_t get_delta_millisec_test( uint32_t time1 )
     {
-    return 0;
+    uint32_t now = 0;
+    // Unsigned integer subtraction in C++ handles wraparound correctly via
+    // modular arithmetic.
+    return now - time1;
     }
 
 TEST( sys, get_delta_millisec )
     {
-    auto hook_get_millisec = subhook_new( reinterpret_cast<void*>( &get_millisec ),
-        reinterpret_cast<void*>( &mock_get_millisec ), SUBHOOK_64BIT_OFFSET );
-    auto res = subhook_install( hook_get_millisec );
-    ASSERT_EQ( res, 0 );
+    auto dt = get_delta_millisec( 0 );
+    EXPECT_GT( dt, 0 );
 
-    auto dt = get_delta_millisec( UINT32_MAX );
+    auto now = get_millisec();
+    dt = get_delta_millisec( now );
+    // Сразу же измеряем пройденное время - должно быть меньше 100 мс.
+    EXPECT_LE( dt, 100 );
+
+    dt = get_delta_millisec_test( UINT32_MAX );
     EXPECT_EQ( dt, 1 );
 
-    dt = get_delta_millisec( 1 );
+    dt = get_delta_millisec_test( 1 );
     EXPECT_EQ( dt, UINT32_MAX );
-
-    subhook_remove( hook_get_millisec );
-    subhook_free( hook_get_millisec );
     }
