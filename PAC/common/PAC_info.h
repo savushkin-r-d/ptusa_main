@@ -105,7 +105,7 @@ class PAC_info: public i_Lua_save_device
         bool emulator_state = true;
 #endif
 
-        void set_cycle_time( u_long current_cycle_time );
+        void set_cycle_time( uint32_t current_cycle_time );
 
     private:
         PAC_info();

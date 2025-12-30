@@ -450,7 +450,7 @@ class MSAPID
         i_AO_device* output;
         i_AI_device* input;
         i_counter* input2;
-        unsigned long lastEvalInOnState;
+        uint32_t lastEvalInOnState;
     public:
         int HI;
         int task_par_offset;
@@ -581,7 +581,7 @@ class cipline_tech_object: public tech_object
 
         bool waterTankLastEmptyState{}; //последнее состояние танка вторичной воды
 
-        unsigned long enddelayTimer;
+        uint32_t enddelayTimer;
         int valvesAreInConflict{};
         void resetProgramName();
         void resetRecipeName();
