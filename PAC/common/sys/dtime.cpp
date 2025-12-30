@@ -1,7 +1,9 @@
 #include "dtime.h"
 
-#ifdef PTUSA_TEST
+#include <chrono>
+#include <cstdint>
 
+#ifdef PTUSA_TEST
 tm get_time_next_hour()
     {
     thread_local static struct tm timeInfo_;
@@ -29,3 +31,19 @@ tm get_fixed_time()
     return timeInfo_;
     }
 #endif
+//-----------------------------------------------------------------------------
+uint32_t get_millisec()
+    {
+    auto now = std::chrono::steady_clock::now();
+    auto duration = now.time_since_epoch();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( 
+        duration ).count();
+
+    return static_cast<uint32_t>( ms );
+    }
+//-----------------------------------------------------------------------------
+uint32_t get_delta_millisec( uint32_t time1 )
+    {
+    uint32_t now = get_millisec();
+    return now >= time1 ? now - time1 : UINT32_MAX - time1 + now;
+    }

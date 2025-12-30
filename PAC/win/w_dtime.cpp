@@ -5,19 +5,7 @@
 
 #include <time.h>
 #include <sys\timeb.h>
-#include <limits.h>
-#include <chrono>
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-uint32_t get_millisec()
-    {
-    auto now = std::chrono::steady_clock::now();
-    auto duration = now.time_since_epoch();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-        duration ).count();
-    
-    return static_cast<uint32_t>( ms );
-    }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
     {
@@ -25,13 +13,6 @@ unsigned long get_sec()
     time( &ltime );
 
     return ( unsigned long )ltime;
-    }
-//-----------------------------------------------------------------------------
-uint32_t get_delta_millisec( uint32_t time1 )
-    {
-    uint32_t now = get_millisec();
-
-    return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
 void sleep_ms( u_int ms )

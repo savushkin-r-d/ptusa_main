@@ -1749,13 +1749,13 @@ unsigned long get_sec();
 /// вычисления разности времени использовать @ref get_delta_millisec.
 ///
 /// @return Время с момента запуска программы в миллисекундах.
-unsigned long get_millisec();
+unsigned int get_millisec();
 //-----------------------------------------------------------------------------
 /// @brief Получение разности времени в миллисекундах.
 ///
 /// @param time1     - начальное время.
 /// @return Разность времени в миллисекундах.
-unsigned long get_delta_millisec( unsigned long time1 );
+unsigned int get_delta_millisec( unsigned int time1 );
 //-----------------------------------------------------------------------------
 /// @brief Ожидание заданное время.
 ///

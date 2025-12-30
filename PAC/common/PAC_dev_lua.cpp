@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/12/25 13:06:56.
+** Generated automatically by tolua++-1.0.92 on 12/30/25 08:23:20.
 */
 
 #ifndef __cplusplus
@@ -8730,7 +8730,7 @@ static int tolua_PAC_dev_get_millisec00(lua_State* tolua_S)
 #endif
  {
   {
-   uint32_t tolua_ret = (uint32_t)  get_millisec();
+   unsigned int tolua_ret = (unsigned int)  get_millisec();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -8757,9 +8757,9 @@ static int tolua_PAC_dev_get_delta_millisec00(lua_State* tolua_S)
  else
 #endif
  {
-  unsigned long time1 = ((unsigned long)  tolua_tonumber(tolua_S,1,0));
+  unsigned int time1 = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
   {
-   unsigned long tolua_ret = (unsigned long)  get_delta_millisec(time1);
+   unsigned int tolua_ret = (unsigned int)  get_delta_millisec(time1);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

@@ -1755,7 +1755,7 @@ class power_unit : public analog_io_device
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
 #ifdef PTUSA_TEST
-        void set_cmd_time( unsigned long t )
+        void set_cmd_time( uint32_t t )
             {
             cmd_time = t;
             }
