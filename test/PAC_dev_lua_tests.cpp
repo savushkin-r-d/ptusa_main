@@ -95,6 +95,32 @@ TEST( toLuapp, tolua_PAC_dev_PDS00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = get_delta_millisec()" ) );  //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GT( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_get_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L, "res = get_millisec( 1 )" ) );  //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_millisec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GT( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
 TEST( toLuapp, tolua_PAC_dev_TS00 )
     {
     lua_State* L = lua_open();
