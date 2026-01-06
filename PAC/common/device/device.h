@@ -1500,6 +1500,7 @@ class counter_iolink : public base_counter
         in_data in_info{ 0, 0, 0, 0, 0 };
 
         io_link_device iol_dev;
+        analog_emulator flow_emulator;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.

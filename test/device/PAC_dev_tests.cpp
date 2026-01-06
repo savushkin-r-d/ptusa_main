@@ -4664,6 +4664,7 @@ TEST( virtual_counter, pause_daily )
 
 TEST( counter_iolink, set_cmd )
     {
+    G_PAC_INFO()->emulation_off();  // Disable emulation for manual control.
     counter_iolink fqt1( "FQT1" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
@@ -4699,6 +4700,8 @@ TEST( counter_iolink, set_cmd )
 
     fqt1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    
+    G_PAC_INFO()->emulation_on();  // Re-enable emulation for other tests.
     }
 
 TEST( counter_iolink, evaluate_io )
@@ -4766,6 +4769,7 @@ TEST( counter_iolink, get_error_description )
 
 TEST( counter_iolink, get_quantity )
     {
+    G_PAC_INFO()->emulation_off();  // Disable emulation for manual control.
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
@@ -4893,6 +4897,8 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
 
     subhook_remove( get_time_hook );
+    
+    G_PAC_INFO()->emulation_on();  // Re-enable emulation for other tests.
     }
 
 TEST( counter_iolink, get_pump_dt )
@@ -4958,6 +4964,36 @@ TEST( counter_iolink, article_sm4000 )
 TEST( counter_iolink, article_sm6100 )
     {
     test_counter_iolink_article( "IFM.SM6100", 0.01f );
+    }
+
+TEST( counter_iolink, emulator_mode_flow )
+    {
+    counter_iolink fqt1( "FQT1" );
+    
+    // Test that in emulator mode get_flow() returns a value.
+    G_PAC_INFO()->emulation_on();
+    
+    // Get flow value multiple times and verify it returns reasonable values.
+    // The emulator is initialized with mean=10.0, stddev=2.0.
+    float flow1 = fqt1.get_flow();
+    float flow2 = fqt1.get_flow();
+    float flow3 = fqt1.get_flow();
+    
+    // Verify that values are within reasonable range (mean ± 3*stddev).
+    // This should cover 99.7% of values for normal distribution.
+    EXPECT_GT( flow1, 4.0f );  // 10.0 - 3*2.0 = 4.0.
+    EXPECT_LT( flow1, 16.0f ); // 10.0 + 3*2.0 = 16.0.
+    
+    EXPECT_GT( flow2, 4.0f );
+    EXPECT_LT( flow2, 16.0f );
+    
+    EXPECT_GT( flow3, 4.0f );
+    EXPECT_LT( flow3, 16.0f );
+    
+    // Values should be different (randomized).
+    EXPECT_TRUE( flow1 != flow2 || flow2 != flow3 );
+    
+    G_PAC_INFO()->emulation_off();
     }
 
 

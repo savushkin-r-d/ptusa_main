@@ -1537,7 +1537,8 @@ int counter_f::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
     device::DST_FQT_IOLINK,
-    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ),
+    flow_emulator( 10.0f, 2.0f )
     {
     set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
@@ -1621,6 +1622,12 @@ float counter_iolink::get_max_raw_value() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow()
     {
+    // If running in emulator mode and flow was not manually set via set_cmd.
+    if ( G_PAC_INFO()->is_emulator() && in_info.flow == 0 )
+        {
+        return flow_emulator.get_value();
+        }
+
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
         + in_info.flow * get_flow_gradient();
     }
