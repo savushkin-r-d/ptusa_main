@@ -210,7 +210,8 @@ elseif(WIN32)
 endif()
 
 add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
-# Temporarily disable luasql_odbc dependency due to missing ODBC headers.
+# TODO: Re-enable luasql_odbc dependency once ODBC headers are available.
+# Temporarily disabled due to missing ODBC headers in CI environment.
 # add_dependencies(lua libptusa_main luasql_odbc)
 add_dependencies(lua libptusa_main)
 
