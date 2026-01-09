@@ -2202,7 +2202,7 @@ void wages_eth::direct_off()
         return device::direct_off();
         }
     
-    if ( weth ) weth->set_state( 0 );
+    if ( weth ) weth->set_wages_state( 0 );
     }
 
 void wages_eth::direct_on()
@@ -2212,7 +2212,7 @@ void wages_eth::direct_on()
         return device::direct_on();
         }
     
-    if ( weth ) weth->set_state( 1 );
+    if ( weth ) weth->set_wages_state( 1 );
     }
 
 void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
