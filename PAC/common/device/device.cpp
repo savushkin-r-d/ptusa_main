@@ -2205,7 +2205,7 @@ void wages_eth::direct_off()
         {
         return device::direct_off();
         }
-    
+
     if ( weth ) weth->set_wages_state( 0 );
     }
 
@@ -2215,7 +2215,7 @@ void wages_eth::direct_on()
         {
         return device::direct_on();
         }
-    
+
     if ( weth ) weth->set_wages_state( 1 );
     }
 

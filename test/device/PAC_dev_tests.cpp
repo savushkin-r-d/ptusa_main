@@ -5196,6 +5196,13 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_state )
@@ -5209,17 +5216,24 @@ TEST( wages_eth, direct_set_state )
     EXPECT_EQ( 1, w1.get_state() );
     w1.direct_set_state( 0 );
     EXPECT_EQ( 0, w1.get_state() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_off )
-    {    
+    {
     wages_eth w1( "W1" );
     w1.direct_on();
     EXPECT_EQ( 1, w1.get_state() );
 
     w1.direct_off();
     EXPECT_EQ( 0, w1.get_state() );
-    
+
     auto ip = "0.0.0.0";
     auto field = "IP";
     w1.set_string_property( field, ip );
