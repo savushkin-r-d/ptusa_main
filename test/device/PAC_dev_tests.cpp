@@ -5207,6 +5207,8 @@ TEST( wages_eth, direct_set_state )
 
 TEST( wages_eth, direct_set_tcp_buff )
     {
+    G_PAC_INFO()->emulation_off();
+
     wages_eth w1( "W1" );
 
     auto ip = "0.0.0.0";
@@ -5230,6 +5232,8 @@ TEST( wages_eth, direct_set_tcp_buff )
         EXPECT_EQ( 0, w1.get_state() );
         EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
         }
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, set_string_property )
@@ -5399,6 +5403,8 @@ TEST( wages_pxc_axl, direct_set_state )
 
 TEST( wages_pxc_axl, direct_set_value )
     {
+    G_PAC_INFO()->emulation_off();
+
     wages_pxc_axl w1( "W1" );
     w1.init( 0, 0, 1, 1 );
     w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
@@ -5410,6 +5416,8 @@ TEST( wages_pxc_axl, direct_set_value )
     const int VALUE = 65900;
     w1.direct_set_value( VALUE );   // Do nothing.
     EXPECT_EQ( 0, w1.get_value() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
