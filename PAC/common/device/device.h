@@ -718,6 +718,9 @@ class wages_eth : public analog_io_device, public i_wages
 
     private:
         auto_smart_ptr < iot_wages_eth > weth;
+        
+        float emulator_value = 0.0f;  ///< Value for emulator mode.
+        int emulator_state = 0;       ///< State for emulator mode.
 
         enum class CONSTANTS
         {
