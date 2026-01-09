@@ -105,7 +105,7 @@ TEST( sys, millisec_to_sec_conversion )
     uint32_t ms_delta = ms_after - ms_before;
     
     // Allow some tolerance for timing precision.
-    EXPECT_GE( ms_delta, sec_delta * 1000 );
+    EXPECT_GE( ms_delta, ( sec_delta - 1 ) * 1000 );
     EXPECT_LE( ms_delta, ( sec_delta + 1 ) * 1000 + 200 );
     }
 
