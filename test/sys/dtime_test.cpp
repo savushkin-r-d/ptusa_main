@@ -1,4 +1,6 @@
 #include "dtime_test.h"
+#include <thread>
+#include <chrono>
 
 uint32_t get_delta_millisec_test( uint32_t time1 )
     {
@@ -6,6 +8,40 @@ uint32_t get_delta_millisec_test( uint32_t time1 )
     // Unsigned integer subtraction in C++ handles wraparound correctly via
     // modular arithmetic.
     return now - time1;
+    }
+
+TEST( sys, get_millisec )
+    {
+    // Test that get_millisec() returns a positive value.
+    uint32_t time1 = get_millisec();
+    EXPECT_GT( time1, 0 );
+
+    // Test that consecutive calls return increasing values.
+    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+    uint32_t time2 = get_millisec();
+    EXPECT_GT( time2, time1 );
+
+    // Test that the difference is reasonable (at least 10ms, at most 100ms).
+    uint32_t diff = time2 - time1;
+    EXPECT_GE( diff, 10 );
+    EXPECT_LE( diff, 100 );
+    }
+
+TEST( sys, get_sec )
+    {
+    // Test that get_sec() returns a positive value.
+    uint32_t sec1 = get_sec();
+    EXPECT_GT( sec1, 0 );
+
+    // Test that consecutive calls return the same or increasing values.
+    uint32_t sec2 = get_sec();
+    EXPECT_GE( sec2, sec1 );
+
+    // Test that after 1 second, the value increases.
+    std::this_thread::sleep_for( std::chrono::milliseconds( 1100 ) );
+    uint32_t sec3 = get_sec();
+    EXPECT_GT( sec3, sec1 );
+    EXPECT_GE( sec3 - sec1, 1 );
     }
 
 TEST( sys, get_delta_millisec )
@@ -23,4 +59,52 @@ TEST( sys, get_delta_millisec )
 
     dt = get_delta_millisec_test( 1 );
     EXPECT_EQ( dt, UINT32_MAX );
+    }
+
+TEST( sys, get_delta_millisec_with_delay )
+    {
+    // Test get_delta_millisec with actual time passage.
+    uint32_t start_time = get_millisec();
+    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+    uint32_t elapsed = get_delta_millisec( start_time );
+    
+    // Should be at least 50ms, but allow some tolerance.
+    EXPECT_GE( elapsed, 50 );
+    EXPECT_LE( elapsed, 200 );
+    }
+
+TEST( sys, get_delta_millisec_wraparound )
+    {
+    // Test wraparound behavior near UINT32_MAX.
+    // Simulate a time near wraparound.
+    uint32_t near_max = UINT32_MAX - 100;
+    uint32_t after_wrap = 50;
+    
+    // The delta should be approximately 150 (100 + 50 + 1).
+    uint32_t delta = after_wrap - near_max;
+    EXPECT_EQ( delta, 151 );
+    }
+
+TEST( sys, millisec_to_sec_conversion )
+    {
+    // Test that get_millisec and get_sec are consistent.
+    uint32_t sec_before = get_sec();
+    uint32_t ms_before = get_millisec();
+    
+    std::this_thread::sleep_for( std::chrono::milliseconds( 1100 ) );
+    
+    uint32_t sec_after = get_sec();
+    uint32_t ms_after = get_millisec();
+    
+    // Both should have increased.
+    EXPECT_GT( sec_after, sec_before );
+    EXPECT_GT( ms_after, ms_before );
+    
+    // Millisecond delta should be roughly 1000x second delta.
+    uint32_t sec_delta = sec_after - sec_before;
+    uint32_t ms_delta = ms_after - ms_before;
+    
+    // Allow some tolerance for timing precision.
+    EXPECT_GE( ms_delta, sec_delta * 1000 );
+    EXPECT_LE( ms_delta, ( sec_delta + 1 ) * 1000 + 200 );
     }
