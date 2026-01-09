@@ -2178,10 +2178,14 @@ void wages_eth::set_string_property( const char* field, const char* value )
 void wages_eth::direct_set_value( float new_value )
     {
     if ( G_PAC_INFO()->is_emulator() )
-        {        
-        if ( new_value >= 0.0f ) return device::direct_set_value( new_value );
+        {
+        if ( new_value >= .0f )
+            {
+            device::direct_set_value( new_value );
+            }
+        return;
         }
-    
+
     if ( weth ) weth->set_wages_value( new_value );
     }
 
@@ -2191,7 +2195,7 @@ void wages_eth::direct_set_state( int state )
         {
         return device::direct_set_state( state );
         }
-    
+
     if ( weth ) weth->set_wages_state( state );
     }
 
@@ -2201,7 +2205,7 @@ void wages_eth::direct_off()
         {
         return device::direct_off();
         }
-    
+
     if ( weth ) weth->set_state( 0 );
     }
 
@@ -2211,7 +2215,7 @@ void wages_eth::direct_on()
         {
         return device::direct_on();
         }
-    
+
     if ( weth ) weth->set_state( 1 );
     }
 
