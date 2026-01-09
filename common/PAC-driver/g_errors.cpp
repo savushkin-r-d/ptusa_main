@@ -581,8 +581,8 @@ void siren_lights_manager::eval()
     if ( tech_obj_error::is_any_message )
         {
         static int step = 0;
-        static unsigned long start_blink_time = 0;
-        static unsigned long start_wait_time = 0;
+        static uint32_t start_blink_time = 0;
+        static uint32_t start_wait_time = 0;
 
         switch ( step )
             {
