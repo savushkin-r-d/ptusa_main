@@ -52,7 +52,7 @@ uint32_t get_millisec()
 //-----------------------------------------------------------------------------
 uint32_t get_delta_millisec( uint32_t time1 )
     {
-    uint32_t now = get_millisec();
+    auto now = get_millisec();
     // Unsigned integer subtraction in C++ handles wraparound correctly via
     // modular arithmetic.
     return now - time1;

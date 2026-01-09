@@ -114,7 +114,6 @@ TEST( sys, sleep_ms )
     // Test that sleep_ms actually delays execution.
     uint32_t start = get_millisec();
     sleep_ms( 50 );
-    uint32_t end = get_millisec();
     
     uint32_t elapsed = get_delta_millisec( start );
     
@@ -128,7 +127,6 @@ TEST( sys, sleep_ms_zero )
     // Test that sleep_ms(0) doesn't crash.
     uint32_t start = get_millisec();
     sleep_ms( 0 );
-    uint32_t end = get_millisec();
     
     uint32_t elapsed = get_delta_millisec( start );
     
