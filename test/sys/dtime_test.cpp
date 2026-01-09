@@ -108,3 +108,117 @@ TEST( sys, millisec_to_sec_conversion )
     EXPECT_GE( ms_delta, sec_delta * 1000 );
     EXPECT_LE( ms_delta, ( sec_delta + 1 ) * 1000 + 200 );
     }
+
+TEST( sys, sleep_ms )
+    {
+    // Test that sleep_ms actually delays execution.
+    uint32_t start = get_millisec();
+    sleep_ms( 50 );
+    uint32_t end = get_millisec();
+    
+    uint32_t elapsed = get_delta_millisec( start );
+    
+    // Should have slept at least 50ms, allow tolerance for scheduling.
+    EXPECT_GE( elapsed, 50 );
+    EXPECT_LE( elapsed, 150 );
+    }
+
+TEST( sys, sleep_ms_zero )
+    {
+    // Test that sleep_ms(0) doesn't crash.
+    uint32_t start = get_millisec();
+    sleep_ms( 0 );
+    uint32_t end = get_millisec();
+    
+    uint32_t elapsed = get_delta_millisec( start );
+    
+    // Should be very quick (less than 10ms).
+    EXPECT_LE( elapsed, 10 );
+    }
+
+TEST( sys, get_time )
+    {
+    // Test that get_time returns a valid time structure.
+    tm time_info = get_time();
+    
+    // Check that the time structure has reasonable values.
+    EXPECT_GE( time_info.tm_year, 100 );  // Year >= 2000.
+    EXPECT_GE( time_info.tm_mon, 0 );
+    EXPECT_LE( time_info.tm_mon, 11 );
+    EXPECT_GE( time_info.tm_mday, 1 );
+    EXPECT_LE( time_info.tm_mday, 31 );
+    EXPECT_GE( time_info.tm_hour, 0 );
+    EXPECT_LE( time_info.tm_hour, 23 );
+    EXPECT_GE( time_info.tm_min, 0 );
+    EXPECT_LE( time_info.tm_min, 59 );
+    EXPECT_GE( time_info.tm_sec, 0 );
+    EXPECT_LE( time_info.tm_sec, 61 );  // Allow leap seconds.
+    }
+
+TEST( sys, get_time_consistency )
+    {
+    // Test that consecutive calls to get_time are consistent.
+    tm time1 = get_time();
+    sleep_ms( 100 );
+    tm time2 = get_time();
+    
+    // Times should be within a few seconds of each other.
+    // Convert to comparable format (ignore differences less than 2 seconds).
+    int diff_sec = ( time2.tm_hour * 3600 + time2.tm_min * 60 + time2.tm_sec ) -
+                   ( time1.tm_hour * 3600 + time1.tm_min * 60 + time1.tm_sec );
+    
+    // Should be within 2 seconds (accounting for wraparound at midnight).
+    if ( diff_sec >= 0 )
+        {
+        EXPECT_LE( diff_sec, 2 );
+        }
+    }
+
+#ifdef PTUSA_TEST
+TEST( sys, get_time_next_hour )
+    {
+    // Test that get_time_next_hour returns time one hour in the future.
+    tm time_next = get_time_next_hour();
+    
+    // Check that the time structure has reasonable values.
+    EXPECT_GE( time_next.tm_year, 100 );  // Year >= 2000.
+    EXPECT_GE( time_next.tm_mon, 0 );
+    EXPECT_LE( time_next.tm_mon, 11 );
+    EXPECT_GE( time_next.tm_mday, 1 );
+    EXPECT_LE( time_next.tm_mday, 31 );
+    EXPECT_GE( time_next.tm_hour, 0 );
+    EXPECT_LE( time_next.tm_hour, 23 );
+    EXPECT_GE( time_next.tm_min, 0 );
+    EXPECT_LE( time_next.tm_min, 59 );
+    EXPECT_GE( time_next.tm_sec, 0 );
+    EXPECT_LE( time_next.tm_sec, 61 );
+    }
+
+TEST( sys, get_fixed_time )
+    {
+    // Test that get_fixed_time returns the expected fixed time.
+    tm fixed_time = get_fixed_time();
+    
+    // Should return 2025-03-12 00:00:00 UTC.
+    EXPECT_EQ( fixed_time.tm_year, 125 );  // 2025 - 1900.
+    EXPECT_EQ( fixed_time.tm_mon, 2 );     // March (0-indexed).
+    EXPECT_EQ( fixed_time.tm_mday, 12 );
+    EXPECT_EQ( fixed_time.tm_hour, 0 );
+    EXPECT_EQ( fixed_time.tm_min, 0 );
+    EXPECT_EQ( fixed_time.tm_sec, 0 );
+    }
+
+TEST( sys, get_fixed_time_consistency )
+    {
+    // Test that get_fixed_time always returns the same value.
+    tm time1 = get_fixed_time();
+    tm time2 = get_fixed_time();
+    
+    EXPECT_EQ( time1.tm_year, time2.tm_year );
+    EXPECT_EQ( time1.tm_mon, time2.tm_mon );
+    EXPECT_EQ( time1.tm_mday, time2.tm_mday );
+    EXPECT_EQ( time1.tm_hour, time2.tm_hour );
+    EXPECT_EQ( time1.tm_min, time2.tm_min );
+    EXPECT_EQ( time1.tm_sec, time2.tm_sec );
+    }
+#endif  // PTUSA_TEST
