@@ -2294,11 +2294,6 @@ void wages_pxc_axl::reset_tare()
 
 float wages_pxc_axl::get_value()
     {
-    if ( G_PAC_INFO()->is_emulator() )
-        {
-        return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
-        }
-    
     return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
     }
 
