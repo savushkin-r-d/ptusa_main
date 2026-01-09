@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
+#include <cmath>
 
 #include "device.h"
 #include "manager.h"
@@ -1547,7 +1548,8 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    if ( auto data = (char*)get_AI_data( 0 ); data )
+    if ( auto data = reinterpret_cast<char*>( get_AI_data( 0 ) );
+        !G_PAC_INFO()->is_emulator() && data )
         {
         auto buff = (char*)&in_info;
 
@@ -1580,7 +1582,7 @@ void counter_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
     {
-    return 0.1f * in_info.temperature;
+    return TE_GRADIENT * in_info.temperature;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
@@ -1638,12 +1640,19 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
+        case 'A': // ABS_V
+        case 'V': // V
+            // Учитываем коэффициент, которые переводит в мл.
+            return base_counter::set_cmd( prop, idx, val / mL_in_L );
+
         case 'F':
-            in_info.flow = static_cast<int16_t>( val / get_flow_gradient() );
+            in_info.flow = static_cast<int16_t>( 
+                round( val / get_flow_gradient() ) );
             break;
 
-        case 'T':
-            in_info.temperature = static_cast<int16_t>( val * 10 );
+        case 'T':            
+            in_info.temperature = static_cast<int16_t>( 
+                round( val / TE_GRADIENT ) );
             break;
 
         default:

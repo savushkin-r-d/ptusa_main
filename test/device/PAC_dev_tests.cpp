@@ -4676,11 +4676,11 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "V", 0, 50 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50.f, fqt1.get_value() );
+    EXPECT_EQ( 50, fqt1.get_quantity() );
+    EXPECT_EQ( 50.f, fqt1.get_value() );
 
     fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 100, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
@@ -4690,7 +4690,7 @@ TEST( counter_iolink, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ(
-        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, DAY_T1=0, PREV_DAY_T1=0, "
+        "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
         "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
@@ -4707,6 +4707,7 @@ TEST( counter_iolink, evaluate_io )
     fqt1.init( 0, 0, 0, 1 );
     fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
     auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
+    G_PAC_INFO()->emulation_off();
 
     *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 11.11f;
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
@@ -4725,6 +4726,8 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
     EXPECT_EQ( 22 * 0.01f, fqt1.get_flow() );
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 tm get_time_next_day()
@@ -4921,6 +4924,7 @@ static void test_counter_iolink_article( const char* article, float gradient )
     {
     counter_iolink fqt( "FQT1" );
     fqt.set_article( article );
+    G_PAC_INFO()->emulation_off();
 
     // Test flow gradient for the specified article.
     fqt.set_cmd( "F", 0, 9.9 );
@@ -4948,6 +4952,7 @@ static void test_counter_iolink_article( const char* article, float gradient )
 
     delete[] fqt.AI_channels.int_read_values[ 0 ];
     fqt.AI_channels.int_read_values[ 0 ] = nullptr;
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( counter_iolink, article_sm4000 )
