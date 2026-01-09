@@ -4,7 +4,6 @@
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
-#include <cmath>
 
 #include "device.h"
 #include "manager.h"
@@ -1548,11 +1547,10 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    if ( auto data = reinterpret_cast<char*>( get_AI_data( 0 ) );
+    if ( auto data = reinterpret_cast<std::byte*>( get_AI_data( 0 ) );
         !G_PAC_INFO()->is_emulator() && data )
         {
-        auto buff = (char*)&in_info;
-
+        auto buff = reinterpret_cast<std::byte*>( &in_info );
         const int SIZE = 8;
         std::copy( data, data + SIZE, buff );
 
@@ -1640,9 +1638,9 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
-        case 'A': // ABS_V
-        case 'V': // V
-            // Учитываем коэффициент, которые переводит в мл.
+        case 'A': // Свойство `ABS_V`.
+        case 'V': // Свойство `V`.
+            // Учитываем коэффициент, который переводит в мл.
             return base_counter::set_cmd( prop, idx, val / mL_in_L );
 
         case 'F':
@@ -1650,7 +1648,7 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
                 round( val / get_flow_gradient() ) );
             break;
 
-        case 'T':            
+        case 'T':
             in_info.temperature = static_cast<int16_t>( 
                 round( val / TE_GRADIENT ) );
             break;
