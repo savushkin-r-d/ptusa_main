@@ -4921,8 +4921,7 @@ int cipline_tech_object::_ToObject( int from, int where )
     {
     float c=0;
     unsigned long tmp;
-    rt_par_float[ P_OP_TIME_LEFT ] = static_cast<uint32_t>( 
-        T[ TMR_OP_TIME ]->get_work_time() / 1000 );
+    rt_par_float[ P_OP_TIME_LEFT ] = T[ TMR_OP_TIME ]->get_work_time() / 1000;
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
 
 
