@@ -2176,7 +2176,7 @@ void wages_eth::direct_set_value( float new_value )
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
-        emulator_value = new_value;
+        if ( new_value >= .0f ) emulator_value = new_value;
         return;
         }
     
