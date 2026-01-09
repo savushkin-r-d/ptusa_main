@@ -4567,11 +4567,15 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
     T[TMR_CHK_CONC]->reset();
     if (what == TANK_K || what == TANK_S || where == TANK_S || where == TANK_K)
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000 * 2); //для ошибки "высокая концентрация в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time(
+            static_cast<uint32_t>( rt_par_float[ P_TM_NO_CONC ] *
+                1000 * 2 ) ); // Для ошибки "высокая концентрация в возвратной трубе".
         }
     else
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000); //для ошибки "нет концентрации в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time(
+            static_cast<uint32_t>( rt_par_float[ P_TM_NO_CONC ] *
+                1000 ) ); // Для ошибки "нет концентрации в возвратной трубе".
         }
     rt_par_float[P_SUM_OP] = 0;
 
@@ -4818,7 +4822,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
         }
 
     float t=600, z=0;
-    unsigned long tm = 0;
+    uint32_t tm = 0;
     ret_circ_flag = 0;
     if ((circ_tank_s && 28 == step_to_init) || (circ_tank_k && 48 == step_to_init))
         {
@@ -4845,15 +4849,15 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
         {
         case WATER:
             t=rt_par_float[P_T_WP];
-            tm=(unsigned long)rt_par_float[PTM_OP]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_OP ] * 1000 );
             break;
         case SANITIZER:
             t=rt_par_float[P_T_SANITIZER];
-            tm=(unsigned long)rt_par_float[PTM_SANITIZER]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_SANITIZER ] * 1000 );
             break;
         case HOT_WATER:
             t=rt_par_float[P_T_D];
-            tm=(unsigned long)rt_par_float[PTM_D]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_D ] * 1000 );
             break;
         case SHCH:
             if (circ_tank_s)
@@ -4864,11 +4868,11 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_S];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = (unsigned long)rt_par_float[PTM_S_SK] * 1000L;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_S_SK ] * 1000L );
                 }
             else
                 {
-                tm=(unsigned long)rt_par_float[PTM_S]*1000;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_S ] * 1000 );
                 }
             z=parpar[0][P_CZAD_S];
             break;
@@ -4882,11 +4886,11 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_K];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = (unsigned long)rt_par_float[PTM_K_SK] * 1000L;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_K_SK ] * 1000L );
                 }
             else
                 {
-                tm=(unsigned long)rt_par_float[PTM_K]*1000;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_K ] * 1000 );
                 }
             break;
         }
@@ -4917,7 +4921,8 @@ int cipline_tech_object::_ToObject( int from, int where )
     {
     float c=0;
     unsigned long tmp;
-    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+    rt_par_float[ P_OP_TIME_LEFT ] = static_cast<uint32_t>( 
+        T[ TMR_OP_TIME ]->get_work_time() / 1000 );
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
 
 
@@ -5707,8 +5712,8 @@ int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_
     dev_upr_sanitizer_pump->on();
     }
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
-    T[TMR_OP_TIME]->set_countdown_time( ( u_long )
-        rt_par_float[P_MAX_OPER_TM]*1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time( static_cast<uint32_t>(
+        rt_par_float[ P_MAX_OPER_TM ] * 1000L ) );
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     NP->on();

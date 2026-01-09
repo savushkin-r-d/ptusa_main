@@ -481,8 +481,8 @@ class MSAPID
         float q2;
         float Uk;
         float dUk;
-        unsigned long start_time;
-        unsigned long last_time;
+        uint32_t start_time;
+        uint32_t last_time;
 
         char prev_manual_mode;
 
