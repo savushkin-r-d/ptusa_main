@@ -1472,6 +1472,8 @@ class counter_iolink : public base_counter
     private:
         ARTICLE n_article = ARTICLE::DEFAULT;
 
+        inline static const float TE_GRADIENT{ 0.1f };
+
         float get_flow_gradient() const;
         enum class CONSTANTS
             {
