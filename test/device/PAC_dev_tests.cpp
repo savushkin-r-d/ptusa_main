@@ -5150,7 +5150,10 @@ TEST( wages_eth, evaluate_io )
 
 TEST( wages_eth, get_value )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5170,7 +5173,10 @@ TEST( wages_eth, tare )
 
 TEST( wages_eth, get_state )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5190,6 +5196,13 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_state )
@@ -5203,10 +5216,41 @@ TEST( wages_eth, direct_set_state )
     EXPECT_EQ( 1, w1.get_state() );
     w1.direct_set_state( 0 );
     EXPECT_EQ( 0, w1.get_state() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( wages_eth, direct_off )
+    {
+    wages_eth w1( "W1" );
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    w1.set_string_property( field, ip );
+    G_PAC_INFO()->emulation_off();
+
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_tcp_buff )
     {
+    G_PAC_INFO()->emulation_off();
+
     wages_eth w1( "W1" );
 
     auto ip = "0.0.0.0";
@@ -5230,6 +5274,8 @@ TEST( wages_eth, direct_set_tcp_buff )
         EXPECT_EQ( 0, w1.get_state() );
         EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
         }
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, set_string_property )
@@ -5339,7 +5385,7 @@ TEST( wages_pxc_axl, tare )
     EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
 
     w1.tare();
-    EXPECT_EQ( .0f, w1.get_value() );
+    EXPECT_EQ( 0.0f, w1.get_value() );
     }
 
 TEST( wages_pxc_axl, reset_tare )
@@ -5400,6 +5446,12 @@ TEST( wages_pxc_axl, direct_set_state )
 TEST( wages_pxc_axl, direct_set_value )
     {
     wages_pxc_axl w1( "W1" );
+    w1.direct_set_value( 10.f );
+    EXPECT_EQ( 10.f, w1.get_value() );
+    w1.direct_set_value( 0.0f );
+    EXPECT_EQ( 0.0f, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
     w1.init( 0, 0, 1, 1 );
     w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
     auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
@@ -5410,6 +5462,8 @@ TEST( wages_pxc_axl, direct_set_value )
     const int VALUE = 65900;
     w1.direct_set_value( VALUE );   // Do nothing.
     EXPECT_EQ( 0, w1.get_value() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
