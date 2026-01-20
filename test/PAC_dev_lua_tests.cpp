@@ -108,11 +108,11 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     lua_remove( L, -1 );   
 
     // Запрашиваем время, прошедшее с момента 0 - результат должен быть
-    // положительным.
+    // неотрицательным.
     ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );    
     auto dt1 = tolua_tonumber( L, -1, 0 );
-    EXPECT_GT( dt1, 0 );
+    EXPECT_GE( dt1, 0 );
     lua_remove( L, -1 );
 
     // Время должно совпать с расчетным.
@@ -144,7 +144,7 @@ TEST( toLuapp, tolua_PAC_dev_get_millisec00 )
     ASSERT_EQ( 1, luaL_dostring( L, "res = get_millisec( 1 )" ) );  //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "res = get_millisec()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
-    EXPECT_GT( tolua_tonumber( L, -1, 0 ), 0 );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
     lua_remove( L, -1 );
 
     lua_close( L );

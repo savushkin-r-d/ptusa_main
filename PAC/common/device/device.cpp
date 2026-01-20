@@ -1217,30 +1217,31 @@ void base_counter::check_self_flow()
     if ( get_flow() <= min_flow )
         {
         // Расход ниже минимального.
-        start_pump_working_time_flow = 0;
+        min_flow_flag = true;
         return;
         }
 
     // Расход выше минимального.
-    if ( 0 == start_pump_working_time_flow )
+    if ( min_flow_flag )
         {
         // Фиксируем время и счетчик появления расхода, превышающего
         // минимальный.
-        start_pump_working_time_flow = get_millisec();
-        counter_prev_value_flow = get_abs_quantity();
+        start_pump_working_time_self_flow = get_millisec();
+        counter_prev_value_self_flow = get_abs_quantity();
+        min_flow_flag = false;
         }
     else
         {
         // Проверяем счетчик на ошибку - он должен изменить свои показания.
-        if ( get_abs_quantity() != counter_prev_value_flow )
+        if ( get_abs_quantity() != counter_prev_value_self_flow )
             {
-            start_pump_working_time_flow = get_millisec();
-            counter_prev_value_flow = get_abs_quantity();
+            start_pump_working_time_self_flow = get_millisec();
+            counter_prev_value_self_flow = get_abs_quantity();
             }
         else
             {
             if ( auto dt = get_pump_dt(); dt > 0 &&
-                get_delta_millisec( start_pump_working_time_flow ) > dt )
+                get_delta_millisec( start_pump_working_time_self_flow ) > dt )
                 {
                 device::direct_set_state( static_cast<int>(
                     STATES::S_FLOW_ERROR ) );
@@ -1268,23 +1269,23 @@ void base_counter::check_connected_pumps()
     if ( !is_pump_working )
         {
         // Насос не работает.
-        start_pump_working_time = 0;
+        non_working_pump_flag = true;
         return;
         }
 
     if ( auto min_flow = get_min_flow(); get_flow() < min_flow )
         {
         // Расход ниже минимального.
-        start_pump_working_time_flow = 0;
         return;
         }
 
     // Насос работает.
-    if ( 0 == start_pump_working_time )
+    if ( non_working_pump_flag )
         {
         // Фиксируем время и показания момента включения насоса. 
         start_pump_working_time = get_millisec();
         counter_prev_value = get_abs_quantity();
+        non_working_pump_flag = false;
         return;
         }
 
@@ -1342,8 +1343,8 @@ void base_counter::evaluate_io()
     if ( device::get_state() == static_cast<int>( STATES::S_PAUSE ) ||
         device::get_state() < 0 )
         {
-        start_pump_working_time_flow = 0;
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_flag = false;
         return;                     // Не изменяем данное состояние.
         }
         
