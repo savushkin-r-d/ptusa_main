@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
+#include <inttypes.h>
 
 #include "device.h"
 #include "manager.h"
@@ -3868,7 +3869,8 @@ void timer::set_countdown_time( uint32_t new_countdown_time )
         {
         if ( 0 == new_countdown_time )
             {
-            printf( "Error void timer::set_countdown_time( uint32_t time ), time = %u!\n",
+            printf( "Error void timer::set_countdown_time( uint32_t time ), "
+                "time = %" PRIu32 "!\n",
                 new_countdown_time );
             }
         }

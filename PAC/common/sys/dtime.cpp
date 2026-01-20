@@ -34,8 +34,9 @@ tm get_fixed_time()
 //-----------------------------------------------------------------------------
 uint32_t get_sec()
     {
+    const static auto START_POINT = std::chrono::steady_clock::now();
     auto now = std::chrono::steady_clock::now();
-    auto duration = now.time_since_epoch();
+    auto duration = now - START_POINT;
     auto s = std::chrono::duration_cast<std::chrono::seconds>( duration ).count();
     return static_cast<uint32_t>( s );
     }
