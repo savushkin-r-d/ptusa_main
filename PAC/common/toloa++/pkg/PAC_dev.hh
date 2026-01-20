@@ -1742,6 +1742,9 @@ PAC_info* G_PAC_INFO();
 /// @warning Время возвращается с момента запуска steady_clock (зависит от реализации).
 unsigned int get_sec();
 //-----------------------------------------------------------------------------
+$ // Check for correct "uint32_t get_millisec()".
+$ static_assert( std::is_same_v<uint32_t, unsigned int>, "uint32_t should be unsigned int" );
+
 /// @brief Получение времени в миллисекундах.
 ///
 /// @return Время с момента запуска steady_clock (зависит от реализации).

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Jan  9 16:12:36 2026.
+** Generated automatically by tolua++-1.0.92 on Tue Jan 20 12:47:00 2026.
 */
 
 #ifndef __cplusplus
@@ -32,6 +32,8 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #pragma warning(disable: 6011)  //dereferencing NULL pointer <name>.
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
+ // Check for correct "uint32_t get_millisec()".
+ static_assert( std::is_same_v<uint32_t, unsigned int>, "uint32_t should be unsigned int" );
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
