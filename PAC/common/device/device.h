@@ -720,12 +720,12 @@ class wages_eth : public analog_io_device, public i_wages
         auto_smart_ptr < iot_wages_eth > weth;
 
         enum class CONSTANTS
-        {
+            {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
 
-            P_CZ,           ///< Сдвиг нуля.
+            P_CZ,               ///< Сдвиг нуля.
             LAST_PARAM_IDX,
-        };
+            };
     };
 //-----------------------------------------------------------------------------
 class wages_pxc_axl : public analog_io_device, public i_wages
@@ -1471,6 +1471,8 @@ class counter_iolink : public base_counter
 
     private:
         ARTICLE n_article = ARTICLE::DEFAULT;
+
+        inline static const float TE_GRADIENT{ 0.1f };
 
         float get_flow_gradient() const;
         enum class CONSTANTS

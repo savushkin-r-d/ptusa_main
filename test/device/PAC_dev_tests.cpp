@@ -4676,11 +4676,11 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "V", 0, 50 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50.f, fqt1.get_value() );
+    EXPECT_EQ( 50, fqt1.get_quantity() );
+    EXPECT_EQ( 50.f, fqt1.get_value() );
 
     fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 100, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
@@ -4690,7 +4690,7 @@ TEST( counter_iolink, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ(
-        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, DAY_T1=0, PREV_DAY_T1=0, "
+        "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
         "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
@@ -4707,6 +4707,7 @@ TEST( counter_iolink, evaluate_io )
     fqt1.init( 0, 0, 0, 1 );
     fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
     auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
+    G_PAC_INFO()->emulation_off();
 
     *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 11.11f;
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
@@ -4725,6 +4726,8 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
     EXPECT_EQ( 22 * 0.01f, fqt1.get_flow() );
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 tm get_time_next_day()
@@ -4921,6 +4924,7 @@ static void test_counter_iolink_article( const char* article, float gradient )
     {
     counter_iolink fqt( "FQT1" );
     fqt.set_article( article );
+    G_PAC_INFO()->emulation_off();
 
     // Test flow gradient for the specified article.
     fqt.set_cmd( "F", 0, 9.9 );
@@ -4948,6 +4952,7 @@ static void test_counter_iolink_article( const char* article, float gradient )
 
     delete[] fqt.AI_channels.int_read_values[ 0 ];
     fqt.AI_channels.int_read_values[ 0 ] = nullptr;
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( counter_iolink, article_sm4000 )
@@ -5150,7 +5155,10 @@ TEST( wages_eth, evaluate_io )
 
 TEST( wages_eth, get_value )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5170,7 +5178,10 @@ TEST( wages_eth, tare )
 
 TEST( wages_eth, get_state )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5190,6 +5201,13 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_state )
@@ -5203,10 +5221,41 @@ TEST( wages_eth, direct_set_state )
     EXPECT_EQ( 1, w1.get_state() );
     w1.direct_set_state( 0 );
     EXPECT_EQ( 0, w1.get_state() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( wages_eth, direct_off )
+    {
+    wages_eth w1( "W1" );
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    w1.set_string_property( field, ip );
+    G_PAC_INFO()->emulation_off();
+
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_tcp_buff )
     {
+    G_PAC_INFO()->emulation_off();
+
     wages_eth w1( "W1" );
 
     auto ip = "0.0.0.0";
@@ -5230,6 +5279,8 @@ TEST( wages_eth, direct_set_tcp_buff )
         EXPECT_EQ( 0, w1.get_state() );
         EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
         }
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, set_string_property )
@@ -5339,7 +5390,7 @@ TEST( wages_pxc_axl, tare )
     EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
 
     w1.tare();
-    EXPECT_EQ( .0f, w1.get_value() );
+    EXPECT_EQ( 0.0f, w1.get_value() );
     }
 
 TEST( wages_pxc_axl, reset_tare )
@@ -5400,6 +5451,12 @@ TEST( wages_pxc_axl, direct_set_state )
 TEST( wages_pxc_axl, direct_set_value )
     {
     wages_pxc_axl w1( "W1" );
+    w1.direct_set_value( 10.f );
+    EXPECT_EQ( 10.f, w1.get_value() );
+    w1.direct_set_value( 0.0f );
+    EXPECT_EQ( 0.0f, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
     w1.init( 0, 0, 1, 1 );
     w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
     auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
@@ -5410,6 +5467,8 @@ TEST( wages_pxc_axl, direct_set_value )
     const int VALUE = 65900;
     w1.direct_set_value( VALUE );   // Do nothing.
     EXPECT_EQ( 0, w1.get_value() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
