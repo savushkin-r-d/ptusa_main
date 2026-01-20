@@ -1547,10 +1547,10 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    if ( auto data = (char*)get_AI_data( 0 ); data )
+    if ( auto data = reinterpret_cast<std::byte*>( get_AI_data( 0 ) );
+        !G_PAC_INFO()->is_emulator() && data )
         {
-        auto buff = (char*)&in_info;
-
+        auto buff = reinterpret_cast<std::byte*>( &in_info );
         const int SIZE = 8;
         std::copy( data, data + SIZE, buff );
 
@@ -1580,7 +1580,7 @@ void counter_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
     {
-    return 0.1f * in_info.temperature;
+    return TE_GRADIENT * in_info.temperature;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
@@ -1638,12 +1638,19 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
+        case 'A': // Свойство `ABS_V`.
+        case 'V': // Свойство `V`.
+            // Учитываем коэффициент, который переводит в мл.
+            return base_counter::set_cmd( prop, idx, val / mL_in_L );
+
         case 'F':
-            in_info.flow = static_cast<int16_t>( val / get_flow_gradient() );
+            in_info.flow = static_cast<int16_t>( 
+                round( val / get_flow_gradient() ) );
             break;
 
         case 'T':
-            in_info.temperature = static_cast<int16_t>( val * 10 );
+            in_info.temperature = static_cast<int16_t>( 
+                round( val / TE_GRADIENT ) );
             break;
 
         default:
@@ -1729,12 +1736,12 @@ DI1::DI1( const char* dev_name, device::DEVICE_TYPE type,
 //-----------------------------------------------------------------------------
 void DI1::direct_on()
     {
-    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_on();
     }
 //-----------------------------------------------------------------------------
 void DI1::direct_off()
     {
-    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_off();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
 int DI1::get_state()
@@ -2127,12 +2134,27 @@ wages_eth::wages_eth( const char* dev_name ) :
 
 float wages_eth::get_value()
     {
-    return weth->get_wages_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::get_value() +
+            get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+        }
+
+    if ( weth ) return weth->get_wages_value() +
+        get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+
+    return 0.0f;
     }
 
 int wages_eth::get_state()
     {
-    return weth->get_wages_state();
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::get_state();
+        }
+
+    if ( weth ) return weth->get_wages_state();
+    return 0;
     }
 
 void wages_eth::evaluate_io()
@@ -2162,22 +2184,46 @@ void wages_eth::set_string_property( const char* field, const char* value )
 
 void wages_eth::direct_set_value( float new_value )
     {
-    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_value( new_value );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        if ( new_value >= .0f )
+            {
+            device::direct_set_value( new_value );
+            }
+        return;
+        }
+
+    if ( weth ) weth->set_wages_value( new_value );
     }
 
 void wages_eth::direct_set_state( int state )
     {
-    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_state( state );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( state );
+        }
+
+    if ( weth ) weth->set_wages_state( state );
     }
 
 void wages_eth::direct_off()
     {
-    weth->set_state( 0 );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_off();
+        }
+
+    if ( weth ) weth->set_wages_state( 0 );
     }
 
 void wages_eth::direct_on()
     {
-    weth->set_state( 1 );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_on();
+        }
+
+    if ( weth ) weth->set_wages_state( 1 );
     }
 
 void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
@@ -2282,7 +2328,10 @@ void wages_pxc_axl::direct_set_state( int new_state )
 
 void wages_pxc_axl::direct_set_value( float new_value )
     {
-    // Do nothing.
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        w = new_value;
+        }
     }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
