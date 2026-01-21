@@ -1179,12 +1179,14 @@ void base_counter::start()
     if ( static_cast<int>( STATES::S_PAUSE ) == device::get_state() )
         {        
         last_read_value = get_raw_value();
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_flag = false;
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_flag = false;
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     }
