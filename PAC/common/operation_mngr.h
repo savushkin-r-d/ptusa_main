@@ -297,7 +297,8 @@ class DI_DO_action: public action
 
         void finalize() override;
 
-        void print( const char* prefix, bool new_line ) const override;
+        void print( const char* prefix = "",
+            bool new_line = true ) const override;
 
         /// @brief Установка свойства для группы DI->DO.
         ///
@@ -333,7 +334,7 @@ class inverted_DI_DO_action : public DI_DO_action
         inverted_DI_DO_action();
 
     private:
-        void evaluate_DO( std::vector< device* > devices, 
+        void evaluate_DO( std::vector< device* > devices,
             DI_DO_action::LOGIC_TYPE logic_t ) override;
     };
 //-----------------------------------------------------------------------------

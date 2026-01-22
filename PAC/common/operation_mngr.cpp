@@ -1250,9 +1250,9 @@ void DI_DO_action::print( const char* prefix, bool new_line ) const
 
     action::print( prefix, false );
     printf( " {" );
-    for ( const auto& idx : logic_type )
+    for ( const auto& logic_t : logic_type )
         {
-        printf( " %d", idx == LOGIC_TYPE::AND ? 1 : 0 );
+        printf( " %d", logic_t == LOGIC_TYPE::AND ? 1 : 0 );
         }
     printf( " } " );
 
@@ -1334,6 +1334,14 @@ int DI_DO_action::set_int_property( const char* prop_name, size_t idx,
     int value )
     {
     action::set_int_property( prop_name, idx, value );
+
+    // Accept only 0 (OR) or 1 (AND) to avoid silently coercing
+    // arbitrary non-zero values to AND.
+    if ( value != 0 && value != 1 )
+        {
+        return 1;
+        }
+
     if ( strcmp( prop_name, "logic_type" ) == 0 )
         {
         while ( idx >= logic_type.size() )
