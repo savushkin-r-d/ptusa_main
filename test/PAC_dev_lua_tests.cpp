@@ -100,7 +100,8 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 
-    ASSERT_EQ( 1, luaL_dostring( L, "res = get_delta_millisec()" ) );  //Некорректный вызов.
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_delta_millisec()" ) );               //Некорректный вызов.
 
     ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "ms" );
@@ -137,11 +138,26 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_get_sec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_sec( 1 )" ) );                       //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_sec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
 TEST( toLuapp, tolua_PAC_dev_get_millisec00 )
     {
     lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
-    ASSERT_EQ( 1, luaL_dostring( L, "res = get_millisec( 1 )" ) );  //Некорректный вызов.
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_millisec( 1 )" ) );                  //Некорректный вызов.
     ASSERT_EQ( 0, luaL_dostring( L, "res = get_millisec()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
@@ -1147,6 +1163,7 @@ TEST( toLuapp, tolua_PAC_dev_valve_methods00 )
     // Тест get_off_fb_value.
     ASSERT_EQ( 0, luaL_dostring( L, "fb_off = V1:get_off_fb_value()" ) );
 
+    valve::clear_switching_off_queue();
     G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
