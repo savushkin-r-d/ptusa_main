@@ -3474,7 +3474,7 @@ int cipline_tech_object::_CheckErr( )
         }
 
     // Нет расхода на подаче
-    if (T[TMR_NO_FLOW]->get_countdown_time() != (rt_par_float[P_TM_R_NO_FLOW] * 1000L))
+    if (T[TMR_NO_FLOW]->get_countdown_time() != rt_par_float[P_TM_R_NO_FLOW] * 1000)
         {
         T[TMR_NO_FLOW]->set_countdown_time(
             static_cast<uint32_t>( rt_par_float[P_TM_R_NO_FLOW] * 1000 ));
@@ -4058,7 +4058,7 @@ int cipline_tech_object::CircRR( int where )
             break;
         }
 
-    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000L);
+    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
     rt_par_float[P_CONC] = c;
     if (T[TMR_OP_TIME]->is_time_up())
@@ -4868,7 +4868,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_S];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = static_cast<uint32_t>( rt_par_float[ PTM_S_SK ] * 1000L );
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_S_SK ] * 1000 );
                 }
             else
                 {
@@ -4886,7 +4886,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_K];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = static_cast<uint32_t>( rt_par_float[ PTM_K_SK ] * 1000L );
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_K_SK ] * 1000 );
                 }
             else
                 {
@@ -5366,7 +5366,7 @@ int cipline_tech_object::_OporCIP( int where )
         {
         if (!dev_ls_ret_pump->is_active())
             {
-            if (get_delta_millisec(ret_pums_ls_timer) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L))
+            if (get_delta_millisec(ret_pums_ls_timer) > rt_par_float[P_TM_RET_IS_EMPTY] * 1000)
                 {
                 return 1;
                 }
@@ -5502,7 +5502,7 @@ int cipline_tech_object::_Circ( int what )
                 {
                 if (LH->is_active())
                     {
-                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                    if (get_delta_millisec(circ_return_timer) > 1000)
                         {
                         V10->off();
                         V11->off();
@@ -5556,7 +5556,7 @@ int cipline_tech_object::_Circ( int what )
                 {
                 if (LH->is_active())
                     {
-                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                    if (get_delta_millisec(circ_return_timer) > 1000)
                         {
                         V10->off();
                         V11->off();
@@ -5712,7 +5712,7 @@ int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_
     }
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
     T[ TMR_OP_TIME ]->set_countdown_time( static_cast<uint32_t>(
-        rt_par_float[ P_MAX_OPER_TM ] * 1000L ) );
+        rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     NP->on();
@@ -6744,7 +6744,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 
 int cipline_tech_object::timeIsOut()
     {
-    if (T[TMR_OP_TIME]->get_work_time() >= rt_par_float[P_MAX_OPER_TM] * 1000L && rt_par_float[P_MAX_OPER_TM] > 0)
+    if (T[TMR_OP_TIME]->get_work_time() >= rt_par_float[P_MAX_OPER_TM] * 1000 && rt_par_float[P_MAX_OPER_TM] > 0)
         {
         return 1;
         }
@@ -7804,7 +7804,7 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt*1000L )
+    if ( get_delta_millisec( last_time ) > dt*1000 )
         {
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
@@ -7828,7 +7828,7 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
         //-Зона разгона.-!>
 
         last_time = get_millisec();
-        } // if ( get_millisec() - last_time > dt*1000L )
+        } // if ( get_millisec() - last_time > dt*1000 )
 
     //-Мягкий пуск.
     // Включили ручной режим.
