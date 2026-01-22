@@ -543,7 +543,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
 
     // Шаг 2 должен отключиться через заданное время, так как переходим к 
     // шагу 1 с задержкой.
-    const auto DELAY_1000MS = 1'000UL;
+    const auto DELAY_1000MS = 1'000;
     test_op->to_step( STEP1, DELAY_1000MS );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
@@ -564,8 +564,8 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     test_op->set_step_cooperate_time_par_n( COOPERATE_TIME_IDX );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP2 );
-    DeltaMilliSecSubHooker::set_millisec( 1000UL *
-        static_cast<unsigned long>( test_tank.par_float[ STEP2_TIME_IDX ] + 1 ) );
+    DeltaMilliSecSubHooker::set_millisec( 1000 *
+        static_cast<uint32_t>( test_tank.par_float[ STEP2_TIME_IDX ] + 1 ) );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP3 );
     EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
