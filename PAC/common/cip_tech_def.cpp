@@ -3474,10 +3474,10 @@ int cipline_tech_object::_CheckErr( )
         }
 
     // Нет расхода на подаче
-    if (T[TMR_NO_FLOW]->get_countdown_time() != rt_par_float[P_TM_R_NO_FLOW] * 1000)
+    if ( auto time = static_cast<uint32_t>( rt_par_float[ P_TM_R_NO_FLOW ] * 1000 );
+        T[ TMR_NO_FLOW ]->get_countdown_time() != time )
         {
-        T[TMR_NO_FLOW]->set_countdown_time(
-            static_cast<uint32_t>( rt_par_float[P_TM_R_NO_FLOW] * 1000 ));
+        T[ TMR_NO_FLOW ]->set_countdown_time( time );
         }
     if (NP->get_state() == ON)
         {
@@ -5362,15 +5362,12 @@ int cipline_tech_object::_OporCIP( int where )
             }
         }
 
-    if (dev_ls_ret_pump)
+    if ( dev_ls_ret_pump &&
+        !dev_ls_ret_pump->is_active() &&
+        get_delta_millisec( ret_pums_ls_timer ) >
+        static_cast<uint32_t>( rt_par_float[ P_TM_RET_IS_EMPTY ] * 1000 ) )
         {
-        if (!dev_ls_ret_pump->is_active())
-            {
-            if (get_delta_millisec(ret_pums_ls_timer) > rt_par_float[P_TM_RET_IS_EMPTY] * 1000)
-                {
-                return 1;
-                }
-            }
+        return 1;
         }
 
     if (FL->get_state() == FLIS)
@@ -6744,7 +6741,9 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 
 int cipline_tech_object::timeIsOut()
     {
-    if (T[TMR_OP_TIME]->get_work_time() >= rt_par_float[P_MAX_OPER_TM] * 1000 && rt_par_float[P_MAX_OPER_TM] > 0)
+    if ( T[ TMR_OP_TIME ]->get_work_time() >=
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) &&
+        rt_par_float[ P_MAX_OPER_TM ] > 0 )
         {
         return 1;
         }
@@ -7804,7 +7803,7 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt*1000 )
+    if ( get_delta_millisec( last_time ) > static_cast<uint32_t>( dt * 1000 ) )
         {
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );

@@ -1026,6 +1026,25 @@ TEST( cipline_tech_object, CircRR )
     G_LUA_MANAGER->free_Lua();
     }
 
+TEST( cipline_tech_object, timeIsOut )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.timeIsOut();
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( cipline_tech_object, InitCheckConc )
     {
     auto L = lua_open();
