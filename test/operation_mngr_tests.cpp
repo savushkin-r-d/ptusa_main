@@ -1820,20 +1820,20 @@ TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	}
 
 
-TEST( DI_DO_action, set_bool_property_logic_type )
+TEST( DI_DO_action, set_int_property )
 	{
 	auto action = DI_DO_action();
 	
 	// Test setting to AND logic.
-	auto res = action.set_bool_property( "logic_type", true );
+	auto res = action.set_int_property( "logic_type", 0, 1 );
 	EXPECT_EQ( 0, res );
 	
 	// Test setting to OR logic.
-	res = action.set_bool_property( "logic_type", false );
+	res = action.set_int_property( "logic_type", 1, 0 );
 	EXPECT_EQ( 0, res );
 	
 	// Test unknown property.
-	res = action.set_bool_property( "unknown_property", false );
+	res = action.set_int_property( "unknown_property", 2, 1 );
 	EXPECT_EQ( 1, res );
 	}
 
@@ -1848,7 +1848,7 @@ TEST( DI_DO_action, evaluate_AND_logic_all_active )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
 	auto action = DI_DO_action();
-	action.set_bool_property( "logic_type", true ); // Set to AND logic.
+	action.set_int_property( "logic_type", 0, 1 ); // Set to AND logic.
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );

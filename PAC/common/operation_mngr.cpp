@@ -1195,15 +1195,14 @@ void DI_DO_action::evaluate()
         }
 
     const auto &devs = devices[ MAIN_GROUP ];
-
+    size_t idx = 0;
     for ( const auto& dev_group : devs )
         {
-        if ( dev_group.empty() )
+        if ( !dev_group.empty() )
             {
-            continue;
+            evaluate_DO( dev_group, logic_type[ idx ] );
             }
-
-        evaluate_DO( dev_group );
+        idx++;        
         }
     }
 //-----------------------------------------------------------------------------
@@ -1240,8 +1239,31 @@ void DI_DO_action::finalize()
             }
         }    
     }
+
 //-----------------------------------------------------------------------------
-void DI_DO_action::evaluate_DO( std::vector< device* > devices )
+void DI_DO_action::print( const char* prefix, bool new_line ) const
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    action::print( prefix, false );
+    printf( " {" );
+    for ( const auto& idx : logic_type )
+        {
+        printf( " %d", idx == LOGIC_TYPE::AND ? 1 : 0 );
+        }
+    printf( " } " );
+
+    if ( new_line )
+        {
+        printf( "\n" );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate_DO( std::vector< device* > devices,
+    LOGIC_TYPE logic_t )
     {
     // Поиск активных DI среди всех входных устройств.
     auto any_di_active = false;
@@ -1273,7 +1295,7 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
 
     // Определяем состояние DO в зависимости от типа логики.
     auto should_activate_do = false;
-    if ( logic_type == LOGIC_TYPE::AND )
+    if ( logic_t == LOGIC_TYPE::AND )
         {
         should_activate_do = all_di_active;
         }
@@ -1308,16 +1330,31 @@ bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
     return false;
     }
 //-----------------------------------------------------------------------------
-int DI_DO_action::set_bool_property( const char* prop_name, bool value )
+int DI_DO_action::set_int_property( const char* prop_name, size_t idx,
+    int value )
     {
-    action::set_bool_property( prop_name, value );
+    action::set_int_property( prop_name, idx, value );
     if ( strcmp( prop_name, "logic_type" ) == 0 )
         {
-        logic_type = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
+        while ( idx >= logic_type.size() )
+            {
+            logic_type.push_back( LOGIC_TYPE::OR );
+            }
+
+        logic_type[ idx ] = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
         return 0;
         }
 
     return 1;
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::add_dev( device* dev, u_int group, u_int subgroup )
+    {
+    action::add_dev( dev, group, subgroup );
+    while ( subgroup >= logic_type.size() )
+        {
+        logic_type.push_back( LOGIC_TYPE::OR );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1326,7 +1363,8 @@ inverted_DI_DO_action::inverted_DI_DO_action():
     {
     }
 //-----------------------------------------------------------------------------
-void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
+void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices,
+    DI_DO_action::LOGIC_TYPE logic_t )
     {
     // Поиск активных DI среди всех входных устройств
     bool any_di_active = false;
