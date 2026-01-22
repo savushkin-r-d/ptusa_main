@@ -1481,6 +1481,9 @@ void device_manager::clear_io_devices()
 
     project_devices.clear();
 
+    valve::clear_switching_off_queue();
+    valve::clear_v_bistable();
+
     G_ERRORS_MANAGER->clear();
     }
 //-----------------------------------------------------------------------------

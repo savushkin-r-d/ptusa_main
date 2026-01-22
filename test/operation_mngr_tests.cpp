@@ -175,8 +175,6 @@ TEST( off_action, evaluate )
 	saved_params_u_int_4& par = PAC_info::get_instance()->par;
 	par[ PAC_info::P_V_OFF_DELAY_TIME ] = 0;
 
-	valve::clear_switching_off_queue();
-
 	virtual_valve V1( "V1" );
 	virtual_valve V2( "V2" );
 	virtual_valve V3( "V3" );

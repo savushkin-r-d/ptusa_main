@@ -1147,7 +1147,6 @@ TEST( toLuapp, tolua_PAC_dev_valve_methods00 )
     // Тест get_off_fb_value.
     ASSERT_EQ( 0, luaL_dostring( L, "fb_off = V1:get_off_fb_value()" ) );
 
-    valve::clear_switching_off_queue();
     G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }

@@ -1254,7 +1254,6 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    valve::clear_v_bistable();
     }
 
 
