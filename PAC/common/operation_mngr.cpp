@@ -976,7 +976,8 @@ step::step( std::string name, operation_state *owner,
 
     actions.push_back( new required_DI_action() );
     actions.push_back( new DI_DO_action() );
-    actions.push_back( new inverted_DI_DO_action() );
+    actions.push_back( new DI_DO_action( "Группы инвертированный DIs->DOs",
+        true ) );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     actions.push_back( new enable_step_by_signal() );
@@ -1125,7 +1126,8 @@ void step::set_dx_time( u_int_4 dx_time )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-DI_DO_action::DI_DO_action( std::string name ) :action( name )
+DI_DO_action::DI_DO_action( std::string name, bool is_inverted_logic ) :
+    action( name ), is_inverted( is_inverted_logic )
     {
     }
 //-----------------------------------------------------------------------------
@@ -1194,16 +1196,11 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    const auto &devs = devices[ MAIN_GROUP ];
-
-    for ( const auto& dev_group : devs )
+    const auto& devs = devices[ MAIN_GROUP ];
+    for ( size_t idx = 0; idx < devs.size(); idx++ )
         {
-        if ( dev_group.empty() )
-            {
-            continue;
-            }
-
-        evaluate_DO( dev_group );
+        evaluate_DO( devs[ idx ],
+            logic_type.size() > idx ? logic_type[ idx ] : LOGIC_TYPE::OR );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1240,8 +1237,31 @@ void DI_DO_action::finalize()
             }
         }    
     }
+
 //-----------------------------------------------------------------------------
-void DI_DO_action::evaluate_DO( std::vector< device* > devices )
+void DI_DO_action::print( const char* prefix, bool new_line ) const
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    action::print( prefix, false );
+    printf( " {" );
+    for ( const auto& logic_t : logic_type )
+        {
+        printf( " %d", logic_t == LOGIC_TYPE::AND ? 1 : 0 );
+        }
+    printf( " } " );
+
+    if ( new_line )
+        {
+        printf( "\n" );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate_DO( const std::vector< device* >& devices,
+    LOGIC_TYPE logic_t )
     {
     // Поиск активных DI среди всех входных устройств.
     auto any_di_active = false;
@@ -1273,13 +1293,18 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices )
 
     // Определяем состояние DO в зависимости от типа логики.
     auto should_activate_do = false;
-    if ( logic_type == LOGIC_TYPE::AND )
+    if ( logic_t == LOGIC_TYPE::AND )
         {
         should_activate_do = all_di_active;
         }
     else // LOGIC_TYPE::OR
         {
         should_activate_do = any_di_active;
+        }
+
+    if ( is_inverted )
+        {
+        should_activate_do = !should_activate_do;
         }
 
     // Управляем DO устройствами (они идут после всех DI).
@@ -1308,51 +1333,45 @@ bool DI_DO_action::is_di_device_type( device::DEVICE_TYPE device_type ) const
     return false;
     }
 //-----------------------------------------------------------------------------
-int DI_DO_action::set_bool_property( const char* prop_name, bool value )
+int DI_DO_action::set_int_property( const char* prop_name, size_t idx,
+    int value )
     {
-    action::set_bool_property( prop_name, value );
+    action::set_int_property( prop_name, idx, value );
+
+    // Accept only 0 (OR) or 1 (AND) to avoid silently coercing
+    // arbitrary non-zero values to AND.
+    if ( value != 0 && value != 1 )
+        {
+        return 1;
+        }
+
     if ( strcmp( prop_name, "logic_type" ) == 0 )
         {
-        logic_type = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
+        while ( idx >= logic_type.size() )
+            {
+            logic_type.push_back( LOGIC_TYPE::OR );
+            }
+
+        logic_type[ idx ] = value ? LOGIC_TYPE::AND : LOGIC_TYPE::OR;
         return 0;
         }
 
     return 1;
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-inverted_DI_DO_action::inverted_DI_DO_action():
-    DI_DO_action( "Группы инвертированный DI->DO's" )
+void DI_DO_action::add_dev( device* dev, u_int group, u_int subgroup )
     {
+    action::add_dev( dev, group, subgroup );
+    while ( subgroup >= logic_type.size() )
+        {
+        logic_type.push_back( LOGIC_TYPE::OR );
+        }
     }
 //-----------------------------------------------------------------------------
-void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
+void DI_DO_action::clear_dev()
     {
-    // Поиск активных DI среди всех входных устройств
-    bool any_di_active = false;
-    u_int di_count = 0;
-    
-    // Подсчитаем количество DI устройств и проверим их активность.
-    for ( const auto& dev : devices )
-        {
-        if ( is_di_device_type( dev->get_type() ) )
-            {
-            di_count++;
-            if ( dev->is_active() )
-                {
-                any_di_active = true;
-                }
-            }
-        }
-
-    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен.
-    int new_state = any_di_active ? 0 : 1;
-    
-    // Управляем DO устройствами (они идут после всех DI).
-    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
-        {
-        (*it)->set_state( new_state );
-        }
+    action::clear_dev();
+    logic_type.clear();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2020,7 +2039,7 @@ int jump_if_action::set_int_property( const char* prop_name, size_t idx,
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( R"("%s" unknown property "%s")",
                 name.c_str(), prop_name );
             }
         }
@@ -2110,7 +2129,7 @@ int enable_step_by_signal::set_bool_property( const char* prop_name, bool value 
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( R"("%s" unknown property "%s")",
                 name.c_str(), prop_name );
             }
         return 1;

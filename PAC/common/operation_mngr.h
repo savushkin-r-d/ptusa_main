@@ -289,7 +289,8 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
+        explicit DI_DO_action( std::string name = "Группы DIs->DOs",
+            bool is_inverted_logic = false );
 
         int check( char* reason, unsigned int max_len ) const override;
 
@@ -297,42 +298,36 @@ class DI_DO_action: public action
 
         void finalize() override;
 
-        /// @brief Установка булевого свойства для группы DI->DO.
+        void print( const char* prefix = "",
+            bool new_line = true ) const override;
+
+        /// @brief Установка свойства для группы DI->DO.
         ///
         /// Используется для конфигурирования логики обработки сигналов DI
         /// (типа логики OR/AND) при управлении соответствующими DO.
-        ///
-        /// @param [in] prop_name Имя свойства, которое необходимо установить.
-        /// @param [in] value     Значение свойства.
-        ///
-        /// @return Результат установки свойства (0 при успешной установке,
-        ///         отрицательное значение при ошибке).
-        int set_bool_property( const char* prop_name, bool value ) override;
+        int set_int_property( const char* prop_name, size_t idx,
+            int value ) override;
 
         bool is_di_device_type( device::DEVICE_TYPE device_type ) const;
+
+        void add_dev( device* dev, u_int group = MAIN_GROUP,
+            u_int subgroup = MAIN_SUBGROUP ) override;
+
+        void clear_dev() override;
 
     private:
         enum class LOGIC_TYPE
             {
-            OR = 0,  // Default: any DI active turns on DO.
-            AND = 1  // All DI must be active to turn on DO.
+            OR = 0,  // Default: any DI active turns on all DO.
+            AND = 1  // All DI must be active to turn on all DO.
             };
 
-        virtual void evaluate_DO( std::vector< device* > devices );
+        std::vector < LOGIC_TYPE > logic_type;
 
-        LOGIC_TYPE logic_type = LOGIC_TYPE::OR;
-    };
-//-----------------------------------------------------------------------------
-/// <summary>
-/// Пары inverted DI->DO.
-/// </summary>
-class inverted_DI_DO_action : public DI_DO_action
-    {
-    public:
-        inverted_DI_DO_action();
+        virtual void evaluate_DO( const std::vector< device* >& devices,
+            LOGIC_TYPE logic_t );
 
-    private:
-        void evaluate_DO( std::vector< device* > devices ) override;
+        bool is_inverted{ false };
     };
 //-----------------------------------------------------------------------------
 /// <summary>

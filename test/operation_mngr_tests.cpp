@@ -1668,7 +1668,7 @@ TEST( DI_DO_action, check )
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
+		"в поле 'Группы DIs->DOs' устройство 'test_AI1 (Test AI)'"
 		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
 
@@ -1773,7 +1773,7 @@ TEST( DI_DO_action, check_multiple_devices )
     res = action.check( &msg[ 0 ], MAX_STR_SIZE );
     EXPECT_EQ( 1, res );
     const std::string EXPECTED_STR = 
-        "в поле 'Группы DI->DO's' устройство 'test_DI1 ()' расположено "
+        "в поле 'Группы DIs->DOs' устройство 'test_DI1 ()' расположено "
         "неправильно: DI сигналы должны быть описаны перед DO сигналами";
     EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
 	}
@@ -1819,21 +1819,89 @@ TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	EXPECT_FALSE( test_DO.is_active() );
 	}
 
+TEST( DI_DO_action, evaluate_multiple_subgroups )
+    {
+    DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    test_DO1.set_descr( "Test DO1" );
+    DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    test_DO2.set_descr( "Test DO2" );
 
-TEST( DI_DO_action, set_bool_property_logic_type )
+    auto action = DI_DO_action();
+    action.add_dev( &test_DI1 );
+    action.add_dev( &test_DI2 );
+    action.add_dev( &test_DO1 );
+    action.set_int_property( "logic_type", 0, 0 ); // Set to OR logic.
+    action.add_dev( &test_DI1, 0, 1 );
+    action.add_dev( &test_DI2, 0, 1 );
+    action.add_dev( &test_DO2, 0, 1 );
+    action.set_int_property( "logic_type", 1, 1 ); // Set to AND logic.
+
+    std::string msg( MAX_STR_SIZE, '\0' );
+    auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 0, res );
+    EXPECT_STREQ( "", msg.c_str() );
+
+    // Изначально все DI неактивны.
+    EXPECT_FALSE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Активируем DI1 - DO1 должно активироваться (OR логика).
+    test_DI1.set_cmd( "ST", 0, 1.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Активируем DI2 - DO2 должно также активироваться (AND логика).
+    test_DI2.set_cmd( "ST", 0, 1.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_TRUE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_TRUE( test_DO2.is_active() );
+
+    // Деактивируем активный DI2 - DO2 должно деактивироваться (AND логика).
+    test_DI2.set_cmd( "ST", 0, 0.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Деактивируем активный DI1 - DO1 должно деактивироваться (OR логика).
+    test_DI1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FALSE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    }
+
+
+TEST( DI_DO_action, set_int_property )
 	{
 	auto action = DI_DO_action();
 	
 	// Test setting to AND logic.
-	auto res = action.set_bool_property( "logic_type", true );
+	auto res = action.set_int_property( "logic_type", 0, 1 );
 	EXPECT_EQ( 0, res );
 	
 	// Test setting to OR logic.
-	res = action.set_bool_property( "logic_type", false );
+	res = action.set_int_property( "logic_type", 1, 0 );
 	EXPECT_EQ( 0, res );
 	
 	// Test unknown property.
-	res = action.set_bool_property( "unknown_property", false );
+	res = action.set_int_property( "unknown_property", 2, 1 );
 	EXPECT_EQ( 1, res );
 	}
 
@@ -1848,7 +1916,7 @@ TEST( DI_DO_action, evaluate_AND_logic_all_active )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
 	auto action = DI_DO_action();
-	action.set_bool_property( "logic_type", true ); // Set to AND logic.
+	action.set_int_property( "logic_type", 0, 1 ); // Set to AND logic.
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
@@ -1933,7 +2001,7 @@ TEST( DI_DO_action, evaluate_OR_logic_default )
 	}
 
 
-TEST( inverted_DI_DO_action, evaluate )
+TEST( DI_DO_action, evaluate_inverted )
     {
     DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
         device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -1941,7 +2009,7 @@ TEST( inverted_DI_DO_action, evaluate )
     DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-    auto action = inverted_DI_DO_action();
+    auto action = DI_DO_action( "Группы инвертированный DIs->DOs", true );
     action.add_dev( &test_DI );
     action.add_dev( &test_DO );
 
