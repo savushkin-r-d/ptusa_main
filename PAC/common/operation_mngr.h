@@ -324,7 +324,7 @@ class DI_DO_action: public action
 
         std::vector < LOGIC_TYPE > logic_type;
 
-        virtual void evaluate_DO( std::vector< device* > devices,
+        virtual void evaluate_DO( const std::vector< device* >& devices,
             LOGIC_TYPE logic_t );
 
         bool is_inverted{ false };

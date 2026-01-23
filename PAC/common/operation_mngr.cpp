@@ -1196,15 +1196,11 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    const auto &devs = devices[ MAIN_GROUP ];
-    size_t idx = 0;
-    for ( const auto& dev_group : devs )
+    const auto& devs = devices[ MAIN_GROUP ];
+    for ( size_t idx = 0; idx < devs.size(); idx++ )
         {
-        if ( !dev_group.empty() )
-            {
-            evaluate_DO( dev_group, logic_type[ idx ] );
-            }
-        idx++;        
+        evaluate_DO( devs[ idx ],
+            logic_type.size() > idx ? logic_type[ idx ] : LOGIC_TYPE::OR );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1264,7 +1260,7 @@ void DI_DO_action::print( const char* prefix, bool new_line ) const
         }
     }
 //-----------------------------------------------------------------------------
-void DI_DO_action::evaluate_DO( std::vector< device* > devices,
+void DI_DO_action::evaluate_DO( const std::vector< device* >& devices,
     LOGIC_TYPE logic_t )
     {
     // Поиск активных DI среди всех входных устройств.
@@ -2043,7 +2039,7 @@ int jump_if_action::set_int_property( const char* prop_name, size_t idx,
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( R"("%s" unknown property "%s")",
                 name.c_str(), prop_name );
             }
         }
@@ -2133,7 +2129,7 @@ int enable_step_by_signal::set_bool_property( const char* prop_name, bool value 
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( R"("%s" unknown property "%s")",
                 name.c_str(), prop_name );
             }
         return 1;
