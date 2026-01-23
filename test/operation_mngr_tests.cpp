@@ -1668,7 +1668,7 @@ TEST( DI_DO_action, check )
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
 	const std::string EXPECTED_STR = 
-		"в поле 'Группы DI->DO's' устройство 'test_AI1 (Test AI)'"
+		"в поле 'Группы DIs->DOs' устройство 'test_AI1 (Test AI)'"
 		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
 
@@ -1773,7 +1773,7 @@ TEST( DI_DO_action, check_multiple_devices )
     res = action.check( &msg[ 0 ], MAX_STR_SIZE );
     EXPECT_EQ( 1, res );
     const std::string EXPECTED_STR = 
-        "в поле 'Группы DI->DO's' устройство 'test_DI1 ()' расположено "
+        "в поле 'Группы DIs->DOs' устройство 'test_DI1 ()' расположено "
         "неправильно: DI сигналы должны быть описаны перед DO сигналами";
     EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
 	}
@@ -1933,7 +1933,7 @@ TEST( DI_DO_action, evaluate_OR_logic_default )
 	}
 
 
-TEST( inverted_DI_DO_action, evaluate )
+TEST( DI_DO_action, evaluate_inverted )
     {
     DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
         device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -1941,7 +1941,7 @@ TEST( inverted_DI_DO_action, evaluate )
     DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 
-    auto action = inverted_DI_DO_action();
+    auto action = DI_DO_action( "Группы инвертированный DIs->DOs", true );
     action.add_dev( &test_DI );
     action.add_dev( &test_DO );
 

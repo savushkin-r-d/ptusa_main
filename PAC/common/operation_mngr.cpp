@@ -976,7 +976,8 @@ step::step( std::string name, operation_state *owner,
 
     actions.push_back( new required_DI_action() );
     actions.push_back( new DI_DO_action() );
-    actions.push_back( new inverted_DI_DO_action() );
+    actions.push_back( new DI_DO_action( "Группы инвертированный DIs->DOs",
+        true ) );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     actions.push_back( new enable_step_by_signal() );
@@ -1125,7 +1126,8 @@ void step::set_dx_time( u_int_4 dx_time )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-DI_DO_action::DI_DO_action( std::string name ) :action( name )
+DI_DO_action::DI_DO_action( std::string name, bool is_inverted_logic ) :
+    action( name ), is_inverted( is_inverted_logic )
     {
     }
 //-----------------------------------------------------------------------------
@@ -1304,6 +1306,11 @@ void DI_DO_action::evaluate_DO( std::vector< device* > devices,
         should_activate_do = any_di_active;
         }
 
+    if ( is_inverted )
+        {
+        should_activate_do = !should_activate_do;
+        }
+
     // Управляем DO устройствами (они идут после всех DI).
     for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
         {
@@ -1365,40 +1372,10 @@ void DI_DO_action::add_dev( device* dev, u_int group, u_int subgroup )
         }
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-inverted_DI_DO_action::inverted_DI_DO_action():
-    DI_DO_action( "Группы инвертированный DI->DO's" )
+void DI_DO_action::clear_dev()
     {
-    }
-//-----------------------------------------------------------------------------
-void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices,
-    DI_DO_action::LOGIC_TYPE logic_t )
-    {
-    // Поиск активных DI среди всех входных устройств
-    bool any_di_active = false;
-    u_int di_count = 0;
-    
-    // Подсчитаем количество DI устройств и проверим их активность.
-    for ( const auto& dev : devices )
-        {
-        if ( is_di_device_type( dev->get_type() ) )
-            {
-            di_count++;
-            if ( dev->is_active() )
-                {
-                any_di_active = true;
-                }
-            }
-        }
-
-    // Инвертированная логика: DO активно, когда НИ ОДИН DI не активен.
-    int new_state = any_di_active ? 0 : 1;
-    
-    // Управляем DO устройствами (они идут после всех DI).
-    for ( auto it = devices.begin() + di_count; it != devices.end(); ++it )
-        {
-        (*it)->set_state( new_state );
-        }
+    action::clear_dev();
+    logic_type.clear();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

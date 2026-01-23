@@ -289,7 +289,8 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        explicit DI_DO_action( std::string name = "Группы DI->DO's" ) ;
+        explicit DI_DO_action( std::string name = "Группы DIs->DOs",
+            bool is_inverted_logic = false );
 
         int check( char* reason, unsigned int max_len ) const override;
 
@@ -312,30 +313,21 @@ class DI_DO_action: public action
         void add_dev( device* dev, u_int group = MAIN_GROUP,
             u_int subgroup = MAIN_SUBGROUP ) override;
 
+        void clear_dev() override;
+
+    private:
         enum class LOGIC_TYPE
             {
-            OR = 0,  // Default: any DI active turns on DO.
-            AND = 1  // All DI must be active to turn on DO.
+            OR = 0,  // Default: any DI active turns on all DO.
+            AND = 1  // All DI must be active to turn on all DO.
             };
 
         std::vector < LOGIC_TYPE > logic_type;
 
-    private:
         virtual void evaluate_DO( std::vector< device* > devices,
             LOGIC_TYPE logic_t );
-    };
-//-----------------------------------------------------------------------------
-/// <summary>
-/// Пары inverted DI->DO.
-/// </summary>
-class inverted_DI_DO_action : public DI_DO_action
-    {
-    public:
-        inverted_DI_DO_action();
 
-    private:
-        void evaluate_DO( std::vector< device* > devices,
-            DI_DO_action::LOGIC_TYPE logic_t ) override;
+        bool is_inverted{ false };
     };
 //-----------------------------------------------------------------------------
 /// <summary>
