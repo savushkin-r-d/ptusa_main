@@ -1819,6 +1819,74 @@ TEST( DI_DO_action, evaluate_multiple_DI_single_active )
 	EXPECT_FALSE( test_DO.is_active() );
 	}
 
+TEST( DI_DO_action, evaluate_multiple_subgroups )
+    {
+    DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    DI1 test_DI2( "test_DI2", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    test_DO1.set_descr( "Test DO1" );
+    DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO,
+        device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+    test_DO2.set_descr( "Test DO2" );
+
+    auto action = DI_DO_action();
+    action.add_dev( &test_DI1 );
+    action.add_dev( &test_DI2 );
+    action.add_dev( &test_DO1 );
+    action.set_int_property( "logic_type", 0, 0 ); // Set to OR logic.
+    action.add_dev( &test_DI1, 0, 1 );
+    action.add_dev( &test_DI2, 0, 1 );
+    action.add_dev( &test_DO2, 0, 1 );
+    action.set_int_property( "logic_type", 1, 1 ); // Set to AND logic.
+
+    std::string msg( MAX_STR_SIZE, '\0' );
+    auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
+    EXPECT_EQ( 0, res );
+    EXPECT_STREQ( "", msg.c_str() );
+
+    // Изначально все DI неактивны.
+    EXPECT_FALSE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Активируем DI1 - DO1 должно активироваться (OR логика).
+    test_DI1.set_cmd( "ST", 0, 1.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Активируем DI2 - DO2 должно также активироваться (AND логика).
+    test_DI2.set_cmd( "ST", 0, 1.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_TRUE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_TRUE( test_DO2.is_active() );
+
+    // Деактивируем активный DI2 - DO2 должно деактивироваться (AND логика).
+    test_DI2.set_cmd( "ST", 0, 0.0 );
+    EXPECT_TRUE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_TRUE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+
+    // Деактивируем активный DI1 - DO1 должно деактивироваться (OR логика).
+    test_DI1.set_cmd( "ST", 0, 0.0 );
+    EXPECT_FALSE( test_DI1.is_active() );
+    EXPECT_FALSE( test_DI2.is_active() );
+    action.evaluate();
+    EXPECT_FALSE( test_DO1.is_active() );
+    EXPECT_FALSE( test_DO2.is_active() );
+    }
+
 
 TEST( DI_DO_action, set_int_property )
 	{
