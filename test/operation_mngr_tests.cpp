@@ -1560,8 +1560,9 @@ TEST( checked_devices_action, init )
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
         FQT1.get_state() );
 
-    //Прошло время ожидания, счетчик не считает - есть ошибка.
+    //Прошло время ожидания (>1ms), счетчик не считает - есть ошибка.
     sleep_ms( 1 );
+    sleep_ms( 0 );
     action.evaluate();
     FQT1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
