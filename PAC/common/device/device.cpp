@@ -1180,7 +1180,7 @@ void base_counter::start()
         {        
         last_read_value = get_raw_value();
         non_working_pump_flag = false;
-        min_flow_flag = false;
+        min_flow_detected_flag = false;
         start_pump_working_time = get_millisec();
         start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
@@ -1188,7 +1188,7 @@ void base_counter::start()
     else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
         non_working_pump_flag = false;
-        min_flow_flag = false;
+        min_flow_detected_flag = false;
         start_pump_working_time = get_millisec();
         start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
@@ -1223,18 +1223,18 @@ void base_counter::check_self_flow()
     if ( get_flow() <= min_flow )
         {
         // Расход ниже минимального.
-        min_flow_flag = true;
+        min_flow_detected_flag = true;
         return;
         }
 
     // Расход выше минимального.
-    if ( min_flow_flag )
+    if ( min_flow_detected_flag )
         {
         // Фиксируем время и счетчик появления расхода, превышающего
         // минимальный.
         start_pump_working_time_self_flow = get_millisec();
         counter_prev_value_self_flow = get_abs_quantity();
-        min_flow_flag = false;
+        min_flow_detected_flag = false;
         }
     else
         {
@@ -1350,7 +1350,7 @@ void base_counter::evaluate_io()
         device::get_state() < 0 )
         {
         non_working_pump_flag = false;
-        min_flow_flag = false;
+        min_flow_detected_flag = false;
         return;                     // Не изменяем данное состояние.
         }
         
@@ -3925,9 +3925,8 @@ void timer::set_countdown_time( uint32_t new_countdown_time )
         {
         if ( 0 == new_countdown_time )
             {
-            printf( "Error void timer::set_countdown_time( uint32_t time ), "
-                "time = %" PRIu32 "!\n",
-                new_countdown_time );
+            printf( "Error in timer::set_countdown_time: "
+                "invalid time value = %" PRIu32 "!\n", new_countdown_time );
             }
         }
 

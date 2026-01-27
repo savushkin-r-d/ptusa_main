@@ -1343,7 +1343,7 @@ class base_counter: public i_counter, public device, public io_device
         uint32_t start_pump_working_time = get_millisec();
         u_int_4 counter_prev_value = 0;
 
-        bool min_flow_flag{ false };
+        bool min_flow_detected_flag{ false };
         uint32_t start_pump_working_time_self_flow = get_millisec();
         u_int_4 counter_prev_value_self_flow = 0;
 
