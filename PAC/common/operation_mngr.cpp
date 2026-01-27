@@ -940,6 +940,8 @@ void checked_devices_action::finalize()
 /// @brief Инициализация действия.
 void checked_devices_action::init()
     {
+    if ( is_empty() ) return;
+
     // Запускаем счётчики при старте шага.
     for ( const auto& group : devices )
         {

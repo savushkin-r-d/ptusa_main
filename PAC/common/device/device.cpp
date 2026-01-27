@@ -1181,12 +1181,16 @@ void base_counter::start()
         last_read_value = get_raw_value();
         non_working_pump_flag = false;
         min_flow_flag = false;
+        start_pump_working_time = get_millisec();
+        start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
         non_working_pump_flag = false;
         min_flow_flag = false;
+        start_pump_working_time = get_millisec();
+        start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     }

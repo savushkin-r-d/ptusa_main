@@ -1533,16 +1533,42 @@ TEST( checked_devices_action, init )
     action.add_dev( &test_DO );
 
     FQT1.pause();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_PAUSE ),
         FQT1.get_state() );
 
     action.init();
     action.evaluate();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
         FQT1.get_state() );
 
-    action.finalize();
+    FQT1.set_cmd( "F", 0, 1 );
+    FQT1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    FQT1.set_cmd( "P_DT", 0, 1 );
+    sleep_ms( 1 );
+    //Прошло заданное время, задан минимальный расход, счетчик не считает -
+    //есть ошибка.
+    FQT1.evaluate_io();    
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
+
+    // После старта действия ошибка счётчика сбрасывается, но она возникнет
+    // опять по прошествии времени ожидания.
+    action.init();
+    action.evaluate();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
+        FQT1.get_state() );
+
+    //Прошло время ожидания, счетчик не считает - есть ошибка.
+    sleep_ms( 1 );
+    action.evaluate();
+    FQT1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
+
+    action.finalize();
+    FQT1.evaluate_io();
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ),
         FQT1.get_state() );
     }
 
