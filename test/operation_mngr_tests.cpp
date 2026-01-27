@@ -1547,6 +1547,7 @@ TEST( checked_devices_action, init )
     FQT1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
     FQT1.set_cmd( "P_DT", 0, 1 );
     sleep_ms( 1 );
+    sleep_ms( 0 );
     //Прошло заданное время, задан минимальный расход, счетчик не считает -
     //есть ошибка.
     FQT1.evaluate_io();    
