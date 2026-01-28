@@ -2022,7 +2022,7 @@ int jump_if_action::set_int_property( const char* prop_name, size_t idx,
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( "'%s' unknown property '%s'",
                 name.c_str(), prop_name );
             }
         }
@@ -2112,7 +2112,7 @@ int enable_step_by_signal::set_bool_property( const char* prop_name, bool value 
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+            G_LOG->warning( "'%s' unknown property '%s'",
                 name.c_str(), prop_name );
             }
         return 1;
@@ -2783,7 +2783,7 @@ int operation_state::on_extra_step( int step_idx )
     return on_extra_step( step_idx, 0, false );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx, u_long step_time,
+int operation_state::on_extra_step( int step_idx, uint32_t step_time,
     bool is_print_time )
     {
     if ( (size_t) step_idx > steps.size() )

@@ -177,7 +177,7 @@ class delay_on_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint32_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -219,7 +219,7 @@ class delay_off_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint32_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -559,7 +559,7 @@ class step
         std::string name; ///< Имя.
 
         bool active;
-        u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
+        uint32_t dx_time;                ///< Время шага, отработанное до паузы.
 
         int tag = -1;   ///< Тег (индекс связанного объекта).
 
@@ -701,7 +701,7 @@ class operation_state
         void load();
 
         int on_extra_step( int step_idx );
-        int on_extra_step( int step_idx, u_long step_time, bool is_print_time );
+        int on_extra_step( int step_idx, uint32_t step_time, bool is_print_time );
 
         int off_extra_step( int step_idx );
 
@@ -719,8 +719,8 @@ class operation_state
     private:
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
-        std::vector< u_long > active_steps_duration;
-        std::vector< u_long > active_steps_start_time;
+        std::vector< uint32_t > active_steps_duration;
+        std::vector< uint32_t > active_steps_start_time;
 
         std::vector< int > saved_active_steps;
 
