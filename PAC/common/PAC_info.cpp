@@ -60,9 +60,9 @@ void PAC_info::eval()
         up_mins = up_msec / ( 1000UL * 60 ) % 60;
         up_secs = up_msec / 1000 % 60;
 
-        sprintf( up_time_str,
-            "%" PRIu32 " дн. %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32,
-            up_days, up_hours, up_mins, up_secs );
+        auto res = fmt::format_to_n( up_time_str, C_MAX_STR_LENGTH - 1,
+            "{} дн. {:02}:{:02}:{:02}", up_days, up_hours, up_mins, up_secs );
+        *res.out = '\0';
         }
     }
 //-----------------------------------------------------------------------------
