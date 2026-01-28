@@ -614,7 +614,7 @@ class operation_state
         ///
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
-        void to_step( u_int new_step, u_long cooperative_time = 0 );
+        void to_step( u_int new_step, uint32_t cooperative_time = 0 );
 
         /// @brief Переход к следующему шагу.
         void to_next_step();

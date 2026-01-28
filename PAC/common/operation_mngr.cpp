@@ -12,6 +12,7 @@
 #include "g_errors.h"
 #include "tech_def.h"
 #include <fmt/chrono.h>
+#include <inttypes.h>
 
 using namespace std::literals; // Enables ""s literal.
 
@@ -2421,7 +2422,7 @@ step* operation_state::operator[]( int idx )
     return &step_stub;
     }
 //-----------------------------------------------------------------------------
-void operation_state::to_step( u_int new_step, u_long cooperative_time )
+void operation_state::to_step( u_int new_step, uint32_t cooperative_time )
     {
     if ( new_step > steps.size() || new_step <= 0 )
         {
@@ -2838,7 +2839,7 @@ int operation_state::on_extra_step( int step_idx, uint32_t step_time,
                 operation_number, name.c_str(), step_idx );
             if ( is_print_time )
                 {
-                printf( " (%lu ms)", step_time );
+                printf( " (%" PRIu32 " ms)", step_time );
                 }
             printf( "." );
             SetColor( RESET );
