@@ -767,7 +767,7 @@ class operation
         ///
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
-        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
+        void to_step( unsigned int new_step, uint32_t cooperative_time = 0 );
 
         /// @brief Переход к следующему шагу.
         ///
