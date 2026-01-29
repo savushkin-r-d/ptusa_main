@@ -97,7 +97,7 @@ altivar_manager * G_ALTIVAR_MANAGER()
 	}
 
 
-altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout, int type) : 
+altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout, int type) : 
 	type(type)
 	{
 	mc = new modbus_client(id, (char*)ip, port, exchangetimeout);

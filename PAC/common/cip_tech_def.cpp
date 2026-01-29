@@ -457,17 +457,14 @@ int cipline_tech_object::save_device( char *buff )
 
     //Время простоя.
     char up_time_str [ 50 ];
-    u_int_4 up_hours;
-    u_int_4 up_mins;
-    u_int_4 up_secs;
 
-    up_secs = operations_manager->get_idle_time();
-    up_hours = up_secs / ( 60 * 60 );
-    up_mins = up_secs / 60 % 60 ;
+    auto up_secs = operations_manager->get_idle_time();
+    auto up_hours = up_secs / ( 60 * 60 );
+    auto up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
 
     sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
-        ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
+        up_hours, up_mins, up_secs );
     answer_size += sprintf( buff + answer_size, "%s", up_time_str );
 
     //Параметры.
@@ -3477,9 +3474,10 @@ int cipline_tech_object::_CheckErr( )
         }
 
     // Нет расхода на подаче
-    if (T[TMR_NO_FLOW]->get_countdown_time() != (rt_par_float[P_TM_R_NO_FLOW] * 1000L))
+    if ( auto time = static_cast<uint32_t>( rt_par_float[ P_TM_R_NO_FLOW ] * 1000 );
+        T[ TMR_NO_FLOW ]->get_countdown_time() != time )
         {
-        T[TMR_NO_FLOW]->set_countdown_time((unsigned long)rt_par_float[P_TM_R_NO_FLOW] * 1000L);
+        T[ TMR_NO_FLOW ]->set_countdown_time( time );
         }
     if (NP->get_state() == ON)
         {
@@ -3760,7 +3758,8 @@ int cipline_tech_object::InitFilRR( int where )
         divider = 1;
         }
     rt_par_float[P_MAX_OPER_TM] = (v/divider)*MAX_OP_TIME*3600;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     cnt->start();
@@ -3814,7 +3813,8 @@ int cipline_tech_object::InitCircRR( int where )
 
     rt_par_float[P_OP_TIME_LEFT] = 0;
     rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CIRC_RR];
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     cnt->start();
@@ -3826,7 +3826,8 @@ int cipline_tech_object::InitCheckConc( int where )
     InitCircRR(where);
     rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CHKC];
     T[TMR_OP_TIME]->reset();
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     return 0;
     }
@@ -3922,7 +3923,8 @@ int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
                 no_liquid_is_warning = 0;
                 break;
             }
-        T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
+        T[ TMR_OP_TIME ]->set_countdown_time(
+            static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
 
         rt_par_float[P_SUM_OP] = 0;
         }
@@ -3977,9 +3979,11 @@ int cipline_tech_object::InitOpolRR( int where )
 
     rt_par_float[P_OP_TIME_LEFT] = 0;
     rt_par_float[P_MAX_OPER_TM] = 300;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
-    T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000L);
+    T[TMR_CHK_CONC]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[P_TM_NO_CONC] * 1000 ) );
     rt_par_float[P_SUM_OP] = 0;
 
     rt_par_float[P_ZAD_CONC] = z;
@@ -4054,7 +4058,7 @@ int cipline_tech_object::CircRR( int where )
             break;
         }
 
-    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000L);
+    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
     rt_par_float[P_CONC] = c;
     if (T[TMR_OP_TIME]->is_time_up())
@@ -4394,7 +4398,8 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
         divider = 1;
         }
     rt_par_float[P_MAX_OPER_TM] = 3.6f * MAX_OP_TIME * p / divider;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
 
     rt_par_float[P_ZAD_CONC] = z;
@@ -4553,18 +4558,24 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
         divider = 1;
         }
     rt_par_float[P_MAX_OPER_TM] = 3.6f * MAX_OP_TIME * p / divider;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
-    T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_FLOW_R] * 1000);
+    T[TMR_RETURN]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[P_TM_NO_FLOW_R] * 1000 ) );
     T[TMR_RETURN]->reset();
     T[TMR_CHK_CONC]->reset();
     if (what == TANK_K || what == TANK_S || where == TANK_S || where == TANK_K)
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000 * 2); //для ошибки "высокая концентрация в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time(
+            static_cast<uint32_t>( rt_par_float[ P_TM_NO_CONC ] *
+                1000 * 2 ) ); // Для ошибки "высокая концентрация в возвратной трубе".
         }
     else
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000); //для ошибки "нет концентрации в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time(
+            static_cast<uint32_t>( rt_par_float[ P_TM_NO_CONC ] *
+                1000 ) ); // Для ошибки "нет концентрации в возвратной трубе".
         }
     rt_par_float[P_SUM_OP] = 0;
 
@@ -4640,9 +4651,11 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
     rt_par_float[P_VRAB] = 0;
     rt_par_float[P_OP_TIME_LEFT] = 0;
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORCIP];
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
-    T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_RET_IS_EMPTY]*1000);
+    T[TMR_RETURN]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_TM_RET_IS_EMPTY ] * 1000 ) );
     T[TMR_RETURN]->reset();
     rt_par_float[P_SUM_OP] = 0;
 
@@ -4707,7 +4720,8 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
     rt_par_float[P_VRAB] = rt_par_float[P_V_RAB_ML];
     rt_par_float[P_OP_TIME_LEFT] = 0;
     rt_par_float[P_MAX_OPER_TM] = 300;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     return 0;
     }
@@ -4786,7 +4800,8 @@ int cipline_tech_object::_InitOporCirc( int where, int step_to_init, int not_fir
     rt_par_float[P_VRAB] = rt_par_float[P_V_LL_BOT];
     rt_par_float[P_OP_TIME_LEFT] = 0;
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORBACHOK];
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
+    T[ TMR_OP_TIME ]->set_countdown_time(
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     T[TMR_OP_TIME]->pause();
     return 0;
@@ -4807,7 +4822,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
         }
 
     float t=600, z=0;
-    unsigned long tm = 0;
+    uint32_t tm = 0;
     ret_circ_flag = 0;
     if ((circ_tank_s && 28 == step_to_init) || (circ_tank_k && 48 == step_to_init))
         {
@@ -4834,15 +4849,15 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
         {
         case WATER:
             t=rt_par_float[P_T_WP];
-            tm=(unsigned long)rt_par_float[PTM_OP]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_OP ] * 1000 );
             break;
         case SANITIZER:
             t=rt_par_float[P_T_SANITIZER];
-            tm=(unsigned long)rt_par_float[PTM_SANITIZER]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_SANITIZER ] * 1000 );
             break;
         case HOT_WATER:
             t=rt_par_float[P_T_D];
-            tm=(unsigned long)rt_par_float[PTM_D]*1000;
+            tm = static_cast<uint32_t>( rt_par_float[ PTM_D ] * 1000 );
             break;
         case SHCH:
             if (circ_tank_s)
@@ -4853,11 +4868,11 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_S];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = (unsigned long)rt_par_float[PTM_S_SK] * 1000L;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_S_SK ] * 1000 );
                 }
             else
                 {
-                tm=(unsigned long)rt_par_float[PTM_S]*1000;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_S ] * 1000 );
                 }
             z=parpar[0][P_CZAD_S];
             break;
@@ -4871,11 +4886,11 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
             t=rt_par_float[P_T_K];
             if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
                 {
-                tm = (unsigned long)rt_par_float[PTM_K_SK] * 1000L;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_K_SK ] * 1000 );
                 }
             else
                 {
-                tm=(unsigned long)rt_par_float[PTM_K]*1000;
+                tm = static_cast<uint32_t>( rt_par_float[ PTM_K ] * 1000 );
                 }
             break;
         }
@@ -4906,7 +4921,7 @@ int cipline_tech_object::_ToObject( int from, int where )
     {
     float c=0;
     unsigned long tmp;
-    rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+    rt_par_float[ P_OP_TIME_LEFT ] = T[ TMR_OP_TIME ]->get_work_time() / 1000;
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
 
 
@@ -5347,15 +5362,12 @@ int cipline_tech_object::_OporCIP( int where )
             }
         }
 
-    if (dev_ls_ret_pump)
+    if ( dev_ls_ret_pump &&
+        !dev_ls_ret_pump->is_active() &&
+        get_delta_millisec( ret_pums_ls_timer ) >
+        static_cast<uint32_t>( rt_par_float[ P_TM_RET_IS_EMPTY ] * 1000 ) )
         {
-        if (!dev_ls_ret_pump->is_active())
-            {
-            if (get_delta_millisec(ret_pums_ls_timer) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L))
-                {
-                return 1;
-                }
-            }
+        return 1;
         }
 
     if (FL->get_state() == FLIS)
@@ -5487,7 +5499,7 @@ int cipline_tech_object::_Circ( int what )
                 {
                 if (LH->is_active())
                     {
-                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                    if (get_delta_millisec(circ_return_timer) > 1000)
                         {
                         V10->off();
                         V11->off();
@@ -5541,7 +5553,7 @@ int cipline_tech_object::_Circ( int what )
                 {
                 if (LH->is_active())
                     {
-                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                    if (get_delta_millisec(circ_return_timer) > 1000)
                         {
                         V10->off();
                         V11->off();
@@ -5696,8 +5708,8 @@ int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_
     dev_upr_sanitizer_pump->on();
     }
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
-    T[TMR_OP_TIME]->set_countdown_time( ( u_long )
-        rt_par_float[P_MAX_OPER_TM]*1000L);
+    T[ TMR_OP_TIME ]->set_countdown_time( static_cast<uint32_t>(
+        rt_par_float[ P_MAX_OPER_TM ] * 1000 ) );
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     NP->on();
@@ -6729,7 +6741,9 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 
 int cipline_tech_object::timeIsOut()
     {
-    if (T[TMR_OP_TIME]->get_work_time() >= rt_par_float[P_MAX_OPER_TM] * 1000L && rt_par_float[P_MAX_OPER_TM] > 0)
+    if ( T[ TMR_OP_TIME ]->get_work_time() >=
+        static_cast<uint32_t>( rt_par_float[ P_MAX_OPER_TM ] * 1000 ) &&
+        rt_par_float[ P_MAX_OPER_TM ] > 0 )
         {
         return 1;
         }
@@ -7789,7 +7803,7 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt*1000L )
+    if ( get_delta_millisec( last_time ) > static_cast<uint32_t>( dt * 1000 ) )
         {
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
@@ -7813,7 +7827,7 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
         //-Зона разгона.-!>
 
         last_time = get_millisec();
-        } // if ( get_millisec() - last_time > dt*1000L )
+        } // if ( get_millisec() - last_time > dt*1000 )
 
     //-Мягкий пуск.
     // Включили ручной режим.

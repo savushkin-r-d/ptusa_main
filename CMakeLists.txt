@@ -112,6 +112,7 @@ endif()
 file(GLOB test_src CONFIGURE_DEPENDS
             test/*.cpp
             test/device/*.cpp
+			test/sys/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)

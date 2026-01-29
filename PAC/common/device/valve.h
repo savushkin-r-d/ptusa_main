@@ -165,7 +165,7 @@ class valve : public digital_io_device
         virtual bool is_switching_off_finished();
 
         bool is_switching_off = false; ///Выключается ли клапан с задержкой.
-        u_long start_off_time = 0; ///Время начала выключения клапана с задержкой.
+        uint32_t start_off_time = 0; ///Время начала выключения клапана с задержкой.
         bool was_on_auto = false;      ///Признак включения клапана управляющей программой.
 
     public:
@@ -177,7 +177,7 @@ class valve : public digital_io_device
 #endif
 
     protected:
-        u_long start_switch_time = get_millisec();
+        uint32_t start_switch_time = get_millisec();
 
     private:
         bool wash_flag = false;
@@ -532,7 +532,7 @@ class valve_AS_DO1_DI2 : public valve_AS
         bool get_fb_state() override;
 
     private:
-        u_long start_err_time;
+        uint32_t start_err_time;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
@@ -556,9 +556,9 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
 #pragma region Выключение мини клапана с задержкой.
 #endif
     private:
-        u_long start_off_time;  //Время начала открытия клапана.
+        uint32_t start_off_time;        // Время начала открытия клапана.
 
-        int is_closing_mini;    //Мини клапан в режиме закрытия
+        int is_closing_mini;    // Мини клапан в режиме закрытия.
 
     public:
         /// @brief Определение завершения отключения клапана с задержкой.

@@ -1,5 +1,6 @@
 #include <string.h>
 #include <fmt/core.h>
+#include <inttypes.h>
 
 #include "PAC_info.h"
 #include "PAC_err.h"
@@ -59,9 +60,9 @@ void PAC_info::eval()
         up_mins = up_msec / ( 1000UL * 60 ) % 60;
         up_secs = up_msec / 1000 % 60;
 
-        sprintf( up_time_str, "%lu дн. %02lu:%02lu:%02lu",
-            (u_long)up_days, (u_long)up_hours,
-            (u_long)up_mins, (u_long)up_secs );
+        auto res = fmt::format_to_n( up_time_str, C_MAX_STR_LENGTH - 1,
+            "{} дн. {:02}:{:02}:{:02}", up_days, up_hours, up_mins, up_secs );
+        *res.out = '\0';
         }
     }
 //-----------------------------------------------------------------------------
@@ -407,7 +408,7 @@ void PAC_info::emulation_off()
     }
 #endif
 //-----------------------------------------------------------------------------
-void PAC_info::set_cycle_time( u_long current_cycle_time )
+void PAC_info::set_cycle_time( uint32_t current_cycle_time )
     {
     cycle_time = current_cycle_time;
     }

@@ -2,6 +2,7 @@
 
 #include "iot_base.h"
 #include "smart_ptr.h"
+#include <cstdint>
 #include <map>
 #include <string>
 class modbus_client;
@@ -9,7 +10,7 @@ class modbus_client;
 class altivar_node: public i_iot_node
 	{
 	public:
-		altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout, int type);
+		altivar_node(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout, int type);
 		~altivar_node();
 		void Evaluate();
 		void Enable();
@@ -82,8 +83,8 @@ class altivar_node: public i_iot_node
 		int type;
 		int querystep;
 		int configurestep;
-		unsigned long querytimer;
-		unsigned long modbustimeout;
+		uint32_t querytimer;
+		uint32_t modbustimeout;
 		int ismodbuserror;
 	};
 

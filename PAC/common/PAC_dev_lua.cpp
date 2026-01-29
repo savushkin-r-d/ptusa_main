@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/12/25 13:06:56.
+** Generated automatically by tolua++-1.0.92 on Tue Jan 20 12:47:00 2026.
 */
 
 #ifndef __cplusplus
@@ -32,6 +32,8 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #pragma warning(disable: 6011)  //dereferencing NULL pointer <name>.
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
+ // Check for correct "uint32_t get_millisec()".
+ static_assert( std::is_same_v<uint32_t, unsigned int>, "uint32_t should be unsigned int" );
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -8703,7 +8705,7 @@ static int tolua_PAC_dev_get_sec00(lua_State* tolua_S)
 #endif
  {
   {
-   unsigned long tolua_ret = (unsigned long)  get_sec();
+   unsigned int tolua_ret = (unsigned int)  get_sec();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -8730,7 +8732,7 @@ static int tolua_PAC_dev_get_millisec00(lua_State* tolua_S)
 #endif
  {
   {
-   unsigned long tolua_ret = (unsigned long)  get_millisec();
+   unsigned int tolua_ret = (unsigned int)  get_millisec();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -8757,9 +8759,9 @@ static int tolua_PAC_dev_get_delta_millisec00(lua_State* tolua_S)
  else
 #endif
  {
-  unsigned long time1 = ((unsigned long)  tolua_tonumber(tolua_S,1,0));
+  unsigned int time1 = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
   {
-   unsigned long tolua_ret = (unsigned long)  get_delta_millisec(time1);
+   unsigned int tolua_ret = (unsigned int)  get_delta_millisec(time1);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

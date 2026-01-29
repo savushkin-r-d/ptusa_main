@@ -95,6 +95,77 @@ TEST( toLuapp, tolua_PAC_dev_PDS00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_delta_millisec()" ) );               //Некорректный вызов.
+
+    ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "ms" );
+    auto ms = tolua_tonumber( L, -1, 0 );
+    lua_remove( L, -1 );   
+
+    // Запрашиваем время, прошедшее с момента 0 - результат должен быть
+    // неотрицательным.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );    
+    auto dt1 = tolua_tonumber( L, -1, 0 );
+    EXPECT_GE( dt1, 0 );
+    lua_remove( L, -1 );
+
+    // Время должно совпать с расчетным.
+    EXPECT_NEAR( dt1, ms, 1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto dt2 = tolua_tonumber( L, -1, 0 );
+    EXPECT_NEAR( dt2, 0, 1 );
+    lua_remove( L, -1 );
+
+    // Корректная обработка переполнения - результат должен быть положительным
+    // и примерно равен UINT32_MAX.
+    ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms + 10 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto dt3 = tolua_tonumber( L, -1, 0 );
+    EXPECT_GT( dt3, 0 );
+    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 1 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_get_sec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_sec( 1 )" ) );                       //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_sec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_get_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_millisec( 1 )" ) );                  //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_millisec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
 TEST( toLuapp, tolua_PAC_dev_TS00 )
     {
     lua_State* L = lua_open();

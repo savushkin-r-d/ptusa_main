@@ -64,7 +64,7 @@ class cip_stats: Serializable
     private:
         std::map<char*, cip_object_stats*, cmp_str> obj_stats;
         bool changed;
-        unsigned long lastchanged;
+        uint32_t lastchanged;
         unsigned int changespending;
         void confirm();
 

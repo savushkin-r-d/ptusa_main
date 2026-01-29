@@ -12,6 +12,7 @@
 #include "g_errors.h"
 #include "tech_def.h"
 #include <fmt/chrono.h>
+#include <inttypes.h>
 
 using namespace std::literals; // Enables ""s literal.
 
@@ -487,7 +488,7 @@ u_long operation::get_active_step_set_time() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-void operation::to_step( unsigned int new_step, unsigned long cooperative_time /*= 0 */)
+void operation::to_step( unsigned int new_step, uint32_t cooperative_time /*= 0 */)
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
@@ -940,6 +941,8 @@ void checked_devices_action::finalize()
 /// @brief Инициализация действия.
 void checked_devices_action::init()
     {
+    if ( is_empty() ) return;
+
     // Запускаем счётчики при старте шага.
     for ( const auto& group : devices )
         {
@@ -2039,7 +2042,7 @@ int jump_if_action::set_int_property( const char* prop_name, size_t idx,
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( R"("%s" unknown property "%s")",
+            G_LOG->warning( "'%s' unknown property '%s'",
                 name.c_str(), prop_name );
             }
         }
@@ -2129,7 +2132,7 @@ int enable_step_by_signal::set_bool_property( const char* prop_name, bool value 
         {
         if ( G_DEBUG )
             {
-            G_LOG->warning( R"("%s" unknown property "%s")",
+            G_LOG->warning( "'%s' unknown property '%s'",
                 name.c_str(), prop_name );
             }
         return 1;
@@ -2303,13 +2306,16 @@ void operation_state::evaluate()
                 {
                 if ( operation_number > 0 )
                     {
-                    int time = (int)owner->get_step_param( par_n );
+                    auto time = static_cast<uint32_t>(
+                        owner->get_step_param( par_n ) );
                     const int MAX_BUFF_SIZE = 200;
                     char buff[ MAX_BUFF_SIZE ] = { 0 };
-                    std::snprintf( buff, MAX_BUFF_SIZE,
-                        "вышло время (%u сек) последнего шага (\'%s\')",
+                    auto out = fmt::format_to_n( buff, MAX_BUFF_SIZE - 1,
+                        "вышло время ({} сек) последнего шага ('{}')",
                         time, steps[ active_step_n ]->get_name() );
-                    owner->owner->set_err_msg( buff, operation_number, 0, i_tech_object::ERR_OFF );
+                    *out.out = '\0';
+                    owner->owner->set_err_msg( buff, operation_number, 0,
+                        i_tech_object::ERR_OFF );
                     owner->off_mode( operation_number );
                     }
                 else
@@ -2319,11 +2325,11 @@ void operation_state::evaluate()
                 }
             else
                 {
-                auto step_switch_time = 0UL;
+                uint32_t step_switch_time{};
                 if ( step_cooperate_time_par_n > 0 &&
                     owner->get_step_param( step_cooperate_time_par_n ) > 0 )
                     {
-                    step_switch_time = static_cast<u_long>
+                    step_switch_time = static_cast<uint32_t>
                         ( owner->get_step_param( step_cooperate_time_par_n ) );
                     }
 
@@ -2419,7 +2425,7 @@ step* operation_state::operator[]( int idx )
     return &step_stub;
     }
 //-----------------------------------------------------------------------------
-void operation_state::to_step( u_int new_step, u_long cooperative_time )
+void operation_state::to_step( u_int new_step, uint32_t cooperative_time )
     {
     if ( new_step > steps.size() || new_step <= 0 )
         {
@@ -2800,7 +2806,7 @@ int operation_state::on_extra_step( int step_idx )
     return on_extra_step( step_idx, 0, false );
     }
 //-----------------------------------------------------------------------------
-int operation_state::on_extra_step( int step_idx, u_long step_time,
+int operation_state::on_extra_step( int step_idx, uint32_t step_time,
     bool is_print_time )
     {
     if ( (size_t) step_idx > steps.size() )
@@ -2836,7 +2842,7 @@ int operation_state::on_extra_step( int step_idx, u_long step_time,
                 operation_number, name.c_str(), step_idx );
             if ( is_print_time )
                 {
-                printf( " (%lu ms)", step_time );
+                printf( " (%" PRIu32 " ms)", step_time );
                 }
             printf( "." );
             SetColor( RESET );

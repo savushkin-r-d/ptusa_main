@@ -177,7 +177,7 @@ class delay_on_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint32_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -219,7 +219,7 @@ class delay_off_action : public action
         void evaluate() override;
 
     private:
-        u_long start_time;
+        uint32_t start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -263,13 +263,13 @@ class open_seat_action: public action
 
         u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
-        u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
+        uint32_t wait_time;      ///< Время ожидания перед промыванием седел.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
         std::vector< std::vector< device* > > wash_lower_seat_devices;
 
-        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+        uint32_t start_cycle_time; ///< Время старта цикла (ожидания или промывки).
 
         bool is_mode;             ///< Является ли шагом операции.
         operation_state* owner;
@@ -548,13 +548,13 @@ class step
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
-        u_int_4 start_time;             ///< Время старта шага.
+        uint32_t start_time;             ///< Время старта шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
 
         bool active;
-        u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
+        uint32_t dx_time;                ///< Время шага, отработанное до паузы.
 
         int tag = -1;   ///< Тег (индекс связанного объекта).
 
@@ -614,7 +614,7 @@ class operation_state
         ///
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
-        void to_step( u_int new_step, u_long cooperative_time = 0 );
+        void to_step( u_int new_step, uint32_t cooperative_time = 0 );
 
         /// @brief Переход к следующему шагу.
         void to_next_step();
@@ -670,14 +670,14 @@ class operation_state
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
 
-        u_int_4 start_time; ///< Время начала операции.
+        uint32_t start_time; ///< Время начала операции.
         step step_stub;     ///< Шаг-заглушка.
 
         operation_manager *owner;
         int operation_number;   /// Номер операции.
 
         /// Время выполнения активного шага, для возобновления после паузы.
-        u_int_4 dx_step_time;
+        uint32_t dx_step_time;
 
 
         /// Номер параметра совместного времени выполнения шагов.
@@ -696,7 +696,7 @@ class operation_state
         void load();
 
         int on_extra_step( int step_idx );
-        int on_extra_step( int step_idx, u_long step_time, bool is_print_time );
+        int on_extra_step( int step_idx, uint32_t step_time, bool is_print_time );
 
         int off_extra_step( int step_idx );
 
@@ -714,8 +714,8 @@ class operation_state
     private:
         /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
         std::vector< int > active_steps;
-        std::vector< u_long > active_steps_duration;
-        std::vector< u_long > active_steps_start_time;
+        std::vector< uint32_t > active_steps_duration;
+        std::vector< uint32_t > active_steps_start_time;
 
         std::vector< int > saved_active_steps;
 
@@ -767,7 +767,7 @@ class operation
         ///
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
-        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
+        void to_step( unsigned int new_step, uint32_t cooperative_time = 0 );
 
         /// @brief Переход к следующему шагу.
         ///
@@ -953,8 +953,8 @@ class operation
 
         u_int run_time = 0;  /// Время выполнения операции (состояние run).
 
-        u_long start_warn = 0;
-        u_long start_wait = 0;
+        uint32_t start_warn = 0;
+        uint32_t start_wait = 0;
         bool is_first_goto_next_state = true;
         bool was_fail = false;
     };
@@ -990,7 +990,7 @@ class operation_manager
         /// выходит за диапазон, возвращается значение заглушки.
         operation* operator[] ( unsigned int idx );
 
-        /// @brief Время бездействия (нет включенных операций).
+        /// @brief Время бездействия (нет включенных операций) в секундах.
         ///
         /// @return - время системы без активных операций.
         unsigned long get_idle_time();

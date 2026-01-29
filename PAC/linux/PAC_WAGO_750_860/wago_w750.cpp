@@ -27,7 +27,7 @@ int wago_manager_w750::read_inputs()
         wago_node *nd = nodes[ i ];
         if ( nd->type == wago_node::T_750_86x ) // KBus
             {
-            static u_long start_time = get_millisec();
+            static uint32_t start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
                 {
                 start_time = get_millisec();
@@ -120,7 +120,7 @@ int wago_manager_w750::write_outputs()
         wago_node *nd = nodes[ i ];
         if ( nd->type == wago_node::T_750_86x ) // KBus
             {
-            static u_long start_time = get_millisec();
+            static uint32_t start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
                 {
                 start_time = get_millisec();

@@ -175,8 +175,6 @@ TEST( off_action, evaluate )
 	saved_params_u_int_4& par = PAC_info::get_instance()->par;
 	par[ PAC_info::P_V_OFF_DELAY_TIME ] = 0;
 
-	valve::clear_switching_off_queue();
-
 	virtual_valve V1( "V1" );
 	virtual_valve V2( "V2" );
 	virtual_valve V3( "V3" );
@@ -545,7 +543,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
 
     // Шаг 2 должен отключиться через заданное время, так как переходим к 
     // шагу 1 с задержкой.
-    const auto DELAY_1000MS = 1'000UL;
+    const auto DELAY_1000MS = 1'000;
     test_op->to_step( STEP1, DELAY_1000MS );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP1 );
@@ -566,8 +564,8 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     test_op->set_step_cooperate_time_par_n( COOPERATE_TIME_IDX );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP2 );
-    DeltaMilliSecSubHooker::set_millisec( 1000UL *
-        static_cast<unsigned long>( test_tank.par_float[ STEP2_TIME_IDX ] + 1 ) );
+    DeltaMilliSecSubHooker::set_millisec( 1000 *
+        static_cast<uint32_t>( test_tank.par_float[ STEP2_TIME_IDX ] + 1 ) );
     test_op->evaluate();
     EXPECT_EQ( test_op->active_step(), STEP3 );
     EXPECT_TRUE( test_op->is_active_run_extra_step( STEP2 ) );
@@ -1535,16 +1533,42 @@ TEST( checked_devices_action, init )
     action.add_dev( &test_DO );
 
     FQT1.pause();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_PAUSE ),
         FQT1.get_state() );
 
     action.init();
     action.evaluate();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
         FQT1.get_state() );
 
-    action.finalize();
+    FQT1.set_cmd( "F", 0, 1 );
+    FQT1.set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    FQT1.set_cmd( "P_DT", 0, 1 );
+    sleep_ms( 2 );
+    //Прошло заданное время, задан минимальный расход, счетчик не считает -
+    //есть ошибка.
+    FQT1.evaluate_io();    
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
+
+    // После старта действия ошибка счётчика сбрасывается, но она возникнет
+    // опять по прошествии времени ожидания.
+    action.init();
+    action.evaluate();
+    FQT1.evaluate_io();
     EXPECT_EQ( static_cast<int>( i_counter::STATES::S_WORK ),
+        FQT1.get_state() );
+
+    //Прошло время ожидания (>1ms), счетчик не считает - есть ошибка.
+    sleep_ms( 2 );
+    action.evaluate();
+    FQT1.evaluate_io();
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
+
+    action.finalize();
+    FQT1.evaluate_io();
+    EXPECT_EQ( static_cast<int>( i_counter::STATES::S_FLOW_ERROR ),
         FQT1.get_state() );
     }
 

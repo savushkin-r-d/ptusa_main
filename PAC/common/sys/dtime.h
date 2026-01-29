@@ -20,6 +20,7 @@
 
 #include "s_types.h"
 
+#include <cstdint>
 #include <time.h>
 #ifdef PTUSA_TEST
 #include <string>
@@ -31,23 +32,23 @@ const int SEC_IN_MIN = 60;
 /// @brief Получение текущего времени в секундах.
 ///
 /// @return Текущее время.
-/// @warning Время возвращается в секундах с 01.01.1970, в 2038 произойдет
-/// переполнение.
-u_long get_sec();
+/// @warning Время возвращается с момента запуска программы.
+uint32_t get_sec();
 //-----------------------------------------------------------------------------
 /// @brief Получение времени в миллисекундах.
 ///
-/// Так как за 4 дня происходит переполнение и отсчет продолжается с 0, то для
-/// вычисления разности времени использовать @ref get_delta_millisec.
+/// Так как примерно за 49.7 дней (2^32 мс) происходит переполнение и отсчет
+/// продолжается с 0, то для вычисления разности времени использовать
+/// @ref get_delta_millisec.
 ///
-/// @return Время с момента запуска программы в миллисекундах.
-u_long get_millisec();
+/// @return Время с момента запуска steady_clock (зависит от реализации).
+uint32_t get_millisec();
 //-----------------------------------------------------------------------------
 /// @brief Получение разности времени в миллисекундах.
 ///
 /// @param time1     - начальное время.
 /// @return Разность времени в миллисекундах.
-u_long get_delta_millisec( u_long time1 );
+uint32_t get_delta_millisec( uint32_t time1 );
 //-----------------------------------------------------------------------------
 /// @brief Ожидание заданное время.
 ///
@@ -65,30 +66,30 @@ extern struct tm get_time();
 
 struct stat_time
     {
-    u_long all_time;
-    u_long cycles_cnt;
+    uint32_t all_time;
+    uint32_t cycles_cnt;
 
-    u_long  max_iteration_cycle_time;
-    u_long  min_iteration_cycle_time;
+    uint32_t  max_iteration_cycle_time;
+    uint32_t  min_iteration_cycle_time;
 
     int print_cycle_last_h;
 
     stat_time() : all_time( 0 ), cycles_cnt( 1 ), max_iteration_cycle_time( 0 ),
-	    min_iteration_cycle_time( 10000 )
-	{
+        min_iteration_cycle_time( 10000 )
+        {
         time_t t_ = time( 0 );
-        struct tm *timeInfo_ = localtime( &t_ );
+        struct tm* timeInfo_ = localtime( &t_ );
 
         print_cycle_last_h = timeInfo_->tm_hour;
-	}
+        }
 
     void clear()
-	{
-	all_time = 0;
-	cycles_cnt = 1;
-	max_iteration_cycle_time = 0;
-	min_iteration_cycle_time = 10000;
-	}
+        {
+        all_time = 0;
+        cycles_cnt = 1;
+        max_iteration_cycle_time = 0;
+        min_iteration_cycle_time = 10000;
+        }
     };
 
 #ifdef PTUSA_TEST
