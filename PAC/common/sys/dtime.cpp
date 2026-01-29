@@ -3,6 +3,11 @@
 #include <chrono>
 #include <cstdint>
 
+namespace
+    {
+    const auto START_POINT = std::chrono::steady_clock::now();
+    }
+
 #ifdef PTUSA_TEST
 tm get_time_next_hour()
     {
@@ -33,8 +38,7 @@ tm get_fixed_time()
 #endif
 //-----------------------------------------------------------------------------
 inline auto get_duration()
-    {
-    const static auto START_POINT = std::chrono::steady_clock::now();
+    {    
     auto now = std::chrono::steady_clock::now();
     auto duration = now - START_POINT;
     return duration;
