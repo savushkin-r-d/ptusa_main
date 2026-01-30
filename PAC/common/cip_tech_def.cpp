@@ -407,7 +407,7 @@ cipline_tech_object::~cipline_tech_object()
     currentProgramName = nullptr;
     }
 
-int cipline_tech_object::save_device( char *buff )
+int cipline_tech_object::save_device( char *buff, const char* prefix )
     {
     int i;
     int answer_size = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
