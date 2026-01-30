@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <algorithm>
 #include <unordered_map>
+#include <inttypes.h>
 
 #include "device.h"
 #include "manager.h"
@@ -76,10 +77,7 @@ signal_column_iolink::signal_column_iolink( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 void signal_column_iolink::set_string_property( const char* field, const char* value )
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if ( strcmp( field, "SIGNALS_SEQUENCE" ) == 0 )
         {
@@ -245,10 +243,7 @@ int camera::set_cmd( const char* prop, u_int idx, double val )
 
 void camera::set_string_property( const char* field, const char* value )
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if ( strcmp( field, "IP" ) == 0 )
         {
@@ -616,9 +611,9 @@ void threshold_regulator::direct_set_value( float val )
 //-----------------------------------------------------------------------------
 void threshold_regulator::set_string_property( const char* field, const char* value )
     {
+    device::set_string_property( field, value );
     if ( !field ) return;
 
-    device::set_string_property( field, value );
     switch ( field[ 0 ] )
         {
         //IN_VALUE
@@ -1184,12 +1179,18 @@ void base_counter::start()
     if ( static_cast<int>( STATES::S_PAUSE ) == device::get_state() )
         {        
         last_read_value = get_raw_value();
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_detected_flag = false;
+        start_pump_working_time = get_millisec();
+        start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     else if ( device::get_state() < 0 ) // Есть какая-либо ошибка.
         {
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_detected_flag = false;
+        start_pump_working_time = get_millisec();
+        start_pump_working_time_self_flow = get_millisec();
         device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
         }
     }
@@ -1222,30 +1223,31 @@ void base_counter::check_self_flow()
     if ( get_flow() <= min_flow )
         {
         // Расход ниже минимального.
-        start_pump_working_time_flow = 0;
+        min_flow_detected_flag = true;
         return;
         }
 
     // Расход выше минимального.
-    if ( 0 == start_pump_working_time_flow )
+    if ( min_flow_detected_flag )
         {
         // Фиксируем время и счетчик появления расхода, превышающего
         // минимальный.
-        start_pump_working_time_flow = get_millisec();
-        counter_prev_value_flow = get_abs_quantity();
+        start_pump_working_time_self_flow = get_millisec();
+        counter_prev_value_self_flow = get_abs_quantity();
+        min_flow_detected_flag = false;
         }
     else
         {
         // Проверяем счетчик на ошибку - он должен изменить свои показания.
-        if ( get_abs_quantity() != counter_prev_value_flow )
+        if ( get_abs_quantity() != counter_prev_value_self_flow )
             {
-            start_pump_working_time_flow = get_millisec();
-            counter_prev_value_flow = get_abs_quantity();
+            start_pump_working_time_self_flow = get_millisec();
+            counter_prev_value_self_flow = get_abs_quantity();
             }
         else
             {
             if ( auto dt = get_pump_dt(); dt > 0 &&
-                get_delta_millisec( start_pump_working_time_flow ) > dt )
+                get_delta_millisec( start_pump_working_time_self_flow ) > dt )
                 {
                 device::direct_set_state( static_cast<int>(
                     STATES::S_FLOW_ERROR ) );
@@ -1273,23 +1275,23 @@ void base_counter::check_connected_pumps()
     if ( !is_pump_working )
         {
         // Насос не работает.
-        start_pump_working_time = 0;
+        non_working_pump_flag = true;
         return;
         }
 
     if ( auto min_flow = get_min_flow(); get_flow() < min_flow )
         {
         // Расход ниже минимального.
-        start_pump_working_time_flow = 0;
         return;
         }
 
     // Насос работает.
-    if ( 0 == start_pump_working_time )
+    if ( non_working_pump_flag )
         {
         // Фиксируем время и показания момента включения насоса. 
         start_pump_working_time = get_millisec();
         counter_prev_value = get_abs_quantity();
+        non_working_pump_flag = false;
         return;
         }
 
@@ -1347,8 +1349,8 @@ void base_counter::evaluate_io()
     if ( device::get_state() == static_cast<int>( STATES::S_PAUSE ) ||
         device::get_state() < 0 )
         {
-        start_pump_working_time_flow = 0;
-        start_pump_working_time = 0;
+        non_working_pump_flag = false;
+        min_flow_detected_flag = false;
         return;                     // Не изменяем данное состояние.
         }
         
@@ -1553,10 +1555,10 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
-    if ( auto data = (char*)get_AI_data( 0 ); data )
+    if ( auto data = reinterpret_cast<std::byte*>( get_AI_data( 0 ) );
+        !G_PAC_INFO()->is_emulator() && data )
         {
-        auto buff = (char*)&in_info;
-
+        auto buff = reinterpret_cast<std::byte*>( &in_info );
         const int SIZE = 8;
         std::copy( data, data + SIZE, buff );
 
@@ -1586,7 +1588,7 @@ void counter_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
     {
-    return 0.1f * in_info.temperature;
+    return TE_GRADIENT * in_info.temperature;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
@@ -1628,7 +1630,7 @@ float counter_iolink::get_max_raw_value() const
 float counter_iolink::get_flow()
     {
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
-        + in_info.flow * 0.01f;
+        + in_info.flow * get_flow_gradient();
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::save_device_ex( char* buff )
@@ -1644,12 +1646,19 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
+        case 'A': // Свойство `ABS_V`.
+        case 'V': // Свойство `V`.
+            // Учитываем коэффициент, который переводит в мл.
+            return base_counter::set_cmd( prop, idx, val / mL_in_L );
+
         case 'F':
-            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            in_info.flow = static_cast<int16_t>( 
+                round( val / get_flow_gradient() ) );
             break;
 
         case 'T':
-            in_info.temperature = static_cast<int16_t>( val * 10 );
+            in_info.temperature = static_cast<int16_t>( 
+                round( val / TE_GRADIENT ) );
             break;
 
         default:
@@ -1687,6 +1696,41 @@ const char* counter_iolink::get_error_description()
         }
     }
 //-----------------------------------------------------------------------------
+void counter_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+
+    if ( strcmp( new_article, "IFM.SM6100" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM6100;
+        return;
+        }
+    if ( strcmp( new_article, "IFM.SM4000" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SM4000;
+        return;
+        }
+
+    G_LOG->warning( "%s unknown article \"%s\"",
+        get_name(), new_article );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow_gradient() const
+    {
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_SM6100:
+            return 0.01f;
+
+        case ARTICLE::IFM_SM4000:
+            return 0.001f;
+
+        case ARTICLE::DEFAULT:
+        default:
+            return 0.01f; // Default to SM6100 gradient.
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 DI1::DI1( const char* dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, 
@@ -1700,12 +1744,12 @@ DI1::DI1( const char* dev_name, device::DEVICE_TYPE type,
 //-----------------------------------------------------------------------------
 void DI1::direct_on()
     {
-    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_on();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_on();
     }
 //-----------------------------------------------------------------------------
 void DI1::direct_off()
     {
-    if ( G_PAC_INFO()->is_emulator() ) digital_io_device::direct_off();
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
 int DI1::get_state()
@@ -2098,12 +2142,27 @@ wages_eth::wages_eth( const char* dev_name ) :
 
 float wages_eth::get_value()
     {
-    return weth->get_wages_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::get_value() +
+            get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+        }
+
+    if ( weth ) return weth->get_wages_value() +
+        get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+
+    return 0.0f;
     }
 
 int wages_eth::get_state()
     {
-    return weth->get_wages_state();
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::get_state();
+        }
+
+    if ( weth ) return weth->get_wages_state();
+    return 0;
     }
 
 void wages_eth::evaluate_io()
@@ -2121,6 +2180,8 @@ void wages_eth::tare()
 
 void wages_eth::set_string_property( const char* field, const char* value )
     {
+    device::set_string_property( field, value );
+
     if ( !weth && strcmp( field, "IP" ) == 0 )
         {
         int port = 1001;
@@ -2131,22 +2192,46 @@ void wages_eth::set_string_property( const char* field, const char* value )
 
 void wages_eth::direct_set_value( float new_value )
     {
-    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_value( new_value );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        if ( new_value >= .0f )
+            {
+            device::direct_set_value( new_value );
+            }
+        return;
+        }
+
+    if ( weth ) weth->set_wages_value( new_value );
     }
 
 void wages_eth::direct_set_state( int state )
     {
-    if ( G_PAC_INFO()->is_emulator() ) return weth->set_wages_state( state );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_set_state( state );
+        }
+
+    if ( weth ) weth->set_wages_state( state );
     }
 
 void wages_eth::direct_off()
     {
-    weth->set_state( 0 );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_off();
+        }
+
+    if ( weth ) weth->set_wages_state( 0 );
     }
 
 void wages_eth::direct_on()
     {
-    weth->set_state( 1 );
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return device::direct_on();
+        }
+
+    if ( weth ) weth->set_wages_state( 1 );
     }
 
 void wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
@@ -2251,7 +2336,10 @@ void wages_pxc_axl::direct_set_state( int new_state )
 
 void wages_pxc_axl::direct_set_value( float new_value )
     {
-    // Do nothing.
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        w = new_value;
+        }
     }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
@@ -3063,11 +3151,13 @@ void level_e_iolink::evaluate_io()
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st, alfa );
     }
 //-----------------------------------------------------------------------------
-void level_e_iolink::set_string_property(const char* field, const char* value)
+void level_e_iolink::set_string_property( const char* field, const char* value )
     {
-    if (strcmp(field, "PT") == 0)
+    device::set_string_property( field, value );
+
+    if ( strcmp( field, "PT" ) == 0 )
         {
-        PT_extra = PT(value);
+        PT_extra = PT( value );
         }
     }
 //-----------------------------------------------------------------------------
@@ -3817,7 +3907,7 @@ bool timer::is_time_up() const
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_long timer::get_work_time() const
+uint32_t timer::get_work_time() const
     {
     if ( STATE::S_WORK == state )
         {
@@ -3829,21 +3919,21 @@ u_long timer::get_work_time() const
         }
     }
 //-----------------------------------------------------------------------------
-void timer::set_countdown_time( u_long new_countdown_time )
+void timer::set_countdown_time( uint32_t new_countdown_time )
     {
     if ( G_DEBUG )
         {
         if ( 0 == new_countdown_time )
             {
-            printf( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
-                new_countdown_time );
+            printf( "Error in timer::set_countdown_time: "
+                "invalid time value = %" PRIu32 "!\n", new_countdown_time );
             }
         }
 
     countdown_time = new_countdown_time;
     }
 //-----------------------------------------------------------------------------
-u_long timer::get_countdown_time() const
+uint32_t timer::get_countdown_time() const
     {
     return countdown_time;
     }
@@ -4082,10 +4172,7 @@ void motor_altivar::direct_off()
 
 void motor_altivar::set_string_property(const char * field, const char * value)
     {
-    if ( G_DEBUG )
-        {
-        printf( "Set string property %s value %s\n", field, value );
-        }
+    device::set_string_property( field, value );
 
     if (strcmp(field, "IP") == 0)
         {

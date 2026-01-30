@@ -117,9 +117,9 @@ class ParamsRecipeManager: public i_Lua_save_device
     private:
         int mId = 0;
         int mAdaptersId = 0;
-        unsigned long mLastAdapterSaveTimer;
-        unsigned long mLastRecipeSaveTimer;
-        unsigned long mLastTechObjectSaveTimer;
+        uint32_t mLastAdapterSaveTimer;
+        uint32_t mLastRecipeSaveTimer;
+        uint32_t mLastTechObjectSaveTimer;
         static auto_smart_ptr <ParamsRecipeManager> sInstance;
 
     };

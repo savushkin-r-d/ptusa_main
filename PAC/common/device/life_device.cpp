@@ -62,12 +62,7 @@ void watchdog::evaluate_io()
 //-----------------------------------------------------------------------------
 void watchdog::set_string_property( const char* field, const char* value )
     {
-    if ( G_DEBUG )
-        {
-        G_LOG->debug( "%s\t watchdog::set_string_property() - "
-            "field = %s, val = \"%s\"",
-            get_name(), field, value );
-        }
+    device::set_string_property( field, value );
 
     if ( !field ) return;
 

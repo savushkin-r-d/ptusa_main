@@ -49,8 +49,8 @@ class watchdog : public device, public i_Lua_save_device
         int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
         float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
         
-        unsigned long start_in_check_time = get_millisec();
-        unsigned long start_out_check_time = get_millisec();
+        uint32_t start_in_check_time = get_millisec();
+        uint32_t start_out_check_time = get_millisec();
 
         std::string error_description{};
     };

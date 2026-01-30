@@ -1101,7 +1101,6 @@ void check_dev( const char* name, int type, int sub_type,
 TEST( device_manager, add_io_device )
     {
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
 
     auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
@@ -1264,8 +1263,6 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
-    valve::clear_v_bistable();
     }
 
 
@@ -1280,8 +1277,6 @@ TEST( device_manager, clear_io_devices )
     G_DEVICE_MANAGER()->clear_io_devices();
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
-
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_device )
@@ -1295,7 +1290,6 @@ TEST( device_manager, get_device )
         G_DEVICE_MANAGER()->get_device( 1 ) );    //Search shouldn't find device.
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( device_manager, get_name_in_Lua )
@@ -1312,7 +1306,6 @@ TEST( device_manager, evaluate_io )
     G_DEVICE_MANAGER()->evaluate_io();
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 
@@ -1833,6 +1826,27 @@ TEST_F( iolink_dev_test, level_e_iolink_evaluate_io )
     EXPECT_EQ( test_dev.get_volume(), 8200.0f );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST_F( iolink_dev_test, level_e_iolink_set_string_property )
+    {
+    level_e_iolink test_dev( "TestDevice" );
+
+    EXPECT_EQ( test_dev.PT_extra, nullptr );
+    test_dev.set_string_property( "PT", "" );
+    ASSERT_EQ( STUB(), dynamic_cast<dev_stub*>( test_dev.PT_extra ) );
+
+    auto PT_name = std::string( "PT1" );
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PT, device::DST_PT_VIRT, PT_name.c_str(), "Test sensor", "PT" );
+    ASSERT_EQ( nullptr, res );
+    const auto PT1 = PT( PT_name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( PT1 ) );
+    test_dev.set_string_property( "PT", "PT1" );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( test_dev.PT_extra ) );
+    ASSERT_EQ( PT1, test_dev.PT_extra );
+    
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
 
 
@@ -4234,6 +4248,18 @@ TEST( camera, get_type_name )
     EXPECT_STREQ( "Камера", test_dev.get_type_name() );
     }
 
+TEST( camera, set_string_property )
+    {
+    camera test_dev( "test_CAM1", device::DST_CAM_DO1_DI1 );
+    EXPECT_EQ( "", test_dev.ip );
+
+    test_dev.set_string_property( "IP", "" );
+    EXPECT_EQ( "", test_dev.ip );
+
+    test_dev.set_string_property( "IP", "127.0.0.1" );
+    EXPECT_EQ( "127.0.0.1", test_dev.ip );
+    }
+
 
 TEST( counter_f, get_state )
     {
@@ -4662,11 +4688,11 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
     fqt1.set_cmd( "V", 0, 50 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
-    EXPECT_EQ( counter_iolink::mL_in_L * 50.f, fqt1.get_value() );
+    EXPECT_EQ( 50, fqt1.get_quantity() );
+    EXPECT_EQ( 50.f, fqt1.get_value() );
 
     fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( counter_iolink::mL_in_L * 100, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
@@ -4676,7 +4702,7 @@ TEST( counter_iolink, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ(
-        "FQT1={M=0, ST=1, V=50000, ABS_V=100000, DAY_T1=0, PREV_DAY_T1=0, "
+        "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
         "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
@@ -4693,6 +4719,7 @@ TEST( counter_iolink, evaluate_io )
     fqt1.init( 0, 0, 0, 1 );
     fqt1.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
     auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
+    G_PAC_INFO()->emulation_off();
 
     *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 11.11f;
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
@@ -4711,6 +4738,8 @@ TEST( counter_iolink, evaluate_io )
     EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
     EXPECT_EQ( 22 * 0.01f, fqt1.get_flow() );
     EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 tm get_time_next_day()
@@ -4903,6 +4932,51 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
+static void test_counter_iolink_article( const char* article, float gradient )
+    {
+    counter_iolink fqt( "FQT1" );
+    fqt.set_article( article );
+    G_PAC_INFO()->emulation_off();
+
+    // Test flow gradient for the specified article.
+    fqt.set_cmd( "F", 0, 9.9 );
+    EXPECT_NEAR( 9.9f, fqt.get_flow(), 0.01f );
+
+    // Test with raw value.
+    fqt.init( 0, 0, 0, 1 );
+    fqt.AI_channels.int_read_values[ 0 ] = new int_2[ 8 ]{ 0 };
+    auto buff = reinterpret_cast<std::byte*>( fqt.AI_channels.int_read_values[ 0 ] );
+
+    // Initialize with zero data.
+    *reinterpret_cast<float*>( fqt.AI_channels.int_read_values[ 0 ] ) = 0.0f;
+    std::swap( buff[ 0 ], buff[ 3 ] );
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    fqt.evaluate_io();
+
+    // Set flow raw value.
+    *reinterpret_cast<float*>( fqt.AI_channels.int_read_values[ 0 ] ) = 0.0f;
+    std::swap( buff[ 0 ], buff[ 3 ] );
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    fqt.AI_channels.int_read_values[ 0 ][ 2 ] = static_cast<int_2>( 1000 );
+    std::swap( buff[ 5 ], buff[ 4 ] );
+    fqt.evaluate_io();
+    EXPECT_NEAR( 1000 * gradient, fqt.get_flow(), 0.01f );
+
+    delete[] fqt.AI_channels.int_read_values[ 0 ];
+    fqt.AI_channels.int_read_values[ 0 ] = nullptr;
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( counter_iolink, article_sm4000 )
+    {
+    test_counter_iolink_article( "IFM.SM4000", 0.001f );
+    }
+
+TEST( counter_iolink, article_sm6100 )
+    {
+    test_counter_iolink_article( "IFM.SM6100", 0.01f );
+    }
+
 
 TEST( wages_RS232, get_value_from_wages )
     {
@@ -5093,7 +5167,10 @@ TEST( wages_eth, evaluate_io )
 
 TEST( wages_eth, get_value )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5113,7 +5190,10 @@ TEST( wages_eth, tare )
 
 TEST( wages_eth, get_state )
     {
+    G_PAC_INFO()->emulation_off();
     wages_eth w1( "W1" );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
 
     auto ip = "0.0.0.0";
     auto field = "IP";
@@ -5133,6 +5213,13 @@ TEST( wages_eth, direct_set_value )
     EXPECT_EQ( 10, w1.get_value() );
     w1.direct_set_value( -10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_state )
@@ -5146,10 +5233,41 @@ TEST( wages_eth, direct_set_state )
     EXPECT_EQ( 1, w1.get_state() );
     w1.direct_set_state( 0 );
     EXPECT_EQ( 0, w1.get_state() );
+
+    G_PAC_INFO()->emulation_off();
+    w1.direct_set_state( 1 );
+    EXPECT_EQ( 1, w1.get_state() );
+    w1.direct_set_state( 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
+    }
+
+TEST( wages_eth, direct_off )
+    {
+    wages_eth w1( "W1" );
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+
+    auto ip = "0.0.0.0";
+    auto field = "IP";
+    w1.set_string_property( field, ip );
+    G_PAC_INFO()->emulation_off();
+
+    w1.direct_on();
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.direct_off();
+    EXPECT_EQ( 0, w1.get_state() );
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, direct_set_tcp_buff )
     {
+    G_PAC_INFO()->emulation_off();
+
     wages_eth w1( "W1" );
 
     auto ip = "0.0.0.0";
@@ -5173,6 +5291,8 @@ TEST( wages_eth, direct_set_tcp_buff )
         EXPECT_EQ( 0, w1.get_state() );
         EXPECT_EQ( CORRECT_VALUE, w1.get_value() );
         }
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( wages_eth, set_string_property )
@@ -5282,7 +5402,7 @@ TEST( wages_pxc_axl, tare )
     EXPECT_EQ( 0.001f * VALUE, w1.get_value() );
 
     w1.tare();
-    EXPECT_EQ( .0f, w1.get_value() );
+    EXPECT_EQ( 0.0f, w1.get_value() );
     }
 
 TEST( wages_pxc_axl, reset_tare )
@@ -5343,6 +5463,12 @@ TEST( wages_pxc_axl, direct_set_state )
 TEST( wages_pxc_axl, direct_set_value )
     {
     wages_pxc_axl w1( "W1" );
+    w1.direct_set_value( 10.f );
+    EXPECT_EQ( 10.f, w1.get_value() );
+    w1.direct_set_value( 0.0f );
+    EXPECT_EQ( 0.0f, w1.get_value() );
+
+    G_PAC_INFO()->emulation_off();
     w1.init( 0, 0, 1, 1 );
     w1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
     auto par_idx = static_cast<unsigned int>( wages_pxc_axl::CONSTANTS::P_CZ );
@@ -5353,6 +5479,8 @@ TEST( wages_pxc_axl, direct_set_value )
     const int VALUE = 65900;
     w1.direct_set_value( VALUE );   // Do nothing.
     EXPECT_EQ( 0, w1.get_value() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
@@ -5494,7 +5622,6 @@ TEST( threshold_regulator, set_value )
     EXPECT_EQ( 1, M1->get_state() );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( threshold_regulator, set_cmd )

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2025.12.01.0)
+project(ptusa_main VERSION 2026.1.28.0)
 
 option(USE_OPCUA "Use OPC UA" ON)
 
@@ -112,6 +112,7 @@ endif()
 file(GLOB test_src CONFIGURE_DEPENDS
             test/*.cpp
             test/device/*.cpp
+			test/sys/*.cpp
             test/dll/*.cpp)
 
 if(NOT USE_OPCUA)

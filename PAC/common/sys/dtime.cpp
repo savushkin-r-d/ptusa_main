@@ -1,7 +1,14 @@
 #include "dtime.h"
 
-#ifdef PTUSA_TEST
+#include <chrono>
+#include <cstdint>
 
+namespace
+    {
+    const auto START_POINT = std::chrono::steady_clock::now();
+    }
+
+#ifdef PTUSA_TEST
 tm get_time_next_hour()
     {
     thread_local static struct tm timeInfo_;
@@ -29,3 +36,33 @@ tm get_fixed_time()
     return timeInfo_;
     }
 #endif
+//-----------------------------------------------------------------------------
+inline auto get_duration()
+    {    
+    auto now = std::chrono::steady_clock::now();
+    auto duration = now - START_POINT;
+    return duration;
+    }
+//-----------------------------------------------------------------------------
+uint32_t get_sec()
+    {
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(
+        get_duration() ).count();
+    return static_cast<uint32_t>( s );
+    }
+//-----------------------------------------------------------------------------
+uint32_t get_millisec()
+    {
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( 
+        get_duration() ).count();
+
+    return static_cast<uint32_t>( ms );
+    }
+//-----------------------------------------------------------------------------
+uint32_t get_delta_millisec( uint32_t time1 )
+    {
+    auto now = get_millisec();
+    // Unsigned integer subtraction in C++ handles wraparound correctly via
+    // modular arithmetic.
+    return now - time1;
+    }

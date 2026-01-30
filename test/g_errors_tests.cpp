@@ -23,11 +23,11 @@ TEST( errors_manager, evaluate )
 
     //Generate error.
     dev->set_cmd( "F", 0, 1 );
-    dev->set_cmd( "P_DT", 0, 1 );
+    dev->set_cmd( "P_DT", 0, 1000 );
     dev->set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
     dev->evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
-    DeltaMilliSecSubHooker::set_millisec( 2UL );
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
     dev->evaluate_io();
     DeltaMilliSecSubHooker::set_default_time();    
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
@@ -64,7 +64,6 @@ TEST( errors_manager, evaluate )
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 TEST( siren_lights_manager, siren_lights_manager )

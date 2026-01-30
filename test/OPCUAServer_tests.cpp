@@ -174,5 +174,4 @@ TEST( OPCUA_server, evaluate )
     G_OPCUA_SERVER.shutdown();
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }

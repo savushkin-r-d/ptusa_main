@@ -31,7 +31,6 @@ TEST( PID, get_actuator )
     ASSERT_EQ( m1, m );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     }
 
 void init_PID_parameters( PID& test_PID, float min_value = 0.f )

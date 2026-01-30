@@ -153,11 +153,11 @@ class TRecipeManager
     private:
         ///@brief Флаг, сигнализирующий об изменении параметров рецепта
         int recipechanged;
-        unsigned long recipechangechecktime;
+        uint32_t recipechangechecktime;
         int lineNo;
         int currentRecipe;
         int curRecipeStartBlock;
-        unsigned long lastEvalTime;
+        uint32_t lastEvalTime;
         unsigned long recipeStartAddr;
         void SaveRecipeName();
 
@@ -331,10 +331,10 @@ class TRecipeManager
         ///@brief Флаг, сигнализирующий об изменении параметров рецепта
         int recipechanged;
         int mediumType;
-        unsigned long recipechangechecktime;
+        uint32_t recipechangechecktime;
         int currentRecipe;
         int curRecipeStartBlock;
-        unsigned long lastEvalTime;
+        uint32_t lastEvalTime;
         unsigned long recipeStartAddr;
         void SaveRecipeName();
 

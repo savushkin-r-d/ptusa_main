@@ -95,6 +95,77 @@ TEST( toLuapp, tolua_PAC_dev_PDS00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_delta_millisec()" ) );               //Некорректный вызов.
+
+    ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "ms" );
+    auto ms = tolua_tonumber( L, -1, 0 );
+    lua_remove( L, -1 );   
+
+    // Запрашиваем время, прошедшее с момента 0 - результат должен быть
+    // неотрицательным.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );    
+    auto dt1 = tolua_tonumber( L, -1, 0 );
+    EXPECT_GE( dt1, 0 );
+    lua_remove( L, -1 );
+
+    // Время должно совпать с расчетным.
+    EXPECT_NEAR( dt1, ms, 1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto dt2 = tolua_tonumber( L, -1, 0 );
+    EXPECT_NEAR( dt2, 0, 1 );
+    lua_remove( L, -1 );
+
+    // Корректная обработка переполнения - результат должен быть положительным
+    // и примерно равен UINT32_MAX.
+    ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms + 10 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto dt3 = tolua_tonumber( L, -1, 0 );
+    EXPECT_GT( dt3, 0 );
+    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 1 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_get_sec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_sec( 1 )" ) );                       //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_sec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
+TEST( toLuapp, tolua_PAC_dev_get_millisec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    ASSERT_EQ( 1, luaL_dostring( L,
+        "res = get_millisec( 1 )" ) );                  //Некорректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res = get_millisec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_GE( tolua_tonumber( L, -1, 0 ), 0 );
+    lua_remove( L, -1 );
+
+    lua_close( L );
+    }
+
 TEST( toLuapp, tolua_PAC_dev_TS00 )
     {
     lua_State* L = lua_open();
@@ -155,7 +226,6 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
         buff );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -188,7 +258,6 @@ TEST( toLuapp, tolua_PAC_dev_i_wages_get_state00 )
     ASSERT_EQ( st, lua_st );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -208,7 +277,6 @@ TEST( toLuapp, tolua_PAC_dev_G00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -229,7 +297,6 @@ TEST( toLuapp, tolua_PAC_dev_CAM00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -257,7 +324,6 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_start_daily00 )
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:start_daily()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -281,7 +347,6 @@ TEST( toLuapp, tolua_PAC_dev_WATCHDOG00 )
     EXPECT_NE( nullptr, dev );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -355,7 +420,6 @@ TEST( toLuapp, tolua_PAC_dev_AI00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -378,7 +442,6 @@ TEST( toLuapp, tolua_PAC_dev_AO00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -401,7 +464,6 @@ TEST( toLuapp, tolua_PAC_dev_DI00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -424,7 +486,6 @@ TEST( toLuapp, tolua_PAC_dev_DO00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -446,7 +507,6 @@ TEST( toLuapp, tolua_PAC_dev_V00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -468,7 +528,6 @@ TEST( toLuapp, tolua_PAC_dev_VC00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -490,7 +549,6 @@ TEST( toLuapp, tolua_PAC_dev_M00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -513,7 +571,6 @@ TEST( toLuapp, tolua_PAC_dev_LS00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -536,7 +593,6 @@ TEST( toLuapp, tolua_PAC_dev_FS00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -559,7 +615,6 @@ TEST( toLuapp, tolua_PAC_dev_TE00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -581,7 +636,6 @@ TEST( toLuapp, tolua_PAC_dev_LT00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -604,7 +658,6 @@ TEST( toLuapp, tolua_PAC_dev_GS00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -627,7 +680,6 @@ TEST( toLuapp, tolua_PAC_dev_HA00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -650,7 +702,6 @@ TEST( toLuapp, tolua_PAC_dev_HL00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -673,7 +724,6 @@ TEST( toLuapp, tolua_PAC_dev_HLA00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -696,7 +746,6 @@ TEST( toLuapp, tolua_PAC_dev_SB00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -719,7 +768,6 @@ TEST( toLuapp, tolua_PAC_dev_FQT00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -742,7 +790,6 @@ TEST( toLuapp, tolua_PAC_dev_QT00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -765,7 +812,6 @@ TEST( toLuapp, tolua_PAC_dev_PT00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -788,7 +834,6 @@ TEST( toLuapp, tolua_PAC_dev_F00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -848,7 +893,6 @@ TEST( toLuapp, tolua_PAC_dev_DEVICE00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -873,7 +917,6 @@ TEST( toLuapp, tolua_PAC_dev_i_DI_device_get_state00 )
     ASSERT_NE( 0, luaL_dostring( L, "res = DI1.get_state()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -895,7 +938,6 @@ TEST( toLuapp, tolua_PAC_dev_i_DI_device_is_active00 )
     EXPECT_EQ( 0, active );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -932,7 +974,6 @@ TEST( toLuapp, tolua_PAC_dev_i_DO_device_on_off00 )
     ASSERT_EQ( 0, luaL_dostring( L, "DO1:direct_off()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -964,7 +1005,6 @@ TEST( toLuapp, tolua_PAC_dev_i_DO_device_set_state00 )
     ASSERT_NE( 0, luaL_dostring( L, "DO1:set_state()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -986,7 +1026,6 @@ TEST( toLuapp, tolua_PAC_dev_i_AI_device_get_value00 )
     EXPECT_EQ( 0.0f, val );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1008,7 +1047,6 @@ TEST( toLuapp, tolua_PAC_dev_i_AI_device_get_state00 )
     EXPECT_EQ( 1, state );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1032,7 +1070,6 @@ TEST( toLuapp, tolua_PAC_dev_i_AO_device_set_value00 )
     ASSERT_NE( 0, luaL_dostring( L, "AO1:set_value()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1082,7 +1119,6 @@ TEST( toLuapp, tolua_PAC_dev_i_counter_methods00 )
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1:abs_reset()" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1129,7 +1165,6 @@ TEST( toLuapp, tolua_PAC_dev_valve_methods00 )
 
     valve::clear_switching_off_queue();
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1151,7 +1186,6 @@ TEST( toLuapp, tolua_PAC_dev_level_get_volume00 )
     EXPECT_EQ( 0.0f, vol );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1211,7 +1245,6 @@ TEST( toLuapp, tolua_PAC_dev_WT00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1235,7 +1268,6 @@ TEST( toLuapp, tolua_PAC_dev_signal_column_methods00 )
     ASSERT_EQ( 0, luaL_dostring( L, "HL1:set_state( 1 )" ) );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1267,7 +1299,6 @@ TEST( toLuapp, tolua_PAC_dev_i_motor_methods00 )
     EXPECT_EQ( 0.0f, amp );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 
@@ -1375,7 +1406,6 @@ TEST( toLuapp, tolua_PAC_dev_G_DEVICE_MANAGER00 )
     lua_remove( L, -1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
     lua_close( L );
     }
 

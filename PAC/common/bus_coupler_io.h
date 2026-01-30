@@ -381,7 +381,7 @@ class io_manager
 			bool is_active;             ///< Признак работающего узла.
             bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
-			u_long  last_poll_time; ///< Время последнего опроса.
+			uint32_t  last_poll_time; ///< Время последнего опроса.
 			bool    is_set_err;     ///< Установлена ли ошибка связи.
 			int     sock;           ///< Сокет соединения.
 
@@ -409,8 +409,8 @@ class io_manager
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
 
-			u_long last_init_time = 0; ///< Время последней попытки подключиться, мсек.
-			u_long delay_time;         ///< Время ожидания до попытки подключиться, мсек.
+			uint32_t last_init_time = 0; ///< Время последней попытки подключиться, мсек.
+			uint32_t delay_time;         ///< Время ожидания до попытки подключиться, мсек.
 
 			stat_time recv_stat;  ///< Статистика работы с сокетом.
 			stat_time send_stat;  ///< Статистика работы с сокетом.

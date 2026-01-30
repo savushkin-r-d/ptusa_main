@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <string>
 #include <sstream>
+#include <stdint.h>
 
 
 #define NOCONC       0.1f
@@ -449,7 +450,7 @@ class MSAPID
         i_AO_device* output;
         i_AI_device* input;
         i_counter* input2;
-        unsigned long lastEvalInOnState;
+        uint32_t lastEvalInOnState;
     public:
         int HI;
         int task_par_offset;
@@ -480,8 +481,8 @@ class MSAPID
         float q2;
         float Uk;
         float dUk;
-        unsigned long start_time;
-        unsigned long last_time;
+        uint32_t start_time;
+        uint32_t last_time;
 
         char prev_manual_mode;
 
@@ -561,26 +562,26 @@ class cipline_tech_object: public tech_object
 
         unsigned int tech_type; //подтип объекта
         int ret_circ_flag; //флаг управления возвратным насосом при циркуляции
-        unsigned long ret_circ_delay; //задержка обратного включения возвратного насоса
+        uint32_t ret_circ_delay; //задержка обратного включения возвратного насоса
 
-        unsigned long steam_valve_delay; //таймер задержки включения отсечного клапана пара (чтобы не включался/выключался на граничных значениях температуры)
-        unsigned long bachok_lvl_err_delay; //задержка для появления ошибки уровня бачка
+        uint32_t steam_valve_delay; //таймер задержки включения отсечного клапана пара (чтобы не включался/выключался на граничных значениях температуры)
+        uint32_t bachok_lvl_err_delay; //задержка для появления ошибки уровня бачка
 
         int pumpflag; //флаг ошибки подающего насоса
-        unsigned long pumptimer; //таймер ошибки подающего насоса
+        uint32_t pumptimer; //таймер ошибки подающего насоса
 
         int sort_last_destination; //куда последний раз направлялось при сортировке
-        unsigned long sort_delay; //таймер задержки при сортировке растворов (чтобы не переключалось хаотически)
+        uint32_t sort_delay; //таймер задержки при сортировке растворов (чтобы не переключалось хаотически)
         int tankempty;					//флаг пустого танка для задержек переключений
-        unsigned long tankemptytimer;	//пауза между переключениями при пустом танке
+        uint32_t tankemptytimer;	//пауза между переключениями при пустом танке
         int tankfull;					//флаг полного танка для задержек переключений
-        unsigned long tankfulltimer;	//пауза между переключениями при полном танке
+        uint32_t tankfulltimer;	//пауза между переключениями при полном танке
 
         int forcesortrr; //флаг принудительной сортировки растворов без учета таймаута переключений
 
         bool waterTankLastEmptyState{}; //последнее состояние танка вторичной воды
 
-        unsigned long enddelayTimer;
+        uint32_t enddelayTimer;
         int valvesAreInConflict{};
         void resetProgramName();
         void resetRecipeName();
@@ -670,8 +671,8 @@ class cipline_tech_object: public tech_object
         static std::unordered_set<int> steps_acid;
 
         //Константы
-        static const unsigned long toTankSwitchTimeMs{ 60000L };
-        static const unsigned long circMaxFeedTimeMs{ 60000L };
+        static const uint32_t toTankSwitchTimeMs{ 60000L };
+        static const uint32_t circMaxFeedTimeMs{ 60000L };
 
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
@@ -707,9 +708,9 @@ class cipline_tech_object: public tech_object
         char circ_water_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке
         char circ_medium_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке на щелочи и кислоте
         char circ_was_feed{}; //флаг факта подпитки
-        unsigned long circ_max_timer; //таймер подпитки
+        uint32_t circ_max_timer; //таймер подпитки
         char circ_temp_reached{}; //флаг достижения заданной температуры на возврате
-        unsigned long circ_return_timer;
+        uint32_t circ_return_timer;
 
         //Рецепты
         TRecipeManager* lineRecipes;
@@ -764,7 +765,7 @@ class cipline_tech_object: public tech_object
         int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
         bool disable_final_rinsing; //Не ополаскивать после дезинфекции
 
-        unsigned long ret_pums_ls_timer{};
+        uint32_t ret_pums_ls_timer{};
 
         static int blockAlarm;
         static cipline_tech_object* Mdls[10];

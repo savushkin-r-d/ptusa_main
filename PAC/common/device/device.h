@@ -720,12 +720,12 @@ class wages_eth : public analog_io_device, public i_wages
         auto_smart_ptr < iot_wages_eth > weth;
 
         enum class CONSTANTS
-        {
+            {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
 
-            P_CZ,           ///< Сдвиг нуля.
+            P_CZ,               ///< Сдвиг нуля.
             LAST_PARAM_IDX,
-        };
+            };
     };
 //-----------------------------------------------------------------------------
 class wages_pxc_axl : public analog_io_device, public i_wages
@@ -798,8 +798,8 @@ class wages_pxc_axl : public analog_io_device, public i_wages
         float w = .0f;
         int st = 0;
 
-        unsigned long tare_time = 0;
-        unsigned long reset_tare_time = 0;
+        uint32_t tare_time = 0;
+        uint32_t reset_tare_time = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
@@ -823,7 +823,7 @@ class wages : public analog_io_device, public i_wages
 
     private:
         float weight = 0.f;
-        unsigned long filter_time = get_millisec();
+        uint32_t filter_time = get_millisec();
 
         enum CONSTANTS
             {
@@ -914,7 +914,7 @@ class DI1 : public digital_io_device
 
     private:
         int current_state;
-        u_int_4 time = 0;
+        uint32_t time = 0;
 
         enum CONSTANTS
             {
@@ -989,7 +989,7 @@ class motor : public i_motor, public io_device
             AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
             };
 
-        u_long start_switch_time = get_millisec();
+        uint32_t start_switch_time = get_millisec();
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1063,7 +1063,7 @@ private:
         AO_INDEX = 0,           ///< Индекс канала аналогового выхода.
     };
 
-    u_long start_switch_time = get_millisec();
+    uint32_t start_switch_time = get_millisec();
 };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
@@ -1120,7 +1120,7 @@ class level_s_iolink : public analog_io_device
 #endif
 
         int current_state;
-        u_int_4 time = get_millisec();
+        uint32_t time = get_millisec();
 
         enum class ARTICLE
             {
@@ -1339,11 +1339,13 @@ class base_counter: public i_counter, public device, public io_device
 
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
-        u_int_4 start_pump_working_time = 0;
+        bool non_working_pump_flag{ false };
+        uint32_t start_pump_working_time = get_millisec();
         u_int_4 counter_prev_value = 0;
 
-        u_int_4 start_pump_working_time_flow = 0;
-        u_int_4 counter_prev_value_flow = 0;
+        bool min_flow_detected_flag{ false };
+        uint32_t start_pump_working_time_self_flow = get_millisec();
+        u_int_4 counter_prev_value_self_flow = 0;
 
         std::vector < device* > motors;
 
@@ -1460,7 +1462,21 @@ class counter_iolink : public base_counter
 
         const char* get_error_description() override;
 
+        void set_article( const char* new_article ) override;
+
+        enum class ARTICLE
+            {
+            DEFAULT,
+            IFM_SM6100,
+            IFM_SM4000,
+            };
+
     private:
+        ARTICLE n_article = ARTICLE::DEFAULT;
+
+        inline static const float TE_GRADIENT{ 0.1f };
+
+        float get_flow_gradient() const;
         enum class CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
@@ -1565,6 +1581,11 @@ class camera : public i_camera, public device, public io_device
         /// @brief Получение состояние готовности.
         virtual bool is_ready() const;
 
+#ifndef PTUSA_TEST      
+    private:
+#endif
+        std::string ip;
+
     protected:
         bool is_cam_ready;
         int result = 0;
@@ -1577,9 +1598,6 @@ class camera : public i_camera, public device, public io_device
             INDEX_DI_READY,
             INDEX_DI_RES_2,
             };
-
-    private:
-        std::string ip;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
@@ -1593,7 +1611,7 @@ class camera_DI2 : public camera
         void evaluate_io() override;
 
     protected:
-        u_int start_switch_time = get_millisec();
+        uint32_t start_switch_time = get_millisec();
 
     private:
         enum class PARAMS
@@ -1741,7 +1759,7 @@ class power_unit : public analog_io_device
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
 #ifdef PTUSA_TEST
-        void set_cmd_time( unsigned long t )
+        void set_cmd_time( uint32_t t )
             {
             cmd_time = t;
             }
@@ -1769,7 +1787,7 @@ class power_unit : public analog_io_device
             };
         
         bool is_processing_cmd = false;
-        unsigned long cmd_time = 0;
+        uint32_t cmd_time = 0;
 
 #pragma pack(push, 1)
         struct process_data_in
@@ -1989,17 +2007,17 @@ class timer
         /// @brief Получение времени работы таймера.
         ///
         /// @return - время работы таймера.
-        u_long  get_work_time() const;
+        uint32_t  get_work_time() const;
 
         /// @brief Установка задания таймера.
         ///
         /// @param new_countdown_time - задание.
-        void set_countdown_time( u_long new_countdown_time );
+        void set_countdown_time( uint32_t new_countdown_time );
 
         /// @brief Получение задания таймера.
         ///
         /// @return - задание таймера.
-        u_long  get_countdown_time() const;
+        uint32_t  get_countdown_time() const;
 
         /// @brief Получение состояния таймера.
         ///
@@ -2007,11 +2025,11 @@ class timer
         STATE get_state() const;
 
     private:
-        u_long  last_time = 0;          ///< Время, когда таймер был запущен/остановлен.
-        u_long  work_time = 0;          ///< Время работы таймера.
+        uint32_t  last_time = 0;          ///< Время, когда таймер был запущен/остановлен.
+        uint32_t  work_time = 0;          ///< Время работы таймера.
 
         STATE   state = STATE::S_STOP;  ///< Состояние.
-        u_long  countdown_time = 0;     ///< Задание таймера.
+        uint32_t  countdown_time = 0;     ///< Задание таймера.
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

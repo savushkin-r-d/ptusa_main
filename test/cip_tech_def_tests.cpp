@@ -969,6 +969,287 @@ TEST( cipline_tech_object, SCInitPumping )
     G_LUA_MANAGER->free_Lua();
     }
 
+TEST( cipline_tech_object, InitFilRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.InitFilRR( TANK_S );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, InitCircRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.InitCircRR( TANK_S );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, CircRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.CircRR( TANK_S );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, timeIsOut )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.timeIsOut();
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, InitCheckConc )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.InitCheckConc( TANK_S );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, InitAddRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.InitAddRR( TANK_S, 0, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, InitOpolRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1.InitOpolRR( TANK_S );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitToObject )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitToObject( WATER, TANK_W, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitFromObject )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitFromObject( WATER, TANK_W, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1._InitFromObject( TANK_S, TANK_W, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitOporCIP )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitOporCIP( TANK_W, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitFilCirc )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitFilCirc( WITH_WATER, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitOporCirc )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitOporCirc( TANK_W, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitCirc )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitCirc( WATER, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1._InitCirc( SANITIZER, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1._InitCirc( HOT_WATER, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1._InitCirc( SHCH, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    res = cip1._InitCirc( KISL, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( cipline_tech_object, _InitDoseRR )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, TECH_TYPE_SELF_CLEAN,
+        "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    InitStationParams();
+
+    auto res = cip1._InitDoseRR( SANITIZER, 5, 0 );
+    EXPECT_EQ( res, 0 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 class cipline_tech_object_test : public ::testing::Test
     {
     protected:
