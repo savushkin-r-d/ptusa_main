@@ -3,6 +3,62 @@
 
 using namespace ::testing;
 
+TEST( PID, output_scaling )
+    {
+    PID test_PID( "PID_SCALE" );
+    
+    // Инициализация параметров ПИД.
+    test_PID.init_param( PID::P_k, 1 );
+    test_PID.init_param( PID::P_Ti, 15 );
+    test_PID.init_param( PID::P_Td, 0.01f );
+    test_PID.init_param( PID::P_dt, 1000 );
+    test_PID.init_param( PID::P_max, 100 );
+    test_PID.init_param( PID::P_min, 0 );
+    test_PID.init_param( PID::P_acceleration_time, 0 );
+    test_PID.init_param( PID::P_is_manual_mode, 0 );
+    test_PID.init_param( PID::P_U_manual, 65 );
+    
+    // Тест 1: Масштабирование 0-100% на 0-130 единиц.
+    test_PID.init_param( PID::P_out_max, 130 );
+    test_PID.init_param( PID::P_out_min, 0 );
+    test_PID.init_param( PID::P_is_zero_start, 1 );
+    test_PID.save_param();
+    
+    test_PID.reset();
+    test_PID.on();
+    test_PID.set( 100.f );
+    
+    // При is_zero_start=1 и отсутствии разгона, ПИД должен начать с 0%.
+    // Это должно масштабироваться в 0 единиц.
+    float value = test_PID.get_value();
+    EXPECT_FLOAT_EQ( value, 0.0f );
+    
+    // Тест 2: Масштабирование с ненулевым минимумом (0-40 единиц).
+    test_PID.init_param( PID::P_out_max, 40 );
+    test_PID.init_param( PID::P_out_min, 0 );
+    test_PID.reset();
+    value = test_PID.get_value();
+    EXPECT_FLOAT_EQ( value, 0.0f );
+    
+    // Тест 3: Масштабирование со смещением (10-50 единиц).
+    test_PID.init_param( PID::P_out_max, 50 );
+    test_PID.init_param( PID::P_out_min, 10 );
+    test_PID.reset();
+    value = test_PID.get_value();
+    EXPECT_FLOAT_EQ( value, 10.0f ); // 0% -> 10 единиц.
+    
+    // Тест 4: При выключенном ПИД и is_zero_start=1 должны получить out_min.
+    test_PID.off();
+    test_PID.off(); // Переход из STOPPING в OFF.
+    float res = test_PID.eval( 50 );
+    EXPECT_FLOAT_EQ( res, 10.0f );
+    
+    // Тест 5: При выключенном ПИД и is_zero_start=0 должны получить out_max.
+    test_PID.init_param( PID::P_is_zero_start, 0 );
+    res = test_PID.eval( 50 );
+    EXPECT_FLOAT_EQ( res, 50.0f );
+    }
+
 TEST( PID, get_actuator )
     {
     auto res = G_DEVICE_MANAGER()->add_io_device(

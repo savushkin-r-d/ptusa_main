@@ -66,8 +66,18 @@ float PID::eval( float currentValue, int deltaSign )
     {
     if ( STATE::OFF == state )
         {
-        if ( ( *par )[ P_is_zero_start ] ) return MIN_OUT_VALUE;
-        else return MAX_OUT_VALUE;
+        float out_max = ( *par )[ P_out_max ];
+        float out_min = ( *par )[ P_out_min ];
+        if ( ( *par )[ P_is_zero_start ] )
+            {
+            // Возвращаем минимальное значение.
+            return out_min;
+            }
+        else
+            {
+            // Возвращаем максимальное значение.
+            return out_max;
+            }
         }
 
     float K = ( *par )[ P_k ];
@@ -145,13 +155,8 @@ float PID::eval( float currentValue, int deltaSign )
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
         if ( unsigned long delta_time = get_delta_millisec( start_time );
             delta_time < acceleration_time )
-            {            
-            if ( auto out_min = ( *par )[ P_out_min ]; start_value < out_min )
-                {
-                // Начинаем с out_min. 
-                start_value = out_min;
-                }
-
+            {
+            // start_value всегда в процентах (0-100%).
             float res = MAX_OUT_VALUE * delta_time / acceleration_time;
             if ( ( *par )[ P_is_zero_start ] )
                 {
@@ -187,43 +192,55 @@ float PID::eval( float currentValue, int deltaSign )
         start_time = get_millisec();
 
         // Устанавливаем начальное значение для разгона регулятора.
-        start_value = ( *par )[ P_U_manual ];
+        // P_U_manual теперь в единицах, конвертируем обратно в проценты.
+        float out_max = ( *par )[ P_out_max ];
+        float out_min = ( *par )[ P_out_min ];
+        float u_manual = ( *par )[ P_U_manual ];
+        
+        if ( out_max != out_min )
+            {
+            start_value = ( u_manual - out_min ) / ( out_max - out_min ) * 
+                MAX_OUT_VALUE;
+            // Ограничиваем start_value в пределах 0-100%.
+            if ( start_value < MIN_OUT_VALUE ) start_value = MIN_OUT_VALUE;
+            if ( start_value > MAX_OUT_VALUE ) start_value = MAX_OUT_VALUE;
+            }
+        else
+            {
+            start_value = MIN_OUT_VALUE;
+            }
 
-        out_value = ( *par )[ P_U_manual ];
+        out_value = u_manual;
         return out_value;
         }
     //-Мягкий пуск.-!>
 
-    //-Ограничение на выходное значение.
+    //-Ограничение внутреннего значения ПИД на 0-100%.
+    if ( Uk < MIN_OUT_VALUE )
+        {
+        Uk = MIN_OUT_VALUE;
+        }
+    if ( Uk > MAX_OUT_VALUE )
+        {
+        Uk = MAX_OUT_VALUE;
+        }
+
+    //-Масштабирование выхода ПИД на заданные единицы измерения.
     float out_max = ( *par )[ P_out_max ];
     float out_min = ( *par )[ P_out_min ];
-
 
     if ( out_min >= out_max )
         {
         G_LOG->warning( "PID::eval() : out_min >= out_max (%f >= %f).",
             out_min, out_max );
         out_min = MIN_OUT_VALUE;
-        ( *par )[ P_out_min ] = MIN_OUT_VALUE;
-        }
-    if ( out_max <= MIN_OUT_VALUE )
-        {
-        G_LOG->warning( "PID::eval() : out_max <= MIN_OUT_VALUE (%f).",
-            MIN_OUT_VALUE );
         out_max = MAX_OUT_VALUE;
+        ( *par )[ P_out_min ] = MIN_OUT_VALUE;
         ( *par )[ P_out_max ] = MAX_OUT_VALUE;
-        }        
-
-    if ( Uk < out_min )
-        {
-        Uk = out_min;
-        }
-    if ( Uk > out_max )
-        {
-        Uk = out_max;
         }
 
-    out_value = Uk;
+    // Масштабирование: 0-100% -> out_min-out_max.
+    out_value = out_min + ( Uk / MAX_OUT_VALUE ) * ( out_max - out_min );
 
     if ( 1 == ( *par )[ P_is_manual_mode ] )
         {
@@ -333,16 +350,6 @@ void PID::init_param( PARAM par_n, float val )
     {
     if ( par_n > 0 && ( u_int ) par_n <= par->get_count() )
         {
-        //Проверка выхода за диапазон допустимых значений.
-        if ( par_n == P_out_min && val < MIN_OUT_VALUE )
-            {
-            val = MIN_OUT_VALUE;
-            }
-        if ( par_n == P_out_max && val > MAX_OUT_VALUE )
-            {
-            val = MAX_OUT_VALUE;
-            }
-
         ( *par )[ par_n ] = val;
         }
     }
@@ -370,7 +377,11 @@ void PID::reset()
     bool is_zero_start = ( *par )[ P_is_zero_start ] != 0;
     start_value = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
     Uk = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
-    out_value = Uk;
+    
+    // Масштабируем Uk (0-100%) в единицы измерения.
+    float out_max = ( *par )[ P_out_max ];
+    float out_min = ( *par )[ P_out_min ];
+    out_value = out_min + ( Uk / MAX_OUT_VALUE ) * ( out_max - out_min );
 
     ( *par )[ P_is_manual_mode ] = 0;
 
@@ -405,17 +416,9 @@ int PID::set_cmd( const char* prop, u_int idx, double val )
             {
             if ( idx > 0 && idx <= par->get_count() )
                 {
-                //Проверка выхода за диапазон допустимых значений.
-                if ( idx == P_out_min && val < MIN_OUT_VALUE )
-                    {
-                    val = MIN_OUT_VALUE;
-                    }
-                if ( idx == P_out_max && val > MAX_OUT_VALUE )
-                    {
-                    val = MAX_OUT_VALUE;
-                    }
-                if ( ( idx == P_out_min && val > ( *par )[ P_out_max ] ) ||
-                    ( idx == P_out_max && val < ( *par )[ P_out_min ] ) )
+                // Проверка что out_min < out_max.
+                if ( ( idx == P_out_min && val >= ( *par )[ P_out_max ] ) ||
+                    ( idx == P_out_max && val <= ( *par )[ P_out_min ] ) )
                     {
                     return 0;
                     }
