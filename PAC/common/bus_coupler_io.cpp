@@ -756,13 +756,28 @@ int io_device::check_output_node_state( u_int index, bool is_digital )
     {
     const IO_channels& channels = is_digital ? DO_channels : AO_channels;
 
-    if ( index >= channels.count || !channels.tables )
+    // If no channels configured or tables not initialized, skip node check.
+    if ( index >= channels.count || !channels.tables || !channels.char_write_values )
         {
-        return 0; // No output channels configured.
+        return 0; // No output channels properly configured.
+        }
+
+    // Check if IO manager is available.
+    auto io_mgr = G_IO_MANAGER();
+    if ( !io_mgr )
+        {
+        return 0; // IO manager not initialized.
         }
 
     u_int node_index = channels.tables[ index ];
-    auto node = G_IO_MANAGER()->get_node( node_index );
+    
+    // Check if node index is valid.
+    if ( node_index >= io_mgr->get_nodes_count() )
+        {
+        return 0; // Invalid node index.
+        }
+
+    auto node = io_mgr->get_node( node_index );
 
     if ( !node )
         {
