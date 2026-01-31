@@ -1,0 +1,49 @@
+# Valgrind suppression file for ptusa_main.
+# This file contains suppressions for known false positives and third-party
+# library issues.
+
+# Lua-related suppressions.
+{
+   Lua_internal_memory
+   Memcheck:Leak
+   ...
+   fun:luaL_newstate
+}
+
+{
+   Lua_realloc
+   Memcheck:Leak
+   ...
+   fun:lua_*
+}
+
+# Open62541 OPC UA library suppressions.
+{
+   open62541_internal
+   Memcheck:Leak
+   ...
+   obj:*/libopen62541.*
+}
+
+# GoogleTest suppressions.
+{
+   gtest_internal
+   Memcheck:Leak
+   ...
+   obj:*/libgtest*
+}
+
+# System library suppressions.
+{
+   dl_init
+   Memcheck:Leak
+   ...
+   fun:_dl_*
+}
+
+{
+   pthread_create
+   Memcheck:Leak
+   ...
+   fun:pthread_create*
+}

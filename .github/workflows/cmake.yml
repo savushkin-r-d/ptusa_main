@@ -370,6 +370,29 @@ jobs:
           message(FATAL_ERROR "Running tests failed!")
         endif()
 
+    - name: Run Valgrind memory leak tests (Linux only)
+      if: runner.os == 'Linux'
+      shell: cmake -P {0}
+      run: |
+        set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
+        
+        execute_process(
+          COMMAND ctest -R valgrind -V
+          WORKING_DIRECTORY build
+          RESULT_VARIABLE result
+          OUTPUT_VARIABLE output
+          ERROR_VARIABLE output
+          ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+        )
+        if (NOT result EQUAL 0)
+          message("::warning::Valgrind tests detected memory issues. Check logs for details.")
+          # Upload valgrind log as artifact for investigation
+          file(READ build/valgrind-main_test.log valgrind_log)
+          message("Valgrind log:\n${valgrind_log}")
+        else()
+          message("::notice::Valgrind memory leak tests passed!")
+        endif()
+
     - name: Install lcov (Linux only)
       if: runner.os == 'Linux'
       shell: bash

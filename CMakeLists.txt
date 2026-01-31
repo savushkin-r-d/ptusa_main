@@ -533,3 +533,30 @@ endif()
 
 include(GoogleTest)
 gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
+
+# Add Valgrind memory leak checking test for main_test.
+if(LINUX)
+    find_program(VALGRIND_EXECUTABLE valgrind)
+    if(VALGRIND_EXECUTABLE)
+        add_test(
+            NAME main_test_valgrind
+            COMMAND ${VALGRIND_EXECUTABLE}
+                --error-exitcode=1
+                --leak-check=full
+                --show-leak-kinds=definite,possible
+                --errors-for-leak-kinds=definite,possible
+                --suppressions=${CMAKE_SOURCE_DIR}/valgrind.supp
+                --gen-suppressions=all
+                --track-origins=yes
+                --verbose
+                --log-file=${CMAKE_BINARY_DIR}/valgrind-main_test.log
+                $<TARGET_FILE:main_test>
+        )
+        set_tests_properties(main_test_valgrind PROPERTIES
+            TIMEOUT 600
+            LABELS "valgrind;memory"
+        )
+    else()
+        message(WARNING "Valgrind not found. Memory leak tests will not be available.")
+    endif()
+endif()
