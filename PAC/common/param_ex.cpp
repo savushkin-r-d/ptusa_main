@@ -333,9 +333,19 @@ void params_manager::evaluate()
         if ( get_delta_millisec( mLastSaveTimer ) > MIN_SAVE_INTERVAL_MS )
             {
             save();
-            // Only clear flag and update timer after successful save.
+            // Clear flag and update timer after save operation.
+            // Note: save() doesn't return error status, so we assume success.
+            // If the underlying write fails, the parameter change will be
+            // lost but will be re-applied if the parameter is modified again.
             isChanged = false;
             mLastSaveTimer = get_millisec();
+            
+            if ( G_DEBUG )
+                {
+                sprintf( G_LOG->msg, 
+                    "params_manager: Periodic save completed." );
+                G_LOG->write_log( i_log::P_DEBUG );
+                }
             }
         }
     }
