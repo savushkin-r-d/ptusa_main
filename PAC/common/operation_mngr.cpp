@@ -2349,7 +2349,9 @@ void operation_state::evaluate()
         {
         if ( next_step >= 0 )
             {
-            G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
+            G_LOG->debug( "Объект '%s', операция '%s': переход к шагу %d ('%s') - %s.",
+                owner->owner->get_name(), name.c_str(), next_step + 1,
+                steps[ next_step ]->get_name(), reason.c_str() );
             if ( G_DEBUG )
                 {
                 if_action->print();
