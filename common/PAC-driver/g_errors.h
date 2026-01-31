@@ -214,6 +214,41 @@ class base_error
             err_par[ P_PARAM_N ] = 0;
             }
 
+        /// @brief Получение времени возникновения тревоги.
+        time_t get_alarm_time() const
+            {
+            return alarm_time;
+            }
+
+        /// @brief Получение времени подтверждения тревоги.
+        time_t get_ack_time() const
+            {
+            return ack_time;
+            }
+
+        /// @brief Получение времени возврата в норму.
+        time_t get_return_time() const
+            {
+            return return_time;
+            }
+
+        /// @brief Получение количества возникновений тревоги.
+        u_int_4 get_occurrence_count() const
+            {
+            return occurrence_count;
+            }
+
+        /// @brief Проверка, является ли тревога временно подавленной.
+        bool is_shelved() const;
+
+        /// @brief Установка временного подавления тревоги.
+        ///
+        /// @param duration - длительность подавления, секунд.
+        void shelve_alarm( u_int_4 duration );
+
+        /// @brief Снятие временного подавления тревоги.
+        void unshelve_alarm();
+
         enum PARAMS  ///< Параметры ошибки, определяют номера битов.
             {
             P_PARAM_N = 1,	  //Номер параметра.
@@ -229,12 +264,21 @@ class base_error
             C_CMD_ACCEPT   = 100,    ///< Подтвердить ошибку.
             C_CMD_SUPPRESS = 200,    ///< Подавить ошибку.
             C_CMD_UNSET_SUPPRESS,    ///< Убрать подавление ошибки.
+            C_CMD_SHELVE,            ///< Временно подавить ошибку.
+            C_CMD_UNSHELVE,          ///< Убрать временное подавление ошибки.
             };
 
     protected:
         saved_params_u_int_4 err_par;
 
         unsigned char error_state;    ///< Состояние ошибки.
+        
+        time_t alarm_time;            ///< Время возникновения тревоги.
+        time_t ack_time;              ///< Время подтверждения тревоги.
+        time_t return_time;           ///< Время возврата в норму.
+        u_int_4 occurrence_count;     ///< Количество возникновений тревоги.
+        time_t shelve_time;           ///< Время установки временного подавления.
+        u_int_4 shelve_duration;      ///< Длительность временного подавления, сек.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке простого устройства (клапан,
