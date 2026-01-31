@@ -1352,6 +1352,12 @@ int io_manager::io_node::get_display_state() const
 
     if ( state != ST_OK )
         {
+        // If node has no I/O configured (emulator mode), return
+        // ST_NO_CONNECT instead of ST_ERROR.
+        if ( DI_cnt == 0 && DO_cnt == 0 && AI_cnt == 0 && AO_cnt == 0 )
+            {
+            return ST_NO_CONNECT;
+            }
         return ST_ERROR;
         }
 
