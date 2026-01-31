@@ -1443,3 +1443,53 @@ TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
     G_LUA_MANAGER->free_Lua();
     ClearCipDevices();
     }
+
+TEST( cipline_tech_object, reset_line_devices_when_no_washing_mode )
+    {
+    // Test that line devices are reset even when washing mode is not selected
+    // This test validates the fix for the issue:
+    // "When washing mode is not selected, resetting the object should also reset line parameters"
+    
+    InitCipDevices();
+    lua_manager::get_instance()->set_Lua( lua_open() );
+    
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.initline();
+    
+    // Add control devices that should be reset
+    auto dm = device_manager::get_instance();
+    dm->add_io_device( device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT, 
+        "LINE1DO_CIP_FINISHED", "", "" );
+    dm->add_io_device( device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT, 
+        "LINE1DO_CIP_IN_PROGRESS", "", "" );
+    
+    auto dev_finished = dm->get_device( "LINE1DO_CIP_FINISHED" );
+    auto dev_in_progress = dm->get_device( "LINE1DO_CIP_IN_PROGRESS" );
+    ASSERT_NE( nullptr, dev_finished );
+    ASSERT_NE( nullptr, dev_in_progress );
+    
+    cip1.dev_upr_cip_finished = dev_finished;
+    cip1.dev_upr_cip_in_progress = dev_in_progress;
+    
+    // Turn on the devices to simulate active state
+    dev_finished->on();
+    dev_in_progress->on();
+    EXPECT_EQ( 1, dev_finished->get_state() );
+    EXPECT_EQ( 1, dev_in_progress->get_state() );
+    
+    // Verify state is 0 (no washing mode selected)
+    EXPECT_EQ( 0, cip1.state );
+    
+    // Call MCMD_RESET when state == 0
+    cip1.SetCommand( MCMD_RESET );
+    cip1.evaluate();
+    
+    // Verify that line devices were turned off
+    EXPECT_EQ( 0, dev_finished->get_state() ) << 
+        "dev_upr_cip_finished should be turned off after reset";
+    EXPECT_EQ( 0, dev_in_progress->get_state() ) << 
+        "dev_upr_cip_in_progress should be turned off after reset";
+    
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
+    }

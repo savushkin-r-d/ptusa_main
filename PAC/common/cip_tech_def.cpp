@@ -1869,6 +1869,7 @@ int cipline_tech_object::EvalCommands()
                 loadedRecipe = -1;
                 loadedProgram = -1;
                 rt_par_float[P_PROGRAM] = 0;
+                ResetLinesDevicesBeforeReset();
                 }
             break;
         case MCMD_EVALUATE:
