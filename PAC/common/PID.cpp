@@ -199,8 +199,10 @@ float PID::eval( float currentValue, int deltaSign )
         
         if ( out_max != out_min )
             {
-            start_value = ( u_manual - out_min ) / ( out_max - out_min ) * 
-                MAX_OUT_VALUE;
+            // Нормализуем значение к диапазону 0-100%.
+            float normalized_percentage = ( u_manual - out_min ) / 
+                ( out_max - out_min );
+            start_value = normalized_percentage * MAX_OUT_VALUE;
             // Ограничиваем start_value в пределах 0-100%.
             if ( start_value < MIN_OUT_VALUE ) start_value = MIN_OUT_VALUE;
             if ( start_value > MAX_OUT_VALUE ) start_value = MAX_OUT_VALUE;
