@@ -19,8 +19,33 @@ bool tech_obj_error::is_any_message = false;
 auto_smart_ptr < siren_lights_manager > siren_lights_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )
+base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL ),
+    alarm_time( 0 ), ack_time( 0 ), return_time( 0 ), occurrence_count( 0 ),
+    shelve_time( 0 ), shelve_duration( 0 )
     {
+    }
+//-----------------------------------------------------------------------------
+bool base_error::is_shelved() const
+    {
+    if ( shelve_time == 0 || shelve_duration == 0 )
+        {
+        return false;
+        }
+    
+    time_t current_time = time( nullptr );
+    return difftime( current_time, shelve_time ) < shelve_duration;
+    }
+//-----------------------------------------------------------------------------
+void base_error::shelve_alarm( u_int_4 duration )
+    {
+    shelve_time = time( nullptr );
+    shelve_duration = duration;
+    }
+//-----------------------------------------------------------------------------
+void base_error::unshelve_alarm()
+    {
+    shelve_time = 0;
+    shelve_duration = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -69,7 +94,45 @@ int tech_dev_error::save_as_Lua_str( char *str )
             static_cast<int>( simple_device->get_type() ) ).size;
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
-            "suppress={}\n", alarm_params & P_IS_SUPPRESS ? "true" : "false" ).size;
+            "suppress={},\n", alarm_params & P_IS_SUPPRESS ? "true" : "false" ).size;
+        
+        // Добавление информации о временных метках.
+        if ( alarm_time > 0 )
+            {
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "alarm_time={},\n", alarm_time ).size;
+            }
+        if ( ack_time > 0 )
+            {
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "ack_time={},\n", ack_time ).size;
+            }
+        if ( return_time > 0 )
+            {
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "return_time={},\n", return_time ).size;
+            }
+        
+        // Добавление счетчика возникновений.
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "occurrence_count={},\n", occurrence_count ).size;
+        
+        // Добавление информации о временном подавлении.
+        if ( is_shelved() )
+            {
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "shelved=true,\n" ).size;
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "shelve_time={},\n", shelve_time ).size;
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "shelve_duration={},\n", shelve_duration ).size;
+            }
+        else
+            {
+            res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+                "shelved=false\n" ).size;
+            }
+        
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE, "}},\n" ).size;
         }
 
@@ -102,6 +165,10 @@ void tech_dev_error::evaluate( bool &is_new_state )
             case AS_RETURN:
                 error_state = AS_ALARM;
                 is_new_state = true;
+                
+                // Запись времени возникновения тревоги и увеличение счетчика.
+                alarm_time = time( nullptr );
+                occurrence_count++;
 
                 is_new_error = true; //Появилась новая ошибка.
 
@@ -110,7 +177,14 @@ void tech_dev_error::evaluate( bool &is_new_state )
             }
         is_any_error = true;
 
-        if ( err_par[ P_PARAM_N ] & P_IS_SUPPRESS )
+        // Проверка временного подавления (shelving).
+        if ( is_shelved() )
+            {
+            is_any_error = false;
+            is_new_error = false;
+            is_any_no_ack_error = false;
+            }
+        else if ( err_par[ P_PARAM_N ] & P_IS_SUPPRESS )
             {
             is_any_error = false;
             is_new_error = false;
@@ -135,6 +209,9 @@ void tech_dev_error::evaluate( bool &is_new_state )
             case AS_ALARM:
                 error_state = AS_RETURN;
                 is_new_state = true;
+                
+                // Запись времени возврата в норму.
+                return_time = time( nullptr );
                 break;
             }
         }
@@ -187,6 +264,9 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
             if ( AS_ALARM == error_state ||
                 AS_RETURN == error_state )
                 {
+                // Запись времени подтверждения.
+                ack_time = time( nullptr );
+                
                 if ( AS_RETURN == error_state )
                     {
                     error_state = AS_NORMAL;
@@ -205,6 +285,15 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
                     }
                 res = 1;
                 }
+            break;
+
+        case C_CMD_SHELVE:
+            // Временное подавление на 1 час (3600 секунд) по умолчанию.
+            shelve_alarm( object_alarm_number > 0 ? object_alarm_number : 3600 );
+            break;
+
+        case C_CMD_UNSHELVE:
+            unshelve_alarm();
             break;
 
         default:
