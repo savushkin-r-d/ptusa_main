@@ -1,4 +1,4 @@
-#include "uni_bus_coupler_io_tests.h"
+#include "pp_mode_alarm_tests.h"
 #include "PAC_err.h"
 
 using namespace ::testing;
@@ -6,7 +6,6 @@ using namespace ::testing;
 // Test PP mode alarm activation.
 TEST( pp_mode_alarm, pp_mode_activation )
     {
-    uni_io_manager mngr;
     io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
@@ -29,7 +28,6 @@ TEST( pp_mode_alarm, pp_mode_activation )
 // Test PP mode alarm deactivation.
 TEST( pp_mode_alarm, pp_mode_deactivation )
     {
-    uni_io_manager mngr;
     io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
@@ -64,7 +62,6 @@ TEST( pp_mode_alarm, initialization )
 // Test that multiple status register bits trigger PP mode.
 TEST( pp_mode_alarm, multiple_error_bits )
     {
-    uni_io_manager mngr;
     io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
