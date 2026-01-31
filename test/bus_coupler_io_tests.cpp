@@ -181,3 +181,86 @@ TEST( io_node, get_display_state_all_node_types )
 	EXPECT_EQ( io_manager::io_node::ST_OK, 
 		io_manager::get_instance()->get_node( 2 )->get_display_state() );
 	}
+
+TEST( io_device, check_output_node_state_ok )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 1, 0, 0, 0, 0, 0 );
+
+	io_device dev( "TEST_DO" );
+	dev.init_and_alloc( 1, 0, 0, 0 );
+	dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = 0;
+
+	EXPECT_EQ( 1, dev.check_output_node_state( 0, true ) );
+	}
+
+TEST( io_device, check_output_node_state_pp_mode )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 1, 0, 0, 0, 0, 0 );
+
+	io_device dev( "TEST_DO" );
+	dev.init_and_alloc( 1, 0, 0, 0 );
+	dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = 0x0010;  // PP mode.
+
+	EXPECT_EQ( -1, dev.check_output_node_state( 0, true ) );
+	}
+
+TEST( io_device, check_output_node_state_not_connected )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 1, 0, 0, 0, 0, 0 );
+
+	io_device dev( "TEST_DO" );
+	dev.init_and_alloc( 1, 0, 0, 0 );
+	dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;
+
+	EXPECT_EQ( -1, dev.check_output_node_state( 0, true ) );
+	}
+
+TEST( io_device, check_output_node_state_not_active )
+	{
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 1, 0, 0, 0, 0, 0 );
+
+	io_device dev( "TEST_DO" );
+	dev.init_and_alloc( 1, 0, 0, 0 );
+	dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = false;
+	node->state = io_manager::io_node::ST_OK;
+	node->status_register = 0;
+
+	EXPECT_EQ( -1, dev.check_output_node_state( 0, true ) );
+	}
+
+TEST( io_device, check_output_node_state_no_channels )
+	{
+	io_device dev( "TEST_DO" );
+	
+	// No channels configured.
+	EXPECT_EQ( 0, dev.check_output_node_state( 0, true ) );
+	}

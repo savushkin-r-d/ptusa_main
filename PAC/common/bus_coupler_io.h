@@ -167,6 +167,18 @@ class io_device
 
         virtual void print() const;
 
+        /// @brief Check output channel network node state.
+        ///
+        /// Checks if the network node associated with the output channel
+        /// is available and not in error/PP mode state.
+        ///
+        /// @param index - index of the channel in DO or AO channels table.
+        /// @param is_digital - true for DO channels, false for AO channels.
+        ///
+        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        ///         0 - no output channels configured.
+        int check_output_node_state( u_int index, bool is_digital = true );
+
 #ifdef PTUSA_TEST
         public:
 #else
