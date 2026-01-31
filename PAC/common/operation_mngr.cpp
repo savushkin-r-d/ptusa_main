@@ -2095,6 +2095,11 @@ bool enable_step_by_signal::is_any_group_active() const
     auto& main_group = devices[ MAIN_GROUP ];
     for( auto& group : main_group )
         {
+        if ( group.empty() )
+            {
+            continue;
+            }
+
         auto is_group_ok = true;
         for( auto& dev : group )
             {
