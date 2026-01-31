@@ -107,6 +107,20 @@ class PAC_info: public i_Lua_save_device
 
         void set_cycle_time( uint32_t current_cycle_time );
 
+        /// @brief Get nodes communication error status.
+        /// @return 0 - all OK, 1 - at least one node has error or PP mode.
+        int get_nodes_comm_error() const
+            {
+            return nodes_comm_error;
+            }
+
+        /// @brief Get watchdog error status.
+        /// @return 0 - all OK, 1 - at least one watchdog has error (state less than 0).
+        int get_watchdog_error() const
+            {
+            return watchdog_error;
+            }
+
     private:
         PAC_info();
 
@@ -136,6 +150,14 @@ class PAC_info: public i_Lua_save_device
         uint32_t restrictions_set_to_off_time;
 
         uint32_t cycle_time = 0;
+
+        /// @brief Indicator: any node has communication error or warning.
+        /// 0 - all OK, 1 - at least one node has error or PP mode active.
+        int nodes_comm_error = 0;
+
+        /// @brief Indicator: any watchdog has error state.
+        /// 0 - all OK, 1 - at least one watchdog has error (state < 0).
+        int watchdog_error = 0;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();

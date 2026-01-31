@@ -70,6 +70,7 @@ TEST( PAC_info, save_device )
     G_PAC_INFO()->reset_params();
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::CLEAR_RESULT_CMD );
     G_PAC_INFO()->set_cycle_time( 100 );
+    G_PAC_INFO()->eval();  // Update error indicators.
 
     const auto MAX_SIZE = 1000;
     const auto REF_STR =
@@ -104,7 +105,9 @@ TEST( PAC_info, save_device )
             "\t-1, \n"
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
-            "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"        
+            "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+            "\tNODES_COMM_ERROR=1,\n"
+            "\tWATCHDOG_ERROR=0,\n"
             "\t}\n";
     char buff[ MAX_SIZE ] = {0};
 
@@ -144,6 +147,8 @@ TEST( PAC_info, save_device )
         "\t},\n"
         "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
         "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+        "\tNODES_COMM_ERROR=1,\n"
+        "\tWATCHDOG_ERROR=0,\n"
         "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1001 );
     G_PAC_INFO()->eval();
@@ -166,3 +171,134 @@ TEST( PAC_info, is_emulator )
     {
     EXPECT_TRUE( G_PAC_INFO()->is_emulator() );
     }
+
+TEST( PAC_info, nodes_comm_error_all_ok )
+    {
+    // Setup: create nodes in OK state.
+    io_manager::get_instance()->init( 2 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+    io_manager::get_instance()->add_node( 1,
+        io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
+        "A200", 0, 0, 0, 0, 0, 0 );
+
+    auto node0 = io_manager::get_instance()->get_node( 0 );
+    node0->is_active = true;
+    node0->state = io_manager::io_node::ST_OK;
+    node0->status_register = 0;  // No PP mode.
+
+    auto node1 = io_manager::get_instance()->get_node( 1 );
+    node1->is_active = true;
+    node1->state = io_manager::io_node::ST_OK;
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
+    }
+
+TEST( PAC_info, nodes_comm_error_one_has_error )
+    {
+    // Setup: create nodes, one with error.
+    io_manager::get_instance()->init( 2 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+    io_manager::get_instance()->add_node( 1,
+        io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
+        "A200", 0, 0, 0, 0, 0, 0 );
+
+    auto node0 = io_manager::get_instance()->get_node( 0 );
+    node0->is_active = true;
+    node0->state = io_manager::io_node::ST_OK;
+    node0->status_register = 0;
+
+    auto node1 = io_manager::get_instance()->get_node( 1 );
+    node1->is_active = true;
+    node1->state = io_manager::io_node::ST_ERROR;  // Error!
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
+    }
+
+TEST( PAC_info, nodes_comm_error_pp_mode )
+    {
+    // Setup: create Phoenix node in PP mode (warning state).
+    io_manager::get_instance()->init( 1 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+
+    auto node = io_manager::get_instance()->get_node( 0 );
+    node->is_active = true;
+    node->state = io_manager::io_node::ST_OK;
+    node->status_register = 0x0010;  // PP mode active (bit 4).
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
+    }
+
+TEST( PAC_info, watchdog_error_all_ok )
+    {
+    // Setup: create watchdog devices with state >= 0.
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto wd1 = new watchdog( "WD1" );
+    G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
+    wd1->set_state( 1 );  // OK state.
+
+    auto wd2 = new watchdog( "WD2" );
+    G_DEVICE_MANAGER()->add_device( wd2, device::DT_WATCHDOG );
+    wd2->set_state( 0 );  // OK state.
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
+    }
+
+TEST( PAC_info, watchdog_error_one_has_error )
+    {
+    // Setup: create watchdog devices, one with error.
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto wd1 = new watchdog( "WD1" );
+    G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
+    wd1->set_state( 1 );  // OK state.
+
+    auto wd2 = new watchdog( "WD2" );
+    G_DEVICE_MANAGER()->add_device( wd2, device::DT_WATCHDOG );
+    wd2->set_state( -1 );  // Error state!
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
+    }
+
+TEST( PAC_info, watchdog_error_no_watchdogs )
+    {
+    // Setup: no watchdog devices.
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
+    }
+
+TEST( PAC_info, combined_errors_both )
+    {
+    // Setup: create node error and watchdog error.
+    io_manager::get_instance()->init( 1 );
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+
+    auto node = io_manager::get_instance()->get_node( 0 );
+    node->is_active = true;
+    node->state = io_manager::io_node::ST_ERROR;
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    auto wd = new watchdog( "WD1" );
+    G_DEVICE_MANAGER()->add_device( wd, device::DT_WATCHDOG );
+    wd->set_state( -1 );
+
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
+    }
+
