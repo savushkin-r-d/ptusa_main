@@ -9,6 +9,7 @@
 #include "PAC_info.h"
 #include "PAC_err.h"
 #include "iot_common.h"
+#include "param_ex.h"
 #ifdef OPCUA
 #include "OPCUAServer.h"
 #endif
@@ -69,6 +70,7 @@ int main_cycle()
     PAC_critical_errors_manager::get_instance()->show_errors();
     G_ERRORS_MANAGER->evaluate();
     G_SIREN_LIGHTS_MANAGER()->eval();
+    params_manager::get_instance()->evaluate();
     sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
 #ifdef USE_PROFIBUS
