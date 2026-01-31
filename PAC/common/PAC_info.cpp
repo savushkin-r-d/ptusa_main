@@ -8,6 +8,7 @@
 #include "lua_manager.h"
 
 #include "bus_coupler_io.h"
+#include "device/manager.h"
 
 #ifdef OPCUA
 #include "OPCUAServer.h"
@@ -63,6 +64,39 @@ void PAC_info::eval()
         auto res = fmt::format_to_n( up_time_str, C_MAX_STR_LENGTH - 1,
             "{} дн. {:02}:{:02}:{:02}", up_days, up_hours, up_mins, up_secs );
         *res.out = '\0';
+        }
+
+    // Check I/O nodes communication status.
+    nodes_comm_error = 0;
+    unsigned int nc = io_manager::get_instance()->get_nodes_count();
+    for ( unsigned int i = 0; i < nc; i++ )
+        {
+        const io_manager::io_node* node = 
+            io_manager::get_instance()->get_node( i );
+        int state = node->get_display_state();
+        // Error or warning (PP mode) state detected.
+        if ( state == io_manager::io_node::ST_ERROR || 
+             state == io_manager::io_node::ST_WARNING )
+            {
+            nodes_comm_error = 1;
+            break;
+            }
+        }
+
+    // Check watchdog devices status.
+    watchdog_error = 0;
+    size_t dev_count = G_DEVICE_MANAGER()->get_device_count();
+    for ( size_t i = 0; i < dev_count; i++ )
+        {
+        device* dev = G_DEVICE_MANAGER()->get_device( i );
+        if ( dev && dev->get_type() == device::DT_WATCHDOG )
+            {
+            if ( dev->get_state() < 0 )
+                {
+                watchdog_error = 1;
+                break;
+                }
+            }
         }
     }
 //-----------------------------------------------------------------------------
@@ -168,6 +202,11 @@ int PAC_info::save_device( char* buff )
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
