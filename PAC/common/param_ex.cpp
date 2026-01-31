@@ -19,7 +19,7 @@ char params_manager::is_init = 0;
 #include "log.h"
 //-----------------------------------------------------------------------------
 params_manager::params_manager(): par( 0 ), project_id( 0 ), isChanged( false ),
-    mLastSaveTimer( 0 )
+    mLastSaveTimer( get_millisec() )
     {
     last_idx = 0;
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
@@ -332,8 +332,9 @@ void params_manager::evaluate()
         {
         if ( get_delta_millisec( mLastSaveTimer ) > MIN_SAVE_INTERVAL_MS )
             {
-            isChanged = false;
             save();
+            // Only clear flag and update timer after successful save.
+            isChanged = false;
             mLastSaveTimer = get_millisec();
             }
         }
