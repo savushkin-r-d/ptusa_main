@@ -2,26 +2,42 @@
 #include "bus_coupler_io.h"
 #include "OPCUAServer.h"
 
-// Мок для G_OPCUA_SERVER
+#include <atomic>
+
+// Мок для G_OPCUA_SERVER.
 class MockOPCUAServer : public OPCUA_server
     {
     public:
         MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
         MOCK_METHOD( void, shutdown, ( ), ( override ) );
+
+        MockOPCUAServer()
+            {
+            instance = this;
+            }
+
+        ~MockOPCUAServer() final
+            {
+            instance = nullptr;
+            }
+
+        // Потокобезопасный доступ к текущему экземпляру mock.
+        static OPCUA_server& get_mock_instance()
+            {
+            return *instance;
+            }
+
+    private:
+        inline static thread_local MockOPCUAServer* instance{ nullptr };
     };
-
-MockOPCUAServer mockServer;
-
-OPCUA_server& get_instance()
-    {
-    return mockServer;
-    }
 
 TEST( PAC_info, OPCUA_server_start_fail )
     {
+    MockOPCUAServer mockServer;
+
     auto get_OPC_hook = subhook_new(
         reinterpret_cast<void*>( &OPCUA_server::get_instance ),
-        reinterpret_cast<void*>( &get_instance ),
+        reinterpret_cast<void*>( &MockOPCUAServer::get_mock_instance ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_OPC_hook );
 
@@ -108,6 +124,7 @@ TEST( PAC_info, save_device )
             "\t}\n";
     char buff[ MAX_SIZE ] = {0};
 
+    G_PAC_INFO()->reset_uptime();
     G_PAC_INFO()->save_device( buff );
     EXPECT_STREQ( REF_STR, buff);
 
@@ -159,6 +176,7 @@ TEST( PAC_info, get_name_in_Lua )
 
 TEST( PAC_info, get_up_time_str )
     {
+    G_PAC_INFO()->reset_uptime();
     EXPECT_STREQ( "0 дн. 0:0:0", G_PAC_INFO()->get_up_time_str() );
     }
 
