@@ -2,40 +2,41 @@
 #include "bus_coupler_io.h"
 #include "OPCUAServer.h"
 
-#include <atomic>
-
 // Мок для G_OPCUA_SERVER.
 class MockOPCUAServer : public OPCUA_server
     {
     public:
-        MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
-        MOCK_METHOD( void, shutdown, ( ), ( override ) );
-
         MockOPCUAServer()
             {
             instance = this;
             }
 
-        ~MockOPCUAServer() final
+        ~MockOPCUAServer()
             {
-            instance = nullptr;
+            if ( instance == this )
+                {
+                instance = nullptr;
+                }
             }
 
-        // Потокобезопасный доступ к текущему экземпляру mock.
+        MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
+        MOCK_METHOD( void, shutdown, ( ), ( override ) );
+
         static OPCUA_server& get_mock_instance()
             {
             return *instance;
             }
 
     private:
-        inline static thread_local MockOPCUAServer* instance{ nullptr };
+        // thread_local для изоляции при параллельном запуске тестов.
+        inline static thread_local MockOPCUAServer* instance = nullptr;
     };
 
 TEST( PAC_info, OPCUA_server_start_fail )
-    {
-    MockOPCUAServer mockServer;
+{
+MockOPCUAServer mockServer;
 
-    auto get_OPC_hook = subhook_new(
+auto get_OPC_hook = subhook_new(
         reinterpret_cast<void*>( &OPCUA_server::get_instance ),
         reinterpret_cast<void*>( &MockOPCUAServer::get_mock_instance ),
         SUBHOOK_64BIT_OFFSET );
@@ -43,7 +44,7 @@ TEST( PAC_info, OPCUA_server_start_fail )
 
     // Подготовка: сервер вернёт ошибку.
     EXPECT_CALL( mockServer, init_all_and_start() )
-        .WillOnce( ::testing::Return( 0xBADF00D ) );
+        .WillRepeatedly( ::testing::Return( 0xBADF00D ) );
     EXPECT_CALL( mockServer, shutdown() );
 
     // Установим начальное значение параметра.
@@ -130,38 +131,38 @@ TEST( PAC_info, save_device )
 
     const auto REF_STR_1s =
         "t.SYSTEM = \n"
-        "\t{\n"
-        "\tRESET_BY=1,\n"
-        "\tUP_DAYS=0,\n"
-        "\tUP_HOURS=0,\n"
-        "\tUP_MINS=0,\n"
-        "\tUP_SECS=1,\n"
-        "\tUP_TIME=\"0 дн. 00:00:01\",\n"
-        "\tCYCLE_TIME=100,\n"
-        "\tWASH_VALVE_SEAT_PERIOD=180,\n"
-        "\tWASH_VALVE_UPPER_SEAT_TIME=2000,\n"
-        "\tWASH_VALVE_LOWER_SEAT_TIME=1000,\n"
-        "\tP_V_OFF_DELAY_TIME=1000,\n"
-        "\tP_V_BOTTOM_ON_DELAY_TIME=1200,\n"
-        "\tP_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME=50,\n"
-        "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME=300,\n"
-        "\tP_RESTRICTIONS_MODE=0,\n"
-        "\tP_RESTRICTIONS_MANUAL_TIME=120000,\n"
-        "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=0,\n"
-        "\tCMD=0,\n"
-        "\tCMD_ANSWER=\"\",\n"
-        "\tVERSION=\"" PRODUCT_VERSION_FULL_STR "\",\n"
-        "\tNODEENABLED = \n"
-        "\t{\n"
-        "\t1, \n"
-        "\t},\n"
-        "\tNODEST = \n"
-        "\t{\n"
-        "\t-1, \n"
-        "\t},\n"
-        "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
-        "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
-        "\t}\n";
+            "\t{\n"
+            "\tRESET_BY=1,\n"
+            "\tUP_DAYS=0,\n"
+            "\tUP_HOURS=0,\n"
+            "\tUP_MINS=0,\n"
+            "\tUP_SECS=1,\n"
+            "\tUP_TIME=\"0 дн. 00:00:01\",\n"
+            "\tCYCLE_TIME=100,\n"
+            "\tWASH_VALVE_SEAT_PERIOD=180,\n"
+            "\tWASH_VALVE_UPPER_SEAT_TIME=2000,\n"
+            "\tWASH_VALVE_LOWER_SEAT_TIME=1000,\n"
+            "\tP_V_OFF_DELAY_TIME=1000,\n"
+            "\tP_V_BOTTOM_ON_DELAY_TIME=1200,\n"
+            "\tP_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME=50,\n"
+            "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME=300,\n"
+            "\tP_RESTRICTIONS_MODE=0,\n"
+            "\tP_RESTRICTIONS_MANUAL_TIME=120000,\n"
+            "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=0,\n"
+            "\tCMD=0,\n"
+            "\tCMD_ANSWER=\"\",\n"
+            "\tVERSION=\"" PRODUCT_VERSION_FULL_STR "\",\n"
+            "\tNODEENABLED = \n"
+            "\t{\n"
+            "\t1, \n"
+            "\t},\n"
+            "\tNODEST = \n"
+            "\t{\n"
+            "\t-1, \n"
+            "\t},\n"
+            "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
+            "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+            "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1001 );
     G_PAC_INFO()->eval();
     G_PAC_INFO()->save_device( buff );
