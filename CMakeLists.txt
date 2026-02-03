@@ -60,22 +60,38 @@ add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/zlib EXCLUDE_FROM_ALL)
 
+# Google Test configuration.
 set(INSTALL_GTEST OFF)
+set(INSTALL_GMOCK OFF)
+# Build as static libraries to avoid DLL export issues.
+set(BUILD_SHARED_LIBS OFF)
+# Use dynamic CRT (/MD) to match the main project.
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# Скрыть внутренние символы для уменьшения размера бинарника.
+set(gtest_hide_internal_symbols ON CACHE BOOL "" FORCE)
 add_subdirectory(deps/googletest EXCLUDE_FROM_ALL)
-foreach(_t gtest gtest_main gmock gmock_main)
-    if(TARGET ${_t})
-        set_target_properties(${_t} PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>"
-            LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>"
-            ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/$<CONFIG>")
-    endif()
-endforeach()
+set(BUILD_SHARED_LIBS ON)
 
 add_subdirectory(deps/subhook EXCLUDE_FROM_ALL)
 
+# Google Benchmark configuration.
 if(NOT MINGW)
-    set (BENCHMARK_ENABLE_TESTING OFF)
+    # Не собирать внутренние тесты benchmark.
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    # Не использовать libc++ (MSVC использует свою STL).
+    set(BENCHMARK_USE_LIBCXX OFF)
+    # Собирать как статическую библиотеку.
+    set(BUILD_SHARED_LIBS OFF)
+    # Не создавать install targets.
+    set(BENCHMARK_ENABLE_INSTALL OFF)
+    if(WIN32)
+        # Отключить GTest-тесты benchmark (требуют pthreads).
+        set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+        # Использовать Win32 threads вместо pthreads.
+        set(CMAKE_USE_WIN32_THREADS_INIT ON)
+    endif()
     add_subdirectory(deps/benchmark EXCLUDE_FROM_ALL)
+    set(BUILD_SHARED_LIBS ON)
 endif()
 
 if(USE_OPCUA)
@@ -210,8 +226,8 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs luasystem term_core luassert_copy)
-add_dependencies(lua libptusa_main luasql_odbc)
+add_dependencies(main_test lua lfs luasystem term_core luassert_copy luasql_odbc)
+add_dependencies(libptusa_main lua)
 
 if(MSVC)
     set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")
@@ -254,8 +270,7 @@ endif()
 set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX "")
 target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
-target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
-target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
+target_compile_definitions(main_test PUBLIC PTUSA_TEST)
 
 #######################################################################################
 
@@ -367,7 +382,7 @@ if(USE_OPCUA)
     endif()
 endif()
 
-target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook fmt::fmt)
+target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic GTest::gtest GTest::gmock subhook fmt::fmt)
 
 if(NOT MINGW)
     target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
