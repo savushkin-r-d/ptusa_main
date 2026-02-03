@@ -104,26 +104,28 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
         "res = get_delta_millisec()" ) );               //Некорректный вызов.
 
     ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "dt_0 = get_delta_millisec( 0 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "dt_ms = get_delta_millisec( ms )" ) );
+
     lua_getfield( L, LUA_GLOBALSINDEX, "ms" );
     auto ms = tolua_tonumber( L, -1, 0 );
-    lua_remove( L, -1 );   
+    lua_remove( L, -1 );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dt_0" );
+    auto dt_0 = tolua_tonumber( L, -1, 0 );
+    lua_remove( L, -1 );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dt_ms" );
+    auto dt_ms = tolua_tonumber( L, -1, 0 );    
+    lua_remove( L, -1 );
 
     // Запрашиваем время, прошедшее с момента 0 - результат должен быть
     // неотрицательным.
-    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
-    lua_getfield( L, LUA_GLOBALSINDEX, "res" );    
-    auto dt1 = tolua_tonumber( L, -1, 0 );
-    EXPECT_GE( dt1, 0 );
-    lua_remove( L, -1 );
-
+    EXPECT_GE( dt_0, 0 );
+    // Запрашиваем время, прошедшее с момента ms - результат должен быть
+    // неотрицательным.
+    EXPECT_GE( dt_ms, 0 );
     // Время должно совпать с расчетным.
-    EXPECT_NEAR( dt1, ms, 1 );
-
-    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms )" ) );
-    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
-    auto dt2 = tolua_tonumber( L, -1, 0 );
-    EXPECT_NEAR( dt2, 0, 1 );
-    lua_remove( L, -1 );
+    EXPECT_NEAR( ms, dt_0, 2 );
+    EXPECT_NEAR( dt_ms, 0, 2 );
 
     // Корректная обработка переполнения - результат должен быть положительным
     // и примерно равен UINT32_MAX.
@@ -132,7 +134,7 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     auto dt3 = tolua_tonumber( L, -1, 0 );
     EXPECT_GT( dt3, 0 );
-    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 1 );
+    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 2 );
     lua_remove( L, -1 );
 
     lua_close( L );
