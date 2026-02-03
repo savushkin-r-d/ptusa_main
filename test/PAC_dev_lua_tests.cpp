@@ -114,7 +114,7 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     auto dt_0 = tolua_tonumber( L, -1, 0 );
     lua_remove( L, -1 );
     lua_getfield( L, LUA_GLOBALSINDEX, "dt_ms" );
-    auto dt_ms = tolua_tonumber( L, -1, 0 );    
+    auto dt_ms = tolua_tonumber( L, -1, 0 );
     lua_remove( L, -1 );
 
     // Запрашиваем время, прошедшее с момента 0 - результат должен быть
