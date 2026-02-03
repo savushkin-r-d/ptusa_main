@@ -33,10 +33,10 @@ class MockOPCUAServer : public OPCUA_server
     };
 
 TEST( PAC_info, OPCUA_server_start_fail )
-{
-MockOPCUAServer mockServer;
+    {
+    MockOPCUAServer mockServer;
 
-auto get_OPC_hook = subhook_new(
+    auto get_OPC_hook = subhook_new(
         reinterpret_cast<void*>( &OPCUA_server::get_instance ),
         reinterpret_cast<void*>( &MockOPCUAServer::get_mock_instance ),
         SUBHOOK_64BIT_OFFSET );
@@ -44,7 +44,7 @@ auto get_OPC_hook = subhook_new(
 
     // Подготовка: сервер вернёт ошибку.
     EXPECT_CALL( mockServer, init_all_and_start() )
-        .WillRepeatedly( ::testing::Return( 0xBADF00D ) );
+        .WillOnce( ::testing::Return( 0xBADF00D ) );
     EXPECT_CALL( mockServer, shutdown() );
 
     // Установим начальное значение параметра.
