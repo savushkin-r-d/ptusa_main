@@ -19,7 +19,8 @@ class MockOPCUAServer : public OPCUA_server
             instance = nullptr;
             }
 
-        // Потокобезопасный доступ к текущему экземпляру mock.
+        // Поток-локальный доступ к текущему экземпляру mock (отдельный экземпляр
+        // на поток, а не синхронизированный общий доступ).
         static OPCUA_server& get_mock_instance()
             {
             return *instance;

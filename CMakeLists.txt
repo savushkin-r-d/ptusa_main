@@ -227,7 +227,7 @@ elseif(WIN32)
 endif()
 
 add_dependencies(main_test lua lfs luasystem term_core luassert_copy
-	luasql_odbc)
+    luasql_odbc)
 add_dependencies(libptusa_main lua)
 
 if(MSVC)
