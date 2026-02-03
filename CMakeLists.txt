@@ -22,7 +22,7 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
-################# create targets ######################################################
+################# create targets ##############################################
 
 if(LINUX)
     add_compile_definitions(LINUX_OS)
@@ -226,7 +226,8 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs luasystem term_core luassert_copy luasql_odbc)
+add_dependencies(main_test lua lfs luasystem term_core luassert_copy
+	luasql_odbc)
 add_dependencies(libptusa_main lua)
 
 if(MSVC)
@@ -272,9 +273,9 @@ target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
 target_compile_definitions(main_test PUBLIC PTUSA_TEST)
 
-#######################################################################################
+###############################################################################
 
-################# project include-paths ###############################################
+################# project include-paths #######################################
 
 set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
@@ -340,29 +341,30 @@ if(NOT MINGW)
     target_include_directories(main_perfomance_test PUBLIC ${GENERAL_INCLUDES})
 endif()
 
-#######################################################################################
+###############################################################################
 
-################# set link options ####################################################
-# WARNING: Without --no-undefined the linker will not check, whether all necessary    #
-#          libraries are linked. When a library which is necessary is not linked,     #
-#          the firmware will crash and there will be NO indication why it crashed.    #
-#######################################################################################
+################# set link options ############################################
+# WARNING:                                                                    #
+# Without --no-undefined the linker will not check, whether all necessary     #
+# libraries are linked. When a library which is necessary is not linked,      #
+# the firmware will crash and there will be NO indication why it crashed.     #
+###############################################################################
 if(LINUX)
     target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
 endif()
-#######################################################################################
+###############################################################################
 
 if(ARP_DEVICE)
     set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH $ORIGIN)
 endif()
 
-################# add link targets ####################################################
+################# add link targets ############################################
 if(ARP_DEVICE)
     find_package(ArpDevice REQUIRED)
     find_package(ArpProgramming REQUIRED)
 endif()
 
-################# add link targets ####################################################
+################# add link targets ############################################
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
@@ -400,7 +402,7 @@ elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
 endif()
 
-#######################################################################################
+###############################################################################
 if(ARP_DEVICE)
     string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
     install(TARGETS ${PROJECT_NAME} libptusa_main PtusaPLCnextEngineer
