@@ -17,24 +17,7 @@ extern bool G_NO_IO_NODES;
 
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр класса.
 
-const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-PAC_info::PAC_info() :
-    par( saved_params_u_int_4( P_PARAMS_COUNT - 1 ) ),
-    up_days( 0 ),
-    up_hours( 0 ),
-    up_mins( 0 ),
-    up_secs( 0 ),
-    up_msec( 0 ),
-    last_check_time( get_millisec() ),
-    reset_type( 1 ), //+ IsResetByWatchDogTimer()
-    cmd( 0 ),
-    restrictions_set_to_off_time( 0 )
-    {
-    strcpy( up_time_str, "0 дн. 0:0:0" );
-    cmd_answer[ 0 ] = 0;
-    }
 //-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
@@ -405,6 +388,17 @@ void PAC_info::emulation_on()
 void PAC_info::emulation_off()
     {
     emulator_state = false;
+    }
+
+void PAC_info::reset_uptime()
+    {
+    up_days = 0;
+    up_hours = 0;
+    up_mins = 0;
+    up_secs = 0;
+    up_msec = 0;
+    last_check_time = get_millisec();
+    strcpy( up_time_str, "0 дн. 0:0:0" );
     }
 #endif
 //-----------------------------------------------------------------------------
