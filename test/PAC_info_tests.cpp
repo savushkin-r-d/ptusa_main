@@ -6,21 +6,21 @@
 class MockOPCUAServer : public OPCUA_server
     {
     public:
+        MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
+        MOCK_METHOD( void, shutdown, ( ), ( override ) );
+
         MockOPCUAServer()
             {
             instance = this;
             }
 
-        ~MockOPCUAServer()
+        ~MockOPCUAServer() final
             {
             if ( instance == this )
                 {
                 instance = nullptr;
                 }
             }
-
-        MOCK_METHOD( UA_StatusCode, init_all_and_start, ( ), ( override ) );
-        MOCK_METHOD( void, shutdown, ( ), ( override ) );
 
         static OPCUA_server& get_mock_instance()
             {
