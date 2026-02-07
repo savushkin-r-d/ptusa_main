@@ -56,6 +56,7 @@ flowchart BT
     wages_eth[wages_eth] --> i_wages
     wages_pxc_axl[wages_pxc_axl] --> i_wages
     wages[wages] --> i_wages
+    dev_stub[dev_stub] --> i_wages
 ```
 
 ## Class analog_io_device scheme ##
@@ -100,6 +101,9 @@ flowchart BT
     valve_iolink_gea_tvis_a15_ss[valve_iolink_gea_tvis_a15_ss] --> valve_iolink_gea_tvis_a15
     valve_iolink_gea_tvis_a15_ds[valve_iolink_gea_tvis_a15_ds] --> valve_iolink_gea_tvis_a15
     valve_iol_terminal[valve_iol_terminal] --> valve
+    valve_iol_terminal_mixproof_DO3[valve_iol_terminal_mixproof_DO3] --> valve
+    valve_iol_terminal_mixproof_DO3_DI2[valve_iol_terminal_mixproof_DO3_DI2] --> valve
+    dev_stub[dev_stub] --> valve
 ```
 
 ## Class i_mix_proof scheme ##
@@ -113,6 +117,7 @@ flowchart BT
     valve_iolink_mix_proof[valve_iolink_mix_proof] --> i_mix_proof
     valve_iolink_gea_tvis_a15_ds[valve_iolink_gea_tvis_a15_ds] --> i_mix_proof
     valve_iol_terminal_mixproof_DO3[valve_iol_terminal_mixproof_DO3] --> i_mix_proof
+    valve_iol_terminal_mixproof_DO3_DI2[valve_iol_terminal_mixproof_DO3_DI2] --> i_mix_proof
 ```
 
 ## Class AI1 scheme ##
