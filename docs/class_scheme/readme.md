@@ -16,6 +16,7 @@ flowchart BT
     analog_io_device --> io_device
     i_motor[i_motor] --> device
     signal_column[signal_column] --> device
+    signal_column --> io_device
     virtual_wages[virtual_wages] --> device
     virtual_device[virtual_device] --> device
     threshold_regulator[threshold_regulator] --> device
