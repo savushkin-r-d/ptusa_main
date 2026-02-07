@@ -3,8 +3,11 @@
 ```mermaid
 flowchart BT
     device[device] --> i_DO_AO_device[i_DO_AO_device]
+    device --> par_device[par_device]
     i_DO_device[i_DO_device] --> i_DI_device[i_DI_device]
     i_AO_device[i_AO_device] --> i_AI_device[i_AI_device]
+    i_DI_device --> i_cmd_device[i_cmd_device]
+    i_AI_device --> i_cmd_device
     i_DO_AO_device --> i_AO_device
     i_DO_AO_device --> i_DO_device
     digital_io_device[digital_io_device] --> device
@@ -12,7 +15,7 @@ flowchart BT
     analog_io_device[analog_io_device] --> device
     analog_io_device --> io_device
     i_motor[i_motor] --> device
-    signal_column[signal_column] --> device   
+    signal_column[signal_column] --> device
     virtual_wages[virtual_wages] --> device
     virtual_device[virtual_device] --> device
     threshold_regulator[threshold_regulator] --> device
