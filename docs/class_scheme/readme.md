@@ -18,9 +18,12 @@ flowchart BT
     signal_column[signal_column] --> device
     signal_column --> io_device
     virtual_wages[virtual_wages] --> device
+    virtual_wages --> i_wages[i_wages]
     virtual_device[virtual_device] --> device
     threshold_regulator[threshold_regulator] --> device
+    threshold_regulator --> i_Lua_save_device[i_Lua_save_device]
     watchdog[watchdog] --> device
+    watchdog --> i_Lua_save_device
 ```
 
 ## Class DO1 scheme ##
