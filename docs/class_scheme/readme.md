@@ -8,16 +8,13 @@ flowchart BT
     i_DO_AO_device --> i_AO_device
     i_DO_AO_device --> i_DO_device
     digital_io_device[digital_io_device] --> device
+    digital_io_device --> io_device[io_device]
     analog_io_device[analog_io_device] --> device
-    analog_io_device --> io_device[io_device]
+    analog_io_device --> io_device
     i_motor[i_motor] --> device
-    signal_column[signal_column] --> device
-    DO1[DO1] --> digital_io_device
-    DI1[DI1] --> digital_io_device
+    signal_column[signal_column] --> device   
     virtual_wages[virtual_wages] --> device
     virtual_device[virtual_device] --> device
-    motor[motor] --> io_device
-    motor_altivar[motor_altivar] --> io_device
     threshold_regulator[threshold_regulator] --> device
     watchdog[watchdog] --> device
 ```
@@ -25,17 +22,19 @@ flowchart BT
 ## Class DO1 scheme ##
 
 ```mermaid
-flowchart TB
-    DO1-->DO_signal
-    DO1-->lamp
-    DO1-->siren
+flowchart BT
+    DO1 --> digital_io_device
+    DO_signal --> DO1
+    lamp --> DO1
+    siren --> DO1
 ```
 
 ## Class DI1 scheme ##
 
 ```mermaid
 flowchart BT
-    level_s[level_s] --> DI1[DI1]
+    DI1 --> digital_io_device
+    level_s[level_s] --> DI1
     flow_s[flow_s] --> DI1
     state_s[state_s] --> DI1
     state_s_inverse[state_s_inverse] --> DI1
@@ -76,7 +75,7 @@ flowchart BT
 ## Class valve scheme ##
 
 ```mermaid
-flowchart RL
+flowchart BT
     valve_DO2_DI2_bistable[valve_DO2_DI2_bistable] --> valve[valve]
     virtual_valve[virtual_valve] --> valve
     valve_DO1[valve_DO1] --> valve
@@ -150,7 +149,7 @@ flowchart BT
 ## Class action scheme ##
 
 ```mermaid
-flowchart RL
+flowchart BT
     on_action[on_action] --> action[action]
     delay_on_action[delay_on_action] --> action
     on_reverse_action[on_reverse_action] --> action
