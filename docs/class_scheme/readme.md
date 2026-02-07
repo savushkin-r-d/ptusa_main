@@ -142,6 +142,9 @@ flowchart BT
     motor[motor] --> i_motor
     motor_altivar[motor_altivar] --> i_motor
     motor_altivar_linear[motor_altivar_linear] --> motor_altivar
+    motor --> io_device[io_device]
+    motor_altivar --> io_device
+    motor_altivar_linear --> io_device
 ```
 
 ## Class level scheme ##
