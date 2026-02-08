@@ -1543,8 +1543,9 @@ class io_manager
         /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
-        void add_node(  unsigned int index, int ntype, int address,
-            char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+        io_manager::io_node* add_node( unsigned int index, int ntype,
+            int address, char* IP_address, char *name,
+            int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
             int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.

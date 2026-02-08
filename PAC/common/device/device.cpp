@@ -631,9 +631,9 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         }
     }
 //-----------------------------------------------------------------------------
-int threshold_regulator::save_device( char* buff )
+int threshold_regulator::save_device( char* buff, const char* prefix )
     {
-    return device::save_device( buff, "\t" );
+    return device::save_device( buff, prefix );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

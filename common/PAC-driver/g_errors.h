@@ -438,7 +438,7 @@ class siren_lights_manager: public i_Lua_save_device
             P_MANUAL_MODE = 1,
             };
 
-        int save_device( char *buff );
+        int save_device( char *buff, const char* prefix = "" ) override;
 
         int set_cmd( const char *prop, u_int idx, double val );
 

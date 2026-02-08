@@ -780,7 +780,7 @@ int  tech_object::lua_on_start( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::save_device( char *buff )
+int tech_object::save_device( char *buff, const char* prefix )
     {
     int res =
         sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,

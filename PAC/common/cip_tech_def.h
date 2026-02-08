@@ -887,7 +887,7 @@ class cipline_tech_object: public tech_object
         static int msa_number;
 
         //overriden members
-        int save_device( char *buff ) override;
+        int save_device( char* buff, const char* prefix = "" ) override;
         int set_cmd( const char *prop, u_int idx, double val ) override;
         int set_cmd( const char *prop, u_int idx, const char* val );
         int evaluate() override;

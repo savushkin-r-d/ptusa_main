@@ -112,7 +112,7 @@ class PID : public device, public i_Lua_save_device
         void set_used_par ( int par_n );
 
         int save_device_ex( char* buff );
-        int save_device( char *buff );
+        int save_device( char *buff, const char* prefix );
 
         const char* get_name_in_Lua() const;
 
