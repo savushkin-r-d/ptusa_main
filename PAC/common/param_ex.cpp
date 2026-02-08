@@ -18,7 +18,8 @@ char params_manager::is_init = 0;
 
 #include "log.h"
 //-----------------------------------------------------------------------------
-params_manager::params_manager(): par( 0 ), project_id( 0 )
+params_manager::params_manager(): par( 0 ), project_id( 0 ), isChanged( false ),
+    mLastSaveTimer( get_millisec() )
     {
     last_idx = 0;
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
@@ -318,6 +319,35 @@ int params_test::make_test()
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void params_manager::set_changed()
+    {
+    isChanged = true;
+    }
+//-----------------------------------------------------------------------------
+void params_manager::evaluate()
+    {
+    if ( isChanged )
+        {
+        if ( get_delta_millisec( mLastSaveTimer ) > MIN_SAVE_INTERVAL_MS )
+            {
+            save();
+            // Clear flag and update timer after save operation.
+            // Note: save() doesn't return error status, so we assume success.
+            // If the underlying write fails, the parameter change will be
+            // lost but will be re-applied if the parameter is modified again.
+            isChanged = false;
+            mLastSaveTimer = get_millisec();
+            
+            if ( G_DEBUG )
+                {
+                sprintf( G_LOG->msg, 
+                    "params_manager: Periodic save completed." );
+                G_LOG->write_log( i_log::P_DEBUG );
+                }
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

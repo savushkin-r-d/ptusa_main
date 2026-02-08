@@ -29,6 +29,7 @@
 #include "base_mem.h"
 #include "g_device.h"
 #include "log.h"
+#include "dtime.h"
 
 #ifdef __BORLANDC__
 #pragma option -w-inl
@@ -141,6 +142,17 @@ class params_manager
 
         void reset_params_size();
 
+        /// @brief Периодическая проверка и сохранение параметров.
+        ///
+        /// Проверяет флаг изменения параметров и сохраняет их,
+        /// если прошло достаточно времени с момента последнего сохранения.
+        void evaluate();
+
+        /// @brief Установка флага изменения параметров.
+        ///
+        /// Вызывается при изменении любого параметра для отложенного сохранения.
+        void set_changed();
+
 	protected:
         static char is_init;
 
@@ -167,6 +179,15 @@ class params_manager
 
         memory_range *params_mem; ///< Память параметров.
         memory_range *CRC_mem;    ///< Память контрольной суммы.
+
+        /// Флаг изменения параметров.
+        bool isChanged;
+
+        /// Время последнего сохранения параметров.
+        uint32_t mLastSaveTimer;
+
+        /// Минимальный интервал между сохранениями (мс).
+        const unsigned long MIN_SAVE_INTERVAL_MS = 10000;
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.
@@ -485,7 +506,8 @@ public parameters < type, is_float >
         ///
         /// Операция доступа через индекс сохраняет значение параметра только
         /// в буфере, так что для сохранения его в энергонезависимой памяти надо
-        /// использовать данный метод.
+        /// использовать данный метод. Сохранение происходит отложенно через
+        /// метод evaluate() с периодичностью MIN_SAVE_INTERVAL_MS.
         type save( u_int idx, type value )
             {
             if ( idx > 0 && idx <= parameters< type, is_float >::get_count() )
@@ -493,8 +515,7 @@ public parameters < type, is_float >
                 idx--;
                 parameters< type, is_float >::get_values()[ idx ] = value;
 
-                params_manager::get_instance()->save(
-                    start_pos + idx * sizeof( type ), sizeof( type ) );
+                params_manager::get_instance()->set_changed();
                 }
             else
                 {
