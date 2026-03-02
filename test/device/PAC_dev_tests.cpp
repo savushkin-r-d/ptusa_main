@@ -1690,6 +1690,9 @@ TEST( AI1, get_state )
     test_value( 30001, -1000.f, OUT_OF_RANGE, ABS_ERR );
     test_value( 1000, 0.5f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
+    mngr.init_node_AI( 0, 0, 1088106, 0 );
+    test_value( -32001, -1000.f, UNDER_RANGE, ABS_ERR );
+    test_value( 1000, 100.f, NO_ERR, ZERO_ABS_ERR, MIN_V, MAX_V );
     mngr.init_node_AI( 0, 0, 2688556, 0 );
     test_value( -32001, -1000.f, UNDER_RANGE, ABS_ERR );
     test_value( 1000, 100.f, NO_ERR, ZERO_ABS_ERR, MIN_V, MAX_V );
