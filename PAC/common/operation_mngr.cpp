@@ -2347,9 +2347,11 @@ void operation_state::evaluate()
     auto reason = std::string();
     if ( int next_step = -1; if_action->is_jump( next_step, reason ) )
         {
-        if ( next_step >= 0 )
+        if ( next_step >= 0 && static_cast<size_t>(next_step) <= steps.size() )
             {
-            G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
+            G_LOG->debug( "Объект '%s', операция '%s': переход к шагу %d ('%s') - %s.",
+                owner->owner->get_name(), name.c_str(), next_step,
+                steps[ next_step - 1 ]->get_name(), reason.c_str() );
             if ( G_DEBUG )
                 {
                 if_action->print();
