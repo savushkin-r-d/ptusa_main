@@ -3,6 +3,7 @@
 #include "base.h"
 #include "valve.h"
 #include "life_device.h"
+#include "node_dev.h"
 #include "device.h"
 
 class dev_stub;
@@ -360,7 +361,7 @@ class device_manager : public i_Lua_save_device
 
         void evaluate_io();
 
-        int save_device( char* buff ) override;
+        int save_device( char* buff, const char* prefix = "" ) override;
 
 #ifdef PTUSA_TEST
         int add_device( device* new_device, device::DEVICE_TYPE dev_type );

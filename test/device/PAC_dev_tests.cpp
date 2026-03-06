@@ -1253,6 +1253,15 @@ TEST( device_manager, add_io_device )
         "Test watchdog", "Art_1" );
     EXPECT_EQ( nullptr, res );
 
+    // Проверка устройства управления узлом сетевых настроек.
+    auto* node1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
+    EXPECT_EQ( nullptr, node1 );
+    // Тестирование несуществующего подтипа.
+    res = G_DEVICE_MANAGER()->add_io_device( device::DT_NODE,
+        device::DST_NODE + 1, "NODE2", "Test invalid node", "" );
+    EXPECT_EQ( nullptr, res );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
@@ -1446,6 +1455,10 @@ TEST( device, get_type_str )
     device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
         device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
     EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
+
+    device dev4( "DEV4", device::DEVICE_TYPE::DT_NODE,
+        device::DEVICE_SUB_TYPE::DST_NODE, 0 );
+    EXPECT_STREQ( dev4.get_type_str(), "NODE" );
     }
 
 TEST( device, save_device )
@@ -5619,7 +5632,7 @@ TEST( threshold_regulator, set_cmd )
 
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
+        "C1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
 
     //Set a property that does not exist.
     auto res = p1.set_cmd( "NO_SUCH_PROPERTY", 0, 1 );
@@ -5635,7 +5648,7 @@ TEST( threshold_regulator, set_cmd )
     p1.on();
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
+        "C1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
     }
 
 TEST( threshold_regulator, set_state )
@@ -6573,6 +6586,46 @@ TEST( device_manager, get_EY )
     // Test non-existent device.
     auto* non_existent = EY( "NON_EXISTENT" );
     EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( non_existent ) );
+    }
+
+
+TEST( node_dev, basic_functionality )
+    {
+    // Инициализация io_manager с одним узлом.
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+
+    // Добавление устройства node_dev.
+    auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "A100", "Test node device", "" );
+    ASSERT_EQ( io_dev, nullptr );
+
+    // Получение указателя на @node_dev для доступа к специфическим методам.
+    auto node = dynamic_cast<node_dev*>( 
+        G_DEVICE_MANAGER()->get_device( "A100" ) );
+    ASSERT_NE( node, nullptr );
+    node->set_io_node( nd );
+
+    // Проверка получения IP-адреса.
+    EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
+
+    // Проверка evaluate_io().
+    node->evaluate_io();
+
+    // Сохранение устройства.
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff { '\0' };
+    node->save_device( buff.data(), "" );
+    EXPECT_STREQ( buff.data(), 
+        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
+
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    io_manager::replace_instance( prev_mngr );
     }
 
 
