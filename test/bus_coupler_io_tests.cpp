@@ -68,7 +68,9 @@ TEST( io_node, get_display_state_not_connected )
 	auto node = io_manager::get_instance()->get_node( 0 );
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_NO_CONNECT;
-	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
+	// With no I/O configured, should return ST_NO_CONNECT (0) instead of
+	// ST_ERROR (-1) in emulator mode.
+	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
 	}
 
 TEST( io_node, get_display_state_connected_ok )
@@ -180,4 +182,63 @@ TEST( io_node, get_display_state_all_node_types )
 		io_manager::get_instance()->get_node( 1 )->get_display_state() );
 	EXPECT_EQ( io_manager::io_node::ST_OK, 
 		io_manager::get_instance()->get_node( 2 )->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_emulator_mode_no_io )
+	{
+	// Test: In emulator mode with no I/O configured, state should be 0
+	// instead of -1.
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 0, 0 );  // No I/O configured.
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;  // Not connected.
+	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_emulator_mode_with_io )
+	{
+	// Test: With I/O configured, state should be -1 when not connected.
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 8, 8, 0, 0, 0, 0 );  // I/O configured.
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;  // Not connected.
+	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_emulator_mode_only_ai )
+	{
+	// Test: Node with only AI configured should return ST_ERROR when not
+	// connected.
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 0, 0, 4, 8 );  // Only AI configured.
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;
+	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
+	}
+
+TEST( io_node, get_display_state_emulator_mode_only_ao )
+	{
+	// Test: Node with only AO configured should return ST_ERROR when not
+	// connected.
+	io_manager::get_instance()->init( 1 );
+	io_manager::get_instance()->add_node( 0,
+		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+		"Axxx", 0, 0, 2, 4, 0, 0 );  // Only AO configured.
+
+	auto node = io_manager::get_instance()->get_node( 0 );
+	node->is_active = true;
+	node->state = io_manager::io_node::ST_NO_CONNECT;
+	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
 	}
