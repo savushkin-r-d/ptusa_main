@@ -164,11 +164,6 @@ __declspec( dllexport )
 #endif
     luaopen_ptusa_main( lua_State* L )
     {
-    if ( L )
-        {
-        luaL_openlib( L, "ptusa_main", ls_lib, 0 );
-        return 1;
-        }
-
-    return 0;
+    luaL_openlib( L, "ptusa_main", ls_lib, 0 );
+    return 1;
     }

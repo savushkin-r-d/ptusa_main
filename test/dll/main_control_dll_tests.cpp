@@ -25,7 +25,14 @@ extern int lua_init( lua_State* L );
 
 TEST( dll, luaopen_ptusa_main )
     {
-    EXPECT_EQ( 1, luaopen_ptusa_main( nullptr ) );
+    auto L = lua_open();
+    auto res = luaopen_ptusa_main( L );
+    EXPECT_EQ( 1, res );
+    
+    // Validate that a module table is on top of the stack.
+    EXPECT_EQ( 1, lua_gettop( L ) );
+    EXPECT_TRUE( lua_istable( L, -1 ) );
+    lua_close( L );
     }
 
 TEST( dll, no_print_stack_traceback )
