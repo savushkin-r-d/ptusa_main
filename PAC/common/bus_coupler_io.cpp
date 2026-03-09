@@ -481,7 +481,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                 if ( val < -32000 )
                     {
                     err = static_cast<int>( ERRORS::UNDER_RANGE );
-                    return -1000;
+                    return -1000.f;
                     }
                 val *= 0.1f;
                 return val;
