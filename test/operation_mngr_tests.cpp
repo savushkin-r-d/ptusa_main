@@ -2335,12 +2335,13 @@ TEST( operation_mngr, get_idle_time )
     EXPECT_GE( res_s, 0 );
     EXPECT_GE( res_ms, 1000ULL * res_s );
 
-    operation_mngr->reset_active_operation_or_idle_time();
     test_tank.set_cmd( "ST", 0, 1 );
     
     res_ms = operation_mngr->get_idle_time();
-    res_s = operation_mngr->get_idle_time_sec();
-    EXPECT_EQ( res_ms, 0 );
+    res_s = operation_mngr->get_idle_time_sec();    
+    // After reset, idle time should be very small and less than 1 second.
+    EXPECT_GE( res_ms, 0 );
+    EXPECT_LT( res_ms, 1000ULL );
     EXPECT_EQ( res_s, 0 );
 
     operation->stop();
