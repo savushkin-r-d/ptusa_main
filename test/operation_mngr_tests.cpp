@@ -2328,9 +2328,6 @@ TEST( operation_mngr, get_idle_time )
     auto operation = ( *operation_mngr )[ 1 ];
     operation->add_step( "Тестовый шаг 1", -1, -1 );
     operation->add_step( "Тестовый шаг 2", -1, -1 );
-    auto operation_state = operation[ 0 ][ 1 ];
-    auto step = operation_state[ 0 ][ 1 ];
-
 
     auto res_ms = operation_mngr->get_idle_time();
     auto res_s = operation_mngr->get_idle_time_sec();
