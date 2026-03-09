@@ -477,7 +477,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                 return -1000;
 
 			case 1088106:   //AXL SE RTD4 PT100
-			case 2688556: //RTD4 1H
+			case 2688556:   //RTD4 1H
 				if (val < -32000 )
 				    {
                     err = static_cast<int>( ERRORS::UNDER_RANGE );
