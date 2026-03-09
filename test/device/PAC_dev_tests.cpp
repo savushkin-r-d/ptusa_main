@@ -1647,6 +1647,11 @@ TEST( AI1, get_state )
     const auto OVER_RANGE = static_cast<int>( io_device::ERRORS::OVER_RANGE );
     const auto OUT_OF_RANGE = static_cast<int>( io_device::ERRORS::OUT_OF_RANGE );
 
+    const auto MIN_V = 10.f;
+    const auto MAX_V = 20.f;
+    const auto ABS_ERR = .02f;
+    const auto ZERO_ABS_ERR = .0f;
+
     auto test_value{ [ & ]( int in_value, float res_value, int err_value,
         float abs_err, float min = .0f, float max = .0f ) {
         sensor.AI_channels.int_read_values[ 0 ][ 0 ] = in_value;
@@ -1661,23 +1666,21 @@ TEST( AI1, get_state )
         int under_range_value, float under_range_res,
         int over_range_value, float over_range_res ) {
         mngr.init_node_AI( 0, 0, io_module, 0 );
-        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
-        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
-        test_value( over_range_value, over_range_res, OVER_RANGE, .0f );
+        test_value( in_range_value, in_range_res, NO_ERR, ABS_ERR );
+        test_value( under_range_value, under_range_res, UNDER_RANGE,
+            ZERO_ABS_ERR );
+        test_value( over_range_value, over_range_res, OVER_RANGE,
+            ZERO_ABS_ERR );
         } };
 
     auto test_m_no_over_range{ [ & ]( int io_module,
         int in_range_value, float in_range_res,
         int under_range_value, float under_range_res ) {
         mngr.init_node_AI( 0, 0, io_module, 0 );
-        test_value( in_range_value, in_range_res, NO_ERR, 0.02f );
-        test_value( under_range_value, under_range_res, UNDER_RANGE, .0f );
+        test_value( in_range_value, in_range_res, NO_ERR, ABS_ERR );
+        test_value( under_range_value, under_range_res, UNDER_RANGE,
+            ZERO_ABS_ERR );
         } };
-
-    const auto MIN_V = 10.f;
-    const auto MAX_V = 20.f;
-    const auto ABS_ERR = .02f;
-    const auto ZERO_ABS_ERR = .0f;
 
     test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
     test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
@@ -1691,20 +1694,20 @@ TEST( AI1, get_state )
     test_value( 1000, 0.5f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
     mngr.init_node_AI( 0, 0, 1088106, 0 );
-    test_value( -32001, -1000.f, UNDER_RANGE, ABS_ERR );
+    test_value( -32001, -1000.f, UNDER_RANGE, ZERO_ABS_ERR );
     test_value( 1000, 100.f, NO_ERR, ZERO_ABS_ERR, MIN_V, MAX_V );
     mngr.init_node_AI( 0, 0, 2688556, 0 );
-    test_value( -32001, -1000.f, UNDER_RANGE, ABS_ERR );
+    test_value( -32001, -1000.f, UNDER_RANGE, ZERO_ABS_ERR );
     test_value( 1000, 100.f, NO_ERR, ZERO_ABS_ERR, MIN_V, MAX_V );
 
     mngr.init_node_AI( 0, 0, 2688491, 0 );
     test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
     test_value( 1000, 10.33f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
     mngr.init_node_AI( 0, 0, 2702072, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
+    test_value( -32001, -1.f, UNDER_RANGE, ZERO_ABS_ERR );
     test_value( 1000, 10.33f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
     mngr.init_node_AI( 0, 0, 1088062, 0 );
-    test_value( -32001, -1.f, UNDER_RANGE, ABS_ERR );
+    test_value( -32001, -1.f, UNDER_RANGE, ZERO_ABS_ERR );
     test_value( 1000, 10.63f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
 
     G_PAC_INFO()->emulation_on();
