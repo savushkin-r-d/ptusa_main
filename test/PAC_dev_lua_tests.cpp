@@ -371,6 +371,48 @@ TEST( toLuapp, tolua_PAC_dev_operation_set_step_cooperate_time_par_n00 )
     }
 
 
+TEST( toLuapp, tolua_PAC_dev_operation_manager_get_idle_time_sec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
+    // Некорректный вызов - c параметром.
+    EXPECT_NE( 0, luaL_dostring( L, 
+        "res = o1:get_modes_manager():get_idle_time_sec( 1 )" ) );
+    // Корректный вызов.
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time_sec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_GE( res, 0 );
+    lua_close( L );
+    }
+
+
+TEST( toLuapp, tolua_PAC_dev_operation_manager_get_idle_time00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
+    // Некорректный вызов - c параметром.
+    EXPECT_NE( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time( 1 )" ) );
+    // Корректный вызов.
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_GE( res, 0 );
+    lua_close( L );
+    }
+
+
 TEST( toLuapp, STUB )
     {
     lua_State* L = lua_open();
