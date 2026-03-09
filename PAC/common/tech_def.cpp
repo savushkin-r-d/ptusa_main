@@ -823,7 +823,7 @@ int tech_object::save_device( char *buff )
     res += sprintf( buff + res, "\n\t\t},\n" );
 
     //Время простоя или текущей активной операции.    
-    auto duration = operations_manager->get_idle_time();
+    auto duration = operations_manager->get_idle_time_sec();
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
         "\tACTIVE_OPERATION_OR_IDLE_TIME={},\n", duration ).size;
 

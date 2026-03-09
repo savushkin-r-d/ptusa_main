@@ -2318,3 +2318,33 @@ TEST( jump_if_action, is_goto_next_step )
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
     EXPECT_EQ( reason, "по активности 'test_SB1'" );
 	}
+
+TEST( operation_mngr, get_idle_time )
+    {
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+    test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+    auto operation_mngr = test_tank.get_modes_manager();
+    auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг 1", -1, -1 );
+    operation->add_step( "Тестовый шаг 2", -1, -1 );
+    auto operation_state = operation[ 0 ][ 1 ];
+    auto step = operation_state[ 0 ][ 1 ];
+
+
+    auto res_ms = operation_mngr->get_idle_time();
+    auto res_s = operation_mngr->get_idle_time_sec();
+    EXPECT_GE( res_ms, 0 );
+    EXPECT_GE( res_s, 0 );
+    EXPECT_GE( res_ms, 1000ULL * res_s );
+
+    operation_mngr->reset_active_operation_or_idle_time();
+    test_tank.set_cmd( "ST", 0, 1 );
+    
+    res_ms = operation_mngr->get_idle_time();
+    res_s = operation_mngr->get_idle_time_sec();
+    EXPECT_EQ( res_ms, 0 );
+    EXPECT_EQ( res_s, 0 );
+
+    operation->stop();
+    }

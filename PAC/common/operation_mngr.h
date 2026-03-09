@@ -993,7 +993,12 @@ class operation_manager
         /// @brief Время бездействия (нет включенных операций) в секундах.
         ///
         /// @return - время системы без активных операций.
-        unsigned long get_idle_time();
+        unsigned long get_idle_time_sec();
+
+        /// @brief Время бездействия (нет включенных операций) в миллисекундах.
+        ///
+        /// @return - время системы без активных операций.
+        unsigned long long get_idle_time();
 
         void reset_active_operation_or_idle_time()
             {
