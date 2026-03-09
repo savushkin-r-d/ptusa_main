@@ -15,12 +15,18 @@ extern "C" {
 using namespace ::testing;
 
 extern int G_DEBUG;
+extern "C" int luaopen_ptusa_main( lua_State* L );
 extern int no_print_stack_traceback( lua_State* L );
 extern int use_print_stack_traceback( lua_State* L );
 extern int switch_on_verbose( lua_State* L );
 extern int switch_off_verbose( lua_State* L );
 extern int lua_init( lua_State* L );
 
+
+TEST( dll, luaopen_ptusa_main )
+    {
+    EXPECT_EQ( 1, luaopen_ptusa_main( nullptr ) );
+    }
 
 TEST( dll, no_print_stack_traceback )
     {
