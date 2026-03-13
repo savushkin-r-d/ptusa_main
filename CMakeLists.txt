@@ -53,6 +53,13 @@ set(BUILD_SHARED_LIBS ON)
 
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
+# Use the standard Windows Lua 5.1 DLL name (lua51.dll) so that ptusa_main.dll
+# is compatible with external Lua 5.1 runtimes (e.g., EPLANner) that use
+# lua51.dll instead of lua.dll.
+if(WIN32)
+    set_target_properties(liblua PROPERTIES OUTPUT_NAME lua51)
+endif()
+
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src;${CMAKE_BINARY_DIR}/deps/lua/lua)
 
@@ -422,13 +429,9 @@ if(ARP_DEVICE)
 
     unset(_ARP_SHORT_DEVICE_VERSION)
 else()
-    if (LINUX)
-        install(TARGETS ${PROJECT_NAME} libptusa_main
-            LIBRARY DESTINATION $<CONFIG>
-            RUNTIME DESTINATION $<CONFIG>)
-    else()
-        install(TARGETS ${PROJECT_NAME} libptusa_main RUNTIME DESTINATION $<CONFIG>)
-    endif()
+    install(TARGETS ${PROJECT_NAME} libptusa_main
+        LIBRARY DESTINATION $<CONFIG>
+        RUNTIME DESTINATION $<CONFIG>)
 endif()
 
 enable_testing()
