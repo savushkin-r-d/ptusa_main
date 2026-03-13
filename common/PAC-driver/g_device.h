@@ -46,7 +46,7 @@ class i_Lua_save_device
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
         ///
         /// @return >= 0 - количество записанных байт.
-        virtual int save_device( char *buff ) = 0;
+        virtual int save_device( char *buff, const char* prefix = "" ) = 0;
 
         /// @brief Отладочная печать объекта в консоль.
         virtual const char* get_name_in_Lua() const = 0;

@@ -1430,6 +1430,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
+        case device::DT_NODE:
+            if ( dev_sub_type == device::DST_NODE )
+                {
+                new_device = new node_dev( dev_name );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown NODE device subtype %d!\n",
+                    dev_sub_type );
+                }
+            break;
+
         default:
             if ( G_DEBUG )
                 {
@@ -1495,7 +1507,7 @@ int device_manager::init_params()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int device_manager::save_device( char* buff )
+int device_manager::save_device( char* buff, const char* prefix )
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "t=\n\t{{\n" ) ).size;
     for ( auto dev : project_devices )
