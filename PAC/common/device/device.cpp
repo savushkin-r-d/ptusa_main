@@ -36,6 +36,13 @@ int DO1::get_state()
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
+    // Check if the network node for output channel is available.
+    int node_state = check_output_node_state( DO_INDEX, true );
+    if ( node_state < 0 )
+        {
+        return -1; // Node error or PP mode.
+        }
+
     return get_DO( DO_INDEX );
     }
 //-----------------------------------------------------------------------------
