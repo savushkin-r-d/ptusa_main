@@ -28,7 +28,7 @@ TEST( dll, luaopen_ptusa_main )
     auto L = lua_open();
     auto res = luaopen_ptusa_main( L );
     EXPECT_EQ( 1, res );
-    
+
     // Validate that a module table is on top of the stack.
     EXPECT_EQ( 1, lua_gettop( L ) );
     EXPECT_TRUE( lua_istable( L, -1 ) );
@@ -76,7 +76,7 @@ TEST( dll, lua_init )
     lua_pushlstring( L, argv2, sizeof( argv2 ) );
     lua_pushlstring( L, argv3, sizeof( argv3 ) );
     lua_pushlstring( L, argv4, sizeof( argv4 ) );
-    lua_pushlstring( L, argv5, sizeof( argv5 ) );    
+    lua_pushlstring( L, argv5, sizeof( argv5 ) );
 
     res = lua_init( L );
     EXPECT_EQ( 1, res );
