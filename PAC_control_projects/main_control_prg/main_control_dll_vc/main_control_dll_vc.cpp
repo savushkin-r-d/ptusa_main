@@ -165,5 +165,5 @@ __declspec( dllexport )
     luaopen_ptusa_main( lua_State* L )
     {
     luaL_openlib( L, "ptusa_main", ls_lib, 0 );
-    return 0;
+    return 1;
     }
