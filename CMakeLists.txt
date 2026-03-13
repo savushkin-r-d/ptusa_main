@@ -54,7 +54,7 @@ set(BUILD_SHARED_LIBS ON)
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
 # Use the standard Windows Lua 5.1 DLL name (lua51.dll) so that ptusa_main.dll
-# is compatible with external Lua 5.1 runtimes (e.g., eplaner) that use
+# is compatible with external Lua 5.1 runtimes (e.g., EPLANner) that use
 # lua51.dll instead of lua.dll.
 if(WIN32)
     set_target_properties(liblua PROPERTIES OUTPUT_NAME lua51)
