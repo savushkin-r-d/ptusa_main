@@ -98,7 +98,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         /// @return 2 - режим в паузе.
         /// @return 1 - режим включен.
         /// @return 0 - режим не включен.
-        int get_operation_state( u_int mode );
+        int get_operation_state( u_int mode ) const;
 
         virtual int  evaluate();
 
@@ -313,7 +313,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
             return operations_manager;
             }
 
-        virtual int save_device( char *buff );
+        int save_device( char *buff, const char* prefix = "" ) const override;
 
         virtual int set_cmd( const char *prop, u_int idx, double val );
 
@@ -344,7 +344,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         char* full_name;   ///< Имя объекта + номер.
         char *name_Lua;    ///< Имя объекта в Lua.
 
-        smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
+        mutable smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
 
         enum PARAMS_ID
             {

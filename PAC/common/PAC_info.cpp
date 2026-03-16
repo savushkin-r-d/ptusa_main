@@ -74,7 +74,7 @@ void PAC_info::reset_params()
     par.save_all();
     }
 //-----------------------------------------------------------------------------
-int PAC_info::save_device( char* buff )
+int PAC_info::save_device( char* buff, const char* prefix ) const
     {
     int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.SYSTEM = \n\t{{\n" ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -363,7 +363,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 
-bool PAC_info::is_emulator()
+bool PAC_info::is_emulator() const
     {
 #ifdef PTUSA_TEST
     return emulator_state;

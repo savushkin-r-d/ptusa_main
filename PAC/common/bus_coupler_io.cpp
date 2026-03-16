@@ -41,7 +41,7 @@ auto_smart_ptr < io_manager > io_manager::instance;
 int io_device::last_err = 0;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int io_device::get_DO( u_int index )
+int io_device::get_DO( u_int index ) const
     {
     if ( index < DO_channels.count &&
         DO_channels.char_write_values &&
@@ -93,7 +93,7 @@ int io_device::set_DO( u_int index, char value )
     return 1;
     }
 //-----------------------------------------------------------------------------
-int io_device::get_DI( u_int index )
+int io_device::get_DI( u_int index ) const
     {
     if ( index < DI_channels.count &&
         DI_channels.char_read_values &&
@@ -120,7 +120,7 @@ int io_device::get_DI( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-float io_device::get_AO( u_int index, float min_value, float max_value )
+float io_device::get_AO( u_int index, float min_value, float max_value ) const
     {
     if ( index < AO_channels.count &&
         AO_channels.int_write_values &&
@@ -358,7 +358,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
     return 0;
     }
 //-----------------------------------------------------------------------------
-float io_device::get_AI( u_int index, float min_value, float max_value, int& err )
+float io_device::get_AI( u_int index, float min_value, float max_value, int& err ) const
     {
     err = static_cast< int >( ERRORS::NO_ERR );
     if ( index < AI_channels.count &&
@@ -581,7 +581,7 @@ int_2* io_device::get_AI_data( u_int index ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index)
+io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index) const
 	{
 	if (vendor == PHOENIX)
 	{
@@ -601,7 +601,7 @@ io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index)
 	return IOLINKSTATE::OK;
 	}
 
-io_device::IOLINKSTATE io_device::get_AO_IOLINK_state(u_int index)
+io_device::IOLINKSTATE io_device::get_AO_IOLINK_state(u_int index) const
 	{
 	if (vendor == PHOENIX)
 		{
@@ -646,7 +646,7 @@ int_2* io_device::get_AO_write_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int_2* io_device::get_AO_read_data( u_int index )
+int_2* io_device::get_AO_read_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
         {
@@ -1141,10 +1141,11 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node * io_manager::get_node( int node_n )
+io_manager::io_node * io_manager::get_node( int node_n ) const
     {
     return nodes[ node_n ];
     }
+
 u_int io_manager::get_nodes_count()
 	{
 	return nodes_count;

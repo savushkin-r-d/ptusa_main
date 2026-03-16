@@ -43,7 +43,7 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device( char* buff, const char* prefix )
+int par_device::save_device( char* buff, const char* prefix ) const
     {
     buff[ 0 ] = 0;
 
@@ -239,12 +239,12 @@ void device::off()
         }
     }
 //-----------------------------------------------------------------------------
-int device::get_state()
+int device::get_state() const
     {
     return state;
     }
 //-----------------------------------------------------------------------------
-float device::get_value()
+float device::get_value() const
     {
     return value;
     }
@@ -260,7 +260,7 @@ void device::set_string_property( const char* field, const char* new_value )
         name, get_type_str(), field, new_value );
     }
 //-----------------------------------------------------------------------------
-int device::save_device( char* buff, const char* prefix )
+int device::save_device( char* buff, const char* prefix ) const
     {
     int res = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}{}={{M={:d}, ",
         prefix, name, is_manual_mode ).size;
@@ -306,6 +306,12 @@ int device::save_device( char* buff, const char* prefix )
 void device::evaluate_io()
     {
     //Do nothing by default.
+    }
+//-----------------------------------------------------------------------------
+/// @brief Отладочная печать объекта в консоль.
+const char* device::get_name_in_Lua() const
+    {
+    return get_name();
     }
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char* prop, u_int idx, const char* val )
@@ -454,7 +460,7 @@ void device::param_emulator( float math_expec, float stddev )
     emulator.param( math_expec, stddev );
     }
 //-----------------------------------------------------------------------------
-analog_emulator& device::get_emulator()
+const analog_emulator& device::get_emulator() const
     {
     return emulator;
     }
@@ -549,7 +555,7 @@ AO1::AO1( const char* dev_name,
     {
     }
 //-----------------------------------------------------------------------------
-float AO1::get_value()
+float AO1::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
 
@@ -571,7 +577,7 @@ virtual_counter::virtual_counter( const char* dev_name ) :
     device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
-int virtual_counter::get_state()
+int virtual_counter::get_state() const
     {
     return device::get_state();
     }
@@ -619,19 +625,19 @@ void virtual_counter::reset()
     device::direct_set_value( 0.f );
     }
 //-----------------------------------------------------------------------------
-u_int virtual_counter::get_quantity()
+u_int virtual_counter::get_quantity() const
     {
     return static_cast<u_int>( device::get_value() );
     }
 //-----------------------------------------------------------------------------
-float virtual_counter::get_flow()
+float virtual_counter::get_flow() const
     {
     return flow_value;
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение абсолютного значения счетчика (без учета
 /// состояния паузы).
-u_int virtual_counter::get_abs_quantity()
+u_int virtual_counter::get_abs_quantity() const
     {
     return abs_value;
     }
@@ -695,7 +701,7 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     }
 //-----------------------------------------------------------------------------
 //Lua.
-int virtual_counter::save_device_ex( char* buff )
+int virtual_counter::save_device_ex( char* buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "ABS_V={}, F={:.2f}, ",
         get_abs_quantity(), get_flow() ) ).size;
@@ -732,7 +738,7 @@ AI1::AI1( const char* dev_name, device::DEVICE_TYPE type,
     set_par_name( P_ZERO_ADJUST_COEFF, 0, "P_CZ" );
     }
 //-----------------------------------------------------------------------------
-int AI1::get_state()
+int AI1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -774,7 +780,7 @@ int AI1::get_params_count() const
     return ADDITIONAL_PARAM_COUNT;
     }
 //-----------------------------------------------------------------------------
-float AI1::get_value()
+float AI1::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -794,13 +800,13 @@ void AI1::direct_set_value( float new_value )
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение максимального значения выхода устройства.
-float AI1::get_max_val()
+float AI1::get_max_val() const
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение минимального значения выхода устройства.
-float AI1::get_min_val()
+float AI1::get_min_val() const
     {
     return 0;
     }
@@ -814,7 +820,7 @@ level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
     set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
-int level::get_volume()
+int level::get_volume() const
     {
     if ( get_state() < 0 )
         {
@@ -824,24 +830,24 @@ int level::get_volume()
     return calc_volume();
     }
 //-----------------------------------------------------------------------------
-int level::calc_volume()
+int level::calc_volume() const
     {
     return (int)get_value();
     }
 //-----------------------------------------------------------------------------
-int level::save_device_ex( char* buff )
+int level::save_device_ex( char* buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "CLEVEL={}, ",
         get_volume() ) ).size;
     return res;
     }
 //-----------------------------------------------------------------------------
-float level::get_max_val()
+float level::get_max_val() const
     {
     return 100;
     }
 //-----------------------------------------------------------------------------
-float level::get_min_val()
+float level::get_min_val() const
     {
     return 0;
     }
@@ -1048,7 +1054,7 @@ void signal_column::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-int signal_column::get_state()
+int signal_column::get_state() const
     {
     int res = green.step != STEP::off || yellow.step != STEP::off ||
         red.step != STEP::off || blue.step != STEP::off ||
@@ -1057,7 +1063,7 @@ int signal_column::get_state()
     return res;
     }
 //-----------------------------------------------------------------------------
-int signal_column::save_device_ex( char* buff )
+int signal_column::save_device_ex( char* buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "L_GREEN={}, ",
         green.step == STEP::on || green.step == STEP::blink_on ? 1 : 0 ) ).size;

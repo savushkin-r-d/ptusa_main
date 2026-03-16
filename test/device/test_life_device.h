@@ -10,7 +10,7 @@ class mock_DI_device : public device
         mock_DI_device() : device( "MockDeviceDI", DEVICE_TYPE::DT_DI,
             DEVICE_SUB_TYPE::DST_DI, 0 ) {}
 
-        MOCK_METHOD( int, get_state, ( ), ( override ) );
+        MOCK_METHOD( int, get_state, (), ( const override ));
     };
 
 class mock_AI_device : public device
@@ -20,7 +20,7 @@ class mock_AI_device : public device
             DEVICE_SUB_TYPE::DST_AI, 0 ) {
             }
 
-        MOCK_METHOD( float, get_value, ( ), ( override ) );
+        MOCK_METHOD( float, get_value, ( ), ( const override ) );
     };
 
 class mock_DO_device : public device

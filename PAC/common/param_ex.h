@@ -223,7 +223,7 @@ template < class type, bool is_float > class parameters
         /// @return - значение элемента с заданным индексом. Если индекс
         /// выходит за диапазон, возвращается значение заглушки - поля @ref
         /// stub ( значение 0 ).
-        type get_val( int idx )
+        type get_val( int idx ) const
             {
             return this->operator []( idx );
             }
@@ -308,7 +308,7 @@ template < class type, bool is_float > class parameters
             printf( "\n" );
             }
 
-        int save_device_ex( char *buff, const char *prefix, const char *new_name )
+        int save_device_ex( char *buff, const char *prefix, const char *new_name ) const
             {
             int res = sprintf( buff, "%s%s=\n", prefix, new_name );
             res += save_dev( buff + res, prefix );
@@ -316,7 +316,7 @@ template < class type, bool is_float > class parameters
             return res;
             }
 
-        int save_device( char *buff, const char *prefix )
+        int save_device( char *buff, const char *prefix ) const
             {
             int res = sprintf( buff, "%s%s=\n", prefix, name );
             res += save_dev( buff + res, prefix );
@@ -369,7 +369,7 @@ template < class type, bool is_float > class parameters
             }
 
     private:
-        int save_dev( char *buff, const char *prefix )
+        int save_dev( char *buff, const char *prefix ) const
             {
             int answer_size = sprintf( buff, "%s\t{\n%s\t",
                 prefix, prefix );

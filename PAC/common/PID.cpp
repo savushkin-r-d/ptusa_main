@@ -356,7 +356,7 @@ void PID::save_param()
     par->save_all();
     }
 //-----------------------------------------------------------------------------
-float PID::get_value()
+float PID::get_value() const
     {
     return out_value;
     }
@@ -470,13 +470,13 @@ int PID::get_state()
     return static_cast<int>( state );
     }
 //-----------------------------------------------------------------------------
-int PID::save_device_ex( char* buff )
+int PID::save_device_ex( char* buff ) const
     {
     int answer_size = sprintf( buff, "Z=%.2f, ", set_value );
     return answer_size;
     }
 //-----------------------------------------------------------------------------
-int PID::save_device( char *buff )
+int PID::save_device( char *buff, const char* prefix ) const
     {
     int answer_size = 0;
     if ( is_old_style )

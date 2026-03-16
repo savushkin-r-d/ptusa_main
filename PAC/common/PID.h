@@ -19,7 +19,7 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class PID : public device, public i_Lua_save_device
+class PID : public device
     {
     public:
         enum PARAM
@@ -76,7 +76,7 @@ class PID : public device, public i_Lua_save_device
         int get_state();
 
         void direct_set_value( float val );
-        float get_value();
+        float get_value() const;
 
         int set_cmd( const char* prop, u_int idx, double val );
 
@@ -111,8 +111,8 @@ class PID : public device, public i_Lua_save_device
         /// @brief Использование kN, TiN, TdN.
         void set_used_par ( int par_n );
 
-        int save_device_ex( char* buff );
-        int save_device( char *buff );
+        int save_device_ex( char* buff ) const;
+        int save_device( char *buff, const char* prefix = "" ) const;
 
         const char* get_name_in_Lua() const;
 

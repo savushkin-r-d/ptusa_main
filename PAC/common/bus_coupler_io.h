@@ -67,7 +67,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int get_DO( u_int index );
+        int get_DO( u_int index ) const;
 
         /// @brief Установка состояния канала дискретного выхода.
         ///
@@ -86,7 +86,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int get_DI( u_int index );
+        int get_DI( u_int index ) const;
 
         /// @brief Получение состояния канала аналогового выхода.
         ///
@@ -97,7 +97,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        float get_AO( u_int index, float min_value, float max_value );
+        float get_AO( u_int index, float min_value, float max_value ) const;
 
         /// @brief Установка состояния канала аналогового выхода.
         ///
@@ -122,7 +122,7 @@ class io_device
         ///
         /// @return - аналоговое значение.
         float get_AI( u_int index, float min_value = 0, float max_value = 0,
-            int& err = last_err );
+            int& err = last_err ) const;
 
         /// @brief Получение данных канала аналогового входа.
         ///
@@ -139,7 +139,7 @@ class io_device
 		/// устройства.
 		///
 		/// @return -  состояние устройства.
-		IOLINKSTATE get_AI_IOLINK_state(u_int index);
+		IOLINKSTATE get_AI_IOLINK_state(u_int index) const;
 
 		/// @brief Получение состояния IO-Link устройства типа AI.
 		///
@@ -147,7 +147,7 @@ class io_device
 		/// устройства.
 		///
 		/// @return -  состояние устройства.
-		IOLINKSTATE get_AO_IOLINK_state(u_int index);
+		IOLINKSTATE get_AO_IOLINK_state(u_int index) const;
 
         /// @brief Получение установленных данных канала аналогового выхода.
         ///
@@ -163,7 +163,7 @@ class io_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int_2* get_AO_read_data( u_int index );
+        int_2* get_AO_read_data( u_int index ) const;
 
         virtual void print() const;
 
@@ -444,7 +444,7 @@ class io_manager
         static auto_smart_ptr < io_manager > instance;
 
     public:
-        io_node * get_node( int node_n );
+        io_node * get_node( int node_n ) const;
 
 		u_int get_nodes_count();
 

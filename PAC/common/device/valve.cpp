@@ -21,18 +21,18 @@ valve_DO2::valve_DO2( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO2 
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение состояния клапана без учета обратной связи.
-valve::VALVE_STATE valve_DO2::get_valve_state()
+valve::VALVE_STATE valve_DO2::get_valve_state() const
     {
     return (VALVE_STATE)get_state();
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение состояния обратной связи.
-bool valve_DO2::get_fb_state()
+bool valve_DO2::get_fb_state() const
     {
     return true;
     }
 //-----------------------------------------------------------------------------
-int valve_DO2::get_state()
+int valve_DO2::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
@@ -90,7 +90,7 @@ valve::valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
     set_par_name( P_FB, 0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
-int valve::save_device_ex( char* buff )
+int valve::save_device_ex( char* buff ) const
     {
     int res = 0;
     if ( is_on_fb )
@@ -106,7 +106,7 @@ int valve::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
-int valve::get_state()
+int valve::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
@@ -281,13 +281,13 @@ void valve::set_seat_wash_state( bool wash_flag )
     this->wash_flag = wash_flag;
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve::get_valve_state()
+valve::VALVE_STATE valve::get_valve_state() const
     {
     return (VALVE_STATE)digital_io_device::get_state();
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение состояния обратной связи.
-bool valve::get_fb_state()
+bool valve::get_fb_state() const
     {
     return true;
     }
@@ -348,13 +348,13 @@ bool valve::is_closed()
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение значения обратной связи на включенное состояние.
-int valve::get_on_fb_value()
+int valve::get_on_fb_value() const
     {
     return on_fb;
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение значения обратной связи на выключенное состояние.
-int valve::get_off_fb_value()
+int valve::get_off_fb_value() const
     {
     return off_fb;
     }
@@ -435,7 +435,7 @@ valve::VALVE_STATE valve_DO1_DI1_off::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_DO1_DI1_off::get_fb_state()
+bool valve_DO1_DI1_off::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -453,14 +453,14 @@ bool valve_DO1_DI1_off::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI1_off::get_off_fb_value()
+int valve_DO1_DI1_off::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI1_off::get_on_fb_value()
+int valve_DO1_DI1_off::get_on_fb_value() const
     {
     return false;
     }
@@ -501,7 +501,7 @@ valve::VALVE_STATE valve_DO1_DI1_on::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_DO1_DI1_on::get_fb_state()
+bool valve_DO1_DI1_on::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -520,14 +520,14 @@ bool valve_DO1_DI1_on::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI1_on::get_on_fb_value()
+int valve_DO1_DI1_on::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
     return get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI1_on::get_off_fb_value()
+int valve_DO1_DI1_on::get_off_fb_value() const
     {
     return false;
     }
@@ -562,7 +562,7 @@ void valve_DO1_DI2::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO1_DI2::get_valve_state()
+valve::VALVE_STATE valve_DO1_DI2::get_valve_state () const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -570,7 +570,7 @@ valve::VALVE_STATE valve_DO1_DI2::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_DO1_DI2::get_fb_state()
+bool valve_DO1_DI2::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -590,14 +590,14 @@ bool valve_DO1_DI2::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI2::get_off_fb_value()
+int valve_DO1_DI2::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_2 );
     }
 //-----------------------------------------------------------------------------
-int valve_DO1_DI2::get_on_fb_value()
+int valve_DO1_DI2::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -636,7 +636,7 @@ void valve_DO2_DI2::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO2_DI2::get_valve_state()
+valve::VALVE_STATE valve_DO2_DI2::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -644,7 +644,7 @@ valve::VALVE_STATE valve_DO2_DI2::get_valve_state()
     return (VALVE_STATE)o1;
     }
 //-----------------------------------------------------------------------------
-bool valve_DO2_DI2::get_fb_state()
+bool valve_DO2_DI2::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -665,14 +665,14 @@ bool valve_DO2_DI2::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_DO2_DI2::get_off_fb_value()
+int valve_DO2_DI2::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_1 );
     }
 //-----------------------------------------------------------------------------
-int valve_DO2_DI2::get_on_fb_value()
+int valve_DO2_DI2::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -750,7 +750,7 @@ void valve_DO2_DI2_bistable::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO2_DI2_bistable::get_valve_state()
+valve::VALVE_STATE valve_DO2_DI2_bistable::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -771,7 +771,7 @@ valve::VALVE_STATE valve_DO2_DI2_bistable::get_valve_state()
     return V_OFF;
     }
 //-----------------------------------------------------------------------------
-bool valve_DO2_DI2_bistable::get_fb_state()
+bool valve_DO2_DI2_bistable::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -799,14 +799,14 @@ bool valve_DO2_DI2_bistable::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_DO2_DI2_bistable::get_off_fb_value()
+int valve_DO2_DI2_bistable::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_CLOSE );
     }
 //-----------------------------------------------------------------------------
-int valve_DO2_DI2_bistable::get_on_fb_value()
+int valve_DO2_DI2_bistable::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -940,7 +940,7 @@ void valve_mix_proof::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_mix_proof::get_valve_state()
+valve::VALVE_STATE valve_mix_proof::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -952,7 +952,7 @@ valve::VALVE_STATE valve_mix_proof::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_mix_proof::get_fb_state()
+bool valve_mix_proof::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -975,14 +975,14 @@ bool valve_mix_proof::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_mix_proof::get_off_fb_value()
+int valve_mix_proof::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_CLOSE );
     }
 //-----------------------------------------------------------------------------
-int valve_mix_proof::get_on_fb_value()
+int valve_mix_proof::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -1122,7 +1122,7 @@ void valve_bottom_mix_proof::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_bottom_mix_proof::get_valve_state()
+valve::VALVE_STATE valve_bottom_mix_proof::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -1135,7 +1135,7 @@ valve::VALVE_STATE valve_bottom_mix_proof::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_bottom_mix_proof::get_fb_state()
+bool valve_bottom_mix_proof::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -1159,14 +1159,14 @@ bool valve_bottom_mix_proof::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_bottom_mix_proof::get_off_fb_value()
+int valve_bottom_mix_proof::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_CLOSE );
     }
 //-----------------------------------------------------------------------------
-int valve_bottom_mix_proof::get_on_fb_value()
+int valve_bottom_mix_proof::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -1258,7 +1258,7 @@ void valve_iolink_mix_proof::open_lower_seat()
     direct_set_state( (int)VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
+valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1326,7 +1326,7 @@ void valve_iolink_mix_proof::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_mix_proof::save_device_ex( char* buff )
+int valve_iolink_mix_proof::save_device_ex( char* buff ) const
     {
     int res = valve::save_device_ex( buff );
 
@@ -1339,7 +1339,7 @@ int valve_iolink_mix_proof::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
-bool valve_iolink_mix_proof::get_fb_state()
+bool valve_iolink_mix_proof::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -1368,7 +1368,7 @@ bool valve_iolink_mix_proof::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_mix_proof::get_state()
+int valve_iolink_mix_proof::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
@@ -1427,21 +1427,21 @@ int valve_iolink_mix_proof::get_state()
     return valve::get_state();
     }
 //-----------------------------------------------------------------------------
-float valve_iolink_mix_proof::get_value()
+float valve_iolink_mix_proof::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_value();
 
     return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_mix_proof::get_off_fb_value()
+int valve_iolink_mix_proof::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return out_info->sv1 == false && in_info.main && in_info.st;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_mix_proof::get_on_fb_value()
+int valve_iolink_mix_proof::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -1632,7 +1632,7 @@ void valve_iolink_shut_off_sorio::evaluate_io()
 #endif
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
+int valve_iolink_shut_off_sorio::save_device_ex( char* buff ) const
     {
     bool cs = out_info->sv1;
     int err = in_info.status;
@@ -1642,7 +1642,7 @@ int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
-float valve_iolink_shut_off_sorio::get_value()
+float valve_iolink_shut_off_sorio::get_value() const
     {
     return 0.1f * in_info.pos;
     }
@@ -1659,7 +1659,7 @@ void valve_iolink_shut_off_sorio::direct_set_value( float new_value )
         }
     }
 //-----------------------------------------------------------------------------
-bool valve_iolink_shut_off_sorio::get_fb_state()
+bool valve_iolink_shut_off_sorio::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -1682,14 +1682,14 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_sorio::get_off_fb_value()
+int valve_iolink_shut_off_sorio::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return !in_info.sv1;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_sorio::get_on_fb_value()
+int valve_iolink_shut_off_sorio::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -1773,7 +1773,7 @@ valve_iolink_gea_tvis_a15::valve_iolink_gea_tvis_a15( const char* dev_name,
     {
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::save_device_ex( char* buff )
+int valve_iolink_gea_tvis_a15::save_device_ex( char* buff ) const
     {
     int cs = in_info.pv_y1_on || in_info.pv_y2_on || in_info.pv_y3_on;
     int err = in_info.error_on;
@@ -1819,7 +1819,7 @@ void valve_iolink_gea_tvis_a15::evaluate_io()
 #endif
 }
 //-----------------------------------------------------------------------------
-float valve_iolink_gea_tvis_a15::get_value()
+float valve_iolink_gea_tvis_a15::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1867,7 +1867,7 @@ void valve_iolink_gea_tvis_a15::direct_on()
     out_info->pv_y3 = false;
     }
 //-----------------------------------------------------------------------------
-bool valve_iolink_gea_tvis_a15::get_fb_state()
+bool valve_iolink_gea_tvis_a15::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1904,7 +1904,7 @@ bool valve_iolink_gea_tvis_a15::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::get_off_fb_value()
+int valve_iolink_gea_tvis_a15::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1915,7 +1915,7 @@ int valve_iolink_gea_tvis_a15::get_off_fb_value()
         in_info.s1 && in_info.s4;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_gea_tvis_a15::get_on_fb_value() 
+int valve_iolink_gea_tvis_a15::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1949,7 +1949,7 @@ valve_iolink_gea_tvis_a15_ss::valve_iolink_gea_tvis_a15_ss( const char* dev_name
     this->out_info = nullptr;
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state()
+valve::VALVE_STATE valve_iolink_gea_tvis_a15_ss::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2002,7 +2002,7 @@ void valve_iolink_gea_tvis_a15_ds::open_lower_seat()
     direct_set_state( (int)VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state()
+valve::VALVE_STATE valve_iolink_gea_tvis_a15_ds::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2120,7 +2120,7 @@ void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
+int valve_iolink_shut_off_thinktop::save_device_ex( char* buff ) const
     {
     bool cs = out_info->sv1;
     int err = in_info.err;
@@ -2130,7 +2130,7 @@ int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
-bool valve_iolink_shut_off_thinktop::get_fb_state()
+bool valve_iolink_shut_off_thinktop::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -2154,21 +2154,21 @@ bool valve_iolink_shut_off_thinktop::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-float valve_iolink_shut_off_thinktop::get_value()
+float valve_iolink_shut_off_thinktop::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_value();
 
     return 0.1f * in_info.pos;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_thinktop::get_off_fb_value()
+int valve_iolink_shut_off_thinktop::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return !out_info->sv1 && in_info.de_en && in_info.st;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_thinktop::get_on_fb_value()
+int valve_iolink_shut_off_thinktop::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -2257,7 +2257,7 @@ const char* valve_iolink_shut_off_thinktop::get_error_description()
     return valve::get_error_description();
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off_thinktop::get_state()
+int valve_iolink_shut_off_thinktop::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
 
@@ -2307,14 +2307,14 @@ void valve_iol_terminal::set_rt_par( u_int idx, float value )
         }
     }
 
-bool valve_iol_terminal::check_config()
+bool valve_iol_terminal::check_config() const
     {
     auto idx = 0;
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
-        {
-        if ( auto data = (char*)get_AO_write_data(
-            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
+        {        
+        if ( auto data = (char*)const_cast<valve_iol_terminal*>( this )->get_AO_write_data(
+            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ ) ;
             !data )
             {
             return false;
@@ -2345,7 +2345,7 @@ unsigned int valve_iol_terminal::get_terminal_id(
     return terminal_id[ static_cast<unsigned int>( n ) - 1 ];
     }
 
-int valve_iol_terminal::get_state()
+int valve_iol_terminal::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return get_valve_state();
 
@@ -2370,7 +2370,7 @@ void valve_iol_terminal::direct_set_state( int new_state )
     else direct_off();
     };
 
-valve::VALVE_STATE valve_iol_terminal::get_valve_state()
+valve::VALVE_STATE valve_iol_terminal::get_valve_state() const
     {
     return state;
     }
@@ -2435,7 +2435,7 @@ valve_iol_terminal_DO1_DI1_on::valve_iol_terminal_DO1_DI1_on( const char* dev_na
     {
     }
 
-bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
+bool valve_iol_terminal_DO1_DI1_on::get_fb_state() const
     {
     if ( !check_config() ) return false;
 
@@ -2456,14 +2456,14 @@ bool valve_iol_terminal_DO1_DI1_on::get_fb_state()
     return false;
     }
 
-int valve_iol_terminal_DO1_DI1_on::get_on_fb_value()
+int valve_iol_terminal_DO1_DI1_on::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
-inline int valve_iol_terminal_DO1_DI1_on::get_off_fb_value()
+inline int valve_iol_terminal_DO1_DI1_on::get_off_fb_value() const
     {
     return false;
     }
@@ -2474,7 +2474,7 @@ valve_iol_terminal_DO1_DI1_off::valve_iol_terminal_DO1_DI1_off( const char* dev_
     {
     }
 
-bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
+bool valve_iol_terminal_DO1_DI1_off::get_fb_state() const
     {
     if ( !check_config() ) return false;
 
@@ -2495,12 +2495,12 @@ bool valve_iol_terminal_DO1_DI1_off::get_fb_state()
     return false;
     }
 
-int valve_iol_terminal_DO1_DI1_off::get_on_fb_value()
+int valve_iol_terminal_DO1_DI1_off::get_on_fb_value() const
     {
     return false;
     }
 
-inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value()
+inline int valve_iol_terminal_DO1_DI1_off::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
@@ -2655,14 +2655,14 @@ void analog_valve_ey::direct_set_value( float new_value )
     conv->set_channel_value( ey_number, new_value );
     }
 //-----------------------------------------------------------------------------
-float analog_valve_ey::get_value()
+float analog_valve_ey::get_value() const
     {
     if ( !conv ) return 0.0f;
 
     return conv->get_channel_value( ey_number );
     }
 //-----------------------------------------------------------------------------
-int analog_valve_ey::get_state()
+int analog_valve_ey::get_state() const
     {
     if ( !conv ) return -200;
     else return conv->get_state();    
@@ -2756,7 +2756,7 @@ float analog_valve_iolink::get_max_value() const
     return static_cast<float>( CONSTANTS::FULL_OPENED );
     }
 //-----------------------------------------------------------------------------
-int analog_valve_iolink::save_device_ex( char* buff )
+int analog_valve_iolink::save_device_ex( char* buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE,
         "NAMUR_ST={}, OPENED={:d}, CLOSED={:d}, BLINK={:d}, ",
@@ -2790,14 +2790,14 @@ void analog_valve_iolink::direct_set_value( float new_value )
     std::swap( buff[ 1 ], buff[ 2 ] );
     }
 //-----------------------------------------------------------------------------
-float analog_valve_iolink::get_value()
+float analog_valve_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AO1::get_value();
 
     return in_info.position;
     }
 //-----------------------------------------------------------------------------
-int analog_valve_iolink::get_state()
+int analog_valve_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -2855,7 +2855,7 @@ valve_iol_terminal_DO1_DI2::valve_iol_terminal_DO1_DI2( const char* dev_name ) :
     {
     }
 
-bool valve_iol_terminal_DO1_DI2::get_fb_state()
+bool valve_iol_terminal_DO1_DI2::get_fb_state() const
     {
     auto o = get_valve_state();
 
@@ -2882,14 +2882,14 @@ bool valve_iol_terminal_DO1_DI2::get_fb_state()
     return false;
     }
 
-int valve_iol_terminal_DO1_DI2::get_on_fb_value()
+int valve_iol_terminal_DO1_DI2::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
-inline int valve_iol_terminal_DO1_DI2::get_off_fb_value()
+inline int valve_iol_terminal_DO1_DI2::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
@@ -2904,7 +2904,7 @@ valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name ) :
     }
 
 /// @brief Получение состояния обратной связи.
-bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
+bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state() const
     {
     auto o = get_valve_state();
 
@@ -2934,14 +2934,14 @@ bool valve_iol_terminal_mixproof_DO3_DI2::get_fb_state()
     return false;
     }
 
-int valve_iol_terminal_mixproof_DO3_DI2::get_on_fb_value()
+int valve_iol_terminal_mixproof_DO3_DI2::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
     return get_DI( static_cast<u_int> ( IO_CONSTANT::DI_INDEX_1 ) );
     }
 
-int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value()
+int valve_iol_terminal_mixproof_DO3_DI2::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
@@ -3023,7 +3023,7 @@ void valve_AS::set_rt_par( u_int idx, float value )
     }
 //-----------------------------------------------------------------------------
 /// @brief Получение данных состояния устройства.
-char valve_AS::get_state_data( const char* data )
+char valve_AS::get_state_data( const char* data ) const
     {
     if ( data == nullptr )
         {
@@ -3080,7 +3080,7 @@ char* valve_AS::get_data_with_offset( char* data )
     return state;
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_AS::get_valve_state()
+valve::VALVE_STATE valve_AS::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -3097,7 +3097,7 @@ valve::VALVE_STATE valve_AS::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_AS::get_fb_state()
+bool valve_AS::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -3155,7 +3155,7 @@ int valve_AS::get_upper_seat_offset() const
         }
     }
 //-----------------------------------------------------------------------------
-int valve_AS::get_off_fb_value()
+int valve_AS::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
@@ -3167,7 +3167,7 @@ int valve_AS::get_off_fb_value()
     return i0 > 0 ? 1 : 0;
     }
 //-----------------------------------------------------------------------------
-int valve_AS::get_on_fb_value()
+int valve_AS::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
@@ -3336,7 +3336,7 @@ void valve_AS_DO1_DI2::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_AS_DO1_DI2::get_valve_state()
+valve::VALVE_STATE valve_AS_DO1_DI2::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -3348,7 +3348,7 @@ valve::VALVE_STATE valve_AS_DO1_DI2::get_valve_state()
     return (VALVE_STATE)o;
     }
 //-----------------------------------------------------------------------------
-bool valve_AS_DO1_DI2::get_fb_state()
+bool valve_AS_DO1_DI2::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
@@ -3465,7 +3465,7 @@ void valve_mini_flushing::direct_off()
         }
     }
 
-valve::VALVE_STATE valve_mini_flushing::get_valve_state()
+valve::VALVE_STATE valve_mini_flushing::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -3476,7 +3476,7 @@ valve::VALVE_STATE valve_mini_flushing::get_valve_state()
     return (VALVE_STATE)o;
     }
 
-bool valve_mini_flushing::get_fb_state()
+bool valve_mini_flushing::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
 
@@ -3498,14 +3498,14 @@ bool valve_mini_flushing::get_fb_state()
     return false;
     }
 
-int valve_mini_flushing::get_off_fb_value()
+int valve_mini_flushing::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
     return get_DI( DI_INDEX_CLOSE );
     }
 
-int valve_mini_flushing::get_on_fb_value()
+int valve_mini_flushing::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
