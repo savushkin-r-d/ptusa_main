@@ -2984,12 +2984,20 @@ operation* operation_manager::operator[]( unsigned int idx )
     return &oper_stub;
     }
 //-----------------------------------------------------------------------------
-unsigned long operation_manager::get_idle_time()
+unsigned long operation_manager::get_idle_time_sec() const
     {
     auto res = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - start_time_point );
 
     return static_cast<unsigned long>( res.count() );
+    }
+//-----------------------------------------------------------------------------
+unsigned long long operation_manager::get_idle_time() const
+    {
+    auto res = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - start_time_point );
+
+    return static_cast<unsigned long long>( res.count() );
     }
 //-----------------------------------------------------------------------------
 void operation_manager::print()
