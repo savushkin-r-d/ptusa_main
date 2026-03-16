@@ -243,9 +243,9 @@ class valve_DO1_DI1_off : public valve
     public:
         explicit valve_DO1_DI1_off( const char* dev_name );
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
 #ifndef PTUSA_TEST
     private:
@@ -258,7 +258,7 @@ class valve_DO1_DI1_off : public valve
 
         // Интерфейс valve для реализации получения расширенного состояния с
         // учетом всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
         bool get_fb_state() const override;
 
@@ -289,7 +289,7 @@ class valve_DO1_DI1_on : public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
         bool get_fb_state() const;
 

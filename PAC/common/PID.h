@@ -73,7 +73,7 @@ class PID : public device
         void direct_on();
         void direct_set_state( int st );
         void direct_off();
-        int get_state();
+        int get_state() const override;
 
         void direct_set_value( float val );
         float get_value() const;

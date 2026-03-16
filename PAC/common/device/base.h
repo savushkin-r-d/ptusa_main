@@ -765,6 +765,7 @@ class device : public i_DO_AO_device, public par_device
 
         void set_emulation( bool new_emulation_state );
 
+        analog_emulator& get_emulator();
         const analog_emulator& get_emulator() const;
 
         /// @brief Получение максимальной длины имени устройства (с учётом 
@@ -795,7 +796,7 @@ class device : public i_DO_AO_device, public par_device
         char* description;
 
         bool emulation = false;
-        mutable analog_emulator emulator;
+        analog_emulator emulator;
 
         int state = 0;      ///< Состояние устройства.
         float value = .0f;  ///< Значение устройства.

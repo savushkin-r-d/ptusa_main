@@ -465,7 +465,7 @@ const char* PID::get_name_in_Lua() const
     return get_name();
     }
 //-----------------------------------------------------------------------------
-int PID::get_state()
+int PID::get_state() const
     {
     return static_cast<int>( state );
     }

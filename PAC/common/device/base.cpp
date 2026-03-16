@@ -460,6 +460,11 @@ void device::param_emulator( float math_expec, float stddev )
     emulator.param( math_expec, stddev );
     }
 //-----------------------------------------------------------------------------
+analog_emulator& device::get_emulator()
+    {
+    return emulator;
+    }
+//-----------------------------------------------------------------------------
 const analog_emulator& device::get_emulator() const
     {
     return emulator;

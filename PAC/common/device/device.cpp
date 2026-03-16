@@ -3803,7 +3803,7 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
             get_name(), prop, idx, val );
         }
 
-    auto emulator = get_emulator();
+    auto& emulator = get_emulator();
     if ( strcmp( prop, "M_EXP" ) == 0 )
         {
         emulator.param( static_cast<float>( val ), emulator.get_st_deviation() );

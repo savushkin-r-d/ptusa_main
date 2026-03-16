@@ -427,7 +427,7 @@ void valve_DO1_DI1_off::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO1_DI1_off::get_valve_state()
+valve::VALVE_STATE valve_DO1_DI1_off::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -493,7 +493,7 @@ void valve_DO1_DI1_on::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO1_DI1_on::get_valve_state()
+valve::VALVE_STATE valve_DO1_DI1_on::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
