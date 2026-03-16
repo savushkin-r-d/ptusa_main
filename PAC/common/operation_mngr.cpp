@@ -2350,7 +2350,7 @@ void operation_state::evaluate()
         if ( next_step > 0 && static_cast<size_t>( next_step ) <= steps.size() )
             {
             G_LOG->debug( "'%s' operation %d '%s' (%s): "
-                "from %d to %d ('%s') - '%s'.",
+                "from %d to %d ('%s') - %s.",
                 owner->owner->get_name(),
                 operation_number,
                 ( *owner )[ operation_number ]->get_name(), get_name(),
