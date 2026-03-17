@@ -291,7 +291,7 @@ class valve_DO1_DI1_on : public valve
         // всех вариантов (ручной режим, обратная связь, ...).
         VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() const;
+        bool get_fb_state() const override;
 
         int get_on_fb_value() const override;
 
@@ -468,7 +468,7 @@ class valve_AS : public valve
 
         VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() const;
+        bool get_fb_state() const override;
 
         /// @brief поменять местами подключение седел клапана.
         bool reverse_seat_connection = false;

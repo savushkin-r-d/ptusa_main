@@ -562,7 +562,7 @@ void valve_DO1_DI2::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO1_DI2::get_valve_state () const
+valve::VALVE_STATE valve_DO1_DI2::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
@@ -2313,7 +2313,7 @@ bool valve_iol_terminal::check_config() const
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
         {        
-        if ( auto data = (char*)get_AO_write_data( static_cast<u_int>
+        if ( const auto data = (char*)get_AO_write_data( static_cast<u_int>
             ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
             !data )
             {
