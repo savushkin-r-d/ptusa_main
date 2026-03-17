@@ -2294,19 +2294,23 @@ void check_fb( const valve* V1 )
     {
     // Нет обратной связи для отключенного состояния.
     EXPECT_FALSE( V1->get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1->get_valve_state() );
 
     *V1->DI_channels.char_read_values[ 1 ] = 1;
     // Есть обратная связь для отключенного состояния.
     EXPECT_TRUE( V1->get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1->get_valve_state() );
 
     *V1->DO_channels.char_write_values[ 0 ] = 1;
     *V1->DI_channels.char_read_values[ 1 ] = 0;
     // Нет обратной связи для включенного состояния.
     EXPECT_FALSE( V1->get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1->get_valve_state() );
 
     *V1->DI_channels.char_read_values[ 0 ] = 1;
     // Есть обратная связь для включенного состояния.
     EXPECT_TRUE( V1->get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1->get_valve_state() );
     }
 
 
@@ -2318,7 +2322,7 @@ TEST( valve_DO1_DI2, valve_DO1_DI2 )
     valve_DO1_DI2 V1( "V1" );
 
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
 
@@ -2326,6 +2330,7 @@ TEST( valve_DO1_DI2, get_fb_state )
     {
     valve_DO1_DI2 V1( "V1" );
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_off();
     V1.init_and_alloc( 1, 2 );
@@ -2343,7 +2348,7 @@ TEST( valve_DO2_DI2, valve_DO2_DI2 )
     valve_DO2_DI2 V1( "V1" );
 
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
 
@@ -2497,7 +2502,7 @@ TEST( valve_DO1_DI1_on, direct_off )
 TEST( valve_DO1_DI1_on, get_on_fb_value )
     {
     valve_DO1_DI1_on V1( "V1" );
-    EXPECT_TRUE( V1.get_on_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
     }
 
 TEST( valve_DO1_DI1_on, get_off_fb_value )
@@ -2515,7 +2520,7 @@ TEST( valve_mix_proof, valve_mix_proof )
     valve_mix_proof V1( "V1" );
 
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
 
@@ -2712,7 +2717,7 @@ TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
     valve_bottom_mix_proof V1( "V1" );
 
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
 
@@ -2810,6 +2815,38 @@ TEST( valve_mini_flushing, get_fb_state )
     }
 
 
+TEST( valve_DO2_DI2_bistable, get_fb_state )
+    {
+    valve_DO2_DI2_bistable V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
+    EXPECT_TRUE( V1.get_off_fb_value() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 2, 2 );
+
+    check_fb( &V1 );
+
+    *V1.DO_channels.char_write_values[ 
+        valve_DO2_DI2_bistable::CONSTANTS::DO_INDEX_OPEN ] = 1;
+    *V1.DO_channels.char_write_values[ 
+        valve_DO2_DI2_bistable::CONSTANTS::DO_INDEX_CLOSE ] = 0;
+    *V1.DI_channels.char_read_values[
+        valve_DO2_DI2_bistable::CONSTANTS::DI_INDEX_OPEN ] = 1;
+    *V1.DI_channels.char_read_values[
+        valve_DO2_DI2_bistable::CONSTANTS::DI_INDEX_CLOSE ] = 0;
+
+    // Есть обратная связь для открытия.
+    EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
+    EXPECT_TRUE( V1.get_on_fb_value() );
+    EXPECT_FALSE( V1.get_off_fb_value() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( valve_iolink_shut_off_sorio, save_device )
     {
     valve_iolink_shut_off_sorio V1( "V1" );
@@ -2874,7 +2911,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
     EXPECT_STREQ(
-        "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "VGEA2={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 
@@ -3008,7 +3045,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, save_device_ex )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
     EXPECT_STREQ(
-        "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
+        "VGEA1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 
@@ -3215,7 +3252,7 @@ TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( true, V1.get_fb_state() );
 
@@ -3357,7 +3394,9 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+    EXPECT_STREQ( 
+        "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n",
+        buff );
 
     const auto WAIT_TIME = 10;
     V1.set_par( 1 /*valve::CONSTANTS::P_ON_TIME*/, 0, WAIT_TIME );
@@ -3424,7 +3463,9 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
+    EXPECT_STREQ( 
+        "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n",
+        buff );
 
     EXPECT_EQ( false, V1.get_fb_state() );
 
@@ -3492,7 +3533,7 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, BLINK=0, "
+    EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, BLINK=0, "
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
 

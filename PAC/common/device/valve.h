@@ -379,7 +379,6 @@ class valve_DO2_DI2_bistable : public valve
 
         void direct_off() override;
 
-    private:
         enum CONSTANTS
             {
             DO_INDEX_OPEN = 0,  ///< Индекс канала дискретного выхода Открыть.
@@ -401,6 +400,7 @@ class valve_DO2_DI2_bistable : public valve
 
         void direct_set_state( int new_state ) override;
 
+    private:
         bool is_stoped;
         bool is_opening;
         bool is_closing;

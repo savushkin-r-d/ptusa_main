@@ -65,7 +65,7 @@ valve::valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
     is_on_fb( is_on_fb ),
     is_off_fb( is_off_fb )
     {
-    on_fb = true;
+    on_fb = false;
     off_fb = true;
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB, 0, "P_FB" );
