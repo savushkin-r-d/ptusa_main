@@ -30,7 +30,7 @@ class par_device: public i_Lua_save_device
         /// @param par_cnt - количество параметров.
         explicit par_device( u_int par_cnt );
 
-        virtual ~par_device();
+        ~par_device() override;
         
         /// Unmovable classe.
         par_device& operator=( par_device&& ) = delete;
@@ -102,7 +102,7 @@ class par_device: public i_Lua_save_device
             return par[ 0 ][ idx ];
             }
 
-        const char* get_name_in_Lua() const
+        const char* get_name_in_Lua() const override
             {
             return "";
             }

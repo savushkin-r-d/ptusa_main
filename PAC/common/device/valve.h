@@ -47,10 +47,10 @@ class valve : public digital_io_device
 #endif
 
         /// @brief Получение значения включенного состояния.
-        bool is_opened();
+        bool is_opened() const;
 
         /// @brief Получение значения выключенного состояния.
-        bool is_closed();
+        bool is_closed() const;
 
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value() const;
@@ -59,7 +59,7 @@ class valve : public digital_io_device
         virtual int get_off_fb_value() const;
 
         /// @brief Сохранение дополнительных данных.
-        virtual int save_device_ex( char* buff ) const;
+        int save_device_ex( char* buff ) const override;
 
         //Состояния клапана (расширенное).
         enum VALVE_STATE_EX
@@ -771,9 +771,9 @@ class valve_iolink_shut_off_thinktop : public valve
 
         ~valve_iolink_shut_off_thinktop() override = default;
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff ) const;
+        int save_device_ex( char* buff ) const override;
 
         void evaluate_io();
 
@@ -827,7 +827,7 @@ class valve_iolink_shut_off_sorio : public valve
 
         explicit valve_iolink_shut_off_sorio( const char* dev_name );
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
         int save_device_ex( char* buff ) const;
 

@@ -425,7 +425,7 @@ class run_time_params_float: public parameters < float, true >
 
     protected:
 
-        float get_val( int idx )
+        float get_val( int idx ) const
             {
             return parameters< float, true >::get_val( idx );
             }
@@ -452,7 +452,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
             }
 
     protected:
-        u_int_4 get_val( int idx )
+        u_int_4 get_val( int idx ) const
             {
             return parameters< u_int_4, false >::get_val( idx );
             }
@@ -554,7 +554,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
               }
 
     protected:
-        u_int_4 get_val( int idx )
+        u_int_4 get_val( int idx ) const
             {
             return saved_params< u_int_4, false >::get_val( idx );
             }
@@ -577,7 +577,7 @@ class saved_params_float: public saved_params < float, true >
               }
 
     protected:
-        float get_val( int idx )
+        float get_val( int idx ) const
             {
             return saved_params< float, true >::get_val( idx );
             }

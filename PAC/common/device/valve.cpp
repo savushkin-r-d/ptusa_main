@@ -337,12 +337,12 @@ void valve::evaluate()
         to_switch_off.end() );
     }
 //-----------------------------------------------------------------------------
-bool valve::is_opened()
+bool valve::is_opened() const
     {
     return get_on_fb_value() > 0;
     }
 //-----------------------------------------------------------------------------
-bool valve::is_closed()
+bool valve::is_closed() const
     {
     return get_off_fb_value() > 0;
     }
@@ -1567,7 +1567,7 @@ valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name )
     {
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state()
+valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2055,7 +2055,7 @@ valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_
     in_info.err = 0;
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
+valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
