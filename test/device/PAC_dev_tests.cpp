@@ -2391,10 +2391,12 @@ TEST( valve_DO1_DI1_off, get_fb_state )
 
     // Нет обратной связи для отключенного состояния.
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_FALSE( V1.get_off_fb_value() );
 
     *V1.DI_channels.char_read_values[ 0 ] = 1;
     // Есть обратная связь для включенного состояния.
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_TRUE( V1.get_off_fb_value() );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -2426,6 +2428,18 @@ TEST( valve_DO1_DI1_off, direct_off )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( valve_DO1_DI1_off, get_on_fb_value )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_FALSE( V1.get_on_fb_value() );
+    }
+
+TEST( valve_DO1_DI1_off, get_off_fb_value )
+    {
+    valve_DO1_DI1_off V1( "V1" );
+    EXPECT_TRUE( V1.get_off_fb_value() );
+    }
+
 
 TEST( valve_DO1_DI1_on, get_fb_state )
     {
@@ -2436,10 +2450,12 @@ TEST( valve_DO1_DI1_on, get_fb_state )
     V1.init_and_alloc( 1, 1 );
 
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
 
     *V1.DI_channels.char_read_values[ 0 ] = 1;
     // Нет обратной связь для включенного состояния.
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_TRUE( V1.get_on_fb_value() );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -2470,6 +2486,18 @@ TEST( valve_DO1_DI1_on, direct_off )
     EXPECT_EQ( V1.get_state(), valve::VALVE_STATE::V_OFF );
 
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST( valve_DO1_DI1_on, get_on_fb_value )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_TRUE( V1.get_on_fb_value() );
+    }
+
+TEST( valve_DO1_DI1_on, get_off_fb_value )
+    {
+    valve_DO1_DI1_on V1( "V1" );
+    EXPECT_FALSE ( V1.get_off_fb_value() );
     }
 
 
