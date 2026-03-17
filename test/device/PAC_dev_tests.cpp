@@ -2351,20 +2351,24 @@ TEST( valve_DO2_DI2, get_fb_state )
     {
     valve_DO2_DI2 V1( "V1" );
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_off();
     V1.init_and_alloc( 2, 2 );
 
     // Нет управления и нет обратных связей.
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     // Нет обратной связь для отключенного состояния.
     *V1.DO_channels.char_write_values[ 0 ] = 1;
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     // Есть управление и обратная связь для отключенного состояния.
     *V1.DI_channels.char_read_values[ 0 ] = 1;
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     // Есть управление и обратная связь для включенного состояния.
     *V1.DO_channels.char_write_values[ 0 ] = 0;
@@ -2372,10 +2376,12 @@ TEST( valve_DO2_DI2, get_fb_state )
     *V1.DO_channels.char_write_values[ 1 ] = 1;
     *V1.DI_channels.char_read_values[ 1 ] = 1;
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
 
     // Нет обратная связь для включенного состояния.
     *V1.DI_channels.char_read_values[ 1 ] = 0;
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_on();
     }
