@@ -2896,9 +2896,13 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
     V1.AI_channels.int_read_values[ 0 ] = new int_2[ 2 ]{ 0 };
 
     EXPECT_TRUE( V1.get_fb_state() ); //Default value.
+    EXPECT_TRUE( V1.get_off_fb_value() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_off();
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_TRUE( V1.get_off_fb_value() );
+    EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_on();
     }
