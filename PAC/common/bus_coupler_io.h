@@ -446,7 +446,7 @@ class io_manager
         static auto_smart_ptr < io_manager > instance;
 
     public:
-        const io_node * const get_node( int node_n ) const;
+        const io_node* get_node( int node_n ) const;
 
 #ifdef PTUSA_TEST
         io_manager::io_node* get_node( int node_n );

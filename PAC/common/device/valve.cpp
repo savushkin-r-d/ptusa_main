@@ -1284,9 +1284,9 @@ void valve_iolink_mix_proof::evaluate_io()
             ( (char*)out_info + extra_offset );
         }
 
-    char* data = (char*)get_AI_data(
+    auto data = (const char*)get_AI_data(
         static_cast<u_int>( CONSTANTS::C_AI_INDEX ) );
-    auto* buff = (char*)&in_info;
+    auto buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -2313,7 +2313,7 @@ bool valve_iol_terminal::check_config() const
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
         {        
-        if ( const auto data = (char*)get_AO_write_data( static_cast<u_int>
+        if ( const auto data = get_AO_write_data( static_cast<u_int>
             ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
             !data )
             {
@@ -2707,8 +2707,8 @@ void analog_valve_iolink::evaluate_io()
     {
     out_info = (out_data*)get_AO_write_data( AO_INDEX );
 
-    char* data = (char*)get_AI_data( AO_INDEX );
-    char* buff = (char*)&in_info;
+    auto data = (const char*)get_AI_data( AO_INDEX );
+    auto buff = (char*)&in_info;
 
     if ( !data ) return;
 
@@ -3084,8 +3084,8 @@ valve::VALVE_STATE valve_AS::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
-    char* data = (char*)get_AO_read_data( AO_INDEX );
-    char state = get_state_data( data );
+    auto data = (const char*)get_AO_read_data( AO_INDEX );
+    auto state = get_state_data( data );
 
     auto o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
@@ -3101,15 +3101,15 @@ bool valve_AS::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    const auto AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_data = (const char*)get_AO_read_data( AO_INDEX );
     auto AO_state = get_state_data( AO_data );
 
     auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
     auto l = ( AO_state & get_lower_seat_offset() ) > 0 ? 1 : 0;
     auto u = ( AO_state & get_upper_seat_offset() ) > 0 ? 1 : 0;
 
-    char* AI_data = (char*)get_AI_data( AI_INDEX );
-    char AI_state = get_state_data( AI_data );
+    auto AI_data = (const char*)get_AI_data( AI_INDEX );
+    auto AI_state = get_state_data( AI_data );
     
     if ( auto i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
         i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
@@ -3159,8 +3159,8 @@ int valve_AS::get_off_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_off_fb_value();
 
-    char* AI_data = (char*)get_AI_data( AI_INDEX );
-    char AI_state = get_state_data( AI_data );
+    auto AI_data = (const char*)get_AI_data( AI_INDEX );
+    auto AI_state = get_state_data( AI_data );
 
     int i0 = AI_state & S_CLOSED;
 
@@ -3171,8 +3171,8 @@ int valve_AS::get_on_fb_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
 
-    char* AI_data = (char*)get_AI_data( AI_INDEX );
-    char AI_state = get_state_data( AI_data );
+    auto AI_data = (const char*)get_AI_data( AI_INDEX );
+    auto AI_state = get_state_data( AI_data );
 
     int i1 = AI_state & S_OPENED;
 
@@ -3340,8 +3340,8 @@ valve::VALVE_STATE valve_AS_DO1_DI2::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_valve_state();
 
-    char* data = (char*)get_AO_read_data( AO_INDEX );
-    char state = get_state_data( data );
+    auto data = (const char*)get_AO_read_data( AO_INDEX );
+    auto state = get_state_data( data );
 
     int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
@@ -3352,10 +3352,10 @@ bool valve_AS_DO1_DI2::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    auto AO_data = (char*)get_AO_read_data( AO_INDEX );
+    auto AO_data = (const char*)get_AO_read_data( AO_INDEX );
     auto AO_state = get_state_data( AO_data );
 
-    auto AI_data = (char*)get_AI_data( AI_INDEX );
+    auto AI_data = (const char*)get_AI_data( AI_INDEX );
     auto AI_state = get_state_data( AI_data );
 
     if ( auto o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0,

@@ -1167,7 +1167,7 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-const io_manager::io_node * const io_manager::get_node( int node_n ) const
+const io_manager::io_node* io_manager::get_node( int node_n ) const
     {
     return nodes[ node_n ];
     }
