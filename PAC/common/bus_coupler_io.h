@@ -157,6 +157,8 @@ class io_device
         /// @return -  указатель на данные канала.
         int_2* get_AO_write_data( u_int index );
 
+        const int_2* const get_AO_write_data( u_int index ) const;
+
         /// @brief Получение текущих данных канала аналогового выхода.
         ///
         /// @param index - индекс канала в таблице аналоговых выходных каналов

@@ -2313,8 +2313,8 @@ bool valve_iol_terminal::check_config() const
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
         {        
-        if ( auto data = (char*)const_cast<valve_iol_terminal*>( this )->get_AO_write_data(
-            static_cast<u_int> ( IO_CONSTANT::AO_INDEX_1 ) + idx++ ) ;
+        if ( auto data = (char*)get_AO_write_data( static_cast<u_int>
+            ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
             !data )
             {
             return false;

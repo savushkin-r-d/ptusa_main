@@ -646,6 +646,30 @@ int_2* io_device::get_AO_write_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
+const int_2* const io_device::get_AO_write_data( u_int index ) const
+    {
+    if ( index < AO_channels.count && AO_channels.int_write_values )
+        {
+        return AO_channels.int_write_values[ index ];
+        }
+
+    if ( G_DEBUG )
+        {
+        print();
+        printf( "io_device->get_AO_write_data(...) - error! " );
+        printf( "index = %d, AO_channels.count = %d, "
+            "AO_channels.int_write_values = %p",
+            index, AO_channels.count, AO_channels.int_write_values );
+        if ( AO_channels.int_write_values )
+            {
+            printf( ", AO_channels.int_write_values[ index ]=%p",
+                AO_channels.int_write_values[ index ] );
+            }
+        printf( "\n" );
+        }
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int_2* io_device::get_AO_read_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
