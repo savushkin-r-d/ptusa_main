@@ -374,18 +374,18 @@ class io_manager
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
 
-			mutable io_node::STATES state; ///< Cостояние работы с узлом.
-			TYPES   type;            ///< Тип.
-			u_int   number;          ///< Номер.
-			char    ip_address[16];  ///< IP-адрес.
-			char    name[20];        ///< Имя.
+			io_node::STATES state; ///< Cостояние работы с узлом.
+			TYPES   type;          ///< Тип.
+			u_int   number;        ///< Номер.
+			char    ip_address[16];///< IP-адрес.
+			char    name[20];      ///< Имя.
 
-			mutable bool is_active;             ///< Признак работающего узла.
-            mutable bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
+			bool is_active;                  ///< Признак работающего узла.
+            bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
 			uint32_t last_poll_time; ///< Время последнего опроса.
-            mutable bool is_set_err; ///< Установлена ли ошибка связи.
-            mutable int sock;        ///< Сокет соединения.
+            bool is_set_err;         ///< Установлена ли ошибка связи.
+            int sock;                ///< Сокет соединения.
 
 			// Digital outputs ( DO ).
 			u_int  DO_cnt;      ///< Amount of DO.
@@ -448,9 +448,7 @@ class io_manager
     public:
         const io_node* get_node( int node_n ) const;
 
-#ifdef PTUSA_TEST
         io_manager::io_node* get_node( int node_n );
-#endif // PTUSA_TEST
 
 		u_int get_nodes_count();
 
@@ -479,7 +477,7 @@ class io_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(const io_node *node);
+		virtual void disconnect(io_node *node);
 
 
     };

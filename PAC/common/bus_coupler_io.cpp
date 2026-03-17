@@ -1172,12 +1172,10 @@ const io_manager::io_node* io_manager::get_node( int node_n ) const
     return nodes[ node_n ];
     }
 
-#ifdef PTUSA_TEST
 io_manager::io_node* io_manager::get_node( int node_n )
     {
     return nodes[ node_n ];
     }
-#endif // PTUSA_TEST
 
 u_int io_manager::get_nodes_count()
 	{
@@ -1215,7 +1213,7 @@ void io_manager::init_node_AI( u_int node_index, u_int AI_index,
         nodes[ node_index ]->AI_offsets[ AI_index ] = offset;
         }
     }
-void io_manager::disconnect(const io_node * node)
+void io_manager::disconnect(io_node * node)
 	{
 	return;
 	}

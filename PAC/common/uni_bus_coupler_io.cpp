@@ -989,7 +989,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         }
     }
 //-----------------------------------------------------------------------------
-void uni_io_manager::disconnect( const io_node* node )
+void uni_io_manager::disconnect( io_node* node )
     {
     if ( node->sock )
         {
