@@ -105,7 +105,7 @@ class uni_io_manager : public io_manager
         /// @brief Отключение от узла.
         ///
         /// @param node - узел, от которого отключаемся.
-        void disconnect( io_node* node ) override;
+        void disconnect( const io_node* node ) override;
     };
 //-----------------------------------------------------------------------------
 #endif // UNI_BUS_COUPLER_IO_H

@@ -284,7 +284,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
         printf( "index = %d, AO_channels.count = %d, "
             "AO_channels.int_write_values = %p",
             index, AO_channels.count, AO_channels.int_write_values );
-        if ( AO_channels.int_write_values )
+        if ( index < AO_channels.count && AO_channels.int_write_values )
             {
             printf( ", AO_channels.int_write_values[ index ]=%p",
                 AO_channels.int_write_values[ index ] );
@@ -636,7 +636,7 @@ int_2* io_device::get_AO_write_data( u_int index )
         printf( "index = %d, AO_channels.count = %d, "
             "AO_channels.int_write_values = %p",
             index, AO_channels.count, AO_channels.int_write_values );
-        if ( AO_channels.int_write_values )
+        if ( index < AO_channels.count && AO_channels.int_write_values )
             {
             printf( ", AO_channels.int_write_values[ index ]=%p",
                 AO_channels.int_write_values[ index ] );
@@ -646,7 +646,7 @@ int_2* io_device::get_AO_write_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-const int_2* const io_device::get_AO_write_data( u_int index ) const
+const int_2* io_device::get_AO_write_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_write_values )
         {
@@ -660,17 +660,18 @@ const int_2* const io_device::get_AO_write_data( u_int index ) const
         printf( "index = %d, AO_channels.count = %d, "
             "AO_channels.int_write_values = %p",
             index, AO_channels.count, AO_channels.int_write_values );
-        if ( AO_channels.int_write_values )
+        if ( index < AO_channels.count && AO_channels.int_write_values )
             {
             printf( ", AO_channels.int_write_values[ index ]=%p",
                 AO_channels.int_write_values[ index ] );
             }
         printf( "\n" );
         }
-    return 0;
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
-const int_2* const io_device::get_AO_read_data( u_int index ) const
+const int_2* io_device::get_AO_read_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
         {
@@ -691,7 +692,8 @@ const int_2* const io_device::get_AO_read_data( u_int index ) const
             }
         printf( "\n" );
         }
-    return 0;
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
 void io_device::print() const
@@ -1213,7 +1215,7 @@ void io_manager::init_node_AI( u_int node_index, u_int AI_index,
         nodes[ node_index ]->AI_offsets[ AI_index ] = offset;
         }
     }
-void io_manager::disconnect(io_node * node)
+void io_manager::disconnect(const io_node * node)
 	{
 	return;
 	}

@@ -157,7 +157,7 @@ class io_device
         /// @return -  указатель на данные канала.
         int_2* get_AO_write_data( u_int index );
 
-        const int_2* const get_AO_write_data( u_int index ) const;
+        const int_2* get_AO_write_data( u_int index ) const;
 
         /// @brief Получение текущих данных канала аналогового выхода.
         ///
@@ -165,7 +165,7 @@ class io_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        const int_2* const get_AO_read_data( u_int index ) const;
+        const int_2* get_AO_read_data( u_int index ) const;
 
         virtual void print() const;
 
@@ -374,18 +374,18 @@ class io_manager
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
 
-			io_node::STATES  state;          ///< Cостояние работы с узлом.
+			mutable io_node::STATES state; ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
 			u_int   number;          ///< Номер.
-			char    ip_address[16];///< IP-адрес.
-			char    name[20];      ///< Имя.
+			char    ip_address[16];  ///< IP-адрес.
+			char    name[20];        ///< Имя.
 
-			bool is_active;             ///< Признак работающего узла.
-            bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
+			mutable bool is_active;             ///< Признак работающего узла.
+            mutable bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
-			uint32_t  last_poll_time; ///< Время последнего опроса.
-			bool    is_set_err;     ///< Установлена ли ошибка связи.
-			int     sock;           ///< Сокет соединения.
+			uint32_t last_poll_time; ///< Время последнего опроса.
+            mutable bool is_set_err; ///< Установлена ли ошибка связи.
+            mutable int sock;        ///< Сокет соединения.
 
 			// Digital outputs ( DO ).
 			u_int  DO_cnt;      ///< Amount of DO.
@@ -479,7 +479,7 @@ class io_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
+		virtual void disconnect(const io_node *node);
 
 
     };

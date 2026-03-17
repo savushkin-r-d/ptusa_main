@@ -11,6 +11,7 @@
 #include "param_ex.h"
 #include "analog_emulator.h"
 #include "bus_coupler_io.h"
+#include "g_device.h"
 
 class PID;
 
@@ -367,8 +368,6 @@ class device : public i_DO_AO_device, public par_device
 
         /// @brief Сохранение устройства в виде скрипта Lua.
         ///
-        /// @param prefix - префикс перед строкой скрипта (обычно символ
-        /// табуляции - для визуального форматирования текста).
         /// @param buff [out] - буфер записи строки.
         int save_device( char* buff ) const override;
 

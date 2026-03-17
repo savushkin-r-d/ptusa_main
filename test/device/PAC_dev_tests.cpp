@@ -2290,7 +2290,7 @@ TEST( valve_DO1_DI1_off, set_cmd )
     }
 
 
-void check_fb( valve* V1 )
+void check_fb( const valve* V1 )
     {
     // Нет обратной связи для отключенного состояния.
     EXPECT_FALSE( V1->get_fb_state() );

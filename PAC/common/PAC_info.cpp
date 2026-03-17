@@ -282,7 +282,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         {
         if ( idx <= io_manager::get_instance()->get_nodes_count() )
             {
-            io_manager::io_node* wn = io_manager::get_instance()->get_node( idx - 1 );
+            auto wn = io_manager::get_instance()->get_node( idx - 1 );
             if ( 1 == val )
                 {
                 if ( !wn->is_active )
