@@ -82,12 +82,12 @@ TEST( signal_column, direct_off )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.direct_on();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.direct_off();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -99,12 +99,12 @@ TEST( signal_column, turn_off_green )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.turn_on_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -122,12 +122,12 @@ TEST( signal_column, turn_off_yellow )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.turn_on_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -145,12 +145,12 @@ TEST( signal_column, turn_off_red )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.turn_on_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -169,19 +169,19 @@ TEST( signal_column, turn_off_blue )
 
     // Без описания колонны синий свет не включается.
     test_dev.turn_on_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
 
     test_dev.turn_on_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -198,12 +198,12 @@ TEST( signal_column, turn_off_siren )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.turn_on_siren();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=1},\n", buff );
 
     test_dev.turn_off_siren();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -221,22 +221,22 @@ TEST( signal_column, normal_blink_red )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.normal_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.set_rt_par( 1, 1 ); // Мы управляем красным цветом.
     test_dev.normal_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -244,11 +244,11 @@ TEST( signal_column, normal_blink_red )
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.normal_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -261,22 +261,22 @@ TEST( signal_column, slow_blink_red )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.slow_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.set_rt_par( 1, 1 ); // Мы управляем красным цветом.
     test_dev.slow_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -284,11 +284,11 @@ TEST( signal_column, slow_blink_red )
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.slow_blink_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_red();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -301,23 +301,23 @@ TEST( signal_column, normal_blink_yellow )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.normal_blink_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.normal_blink_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -330,23 +330,23 @@ TEST( signal_column, slow_blink_yellow )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.slow_blink_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.slow_blink_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_yellow();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -359,23 +359,23 @@ TEST( signal_column, normal_blink_green )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.normal_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.normal_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -388,23 +388,23 @@ TEST( signal_column, slow_blink_green )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.slow_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.set_string_property( "SIGNALS_SEQUENCE", "AGYRB" );
     test_dev.slow_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.turn_off_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -418,22 +418,22 @@ TEST( signal_column, normal_blink_blue )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.normal_blink_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.normal_blink_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
     test_dev.turn_off_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -447,22 +447,22 @@ TEST( signal_column, slow_blink_blue )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.slow_blink_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
 
     test_dev.turn_off_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
     test_dev.slow_blink_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
     test_dev.turn_off_blue();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     G_PAC_INFO()->emulation_on();
@@ -477,120 +477,120 @@ TEST( signal_column, direct_set_state )
     char buff[ BUFF_SIZE ] = { 0 };
 
     test_dev.direct_set_state( signal_column::CMD::GREEN_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::YELLOW_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::RED_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::BLUE_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::SIREN_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=1, L_RED=1, "
         "L_BLUE=1, L_SIREN=1},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::LIGHTS_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=1},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::TURN_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     test_dev.direct_set_state( signal_column::CMD::TURN_ON );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // Green lamp.
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::GREEN_NORMAL_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::GREEN_SLOW_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.direct_set_state( signal_column::CMD::GREEN_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // Yellow lamp
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::YELLOW_NORMAL_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::YELLOW_SLOW_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.direct_set_state( signal_column::CMD::YELLOW_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // Red lamp
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::RED_NORMAL_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::RED_SLOW_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.direct_set_state( signal_column::CMD::RED_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // Blue lamp
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::BLUE_NORMAL_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::BLUE_SLOW_BLINK );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=1, L_SIREN=0},\n", buff );
     test_dev.direct_set_state( signal_column::CMD::BLUE_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // SIREN_OFF.
     test_dev.turn_on_siren();
     test_dev.direct_set_state( signal_column::CMD::SIREN_OFF );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     // Do nothing.
     test_dev.off();
     test_dev.direct_set_state( signal_column::CMD::SIREN_OFF + 1 );
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -603,17 +603,17 @@ TEST( signal_column, blink )
 
     G_PAC_INFO()->emulation_off();
     test_dev.slow_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
     test_dev.slow_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     test_dev.slow_blink_green();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
 
@@ -647,7 +647,7 @@ TEST( signal_column, show_error_exists )
     // Просто вызываем данный метод - он должен включить мигание красной лампы
     // и сирену.
     test_dev.show_error_exists();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=0, L_RED=1, "
         "L_BLUE=0, L_SIREN=1},\n", buff );
     }
@@ -660,7 +660,7 @@ TEST( signal_column, show_message_exists )
     signal_column_iolink test_dev( "test_HL1" );
     // Просто вызываем данный метод - он должен включить мигание желтой лампы.
     test_dev.show_message_exists();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -673,7 +673,7 @@ TEST( signal_column, show_batch_is_not_running )
     signal_column_iolink test_dev( "test_HL1" );
     // Просто вызываем данный метод - он должен включить желтую лампу.
     test_dev.show_batch_is_not_running();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -686,7 +686,7 @@ TEST( signal_column, show_batch_is_running )
     signal_column_iolink test_dev( "test_HL1" );
     // Просто вызываем данный метод - он должен включить зелёную лампу.
     test_dev.show_batch_is_running();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -702,7 +702,7 @@ TEST( signal_column, show_operation_is_not_running )
     test_dev.turn_on_siren();
     // Просто вызываем данный метод - он должен включить желтую лампу.
     test_dev.show_operation_is_not_running();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=0, L_YELLOW=1, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -715,7 +715,7 @@ TEST( signal_column, show_operation_is_running )
     signal_column_iolink test_dev( "test_HL1" );
     // Просто вызываем данный метод - он должен включить зелёную лампу.
     test_dev.show_operation_is_running();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=1, V=0, L_GREEN=1, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -731,7 +731,7 @@ TEST( signal_column, show_idle )
     test_dev.turn_on_siren();
     // Просто вызываем данный метод - он должен отключить все лампы и сирену.
     test_dev.show_idle();
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_HL1={M=0, ST=0, V=0, L_GREEN=0, L_YELLOW=0, L_RED=0, "
         "L_BLUE=0, L_SIREN=0},\n", buff );
     }
@@ -1453,7 +1453,7 @@ TEST( device, save_device )
     temperature_e_analog t1( "T1" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
-    t1.save_device( buff, "" );
+    t1.save_device( buff );
     EXPECT_STREQ(
         "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, "
         "P_ERR=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
@@ -1507,17 +1507,17 @@ TEST( analog_io_device, set_cmd )
     obj.set_cmd( "E", 0, 0 );
     obj.set_cmd( "NOT_EXIST", 0, 1 );       //Несуществующее поле.
 
-    obj.save_device( buff, "" );
+    obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
 
     // Проверка включения ручного режима.
     obj.set_cmd( "M", 0, 1 );
-    obj.save_device( buff, "" );
+    obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=1, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
 
     // Проверка отключения ручного режима.
     obj.set_cmd( "M", 0, 0 );
-    obj.save_device( buff, "" );
+    obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
 
     // Проверка включения ручного режима - только на 1 должен включиться.
@@ -1551,7 +1551,7 @@ TEST( analog_io_device, set_cmd )
 #endif
         ;
     EXPECT_EQ( output, exp_output );
-    obj.save_device( buff, "" );
+    obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
     }
 
@@ -1746,7 +1746,7 @@ TEST( level, level )
     char buff[ BUFF_SIZE ] = { 0 };
     level test_dev( "test_LT1", device::DEVICE_SUB_TYPE::DST_LT_VIRT, 0 );
 
-    test_dev.save_device( buff, "" );
+    test_dev.save_device( buff );
     EXPECT_STREQ( "test_LT1={M=0, ST=1, V=0, CLEVEL=0, P_CZ=0, P_ERR=0},\n", buff );
     }
 
@@ -1849,7 +1849,7 @@ TEST( pressure_e, pressure_e )
     char buff[ BUFF_SIZE ] = { 0 };
     pressure_e P1( "P1" );
 
-    P1.save_device( buff, "" );
+    P1.save_device( buff );
     EXPECT_STREQ( "P1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, "
         "P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
@@ -1866,7 +1866,7 @@ TEST( pressure_e_iolink, pressure_e_iolink )
     std::array<char, 200> buff{ '\0' };
     pressure_e_iolink test_dev( "P1" );
 
-    test_dev.save_device( buff.data(), "" );
+    test_dev.save_device( buff.data() );
     EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_ERR=0},\n",
         buff.data() );
     }
@@ -2023,7 +2023,7 @@ TEST( flow_s, flow_s )
     char buff[ BUFF_SIZE ] = { 0 };
     flow_s FS1( "FS1" );
 
-    FS1.save_device( buff, "" );
+    FS1.save_device( buff );
     EXPECT_STREQ( "FS1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
@@ -2040,7 +2040,7 @@ TEST( DI_signal, DI_signal )
     char buff[ BUFF_SIZE ] = { 0 };
     DI_signal DI1( "DI1" );
 
-    DI1.save_device( buff, "" );
+    DI1.save_device( buff );
     EXPECT_STREQ( "DI1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
@@ -2073,7 +2073,7 @@ TEST( button, button )
     char buff[ BUFF_SIZE ] = { 0 };
     button BT1( "BT1" );
 
-    BT1.save_device( buff, "" );
+    BT1.save_device( buff );
     EXPECT_STREQ( "BT1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
@@ -2090,7 +2090,7 @@ TEST( DO_signal, DO_signal )
     char buff[ BUFF_SIZE ] = { 0 };
     DO_signal DO1( "DO1" );
 
-    DO1.save_device( buff, "" );
+    DO1.save_device( buff );
     EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff );
     }
 
@@ -2107,7 +2107,7 @@ TEST( siren, siren )
     char buff[ BUFF_SIZE ] = { 0 };
     siren S1( "S1" );
 
-    S1.save_device( buff, "" );
+    S1.save_device( buff );
     EXPECT_STREQ( "S1={M=0, ST=0},\n", buff );
     }
 
@@ -2124,7 +2124,7 @@ TEST( lamp, lamp )
     char buff[ BUFF_SIZE ] = { 0 };
     lamp L1( "L1" );
 
-    L1.save_device( buff, "" );
+    L1.save_device( buff );
     EXPECT_STREQ( "L1={M=0, ST=0},\n", buff );
     }
 
@@ -2173,7 +2173,7 @@ TEST( concentration_e_iolink, concentration_e_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     concentration_e_iolink Q1( "Q1" );
 
-    Q1.save_device( buff, "" );
+    Q1.save_device( buff );
     EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0},\n", buff );
     }
 
@@ -2192,7 +2192,7 @@ TEST( state_s, is_active )
 
     EXPECT_FALSE( GS1.is_active() );
 
-    GS1.save_device( buff, "" );
+    GS1.save_device( buff );
     EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
@@ -2210,7 +2210,7 @@ TEST( state_s_inverse, is_active )
 
     EXPECT_TRUE( GS1.is_active() );
 
-    GS1.save_device( buff, "" );
+    GS1.save_device( buff );
     EXPECT_STREQ( "GS1={M=0, ST=0, P_DT=0},\n", buff );
     }
 
@@ -2317,7 +2317,7 @@ TEST( valve_DO1_DI2, valve_DO1_DI2 )
 
     valve_DO1_DI2 V1( "V1" );
 
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
@@ -2342,7 +2342,7 @@ TEST( valve_DO2_DI2, valve_DO2_DI2 )
 
     valve_DO2_DI2 V1( "V1" );
 
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
@@ -2480,7 +2480,7 @@ TEST( valve_mix_proof, valve_mix_proof )
 
     valve_mix_proof V1( "V1" );
 
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
@@ -2677,7 +2677,7 @@ TEST( valve_bottom_mix_proof, valve_bottom_mix_proof )
 
     valve_bottom_mix_proof V1( "V1" );
 
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, "
         "P_FB=0},\n", buff );
     }
@@ -2781,7 +2781,7 @@ TEST( valve_iolink_shut_off_sorio, save_device )
     valve_iolink_shut_off_sorio V1( "V1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
@@ -2805,13 +2805,13 @@ TEST( valve_iolink_shut_off_sorio, evaluate_io )
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
     char str_buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=34.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
 
     V1.direct_set_value( 12.1f );
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=12.1, P_ON_TIME=0, P_FB=0},\n",
         str_buff );
@@ -2838,7 +2838,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, save_device_ex )
     valve_iolink_gea_tvis_a15_ds V1( "VGEA2" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
@@ -2877,7 +2877,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
     char str_buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=16.5, P_ON_TIME=0, P_FB=0},\n",
@@ -2889,7 +2889,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 564;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=56.4, P_ON_TIME=0, P_FB=0},\n",
@@ -2901,7 +2901,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 166;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     // Состояние должно быть VX_LOWER_SEAT_FB_OFF - 33.
     EXPECT_STREQ(
         "VGEA2={M=0, ST=33, FB_ON_ST=0, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
@@ -2915,7 +2915,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 81;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     // Состояние должно быть VX_UPPER_SEAT_FB_OFF - 32.
     EXPECT_STREQ(
         "VGEA2={M=0, ST=32, FB_ON_ST=0, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
@@ -2929,7 +2929,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 165;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=16.5, P_ON_TIME=0, P_FB=0},\n",
@@ -2943,7 +2943,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 564;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=56.4, P_ON_TIME=0, P_FB=0},\n",
@@ -2957,7 +2957,7 @@ TEST( valve_iolink_gea_tvis_a15_ds, evaluate_io )
     *pos = 5;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA2={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=0.5, P_ON_TIME=0, P_FB=0},\n",
@@ -2972,7 +2972,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, save_device_ex )
     valve_iolink_gea_tvis_a15_ss V1( "VGEA1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
@@ -3008,7 +3008,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.evaluate_io();
     const int BUFF_SIZE = 100;
     char str_buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=16.5, P_ON_TIME=0, P_FB=0},\n",
@@ -3023,7 +3023,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=56.4, P_ON_TIME=0, P_FB=0},\n",
@@ -3038,7 +3038,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=10, FB_ON_ST=0, FB_OFF_ST=1, CS=0, SUP=0, ERR=0, "
         "V=16.5, P_ON_TIME=0, P_FB=0},\n",
@@ -3053,7 +3053,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=56.4, P_ON_TIME=0, P_FB=0},\n",
@@ -3068,7 +3068,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=11, FB_ON_ST=0, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=102.0, P_ON_TIME=0, P_FB=0},\n",
@@ -3085,7 +3085,7 @@ TEST( valve_iolink_gea_tvis_a15_ss, evaluate_io )
     V1.AI_channels.int_read_values[ 0 ][ 1 ] = pos;
     std::swap( buff[ 2 ], buff[ 3 ] );
     V1.evaluate_io();
-    V1.save_device( str_buff, "" );
+    V1.save_device( str_buff );
     EXPECT_STREQ(
         "VGEA1={M=0, ST=11, FB_ON_ST=1, FB_OFF_ST=0, CS=1, SUP=0, ERR=0, "
         "V=102.0, P_ON_TIME=0, P_FB=0},\n",
@@ -3145,7 +3145,7 @@ TEST( valve_iol_terminal_DO1_DI1_off, get_fb_state )
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( false, V1.get_fb_state() );
@@ -3180,7 +3180,7 @@ TEST( valve_iol_terminal_DO1_DI1_on, get_fb_state )
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( true, V1.get_fb_state() );
@@ -3249,7 +3249,7 @@ TEST( valve_iol_terminal_mixproof_DO3, off )
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0},\n", buff );
 
     V1.on();
@@ -3322,7 +3322,7 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     const auto WAIT_TIME = 10;
@@ -3389,7 +3389,7 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
 
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n", buff );
 
     EXPECT_EQ( false, V1.get_fb_state() );
@@ -3457,7 +3457,7 @@ TEST( valve_iolink_mix_proof, valve_iolink_mix_proof )
     valve_iolink_mix_proof V1( "V1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ( "V1={M=0, ST=0, FB_ON_ST=1, FB_OFF_ST=1, BLINK=0, "
         "CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n", buff );
     }
@@ -3698,7 +3698,7 @@ TEST( valve_iolink_shut_off_thinktop, valve_iolink_shut_off_thinktop )
     valve_iolink_shut_off_thinktop V1( "V1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, BLINK=0, CS=0, ERR=0, V=0.0, P_ON_TIME=0, P_FB=0},\n",
         buff );
@@ -3845,7 +3845,7 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     analog_valve_iolink V1( "V1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    V1.save_device( buff, "" );
+    V1.save_device( buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, P_FB=1},\n",
         buff );
@@ -4034,7 +4034,7 @@ TEST( i_motor, i_motor )
     i_motor M1( "M1", device::DST_M_FREQ, 0 );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    M1.save_device( buff, "" );
+    M1.save_device( buff );
     EXPECT_STREQ( "M1={M=0, ST=0, V=0},\n", buff );
     }
 
@@ -4097,7 +4097,7 @@ TEST( motor, save_device )
     motor M1( "M1", device::DST_M_REV_FREQ_2_ERROR );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
-    M1.save_device( buff, "" );
+    M1.save_device( buff );
     EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, ERRT=0, P_ON_TIME=0},\n", buff );
 
     G_PAC_INFO()->emulation_off();
@@ -4107,7 +4107,7 @@ TEST( motor, save_device )
     *M1.DO_channels.char_write_values[ 1 ] = 1;
 
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
-    M1.save_device( buff, "" );
+    M1.save_device( buff );
     DeltaMilliSecSubHooker::set_default_time();
     EXPECT_STREQ( "M1={M=0, ST=-1, V=0, R=1, ERRT=1, P_ON_TIME=0},\n", buff );
 
@@ -4175,7 +4175,7 @@ TEST( motor_altivar, set_cmd )
     motor_altivar m1( "M1", device::M_ATV );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
-    m1.save_device( buff, "" );
+    m1.save_device( buff );
     EXPECT_STREQ(
         "M1={M=0, ST=0, V=0, R=0, FRQ=0.0, RPM=0, EST=0, AMP=0.0, "
         "MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
@@ -4185,7 +4185,7 @@ TEST( motor_altivar, set_cmd )
     m1.set_cmd( "RPM", 0, 12 );
     m1.set_cmd( "EST", 0, 2 );
     m1.set_cmd( "AMP", 0, 23.3 );
-    m1.save_device( buff, "" );
+    m1.save_device( buff );
     EXPECT_STREQ(
         "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.1, RPM=12, EST=2, AMP=23.3, "
         "MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
@@ -4384,7 +4384,7 @@ TEST( counter_f, set_cmd )
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
 
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0, F=9.90, P_MIN_FLOW=0, "
@@ -4454,7 +4454,7 @@ TEST( counter, set_cmd )
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( 100, fqt1.get_abs_quantity() );
 
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ( "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0},\n", buff );
 
@@ -4480,7 +4480,7 @@ TEST( counter, set_cmd )
     fqt1.set_cmd( "DAY_T2", 0, 200 );
     fqt1.set_cmd( "PREV_DAY_T1", 0, 10 );
     fqt1.set_cmd( "PREV_DAY_T2", 0, 20 );
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ( "FQT1={M=0, ST=2, V=50, ABS_V=100, DAY_T1=100, "
         "PREV_DAY_T1=10, DAY_T2=200, PREV_DAY_T2=20},\n", buff );
     }
@@ -4525,7 +4525,7 @@ TEST( virtual_counter, virtual_counter )
     EXPECT_EQ( 0, fqt1.get_flow() );
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ( "FQT1={M=0, ST=1, V=0, ABS_V=0, F=0.00},\n", buff );
     }
 
@@ -4693,7 +4693,7 @@ TEST( counter_iolink, set_cmd )
     fqt1.set_cmd( "T", 0, 1.1 );
     EXPECT_EQ( 1.1f, fqt1.get_temperature() );
 
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=50, ABS_V=100, DAY_T1=0, PREV_DAY_T1=0, "
         "DAY_T2=0, PREV_DAY_T2=0, F=9.90, T=1.1, "
@@ -4814,7 +4814,7 @@ TEST( counter_iolink, get_quantity )
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=10, PREV_DAY_T1=0, "
         "DAY_T2=10, PREV_DAY_T2=0, F=0.00, T=0.0, "
@@ -4823,7 +4823,7 @@ TEST( counter_iolink, get_quantity )
         reinterpret_cast<void*>( &get_time_next_day ), SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
     fqt1.evaluate_io();         // New day.
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=10000, ABS_V=10000, DAY_T1=0, PREV_DAY_T1=10, "
         "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
@@ -4841,7 +4841,7 @@ TEST( counter_iolink, get_quantity )
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=2, V=10000, ABS_V=20000, DAY_T1=0, PREV_DAY_T1=10, "
         "DAY_T2=0, PREV_DAY_T2=10, F=0.00, T=0.0, "
@@ -4854,7 +4854,7 @@ TEST( counter_iolink, get_quantity )
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
     EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
-    fqt1.save_device( buff, "" );
+    fqt1.save_device( buff );
     EXPECT_STREQ(
         "FQT1={M=0, ST=1, V=20000, ABS_V=30000, DAY_T1=10, PREV_DAY_T1=10, "
         "DAY_T2=10, PREV_DAY_T2=10, F=0.00, T=0.0, "
@@ -5095,7 +5095,7 @@ TEST( wages, save_device )
     char buff[ BUFF_SIZE ] = { 0 };
 
     wages w1( "W1" );
-    w1.save_device( buff, "" );
+    w1.save_device( buff );
     EXPECT_STREQ(
         "W1={M=0, ST=0, V=0, W=0.000, P_NOMINAL_W=0, P_RKP=0, P_CZ=0, P_DT=0},\n",
         buff );
@@ -5483,13 +5483,13 @@ TEST( temperature_e, save_device )
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
-    T1.save_device( buff, "" );
+    T1.save_device( buff );
     EXPECT_STREQ(
         "T1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
         buff );
 
     T1.set_cmd( "E", 0, 1 );
-    T1.save_device( buff, "" );
+    T1.save_device( buff );
     EXPECT_STRNE(
         "T1={M=0, ST=1, V=0, E=1, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
         buff );
@@ -5514,7 +5514,7 @@ TEST( temperature_e_iolink, save_device )
     const int BUFF_SIZE = 200;
     std::array <char, BUFF_SIZE> buff = { 0 };
 
-    T1.save_device( buff.data(), "" );
+    T1.save_device( buff.data() );
     EXPECT_STREQ(
         "T1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_CZ=0, P_ERR=0},\n",
         buff.data() );
@@ -5625,7 +5625,7 @@ TEST( threshold_regulator, set_cmd )
 
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
+        "C1={M=0, ST=0, V=0, P_is_reverse=0, P_delta=0},\n", buff );
 
     //Set a property that does not exist.
     auto res = p1.set_cmd( "NO_SUCH_PROPERTY", 0, 1 );
@@ -5641,7 +5641,7 @@ TEST( threshold_regulator, set_cmd )
     p1.on();
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\tC1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
+        "C1={M=0, ST=1, V=0, P_is_reverse=1, P_delta=10},\n", buff );
     }
 
 TEST( threshold_regulator, set_state )
@@ -5825,7 +5825,7 @@ TEST( circuit_breaker, circuit_breaker )
     char str_buff[ BUFF_SIZE ] = { 0 };
     circuit_breaker F1( "F1" );
 
-    F1.save_device( str_buff, "" );
+    F1.save_device( str_buff );
     EXPECT_STREQ(
         "F1={M=0, ST=0, V=0, ERR=0, M=0, "
         "NOMINAL_CURRENT_CH={0,0,0,0}, LOAD_CURRENT_CH={0.0,0.0,0.0,0.0}, "
@@ -5865,7 +5865,7 @@ TEST( power_unit, evaluate_io )
 
     const int BUFF_SIZE = 1000;
     char str_buff[ BUFF_SIZE ] = { 0 };
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5885,7 +5885,7 @@ TEST( power_unit, evaluate_io )
     // Load current, channel 1
     G1.AI_channels.int_read_values[ 0 ][ 5 ] = 0b0'0000'1000;
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0.10, NOMINAL_CURRENT_CH={2.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5940,7 +5940,7 @@ TEST( power_unit, on )
     power_unit G1( "G1" );
     G1.off();
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5949,7 +5949,7 @@ TEST( power_unit, on )
         str_buff );
     G1.on();
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5967,7 +5967,7 @@ TEST( power_unit, set_cmd )
 
     G1.set_cmd( "ST", 0, 1 );       // On().
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5977,7 +5977,7 @@ TEST( power_unit, set_cmd )
 
     G1.set_cmd( "ST", 0, 0 );       // Off().
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5987,7 +5987,7 @@ TEST( power_unit, set_cmd )
 
     G1.set_cmd( "ST_CH", 1, 1 );    // Channel 1.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -5997,7 +5997,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 2, 1 );    // Channel 2.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6007,7 +6007,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 3, 1 );    // Channel 3.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6017,7 +6017,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 4, 1 );    // Channel 4.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6027,7 +6027,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 5, 1 );    // Channel 5.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6037,7 +6037,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 6, 1 );    // Channel 6.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6047,7 +6047,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 7, 1 );    // Channel 7.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6057,7 +6057,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "ST_CH", 8, 1 );    // Channel 8.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6067,7 +6067,7 @@ TEST( power_unit, set_cmd )
 
     G1.set_cmd( "ST_CH", 9, 1 );    // Channel 9 - incorrect.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=1, V=0, NOMINAL_CURRENT_CH={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6078,7 +6078,7 @@ TEST( power_unit, set_cmd )
     G1.off();
     G1.set_cmd( "NOMINAL_CURRENT_CH", 1, 1 );    // Nominal current 1.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6087,7 +6087,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 2, 1 );    // Nominal current 2.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,1.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6096,7 +6096,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 3, 1 );    // Nominal current 3.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,1.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6105,7 +6105,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 4, 1 );    // Nominal current 4.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,2.0,1.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6114,7 +6114,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 5, 1 );    // Nominal current 5.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,2.0,2.0,1.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6123,7 +6123,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 6, 1 );    // Nominal current 6.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,2.0,2.0,2.0,1.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6132,7 +6132,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 7, 1 );    // Nominal current 7.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6141,7 +6141,7 @@ TEST( power_unit, set_cmd )
         str_buff );
     G1.set_cmd( "NOMINAL_CURRENT_CH", 8, 1 );    // Nominal current 8.
     G1.evaluate_io();
-    G1.save_device( str_buff, "" );
+    G1.save_device( str_buff );
     EXPECT_STREQ(
         "G1={M=0, ST=0, V=0, NOMINAL_CURRENT_CH={2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0}, "
         "LOAD_CURRENT_CH={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, "
@@ -6172,7 +6172,7 @@ TEST( power_unit, decode_nominal_current )
     G1.AI_channels.int_read_values[ 0 ][ 3 ] |= ( 0b00'010'011 << 8 );  // ch3=2, ch4=3
 
     G1.evaluate_io();
-    G1.save_device( str_buff.data(), "" );
+    G1.save_device( str_buff.data() );
 
     // Verify the decoded values match expectations
     EXPECT_STREQ(
@@ -6433,19 +6433,19 @@ TEST( converter_iolink_ao, save_device_ex )
     converter_iolink_ao Y1( "Y1" );
     char buff[ 1000 ]{};
 
-    auto len = Y1.save_device( buff, "" );
+    auto len = Y1.save_device( buff );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={0.00,0.00}},\n" );
 
     Y1.set_channel_value( 1, 42.5f );
-    len = Y1.save_device( buff, "" );
+    len = Y1.save_device( buff );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,0.00}},\n" );
 
     Y1.set_channel_value( 2, 21.5f );
-    len = Y1.save_device( buff, "" );
+    len = Y1.save_device( buff );
     EXPECT_GT( len, 0 );
     EXPECT_STRCASEEQ( buff,
         "Y1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, CH={42.50,21.50}},\n" );

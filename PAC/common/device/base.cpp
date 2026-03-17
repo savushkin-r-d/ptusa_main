@@ -43,7 +43,7 @@ const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DE
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int par_device::save_device( char* buff, const char* prefix ) const
+int par_device::save_device( char* buff ) const
     {
     buff[ 0 ] = 0;
 
@@ -52,7 +52,7 @@ int par_device::save_device( char* buff, const char* prefix ) const
         return 0;
         }
 
-    int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}", prefix ).size;
+    auto size = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
@@ -260,10 +260,10 @@ void device::set_string_property( const char* field, const char* new_value )
         name, get_type_str(), field, new_value );
     }
 //-----------------------------------------------------------------------------
-int device::save_device( char* buff, const char* prefix ) const
+int device::save_device( char* buff ) const
     {
-    int res = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}{}={{M={:d}, ",
-        prefix, name, is_manual_mode ).size;
+    int res = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}={{M={:d}, ",
+        name, is_manual_mode ).size;
 
     if ( type != DT_AO )
         {

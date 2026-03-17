@@ -1718,8 +1718,6 @@ class threshold_regulator :public device
 
         void direct_set_value( float val ) override;
 
-        int save_device( char* buff, const char* prefix = "" ) const override;
-
         void set_string_property( const char* field, const char* value ) override;
 
     private:

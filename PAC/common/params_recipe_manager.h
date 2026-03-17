@@ -95,7 +95,7 @@ class ParamsRecipeManager: public i_Lua_save_device
         ~ParamsRecipeManager();
         static ParamsRecipeManager* getInstance();
 
-        int save_device( char *buff, const char* prefix = "" ) const override;
+        int save_device( char *buff ) const override;
         int parseDriverCmd( const char *buff);
 
         const char *get_name_in_Lua( ) const override;

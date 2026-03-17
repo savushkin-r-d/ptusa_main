@@ -407,12 +407,11 @@ cipline_tech_object::~cipline_tech_object()
     currentProgramName = nullptr;
     }
 
-int cipline_tech_object::save_device( char *buff, const char* prefix ) const
+int cipline_tech_object::save_device( char *buff ) const
     {
     int i;
     int answer_size = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
-        name_Lua, name_Lua,
-        name_Lua );
+        name_Lua, name_Lua, name_Lua );
 
     //Команда
     answer_size += sprintf( buff + answer_size, "\tCMD=%d,\n", ncmd );

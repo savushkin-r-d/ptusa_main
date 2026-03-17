@@ -66,7 +66,7 @@ class PAC_info: public i_Lua_save_device
 
         void reset_params();
 
-        int save_device( char *buff, const char* prefix = "" ) const override;
+        int save_device( char *buff ) const override;
 
         bool is_emulator() const;
 

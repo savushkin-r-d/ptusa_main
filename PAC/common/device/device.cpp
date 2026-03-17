@@ -631,11 +631,6 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         }
     }
 //-----------------------------------------------------------------------------
-int threshold_regulator::save_device( char* buff, const char* prefix ) const
-    {
-    return device::save_device( buff, "\t" );
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 power_unit::power_unit( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type  ) :
@@ -718,7 +713,7 @@ void power_unit::evaluate_io()
 
 
     char buff[ 500 ] = { 0 };
-    save_device( buff, "" );
+    save_device( buff );
     fmt::println( "{}", buff );
 #endif
 

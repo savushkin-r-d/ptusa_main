@@ -111,10 +111,10 @@ class PID : public device
         /// @brief Использование kN, TiN, TdN.
         void set_used_par ( int par_n );
 
-        int save_device_ex( char* buff ) const;
-        int save_device( char *buff, const char* prefix = "" ) const;
+        int save_device_ex( char* buff ) const override;
+        int save_device( char *buff ) const override;
 
-        const char* get_name_in_Lua() const;
+        const char* get_name_in_Lua() const override;
 
         device* get_actuator() const;
 

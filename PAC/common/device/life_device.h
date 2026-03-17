@@ -29,8 +29,6 @@ class watchdog : public device
         void set_string_property( const char* field, const char* value ) override;
         void set_property( const char* field, device* value ) override;
 
-        int save_device( char* buff, const char* prefix = "" ) const override;
-
         const char* get_name_in_Lua() const override;
 
         const char* get_error_description() override;

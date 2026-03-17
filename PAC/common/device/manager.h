@@ -360,7 +360,7 @@ class device_manager : public i_Lua_save_device
 
         void evaluate_io();
 
-        int save_device( char* buff, const char* prefix = "" ) const override;
+        int save_device( char* buff ) const override;
 
 #ifdef PTUSA_TEST
         int add_device( device* new_device, device::DEVICE_TYPE dev_type );
