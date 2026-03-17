@@ -670,7 +670,7 @@ const int_2* const io_device::get_AO_write_data( u_int index ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-int_2* io_device::get_AO_read_data( u_int index ) const
+const int_2* const io_device::get_AO_read_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
         {
@@ -1165,10 +1165,17 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node * io_manager::get_node( int node_n ) const
+const io_manager::io_node * const io_manager::get_node( int node_n ) const
     {
     return nodes[ node_n ];
     }
+
+#ifdef PTUSA_TEST
+io_manager::io_node* io_manager::get_node( int node_n )
+    {
+    return nodes[ node_n ];
+    }
+#endif // PTUSA_TEST
 
 u_int io_manager::get_nodes_count()
 	{

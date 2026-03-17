@@ -165,7 +165,7 @@ class io_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int_2* get_AO_read_data( u_int index ) const;
+        const int_2* const get_AO_read_data( u_int index ) const;
 
         virtual void print() const;
 
@@ -439,14 +439,18 @@ class io_manager
 
     protected:
         io_manager();
-        u_int       nodes_count;        ///< Количество узлов.
+        u_int     nodes_count;        ///< Количество узлов.
         io_node **nodes;              ///< Узлы.
 
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
     public:
-        io_node * get_node( int node_n ) const;
+        const io_node * const get_node( int node_n ) const;
+
+#ifdef PTUSA_TEST
+        io_manager::io_node* get_node( int node_n );
+#endif // PTUSA_TEST
 
 		u_int get_nodes_count();
 

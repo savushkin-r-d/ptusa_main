@@ -131,7 +131,7 @@ int PAC_info::save_device( char* buff ) const
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        auto wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
             wn->is_active ? "1, " : "0, " ).size;
         }
@@ -141,7 +141,7 @@ int PAC_info::save_device( char* buff ) const
         "\tNODEST = \n\t{{\n\t" ).size;
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        const io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        auto wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
             "{}, ", wn->get_display_state() ).size;
         }
