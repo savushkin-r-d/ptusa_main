@@ -685,7 +685,7 @@ const int_2* io_device::get_AO_read_data( u_int index ) const
         printf( "index = %d, AO_channels.count = %d, "
             "AO_channels.int_read_values = %p",
             index, AO_channels.count, AO_channels.int_read_values );
-        if ( AO_channels.int_read_values )
+        if ( index < AO_channels.count && AO_channels.int_read_values )
             {
             printf( ", AO_channels.int_read_values[ index ]=%p",
                 AO_channels.int_read_values[ index ] );
