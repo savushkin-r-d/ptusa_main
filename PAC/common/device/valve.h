@@ -13,9 +13,11 @@ class converter_iolink_ao;
 class valve : public digital_io_device
     {
     public:
+        /// @brief Конструктор для клапана c обратными связями.
+        /// 
         /// @param is_on_fb - использовать обратную связь на включенное состояние.
         /// @param is_off_fb - использовать обратную связь на выключенное состояние.
-        /// @param number - номер устройства.
+        /// @param dev_name - имя клапана.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( bool is_on_fb, bool is_off_fb,
@@ -23,15 +25,12 @@ class valve : public digital_io_device
             device::DEVICE_SUB_TYPE sub_type );
 
         /// @brief Конструктор для клапана без обратных связей.
-        /// @param number - номер устройства.
+        /// 
+        /// @param dev_name - имя клапана.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
-
-        valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
-            device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
-            int extra_params_cnt );
 
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.

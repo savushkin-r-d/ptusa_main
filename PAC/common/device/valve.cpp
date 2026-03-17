@@ -77,19 +77,6 @@ valve::valve( const char* dev_name, device::DEVICE_TYPE type,
     {
     }
 //-----------------------------------------------------------------------------
-valve::valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
-    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
-    int extra_params_cnt ) :
-    digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT + extra_params_cnt ),
-    is_on_fb( is_on_fb ),
-    is_off_fb( is_off_fb )
-    {
-    on_fb = true;
-    off_fb = true;
-    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    set_par_name( P_FB, 0, "P_FB" );
-    }
-//-----------------------------------------------------------------------------
 int valve::save_device_ex( char* buff ) const
     {
     int res = 0;
