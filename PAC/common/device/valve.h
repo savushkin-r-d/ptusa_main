@@ -717,9 +717,9 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff ) const;
+        int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         void set_rt_par( u_int idx, float value );
 
@@ -775,7 +775,7 @@ class valve_iolink_shut_off_thinktop : public valve
 
         int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         void set_rt_par( u_int idx, float value );
 
@@ -829,9 +829,9 @@ class valve_iolink_shut_off_sorio : public valve
 
         VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff ) const;
+        int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         float get_value() const final;
 
@@ -1185,13 +1185,13 @@ class analog_valve_iolink : public AO1
 
         virtual ~analog_valve_iolink() = default;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         float get_min_value() const override;
 
         float get_max_value() const override;
 
-        int save_device_ex( char* buff ) const;
+        int save_device_ex( char* buff ) const override;
 
         enum class CONSTANTS
             {
