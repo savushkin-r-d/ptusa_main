@@ -1299,6 +1299,25 @@ TEST( device_manager, evaluate_io )
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
+TEST( device_manager, save_device )
+    {
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
+    ASSERT_EQ( nullptr, res );
+
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    G_DEVICE_MANAGER()->save_device( buff );
+    EXPECT_STREQ(
+        "t=\n"
+        "\t{\n"
+        "\tT1={M=0, ST=0, V=0},\n"
+        "\t}\n",
+        buff );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
 
 TEST( dev_stub, is_active )
     {
