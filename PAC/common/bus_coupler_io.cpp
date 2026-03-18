@@ -992,19 +992,33 @@ void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset,
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void io_manager::init( int nodes_count )
+void io_manager::init( int new_nodes_count )
     {
-    this->nodes_count = nodes_count;
+#ifdef PTUSA_TEST
+    if ( nodes_count && nodes )
+        {
+        for ( u_int i = 0; i < nodes_count; i++ )
+            {
+            delete nodes[ i ];
+            nodes[ i ] = nullptr;
+            }
+
+        delete[] nodes;
+        nodes = nullptr;
+        nodes_count = 0;
+        }
+#endif // PTUSA_TEST
+
+    nodes_count = new_nodes_count;
 
     if ( nodes_count )
         {
         nodes = new io_node*[ nodes_count ];
-        for ( int i = 0; i < nodes_count; i++ )
+        for ( u_int i = 0; i < nodes_count; i++ )
             {
             nodes[ i ] = 0;
             }
         }
-
     }
 //-----------------------------------------------------------------------------
 io_manager* io_manager::get_instance()

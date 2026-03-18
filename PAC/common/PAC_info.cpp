@@ -280,7 +280,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "NODEENABLED" ) == 0 )
         {
-        if ( idx <= io_manager::get_instance()->get_nodes_count() )
+        if ( idx > 0 && idx <= io_manager::get_instance()->get_nodes_count() )
             {
             auto wn = io_manager::get_instance()->get_node( idx - 1 );
             if ( 1 == val )
