@@ -55,12 +55,10 @@ void init_PID_parameters( PID& test_PID, float min_value = 0.f )
 
 TEST( PID, direct_set_value )
     {
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_REGULATOR, device::DST_REGULATOR_PID, "TC1",
         "Test controller", "T" );
-    ASSERT_EQ( nullptr, res );        
+    ASSERT_EQ( nullptr, res );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "TE1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
@@ -119,7 +117,50 @@ TEST( PID, direct_set_value )
     //состояни "Выключаюсь".
     p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
     EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
+
+    const int BUFF_SIZE = 512;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    p1->save_device( buff );
+    EXPECT_STREQ(
+        "TC1={M=0, ST=0, V=0, Z=10.00, P_k=1, P_Ti=15, P_Td=0.01, "
+        "P_dt=1000, P_max=100, P_min=0, P_acceleration_time=30, "
+        "P_is_manual_mode=0, P_U_manual=65, P_k2=0, P_Ti2=0, P_Td2=0, "
+        "P_out_max=100, P_out_min=0, P_is_reverse=0, P_is_zero_start=1},\n",
+        buff );        
+
+    G_DEVICE_MANAGER()->clear_io_devices();
     }
+
+TEST( PID, save_device )
+    {
+    const int BUFF_SIZE = 512;
+    char buff[ BUFF_SIZE ] = { 0 };
+     
+    auto REF_STR =
+        "t.PID1 = \n"
+        "\t{\n"
+        "\tST=0,\n"
+        "\tS_PAR_F=\n"
+        "\t\t{\n"
+        "\t\t0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \n"
+        "\t\t},\n"
+        "\tRT_PAR_F={ 0.00, 0.00 }\n\t"
+        "}\n";
+
+    PID pid1( 1 );
+    pid1.save_device( buff );
+    EXPECT_STREQ( buff, REF_STR );
+
+    PID pid2( "PID2" );
+    pid2.save_device( buff );
+    EXPECT_STREQ(
+        "PID2={M=0, ST=0, V=0, Z=0.00, P_k=0, P_Ti=0, P_Td=0, P_dt=0, "
+        "P_max=0, P_min=0, P_acceleration_time=0, P_is_manual_mode=0, "
+        "P_U_manual=0, P_k2=0, P_Ti2=0, P_Td2=0, P_out_max=0, P_out_min=0, "
+        "P_is_reverse=0, P_is_zero_start=0},\n", buff );
+    }
+
 
 TEST( PID, eval )
     {

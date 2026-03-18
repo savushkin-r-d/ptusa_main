@@ -489,7 +489,7 @@ int PID::save_device( char *buff ) const
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
         answer_size += sprintf( buff + answer_size,
-            "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
+            "\t%s={ %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
 
         answer_size += sprintf( buff + answer_size, "\t}\n" );
         }

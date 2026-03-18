@@ -1,5 +1,6 @@
 #include "PAC_dev_tests.h"
 #include "uni_bus_coupler_io.h"
+#include "../../PAC/common/PID.h"
 
 using namespace ::testing;
 
@@ -1465,6 +1466,13 @@ TEST( device, get_type_str )
     device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
         device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
     EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
+    }
+
+TEST( device, get_name_in_Lua )
+    {
+    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
+        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
+    EXPECT_STREQ( dev1.get_name_in_Lua(), "DEV1" );
     }
 
 TEST( device, save_device )
@@ -5824,6 +5832,12 @@ TEST( par_device, set_par_name )
     dev.set_par_name( IDX, OFFSET, "TEST_NAME" );
     // Попытка установки имени для несуществующего индекса параметра.
     dev.set_par_name( IDX, OFFSET + 1, "TEST_NAME" );
+    }
+
+TEST( par_device, get_name_in_Lua )
+    {
+    par_device dev( 1 );
+    EXPECT_STREQ( dev.get_name_in_Lua(), "" );
     }
 
 
