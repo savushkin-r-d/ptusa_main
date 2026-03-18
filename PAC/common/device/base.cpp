@@ -262,8 +262,10 @@ void device::set_string_property( const char* field, const char* new_value )
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff ) const
     {
+    // LCOV_EXCL_START
     int res = fmt::format_to_n( buff, MAX_COPY_SIZE, "{}={{M={:d}, ",
-        name, is_manual_mode ).size; // LCOV_EXCL_LINE
+        name, is_manual_mode ).size;
+    // LCOV_EXCL_STOP
 
     if ( type != DT_AO )
         {
