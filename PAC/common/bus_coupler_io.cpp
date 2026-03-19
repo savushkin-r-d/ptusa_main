@@ -280,7 +280,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
     if ( G_DEBUG )
         {        
         fmt::print( "'{}' (", name );
-        print();
+        io_device::print();
         fmt::print( ") io_device->get_AO(...) error: " );
         fmt::print( "index = {}, AO_channels.count = {}, "
             "AO_channels.int_write_values = {}",
@@ -344,20 +344,27 @@ int io_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
-
-        //if ( G_DEBUG )
-        //    {
-        //    printf("set_AO value=%d\n", ( u_int ) value );
-        //    }
         return 0;
         }
 
     if ( G_DEBUG )
         {
-        printf( "io_device->set_AO(...) - error!\n" );
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->set_AO(...) error: " );
+        fmt::print( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
+        if ( index < AO_channels.count && AO_channels.int_write_values )
+            {
+            fmt::print( ", AO_channels.int_write_values[ index ]={}",
+                static_cast<void*>( AO_channels.int_write_values[ index ] ) );
+            }
+        fmt::print( "\n" );
         }
 
-    return 0;
+    return 1;
     }
 //-----------------------------------------------------------------------------
 float io_device::get_AI( u_int index, float min_value, float max_value, int& err ) const
@@ -532,21 +539,23 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AI(...) - error! " );
-        printf( "index = %d, AI_channels.count = %d, "
-            "AI_channels.int_read_values = %p",
-            index, AI_channels.count, AI_channels.int_read_values );
-        if ( AI_channels.int_read_values )
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AI(...) error: " );
+        fmt::print( "index = {}, AI_channels.count = {}, "
+            "AI_channels.int_read_values = {}",
+            index, AI_channels.count,
+            static_cast<void*>( AI_channels.int_read_values ) );
+        if ( index < AI_channels.count && AI_channels.int_read_values )
             {
-            printf( ", AI_channels.int_read_values[ index ]=%p",
-                AI_channels.int_read_values[ index ] );
+            fmt::print( ", AI_channels.int_read_values[ index ]={}",
+                static_cast<void*>( AI_channels.int_read_values[ index ] ) );
             }
-        printf( "\n" );
+        fmt::print( "\n" );
         }
 
     err = static_cast<int>( ERRORS::BAD_IO_DATA );
-    return 0;
+    return 0.0f;
     }
 //-----------------------------------------------------------------------------
 int_2* io_device::get_AI_data( u_int index ) const
@@ -560,27 +569,19 @@ int_2* io_device::get_AI_data( u_int index ) const
         {
         if ( G_USE_LOG )
             {
-            sprintf( G_LOG->msg, "io_device->get_AI_data(...) - error");
-            G_LOG->write_log(i_log::P_ERR );
+            G_LOG->error( "'%s' io_device->get_AI_data(...) error.", name );
             }
-        else
-            {
-            print();
 
-            printf("io_device->get_AI_data(...) - error! ");
-            printf("index = %d, AI_channels.count = %d, "
-                    "AI_channels.int_read_values = %p", index,
-                    AI_channels.count, AI_channels.int_read_values);
-            if (AI_channels.int_read_values)
-                {
-                printf(", AI_channels.int_read_values[ index ]=%p",
-                        AI_channels.int_read_values[index]);
-                }
-            printf("\n");
-            }
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AI(...) error: " );
+        fmt::println( "index = {}, AI_channels.count = {}, "
+            "AI_channels.int_read_values = {}",
+            index, AI_channels.count,
+            static_cast<void*>( AI_channels.int_read_values ) );
         }
 
-    return 0;
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
 io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index) const
@@ -633,19 +634,16 @@ int_2* io_device::get_AO_write_data( u_int index )
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AO_write_data(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %p",
-            index, AO_channels.count, AO_channels.int_write_values );
-        if ( index < AO_channels.count && AO_channels.int_write_values )
-            {
-            printf( ", AO_channels.int_write_values[ index ]=%p",
-                AO_channels.int_write_values[ index ] );
-            }
-        printf( "\n" );
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_write_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
         }
-    return 0;
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
 const int_2* io_device::get_AO_write_data( u_int index ) const
@@ -657,17 +655,13 @@ const int_2* io_device::get_AO_write_data( u_int index ) const
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AO_write_data(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %p",
-            index, AO_channels.count, AO_channels.int_write_values );
-        if ( index < AO_channels.count && AO_channels.int_write_values )
-            {
-            printf( ", AO_channels.int_write_values[ index ]=%p",
-                AO_channels.int_write_values[ index ] );
-            }
-        printf( "\n" );
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_write_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
         }
 
     return nullptr;
