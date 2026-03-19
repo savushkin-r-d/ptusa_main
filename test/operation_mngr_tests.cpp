@@ -513,7 +513,6 @@ TEST( operation_state, to_step )
     test_op->add_step( "Process #1", STEP3, STEP2_TIME_IDX, MAX_TIME_IDX );
     test_op->add_step( "Process #2" );
 
-    G_DEBUG = 1;
     //Корректный переход к заданному шагу.
     testing::internal::CaptureStdout();
     auto STR_STEP1 =
@@ -587,6 +586,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP3 ) );
 
 
+    G_DEBUG = 1;
     G_LUA_MANAGER->free_Lua();
     }
 
@@ -892,7 +892,6 @@ TEST( operation, on_extra_step_debug_output )
 
 
 	// Clean up
-	G_DEBUG = 0;
 	test_op->finalize();
 	G_LUA_MANAGER->free_Lua();
 	}
@@ -1368,8 +1367,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	if_action_in_run->set_int_property( "next_state_n", 0,
 		operation::state_idx::PAUSE );
 	test_DI_one.on();
-    testing::internal::CaptureStdout();
-    G_DEBUG = 1;
+    testing::internal::CaptureStdout();    
 	test_op->evaluate();    
     G_DEBUG = 0;
 
@@ -1387,6 +1385,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );		
 	test_op->finalize();
 
+    G_DEBUG = 1;
 	G_LUA_MANAGER->free_Lua();
 	}
 
@@ -1447,7 +1446,6 @@ TEST( operation, evaluate_off_last_step )
     tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 1, 1, 1 );
     auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
-    G_DEBUG = 1;
     test_op->add_step( "Тестовый шаг 1", -1, -1 );
     const int DELAY_TIME_S = 10;
     const int DELAY_PARAM_IDX = 2;
@@ -1466,7 +1464,6 @@ TEST( operation, evaluate_off_last_step )
     test_op->evaluate();    
     EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
-    G_DEBUG = 0;
     test_op->finalize();
     DeltaMilliSecSubHooker::set_default_time();
     G_LUA_MANAGER->free_Lua();
