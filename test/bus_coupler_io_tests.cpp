@@ -181,3 +181,23 @@ TEST( io_node, get_display_state_all_node_types )
 	EXPECT_EQ( io_manager::io_node::ST_OK, 
 		io_manager::get_instance()->get_node( 2 )->get_display_state() );
 	}
+
+
+TEST( io_device, get_AO )
+    {
+    io_device dev1( "D1" );
+    
+    testing::internal::CaptureStdout();
+    auto res = dev1.get_AO( 0, 0.0f, 100.0f );
+    auto output = testing::internal::GetCapturedStdout();
+    auto REFERENCE_OUTPUT = "'D1' (I/O: 0) io_device->get_AO(...) error: "
+        "index = 0, AO_channels.count = 0, AO_channels.int_write_values = "
+#ifdef LINUX
+        "(nil)"
+#else
+        "00000000";
+#endif
+        "\n";
+    EXPECT_EQ( output, REFERENCE_OUTPUT );
+    EXPECT_EQ( res, 0.0f );
+    }

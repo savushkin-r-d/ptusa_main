@@ -278,9 +278,10 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
         }
 
     if ( G_DEBUG )
-        {
+        {        
+        printf( "'%s' (", name );
         print();
-        printf( "io_device->get_AO(...) - error! " );
+        printf( ") io_device->get_AO(...) error: " );
         printf( "index = %d, AO_channels.count = %d, "
             "AO_channels.int_write_values = %p",
             index, AO_channels.count, AO_channels.int_write_values );
@@ -292,7 +293,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
         printf( "\n" );
         }
 
-    return 0;
+    return 0.0f;
     }
 //-----------------------------------------------------------------------------
 int io_device::set_AO( u_int index, float value, float min_value,
@@ -698,13 +699,17 @@ const int_2* io_device::get_AO_read_data( u_int index ) const
 //-----------------------------------------------------------------------------
 void io_device::print() const
     {
-    printf( " " );
+    if ( !DI_channels.count && !DO_channels.count &&
+        !AI_channels.count && !AO_channels.count )
+        {
+        printf( "I/O: 0" );
+        return;
+        }
 
     DI_channels.print();
     DO_channels.print();
     AI_channels.print();
     AO_channels.print();
-    //printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 io_device::io_device( const char* name ) : name( name ), vendor( PHOENIX ),
