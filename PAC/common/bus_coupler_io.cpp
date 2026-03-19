@@ -279,6 +279,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
 
     if ( G_DEBUG )
         {        
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AO(...) error: " );
@@ -286,12 +287,15 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
             "AO_channels.int_write_values = {}",
             index, AO_channels.count, 
             static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
         if ( index < AO_channels.count && AO_channels.int_write_values )
             {
+            // LCOV_EXCL_START
             fmt::print( ", AO_channels.int_write_values[ index ]={}",
                 static_cast<void*>( AO_channels.int_write_values[ index ] ) );
+            // LCOV_EXCL_STOP
             }
-        fmt::print( "\n" );
+        fmt::print( "\n" );        
         }
 
     return 0.0f;
@@ -349,6 +353,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
 
     if ( G_DEBUG )
         {
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->set_AO(...) error: " );
@@ -356,10 +361,13 @@ int io_device::set_AO( u_int index, float value, float min_value,
             "AO_channels.int_write_values = {}",
             index, AO_channels.count,
             static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
         if ( index < AO_channels.count && AO_channels.int_write_values )
             {
+            // LCOV_EXCL_START
             fmt::print( ", AO_channels.int_write_values[ index ]={}",
                 static_cast<void*>( AO_channels.int_write_values[ index ] ) );
+            // LCOV_EXCL_STOP
             }
         fmt::print( "\n" );
         }
@@ -539,6 +547,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
 
     if ( G_DEBUG )
         {
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AI(...) error: " );
@@ -546,10 +555,13 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
             "AI_channels.int_read_values = {}",
             index, AI_channels.count,
             static_cast<void*>( AI_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
         if ( index < AI_channels.count && AI_channels.int_read_values )
             {
+            // LCOV_EXCL_START
             fmt::print( ", AI_channels.int_read_values[ index ]={}",
                 static_cast<void*>( AI_channels.int_read_values[ index ] ) );
+            // LCOV_EXCL_STOP
             }
         fmt::print( "\n" );
         }
@@ -572,6 +584,7 @@ int_2* io_device::get_AI_data( u_int index ) const
             G_LOG->error( "'%s' io_device->get_AI_data(...) error.", name );
             }
 
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AI_data(...) error: " );
@@ -579,6 +592,7 @@ int_2* io_device::get_AI_data( u_int index ) const
             "AI_channels.int_read_values = {}",
             index, AI_channels.count,
             static_cast<void*>( AI_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
         }
 
     return nullptr;
@@ -634,6 +648,7 @@ int_2* io_device::get_AO_write_data( u_int index )
 
     if ( G_DEBUG )
         {
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AO_write_data(...) error: " );
@@ -641,6 +656,7 @@ int_2* io_device::get_AO_write_data( u_int index )
             "AO_channels.int_write_values = {}",
             index, AO_channels.count,
             static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
         }
 
     return nullptr;
@@ -655,6 +671,7 @@ const int_2* io_device::get_AO_write_data( u_int index ) const
 
     if ( G_DEBUG )
         {
+        // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AO_write_data(...) error: " );
@@ -662,6 +679,7 @@ const int_2* io_device::get_AO_write_data( u_int index ) const
             "AO_channels.int_write_values = {}",
             index, AO_channels.count,
             static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
         }
 
     return nullptr;
