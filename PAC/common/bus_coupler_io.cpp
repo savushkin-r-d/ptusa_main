@@ -574,7 +574,7 @@ int_2* io_device::get_AI_data( u_int index ) const
 
         fmt::print( "'{}' (", name );
         io_device::print();
-        fmt::print( ") io_device->get_AI(...) error: " );
+        fmt::print( ") io_device->get_AI_data(...) error: " );
         fmt::println( "index = {}, AI_channels.count = {}, "
             "AI_channels.int_read_values = {}",
             index, AI_channels.count,
