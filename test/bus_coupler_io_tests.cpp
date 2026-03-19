@@ -195,7 +195,7 @@ TEST( io_device, get_AO )
 #ifdef LINUX
         "(nil)"
 #else
-        "00000000";
+        "00000000"
 #endif
         "\n";
     EXPECT_EQ( output, REFERENCE_OUTPUT );
