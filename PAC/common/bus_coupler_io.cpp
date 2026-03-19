@@ -279,18 +279,19 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
 
     if ( G_DEBUG )
         {        
-        printf( "'%s' (", name );
+        fmt::print( "'{}' (", name );
         print();
-        printf( ") io_device->get_AO(...) error: " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %p",
-            index, AO_channels.count, AO_channels.int_write_values );
+        fmt::print( ") io_device->get_AO(...) error: " );
+        fmt::print( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count, 
+            static_cast<void*>( AO_channels.int_write_values ) );
         if ( index < AO_channels.count && AO_channels.int_write_values )
             {
-            printf( ", AO_channels.int_write_values[ index ]=%p",
-                AO_channels.int_write_values[ index ] );
+            fmt::print( ", AO_channels.int_write_values[ index ]={}",
+                static_cast<void*>( AO_channels.int_write_values[ index ] ) );
             }
-        printf( "\n" );
+        fmt::print( "\n" );
         }
 
     return 0.0f;
@@ -702,7 +703,7 @@ void io_device::print() const
     if ( !DI_channels.count && !DO_channels.count &&
         !AI_channels.count && !AO_channels.count )
         {
-        printf( "I/O: 0" );
+        fmt::print( "I/O: 0" );
         return;
         }
 

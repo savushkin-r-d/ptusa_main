@@ -191,13 +191,7 @@ TEST( io_device, get_AO )
     auto res = dev1.get_AO( 0, 0.0f, 100.0f );
     auto output = testing::internal::GetCapturedStdout();
     auto REFERENCE_OUTPUT = "'D1' (I/O: 0) io_device->get_AO(...) error: "
-        "index = 0, AO_channels.count = 0, AO_channels.int_write_values = "
-#ifdef LINUX
-        "(nil)"
-#else
-        "00000000"
-#endif
-        "\n";
+        "index = 0, AO_channels.count = 0, AO_channels.int_write_values = 0x0\n";
     EXPECT_EQ( output, REFERENCE_OUTPUT );
     EXPECT_EQ( res, 0.0f );
     }
