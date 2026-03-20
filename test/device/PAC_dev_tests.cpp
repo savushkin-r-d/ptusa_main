@@ -3633,6 +3633,9 @@ TEST( valve_AS_DO1_DI2, get_fb_state )
     v1.AO_channels.int_write_values[ 0 ] = new int_2[ AO_SIZE ]{ 0 };
 
     EXPECT_FALSE( v1.get_fb_state() );
+    EXPECT_EQ( v1.get_valve_state(), valve::VALVE_STATE::V_OFF );
+    EXPECT_FALSE( v1.get_off_fb_value() );
+    EXPECT_FALSE( v1.get_on_fb_value() );    
 
     G_PAC_INFO()->emulation_on();
     }
