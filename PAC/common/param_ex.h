@@ -58,7 +58,12 @@ class params_manager
     public:
         enum CONSTANTS
             {
-            C_TOTAL_PARAMS_SIZE = 1024 * 30, ///< Общий размер памяти параметров.
+            C_TOTAL_PARAMS_SIZE =
+#ifdef PTUSA_TEST
+                1024 * 100,  ///< Общий размер памяти параметров для тестов.
+#else
+                1024 * 30,   ///< Общий размер памяти параметров.
+#endif
 
             C_SYS_MEM_SIZE    = 10,          ///< Память для хранения CRC и т.д.
 
