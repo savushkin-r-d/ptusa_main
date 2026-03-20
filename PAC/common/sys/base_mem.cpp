@@ -111,7 +111,7 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
     {
     const int EEPROM_SIZE
 #ifdef PTUSA_TEST
-        = 320'768;
+        = 10 * 32'768;
 #else
         = 32'768;
 #endif

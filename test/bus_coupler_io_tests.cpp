@@ -1,4 +1,5 @@
 #include "bus_coupler_io_tests.h"
+#include "uni_bus_coupler_io.h"
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -205,6 +206,36 @@ TEST( io_device, get_AO_read_data )
         "index = 0, AO_channels.count = 0, AO_channels.int_read_values = 0x0\n";
     EXPECT_EQ( output, REFERENCE_OUTPUT );
     EXPECT_EQ( res, nullptr);
+    }
+
+TEST( io_device, get_AO_IOLINK_state )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    auto prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+    mngr.init_node_AO( 0, 0, 1027843, 0 );
+
+    io_device dev1( "D1" );
+    dev1.set_io_vendor( io_device::VENDOR::PHOENIX );
+    dev1.init_and_alloc( 0, 0, 2, 0 );
+    dev1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0, 1, 1 );
+    const io_device& DEV1 = dev1;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ), 
+        io_device::IOLINKSTATE::NOTCONNECTED );
+
+    // Bit 0 - IOLink connected.
+    *dev1.AO_channels.int_module_read_values[ 0 ] = 0b1;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ),
+        io_device::IOLINKSTATE::DEVICEERROR );
+
+    // Bit 0 - IOLink connected and bit 7 - IOLink Ok.
+    *dev1.AO_channels.int_module_read_values[ 0 ] = 0b1 | 0b1'0000'0000;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ),
+        io_device::IOLINKSTATE::OK );
+
+    io_manager::replace_instance( prev_mngr );
     }
 
 

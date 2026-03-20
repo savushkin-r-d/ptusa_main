@@ -593,45 +593,45 @@ int_2* io_device::get_AI_data( u_int index ) const
     return nullptr;
     }
 //-----------------------------------------------------------------------------
-io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index) const
-	{
-	if (vendor == PHOENIX)
-	{
-		if (index < AI_channels.count && AI_channels.int_module_read_values[index])
-			{
-			u_int module_states = *((u_int*)(AI_channels.int_module_read_values[index]));
-			int_2 logical_port = AI_channels.logical_ports[index];
-			if (logical_port > 0 && logical_port <= 8)
-				{
-				bool iolinkconnected = module_states & (1 << (logical_port - 1));
-				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
-				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
-				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
-				}
-			}
-	}
-	return IOLINKSTATE::OK;
-	}
+io_device::IOLINKSTATE io_device::get_AI_IOLINK_state( u_int index ) const
+    {
+    if ( vendor == PHOENIX )
+        {
+        if ( index < AI_channels.count && AI_channels.int_module_read_values[ index ] )
+            {
+            u_int module_states = *( (u_int*)( AI_channels.int_module_read_values[ index ] ) );
+            int_2 logical_port = AI_channels.logical_ports[ index ];
+            if ( logical_port > 0 && logical_port <= 8 )
+                {
+                bool iolinkconnected = module_states & ( 1 << ( logical_port - 1 ) );
+                bool iolinkdatavalid = module_states & ( 1 << ( logical_port + 7 ) );
+                if ( !iolinkconnected ) return IOLINKSTATE::NOTCONNECTED;
+                if ( !iolinkdatavalid ) return IOLINKSTATE::DEVICEERROR;
+                }
+            }
+        }
+    return IOLINKSTATE::OK;
+    }
 
-io_device::IOLINKSTATE io_device::get_AO_IOLINK_state(u_int index) const
-	{
-	if (vendor == PHOENIX)
-		{
-		if (index < AO_channels.count && AO_channels.int_module_read_values[index])
-			{
-			u_int module_states = *((u_int*)(AO_channels.int_module_read_values[index]));
-			int_2 logical_port = AO_channels.logical_ports[index];
-			if (logical_port > 0 && logical_port <= 8)
-				{
-				bool iolinkconnected = module_states & (1 << (logical_port - 1));
-				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
-				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
-				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
-				}
-			}
-		}
-	return IOLINKSTATE::OK;
-	}
+io_device::IOLINKSTATE io_device::get_AO_IOLINK_state( u_int index ) const
+    {
+    if ( vendor == PHOENIX )
+        {
+        if ( index < AO_channels.count && AO_channels.int_module_read_values[ index ] )
+            {
+            u_int module_states = *( (u_int*)( AO_channels.int_module_read_values[ index ] ) );
+            int_2 logical_port = AO_channels.logical_ports[ index ];
+            if ( logical_port > 0 && logical_port <= 8 )
+                {
+                bool iolinkconnected = module_states & ( 1 << ( logical_port - 1 ) );
+                bool iolinkdatavalid = module_states & ( 1 << ( logical_port + 7 ) );
+                if ( !iolinkconnected ) return IOLINKSTATE::NOTCONNECTED;
+                if ( !iolinkdatavalid ) return IOLINKSTATE::DEVICEERROR;
+                }
+            }
+        }
+    return IOLINKSTATE::OK;
+    }
 
 //-----------------------------------------------------------------------------
 int_2* io_device::get_AO_write_data( u_int index )
