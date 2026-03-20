@@ -145,10 +145,10 @@ float PID::eval( float currentValue, int deltaSign )
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
         if ( unsigned long delta_time = get_delta_millisec( start_time );
             delta_time < acceleration_time )
-            {            
+            {
             if ( auto out_min = ( *par )[ P_out_min ]; start_value < out_min )
                 {
-                // Начинаем с out_min. 
+                // Начинаем с out_min.
                 start_value = out_min;
                 }
 
@@ -212,7 +212,7 @@ float PID::eval( float currentValue, int deltaSign )
             MIN_OUT_VALUE );
         out_max = MAX_OUT_VALUE;
         ( *par )[ P_out_max ] = MAX_OUT_VALUE;
-        }        
+        }
 
     if ( Uk < out_min )
         {
@@ -236,7 +236,7 @@ float PID::eval( float currentValue, int deltaSign )
 void  PID::direct_on()
     {
     if ( state != STATE::ON )
-        {        
+        {
         if ( STATE::OFF == state )
             {
             // Только для отключенного состояния.
@@ -489,7 +489,7 @@ int PID::save_device( char *buff ) const
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
         answer_size += sprintf( buff + answer_size,
-            "\t%s={ %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
+            "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
 
         answer_size += sprintf( buff + answer_size, "\t}\n" );
         }

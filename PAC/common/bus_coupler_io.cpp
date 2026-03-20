@@ -689,17 +689,15 @@ const int_2* io_device::get_AO_read_data( u_int index ) const
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AO_read_data(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_read_values = %p",
-            index, AO_channels.count, AO_channels.int_read_values );
-        if ( index < AO_channels.count && AO_channels.int_read_values )
-            {
-            printf( ", AO_channels.int_read_values[ index ]=%p",
-                AO_channels.int_read_values[ index ] );
-            }
-        printf( "\n" );
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_read_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_read_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
         }
 
     return nullptr;
@@ -871,31 +869,31 @@ void io_device::IO_channels::init( int ch_count )
         {
         count = ch_count;
 
-        tables  = new u_int[ count ];
-        offsets = new u_int[ count ];
-		module_offsets = new int[ count ];
-		logical_ports = new int[ count ];
+        tables = new u_int[ count ]{};
+        offsets = new u_int[ count ]{};
+        module_offsets = new int[ count ]{};
+        logical_ports = new int[ count ]{};
 
         switch ( type )
             {
             case IO_channels::CT_DI:
-                char_read_values = new u_char*[ count ]{ nullptr };
+                char_read_values = new u_char*[ count ]{};
                 break;
 
             case IO_channels::CT_DO:
-                char_read_values  = new u_char*[ count ]{ nullptr };
-                char_write_values = new u_char*[ count ]{ nullptr };
+                char_read_values  = new u_char*[ count ]{};
+                char_write_values = new u_char*[ count ]{};
                 break;
 
             case IO_channels::CT_AI:
-                int_read_values = new int_2*[ count ]{ nullptr };
-				int_module_read_values = new int_2*[count]{ nullptr };
+                int_read_values = new int_2*[ count ]{};
+				int_module_read_values = new int_2*[count]{};
                 break;
 
             case IO_channels::CT_AO:
-                int_read_values  = new int_2*[ count ]{ nullptr };
-				int_module_read_values = new int_2*[count]{ nullptr };
-                int_write_values = new int_2*[ count ]{ nullptr };
+                int_read_values  = new int_2*[ count ]{};
+				int_module_read_values = new int_2*[count]{};
+                int_write_values = new int_2*[ count ]{};
                 break;
             }
         }

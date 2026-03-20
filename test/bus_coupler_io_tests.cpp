@@ -194,12 +194,22 @@ TEST( io_device, get_AO )
     EXPECT_EQ( res, 0.0f );
     }
 
+TEST( io_device, get_AO_read_data )
+    {
+    io_device dev1( "D1" );
+
+    testing::internal::CaptureStdout();
+    auto res = dev1.get_AO_read_data( 0 );
+    auto output = testing::internal::GetCapturedStdout();
+    auto REFERENCE_OUTPUT = "'D1' (I/O: 0) io_device->get_AO_read_data(...) error: "
+        "index = 0, AO_channels.count = 0, AO_channels.int_read_values = 0x0\n";
+    EXPECT_EQ( output, REFERENCE_OUTPUT );
+    EXPECT_EQ( res, nullptr);
+    }
+
 
 TEST( io_manager, init )
     {
-    const int ZERO_SIZE = 0;
-    const int ZERO_COUNT = 0;
-
     io_manager::get_instance()->init( 1 );
 
     // Second init - should clear previous.
@@ -210,13 +220,11 @@ TEST( io_manager, init )
 
 TEST( io_manager, get_node )
     {
-    const int ZERO_SIZE = 0;
-    const int ZERO_COUNT = 0;
-
+    const auto IO_MNGR = io_manager::get_instance();
     io_manager::get_instance()->init( 1 );
-    const auto const_res1 = io_manager::get_instance()->get_node( 1 );
+    const auto const_res1 = IO_MNGR->get_node( 1 );
     EXPECT_EQ( const_res1, nullptr );
-    auto const_res2 = io_manager::get_instance()->get_node( 0 );
+    auto const_res2 = IO_MNGR->get_node( 0 );
     EXPECT_EQ( const_res2, nullptr );
 
     auto res = io_manager::get_instance()->get_node( 1 );
@@ -229,7 +237,7 @@ TEST( io_manager, get_node )
         "A100", 0, 0, 0, 0, 0, 0 );
     res = io_manager::get_instance()->get_node( 0 );
     EXPECT_NE( res, nullptr );
-    auto const_res3 = io_manager::get_instance()->get_node( 0 );
+    auto const_res3 = IO_MNGR->get_node( 0 );
     EXPECT_NE( const_res3, nullptr );
     }
  
