@@ -2905,11 +2905,15 @@ TEST( valve_mini_flushing, get_fb_state )
     G_PAC_INFO()->emulation_off();
 
     EXPECT_FALSE( V1.get_fb_state() );
+    EXPECT_FALSE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
 
     // Устанавливаем сигнал обратной связи.    
     *V1.DI_channels.char_read_values[
         valve_mini_flushing::CONSTANTS_DI::DI_INDEX_CLOSE ] = 1;
     EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_TRUE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -3892,6 +3896,8 @@ TEST( valve_iolink_shut_off_thinktop, get_state )
 
     G_PAC_INFO()->emulation_off();
     EXPECT_EQ( V1.get_state(), valve::VALVE_STATE_EX::VX_OFF_FB_OFF );
+    EXPECT_EQ( V1.get_off_fb_value(), 0 );
+    EXPECT_EQ( V1.get_on_fb_value(), 0 );
 
     G_PAC_INFO()->emulation_on();
     }

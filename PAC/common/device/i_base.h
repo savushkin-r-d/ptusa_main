@@ -136,7 +136,7 @@ class i_wages
 
         /// @brief Тарировка.
         virtual void tare() = 0;
-        ///@brief Возвращает вес в килограммах
+        ///@brief Возвращает вес в килограммах.
         virtual float get_value() const = 0;
         ///@brief Возвращает состояние
         virtual int get_state() const = 0;
