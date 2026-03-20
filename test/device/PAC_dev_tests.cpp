@@ -5136,6 +5136,19 @@ TEST( counter_iolink, article_sm6100 )
     }
 
 
+TEST( virtual_wages, get_value )
+    {
+    virtual_wages w1( "W1" );
+    EXPECT_EQ( 0.0f, w1.get_value() );
+    }
+
+TEST( virtual_wages, get_state )
+    {
+    virtual_wages w1( "W1" );
+    EXPECT_EQ( 0, w1.get_state() );
+    }
+
+
 TEST( wages_RS232, get_value_from_wages )
     {
     wages_RS232 w1( "W1" );

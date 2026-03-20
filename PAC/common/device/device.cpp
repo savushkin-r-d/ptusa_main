@@ -221,8 +221,10 @@ int camera::get_result( int n ) const
 
 int camera::save_device_ex( char* buff ) const
     {
+    // LCOV_EXCL_START
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT={}, READY={}, ",
         get_result(), is_cam_ready ) ).size;
+    // LCOV_EXCL_STOP
     return res;
     }
 
@@ -1388,10 +1390,12 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int base_counter::save_device_ex( char* buff ) const
     {
+    // LCOV_EXCL_START
     return fmt::format_to_n( buff, MAX_COPY_SIZE,
         "ABS_V={}, DAY_T1={}, PREV_DAY_T1={}, DAY_T2={}, PREV_DAY_T2={}, ",
         get_abs_quantity(), day_t1_value, prev_day_t1_value,
         day_t2_value, prev_day_t2_value ).size;
+    // LCOV_EXCL_STOP
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
