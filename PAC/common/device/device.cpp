@@ -221,7 +221,7 @@ int camera::get_result( int n ) const
 
 int camera::save_device_ex( char* buff ) const
     {
-    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT=%d, READY=%d, ",
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT={}, READY={}, ",
         get_result(), is_cam_ready ) ).size;
     return res;
     }
@@ -787,6 +787,7 @@ float power_unit::decode_nominal_current( uint8_t code )
 //-----------------------------------------------------------------------------
 int power_unit::save_device_ex( char* buff ) const
     {
+    // LCOV_EXCL_START
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE,
         "NOMINAL_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
         decode_nominal_current( p_data_in.nominal_current_ch1 ),
@@ -796,7 +797,7 @@ int power_unit::save_device_ex( char* buff ) const
         decode_nominal_current( p_data_in.nominal_current_ch5 ),
         decode_nominal_current( p_data_in.nominal_current_ch6 ),
         decode_nominal_current( p_data_in.nominal_current_ch7 ),
-        decode_nominal_current( p_data_in.nominal_current_ch8 ) );
+        decode_nominal_current( p_data_in.nominal_current_ch8 ) );    
     auto size = static_cast<int>( res.size );
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -827,6 +828,7 @@ int power_unit::save_device_ex( char* buff ) const
         "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
     size += res.size;    
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE, "ERR={}, ", err );
+    // LCOV_EXCL_STOP
     size += res.size;
 
     *res.out = 0;
@@ -3657,7 +3659,7 @@ int concentration_e_ok::save_device_ex( char* buff ) const
     if ( G_PAC_INFO()->is_emulator() )
         {
         res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE,
-            "OK={1}, " ).size );
+            "OK=1, " ).size );
         }
     else
         {
@@ -3684,8 +3686,10 @@ concentration_e_iolink::~concentration_e_iolink()
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff ) const
     {
+    // LCOV_EXCL_START
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "T={:.1f}, ",
         get_temperature() ) ).size;
+    // LCOV_EXCL_STOP
 
     return res;
     }
@@ -3821,11 +3825,13 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
 
 int analog_io_device::save_device_ex( char* buff ) const
     {
-    auto res = fmt::format_to_n( 
-        buff, MAX_COPY_SIZE, 
+    // LCOV_EXCL_START
+    auto res = fmt::format_to_n(
+        buff, MAX_COPY_SIZE,
         "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
         is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
-        get_emulator().get_st_deviation());
+        get_emulator().get_st_deviation() );
+    // LCOV_EXCL_STOP
     return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------

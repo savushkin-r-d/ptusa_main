@@ -2167,6 +2167,18 @@ TEST( concentration_e, get_type_name )
     EXPECT_STREQ( "Концентрация", test_dev.get_type_name() );
     }
 
+TEST( concentration_e, get_max_val )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_EQ( test_dev.get_max_val(), 0 );
+    }
+
+TEST( concentration_e, get_min_val )
+    {
+    concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
+    EXPECT_EQ( test_dev.get_min_val(), 0 );
+    }
+
 TEST( concentration_e, get_error_description )
     {
     concentration_e test_dev( "test_QT1", device::DEVICE_SUB_TYPE::DST_QT_VIRT );
@@ -2190,6 +2202,17 @@ TEST( concentration_e_ok, get_state )
     {
     concentration_e_ok Q1( "Q1" );
     EXPECT_EQ( Q1.get_state(), 1 );
+    }
+
+TEST( concentration_e_ok, save_device )
+    {
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+    concentration_e_ok Q1( "Q1" );
+
+    Q1.save_device( buff );
+    EXPECT_STREQ( "Q1={M=0, ST=1, V=0, OK=1, P_CZ=0, P_MIN_V=0, P_MAX_V=0},\n",
+        buff );
     }
 
 
@@ -3212,6 +3235,7 @@ TEST( valve_iol_terminal, direct_set_state )
     V1.direct_set_state( valve::V_LOWER_SEAT + 10 );  //Неправильное состояние.
     EXPECT_EQ( valve::VALVE_STATE::V_ON, V1.get_valve_state() );
     }
+
 
 TEST( valve_iol_terminal_DO1, on )
     {
@@ -4356,6 +4380,42 @@ TEST( camera, set_string_property )
 
     test_dev.set_string_property( "IP", "127.0.0.1" );
     EXPECT_EQ( "127.0.0.1", test_dev.ip );
+    }
+
+TEST( camera, get_result )
+    {
+    camera test_dev( "test_CAM1", device::DST_CAM_DO1_DI1 );
+    EXPECT_EQ( test_dev.get_result( 1 ), 0 );
+    }
+
+TEST( camera, save_device )
+    {
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    camera test_dev( "test_CAM1", device::DST_CAM_DO1_DI1 );
+    test_dev.save_device( buff );
+    EXPECT_STREQ( "test_CAM1={M=0, ST=0, V=0, RESULT=0, READY=true},\n", buff );
+    }
+
+
+TEST( camera_DI3, get_result )
+    {
+    camera_DI3 test_dev( "test_CAM3" );
+    EXPECT_EQ( test_dev.get_result( 1 ), 0 );
+    }
+
+
+TEST( analog_input, get_max_val )
+    {
+    analog_input test_AI( "test_AI1" );
+    EXPECT_EQ( test_AI.get_max_val(), 0 );
+    }
+
+TEST( analog_input, get_min_val )
+    {
+    analog_input test_AI( "test_AI1" );
+    EXPECT_EQ( test_AI.get_min_val(), 0 );
     }
 
 
