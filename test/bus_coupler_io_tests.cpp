@@ -220,7 +220,7 @@ TEST( io_manager, init )
 
 TEST( io_manager, get_node )
     {
-    const auto IO_MNGR = io_manager::get_instance();
+    const io_manager *IO_MNGR = io_manager::get_instance();
     io_manager::get_instance()->init( 1 );
     const auto const_res1 = IO_MNGR->get_node( 1 );
     EXPECT_EQ( const_res1, nullptr );

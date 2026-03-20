@@ -138,7 +138,7 @@ TEST( PID, save_device )
     char buff[ BUFF_SIZE ] = { 0 };
      
     auto REF_STR =
-        "t.PID1 = \n"
+        "t.PID1=\n"
         "\t{\n"
         "\tST=0,\n"
         "\tS_PAR_F=\n"
