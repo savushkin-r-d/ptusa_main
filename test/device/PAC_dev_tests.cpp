@@ -1900,6 +1900,18 @@ TEST( pressure_e, get_type_name )
     EXPECT_STREQ( "Давление", test_dev.get_type_name() );
     }
 
+TEST( pressure_e, get_max_val )
+    {
+    pressure_e test_dev( "test_PT1" );
+    EXPECT_EQ( test_dev.get_max_val(), 0 );
+    }
+
+TEST( pressure_e, get_min_val )
+    {
+    pressure_e test_dev( "test_PT1" );
+    EXPECT_EQ( test_dev.get_min_val(), 0 );
+    }
+
 
 TEST( pressure_e_iolink, pressure_e_iolink )
     {
