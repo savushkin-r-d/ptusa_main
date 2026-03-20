@@ -203,7 +203,6 @@ class valve_DO1 : public valve
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
 
-    private:
         /// @brief Получение состояния клапана без учета обратной связи.
         VALVE_STATE get_valve_state() const override;
 

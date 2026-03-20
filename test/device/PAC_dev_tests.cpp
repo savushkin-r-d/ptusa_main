@@ -1804,6 +1804,20 @@ TEST( level, get_volume )
     }
 
 
+TEST( level_e_cyl, get_volume )
+    {
+    level_e_cyl test_dev( "test_LT1" );
+    EXPECT_EQ( test_dev.get_volume(), 0.f );
+    }
+
+
+TEST( level_e_cone, get_volume )
+    {
+    level_e_cone test_dev( "test_LT1" );
+    EXPECT_EQ( test_dev.get_volume(), 0.f );
+    }
+
+
 TEST_F( iolink_dev_test, level_e_iolink_get_error_description )
     {
     level_e_iolink test_dev( "TestDevice" );
@@ -2441,6 +2455,31 @@ TEST( valve_DO2_DI2, get_fb_state )
     }
 
 
+TEST( valve_DO1, get_fb_state )
+    {
+    valve_DO1 V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    V1.init_and_alloc( 1 );
+
+    EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( V1.get_state(), 0 );
+    // Нет обратных связей.
+    EXPECT_FALSE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
+
+    *V1.DO_channels.char_write_values[ 0 ] = 1;
+    EXPECT_TRUE( V1.get_fb_state() );
+    EXPECT_EQ( V1.get_state(), 1 );
+    // Нет обратных связей.
+    EXPECT_FALSE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( valve_DO1_DI1_off, get_fb_state )
     {
     valve_DO1_DI1_off V1( "V1" );
@@ -2946,11 +2985,13 @@ TEST( valve_iolink_shut_off_sorio, get_fb_state )
 
     EXPECT_TRUE( V1.get_fb_state() ); //Default value.
     EXPECT_TRUE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_off();
     EXPECT_FALSE( V1.get_fb_state() );
     EXPECT_TRUE( V1.get_off_fb_value() );
+    EXPECT_FALSE( V1.get_on_fb_value() );
     EXPECT_EQ( valve::VALVE_STATE::V_OFF, V1.get_valve_state() );
 
     G_PAC_INFO()->emulation_on();
@@ -3883,6 +3924,19 @@ TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_enabled_and_al_err
 
     G_PAC_INFO()->emulation_on();
     }
+
+
+TEST( valve_iolink_shut_off_thinktop, get_fb_state )
+    {
+    valve_iolink_shut_off_thinktop_testable V1( "V1" );
+    EXPECT_TRUE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_off();
+    EXPECT_FALSE( V1.get_fb_state() );
+
+    G_PAC_INFO()->emulation_on();
+    }
+
 
 TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_disabled_and_module_error )
     {
