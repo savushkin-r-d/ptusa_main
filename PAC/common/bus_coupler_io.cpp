@@ -579,11 +579,6 @@ int_2* io_device::get_AI_data( u_int index ) const
 
     if ( G_DEBUG )
         {
-        if ( G_USE_LOG )
-            {
-            G_LOG->error( "'%s' io_device->get_AI_data(...) error.", name );
-            }
-
         // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
@@ -1269,17 +1264,6 @@ void io_manager::print() const
         }
     }
 //-----------------------------------------------------------------------------
-void io_manager::print_log() const
-    {
-    sprintf(G_LOG->msg, "I\\O manager [%d]:\n", nodes_count);
-    G_LOG->write_log(i_log::P_DEBUG);
-
-    for (u_int i = 0; i < nodes_count; i++)
-        {
-        nodes[i]->print_log();
-        }
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 io_manager::io_node::~io_node()
     {
@@ -1406,16 +1390,6 @@ void io_manager::io_node::print()
         name, type, number, ip_address,
         DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
         AI_cnt, AI_size, AO_cnt, AO_size );
-    }
-//-----------------------------------------------------------------------------
-void io_manager::io_node::print_log()
-    {
-    sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\", "
-        "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
-        name, type, number, ip_address,
-        DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
-        AI_cnt, AI_size, AO_cnt, AO_size );
-    G_LOG->write_log(i_log::P_DEBUG);
     }
 //-----------------------------------------------------------------------------
 int io_manager::io_node::get_display_state() const

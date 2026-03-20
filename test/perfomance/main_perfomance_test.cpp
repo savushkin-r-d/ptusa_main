@@ -5,9 +5,8 @@
 #include "lua_manager.h"
 #include "log.h"
 
-int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
-bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
+int G_DEBUG = 0;            //Вывод дополнительной отладочной информации.
+bool G_NO_IO_NODES = true;  // По умолчанию обмен с модулями отключен.
 bool G_READ_ONLY_IO_NODES = false;
 
 lua_State* L = nullptr;

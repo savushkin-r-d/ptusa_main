@@ -11,7 +11,6 @@ const int STD_OUT_FILENO = 1;
 /*
 	TEST METHODS DEFENITION:
 	void print()
-	void print_log()
 */
 
 TEST( io_manager, print )
@@ -35,7 +34,6 @@ TEST( io_manager, print )
 		close( tmp );
 
 		io_manager::get_instance()->print();
-		io_manager::get_instance()->print_log();
 
 		fflush( stdout );
 		dup2( old, STD_OUT_FILENO );

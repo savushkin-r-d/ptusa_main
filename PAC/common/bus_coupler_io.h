@@ -247,7 +247,6 @@ class io_manager
         virtual ~io_manager();
 
         void print() const;
-        void print_log() const;
 
         /// @brief Чтение модулей ввода.
         ///
@@ -332,7 +331,6 @@ class io_manager
 			~io_node();
 
 			void print();
-			void print_log();
 
             enum W_CONST
                 {
