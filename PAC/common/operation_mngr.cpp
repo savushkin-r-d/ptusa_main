@@ -2354,7 +2354,7 @@ void operation_state::evaluate()
                 owner->owner->get_name(),
                 operation_number,
                 ( *owner )[ operation_number ]->get_name(), get_name(),
-                active_step_n + 1, 
+                active_step_n + 1,
                 next_step, steps[ next_step - 1 ]->get_name(),
                 reason.c_str() );
             if ( G_DEBUG )
@@ -2362,6 +2362,21 @@ void operation_state::evaluate()
                 if_action->print();
                 }
             to_step( next_step );
+            }
+        else
+            {
+            G_LOG->warning( "'%s' operation %d '%s' (%s): "
+                "invalid jump target %d (steps count %d) - %s.",
+                owner->owner->get_name(),
+                operation_number,
+                ( *owner )[ operation_number ]->get_name(), get_name(),
+                next_step,
+                static_cast<int>( steps.size() ),
+                reason.c_str() );
+            if ( G_DEBUG )
+                {
+                if_action->print();
+                }
             }
         }
 
