@@ -446,9 +446,9 @@ class io_manager
         static auto_smart_ptr < io_manager > instance;
 
     public:
-        const io_node* get_node( int node_n ) const;
+        const io_node* get_node( u_int node_n ) const;
 
-        io_manager::io_node* get_node( int node_n );
+        io_manager::io_node* get_node( u_int node_n );
 
 		u_int get_nodes_count();
 

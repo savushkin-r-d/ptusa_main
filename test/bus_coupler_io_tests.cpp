@@ -195,3 +195,43 @@ TEST( io_device, get_AO )
     EXPECT_EQ( output, REFERENCE_OUTPUT );
     EXPECT_EQ( res, 0.0f );
     }
+
+
+TEST( io_manager, init )
+    {
+    const int ZERO_SIZE = 0;
+    const int ZERO_COUNT = 0;
+
+    io_manager::get_instance()->init( 1 );
+
+    // Second init - should clear previous.
+    io_manager::get_instance()->init( 2 );
+
+    EXPECT_EQ( io_manager::get_instance()->get_nodes_count(), 2 );
+    }
+
+TEST( io_manager, get_node )
+    {
+    const int ZERO_SIZE = 0;
+    const int ZERO_COUNT = 0;
+
+    io_manager::get_instance()->init( 1 );
+    const auto const_res1 = io_manager::get_instance()->get_node( 1 );
+    EXPECT_EQ( const_res1, nullptr );
+    auto const_res2 = io_manager::get_instance()->get_node( 0 );
+    EXPECT_EQ( const_res2, nullptr );
+
+    auto res = io_manager::get_instance()->get_node( 1 );
+    EXPECT_EQ( res, nullptr );
+    res = io_manager::get_instance()->get_node( 0 );
+    EXPECT_EQ( res, nullptr );
+
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+    res = io_manager::get_instance()->get_node( 0 );
+    EXPECT_NE( res, nullptr );
+    auto const_res3 = io_manager::get_instance()->get_node( 0 );
+    EXPECT_NE( const_res3, nullptr );
+    }
+ 

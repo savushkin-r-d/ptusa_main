@@ -1034,7 +1034,7 @@ void io_manager::init( int new_nodes_count )
         nodes = new io_node*[ nodes_count ];
         for ( u_int i = 0; i < nodes_count; i++ )
             {
-            nodes[ i ] = 0;
+            nodes[ i ] = nullptr;
             }
         }
     }
@@ -1199,14 +1199,24 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-const io_manager::io_node* io_manager::get_node( int node_n ) const
+const io_manager::io_node* io_manager::get_node( u_int node_n ) const
     {
-    return nodes[ node_n ];
+    if ( node_n < nodes_count )
+        {
+        return nodes[ node_n ];
+        }
+
+    return nullptr;
     }
 
-io_manager::io_node* io_manager::get_node( int node_n )
+io_manager::io_node* io_manager::get_node( u_int node_n )
     {
-    return nodes[ node_n ];
+    if ( node_n < nodes_count )
+        {
+        return nodes[ node_n ]; 
+        }
+
+    return nullptr;
     }
 
 u_int io_manager::get_nodes_count()
