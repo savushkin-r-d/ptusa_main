@@ -15,7 +15,7 @@
 
 #ifdef PAC_PLCNEXT
 // Права: чтение/запись/выполнение для всех.
-#inclide <sys/stat.h>)
+#include <sys/stat.h>
 const mode_t MODE_777 = S_IRUSR | S_IWUSR | S_IXUSR |  // Владелец.
                         S_IRGRP | S_IWGRP | S_IXGRP |  // Группа.
                         S_IROTH | S_IWOTH | S_IXOTH;   // Остальные.
