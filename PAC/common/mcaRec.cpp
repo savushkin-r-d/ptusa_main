@@ -601,7 +601,7 @@ int TRecipeManager::SaveToFile(const char* filename)
         fseek(memFile, 0, SEEK_SET);
         fwrite(recipeMemory, 1, recipeMemorySize, memFile);
         fclose(memFile);
-#ifdef PAC_PLCNEXT
+#ifdef LINUX_OS
         if ( chmod( fname, MODE_777 ) != 0 )
             {
             G_LOG->error( "Save recipe manager: chmod failed ('%s')!",
@@ -1002,7 +1002,7 @@ int TMediumRecipeManager::SaveToFile( const char* filename )
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
         fclose( memFile );
-#ifdef PAC_PLCNEXT
+#ifdef LINUX_OS
         if ( chmod( fname, MODE_777 ) != 0 )
             {
             G_LOG->error( "Save recipe: chmod failed ('%s')!", fname );

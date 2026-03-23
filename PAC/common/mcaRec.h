@@ -13,7 +13,7 @@
 #include "param_ex.h"
 #include "dtime.h"
 
-#ifdef PAC_PLCNEXT
+#ifdef LINUX_OS
 // Права: чтение/запись/выполнение для всех.
 #include <sys/stat.h>
 const mode_t MODE_777 = S_IRUSR | S_IWUSR | S_IXUSR |  // Владелец.

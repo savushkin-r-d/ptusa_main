@@ -175,7 +175,7 @@ void cip_stats::saveToFile(const char * filename)
     std::ofstream ofs(fname, std::ios::binary);
     serialize(ofs);
     ofs.close();
-#ifdef PAC_PLCNEXT
+#ifdef LINUX_OS
     if ( chmod( fname, MODE_777 ) != 0 )
         {
         G_LOG->error( "Save CIP stats: chmod failed ('%s')!", fname );
