@@ -579,35 +579,35 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     return 0;
     }
 
-int TRecipeManager::SaveToFile(const char* filename)
+int TRecipeManager::SaveToFile( const char* filename )
     {
 #ifdef DEBUG
-    printf("Saving recipes to file %s\n", filename);
+    printf( "Saving recipes to file %s\n", filename );
 #endif // DEBUG
     FILE* memFile = nullptr;
-    char fname[50];
+    char fname[ 50 ];
 #ifdef PAC_PLCNEXT
-    sprintf(fname, "/opt/main/%s", filename);
+    sprintf( fname, "/opt/main/%s", filename );
 #else
-    sprintf(fname, "%s", filename);
+    sprintf( fname, "%s", filename );
 #endif // PAC_PLCNEXT
-    memFile = fopen(fname, "r+b");
-    if (nullptr == memFile)
+    memFile = fopen( fname, "r+b" );
+    if ( nullptr == memFile )
         {
-        memFile = fopen(fname, "w+b");
+        memFile = fopen( fname, "w+b" );
         }
-    if (memFile)
+    if ( memFile )
         {
-        fseek(memFile, 0, SEEK_SET);
-        fwrite(recipeMemory, 1, recipeMemorySize, memFile);
-        fclose(memFile);
+        fseek( memFile, 0, SEEK_SET );
+        fwrite( recipeMemory, 1, recipeMemorySize, memFile );
 #ifdef LINUX_OS
-        if ( chmod( fname, MODE_FILE ) != 0 )
+        if ( fchmod( fileno( memFile ), MODE_FILE ) != 0 )
             {
-            G_LOG->error( "Save recipe manager: chmod failed ('%s')!",
-                fname );
+            G_LOG->error( "Save recipe : fchmod ('%s') failed - %s!",
+                fname, std::strerror( errno ) );
             }
 #endif
+        fclose( memFile );
         }
     return 0;
     }
@@ -1001,13 +1001,15 @@ int TMediumRecipeManager::SaveToFile( const char* filename )
         {
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
-        fclose( memFile );
 #ifdef LINUX_OS
-        if ( chmod( fname, MODE_FILE ) != 0 )
+        if ( fchmod( fileno( memFile ), MODE_FILE ) != 0 )
             {
-            G_LOG->error( "Save recipe: chmod failed ('%s')!", fname );
+            G_LOG->error( "Save medium recipe: fchmod ('%s') failed - %s!",
+                fname, std::strerror( errno ) );
+
             }
 #endif
+        fclose( memFile );
         }
     return 0;
     }

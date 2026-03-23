@@ -178,7 +178,8 @@ void cip_stats::saveToFile(const char * filename)
 #ifdef LINUX_OS
     if ( chmod( fname, MODE_FILE ) != 0 )
         {
-        G_LOG->error( "Save CIP stats: chmod failed ('%s')!", fname );
+        G_LOG->error( "Save CIP stats: chmod ('%s') failed - %s!",
+            fname, std::strerror( errno ) );
         }
 #endif
     }
