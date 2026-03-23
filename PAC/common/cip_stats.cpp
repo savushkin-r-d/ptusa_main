@@ -178,8 +178,7 @@ void cip_stats::saveToFile(const char * filename)
 #ifdef PAC_PLCNEXT
     if ( chmod( fname, MODE_777 ) != 0 )
         {
-        G_LOG->error( "Save CIP stats: chmod failed!",
-            script_n, FILE_CNT );
+        G_LOG->error( "Save CIP stats: chmod failed!" );
         }
 #endif
     }

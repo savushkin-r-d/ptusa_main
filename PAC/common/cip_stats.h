@@ -11,13 +11,6 @@
 #define MAX_ID_LENGTH 32
 #define MAX_FIELD_LENGTH 24
 
-#ifdef PAC_PLCNEXT
-// Права: чтение/запись/выполнение для всех.
-const mode_t MODE_777 = S_IRUSR | S_IWUSR | S_IXUSR |  // Владелец.
-                        S_IRGRP | S_IWGRP | S_IXGRP |  // Группа.
-                        S_IROTH | S_IWOTH | S_IXOTH;   // Остальные.
-#endif
-
 class Serializable
     {
     public:
