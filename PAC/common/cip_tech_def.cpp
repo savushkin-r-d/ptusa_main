@@ -458,7 +458,7 @@ int cipline_tech_object::save_device( char *buff )
     //Время простоя.
     char up_time_str [ 50 ];
 
-    auto up_secs = operations_manager->get_idle_time();
+    auto up_secs = operations_manager->get_idle_time_sec();
     auto up_hours = up_secs / ( 60 * 60 );
     auto up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
