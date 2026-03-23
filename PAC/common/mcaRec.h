@@ -16,6 +16,7 @@
 #ifdef LINUX_OS
 // Права: чтение/запись/выполнение для всех.
 #include <sys/stat.h>
+#include <cerrno>
 const mode_t MODE_FILE = S_IRUSR | S_IWUSR | // Владелец: чтение/запись.
                          S_IRGRP | S_IWGRP   // Группа: чтение/запись.
                          ;                   // Остальные: нет доступа.
