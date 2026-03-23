@@ -19,7 +19,7 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class PID : public device, public i_Lua_save_device
+class PID : public device
     {
     public:
         enum PARAM
@@ -70,17 +70,17 @@ class PID : public device, public i_Lua_save_device
 #ifndef __GNUC__
 #pragma region Интерфейс device.
 #endif
-        void direct_on();
-        void direct_set_state( int st );
-        void direct_off();
-        int get_state();
+        void direct_on() override;
+        void direct_set_state( int st ) override;
+        void direct_off() override;
+        int get_state() const override;
 
-        void direct_set_value( float val );
-        float get_value();
+        void direct_set_value( float val ) override;
+        float get_value() const override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        void set_string_property( const char* field, const char* value );
+        void set_string_property( const char* field, const char* value ) override;
 #ifndef __GNUC__
 #pragma endregion
 #endif
@@ -111,10 +111,10 @@ class PID : public device, public i_Lua_save_device
         /// @brief Использование kN, TiN, TdN.
         void set_used_par ( int par_n );
 
-        int save_device_ex( char* buff );
-        int save_device( char *buff );
+        int save_device_ex( char* buff ) const override;
+        int save_device( char *buff ) const override;
 
-        const char* get_name_in_Lua() const;
+        const char* get_name_in_Lua() const override;
 
         device* get_actuator() const;
 

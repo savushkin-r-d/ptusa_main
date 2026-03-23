@@ -47,7 +47,6 @@
 #include "main_cycle.h"
 
 int G_DEBUG = 0;                //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;              //Вывод в системный лог (syslog).
 
 // Обмен с модулями ввода/вывода.
 #if defined WIN_OS

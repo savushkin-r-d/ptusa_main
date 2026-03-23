@@ -23,7 +23,6 @@
 #include "main_cycle.h"
 
 int G_DEBUG = 1;    //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 1;  //Вывод в системный лог (syslog).
 
 // В Linux по умолчанию обмен с модулями ввода/вывода включен.
 bool G_NO_IO_NODES = false;     

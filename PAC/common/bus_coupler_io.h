@@ -67,7 +67,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int get_DO( u_int index );
+        int get_DO( u_int index ) const;
 
         /// @brief Установка состояния канала дискретного выхода.
         ///
@@ -86,7 +86,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int get_DI( u_int index );
+        int get_DI( u_int index ) const;
 
         /// @brief Получение состояния канала аналогового выхода.
         ///
@@ -97,7 +97,7 @@ class io_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        float get_AO( u_int index, float min_value, float max_value );
+        float get_AO( u_int index, float min_value, float max_value ) const;
 
         /// @brief Установка состояния канала аналогового выхода.
         ///
@@ -122,7 +122,7 @@ class io_device
         ///
         /// @return - аналоговое значение.
         float get_AI( u_int index, float min_value = 0, float max_value = 0,
-            int& err = last_err );
+            int& err = last_err ) const;
 
         /// @brief Получение данных канала аналогового входа.
         ///
@@ -139,7 +139,7 @@ class io_device
 		/// устройства.
 		///
 		/// @return -  состояние устройства.
-		IOLINKSTATE get_AI_IOLINK_state(u_int index);
+		IOLINKSTATE get_AI_IOLINK_state(u_int index) const;
 
 		/// @brief Получение состояния IO-Link устройства типа AI.
 		///
@@ -147,7 +147,7 @@ class io_device
 		/// устройства.
 		///
 		/// @return -  состояние устройства.
-		IOLINKSTATE get_AO_IOLINK_state(u_int index);
+		IOLINKSTATE get_AO_IOLINK_state(u_int index) const;
 
         /// @brief Получение установленных данных канала аналогового выхода.
         ///
@@ -157,13 +157,15 @@ class io_device
         /// @return -  указатель на данные канала.
         int_2* get_AO_write_data( u_int index );
 
+        const int_2* get_AO_write_data( u_int index ) const;
+
         /// @brief Получение текущих данных канала аналогового выхода.
         ///
         /// @param index - индекс канала в таблице аналоговых выходных каналов
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int_2* get_AO_read_data( u_int index );
+        const int_2* get_AO_read_data( u_int index ) const;
 
         virtual void print() const;
 
@@ -245,7 +247,6 @@ class io_manager
         virtual ~io_manager();
 
         void print() const;
-        void print_log() const;
 
         /// @brief Чтение модулей ввода.
         ///
@@ -330,7 +331,6 @@ class io_manager
 			~io_node();
 
 			void print();
-			void print_log();
 
             enum W_CONST
                 {
@@ -372,18 +372,18 @@ class io_manager
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
 
-			io_node::STATES  state;          ///< Cостояние работы с узлом.
-			TYPES   type;            ///< Тип.
-			u_int   number;          ///< Номер.
+			io_node::STATES state; ///< Cостояние работы с узлом.
+			TYPES   type;          ///< Тип.
+			u_int   number;        ///< Номер.
 			char    ip_address[16];///< IP-адрес.
 			char    name[20];      ///< Имя.
 
-			bool is_active;             ///< Признак работающего узла.
+			bool is_active;                  ///< Признак работающего узла.
             bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
 
-			uint32_t  last_poll_time; ///< Время последнего опроса.
-			bool    is_set_err;     ///< Установлена ли ошибка связи.
-			int     sock;           ///< Сокет соединения.
+			uint32_t last_poll_time; ///< Время последнего опроса.
+            bool is_set_err;         ///< Установлена ли ошибка связи.
+            int sock;                ///< Сокет соединения.
 
 			// Digital outputs ( DO ).
 			u_int  DO_cnt;      ///< Amount of DO.
@@ -437,14 +437,16 @@ class io_manager
 
     protected:
         io_manager();
-        u_int       nodes_count;        ///< Количество узлов.
+        u_int     nodes_count;        ///< Количество узлов.
         io_node **nodes;              ///< Узлы.
 
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
     public:
-        io_node * get_node( int node_n );
+        const io_node* get_node( u_int node_n ) const;
+
+        io_manager::io_node* get_node( u_int node_n );
 
 		u_int get_nodes_count();
 

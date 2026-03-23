@@ -6,7 +6,7 @@
 #include "device/device.h"
 #include "device/manager.h"
 
-class watchdog : public device, public i_Lua_save_device
+class watchdog : public device
     {
     public:
         enum class PARAM
@@ -28,8 +28,6 @@ class watchdog : public device, public i_Lua_save_device
 
         void set_string_property( const char* field, const char* value ) override;
         void set_property( const char* field, device* value ) override;
-
-        int save_device( char* buff ) override;
 
         const char* get_name_in_Lua() const override;
 

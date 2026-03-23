@@ -47,14 +47,17 @@ TEST( dll, use_print_stack_traceback )
 
 TEST( dll, switch_on_verbose )
     {
+    G_DEBUG = 0;
     switch_on_verbose( nullptr );
     EXPECT_EQ( 1, G_DEBUG );
     }
 
 TEST( dll, switch_off_verbose )
     {
+    G_DEBUG = 1;
     switch_off_verbose( nullptr );
     EXPECT_EQ( 0, G_DEBUG );
+    G_DEBUG = 1;
     }
 
 TEST( dll, lua_init )

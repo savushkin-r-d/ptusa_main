@@ -5,7 +5,7 @@ using namespace ::testing;
 
 void InitStationParams()
     {
-    printf( "===================================Init station params" );
+    printf( "===================================Init station params\n" );
     cipline_tech_object::set_station_par( 1, 1.5f );
     cipline_tech_object::set_station_par( 2, 0.3f );
     cipline_tech_object::set_station_par( 3, 0.1f );

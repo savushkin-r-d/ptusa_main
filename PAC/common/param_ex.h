@@ -58,7 +58,12 @@ class params_manager
     public:
         enum CONSTANTS
             {
-            C_TOTAL_PARAMS_SIZE = 1024 * 30, ///< Общий размер памяти параметров.
+            C_TOTAL_PARAMS_SIZE =
+#ifdef PTUSA_TEST
+                1024 * 100,  ///< Общий размер памяти параметров для тестов.
+#else
+                1024 * 30,   ///< Общий размер памяти параметров.
+#endif
 
             C_SYS_MEM_SIZE    = 10,          ///< Память для хранения CRC и т.д.
 
@@ -223,7 +228,7 @@ template < class type, bool is_float > class parameters
         /// @return - значение элемента с заданным индексом. Если индекс
         /// выходит за диапазон, возвращается значение заглушки - поля @ref
         /// stub ( значение 0 ).
-        type get_val( int idx )
+        type get_val( int idx ) const
             {
             return this->operator []( idx );
             }
@@ -308,7 +313,7 @@ template < class type, bool is_float > class parameters
             printf( "\n" );
             }
 
-        int save_device_ex( char *buff, const char *prefix, const char *new_name )
+        int save_device_ex( char *buff, const char *prefix, const char *new_name ) const
             {
             int res = sprintf( buff, "%s%s=\n", prefix, new_name );
             res += save_dev( buff + res, prefix );
@@ -316,7 +321,7 @@ template < class type, bool is_float > class parameters
             return res;
             }
 
-        int save_device( char *buff, const char *prefix )
+        int save_device( char *buff, const char *prefix ) const
             {
             int res = sprintf( buff, "%s%s=\n", prefix, name );
             res += save_dev( buff + res, prefix );
@@ -369,7 +374,7 @@ template < class type, bool is_float > class parameters
             }
 
     private:
-        int save_dev( char *buff, const char *prefix )
+        int save_dev( char *buff, const char *prefix ) const
             {
             int answer_size = sprintf( buff, "%s\t{\n%s\t",
                 prefix, prefix );
@@ -425,7 +430,7 @@ class run_time_params_float: public parameters < float, true >
 
     protected:
 
-        float get_val( int idx )
+        float get_val( int idx ) const
             {
             return parameters< float, true >::get_val( idx );
             }
@@ -452,7 +457,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
             }
 
     protected:
-        u_int_4 get_val( int idx )
+        u_int_4 get_val( int idx ) const
             {
             return parameters< u_int_4, false >::get_val( idx );
             }
@@ -554,7 +559,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
               }
 
     protected:
-        u_int_4 get_val( int idx )
+        u_int_4 get_val( int idx ) const
             {
             return saved_params< u_int_4, false >::get_val( idx );
             }
@@ -577,7 +582,7 @@ class saved_params_float: public saved_params < float, true >
               }
 
     protected:
-        float get_val( int idx )
+        float get_val( int idx ) const
             {
             return saved_params< float, true >::get_val( idx );
             }

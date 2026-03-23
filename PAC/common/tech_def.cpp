@@ -319,7 +319,7 @@ int tech_object::get_mode( u_int operation )
     return ( int )( ( u_int_4 ) ( state.at( idx / 32 ) >> idx % 32 ) & 1 );
     }
 //-----------------------------------------------------------------------------
-int tech_object::get_operation_state( u_int operation )
+int tech_object::get_operation_state( u_int operation ) const
     {
     if ( operation > operations_count || 0 == operation ) return 0;
 
@@ -780,7 +780,7 @@ int  tech_object::lua_on_start( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::save_device( char *buff )
+int tech_object::save_device( char *buff ) const
     {
     int res =
         sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,
