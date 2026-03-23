@@ -2352,14 +2352,36 @@ void operation_state::evaluate()
     auto reason = std::string();
     if ( int next_step = -1; if_action->is_jump( next_step, reason ) )
         {
-        if ( next_step >= 0 )
+        if ( next_step > 0 && static_cast<size_t>( next_step ) <= steps.size() )
             {
-            G_LOG->debug( "Переход к новому шагу - %s.", reason.c_str() );
+            G_LOG->debug( "'%s' operation %d '%s' (%s): "
+                "from %d to %d ('%s') - %s.",
+                owner->owner->get_name(),
+                operation_number,
+                ( *owner )[ operation_number ]->get_name(), get_name(),
+                active_step_n + 1,
+                next_step, steps[ next_step - 1 ]->get_name(),
+                reason.c_str() );
             if ( G_DEBUG )
                 {
                 if_action->print();
                 }
             to_step( next_step );
+            }
+        else
+            {
+            G_LOG->warning( "'%s' operation %d '%s' (%s): "
+                "invalid jump target %d (steps count %d) - %s.",
+                owner->owner->get_name(),
+                operation_number,
+                ( *owner )[ operation_number ]->get_name(), get_name(),
+                next_step,
+                static_cast<int>( steps.size() ),
+                reason.c_str() );
+            if ( G_DEBUG )
+                {
+                if_action->print();
+                }
             }
         }
 
