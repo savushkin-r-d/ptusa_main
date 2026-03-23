@@ -14,7 +14,7 @@
 ///
 /// Предоставляет доступ к IP-адресу узла, состоянию узла и командам для
 /// управления пробросом портов.
-class node_dev : public device, public i_Lua_save_device
+class node_dev : public device
 	{
 	public:
 
@@ -27,7 +27,7 @@ class node_dev : public device, public i_Lua_save_device
 
 		void evaluate_io() override;
 
-        int save_device( char* buff, const char* prefix ) override;
+        int save_device( char* buff ) const override;
 
 		const char* get_name_in_Lua() const override;
 
@@ -39,8 +39,8 @@ class node_dev : public device, public i_Lua_save_device
 #ifndef PTUSA_TEST
 	private:
 #endif
-        int web_value{ 0 };      ///< Состояние проброса порта 80.
-        int startup_value{ 0 };  ///< Состояние проброса порта 1962.
+        int web_value{};      ///< Состояние проброса порта 80.
+        int startup_value{};  ///< Состояние проброса порта 1962.
 
         io_manager::io_node* node{ nullptr };
 	};

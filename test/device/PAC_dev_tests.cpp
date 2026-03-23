@@ -6882,8 +6882,8 @@ TEST( node_dev, basic_functionality )
 
     // Сохранение устройства.
     const int BUFF_SIZE = 200;
-    std::array <char, BUFF_SIZE> buff { '\0' };
-    node->save_device( buff.data(), "" );
+    std::array <char, BUFF_SIZE> buff {};
+    node->save_device( buff.data() );
     EXPECT_STREQ( buff.data(), 
         "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
 
