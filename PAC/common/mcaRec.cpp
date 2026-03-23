@@ -6,10 +6,6 @@
 #include "dtime.h"
 #endif // MSAPANEL
 
-#ifdef PAC_PLCNEXT
-#include "stdlib.h"
-#endif
-
 #include "utf2cp1251.h"
 
 int TRecipeManager::startRecipeBlock = 0;
@@ -606,9 +602,11 @@ int TRecipeManager::SaveToFile(const char* filename)
         fwrite(recipeMemory, 1, recipeMemorySize, memFile);
         fclose(memFile);
 #ifdef PAC_PLCNEXT
-        char syscommand[] = "chmod 777 ";
-        strcat(syscommand, fname);
-        system(syscommand);
+        if ( chmod( fname, MODE_777 ) != 0 )
+            {
+            G_LOG->error( "Save recipe manager: chmod failed!",
+                script_n, FILE_CNT );
+            }
 #endif
         }
     return 0;
@@ -982,36 +980,38 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
     return 0;
 }
 
-int TMediumRecipeManager::SaveToFile(const char* filename)
-{
+int TMediumRecipeManager::SaveToFile( const char* filename )
+    {
 #ifdef DEBUG
-    printf("Saving recipes to file %s\n", filename);
+    printf( "Saving recipes to file %s\n", filename );
 #endif // DEBUG
     FILE* memFile = nullptr;
-    char fname[50];
+    char fname[ 50 ];
 #ifdef PAC_PLCNEXT
-    sprintf(fname, "/opt/main/%s", filename);
+    sprintf( fname, "/opt/main/%s", filename );
 #else
-    sprintf(fname, "%s", filename);
+    sprintf( fname, "%s", filename );
 #endif // PAC_PLCNEXT
-    memFile = fopen(fname, "r+b");
-    if (nullptr == memFile)
-    {
-        memFile = fopen(fname, "w+b");
-    }
-    if (memFile)
-    {
-        fseek(memFile, 0, SEEK_SET);
-        fwrite(recipeMemory, 1, recipeMemorySize, memFile);
-        fclose(memFile);
+    memFile = fopen( fname, "r+b" );
+    if ( nullptr == memFile )
+        {
+        memFile = fopen( fname, "w+b" );
+        }
+    if ( memFile )
+        {
+        fseek( memFile, 0, SEEK_SET );
+        fwrite( recipeMemory, 1, recipeMemorySize, memFile );
+        fclose( memFile );
 #ifdef PAC_PLCNEXT
-        char syscommand[] = "chmod 777 ";
-        strcat(syscommand, fname);
-        system(syscommand);
+        if ( chmod( fname, MODE_777 ) != 0 )
+            {
+            G_LOG->error( "Save recipe: chmod failed!",
+                script_n, FILE_CNT );
+            }
 #endif
-    }
+        }
     return 0;
-}
+    }
 
 int TMediumRecipeManager::LoadFromFile(const char* filename)
 {

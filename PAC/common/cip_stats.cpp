@@ -3,9 +3,6 @@
 #pragma warning(disable: 4996)
 #endif // WIN_OS
 #include "cip_stats.h"
-#ifdef PAC_PLCNEXT
-#include "stdlib.h"
-#endif
 
 cip_object_stats::cip_object_stats(const char* objname)
     {
@@ -179,9 +176,11 @@ void cip_stats::saveToFile(const char * filename)
     serialize(ofs);
     ofs.close();
 #ifdef PAC_PLCNEXT
-	char syscommand[] = "chmod 777 ";
-	strcat(syscommand, fname);
-	system(syscommand);
+    if ( chmod( fname, MODE_777 ) != 0 )
+        {
+        G_LOG->error( "Save CIP stats: chmod failed!",
+            script_n, FILE_CNT );
+        }
 #endif
     }
 
