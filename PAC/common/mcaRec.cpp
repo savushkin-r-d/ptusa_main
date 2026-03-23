@@ -604,7 +604,8 @@ int TRecipeManager::SaveToFile(const char* filename)
 #ifdef PAC_PLCNEXT
         if ( chmod( fname, MODE_777 ) != 0 )
             {
-            G_LOG->error( "Save recipe manager: chmod failed!" );
+            G_LOG->error( "Save recipe manager: chmod failed ('%s')!",
+                fname );
             }
 #endif
         }
@@ -1004,7 +1005,7 @@ int TMediumRecipeManager::SaveToFile( const char* filename )
 #ifdef PAC_PLCNEXT
         if ( chmod( fname, MODE_777 ) != 0 )
             {
-            G_LOG->error( "Save recipe: chmod failed!" );
+            G_LOG->error( "Save recipe: chmod failed ('%s')!", fname );
             }
 #endif
         }
