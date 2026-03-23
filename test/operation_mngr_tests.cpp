@@ -2165,6 +2165,15 @@ TEST( enable_step_by_signal, should_turn_off )
 	EXPECT_EQ( true, action.should_turn_off() );	//Flag was set to true.
     }
 
+TEST( enable_step_by_signal, is_any_group_active_with_empty_group )
+    {
+    auto action = enable_step_by_signal();
+    DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    action.add_dev( &test_DI1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
+    EXPECT_FALSE( action.is_any_group_active() );	//No active group.  
+    }
+
 TEST( enable_step_by_signal, is_any_group_active )
 	{
 	auto action = enable_step_by_signal();
