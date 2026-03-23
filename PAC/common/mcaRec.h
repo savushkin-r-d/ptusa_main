@@ -16,9 +16,9 @@
 #ifdef LINUX_OS
 // Права: чтение/запись/выполнение для всех.
 #include <sys/stat.h>
-const mode_t MODE_777 = S_IRUSR | S_IWUSR | S_IXUSR |  // Владелец.
-                        S_IRGRP | S_IWGRP | S_IXGRP |  // Группа.
-                        S_IROTH | S_IWOTH | S_IXOTH;   // Остальные.
+const mode_t MODE_FILE = S_IRUSR | S_IWUSR | // Владелец: чтение/запись.
+                         S_IRGRP | S_IWGRP | // Группа: чтение/запись.
+                         S_IROTH;            // Остальные: только чтение.
 #endif
 
 ///@brief Множитель размера строки для кодировки UTF-8

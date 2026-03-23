@@ -176,7 +176,7 @@ void cip_stats::saveToFile(const char * filename)
     serialize(ofs);
     ofs.close();
 #ifdef LINUX_OS
-    if ( chmod( fname, MODE_777 ) != 0 )
+    if ( chmod( fname, MODE_FILE ) != 0 )
         {
         G_LOG->error( "Save CIP stats: chmod failed ('%s')!", fname );
         }
