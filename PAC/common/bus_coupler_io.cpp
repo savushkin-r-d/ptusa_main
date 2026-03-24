@@ -1294,49 +1294,27 @@ io_manager::io_node::~io_node()
     }
 //-----------------------------------------------------------------------------
 io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
-    const char* name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
-    int AI_size ) : state( ST_NO_CONNECT ),
-    type( (TYPES)type ),
+    const char* new_name,
+    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
+    int AI_size ) : type( static_cast<TYPES>( type ) ),
     number( number ),
-
-    is_active( true ),
-
-    last_poll_time( get_millisec() ),
-    is_set_err( 0 ),
-    sock( 0 ),
-
     DO_cnt( DO_cnt ),
-    DO( 0 ),
-    DO_( 0 ),
     AO_cnt( AO_cnt ),
     AO_size( AO_size ),
-    AO{},
-    AO_{},
-    AO_offsets{},
-    AO_types{},
     DI_cnt( DI_cnt ),
-    DI{},
     AI_cnt( AI_cnt ),
-    AI_size( AI_size ),
-    AI{},
-    AI_offsets{},
-    AI_types{},
-    delay_time( C_INITIAL_RECONNECT_DELAY )
+    AI_size( AI_size )
     {
     if ( str_ip_address )
         {
         strcpy( ip_address, str_ip_address );
-        }
-    else
-        {
-        memset( ip_address, 0, sizeof( ip_address ) );
         }
 
     if ( ip_address[ 0 ] == 0 && type >= WAGO_750_XXX_ETHERNET )
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его IP адрес.", name );
+            "Узел \"%s\" отключен, так как не задан его IP адрес.", new_name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
@@ -1344,39 +1322,35 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его тип.", name );
+            "Узел \"%s\" отключен, так как не задан его тип.", new_name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
-    if ( name )
+    if ( new_name )
         {
-        strcpy( this->name, name );
-        }
-    else
-        {
-        memset( this->name, 0, sizeof( this->name ) );
+        strcpy( name, new_name );
         }
 
     if ( AI_cnt )
         {
-        AI_offsets = new u_int[ AI_cnt ]{ 0 };
-        AI_types = new u_int[ AI_cnt ]{ 0 };
+        AI_offsets = new u_int[ AI_cnt ]{};
+        AI_types = new u_int[ AI_cnt ]{};
         }
     if ( AO_cnt )
         {
-        AO_types = new u_int[ AO_cnt ]{ 0 };
-        AO_offsets = new u_int[ AO_cnt ]{ 0 };
+        AO_types = new u_int[ AO_cnt ]{};
+        AO_offsets = new u_int[ AO_cnt ]{};
         }
 
     if ( DI_cnt )
         {
-        DI = new u_char[ DI_cnt ]{ 0 };
+        DI = new u_char[ DI_cnt ]{};
         }
 
     if ( DO_cnt )
         {
-        DO = new u_char[ DO_cnt ]{ 0 };
-        DO_ = new u_char[ DO_cnt ]{ 0 };
+        DO = new u_char[ DO_cnt ]{};
+        DO_ = new u_char[ DO_cnt ]{};
         }
     }
 
@@ -1392,19 +1366,13 @@ void io_manager::io_node::print()
 //-----------------------------------------------------------------------------
 int io_manager::io_node::get_display_state() const
     {
-    if ( !is_active )
+    if ( !is_active || G_PAC_INFO()->is_emulator() )
         {
         return ST_NO_CONNECT;
         }
 
     if ( state != ST_OK )
         {
-        // If node has no I/O configured (emulator mode), return
-        // ST_NO_CONNECT instead of ST_ERROR.
-        if ( DI_cnt == 0 && DO_cnt == 0 && AI_cnt == 0 && AO_cnt == 0 )
-            {
-            return ST_NO_CONNECT;
-            }
         return ST_ERROR;
         }
 
