@@ -13,15 +13,6 @@
 #include "param_ex.h"
 #include "dtime.h"
 
-#ifdef LINUX_OS
-// Права: чтение/запись/выполнение для всех.
-#include <sys/stat.h>
-#include <cerrno>
-const mode_t MODE_FILE = S_IRUSR | S_IWUSR | // Владелец: чтение/запись.
-                         S_IRGRP | S_IWGRP   // Группа: чтение/запись.
-                         ;                   // Остальные: нет доступа.
-#endif
-
 ///@brief Множитель размера строки для кодировки UTF-8
 #define UNICODE_MULTIPLIER 3
 ///@brief Максимальная длина имени для рецепта

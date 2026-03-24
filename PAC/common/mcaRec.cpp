@@ -600,13 +600,6 @@ int TRecipeManager::SaveToFile( const char* filename )
         {
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
-#ifdef LINUX_OS
-        if ( fchmod( fileno( memFile ), MODE_FILE ) != 0 )
-            {
-            G_LOG->error( "Save recipe : fchmod ('%s') failed - %s!",
-                fname, std::strerror( errno ) );
-            }
-#endif
         fclose( memFile );
         }
     return 0;
@@ -1001,14 +994,6 @@ int TMediumRecipeManager::SaveToFile( const char* filename )
         {
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
-#ifdef LINUX_OS
-        if ( fchmod( fileno( memFile ), MODE_FILE ) != 0 )
-            {
-            G_LOG->error( "Save medium recipe: fchmod ('%s') failed - %s!",
-                fname, std::strerror( errno ) );
-
-            }
-#endif
         fclose( memFile );
         }
     return 0;
