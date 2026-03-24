@@ -1003,20 +1003,26 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         ( nd->prev_status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
 
     // PP mode has become active.
-    if ( is_pp_mode_active && !was_pp_mode_active && !nd->is_pp_mode_alarm_set )
+    if ( is_pp_mode_active && !was_pp_mode_active )
         {
-        nd->is_pp_mode_alarm_set = true;
-        PAC_critical_errors_manager::get_instance()->set_global_error(
-            PAC_critical_errors_manager::AC_SERVICE,
-            PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+        if ( !nd->is_pp_mode_alarm_set )
+            {
+            nd->is_pp_mode_alarm_set = true;
+            PAC_critical_errors_manager::get_instance()->set_global_error(
+                PAC_critical_errors_manager::AC_SERVICE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+            }
         }
     // PP mode has become inactive.
-    else if ( !is_pp_mode_active && nd->is_pp_mode_alarm_set )
+    else if ( !is_pp_mode_active && was_pp_mode_active )
         {
-        nd->is_pp_mode_alarm_set = false;
-        PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_SERVICE,
-            PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+        if ( nd->is_pp_mode_alarm_set )
+            {
+            nd->is_pp_mode_alarm_set = false;
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_SERVICE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+            }
         }
 
     nd->prev_status_register = nd->status_register;
