@@ -54,8 +54,13 @@ void PAC_info::eval()
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        const io_manager::io_node* node = 
+        const io_manager::io_node* node =
             io_manager::get_instance()->get_node( i );
+        if ( !node )
+            {
+            // Skip uninitialized or missing I/O nodes.
+            continue;
+            }
         int state = node->get_display_state();
         // Error or warning (PP mode) state detected.
         if ( state == io_manager::io_node::ST_ERROR || 

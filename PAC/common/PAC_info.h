@@ -152,6 +152,14 @@ class PAC_info: public i_Lua_save_device
         uint32_t restrictions_set_to_off_time{};
 
         uint32_t cycle_time{};
+
+        /// @brief Indicator: any node has communication error or warning.
+        /// 0 - all OK, 1 - at least one node has error or PP mode active.
+        int nodes_comm_error = 0;
+
+        /// @brief Indicator: any watchdog has error state.
+        /// 0 - all OK, 1 - at least one watchdog has error (state < 0).
+        int watchdog_error = 0;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();
