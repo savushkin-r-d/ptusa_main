@@ -109,7 +109,13 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
     last_NVRAM_pos( 0 ),
     last_EEPROM_pos( 0 )
     {
-    const int EEPROM_SIZE = 32768;
+    const int EEPROM_SIZE
+#ifdef PTUSA_TEST
+        = 10 * 32'768;
+#else
+        = 32'768;
+#endif
+     
     const int NVRAM_SIZE = 32;
 
 #ifdef WIN_OS

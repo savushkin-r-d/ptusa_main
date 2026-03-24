@@ -319,7 +319,7 @@ int tech_object::get_mode( u_int operation )
     return ( int )( ( u_int_4 ) ( state.at( idx / 32 ) >> idx % 32 ) & 1 );
     }
 //-----------------------------------------------------------------------------
-int tech_object::get_operation_state( u_int operation )
+int tech_object::get_operation_state( u_int operation ) const
     {
     if ( operation > operations_count || 0 == operation ) return 0;
 
@@ -780,7 +780,7 @@ int  tech_object::lua_on_start( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::save_device( char *buff )
+int tech_object::save_device( char *buff ) const
     {
     int res =
         sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,
@@ -823,7 +823,7 @@ int tech_object::save_device( char *buff )
     res += sprintf( buff + res, "\n\t\t},\n" );
 
     //Время простоя или текущей активной операции.    
-    auto duration = operations_manager->get_idle_time();
+    auto duration = operations_manager->get_idle_time_sec();
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
         "\tACTIVE_OPERATION_OR_IDLE_TIME={},\n", duration ).size;
 
