@@ -513,7 +513,6 @@ TEST( operation_state, to_step )
     test_op->add_step( "Process #1", STEP3, STEP2_TIME_IDX, MAX_TIME_IDX );
     test_op->add_step( "Process #2" );
 
-    G_DEBUG = 1;
     //Корректный переход к заданному шагу.
     testing::internal::CaptureStdout();
     auto STR_STEP1 =
@@ -587,6 +586,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_FALSE( test_op->is_active_run_extra_step( STEP3 ) );
 
 
+    G_DEBUG = 1;
     G_LUA_MANAGER->free_Lua();
     }
 
@@ -892,7 +892,6 @@ TEST( operation, on_extra_step_debug_output )
 
 
 	// Clean up
-	G_DEBUG = 0;
 	test_op->finalize();
 	G_LUA_MANAGER->free_Lua();
 	}
@@ -1368,8 +1367,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	if_action_in_run->set_int_property( "next_state_n", 0,
 		operation::state_idx::PAUSE );
 	test_DI_one.on();
-    testing::internal::CaptureStdout();
-    G_DEBUG = 1;
+    testing::internal::CaptureStdout();    
 	test_op->evaluate();    
     G_DEBUG = 0;
 
@@ -1387,6 +1385,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );		
 	test_op->finalize();
 
+    G_DEBUG = 1;
 	G_LUA_MANAGER->free_Lua();
 	}
 
@@ -1447,7 +1446,6 @@ TEST( operation, evaluate_off_last_step )
     tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 1, 1, 1 );
     auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
-    G_DEBUG = 1;
     test_op->add_step( "Тестовый шаг 1", -1, -1 );
     const int DELAY_TIME_S = 10;
     const int DELAY_PARAM_IDX = 2;
@@ -1466,7 +1464,6 @@ TEST( operation, evaluate_off_last_step )
     test_op->evaluate();    
     EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
-    G_DEBUG = 0;
     test_op->finalize();
     DeltaMilliSecSubHooker::set_default_time();
     G_LUA_MANAGER->free_Lua();
@@ -2168,6 +2165,15 @@ TEST( enable_step_by_signal, should_turn_off )
 	EXPECT_EQ( true, action.should_turn_off() );	//Flag was set to true.
     }
 
+TEST( enable_step_by_signal, is_any_group_active_with_empty_group )
+    {
+    auto action = enable_step_by_signal();
+    DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
+        device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+    action.add_dev( &test_DI1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
+    EXPECT_FALSE( action.is_any_group_active() );	//No active group.  
+    }
+
 TEST( enable_step_by_signal, is_any_group_active )
 	{
 	auto action = enable_step_by_signal();
@@ -2196,37 +2202,37 @@ TEST( enable_step_by_signal, is_any_group_active )
 
 
 TEST( jump_if_action, is_goto_next_step )
-	{
-	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+    {
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 
-	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
-	auto operation_mngr = test_tank.get_modes_manager();
-	auto operation = ( *operation_mngr )[ 1 ];
-	operation->add_step( "Тестовый шаг 1", -1, -1 );
-	operation->add_step( "Тестовый шаг 2", -1, -1 );
-	auto operation_state = operation[ 0 ][ 1 ];
-	auto step = operation_state[ 0 ][ 1 ];
+    test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+    auto operation_mngr = test_tank.get_modes_manager();
+    auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг 1", -1, -1 );
+    operation->add_step( "Тестовый шаг 2", -1, -1 );
+    auto operation_state = operation[ 0 ][ 1 ];
+    auto step = operation_state[ 0 ][ 1 ];
 
-	operation->start();
-	operation->evaluate();
+    operation->start();
+    operation->evaluate();
 
-	auto action = reinterpret_cast<jump_if_action*>
-		( ( *step )[ step::ACTIONS::A_JUMP_IF ] );
+    auto action = reinterpret_cast<jump_if_action*>
+        ( ( *step )[ step::ACTIONS::A_JUMP_IF ] );
 
-	int next_step = 0;
+    int next_step = 0;
     std::string reason = "";
-	auto is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_EQ( false, is_goto_next_step );  //Empty next state.
-	EXPECT_EQ( -1, next_step );
+    auto is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_EQ( false, is_goto_next_step );  //Empty next state.
+    EXPECT_EQ( -1, next_step );
 
-	const int SET_NEXT_STEP = 2;
-	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
-	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
+    const int SET_NEXT_STEP = 2;
+    EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
+    EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );
 
     reason.clear();
-	EXPECT_EQ( -1, action->get_int_property( "no_exist", 0 ) );
-	next_step = action->get_int_property( "next_step_n", 0 );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    EXPECT_EQ( -1, action->get_int_property( "no_exist", 0 ) );
+    next_step = action->get_int_property( "next_step_n", 0 );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
     is_goto_next_step = action->is_jump( next_step, reason );
     //Empty device list - unconditional jump.
     EXPECT_EQ( true, is_goto_next_step );
@@ -2247,74 +2253,109 @@ TEST( jump_if_action, is_goto_next_step )
     valve_DO1 test_valve( "V3" );
     action->add_dev( &test_valve, 1, 0 );
 
-	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
-	//перехода.
+    // По умолчанию все сигналы неактивны, к новому шагу не должно быть
+    // перехода.
     reason.clear();
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_EQ( false, is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_EQ( false, is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
 
-	//Устанавливаем сигналы, к новому шагу не должно быть перехода.
-	test_DI_1_1.on();
-	test_DI_1_2.on();
-	test_DI_2_1.on();
-	test_DI_2_2.on();
-	test_valve.off();
-    reason.clear();
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_EQ( false, is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
-
-	//Устанавливаем сигналы, к новому шагу должен быть переход.
-	test_DI_1_1.on();
+    // Устанавливаем сигналы, к новому шагу не должно быть перехода.
+    test_DI_1_1.on();
     test_DI_1_2.on();
-	test_DI_2_1.off();
-    test_DI_2_2.off();
-	test_valve.off();
+    test_DI_2_1.on();
+    test_DI_2_2.on();
+    test_valve.off();
     reason.clear();
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_EQ( true, is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_EQ( false, is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
+
+    // Устанавливаем сигналы, к новому шагу должен быть переход.
+    test_DI_1_1.on();
+    test_DI_1_2.on();
+    test_DI_2_1.off();
+    test_DI_2_2.off();
+    test_valve.off();
+    reason.clear();
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_EQ( true, is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
     EXPECT_EQ( reason, "по активности 'test_DI1_1', 'test_DI1_2' "
         "и по неактивности 'test_DI2_1', 'test_DI2_2'" );
 
-	//Устанавливаем сигналы (клапан V3), к новому шагу должен быть
+
+    // Устанавливаем сигналы (клапан V3), к новому шагу должен быть
     // переход.
-	test_DI_1_1.off();
-	test_DI_1_2.off();
-	test_DI_2_1.off();
-	test_DI_2_2.off();
-	test_valve.on();
+    test_DI_1_1.off();
+    test_DI_1_2.off();
+    test_DI_2_1.off();
+    test_DI_2_2.off();
+    test_valve.on();
     reason.clear();
-	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_EQ( true, is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    test_valve.set_cmd( "FB_ON_ST", 0, 1 );
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_EQ( true, is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
     EXPECT_EQ( reason, "по активности 'V3'" );
 
-	//Выполняем операцию, должен осуществиться переход к новому шагу.
-	operation->evaluate();
-	EXPECT_EQ( SET_NEXT_STEP, operation->get_run_active_step() );	
-	
+    // Выполняем операцию, перехода не будет - нет такого шага.
+    EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0,
+        SET_NEXT_STEP + 1 ) );
+    operation->evaluate();
+    EXPECT_NE( SET_NEXT_STEP, operation->get_run_active_step() );
 
-	//Проверяем переход по состоянию устройства "кнопка" ("SB").
-	operation->switch_off();
-	virtual_device test_SB1( "test_SB1", device::DT_SB, device::DST_SB_VIRT );
-	action->clear_dev();
-	action->add_dev( &test_SB1 );	
+    // Выполняем операцию, должен осуществиться переход к новому шагу.
+    EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );
+    operation->evaluate();
+    EXPECT_EQ( SET_NEXT_STEP, operation->get_run_active_step() );
 
-	//По умолчанию кнопка неактивна, к новому шагу не должно быть
-	//перехода.
+
+    // Проверяем переход по состоянию устройства "кнопка" ("SB").
+    operation->switch_off();
+    virtual_device test_SB1( "test_SB1", device::DT_SB, device::DST_SB_VIRT );
+    action->clear_dev();
+    action->add_dev( &test_SB1 );
+
+    // По умолчанию кнопка неактивна, к новому шагу не должно быть
+    // перехода.
     reason.clear();
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_FALSE( is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_FALSE( is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
 
-	//Устанавливаем состояние кнопки, к новому шагу должен быть переход.
-	test_SB1.on();
+    // Устанавливаем состояние кнопки, к новому шагу должен быть переход.
+    test_SB1.on();
     reason.clear();
-	is_goto_next_step = action->is_jump( next_step, reason );
-	EXPECT_TRUE( is_goto_next_step );
-	EXPECT_EQ( SET_NEXT_STEP, next_step );
+    is_goto_next_step = action->is_jump( next_step, reason );
+    EXPECT_TRUE( is_goto_next_step );
+    EXPECT_EQ( SET_NEXT_STEP, next_step );
     EXPECT_EQ( reason, "по активности 'test_SB1'" );
-	}
+    }
+
+TEST( operation_mngr, get_idle_time )
+    {
+    tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+    test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+    auto operation_mngr = test_tank.get_modes_manager();
+    auto operation = ( *operation_mngr )[ 1 ];
+    operation->add_step( "Тестовый шаг 1", -1, -1 );
+    operation->add_step( "Тестовый шаг 2", -1, -1 );
+
+    auto res_s = operation_mngr->get_idle_time_sec();
+    auto res_ms = operation_mngr->get_idle_time();
+    EXPECT_GE( res_ms, 0 );
+    EXPECT_GE( res_s, 0 );
+    EXPECT_GE( res_ms, 1000ULL * res_s );
+    test_tank.set_cmd( "ST", 0, 1 );
+
+    res_s = operation_mngr->get_idle_time_sec();
+    res_ms = operation_mngr->get_idle_time();
+    // After reset, idle time should be very small and less than 1 second.
+    EXPECT_GE( res_ms, 0 );
+    EXPECT_LT( res_ms, 1000ULL );
+    EXPECT_EQ( res_s, 0 );
+
+    operation->stop();
+    }

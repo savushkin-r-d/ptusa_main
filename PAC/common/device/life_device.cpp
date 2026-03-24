@@ -123,13 +123,6 @@ void watchdog::set_property( const char* field, device* value )
         }
     }
 //-----------------------------------------------------------------------------
-int watchdog::save_device( char* buff )
-    {
-    auto answer_size = device::save_device( buff, "" );
-
-    return answer_size;
-    }
-//-----------------------------------------------------------------------------
 const char* watchdog::get_name_in_Lua() const
     {
     return get_name();

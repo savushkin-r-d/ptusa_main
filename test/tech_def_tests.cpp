@@ -295,7 +295,8 @@ t.TANK0=
 	EXPECT_STREQ( REF_STR0, buff );
 
 	tech_object tank1( "TANK", 1, 1, "TANK1", 2, 1, 10, 10, 10, 10 );
-    tank1.get_modes_manager()->add_operation( "Test operation" );
+    tank1.get_modes_manager()->add_operation( "Test operation 1" );
+    tank1.get_modes_manager()->add_operation( "Test operation 2" );
     tank1.save_device( buff );
     auto REF_STR1 = R"(t.TANK1 = t.TANK1 or {}
 t.TANK1=

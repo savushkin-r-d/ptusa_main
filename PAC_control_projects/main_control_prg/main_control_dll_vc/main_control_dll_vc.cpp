@@ -20,7 +20,6 @@
 
 #ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
 bool G_NO_IO_NODES = true; // По умолчанию обмен с модулями отключен.
 bool G_READ_ONLY_IO_NODES = false;
@@ -165,5 +164,5 @@ __declspec( dllexport )
     luaopen_ptusa_main( lua_State* L )
     {
     luaL_openlib( L, "ptusa_main", ls_lib, 0 );
-    return 0;
+    return 1;
     }

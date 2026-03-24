@@ -66,6 +66,7 @@ TEST( errors_manager, evaluate )
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
+
 TEST( siren_lights_manager, siren_lights_manager )
     {
     const int BUFF_SIZE = 200;
@@ -73,6 +74,12 @@ TEST( siren_lights_manager, siren_lights_manager )
 
     G_SIREN_LIGHTS_MANAGER()->save_device( buff );
     EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );
+    }
+
+TEST( siren_lights_manager, get_name_in_Lua )
+    {
+    EXPECT_STREQ( "G_SIREN_MNGR",
+        G_SIREN_LIGHTS_MANAGER()->get_name_in_Lua() );
     }
 
 TEST( siren_lights_manager, set_cmd )
