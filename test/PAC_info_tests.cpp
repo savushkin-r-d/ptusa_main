@@ -184,6 +184,8 @@ TEST( PAC_info, save_device )
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
             "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+            "\tNODES_COMM_ERROR=1,\n"
+            "\tWATCHDOG_ERROR=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1001 );
     G_PAC_INFO()->eval();
