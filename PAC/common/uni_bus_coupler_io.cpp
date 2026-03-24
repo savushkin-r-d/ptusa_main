@@ -628,7 +628,8 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     return 0;
     }
 
-int uni_io_manager::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
+int uni_io_manager::read_input_registers(io_node* node, unsigned int address,
+    unsigned int quantity, unsigned char station /*= 0*/)
     {
     buff[0] = 's';
     buff[1] = 's';
@@ -658,7 +659,8 @@ int uni_io_manager::read_input_registers(io_node* node, unsigned int address, un
     return -1;
     }
 
-int uni_io_manager::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
+int uni_io_manager::write_holding_registers(io_node* node,
+    unsigned int address, unsigned int quantity, unsigned char station)
     {
     unsigned int bytes_cnt = quantity * 2;
     buff[0] = 's';

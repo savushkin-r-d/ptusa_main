@@ -3,48 +3,62 @@
 
 using namespace ::testing;
 
+class test_uni_io_manager1 : public uni_io_manager
+    {
+    public:
+        ~test_uni_io_manager1() override = default;
+
+        void activate_eror()
+            {
+            buff[ 1 ] = 0x10; // PP mode is active.
+            }
+
+        void deactivate_eror()
+            {
+            buff[ 1 ] = 0x0; // PP mode is inactive.
+            }
+
+        int read_input_registers( io_node* node, unsigned int address,
+            unsigned int quantity, unsigned char station /*= 0*/ ) override
+            {
+            resultbuff = buff;
+            return 1;
+            }
+    };
+
 // Test PP mode alarm activation.
-TEST( pp_mode_alarm, pp_mode_activation )
+TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+    G_IO_MANAGER()->init( 1 );
+    G_IO_MANAGER()->add_node( 0,
+        io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1", "A100",
+        0, 0, 0, 0, 0, 0 );
+    auto node = G_IO_MANAGER()->get_node( 0 );
 
-    // Simulate status register change to PP mode active.
-    node.prev_status_register = 0;
-    node.status_register = 0x0010; // Bit 4: PP mode active.
-    node.is_pp_mode_alarm_set = false;
+    test_uni_io_manager1 mngr;
+    mngr.activate_eror();
+    mngr.read_phoenix_status_register( node );
 
-    // Manually trigger the PP mode detection logic.
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
+    u_int_2 err_id = 0;
+    std::array<char, 300> buff{};
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+        err_id );
+    auto REF_STR = R"(	{
+	description = "5-1-1 : Узел ввода/вывода 'A100' ('127.0.0.1') - отключен для обслуживания",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)";
+    EXPECT_STREQ( buff.data(), REF_STR );    // Ошибка.
 
-    EXPECT_TRUE( is_pp_mode_active );
-    EXPECT_FALSE( was_pp_mode_active );
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    }
-
-// Test PP mode alarm deactivation.
-TEST( pp_mode_alarm, pp_mode_deactivation )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-
-    // Simulate status register change from PP mode to normal.
-    node.prev_status_register = 0x0010; // PP mode was active.
-    node.status_register = 0; // PP mode is now inactive.
-    node.is_pp_mode_alarm_set = true;
-
-    // Manually trigger the PP mode detection logic.
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-
-    EXPECT_FALSE( is_pp_mode_active );
-    EXPECT_TRUE( was_pp_mode_active );
-    EXPECT_TRUE( node.is_pp_mode_alarm_set );
+    mngr.deactivate_eror();
+    mngr.read_phoenix_status_register( node );
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+        err_id );
+    EXPECT_STREQ( buff.data(), "" );    // Нет ошибок.
     }
 
 // Test that PP mode alarm flag is initialized correctly.
@@ -156,30 +170,6 @@ TEST( pp_mode_alarm, transition_inactive_to_active )
     EXPECT_FALSE( was_pp_mode_active );
     }
 
-// Test PP mode transition from active to inactive.
-TEST( pp_mode_alarm, transition_active_to_inactive )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Start with PP mode active.
-    node.prev_status_register = 0x0020; // Bit 5 set.
-    node.status_register = 0x0020;
-    node.is_pp_mode_alarm_set = true;
-    
-    // Transition to PP mode inactive.
-    node.prev_status_register = node.status_register;
-    node.status_register = 0;
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    EXPECT_FALSE( is_pp_mode_active );
-    EXPECT_TRUE( was_pp_mode_active );
-    }
-
 // Test no alarm when PP mode stays active.
 TEST( pp_mode_alarm, pp_mode_stays_active )
     {
@@ -260,86 +250,6 @@ TEST( pp_mode_alarm, read_status_with_error_flag )
     EXPECT_EQ( 0x0010, node.status_register );
     EXPECT_EQ( 0, node.prev_status_register );
     EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    }
-
-// Test PP mode alarm activation through read_phoenix_status_register.
-TEST( pp_mode_alarm, read_status_activates_alarm )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Simulate transition to PP mode.
-    node.read_io_error_flag = false;
-    node.prev_status_register = 0;
-    node.status_register = 0x0001; // Will be set by read.
-    node.is_pp_mode_alarm_set = false;
-    
-    // Manually set resultbuff to simulate successful read.
-    mngr.resultbuff[0] = 0;
-    mngr.resultbuff[1] = 0x01; // Bit 0 set.
-    
-    // Note: We can't fully test this without mocking read_input_registers,
-    // but we can test the state change logic.
-    // Simulate what would happen after a successful read.
-    node.status_register = 0x0001;
-    
-    // Manually trigger the state change logic.
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    if ( is_pp_mode_active && !was_pp_mode_active )
-        {
-        if ( !node.is_pp_mode_alarm_set )
-            {
-            node.is_pp_mode_alarm_set = true;
-            // In real code: set_global_error would be called.
-            }
-        }
-    
-    node.prev_status_register = node.status_register;
-    
-    EXPECT_TRUE( node.is_pp_mode_alarm_set );
-    EXPECT_EQ( 0x0001, node.prev_status_register );
-    }
-
-// Test PP mode alarm deactivation through status register update.
-TEST( pp_mode_alarm, read_status_deactivates_alarm )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Start with PP mode active.
-    node.read_io_error_flag = false;
-    node.prev_status_register = 0x0010;
-    node.status_register = 0x0010;
-    node.is_pp_mode_alarm_set = true;
-    
-    // Simulate transition to normal mode.
-    node.status_register = 0;
-    
-    // Manually trigger the state change logic.
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    if ( !is_pp_mode_active && was_pp_mode_active )
-        {
-        if ( node.is_pp_mode_alarm_set )
-            {
-            node.is_pp_mode_alarm_set = false;
-            // In real code: reset_global_error would be called.
-            }
-        }
-    
-    node.prev_status_register = node.status_register;
-    
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    EXPECT_EQ( 0, node.prev_status_register );
     }
 
 // Test that alarm is not set again if already active.

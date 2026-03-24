@@ -128,7 +128,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     int res = 0;
-
+    str[ 0 ] = 0;
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
