@@ -6849,116 +6849,76 @@ TEST( timer_manager, get_count )
     }
 
 
-TEST( DO1, get_state_with_node_check_ok )
+class DO1_test : public ::testing::Test
     {
-    G_PAC_INFO()->emulation_off();
-    
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
-    
-    DO1 dev( "TEST_DO", device::DT_DO, device::DST_DO );
-    dev.init_and_alloc( 1, 0, 0, 0 );
-    dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
-    
-    auto node = mngr.get_node( 0 );
-    node->is_active = true;
-    node->state = io_manager::io_node::ST_OK;
-    node->status_register = 0;
-    
-    // Set DO channel value to 1.
-    *dev.DO_channels.char_write_values[ 0 ] = 1;
-    
+    protected:
+        void SetUp() override
+            {
+            G_PAC_INFO()->emulation_off();
+
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
+
+            dev.init_and_alloc( 1, 0, 0, 0 );
+            dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+            // Set DO channel value to 1.
+            *dev.DO_channels.char_write_values[ 0 ] = 1;
+
+            node = mngr.get_node( 0 );
+            node->is_active = true;
+            node->state = io_manager::io_node::ST_OK;
+            node->status_register = 0;
+            };
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            G_PAC_INFO()->emulation_on();
+            };
+
+        DO1 dev{ "TEST_DO", device::DT_DO, device::DST_DO };
+        io_manager::io_node* node{};
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+TEST_F( DO1_test, get_state_with_node_check_ok )
+    {
     // Node is OK, should return channel value.
     EXPECT_EQ( 1, dev.get_state() );
-    
-    io_manager::replace_instance( prev_mngr );
-    G_PAC_INFO()->emulation_on();
+
+    // Set DO channel value to 0.
+    *dev.DO_channels.char_write_values[ 0 ] = 0;
+
+    // Node is OK, should return channel value.
+    EXPECT_EQ( 0, dev.get_state() );
     }
 
-TEST( DO1, get_state_with_node_pp_mode )
+TEST_F( DO1_test, get_state_with_node_pp_mode )
     {
-    G_PAC_INFO()->emulation_off();
-    
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
-    
-    DO1 dev( "TEST_DO", device::DT_DO, device::DST_DO );
-    dev.init_and_alloc( 1, 0, 0, 0 );
-    dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
-    
-    auto node = mngr.get_node( 0 );
-    node->is_active = true;
-    node->state = io_manager::io_node::ST_OK;
     node->status_register = 0x0010;  // PP mode active.
-    
-    // Set DO channel value to 1.
-    *dev.DO_channels.char_write_values[ 0 ] = 1;
-    
+
     // Node in PP mode, should return error (-1).
     EXPECT_EQ( -1, dev.get_state() );
-    
-    io_manager::replace_instance( prev_mngr );
-    G_PAC_INFO()->emulation_on();
     }
 
-TEST( DO1, get_state_with_node_not_connected )
+TEST_F( DO1_test, get_state_with_node_not_connected )
     {
-    G_PAC_INFO()->emulation_off();
-    
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
-    
-    DO1 dev( "TEST_DO", device::DT_DO, device::DST_DO );
-    dev.init_and_alloc( 1, 0, 0, 0 );
-    dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
-    
-    auto node = mngr.get_node( 0 );
-    node->is_active = true;
     node->state = io_manager::io_node::ST_NO_CONNECT;
-    
-    // Set DO channel value to 1.
-    *dev.DO_channels.char_write_values[ 0 ] = 1;
-    
+
     // Node not connected, should return error (-1).
     EXPECT_EQ( -1, dev.get_state() );
-    
-    io_manager::replace_instance( prev_mngr );
-    G_PAC_INFO()->emulation_on();
     }
 
-TEST( DO1, get_state_with_node_not_active )
+TEST_F( DO1_test, get_state_with_node_not_active )
     {
-    G_PAC_INFO()->emulation_off();
-    
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
-    
-    DO1 dev( "TEST_DO", device::DT_DO, device::DST_DO );
-    dev.init_and_alloc( 1, 0, 0, 0 );
-    dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
-    
-    auto node = mngr.get_node( 0 );
     node->is_active = false;  // Node not active.
-    node->state = io_manager::io_node::ST_OK;
-    
-    // Set DO channel value to 1.
-    *dev.DO_channels.char_write_values[ 0 ] = 1;
-    
+
     // Node not active, should return error (-1).
     EXPECT_EQ( -1, dev.get_state() );
-    
-    io_manager::replace_instance( prev_mngr );
-    G_PAC_INFO()->emulation_on();
     }
