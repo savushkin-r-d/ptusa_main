@@ -32,7 +32,7 @@ signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int DO1::get_state()
+int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
@@ -161,7 +161,7 @@ const char* signal_column_iolink::get_error_description()
     return iol_dev.get_error_description( get_error_id() );
     }
 //-----------------------------------------------------------------------------
-int signal_column_iolink::get_state()
+int signal_column_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -209,7 +209,7 @@ void camera::direct_on()
     set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 1 );
     }
 
-int camera::get_result( int n )
+int camera::get_result( int n ) const
     {
     if ( !G_PAC_INFO()->is_emulator() )
         {
@@ -219,10 +219,12 @@ int camera::get_result( int n )
     return result;
     }
 
-int camera::save_device_ex( char* buff )
+int camera::save_device_ex( char* buff ) const
     {
-    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT=%d, READY=%d, ",
+    // LCOV_EXCL_START
+    auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "RESULT={}, READY={}, ",
         get_result(), is_cam_ready ) ).size;
+    // LCOV_EXCL_STOP
     return res;
     }
 
@@ -305,7 +307,7 @@ void camera_DI3::evaluate_io()
         }
     }
 
-int camera_DI3::get_result( int n )
+int camera_DI3::get_result( int n ) const
     {
     switch ( n )
         {
@@ -380,7 +382,7 @@ dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
     {
     }
 //-----------------------------------------------------------------------------
-float dev_stub::get_value()
+float dev_stub::get_value() const
     {
     return 0;
     }
@@ -415,12 +417,12 @@ void dev_stub::set_state( int new_state )
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE dev_stub::get_valve_state()
+valve::VALVE_STATE dev_stub::get_valve_state() const
     {
     return VALVE_STATE::V_OFF;
     }
 //-----------------------------------------------------------------------------
-int dev_stub::get_state()
+int dev_stub::get_state() const
     {
     return 0;
     }
@@ -465,12 +467,12 @@ void dev_stub::reset()
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
-u_int dev_stub::get_quantity()
+u_int dev_stub::get_quantity() const
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
-float dev_stub::get_flow()
+float dev_stub::get_flow() const
     {
     return 0.;
     }
@@ -490,7 +492,7 @@ void dev_stub::abs_reset()
     // Ничего не делаем.
     }
 //-----------------------------------------------------------------------------
-u_int dev_stub::get_abs_quantity()
+u_int dev_stub::get_abs_quantity() const
     {
     return 0;
     }
@@ -525,7 +527,7 @@ threshold_regulator::threshold_regulator( const char* name ) :device( name,
     set_par_name( static_cast<int>( PARAM::P_is_reverse ), 0, "P_is_reverse" );
     }
 //-----------------------------------------------------------------------------
-int threshold_regulator::get_state()
+int threshold_regulator::get_state() const
     {
     return static_cast<int>( state );
     };
@@ -569,7 +571,7 @@ const char* threshold_regulator::get_name_in_Lua() const
     return get_name();
     };
 //-----------------------------------------------------------------------------
-float threshold_regulator::get_value()
+float threshold_regulator::get_value() const
     {
     return static_cast<float>( out_state );
     };
@@ -631,11 +633,6 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         }
     }
 //-----------------------------------------------------------------------------
-int threshold_regulator::save_device( char* buff )
-    {
-    return device::save_device( buff, "\t" );
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 power_unit::power_unit( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type  ) :
@@ -649,12 +646,12 @@ power_unit::power_unit( const char* dev_name,
         "Struct `process_data_out` must be the 7 bytes size." );
     }
 //-----------------------------------------------------------------------------
-float power_unit::get_value()
+float power_unit::get_value() const
     {
     return v;
     }
 //-----------------------------------------------------------------------------
-int power_unit::get_state()
+int power_unit::get_state() const
     {
     return st;
     }
@@ -718,7 +715,7 @@ void power_unit::evaluate_io()
 
 
     char buff[ 500 ] = { 0 };
-    save_device( buff, "" );
+    save_device( buff );
     fmt::println( "{}", buff );
 #endif
 
@@ -790,8 +787,9 @@ float power_unit::decode_nominal_current( uint8_t code )
         }
     }
 //-----------------------------------------------------------------------------
-int power_unit::save_device_ex( char* buff )
+int power_unit::save_device_ex( char* buff ) const
     {
+    // LCOV_EXCL_START
     auto res = fmt::format_to_n( buff, MAX_COPY_SIZE,
         "NOMINAL_CURRENT_CH={{{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}}}, ",
         decode_nominal_current( p_data_in.nominal_current_ch1 ),
@@ -801,7 +799,7 @@ int power_unit::save_device_ex( char* buff )
         decode_nominal_current( p_data_in.nominal_current_ch5 ),
         decode_nominal_current( p_data_in.nominal_current_ch6 ),
         decode_nominal_current( p_data_in.nominal_current_ch7 ),
-        decode_nominal_current( p_data_in.nominal_current_ch8 ) );
+        decode_nominal_current( p_data_in.nominal_current_ch8 ) );    
     auto size = static_cast<int>( res.size );
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -832,6 +830,7 @@ int power_unit::save_device_ex( char* buff )
         "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
     size += res.size;    
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE, "ERR={}, ", err );
+    // LCOV_EXCL_STOP
     size += res.size;
 
     *res.out = 0;
@@ -1056,7 +1055,7 @@ base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     device::direct_set_state( static_cast<int>( STATES::S_WORK ) );
     }
 //-----------------------------------------------------------------------------
-int base_counter::get_state()
+int base_counter::get_state() const
     {
     return device::get_state();
     }
@@ -1144,17 +1143,17 @@ float base_counter::calculate_quantity( float& val, float& last_read_val,
     return delta;
     }
 //-----------------------------------------------------------------------------
-float base_counter::get_value()
+float base_counter::get_value() const
     {
     return value;
     }
 //-----------------------------------------------------------------------------
-u_int base_counter::get_quantity()
+u_int base_counter::get_quantity() const
     {
     return static_cast<u_int>( value );
     }
 //-----------------------------------------------------------------------------
-u_int base_counter::get_abs_quantity()
+u_int base_counter::get_abs_quantity() const
     {
     return static_cast<u_int>( abs_value );
     }
@@ -1389,12 +1388,14 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     };
 //-----------------------------------------------------------------------------
-int base_counter::save_device_ex( char* buff )
+int base_counter::save_device_ex( char* buff ) const
     {
+    // LCOV_EXCL_START
     return fmt::format_to_n( buff, MAX_COPY_SIZE,
         "ABS_V={}, DAY_T1={}, PREV_DAY_T1={}, DAY_T2={}, PREV_DAY_T2={}, ",
         get_abs_quantity(), day_t1_value, prev_day_t1_value,
         day_t2_value, prev_day_t2_value ).size;
+    // LCOV_EXCL_STOP
     }
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description()
@@ -1458,7 +1459,7 @@ float counter::get_max_raw_value() const
     return USHRT_MAX;
     }
 //-----------------------------------------------------------------------------
-float counter::get_flow()
+float counter::get_flow() const
     {
     return .0f;
     }
@@ -1484,7 +1485,7 @@ counter_f::counter_f( const char *dev_name ) :
     set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
     }
 //-----------------------------------------------------------------------------
-int counter_f::get_state()
+int counter_f::get_state() const
     {
     if ( get_flow() == -1. )
         {
@@ -1494,7 +1495,7 @@ int counter_f::get_state()
     return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
-float counter_f::get_flow()
+float counter_f::get_flow() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1508,7 +1509,7 @@ float counter_f::get_flow()
         }
     }
 //-----------------------------------------------------------------------------
-int counter_f::save_device_ex( char *buff )
+int counter_f::save_device_ex( char *buff ) const
     {
     int res = counter::save_device_ex( buff );
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, ",
@@ -1591,7 +1592,7 @@ float counter_iolink::get_temperature() const
     return TE_GRADIENT * in_info.temperature;
     }
 //-----------------------------------------------------------------------------
-int counter_iolink::get_state()
+int counter_iolink::get_state() const
     {
     if ( !G_PAC_INFO()->is_emulator() )
         {
@@ -1627,13 +1628,13 @@ float counter_iolink::get_max_raw_value() const
     return 499999999.99f; ///< Максимальное значение счетчика.
     }
 //-----------------------------------------------------------------------------
-float counter_iolink::get_flow()
+float counter_iolink::get_flow() const
     {
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
         + in_info.flow * get_flow_gradient();
     }
 //-----------------------------------------------------------------------------
-int counter_iolink::save_device_ex( char* buff )
+int counter_iolink::save_device_ex( char* buff ) const
     {
     int res = base_counter::save_device_ex( buff );
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
@@ -1668,17 +1669,17 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     };
 //-----------------------------------------------------------------------------
-u_int counter_iolink::get_quantity()
+u_int counter_iolink::get_quantity() const
     {
     return static_cast<u_int>( get_value() );
     }
 //-----------------------------------------------------------------------------
-u_int counter_iolink::get_abs_quantity()
+u_int counter_iolink::get_abs_quantity() const
     {
     return static_cast<u_int>( mL_in_L * get_abs_value() );
     }
 //-----------------------------------------------------------------------------
-float counter_iolink::get_value()
+float counter_iolink::get_value() const
     {
     return base_counter::get_value() * mL_in_L;
     }
@@ -1752,7 +1753,7 @@ void DI1::direct_off()
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
-int DI1::get_state()
+int DI1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
@@ -1785,7 +1786,7 @@ temperature_e::temperature_e( const char* dev_name ) : AI1( dev_name, DT_TE, DST
     param_emulator( 20, 2 );    //Average room temperature.
     }
 //-----------------------------------------------------------------------------
-float temperature_e::get_value()
+float temperature_e::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1811,7 +1812,7 @@ temperature_e_analog::temperature_e_analog( const char* dev_name ) :
     param_emulator( 20, 2 );    //Average room temperature.
     }
 //-----------------------------------------------------------------------------
-float temperature_e_analog::get_value()
+float temperature_e_analog::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1841,7 +1842,7 @@ temperature_e_iolink::temperature_e_iolink( const char* dev_name ) :
         start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
-float temperature_e_iolink::get_value()
+float temperature_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
@@ -1856,7 +1857,7 @@ float temperature_e_iolink::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int temperature_e_iolink::get_state()
+int temperature_e_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -1892,7 +1893,7 @@ temperature_e_iolink_tm311::temperature_e_iolink_tm311( const char* dev_name ) :
         start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
-float temperature_e_iolink_tm311::get_value()
+float temperature_e_iolink_tm311::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
@@ -1907,7 +1908,7 @@ float temperature_e_iolink_tm311::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int temperature_e_iolink_tm311::get_state()
+int temperature_e_iolink_tm311::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -1996,7 +1997,7 @@ void virtual_wages::direct_set_value( float new_value )
     value = new_value;
     }
 
-float virtual_wages::get_value()
+float virtual_wages::get_value() const
     {
     return value;
     }
@@ -2011,7 +2012,7 @@ void virtual_wages::direct_on()
     state = 1;
     }
 
-int virtual_wages::get_state()
+int virtual_wages::get_state() const
     {
     return state;
     }
@@ -2077,7 +2078,7 @@ float wages_RS232::get_value_from_wages()
     return value;
     }
 
-float wages_RS232::get_value()
+float wages_RS232::get_value() const
     {
     return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
     }
@@ -2101,7 +2102,7 @@ void wages_RS232::set_command( int new_state )
         }
     }
 
-int wages_RS232::get_state()
+int wages_RS232::get_state() const
     {
     //Здесь мы должны получать состояние весов. Например: идёт взвешивание,
     //взвешивание успешно завершилось, ошибка взвешивания (отрицательные
@@ -2140,7 +2141,7 @@ wages_eth::wages_eth( const char* dev_name ) :
     set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     }
 
-float wages_eth::get_value()
+float wages_eth::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2154,7 +2155,7 @@ float wages_eth::get_value()
     return 0.0f;
     }
 
-int wages_eth::get_state()
+int wages_eth::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2310,12 +2311,12 @@ void wages_pxc_axl::reset_tare()
     set_par( static_cast<int>( CONSTANTS::P_CZ ), 0, 0 );
     }
 
-float wages_pxc_axl::get_value()
+float wages_pxc_axl::get_value() const
     {
     return w + get_par( static_cast<int>( CONSTANTS::P_CZ ) );
     }
 
-int wages_pxc_axl::get_state()
+int wages_pxc_axl::get_state() const
     {
     return st;
     }
@@ -2357,7 +2358,7 @@ void wages::tare()
     return;
     }
 //-----------------------------------------------------------------------------
-float wages::get_weight()
+float wages::get_weight() const
     {
     if (get_delta_millisec(filter_time) > 500)
         {
@@ -2381,7 +2382,7 @@ float wages::get_weight()
     return weight + get_par(P_CZ, 0);
     }
 //-----------------------------------------------------------------------------
-float wages::get_value()
+float wages::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return weight + get_par(P_CZ, 0);
 
@@ -2406,12 +2407,12 @@ void wages::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-int wages::get_state()
+int wages::get_state() const
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wages::save_device_ex( char* buff )
+int wages::save_device_ex( char* buff ) const
     {
     return static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE, "W={:.3f}, ",
         get_value() ).size );
@@ -2432,7 +2433,7 @@ level_e_cyl::level_e_cyl( const char* dev_name ) : level(
     set_par_name( P_R, start_param_idx, "P_R" );
     }
 //-----------------------------------------------------------------------------
-int level_e_cyl::calc_volume()
+int level_e_cyl::calc_volume() const
     {
     float v = get_par( P_R, start_param_idx );
     v = (float)M_PI * v * v *  get_value() *
@@ -2453,7 +2454,7 @@ level_e_cone::level_e_cone( const char* dev_name ) : level(
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
     }
 //-----------------------------------------------------------------------------
-int level_e_cone::calc_volume()
+int level_e_cone::calc_volume() const
     {
     float r = get_par( P_R, start_param_idx );
     float tg_a = 0;
@@ -2498,7 +2499,7 @@ void valve_DO1::direct_off()
     set_DO( DO_INDEX, 0 );
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_DO1::get_valve_state()
+valve::VALVE_STATE valve_DO1::get_valve_state() const
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -2508,7 +2509,7 @@ valve::VALVE_STATE valve_DO1::get_valve_state()
     return (VALVE_STATE)get_DO( DO_INDEX );
     };
 //-----------------------------------------------------------------------------
-bool valve_DO1::get_fb_state()
+bool valve_DO1::get_fb_state() const
     {
     return true;
     }
@@ -2525,7 +2526,7 @@ void virtual_motor::direct_set_value( float new_value )
     value = new_value;
     }
 
-float virtual_motor::get_value()
+float virtual_motor::get_value() const
     {
     return value;
     }
@@ -2540,7 +2541,7 @@ void virtual_motor::direct_on()
     state = 1;
     }
 
-int virtual_motor::get_state()
+int virtual_motor::get_state() const
     {
     return state;
     }
@@ -2558,7 +2559,7 @@ motor::motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }
 //-----------------------------------------------------------------------------
-float motor::get_value()
+float motor::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
@@ -2654,7 +2655,7 @@ void motor::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-int motor::get_state()
+int motor::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -2801,7 +2802,7 @@ void motor::direct_off()
     direct_set_value( 0 );
     }
 //-----------------------------------------------------------------------------
-int motor::save_device_ex( char *buff )
+int motor::save_device_ex( char *buff ) const
     {
     int res = 0;
     if ( G_PAC_INFO()->is_emulator() )
@@ -2986,14 +2987,14 @@ level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
     }
 #endif
 
-float level_s_iolink::get_value()
+float level_s_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_value();
 
     return v;
     }
 
-int level_s_iolink::get_state()
+int level_s_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -3053,7 +3054,7 @@ level_e_iolink::level_e_iolink( const char *dev_name ) :
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
     }
 //-----------------------------------------------------------------------------
-int level_e_iolink::calc_volume()
+int level_e_iolink::calc_volume() const
     {
     int v_kg = 0;
     float v = 0.0;
@@ -3106,7 +3107,7 @@ int level_e_iolink::calc_volume()
     return v_kg;
     }
 //-----------------------------------------------------------------------------
-float level_e_iolink::get_value()
+float level_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
@@ -3120,7 +3121,7 @@ float level_e_iolink::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int level_e_iolink::get_state()
+int level_e_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
 
@@ -3175,12 +3176,12 @@ pressure_e::pressure_e( const char* dev_name ) : AI1( dev_name, DT_PT, DST_NONE,
     set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
     }
 //-----------------------------------------------------------------------------
-float pressure_e::get_max_val()
+float pressure_e::get_max_val() const
     {
     return get_par( P_MAX_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-float pressure_e::get_min_val()
+float pressure_e::get_min_val() const
     {
     return get_par( P_MIN_V, start_param_idx );
     }
@@ -3376,7 +3377,7 @@ pressure_e_iolink::ARTICLE pressure_e_iolink::get_article_n() const
     }
 #endif
 //-----------------------------------------------------------------------------
-float pressure_e_iolink::get_value()
+float pressure_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
 
@@ -3390,7 +3391,7 @@ float pressure_e_iolink::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int pressure_e_iolink::get_state()
+int pressure_e_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
@@ -3411,7 +3412,7 @@ circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
     {
     }
 //-----------------------------------------------------------------------------
-int circuit_breaker::save_device_ex( char *buff )
+int circuit_breaker::save_device_ex( char *buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "ERR={}, M={}, ",
         err, m ) ).size;
@@ -3537,14 +3538,14 @@ void circuit_breaker::direct_off()
         }
     }
 //-----------------------------------------------------------------------------
-float circuit_breaker::get_value()
+float circuit_breaker::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
 
     return v;
     }
 //-----------------------------------------------------------------------------
-int circuit_breaker::get_state()
+int circuit_breaker::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
@@ -3632,12 +3633,12 @@ concentration_e::concentration_e( const char* dev_name,
     set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
     }
 //-----------------------------------------------------------------------------
-float concentration_e::get_max_val()
+float concentration_e::get_max_val() const
     {
     return get_par( P_MAX_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-float concentration_e::get_min_val()
+float concentration_e::get_min_val() const
     {
     return get_par( P_MIN_V, start_param_idx );
     }
@@ -3648,7 +3649,7 @@ concentration_e_ok::concentration_e_ok( const char* dev_name ) : concentration_e
     {
     }
 
-int concentration_e_ok::get_state()
+int concentration_e_ok::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return concentration_e::get_state();
 
@@ -3656,13 +3657,13 @@ int concentration_e_ok::get_state()
     return i == 1 ? concentration_e::get_state() : -1;
     }
 
-int concentration_e_ok::save_device_ex( char* buff )
+int concentration_e_ok::save_device_ex( char* buff ) const
     {
     int res = 0;
     if ( G_PAC_INFO()->is_emulator() )
         {
         res = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE,
-            "OK={1}, " ).size );
+            "OK=1, " ).size );
         }
     else
         {
@@ -3687,10 +3688,12 @@ concentration_e_iolink::~concentration_e_iolink()
     info = nullptr;
     }
 //-----------------------------------------------------------------------------
-int concentration_e_iolink::save_device_ex( char *buff )
+int concentration_e_iolink::save_device_ex( char *buff ) const
     {
+    // LCOV_EXCL_START
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "T={:.1f}, ",
         get_temperature() ) ).size;
+    // LCOV_EXCL_STOP
 
     return res;
     }
@@ -3700,7 +3703,7 @@ float concentration_e_iolink::get_temperature() const
     return .1f * info->temperature;
     }
 //-----------------------------------------------------------------------------
-float concentration_e_iolink::get_value()
+float concentration_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
 
@@ -3714,7 +3717,7 @@ float concentration_e_iolink::get_value()
         }
     }
 //-----------------------------------------------------------------------------
-int concentration_e_iolink::get_state()
+int concentration_e_iolink::get_state() const
 	{
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
@@ -3771,12 +3774,12 @@ analog_input::analog_input( const char* dev_name ) : AI1( dev_name, DT_AI,
     set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
     }
 //-----------------------------------------------------------------------------
-float analog_input::get_max_val()
+float analog_input::get_max_val() const
     {
     return get_par( P_MAX_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-float analog_input::get_min_val()
+float analog_input::get_min_val() const
     {
     return get_par( P_MIN_V, start_param_idx );
     }
@@ -3803,7 +3806,7 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
             get_name(), prop, idx, val );
         }
 
-    analog_emulator& emulator = get_emulator();
+    auto& emulator = get_emulator();
     if ( strcmp( prop, "M_EXP" ) == 0 )
         {
         emulator.param( static_cast<float>( val ), emulator.get_st_deviation() );
@@ -3824,17 +3827,19 @@ int analog_io_device::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 
-int analog_io_device::save_device_ex( char* buff )
+int analog_io_device::save_device_ex( char* buff ) const
     {
-    auto res = fmt::format_to_n( 
-        buff, MAX_COPY_SIZE, 
+    // LCOV_EXCL_START
+    auto res = fmt::format_to_n(
+        buff, MAX_COPY_SIZE,
         "E={}, M_EXP={:.1f}, S_DEV={:.1f}, ",
         is_emulation() ? 1 : 0, get_emulator().get_m_expec(),
-        get_emulator().get_st_deviation());
+        get_emulator().get_st_deviation() );
+    // LCOV_EXCL_STOP
     return static_cast<int>( res.size );
     }
 //-----------------------------------------------------------------------------
-float analog_io_device::get_value()
+float analog_io_device::get_value() const
     {
     if ( is_emulation() ) return get_emulator().get_value();
     
@@ -3999,7 +4004,7 @@ void virtual_device::direct_set_value( float new_value )
     value = new_value;
     }
 
-float virtual_device::get_value()
+float virtual_device::get_value() const
     {
     return value;
     }
@@ -4014,7 +4019,7 @@ void virtual_device::direct_on()
     state = 1;
     }
 
-int virtual_device::get_state()
+int virtual_device::get_state() const
     {
     return state;
     }
@@ -4068,7 +4073,7 @@ motor_altivar::motor_altivar( const char* dev_name,
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }
 
-int motor_altivar::save_device_ex(char * buff)
+int motor_altivar::save_device_ex(char * buff) const
     {
     int res = 0;
     if ( G_PAC_INFO()->is_emulator() )
@@ -4088,7 +4093,7 @@ int motor_altivar::save_device_ex(char * buff)
     return res;
     }
 
-float motor_altivar::get_value()
+float motor_altivar::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return freq;
 
@@ -4140,7 +4145,7 @@ void motor_altivar::direct_set_state(int new_state)
         }
     }
 
-int motor_altivar::get_state()
+int motor_altivar::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
@@ -4316,7 +4321,7 @@ float converter_iolink_ao::get_channel_value( u_int ch ) const
         }
     }
 
-int converter_iolink_ao::get_state()
+int converter_iolink_ao::get_state() const
     {
     if ( err )
         {
@@ -4396,7 +4401,7 @@ void converter_iolink_ao::evaluate_io()
         }
     }
 
-int converter_iolink_ao::save_device_ex( char* buff )
+int converter_iolink_ao::save_device_ex( char* buff ) const
     {
     auto l = analog_io_device::save_device_ex( buff );
     auto res = fmt::format_to_n( buff + l, MAX_COPY_SIZE,

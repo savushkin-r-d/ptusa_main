@@ -53,7 +53,7 @@ class DO1 : public digital_io_device
             {
             }
 
-        int  get_state() override;
+        int  get_state() const override;
         void direct_on() override;
         void direct_off() override;
 
@@ -70,7 +70,7 @@ class temperature_e : public AI1
     public:
         explicit temperature_e( const char* dev_name );
 
-        float get_value() override;
+        float get_value() const override;
 
     private:
         u_int start_param_idx;
@@ -88,7 +88,7 @@ class temperature_e_analog : public AI1
     public:
         explicit temperature_e_analog( const char* dev_name );
 
-        float get_value() override;
+        float get_value() const override;
 
     private:
         u_int start_param_idx;
@@ -110,9 +110,9 @@ class temperature_e_iolink : public AI1
 
         ~temperature_e_iolink() override = default;
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -148,9 +148,9 @@ class temperature_e_iolink_tm311 : public AI1
 
         ~temperature_e_iolink_tm311() override = default;
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -215,7 +215,7 @@ class level_e_cyl : public level
     public:
         explicit level_e_cyl( const char* dev_name );
 
-        int calc_volume() override;
+        int calc_volume() const override;
 
     private:
         enum CONSTANTS
@@ -235,7 +235,7 @@ class level_e_cone : public level
     public:
         explicit level_e_cone( const char* dev_name );
 
-         int calc_volume() override;
+         int calc_volume() const override;
 
     private:
         enum CONSTANTS
@@ -256,8 +256,8 @@ class pressure_e : public AI1
     public:
         explicit pressure_e( const char* dev_name );
 
-        float get_max_val() override;
-        float get_min_val() override;
+        float get_max_val() const override;
+        float get_min_val() const override;
 
     private:
         enum CONSTANTS
@@ -277,9 +277,9 @@ class pressure_e_iolink : public analog_io_device
     public:
         explicit pressure_e_iolink( const char* dev_name );
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void set_article( const char* new_article ) override;
 
@@ -402,7 +402,7 @@ class circuit_breaker : public analog_io_device
     public:
         explicit circuit_breaker(const char* dev_name);
 
-        int save_device_ex(char* buff) override;
+        int save_device_ex(char* buff) const override;
 
         int set_cmd(const char* prop, u_int idx, double val) override;
 
@@ -412,9 +412,9 @@ class circuit_breaker : public analog_io_device
 
         void direct_off() override;
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -482,10 +482,10 @@ class level_e_iolink : public level
     public:
         explicit level_e_iolink( const char* dev_name );
 
-        int calc_volume() override;
+        int calc_volume() const override;
 
-        float get_value() override;
-        int get_state() override;
+        float get_value() const override;
+        int get_state() const override;
 
         void set_article( const char* new_article ) override;
         void evaluate_io() override;
@@ -525,8 +525,8 @@ class concentration_e : public AI1
     public:
         concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type );
 
-        float get_max_val() override;
-        float get_min_val() override;
+        float get_max_val() const override;
+        float get_min_val() const override;
 
     private:
         enum CONSTANTS
@@ -546,9 +546,9 @@ class concentration_e_ok : public concentration_e
     public:
         explicit concentration_e_ok( const char* dev_name );
 
-        int get_state() override;
+        int get_state() const override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
     private:
         enum CONSTANTS
@@ -565,13 +565,13 @@ class concentration_e_iolink : public analog_io_device
 
         ~concentration_e_iolink() override;
 
-        int save_device_ex( char *buff ) override;
+        int save_device_ex( char *buff ) const override;
 
         float get_temperature() const;
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -612,8 +612,8 @@ class analog_input : public AI1
     public:
         explicit analog_input( const char* dev_name );
 
-        float get_max_val() override;
-        float get_min_val() override;
+        float get_max_val() const override;
+        float get_min_val() const override;
 
     private:
         enum CONSTANTS
@@ -634,7 +634,7 @@ class virtual_wages : public device, public i_wages
 
         void direct_off() override;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_value(float new_value) override;
 
@@ -642,7 +642,7 @@ class virtual_wages : public device, public i_wages
 
         void direct_on() override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void tare() override;
 
@@ -656,9 +656,9 @@ class wages_RS232 : public analog_io_device, public i_wages
     public:
         explicit wages_RS232( const char* dev_name );
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -695,9 +695,9 @@ class wages_eth : public analog_io_device, public i_wages
     public:
         explicit wages_eth( const char* dev_name );
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void evaluate_io() override;
 
@@ -717,7 +717,7 @@ class wages_eth : public analog_io_device, public i_wages
             int new_status );
 
     private:
-        auto_smart_ptr < iot_wages_eth > weth;
+        mutable auto_smart_ptr < iot_wages_eth > weth;
 
         enum class CONSTANTS
             {
@@ -738,9 +738,9 @@ class wages_pxc_axl : public analog_io_device, public i_wages
         void tare() override;
         void reset_tare();
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void direct_set_state( int new_state ) override;
 
@@ -809,21 +809,21 @@ class wages : public analog_io_device, public i_wages
         explicit wages( const char *dev_name);
 
         void tare() override;
-        float get_weight();
+        float get_weight() const;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_state( int new_state ) override;
 
         void direct_set_value( float new_value ) override;
 
-        int get_state() override;
+        int get_state() const override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
     private:
-        float weight = 0.f;
-        uint32_t filter_time = get_millisec();
+        mutable float weight = 0.f;
+        mutable uint32_t filter_time = get_millisec();
 
         enum CONSTANTS
             {
@@ -856,13 +856,13 @@ class virtual_device : public device
 
         void direct_set_value( float new_value ) override;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_state( int new_state ) override;
 
         void direct_on() override;
 
-        int get_state() override;
+        int get_state() const override;
 
         bool is_active() override;
 
@@ -910,11 +910,11 @@ class DI1 : public digital_io_device
 
         void direct_off() override;
 
-        int get_state() override;
+        int get_state() const override;
 
     private:
-        int current_state;
-        uint32_t time = 0;
+        mutable int current_state;
+        mutable uint32_t time = 0;
 
         enum CONSTANTS
             {
@@ -935,13 +935,13 @@ class virtual_motor : public i_motor
 
         void direct_set_value( float new_value ) override;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_state( int new_state ) override;
 
         void direct_on() override;
 
-        int get_state() override;
+        int get_state() const override;
 
     private:
         float value = .0f;
@@ -955,15 +955,15 @@ class motor : public i_motor, public io_device
     public:
         motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type );
 
-        int save_device_ex( char *buff ) override;
+        int save_device_ex( char *buff ) const override;
 
-        float get_value()  override;
+        float get_value() const override;
 
         void direct_set_value( float new_value ) override;
 
         void direct_set_state( int new_state ) override;
 
-        int get_state() override;
+        int get_state() const override;
 
         void direct_on() override;
 
@@ -989,7 +989,7 @@ class motor : public i_motor, public io_device
             AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
             };
 
-        uint32_t start_switch_time = get_millisec();
+        mutable uint32_t start_switch_time = get_millisec();
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1001,15 +1001,15 @@ public:
     motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
         u_int par_cnt = 0 );
 
-    int save_device_ex(char *buff) override;
+    int save_device_ex(char *buff) const override;
 
-    float get_value() override;
+    float get_value() const override;
 
     void direct_set_value(float value) override;
 
     void direct_set_state(int new_state) override;
 
-    int  get_state() override;
+    int  get_state() const override;
 
     void direct_on() override;
 
@@ -1103,9 +1103,9 @@ class level_s_iolink : public analog_io_device
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
-        float get_value() override;
+        float get_value() const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         bool is_active() override;
 
@@ -1284,13 +1284,13 @@ class base_counter: public i_counter, public device, public io_device
         void restart() override;
 
         /// @brief Получение состояния работы счетчика.
-        int get_state() override;
+        int get_state() const override;
 
         void direct_on() override;
 
         void direct_off() override;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_state( int new_state ) override;
 
@@ -1308,14 +1308,14 @@ class base_counter: public i_counter, public device, public io_device
             bool& is_first_read ) const;
 
         /// @brief Получение значения счетчика (c учетом паузы).
-        u_int get_quantity() override;
+        u_int get_quantity() const override;
 
         /// @brief Получение абсолютного значения счетчика (без учета паузы).
-        u_int get_abs_quantity() override;
+        u_int get_abs_quantity() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         const char* get_error_description() override;
 
@@ -1379,7 +1379,7 @@ class counter : public base_counter
 
         float get_max_raw_value() const override;
 
-        float get_flow() override;
+        float get_flow() const override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
@@ -1400,11 +1400,11 @@ class counter_f : public counter
     public:
         explicit counter_f( const char *dev_name );
 
-        int get_state() override;
+        int get_state() const override;
 
-        float get_flow() override;
+        float get_flow() const override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
@@ -1437,9 +1437,9 @@ class counter_iolink : public base_counter
 
         float get_temperature() const;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
-        int get_state() override;
+        int get_state() const override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
@@ -1448,15 +1448,15 @@ class counter_iolink : public base_counter
 
         float get_max_raw_value() const override;
 
-        float get_flow() override;
+        float get_flow() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        u_int get_quantity() override;
+        u_int get_quantity() const override;
 
-        u_int get_abs_quantity() override;
+        u_int get_abs_quantity() const override;
 
-        float get_value() override;
+        float get_value() const override;
 
         static const int mL_in_L = 1000;
 
@@ -1531,7 +1531,7 @@ class signal_column_iolink : public signal_column
 
         void evaluate_io() override;
 
-        int get_state() override;
+        int get_state() const override;
 
         const char* get_error_description() override;
 
@@ -1570,13 +1570,13 @@ class camera : public i_camera, public device, public io_device
 
         void direct_on() override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
         void set_string_property( const char* field, const char* value ) override;
 
-        int get_result( int n = 1 ) override;
+        int get_result( int n = 1 ) const override;
 
         /// @brief Получение состояние готовности.
         virtual bool is_ready() const;
@@ -1588,7 +1588,7 @@ class camera : public i_camera, public device, public io_device
 
     protected:
         bool is_cam_ready;
-        int result = 0;
+        mutable int result = 0;
 
         enum class CONSTANTS
             {
@@ -1632,7 +1632,7 @@ class camera_DI3 : public camera_DI2
 
         void evaluate_io() override;
 
-        int get_result( int n = 1 ) override;
+        int get_result( int n = 1 ) const override;
 
     private:
         int result_2 = 0;
@@ -1651,7 +1651,7 @@ class dev_stub final : public i_counter, public valve, public i_wages,
         u_int_4 get_serial_n() const override;
         void    print() const override;
 
-        float get_value() override;
+        float get_value() const override;
         void direct_set_value( float new_value ) override;
 
         bool is_active() override;
@@ -1666,20 +1666,20 @@ class dev_stub final : public i_counter, public valve, public i_wages,
         void set_value( float new_value ) override;
         void set_state( int new_state ) override;
 
-        int get_state() override;
+        int get_state() const override;
 
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
         void    pause() override;
         void    start() override;
         void    reset() override;
-        u_int   get_quantity() override;
-        float   get_flow() override;
+        u_int   get_quantity() const override;
+        float   get_flow() const override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
 
-        u_int get_abs_quantity() override;
+        u_int get_abs_quantity() const override;
         void  abs_reset() override;
 
         void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) override;
@@ -1691,7 +1691,7 @@ class dev_stub final : public i_counter, public valve, public i_wages,
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-class threshold_regulator :public device, public i_Lua_save_device
+class threshold_regulator :public device
     {
     public:
         enum class PARAM
@@ -1704,7 +1704,7 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         explicit threshold_regulator( const char* name );
 
-        int get_state() override;
+        int get_state() const override;
 
         void direct_off() override;
 
@@ -1714,11 +1714,9 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         const char* get_name_in_Lua() const override;
 
-        float get_value() override;
+        float get_value() const override;
 
         void direct_set_value( float val ) override;
-
-        int save_device( char* buff ) override;
 
         void set_string_property( const char* field, const char* value ) override;
 
@@ -1747,14 +1745,14 @@ class power_unit : public analog_io_device
         void direct_on() override;
         void direct_off() override;
 
-        float get_value() override;
-        int get_state() override;
+        float get_value() const override;
+        int get_state() const override;
 
         void direct_set_value( float val ) override;
 
         void evaluate_io() override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
@@ -1893,7 +1891,7 @@ class converter_iolink_ao : public analog_io_device
         void direct_on() override;
         void direct_off() override;
 
-        int get_state() override;
+        int get_state() const override;
 
         float get_channel_value( u_int ch ) const;
 
@@ -1906,7 +1904,7 @@ class converter_iolink_ao : public analog_io_device
 
         void evaluate_io() override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 

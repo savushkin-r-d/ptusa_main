@@ -232,15 +232,8 @@ int project_manager::lua_load_configuration()
 
     if ( G_DEBUG )
         {
-        if ( G_USE_LOG )
-            {
-            io_manager::get_instance()->print_log();
-            }
-        else
-            {
-            io_manager::get_instance()->print();
-            printf( "\n" );
-            }
+        io_manager::get_instance()->print();
+        printf( "\n" );
         }
 
     //-Devices data.

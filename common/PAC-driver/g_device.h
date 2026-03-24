@@ -27,56 +27,11 @@
 #include <vector>
 
 #include "smart_ptr.h"
-
 #include "tcp_cmctr.h"
+#include "device/i_base.h"
 
 extern "C" {
 #include "zlib.h"
-    };
-
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
-class i_Lua_save_device
-    {
-    public:
-        virtual ~i_Lua_save_device() = default;
-
-        /// @brief Сохранение самого устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_device( char *buff ) = 0;
-
-        /// @brief Отладочная печать объекта в консоль.
-        virtual const char* get_name_in_Lua() const = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс устройства, позволяющий получать команды от сервера.
-class i_cmd_device
-    {
-    public:
-        virtual ~i_cmd_device() = default;
-
-        /// @brief Выполнение числовой команды.
-        ///
-        /// @param prop [ in ] - имя свойства.
-        /// @param idx [ in ]  - индекс для свойства.
-        /// @param val [ in ]  - значение.
-        ///
-        /// @return 0 - ок.
-        /// @return 1 - ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, double val ) = 0;
-
-        /// @brief Выполнение строковой команды.
-        ///
-        /// @param prop [ in ] - имя свойства.
-        /// @param idx [ in ]  - индекс для свойства.
-        /// @param val [ in ]  - значение.
-        ///
-        /// @return 0 - ок.
-        /// @return 1 - Ошибка.
-        virtual int set_cmd( const char *prop, u_int idx, const char *val ) = 0;
     };
 
 #endif // DRIVER

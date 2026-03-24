@@ -233,9 +233,8 @@ elseif(WIN32)
     endif()
 endif()
 
-add_dependencies(main_test lua lfs luasystem term_core luassert_copy
-    luasql_odbc)
 add_dependencies(libptusa_main lua)
+add_dependencies(lua lfs luasystem term_core luassert_copy luasql_odbc)
 
 if(MSVC)
     set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")

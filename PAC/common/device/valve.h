@@ -13,9 +13,11 @@ class converter_iolink_ao;
 class valve : public digital_io_device
     {
     public:
+        /// @brief Конструктор для клапана c обратными связями.
+        /// 
         /// @param is_on_fb - использовать обратную связь на включенное состояние.
         /// @param is_off_fb - использовать обратную связь на выключенное состояние.
-        /// @param number - номер устройства.
+        /// @param dev_name - имя клапана.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( bool is_on_fb, bool is_off_fb,
@@ -23,15 +25,12 @@ class valve : public digital_io_device
             device::DEVICE_SUB_TYPE sub_type );
 
         /// @brief Конструктор для клапана без обратных связей.
-        /// @param number - номер устройства.
+        /// 
+        /// @param dev_name - имя клапана.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
-
-        valve( bool is_on_fb, bool is_off_fb, const char* dev_name,
-            device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
-            int extra_params_cnt );
 
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.
@@ -47,19 +46,19 @@ class valve : public digital_io_device
 #endif
 
         /// @brief Получение значения включенного состояния.
-        bool is_opened();
+        bool is_opened() const;
 
         /// @brief Получение значения выключенного состояния.
-        bool is_closed();
+        bool is_closed() const;
 
         /// @brief Получение значения обратной связи на включенное состояние.
-        virtual int get_on_fb_value();
+        virtual int get_on_fb_value() const;
 
         /// @brief Получение значения обратной связи на выключенное состояние.
-        virtual int get_off_fb_value();
+        virtual int get_off_fb_value() const;
 
         /// @brief Сохранение дополнительных данных.
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) const override;
 
         //Состояния клапана (расширенное).
         enum VALVE_STATE_EX
@@ -97,7 +96,7 @@ class valve : public digital_io_device
 
         /// @brief Получение расширенного состояния клапана (учет обратной
         /// связи, ручного режима, ...).
-        int get_state() override;
+        int get_state() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
@@ -120,10 +119,10 @@ class valve : public digital_io_device
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
         /// @brief Получение состояния клапана без учета обратной связи.
-        virtual VALVE_STATE get_valve_state();
+        virtual VALVE_STATE get_valve_state() const;
 
         /// @brief Получение состояния обратной связи.
-        virtual bool get_fb_state();
+        virtual bool get_fb_state() const;
 
     protected:
         enum FB_STATE
@@ -177,7 +176,7 @@ class valve : public digital_io_device
 #endif
 
     protected:
-        uint32_t start_switch_time = get_millisec();
+        mutable uint32_t start_switch_time = get_millisec();
 
     private:
         bool wash_flag = false;
@@ -204,12 +203,11 @@ class valve_DO1 : public valve
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
 
-    private:
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления.
@@ -219,12 +217,12 @@ class valve_DO2 : public valve
         explicit valve_DO2( const char* dev_name );
 
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int  get_state() override;
+        int  get_state() const override;
         void direct_on() override;
         void direct_off() override;
 
@@ -243,9 +241,9 @@ class valve_DO1_DI1_off : public valve
     public:
         explicit valve_DO1_DI1_off( const char* dev_name );
 
-        void direct_on();
+        void direct_on() override;
 
-        void direct_off();
+        void direct_off() override;
 
 #ifndef PTUSA_TEST
     private:
@@ -258,13 +256,13 @@ class valve_DO1_DI1_off : public valve
 
         // Интерфейс valve для реализации получения расширенного состояния с
         // учетом всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() final;
+        int get_on_fb_value() const final;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -289,13 +287,13 @@ class valve_DO1_DI1_on : public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state();
+        bool get_fb_state() const override;
 
-        int get_on_fb_value();
+        int get_on_fb_value() const override;
 
-        int get_off_fb_value();
+        int get_off_fb_value() const final;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и двумя обратными связями.
@@ -323,13 +321,13 @@ class valve_DO1_DI2 : public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями.
@@ -357,13 +355,13 @@ class valve_DO2_DI2 : public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями
@@ -380,7 +378,6 @@ class valve_DO2_DI2_bistable : public valve
 
         void direct_off() override;
 
-    private:
         enum CONSTANTS
             {
             DO_INDEX_OPEN = 0,  ///< Индекс канала дискретного выхода Открыть.
@@ -392,16 +389,17 @@ class valve_DO2_DI2_bistable : public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
         void direct_set_state( int new_state ) override;
 
+    private:
         bool is_stoped;
         bool is_opening;
         bool is_closing;
@@ -441,13 +439,13 @@ class valve_mix_proof : public i_mix_proof, public valve
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -462,13 +460,13 @@ class valve_AS : public valve
         void set_rt_par( u_int idx, float value );
 
         /// @brief Получение данных состояния устройства.
-        char get_state_data( const char* data );
+        char get_state_data( const char* data ) const;
 
         char* get_data_with_offset( char* data );
 
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state();
+        bool get_fb_state() const override;
 
         /// @brief поменять местами подключение седел клапана.
         bool reverse_seat_connection = false;
@@ -477,9 +475,9 @@ class valve_AS : public valve
 
         int get_upper_seat_offset() const;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
         void direct_off() override;
 
@@ -527,12 +525,12 @@ class valve_AS_DO1_DI2 : public valve_AS
 
         void direct_set_state( int new_state );
 
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
     private:
-        uint32_t start_err_time;
+        mutable uint32_t start_err_time;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
@@ -593,13 +591,13 @@ class valve_bottom_mix_proof : public i_mix_proof, public valve
     protected:
 #endif
 
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
@@ -639,12 +637,12 @@ class valve_mini_flushing : public i_mix_proof, public valve
 #endif
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
-        VALVE_STATE get_valve_state() final;
+        VALVE_STATE get_valve_state() const final;
 
-        bool get_fb_state() final;
+        bool get_fb_state() const final;
 
-        int get_off_fb_value() final;
-        int get_on_fb_value() final;
+        int get_off_fb_value() const final;
+        int get_on_fb_value() const final;
     };
 //-----------------------------------------------------------------------------
 class io_link_valve
@@ -715,23 +713,23 @@ class valve_iolink_mix_proof : public i_mix_proof, public valve
 
         void open_lower_seat();
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         void set_rt_par( u_int idx, float value );
 
-        int get_state() override;
+        int get_state() const override;
 
-        float get_value() override;
+        float get_value() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
         void direct_on() override;
 
@@ -771,21 +769,21 @@ class valve_iolink_shut_off_thinktop : public valve
 
         ~valve_iolink_shut_off_thinktop() override = default;
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         void set_rt_par( u_int idx, float value );
 
-        float get_value() override;
+        float get_value() const override;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
         void direct_on() override;
 
@@ -797,7 +795,7 @@ class valve_iolink_shut_off_thinktop : public valve
 
         const char* get_error_description() override;
 
-        int get_state() override;
+        int get_state() const override;
 
 #ifndef PTUSA_TEST
     private:
@@ -827,21 +825,21 @@ class valve_iolink_shut_off_sorio : public valve
 
         explicit valve_iolink_shut_off_sorio( const char* dev_name );
 
-        VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state() const override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) const override;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
-        float get_value() final;
+        float get_value() const final;
 
         void direct_set_value( float new_value ) final;
 
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
         void direct_on() override;
 
@@ -889,17 +887,17 @@ class valve_iolink_gea_tvis_a15 : public valve
         explicit valve_iolink_gea_tvis_a15( const char* dev_name,
             device::DEVICE_SUB_TYPE device_sub_type );
 
-        int save_device_ex( char* buff ) final;
+        int save_device_ex( char* buff ) const final;
         void evaluate_io() final;
-        float get_value() final;
+        float get_value() const final;
 
         void direct_set_value( float new_value ) final;
 
         void direct_off() final;
         void direct_on() final;
-        bool get_fb_state() final;
-        int get_off_fb_value() final;
-        int get_on_fb_value() final;
+        bool get_fb_state() const final;
+        int get_off_fb_value() const final;
+        int get_on_fb_value() const final;
 
         void set_rt_par( u_int idx, float value ) override;
 
@@ -960,7 +958,7 @@ class valve_iolink_gea_tvis_a15_ss : public valve_iolink_gea_tvis_a15
         static const std::string GEA_TVIS_A15_SINGLE_SEAT_ARTICLE;
         explicit valve_iolink_gea_tvis_a15_ss( const char* dev_name );
 
-        VALVE_STATE get_valve_state() final;
+        VALVE_STATE get_valve_state() const final;
 
         void direct_set_state( int new_state ) final;
     };
@@ -974,7 +972,7 @@ class valve_iolink_gea_tvis_a15_ds : public valve_iolink_gea_tvis_a15, public i_
 
         void open_upper_seat() final;
         void open_lower_seat() final;
-        VALVE_STATE get_valve_state() final;
+        VALVE_STATE get_valve_state() const final;
 
         void direct_set_state( int new_state ) final;
     };
@@ -993,7 +991,7 @@ class valve_iol_terminal : public valve
 
         void set_rt_par( u_int idx, float value ) override;
 
-        bool check_config();
+        bool check_config() const;
 
         /// @brief Установка данных состояния устройства.
         void set_state_bit( char* data, unsigned int n ) const;
@@ -1019,10 +1017,10 @@ class valve_iol_terminal : public valve
 
         unsigned int get_terminal_id( valve_iol_terminal::TERMINAL_OUTPUT n ) const;
 
-        int get_state() override;
+        int get_state() const override;
         void direct_set_state( int new_state ) override;
 
-        VALVE_STATE get_valve_state() override;
+        VALVE_STATE get_valve_state() const override;
 
         void direct_on() override;
         void direct_off() override;        
@@ -1050,11 +1048,11 @@ class valve_iol_terminal_DO1_DI1_on : public valve_iol_terminal
         explicit valve_iol_terminal_DO1_DI1_on( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
@@ -1064,11 +1062,11 @@ class valve_iol_terminal_DO1_DI1_off : public valve_iol_terminal
         explicit valve_iol_terminal_DO1_DI1_off( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления.
@@ -1095,11 +1093,11 @@ class valve_iol_terminal_DO1_DI2 : public valve_iol_terminal
         explicit valve_iol_terminal_DO1_DI2( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief IO-Link клапан (от пневмооострова) с тремя каналом управления и
@@ -1110,11 +1108,11 @@ class valve_iol_terminal_mixproof_DO3_DI2 : public valve_iol_terminal_mixproof_D
         explicit valve_iol_terminal_mixproof_DO3_DI2( const char* dev_name );
 
         /// @brief Получение состояния обратной связи.
-        bool get_fb_state() override;
+        bool get_fb_state() const override;
 
-        int get_on_fb_value() override;
+        int get_on_fb_value() const override;
 
-        int get_off_fb_value() override;
+        int get_off_fb_value() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Управляемый клапан.
@@ -1158,8 +1156,8 @@ class analog_valve_ey : public device
 
         void direct_set_value( float new_value ) override;
 
-        float get_value() override;
-        int get_state() override;
+        float get_value() const override;
+        int get_state() const override;
 
         void set_rt_par( u_int idx, float value ) override;
 
@@ -1185,13 +1183,13 @@ class analog_valve_iolink : public AO1
 
         virtual ~analog_valve_iolink() = default;
 
-        void evaluate_io();
+        void evaluate_io() override;
 
         float get_min_value() const override;
 
         float get_max_value() const override;
 
-        int save_device_ex( char* buff );
+        int save_device_ex( char* buff ) const override;
 
         enum class CONSTANTS
             {
@@ -1205,11 +1203,11 @@ class analog_valve_iolink : public AO1
 
         void direct_set_value( float new_value ) override;
 
-        float get_value() override;
+        float get_value() const override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        int get_state() override;
+        int get_state() const override;
 
         const char* get_error_description() override;
 

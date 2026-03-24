@@ -1495,12 +1495,13 @@ int device_manager::init_params()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int device_manager::save_device( char* buff )
+int device_manager::save_device( char* buff ) const
     {
     auto res = ( fmt::format_to_n( buff, MAX_COPY_SIZE, "t=\n\t{{\n" ) ).size;
     for ( auto dev : project_devices )
         {
-        res += dev->save_device( buff + res, "\t" );
+        buff[ res++ ] = '\t';
+        res += dev->save_device( buff + res );
         }
     res += ( fmt::format_to_n( buff + res, MAX_COPY_SIZE, "\t}}\n" ) ).size;
     return res;
