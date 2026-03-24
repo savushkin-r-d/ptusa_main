@@ -790,12 +790,13 @@ void io_device::set_io_vendor( VENDOR vendor )
     this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
-int io_device::check_output_node_state( u_int index, bool is_digital )
+int io_device::check_output_node_state( u_int index, bool is_digital ) const
     {
     const IO_channels& channels = is_digital ? DO_channels : AO_channels;
 
     // If no channels configured or tables not initialized, skip node check.
-    if ( index >= channels.count || !channels.tables || !channels.char_write_values )
+    if ( index >= channels.count || !channels.tables ||
+        !channels.char_write_values )
         {
         return 0; // No output channels properly configured.
         }
@@ -808,7 +809,7 @@ int io_device::check_output_node_state( u_int index, bool is_digital )
         }
 
     u_int node_index = channels.tables[ index ];
-    
+
     // Check if node index is valid.
     if ( node_index >= io_mgr->get_nodes_count() )
         {
@@ -824,7 +825,8 @@ int io_device::check_output_node_state( u_int index, bool is_digital )
 
     int node_state = node->get_display_state();
 
-    // Return error if node is not OK (error, warning/PP mode, or not connected).
+    // Return error if node is not OK (error, warning/PP mode, or not
+    // connected).
     if ( node_state != io_manager::io_node::ST_OK )
         {
         return -1;
@@ -833,7 +835,8 @@ int io_device::check_output_node_state( u_int index, bool is_digital )
     return 1; // Node is OK.
     }
 //-----------------------------------------------------------------------------
-void io_device::init_channel( int type, int ch_inex, int node, int offset, int module_offset /*= -1*/, int logical_port /*= -1 */ )
+void io_device::init_channel( int type, int ch_inex, int node, int offset,
+    int module_offset /*= -1*/, int logical_port /*= -1 */ )
     {
     switch ( type )
         {

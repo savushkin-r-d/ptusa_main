@@ -179,7 +179,8 @@ class io_device
         ///
         /// @return 1 - node is OK, -1 - node has error or PP mode,
         ///         0 - no output channels configured.
-        int check_output_node_state( u_int index, bool is_digital = true );
+        int check_output_node_state( u_int index = 0,
+            bool is_digital = true ) const;
 
 #ifdef PTUSA_TEST
         public:
