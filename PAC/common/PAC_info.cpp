@@ -18,24 +18,7 @@ extern bool G_NO_IO_NODES;
 
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр класса.
 
-const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-PAC_info::PAC_info() :
-    par( saved_params_u_int_4( P_PARAMS_COUNT - 1 ) ),
-    up_days( 0 ),
-    up_hours( 0 ),
-    up_mins( 0 ),
-    up_secs( 0 ),
-    up_msec( 0 ),
-    last_check_time( get_millisec() ),
-    reset_type( 1 ), //+ IsResetByWatchDogTimer()
-    cmd( 0 ),
-    restrictions_set_to_off_time( 0 )
-    {
-    strcpy( up_time_str, "0 дн. 0:0:0" );
-    cmd_answer[ 0 ] = 0;
-    }
 //-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
@@ -125,7 +108,7 @@ void PAC_info::reset_params()
     par.save_all();
     }
 //-----------------------------------------------------------------------------
-int PAC_info::save_device( char* buff )
+int PAC_info::save_device( char* buff ) const
     {
     int size = fmt::format_to_n( buff, MAX_COPY_SIZE, "t.SYSTEM = \n\t{{\n" ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -182,7 +165,7 @@ int PAC_info::save_device( char* buff )
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        auto wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
             wn->is_active ? "1, " : "0, " ).size;
         }
@@ -192,7 +175,7 @@ int PAC_info::save_device( char* buff )
         "\tNODEST = \n\t{{\n\t" ).size;
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        const io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
+        auto wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
             "{}, ", wn->get_display_state() ).size;
         }
@@ -336,9 +319,9 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "NODEENABLED" ) == 0 )
         {
-        if ( idx <= io_manager::get_instance()->get_nodes_count() )
+        if ( idx > 0 && idx <= io_manager::get_instance()->get_nodes_count() )
             {
-            io_manager::io_node* wn = io_manager::get_instance()->get_node( idx - 1 );
+            auto wn = io_manager::get_instance()->get_node( idx - 1 );
             if ( 1 == val )
                 {
                 if ( !wn->is_active )
@@ -419,7 +402,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 
-bool PAC_info::is_emulator()
+bool PAC_info::is_emulator() const
     {
 #ifdef PTUSA_TEST
     return emulator_state;
@@ -444,6 +427,17 @@ void PAC_info::emulation_on()
 void PAC_info::emulation_off()
     {
     emulator_state = false;
+    }
+
+void PAC_info::reset_uptime()
+    {
+    up_days = 0;
+    up_hours = 0;
+    up_mins = 0;
+    up_secs = 0;
+    up_msec = 0;
+    last_check_time = get_millisec();
+    strcpy( up_time_str, "0 дн. 0:0:0" );
     }
 #endif
 //-----------------------------------------------------------------------------

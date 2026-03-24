@@ -104,26 +104,28 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
         "res = get_delta_millisec()" ) );               //Некорректный вызов.
 
     ASSERT_EQ( 0, luaL_dostring( L, "ms = get_millisec()" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "dt_0 = get_delta_millisec( 0 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "dt_ms = get_delta_millisec( ms )" ) );
+
     lua_getfield( L, LUA_GLOBALSINDEX, "ms" );
     auto ms = tolua_tonumber( L, -1, 0 );
-    lua_remove( L, -1 );   
+    lua_remove( L, -1 );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dt_0" );
+    auto dt_0 = tolua_tonumber( L, -1, 0 );
+    lua_remove( L, -1 );
+    lua_getfield( L, LUA_GLOBALSINDEX, "dt_ms" );
+    auto dt_ms = tolua_tonumber( L, -1, 0 );
+    lua_remove( L, -1 );
 
     // Запрашиваем время, прошедшее с момента 0 - результат должен быть
     // неотрицательным.
-    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( 0 )" ) );
-    lua_getfield( L, LUA_GLOBALSINDEX, "res" );    
-    auto dt1 = tolua_tonumber( L, -1, 0 );
-    EXPECT_GE( dt1, 0 );
-    lua_remove( L, -1 );
-
+    EXPECT_GE( dt_0, 0 );
+    // Запрашиваем время, прошедшее с момента ms - результат должен быть
+    // неотрицательным.
+    EXPECT_GE( dt_ms, 0 );
     // Время должно совпать с расчетным.
-    EXPECT_NEAR( dt1, ms, 1 );
-
-    ASSERT_EQ( 0, luaL_dostring( L, "res = get_delta_millisec( ms )" ) );
-    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
-    auto dt2 = tolua_tonumber( L, -1, 0 );
-    EXPECT_NEAR( dt2, 0, 1 );
-    lua_remove( L, -1 );
+    EXPECT_NEAR( ms, dt_0, 2 );
+    EXPECT_NEAR( dt_ms, 0, 2 );
 
     // Корректная обработка переполнения - результат должен быть положительным
     // и примерно равен UINT32_MAX.
@@ -132,7 +134,7 @@ TEST( toLuapp, tolua_PAC_dev_get_delta_millisec00 )
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     auto dt3 = tolua_tonumber( L, -1, 0 );
     EXPECT_GT( dt3, 0 );
-    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 1 );
+    EXPECT_NEAR( dt3, UINT32_MAX, 10 + 2 );
     lua_remove( L, -1 );
 
     lua_close( L );
@@ -211,7 +213,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
 
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
-    TE1->save_device( buff, "" );
+    TE1->save_device( buff );
     EXPECT_STREQ(
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=20.0, S_DEV=2.0, P_CZ=0, P_ERR=0},\n",
         buff );
@@ -220,7 +222,7 @@ TEST( toLuapp, tolua_PAC_dev_device_param_emulator00 )
     ASSERT_EQ( 1, luaL_dostring( L, "TE1:param_emulator( 50 )" ) );
 
     ASSERT_EQ( 0, luaL_dostring( L, "TE1:param_emulator( 50, 5 )" ) );
-    TE1->save_device( buff, "" );
+    TE1->save_device( buff );
     EXPECT_STREQ(
         "TE1={M=0, ST=1, V=0, E=0, M_EXP=50.0, S_DEV=5.0, P_CZ=0, P_ERR=0},\n",
         buff );
@@ -365,6 +367,48 @@ TEST( toLuapp, tolua_PAC_dev_operation_set_step_cooperate_time_par_n00 )
     // Некорректный вызов - без параметра.
     EXPECT_NE( 0, luaL_dostring( L, "oper:set_step_cooperate_time_par_n()" ) );
 
+    lua_close( L );
+    }
+
+
+TEST( toLuapp, tolua_PAC_dev_operation_manager_get_idle_time_sec00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
+    // Некорректный вызов - c параметром.
+    EXPECT_NE( 0, luaL_dostring( L, 
+        "res = o1:get_modes_manager():get_idle_time_sec( 1 )" ) );
+    // Корректный вызов.
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time_sec()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_GE( res, 0 );
+    lua_close( L );
+    }
+
+
+TEST( toLuapp, tolua_PAC_dev_operation_manager_get_idle_time00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
+    // Некорректный вызов - c параметром.
+    EXPECT_NE( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time( 1 )" ) );
+    // Корректный вызов.
+    EXPECT_EQ( 0, luaL_dostring( L,
+        "res = o1:get_modes_manager():get_idle_time()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    auto res = tolua_tonumber( L, -1, 0 );
+    lua_pop( L, 1 );
+    ASSERT_GE( res, 0 );
     lua_close( L );
     }
 

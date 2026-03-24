@@ -62,13 +62,13 @@ class PAC_info: public i_Lua_save_device
             P_PARAMS_COUNT
             };
 
-        saved_params_u_int_4 par;
+        saved_params_u_int_4 par{ saved_params_u_int_4( P_PARAMS_COUNT - 1 ) };
 
         void reset_params();
 
-        int save_device( char *buff );
+        int save_device( char *buff ) const override;
 
-        bool is_emulator();
+        bool is_emulator() const;
 
         void print() const;
 
@@ -103,6 +103,8 @@ class PAC_info: public i_Lua_save_device
         void emulation_off();
 
         bool emulator_state = true;
+
+        void reset_uptime();
 #endif
 
         void set_cycle_time( uint32_t current_cycle_time );
@@ -122,42 +124,34 @@ class PAC_info: public i_Lua_save_device
             }
 
     private:
-        PAC_info();
+        PAC_info() = default;
 
         static auto_smart_ptr < PAC_info > instance;///< Экземпляр класса.
 
-        static const u_int_4 MSEC_IN_DAY;
+        inline static const uint32_t MSEC_IN_DAY = 24U * 60U * 60U * 1000U;
         enum CONSTANTS
             {
             C_MAX_STR_LENGTH = 50,
             };
 
-        uint32_t up_days;
-        uint32_t up_hours;
-        uint32_t up_mins;
-        uint32_t up_secs;
+        uint32_t up_days{};
+        uint32_t up_hours{};
+        uint32_t up_mins{};
+        uint32_t up_secs{};
 
-        uint32_t up_msec;
-        uint32_t last_check_time;
+        uint32_t up_msec{};
+        uint32_t last_check_time{ get_millisec() };
 
-        u_int_4 reset_type;
+        u_int_4 reset_type{ 1 };
 
-        char up_time_str[ C_MAX_STR_LENGTH ];
+        char up_time_str[ C_MAX_STR_LENGTH ]{ "0 дн. 0:0:0" };
 
-        int  cmd;
-        char cmd_answer[ 200 ];
+        int  cmd{};
+        char cmd_answer[ 200 ]{};
 
-        uint32_t restrictions_set_to_off_time;
+        uint32_t restrictions_set_to_off_time{};
 
-        uint32_t cycle_time = 0;
-
-        /// @brief Indicator: any node has communication error or warning.
-        /// 0 - all OK, 1 - at least one node has error or PP mode active.
-        int nodes_comm_error = 0;
-
-        /// @brief Indicator: any watchdog has error state.
-        /// 0 - all OK, 1 - at least one watchdog has error (state < 0).
-        int watchdog_error = 0;
+        uint32_t cycle_time{};
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();
