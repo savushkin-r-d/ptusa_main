@@ -41,7 +41,7 @@ auto_smart_ptr < io_manager > io_manager::instance;
 int io_device::last_err = 0;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int io_device::get_DO( u_int index )
+int io_device::get_DO( u_int index ) const
     {
     if ( index < DO_channels.count &&
         DO_channels.char_write_values &&
@@ -93,7 +93,7 @@ int io_device::set_DO( u_int index, char value )
     return 1;
     }
 //-----------------------------------------------------------------------------
-int io_device::get_DI( u_int index )
+int io_device::get_DI( u_int index ) const
     {
     if ( index < DI_channels.count &&
         DI_channels.char_read_values &&
@@ -120,7 +120,7 @@ int io_device::get_DI( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-float io_device::get_AO( u_int index, float min_value, float max_value )
+float io_device::get_AO( u_int index, float min_value, float max_value ) const
     {
     if ( index < AO_channels.count &&
         AO_channels.int_write_values &&
@@ -278,21 +278,27 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
         }
 
     if ( G_DEBUG )
-        {
-        print();
-        printf( "io_device->get_AO(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %p",
-            index, AO_channels.count, AO_channels.int_write_values );
-        if ( AO_channels.int_write_values )
+        {        
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO(...) error: " );
+        fmt::print( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count, 
+            static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
+        if ( index < AO_channels.count && AO_channels.int_write_values )
             {
-            printf( ", AO_channels.int_write_values[ index ]=%p",
-                AO_channels.int_write_values[ index ] );
+            // LCOV_EXCL_START
+            fmt::print( ", AO_channels.int_write_values[ index ]={}",
+                static_cast<void*>( AO_channels.int_write_values[ index ] ) );
+            // LCOV_EXCL_STOP
             }
-        printf( "\n" );
+        fmt::print( "\n" );        
         }
 
-    return 0;
+    return 0.0f;
     }
 //-----------------------------------------------------------------------------
 int io_device::set_AO( u_int index, float value, float min_value,
@@ -342,23 +348,34 @@ int io_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
-
-        //if ( G_DEBUG )
-        //    {
-        //    printf("set_AO value=%d\n", ( u_int ) value );
-        //    }
         return 0;
         }
 
     if ( G_DEBUG )
         {
-        printf( "io_device->set_AO(...) - error!\n" );
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->set_AO(...) error: " );
+        fmt::print( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
+        if ( index < AO_channels.count && AO_channels.int_write_values )
+            {
+            // LCOV_EXCL_START
+            fmt::print( ", AO_channels.int_write_values[ index ]={}",
+                static_cast<void*>( AO_channels.int_write_values[ index ] ) );
+            // LCOV_EXCL_STOP
+            }
+        fmt::print( "\n" );
         }
 
-    return 0;
+    return 1;
     }
 //-----------------------------------------------------------------------------
-float io_device::get_AI( u_int index, float min_value, float max_value, int& err )
+float io_device::get_AI( u_int index, float min_value, float max_value, int& err ) const
     {
     err = static_cast< int >( ERRORS::NO_ERR );
     if ( index < AI_channels.count &&
@@ -476,14 +493,15 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
                 err = static_cast<int>( ERRORS::OUT_OF_RANGE );
                 return -1000;
 
-			case 2688556: //RTD4 1H
-				if (val < -32000 )
-				    {
+            case 1088106:   //AXL SE RTD4 PT100.
+            case 2688556:   //RTD4 1H.
+                if ( val < -32000 )
+                    {
                     err = static_cast<int>( ERRORS::UNDER_RANGE );
-					return -1000;
-				    }
-				val *= 0.1f;
-				return val;
+                    return -1000.f;
+                    }
+                val *= 0.1f;
+                return val;
 
             case 2688491:   //AXL F AI4 I 1H
             case 2702072:   //AXL F AI2 AO2 1H
@@ -529,21 +547,27 @@ float io_device::get_AI( u_int index, float min_value, float max_value, int& err
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AI(...) - error! " );
-        printf( "index = %d, AI_channels.count = %d, "
-            "AI_channels.int_read_values = %p",
-            index, AI_channels.count, AI_channels.int_read_values );
-        if ( AI_channels.int_read_values )
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AI(...) error: " );
+        fmt::print( "index = {}, AI_channels.count = {}, "
+            "AI_channels.int_read_values = {}",
+            index, AI_channels.count,
+            static_cast<void*>( AI_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
+        if ( index < AI_channels.count && AI_channels.int_read_values )
             {
-            printf( ", AI_channels.int_read_values[ index ]=%p",
-                AI_channels.int_read_values[ index ] );
+            // LCOV_EXCL_START
+            fmt::print( ", AI_channels.int_read_values[ index ]={}",
+                static_cast<void*>( AI_channels.int_read_values[ index ] ) );
+            // LCOV_EXCL_STOP
             }
-        printf( "\n" );
+        fmt::print( "\n" );
         }
 
     err = static_cast<int>( ERRORS::BAD_IO_DATA );
-    return 0;
+    return 0.0f;
     }
 //-----------------------------------------------------------------------------
 int_2* io_device::get_AI_data( u_int index ) const
@@ -555,70 +579,59 @@ int_2* io_device::get_AI_data( u_int index ) const
 
     if ( G_DEBUG )
         {
-        if ( G_USE_LOG )
-            {
-            sprintf( G_LOG->msg, "io_device->get_AI_data(...) - error");
-            G_LOG->write_log(i_log::P_ERR );
-            }
-        else
-            {
-            print();
-
-            printf("io_device->get_AI_data(...) - error! ");
-            printf("index = %d, AI_channels.count = %d, "
-                    "AI_channels.int_read_values = %p", index,
-                    AI_channels.count, AI_channels.int_read_values);
-            if (AI_channels.int_read_values)
-                {
-                printf(", AI_channels.int_read_values[ index ]=%p",
-                        AI_channels.int_read_values[index]);
-                }
-            printf("\n");
-            }
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AI_data(...) error: " );
+        fmt::println( "index = {}, AI_channels.count = {}, "
+            "AI_channels.int_read_values = {}",
+            index, AI_channels.count,
+            static_cast<void*>( AI_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
         }
 
-    return 0;
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
-io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index)
-	{
-	if (vendor == PHOENIX)
-	{
-		if (index < AI_channels.count && AI_channels.int_module_read_values[index])
-			{
-			u_int module_states = *((u_int*)(AI_channels.int_module_read_values[index]));
-			int_2 logical_port = AI_channels.logical_ports[index];
-			if (logical_port > 0 && logical_port <= 8)
-				{
-				bool iolinkconnected = module_states & (1 << (logical_port - 1));
-				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
-				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
-				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
-				}
-			}
-	}
-	return IOLINKSTATE::OK;
-	}
+io_device::IOLINKSTATE io_device::get_AI_IOLINK_state( u_int index ) const
+    {
+    if ( vendor == PHOENIX )
+        {
+        if ( index < AI_channels.count && AI_channels.int_module_read_values[ index ] )
+            {
+            u_int module_states = *( (u_int*)( AI_channels.int_module_read_values[ index ] ) );
+            int_2 logical_port = AI_channels.logical_ports[ index ];
+            if ( logical_port > 0 && logical_port <= 8 )
+                {
+                bool iolinkconnected = module_states & ( 1 << ( logical_port - 1 ) );
+                bool iolinkdatavalid = module_states & ( 1 << ( logical_port + 7 ) );
+                if ( !iolinkconnected ) return IOLINKSTATE::NOTCONNECTED;
+                if ( !iolinkdatavalid ) return IOLINKSTATE::DEVICEERROR;
+                }
+            }
+        }
+    return IOLINKSTATE::OK;
+    }
 
-io_device::IOLINKSTATE io_device::get_AO_IOLINK_state(u_int index)
-	{
-	if (vendor == PHOENIX)
-		{
-		if (index < AO_channels.count && AO_channels.int_module_read_values[index])
-			{
-			u_int module_states = *((u_int*)(AO_channels.int_module_read_values[index]));
-			int_2 logical_port = AO_channels.logical_ports[index];
-			if (logical_port > 0 && logical_port <= 8)
-				{
-				bool iolinkconnected = module_states & (1 << (logical_port - 1));
-				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
-				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
-				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
-				}
-			}
-		}
-	return IOLINKSTATE::OK;
-	}
+io_device::IOLINKSTATE io_device::get_AO_IOLINK_state( u_int index ) const
+    {
+    if ( vendor == PHOENIX )
+        {
+        if ( index < AO_channels.count && AO_channels.int_module_read_values[ index ] )
+            {
+            u_int module_states = *( (u_int*)( AO_channels.int_module_read_values[ index ] ) );
+            int_2 logical_port = AO_channels.logical_ports[ index ];
+            if ( logical_port > 0 && logical_port <= 8 )
+                {
+                bool iolinkconnected = module_states & ( 1 << ( logical_port - 1 ) );
+                bool iolinkdatavalid = module_states & ( 1 << ( logical_port + 7 ) );
+                if ( !iolinkconnected ) return IOLINKSTATE::NOTCONNECTED;
+                if ( !iolinkdatavalid ) return IOLINKSTATE::DEVICEERROR;
+                }
+            }
+        }
+    return IOLINKSTATE::OK;
+    }
 
 //-----------------------------------------------------------------------------
 int_2* io_device::get_AO_write_data( u_int index )
@@ -630,22 +643,44 @@ int_2* io_device::get_AO_write_data( u_int index )
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AO_write_data(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %p",
-            index, AO_channels.count, AO_channels.int_write_values );
-        if ( AO_channels.int_write_values )
-            {
-            printf( ", AO_channels.int_write_values[ index ]=%p",
-                AO_channels.int_write_values[ index ] );
-            }
-        printf( "\n" );
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_write_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
         }
-    return 0;
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
-int_2* io_device::get_AO_read_data( u_int index )
+const int_2* io_device::get_AO_write_data( u_int index ) const
+    {
+    if ( index < AO_channels.count && AO_channels.int_write_values )
+        {
+        return AO_channels.int_write_values[ index ];
+        }
+
+    if ( G_DEBUG )
+        {
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_write_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_write_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_write_values ) );
+        // LCOV_EXCL_STOP
+        }
+
+    return nullptr;
+    }
+//-----------------------------------------------------------------------------
+const int_2* io_device::get_AO_read_data( u_int index ) const
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
         {
@@ -654,30 +689,33 @@ int_2* io_device::get_AO_read_data( u_int index )
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AO_read_data(...) - error! " );
-        printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_read_values = %p",
-            index, AO_channels.count, AO_channels.int_read_values );
-        if ( AO_channels.int_read_values )
-            {
-            printf( ", AO_channels.int_read_values[ index ]=%p",
-                AO_channels.int_read_values[ index ] );
-            }
-        printf( "\n" );
+        // LCOV_EXCL_START
+        fmt::print( "'{}' (", name );
+        io_device::print();
+        fmt::print( ") io_device->get_AO_read_data(...) error: " );
+        fmt::println( "index = {}, AO_channels.count = {}, "
+            "AO_channels.int_read_values = {}",
+            index, AO_channels.count,
+            static_cast<void*>( AO_channels.int_read_values ) );
+        // LCOV_EXCL_STOP
         }
-    return 0;
+
+    return nullptr;
     }
 //-----------------------------------------------------------------------------
 void io_device::print() const
     {
-    printf( " " );
+    if ( !DI_channels.count && !DO_channels.count &&
+        !AI_channels.count && !AO_channels.count )
+        {
+        fmt::print( "I/O: 0" );
+        return;
+        }
 
     DI_channels.print();
     DO_channels.print();
     AI_channels.print();
     AO_channels.print();
-    //printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 io_device::io_device( const char* name ) : name( name ), vendor( PHOENIX ),
@@ -831,31 +869,31 @@ void io_device::IO_channels::init( int ch_count )
         {
         count = ch_count;
 
-        tables  = new u_int[ count ];
-        offsets = new u_int[ count ];
-		module_offsets = new int[ count ];
-		logical_ports = new int[ count ];
+        tables = new u_int[ count ]{};
+        offsets = new u_int[ count ]{};
+        module_offsets = new int[ count ]{};
+        logical_ports = new int[ count ]{};
 
         switch ( type )
             {
             case IO_channels::CT_DI:
-                char_read_values = new u_char*[ count ]{ nullptr };
+                char_read_values = new u_char*[ count ]{};
                 break;
 
             case IO_channels::CT_DO:
-                char_read_values  = new u_char*[ count ]{ nullptr };
-                char_write_values = new u_char*[ count ]{ nullptr };
+                char_read_values  = new u_char*[ count ]{};
+                char_write_values = new u_char*[ count ]{};
                 break;
 
             case IO_channels::CT_AI:
-                int_read_values = new int_2*[ count ]{ nullptr };
-				int_module_read_values = new int_2*[count]{ nullptr };
+                int_read_values = new int_2*[ count ]{};
+				int_module_read_values = new int_2*[count]{};
                 break;
 
             case IO_channels::CT_AO:
-                int_read_values  = new int_2*[ count ]{ nullptr };
-				int_module_read_values = new int_2*[count]{ nullptr };
-                int_write_values = new int_2*[ count ]{ nullptr };
+                int_read_values  = new int_2*[ count ]{};
+				int_module_read_values = new int_2*[count]{};
+                int_write_values = new int_2*[ count ]{};
                 break;
             }
         }
@@ -965,19 +1003,33 @@ void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset,
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void io_manager::init( int nodes_count )
+void io_manager::init( int new_nodes_count )
     {
-    this->nodes_count = nodes_count;
+#ifdef PTUSA_TEST
+    if ( nodes_count && nodes )
+        {
+        for ( u_int i = 0; i < nodes_count; i++ )
+            {
+            delete nodes[ i ];
+            nodes[ i ] = nullptr;
+            }
+
+        delete[] nodes;
+        nodes = nullptr;
+        nodes_count = 0;
+        }
+#endif // PTUSA_TEST
+
+    nodes_count = new_nodes_count;
 
     if ( nodes_count )
         {
         nodes = new io_node*[ nodes_count ];
-        for ( int i = 0; i < nodes_count; i++ )
+        for ( u_int i = 0; i < nodes_count; i++ )
             {
-            nodes[ i ] = 0;
+            nodes[ i ] = nullptr;
             }
         }
-
     }
 //-----------------------------------------------------------------------------
 io_manager* io_manager::get_instance()
@@ -1140,10 +1192,26 @@ io_manager::~io_manager()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node * io_manager::get_node( int node_n )
+const io_manager::io_node* io_manager::get_node( u_int node_n ) const
     {
-    return nodes[ node_n ];
+    if ( node_n < nodes_count )
+        {
+        return nodes[ node_n ];
+        }
+
+    return nullptr;
     }
+
+io_manager::io_node* io_manager::get_node( u_int node_n )
+    {
+    if ( node_n < nodes_count )
+        {
+        return nodes[ node_n ]; 
+        }
+
+    return nullptr;
+    }
+
 u_int io_manager::get_nodes_count()
 	{
 	return nodes_count;
@@ -1191,17 +1259,6 @@ void io_manager::print() const
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         nodes[ i ]->print();
-        }
-    }
-//-----------------------------------------------------------------------------
-void io_manager::print_log() const
-    {
-    sprintf(G_LOG->msg, "I\\O manager [%d]:\n", nodes_count);
-    G_LOG->write_log(i_log::P_DEBUG);
-
-    for (u_int i = 0; i < nodes_count; i++)
-        {
-        nodes[i]->print_log();
         }
     }
 //-----------------------------------------------------------------------------
@@ -1331,16 +1388,6 @@ void io_manager::io_node::print()
         name, type, number, ip_address,
         DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
         AI_cnt, AI_size, AO_cnt, AO_size );
-    }
-//-----------------------------------------------------------------------------
-void io_manager::io_node::print_log()
-    {
-    sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\", "
-        "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
-        name, type, number, ip_address,
-        DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
-        AI_cnt, AI_size, AO_cnt, AO_size );
-    G_LOG->write_log(i_log::P_DEBUG);
     }
 //-----------------------------------------------------------------------------
 int io_manager::io_node::get_display_state() const

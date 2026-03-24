@@ -148,7 +148,7 @@ Eclipse IDE с проектом на базе CMake в Linux.
 
 Загрузите последние версии с веб-сайта Phoenix Contact
 <https://www.phoenixcontact.com/products> (например, из области **AXC F 2152**)
-`PLCnext Technology C++ Toolchain для Windows` (текущая 2023.0 LTS) и `sdk для
+`PLCnext Control firmware` (текущая 2023.0 LTS) и `sdk для
 Windows 64 bit` (текущая 2022.0.4 LTS) , в разделе Загрузки->Программное
 обеспечение $-$ <http://www.phoenixcontact.com/qr/2404267/softw>.
 

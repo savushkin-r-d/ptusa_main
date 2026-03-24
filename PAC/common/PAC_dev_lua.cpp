@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Jan 20 12:47:00 2026.
+** Generated automatically by tolua++-1.0.92 on Tue Mar 17 10:34:40 2026.
 */
 
 #ifndef __cplusplus
@@ -5963,6 +5963,38 @@ static int tolua_PAC_dev_operation_manager__geti00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_idle_time_sec of class  operation_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_manager_get_idle_time_sec00
+static int tolua_PAC_dev_operation_manager_get_idle_time_sec00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"operation_manager",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  operation_manager* self = (operation_manager*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_idle_time_sec'", NULL);
+#endif
+  {
+   unsigned long tolua_ret = (unsigned long)  self->get_idle_time_sec();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_idle_time_sec'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: get_idle_time of class  operation_manager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_manager_get_idle_time00
 static int tolua_PAC_dev_operation_manager_get_idle_time00(lua_State* tolua_S)
@@ -5982,7 +6014,7 @@ static int tolua_PAC_dev_operation_manager_get_idle_time00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_idle_time'", NULL);
 #endif
   {
-   unsigned long tolua_ret = (unsigned long)  self->get_idle_time();
+   unsigned long long tolua_ret = (unsigned long long)  self->get_idle_time();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -15851,6 +15883,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"add_mode",tolua_PAC_dev_operation_manager_add_mode00);
    tolua_function(tolua_S,"add_operation",tolua_PAC_dev_operation_manager_add_operation00);
    tolua_function(tolua_S,".geti",tolua_PAC_dev_operation_manager__geti00);
+   tolua_function(tolua_S,"get_idle_time_sec",tolua_PAC_dev_operation_manager_get_idle_time_sec00);
    tolua_function(tolua_S,"get_idle_time",tolua_PAC_dev_operation_manager_get_idle_time00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"operation_state","operation_state","",NULL);

@@ -407,12 +407,11 @@ cipline_tech_object::~cipline_tech_object()
     currentProgramName = nullptr;
     }
 
-int cipline_tech_object::save_device( char *buff )
+int cipline_tech_object::save_device( char *buff ) const
     {
     int i;
     int answer_size = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
-        name_Lua, name_Lua,
-        name_Lua );
+        name_Lua, name_Lua, name_Lua );
 
     //Команда
     answer_size += sprintf( buff + answer_size, "\tCMD=%d,\n", ncmd );
@@ -458,7 +457,7 @@ int cipline_tech_object::save_device( char *buff )
     //Время простоя.
     char up_time_str [ 50 ];
 
-    auto up_secs = operations_manager->get_idle_time();
+    auto up_secs = operations_manager->get_idle_time_sec();
     auto up_hours = up_secs / ( 60 * 60 );
     auto up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;

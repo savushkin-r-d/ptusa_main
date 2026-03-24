@@ -21,7 +21,7 @@ void analog_emulator::param( float math_expec, float stddev )
     d.param( std::normal_distribution<float>::param_type{ math_expec, stddev } );
     }
 
-float analog_emulator::get_value()
+float analog_emulator::get_value() const
     {
     return d( rd );
     }

@@ -11,6 +11,7 @@
 #include "param_ex.h"
 #include "analog_emulator.h"
 #include "bus_coupler_io.h"
+#include "i_base.h"
 
 class PID;
 
@@ -21,7 +22,7 @@ const size_t MAX_COPY_SIZE = 2000;
 /// Параметры хранятся в энергонезависимой памяти (сохраняют значение после
 /// перезагрузки PAC). Доступ к параметрам производится на основе номера и
 /// смещения (итоговый индекс равен их сумме). Каждый параметр имеет имя.
-class par_device
+class par_device: public i_Lua_save_device
     {
     friend class device;
     friend class PID;
@@ -30,7 +31,7 @@ class par_device
         /// @param par_cnt - количество параметров.
         explicit par_device( u_int par_cnt );
 
-        virtual ~par_device();
+        ~par_device() override;
         
         /// Unmovable classe.
         par_device& operator=( par_device&& ) = delete;
@@ -40,10 +41,8 @@ class par_device
         /// Сохраняем на основе названий параметров в виде таблицы:
         /// имя_параметра = 'значение'.
         ///
-        /// @param prefix - префикс перед строкой скрипта (обычно символ
-        /// табуляции - для визуального форматирования текста).
         /// @param buff [out] - буфер записи строки.
-        virtual int save_device( char* buff, const char* prefix = "" );
+        int save_device( char* buff ) const override;
 
         /// @brief Выполнение команда (установка значения параметра).
         ///
@@ -102,6 +101,11 @@ class par_device
             return par[ 0 ][ idx ];
             }
 
+        const char* get_name_in_Lua() const override
+            {
+            return "";
+            }
+
     private:
         /// @brief Ошибки устройства.
         saved_params_u_int_4* err_par = nullptr;
@@ -113,230 +117,6 @@ class par_device
 
         saved_params_float* par = nullptr; ///< Параметры.
         char** par_name = nullptr;         ///< Названия параметров.
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс счетчика.
-class i_counter
-    {
-    public:
-        virtual ~i_counter() = default;
-
-        /// @brief Приостановка работы счетчика.
-        virtual void pause() = 0;
-
-        /// @brief Возобновление работы счетчика.
-        virtual void start() = 0;
-
-        /// @brief Сброс счетчика и остановка счета.
-        ///
-        /// После сброса для продолжения работы необходимо вызвать @ref start().
-        virtual void reset() = 0;
-
-        /// @brief Сброс счетчика и продолжение счета.
-        virtual void restart();
-
-        /// @brief Получение значения счетчика.
-        virtual u_int get_quantity() = 0;
-
-        /// @brief Получение значения счетчика.
-        virtual float get_flow() = 0;
-
-        /// @brief Получение состояния работы счетчика.
-        virtual int get_state() = 0;
-
-        /// @brief Получение абсолютного значения счетчика (без учета
-        /// состояния паузы).
-        virtual u_int get_abs_quantity() = 0;
-
-        /// @brief Сброс абсолютного значения счетчика.
-        virtual void  abs_reset() = 0;
-
-        enum DAY_CTR
-            {
-            DAY_T1,
-            DAY_T2
-            };
-
-        /// @brief Приостановка работы дневного счетчика.
-        virtual void pause_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) = 0;
-
-        /// @brief Возобновление работы дневного счетчика.
-        virtual void start_daily( DAY_CTR n = DAY_CTR::DAY_T1 ) = 0;
-
-        enum class STATES
-            {
-            S_WORK = 1,
-            S_PAUSE,
-
-            S_PUMP_ERROR = -9,  // Ошибка связанного насоса.
-            S_FLOW_ERROR = -10, // Ошибка расхода (самотёка).
-
-            S_LOW_ERR = -12,
-            };
-
-    protected:
-        /// @brief Получение времени ожидания работы насоса.
-        virtual u_long get_pump_dt() const = 0;
-
-        /// @brief Получение минимального расхода для учета работы связанных
-        /// насосов.
-        virtual float get_min_flow() const = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс противосмешивающего клапана (mixproof).
-class i_mix_proof
-    {
-    public:
-        virtual ~i_mix_proof() = default;
-
-        /// @brief Открыть верхнее седло.
-        virtual void open_upper_seat() = 0;
-
-        /// @brief Открыть нижнее седло.
-        virtual void open_lower_seat() = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс весов.
-class i_wages
-    {
-    public:
-        virtual ~i_wages() = default;
-
-        /// @brief Тарировка.
-        virtual void tare() = 0;
-        ///@brief Возвращает вес в килограммах
-        virtual float get_value() = 0;
-        ///@brief Возвращает состояние
-        virtual int get_state() = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство на основе дискретного входа.
-///
-/// Обратная связь, предельный уровень и т.д. являются примерами таких
-/// устройств.
-class i_DI_device : public i_cmd_device
-    {
-    public:
-        /// @brief Получение состояния устройства.
-        ///
-        /// @return состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
-
-        /// @brief Проверка активного состояния.
-        ///
-        /// Для уровня - сработал он или нет.
-        ///
-        /// @return 1 - устройство активно.
-        /// @return 0 - устройство неактивно.
-        virtual bool is_active();
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство на основе дискретного выхода.
-///
-/// Клапан, мешалка и т.д. являются примерами таких устройств.
-class i_DO_device : public i_DI_device
-    {
-    public:
-        /// @brief Включение устройства с учетом ручного режима.
-        virtual void on();
-
-        virtual void print() const = 0;
-
-        /// @brief Выключение устройства с учетом ручного режима.
-        virtual void off() = 0;
-
-        /// @brief немедленное выключение устройства
-        virtual void direct_off() = 0;
-
-        /// @brief немедленное выключение устройства c учетом ручного режима
-        virtual void instant_off();
-
-        /// @brief Установка нового состояния устройства с учетом ручного режима.
-        ///
-        /// @param new_state - новое состояние устройства.
-        virtual void set_state( int new_state );
-
-    protected:
-        /// @brief Установка нового состояния устройства.
-        ///
-        /// @param new_state - новое состояние объекта.
-        virtual void direct_set_state( int new_state ) = 0;
-
-        /// @brief Включение устройства.
-        ///
-        /// Установка устройства в активное состояние. Для клапана это означает
-        /// его активирование, то есть если он нормально закрытый - открытие.
-        virtual void direct_on() = 0;
-
-        /// @brief Включен ли ручной режим.
-        ///
-        /// В ручном режиме устройство управляется по командам от сервера
-        /// (управляющая программа не влияет на устройство).
-        ///
-        /// @return true - ручной режим включен.
-        /// @return false - ручной режим выключен.
-        virtual bool get_manual_mode() const = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство на на основе аналогового входа.
-///
-/// Температура, расход и т.д. являются примерами таких устройств.
-class i_AI_device : public i_cmd_device
-    {
-    public:
-        /// @brief Получение текущего состояния устройства.
-        ///
-        /// @return - текущее состояние устройства в виде дробного числа.
-        virtual float get_value() = 0;
-
-        /// @brief Получение состояния устройства.
-        ///
-        /// @return состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство на основе аналогового выхода.
-///
-/// Аналоговый канал управления и т.д. являются примерами таких устройств.
-class i_AO_device : public i_AI_device
-    {
-    public:
-        /// @brief Выключение устройства с учетом ручного режима.
-        virtual void off() = 0;
-
-        /// @brief Установка текущего состояния устройства с учетом ручного режима.
-        virtual void set_value( float new_value );
-
-    protected:
-        /// @brief Установка текущего состояния устройства.
-        ///
-        /// @param new_value - новое состояние устройства.
-        virtual void direct_set_value( float new_value ) = 0;
-
-        /// @brief Включен ли ручной режим.
-        ///
-        /// В ручном режиме устройство управляется по командам от сервера
-        /// (управляющая программа не влияет на устройство).
-        ///
-        /// @return true - ручной режим включен.
-        /// @return false - ручной режим выключен.
-        virtual bool get_manual_mode() const = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс устройства как с аналоговыми, так и дискретными каналами.
-class i_DO_AO_device : public i_AO_device, public i_DO_device
-    {
-    public:
-        /// @brief Выключение устройства.
-        ///
-        /// Установка устройства в пассивное состояние. Для клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        void off() override = 0;
-
-        /// @brief Получение состояния устройства.
-        ///
-        /// @return состояние устройства в виде целого числа.
-        int get_state() override = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в
@@ -364,13 +144,14 @@ class device : public i_DO_AO_device, public par_device
 
         /// @brief Сохранение устройства в виде скрипта Lua.
         ///
-        /// @param prefix - префикс перед строкой скрипта (обычно символ
-        /// табуляции - для визуального форматирования текста).
         /// @param buff [out] - буфер записи строки.
-        int save_device( char* buff, const char* prefix ) override;
+        int save_device( char* buff ) const override;
 
         /// @brief Расчет состояния на основе текущих данных от I/O.
         virtual void evaluate_io();
+
+        /// @brief Отладочная печать объекта в консоль.
+        const char* get_name_in_Lua() const override;
 
         enum CONSTANTS
             {
@@ -680,12 +461,12 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Получение состояния устройства.
         ///
         /// @return состояние устройства в виде целого числа.
-        int get_state() override;
+        int get_state() const override;
 
         /// @brief Получение текущего состояния устройства.
         ///
         /// @return - текущее состояние устройства в виде дробного числа.
-        float get_value() override;
+        float get_value() const override;
 
         /// @brief Вывод объекта в консоль.
         ///
@@ -735,7 +516,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
         ///
         /// @param buff [out] - буфер записи строки.
-        virtual int save_device_ex( char* buff )
+        virtual int save_device_ex( char* buff ) const
             {
             buff[ 0 ] = 0;
             return 0;
@@ -758,6 +539,7 @@ class device : public i_DO_AO_device, public par_device
         void set_emulation( bool new_emulation_state );
 
         analog_emulator& get_emulator();
+        const analog_emulator& get_emulator() const;
 
         /// @brief Получение максимальной длины имени устройства (с учётом 
         /// символа завершения строки).
@@ -825,9 +607,9 @@ class analog_io_device : public device, public io_device
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
-        float get_value() override;
+        float get_value() const override;
     };
 //-----------------------------------------------------------------------------
 class i_motor : public device
@@ -856,7 +638,7 @@ class i_camera
         virtual ~i_camera() = default;
 
         /// @brief Получение статуса событий от камеры.
-        virtual int get_result( int n = 1 ) = 0;
+        virtual int get_result( int n = 1 ) const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
@@ -873,7 +655,7 @@ class AO1 : public analog_io_device
         virtual float get_min_value() const = 0;
         virtual float get_max_value() const = 0;
 
-        float get_value() override;
+        float get_value() const override;
         void  direct_set_value( float new_value ) override;
 
     protected:
@@ -889,7 +671,7 @@ class virtual_counter : public device, public i_counter
     public:
         explicit virtual_counter( const char* dev_name );
 
-        int get_state() override;
+        int get_state() const override;
 
         void direct_on() override;
 
@@ -903,13 +685,13 @@ class virtual_counter : public device, public i_counter
 
         void reset() override;
 
-        u_int get_quantity() override;
+        u_int get_quantity() const override;
 
-        float get_flow() override;
+        float get_flow() const override;
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
-        u_int get_abs_quantity() override;
+        u_int get_abs_quantity() const override;
 
         /// @brief Сброс абсолютного значения счетчика.
         void abs_reset() override;
@@ -921,7 +703,7 @@ class virtual_counter : public device, public i_counter
         void eval( u_int read_value, u_int abs_read_value, float read_flow );
 
         //Lua.
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
@@ -949,21 +731,21 @@ class AI1 : public analog_io_device
         AI1( const char* dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-        int get_state() override;
+        int get_state() const override;
 
         const char* get_error_description() override;
 
         virtual int get_params_count() const;
 
-        float get_value() override;
+        float get_value() const override;
 
         void  direct_set_value( float new_value ) override;
 
         /// @brief Получение максимального значения выхода устройства.
-        virtual float get_max_val();
+        virtual float get_max_val() const;
 
         /// @brief Получение минимального значения выхода устройства.
-        virtual float get_min_val();
+        virtual float get_min_val() const;
 
     protected:
         enum CONSTANTS
@@ -983,13 +765,13 @@ class level : public AI1
         level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt );
 
-        int get_volume();
-        virtual int calc_volume();
+        int get_volume() const;
+        virtual int calc_volume() const;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
-        float get_max_val() override;
-        float get_min_val() override;
+        float get_max_val() const override;
+        float get_min_val() const override;
 
         int get_params_count() const override;
 
@@ -1087,9 +869,9 @@ class signal_column : public device, public io_device
         void direct_off() override;
         void direct_on() override;
 
-        int get_state() override;
+        int get_state() const override;
 
-        int save_device_ex( char* buff ) override;
+        int save_device_ex( char* buff ) const override;
 
 #ifdef _MSC_VER
 #pragma region Сигнализация о событиях

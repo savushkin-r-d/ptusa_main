@@ -145,10 +145,10 @@ float PID::eval( float currentValue, int deltaSign )
             static_cast<unsigned int>( ( *par )[ P_acceleration_time ] );
         if ( unsigned long delta_time = get_delta_millisec( start_time );
             delta_time < acceleration_time )
-            {            
+            {
             if ( auto out_min = ( *par )[ P_out_min ]; start_value < out_min )
                 {
-                // Начинаем с out_min. 
+                // Начинаем с out_min.
                 start_value = out_min;
                 }
 
@@ -212,7 +212,7 @@ float PID::eval( float currentValue, int deltaSign )
             MIN_OUT_VALUE );
         out_max = MAX_OUT_VALUE;
         ( *par )[ P_out_max ] = MAX_OUT_VALUE;
-        }        
+        }
 
     if ( Uk < out_min )
         {
@@ -236,7 +236,7 @@ float PID::eval( float currentValue, int deltaSign )
 void  PID::direct_on()
     {
     if ( state != STATE::ON )
-        {        
+        {
         if ( STATE::OFF == state )
             {
             // Только для отключенного состояния.
@@ -356,7 +356,7 @@ void PID::save_param()
     par->save_all();
     }
 //-----------------------------------------------------------------------------
-float PID::get_value()
+float PID::get_value() const
     {
     return out_value;
     }
@@ -465,23 +465,23 @@ const char* PID::get_name_in_Lua() const
     return get_name();
     }
 //-----------------------------------------------------------------------------
-int PID::get_state()
+int PID::get_state() const
     {
     return static_cast<int>( state );
     }
 //-----------------------------------------------------------------------------
-int PID::save_device_ex( char* buff )
+int PID::save_device_ex( char* buff ) const
     {
     int answer_size = sprintf( buff, "Z=%.2f, ", set_value );
     return answer_size;
     }
 //-----------------------------------------------------------------------------
-int PID::save_device( char *buff )
+int PID::save_device( char *buff ) const
     {
     int answer_size = 0;
     if ( is_old_style )
         {
-        answer_size = sprintf( buff, "t.%s = \n\t{\n", get_name() );
+        answer_size = sprintf( buff, "t.%s=\n\t{\n", get_name() );
 
         answer_size += sprintf( buff + answer_size, "\tST=%u,\n",
             static_cast<unsigned int>(state) );
@@ -489,13 +489,13 @@ int PID::save_device( char *buff )
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
         answer_size += sprintf( buff + answer_size,
-            "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
+            "\t%s={ %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
 
         answer_size += sprintf( buff + answer_size, "\t}\n" );
         }
     else
         {
-        answer_size = device::save_device( buff, "\t" );
+        answer_size = device::save_device( buff );
         }
 
     return answer_size;

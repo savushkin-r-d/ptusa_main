@@ -1,4 +1,5 @@
 #include "bus_coupler_io_tests.h"
+#include "uni_bus_coupler_io.h"
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -11,7 +12,6 @@ const int STD_OUT_FILENO = 1;
 /*
 	TEST METHODS DEFENITION:
 	void print()
-	void print_log()
 */
 
 TEST( io_manager, print )
@@ -35,7 +35,6 @@ TEST( io_manager, print )
 		close( tmp );
 
 		io_manager::get_instance()->print();
-		io_manager::get_instance()->print_log();
 
 		fflush( stdout );
 		dup2( old, STD_OUT_FILENO );
@@ -242,3 +241,94 @@ TEST( io_node, get_display_state_emulator_mode_only_ao )
 	node->state = io_manager::io_node::ST_NO_CONNECT;
 	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
 	}
+
+TEST( io_device, get_AO )
+    {
+    io_device dev1( "D1" );
+    
+    testing::internal::CaptureStdout();
+    auto res = dev1.get_AO( 0, 0.0f, 100.0f );
+    auto output = testing::internal::GetCapturedStdout();
+    auto REFERENCE_OUTPUT = "'D1' (I/O: 0) io_device->get_AO(...) error: "
+        "index = 0, AO_channels.count = 0, AO_channels.int_write_values = 0x0\n";
+    EXPECT_EQ( output, REFERENCE_OUTPUT );
+    EXPECT_EQ( res, 0.0f );
+    }
+
+TEST( io_device, get_AO_read_data )
+    {
+    io_device dev1( "D1" );
+
+    testing::internal::CaptureStdout();
+    auto res = dev1.get_AO_read_data( 0 );
+    auto output = testing::internal::GetCapturedStdout();
+    auto REFERENCE_OUTPUT = "'D1' (I/O: 0) io_device->get_AO_read_data(...) error: "
+        "index = 0, AO_channels.count = 0, AO_channels.int_read_values = 0x0\n";
+    EXPECT_EQ( output, REFERENCE_OUTPUT );
+    EXPECT_EQ( res, nullptr);
+    }
+
+TEST( io_device, get_AO_IOLINK_state )
+    {
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    auto prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+    mngr.init_node_AO( 0, 0, 1027843, 0 );
+
+    io_device dev1( "D1" );
+    dev1.set_io_vendor( io_device::VENDOR::PHOENIX );
+    dev1.init_and_alloc( 0, 0, 2, 0 );
+    dev1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0, 1, 1 );
+    const io_device& DEV1 = dev1;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ), 
+        io_device::IOLINKSTATE::NOTCONNECTED );
+
+    // Bit 0 - IOLink connected.
+    *dev1.AO_channels.int_module_read_values[ 0 ] = 0b1;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ),
+        io_device::IOLINKSTATE::DEVICEERROR );
+
+    // Bit 0 - IOLink connected and bit 7 - IOLink Ok.
+    *dev1.AO_channels.int_module_read_values[ 0 ] = 0b1 | 0b1'0000'0000;
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ),
+        io_device::IOLINKSTATE::OK );
+
+    io_manager::replace_instance( prev_mngr );
+    }
+
+
+TEST( io_manager, init )
+    {
+    io_manager::get_instance()->init( 1 );
+
+    // Second init - should clear previous.
+    io_manager::get_instance()->init( 2 );
+
+    EXPECT_EQ( io_manager::get_instance()->get_nodes_count(), 2 );
+    }
+
+TEST( io_manager, get_node )
+    {
+    const io_manager *IO_MNGR = io_manager::get_instance();
+    io_manager::get_instance()->init( 1 );
+    const auto const_res1 = IO_MNGR->get_node( 1 );
+    EXPECT_EQ( const_res1, nullptr );
+    auto const_res2 = IO_MNGR->get_node( 0 );
+    EXPECT_EQ( const_res2, nullptr );
+
+    auto res = io_manager::get_instance()->get_node( 1 );
+    EXPECT_EQ( res, nullptr );
+    res = io_manager::get_instance()->get_node( 0 );
+    EXPECT_EQ( res, nullptr );
+
+    io_manager::get_instance()->add_node( 0,
+        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
+        "A100", 0, 0, 0, 0, 0, 0 );
+    res = io_manager::get_instance()->get_node( 0 );
+    EXPECT_NE( res, nullptr );
+    auto const_res3 = IO_MNGR->get_node( 0 );
+    EXPECT_NE( const_res3, nullptr );
+    }
+ 
