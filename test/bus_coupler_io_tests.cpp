@@ -75,8 +75,6 @@ TEST( io_node, get_display_state_not_connected )
 	// Should return ST_NO_CONNECT (0) instead of ST_ERROR (-1) in emulator
     // mode.
 	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
-
-    G_PAC_INFO()->emulation_off();
 	}
 
 TEST( io_node, get_display_state_connected_ok )

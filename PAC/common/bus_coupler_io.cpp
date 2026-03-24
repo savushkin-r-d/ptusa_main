@@ -1293,10 +1293,10 @@ io_manager::io_node::~io_node()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
+io_manager::io_node::io_node( int node_type, int number, const char* str_ip_address,
     const char* new_name,
     int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
-    int AI_size ) : type( static_cast<TYPES>( type ) ),
+    int AI_size ) : type( static_cast<TYPES>( node_type ) ),
     number( number ),
     DO_cnt( DO_cnt ),
     AO_cnt( AO_cnt ),
@@ -1305,6 +1305,11 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
     AI_cnt( AI_cnt ),
     AI_size( AI_size )
     {
+    if ( new_name )
+        {
+        strcpy( name, new_name );
+        }
+
     if ( str_ip_address )
         {
         strcpy( ip_address, str_ip_address );
@@ -1314,7 +1319,7 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его IP адрес.", new_name );
+            "Узел \"%s\" отключен, так как не задан его IP адрес.", name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
@@ -1322,13 +1327,8 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его тип.", new_name );
+            "Узел \"%s\" отключен, так как не задан его тип.", name );
         G_LOG->write_log( i_log::P_NOTICE );
-        }
-
-    if ( new_name )
-        {
-        strcpy( name, new_name );
         }
 
     if ( AI_cnt )
