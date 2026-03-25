@@ -979,9 +979,9 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         {
         return;
         }
-
-    int result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
-    if ( result > 0 )
+    
+    if ( auto result = read_input_registers( nd, 
+        PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
         {
         nd->status_register = static_cast<u_int_2>(
             BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
@@ -999,13 +999,12 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         }
 
     // Check for PP mode state changes.
-    bool is_pp_mode_active = 
-        ( nd->status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( nd->prev_status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
-
     // PP mode has become active.
-    if ( is_pp_mode_active && !was_pp_mode_active )
+    if ( auto is_pp_mode_active =
+        ( nd->status_register & io_node::STATUS_REG_ERROR_MASK ) != 0,
+        was_pp_mode_active =
+        ( nd->prev_status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
+        is_pp_mode_active && !was_pp_mode_active )
         {
         if ( !nd->is_pp_mode_alarm_set )
             {
@@ -1016,15 +1015,13 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             }
         }
     // PP mode has become inactive.
-    else if ( !is_pp_mode_active && was_pp_mode_active )
+    else if ( !is_pp_mode_active && was_pp_mode_active &&
+        nd->is_pp_mode_alarm_set )
         {
-        if ( nd->is_pp_mode_alarm_set )
-            {
-            nd->is_pp_mode_alarm_set = false;
-            PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_SERVICE,
-                PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
-            }
+        nd->is_pp_mode_alarm_set = false;
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_SERVICE,
+            PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
 
     nd->prev_status_register = nd->status_register;

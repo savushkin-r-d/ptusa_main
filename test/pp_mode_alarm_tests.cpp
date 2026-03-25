@@ -80,7 +80,7 @@ TEST( pp_mode_alarm, multiple_error_bits )
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
 
     // Test each bit in the error mask.
-    for ( int bit = 0; bit < 6; bit++ )
+    for ( u_int_2 bit = 0; bit < 6; bit++ )
         {
         u_int_2 test_value = 1 << bit;
         EXPECT_TRUE( 
