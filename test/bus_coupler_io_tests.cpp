@@ -190,6 +190,8 @@ TEST( io_device, check_output_DO_node_state )
     EXPECT_EQ( 0, dev.check_output_DO_node_state() );
 
     io_manager::get_instance()->init( 1 );
+    EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
         "Axxx", 1, 0, 0, 0, 0, 0 );
