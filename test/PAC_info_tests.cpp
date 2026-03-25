@@ -210,7 +210,7 @@ TEST( PAC_info, is_emulator )
     EXPECT_TRUE( G_PAC_INFO()->is_emulator() );
     }
 
-TEST_F( PAC_info_io_test, nodes_comm_error_all_ok )
+TEST_F( PAC_info_io_test, nodes_comm_error )
     {
     // Setup: create nodes in OK state.
     mngr.init( 2 );
@@ -232,26 +232,7 @@ TEST_F( PAC_info_io_test, nodes_comm_error_all_ok )
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
-    }
 
-TEST_F( PAC_info_io_test, nodes_comm_error_one_has_error )
-    {
-    // Setup: create nodes, one with error.
-    mngr.init( 2 );
-    mngr.add_node( 0,
-        io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
-        "A100", 0, 0, 0, 0, 0, 0 );
-    mngr.add_node( 1,
-        io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
-        "A200", 0, 0, 0, 0, 0, 0 );
-
-    auto node0 = mngr.get_node( 0 );
-    node0->is_active = true;
-    node0->state = io_manager::io_node::ST_OK;
-    node0->status_register = 0;
-
-    auto node1 = mngr.get_node( 1 );
-    node1->is_active = true;
     node1->state = io_manager::io_node::ST_ERROR;  // Error!
 
     G_PAC_INFO()->eval();
