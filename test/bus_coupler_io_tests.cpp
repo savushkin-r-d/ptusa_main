@@ -181,13 +181,13 @@ TEST( io_node, get_display_state_all_node_types )
 		io_manager::get_instance()->get_node( 2 )->get_display_state() );
 	}
 
-TEST( io_device, check_output_node_state )
+TEST( io_device, check_output_DO_node_state )
 	{
 	io_device dev( "TEST_DO" );
 	dev.init_and_alloc( 1, 0, 0, 0 );
     
     io_manager::get_instance()->init( 0 );
-    EXPECT_EQ( 0, dev.check_output_node_state() );
+    EXPECT_EQ( 0, dev.check_output_DO_node_state() );
 
     io_manager::get_instance()->init( 1 );
     io_manager::get_instance()->add_node( 0,
@@ -199,18 +199,18 @@ TEST( io_device, check_output_node_state )
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;
-	EXPECT_EQ( 1, dev.check_output_node_state() );
+	EXPECT_EQ( 1, dev.check_output_DO_node_state() );
 
     node->status_register = 0x0010;  // PP mode.
-    EXPECT_EQ( -1, dev.check_output_node_state() );
+    EXPECT_EQ( -1, dev.check_output_DO_node_state() );
 
     node->state = io_manager::io_node::ST_NO_CONNECT;
-    EXPECT_EQ( -1, dev.check_output_node_state() );
+    EXPECT_EQ( -1, dev.check_output_DO_node_state() );
     
     node->is_active = false;
     node->state = io_manager::io_node::ST_OK;
     node->status_register = 0;
-    EXPECT_EQ( -1, dev.check_output_node_state() );
+    EXPECT_EQ( -1, dev.check_output_DO_node_state() );
 	}
 
 TEST( io_device, check_output_node_state_no_channels )
@@ -218,7 +218,7 @@ TEST( io_device, check_output_node_state_no_channels )
 	io_device dev( "TEST_DO" );
 	
 	// No channels configured.
-	EXPECT_EQ( 0, dev.check_output_node_state() );
+	EXPECT_EQ( 0, dev.check_output_DO_node_state() );
 	}
 
 TEST( io_device, get_AO )

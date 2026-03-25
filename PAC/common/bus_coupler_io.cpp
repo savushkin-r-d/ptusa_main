@@ -790,19 +790,17 @@ void io_device::set_io_vendor( VENDOR vendor )
     this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
-int io_device::check_output_node_state( u_int index, bool is_digital ) const
+int io_device::check_output_DO_node_state( u_int index ) const
     {
-    const auto& channels = is_digital ? DO_channels : AO_channels;
-
     // If no channels configured or tables not initialized, skip node check.
-    if ( index >= channels.count || !channels.tables ||
-        !channels.char_write_values )
+    if ( index >= DO_channels.count || !DO_channels.tables ||
+        !DO_channels.char_write_values || !DO_channels.char_write_values[ index ] )
         {
         return 0; // No output channels properly configured.
         }
 
     auto io_mgr = G_IO_MANAGER();
-    auto node_index = channels.tables[ index ];
+    auto node_index = DO_channels.tables[ index ];
 
     // Check if node index is valid.
     if ( node_index >= io_mgr->get_nodes_count() )
