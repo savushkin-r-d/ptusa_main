@@ -792,7 +792,7 @@ void io_device::set_io_vendor( VENDOR vendor )
 //-----------------------------------------------------------------------------
 int io_device::check_output_node_state( u_int index, bool is_digital ) const
     {
-    const IO_channels& channels = is_digital ? DO_channels : AO_channels;
+    const auto& channels = is_digital ? DO_channels : AO_channels;
 
     // If no channels configured or tables not initialized, skip node check.
     if ( index >= channels.count || !channels.tables ||
@@ -801,14 +801,8 @@ int io_device::check_output_node_state( u_int index, bool is_digital ) const
         return 0; // No output channels properly configured.
         }
 
-    // Check if IO manager is available.
     auto io_mgr = G_IO_MANAGER();
-    if ( !io_mgr )
-        {
-        return 0; // IO manager not initialized.
-        }
-
-    u_int node_index = channels.tables[ index ];
+    auto node_index = channels.tables[ index ];
 
     // Check if node index is valid.
     if ( node_index >= io_mgr->get_nodes_count() )
@@ -817,17 +811,15 @@ int io_device::check_output_node_state( u_int index, bool is_digital ) const
         }
 
     auto node = io_mgr->get_node( node_index );
-
     if ( !node )
         {
         return -1; // Node not found.
-        }
-
-    int node_state = node->get_display_state();
+        }    
 
     // Return error if node is not OK (error, warning/PP mode, or not
     // connected).
-    if ( node_state != io_manager::io_node::ST_OK )
+    if ( auto node_state = node->get_display_state();
+        node_state != io_manager::io_node::ST_OK )
         {
         return -1;
         }
