@@ -1443,3 +1443,53 @@ TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
     G_LUA_MANAGER->free_Lua();
     ClearCipDevices();
     }
+
+TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep67 )
+    {
+    // Окружение.
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+
+    // По умолчанию параметр = 0 (охлаждение разрешено).
+    EXPECT_EQ( 0.0f,
+        cip1.rt_par_float[ P_NO_COOL_AFTER_DESINFECTION ] );
+
+    // Устанавливаем параметр = 1 (не охлаждать после дезинфекции).
+    cip1.rt_par_float[ P_NO_COOL_AFTER_DESINFECTION ] = 1;
+
+    // После шага 67 при включённом параметре переходим на 555.
+    EXPECT_EQ( 555, cip1._GoToStep( 67, 0 ) );
+
+    // Сбрасываем параметр = 0, проверяем стандартное поведение.
+    cip1.rt_par_float[ P_NO_COOL_AFTER_DESINFECTION ] = 0;
+
+    // При выключенном параметре шаг 67 вызывает LoadProgram.
+    // LoadProgram возвращает 555, т.к. curprg == -1 (нет программы).
+    EXPECT_EQ( 555, cip1._GoToStep( 67, 0 ) );
+
+    // Проверяем маппинг рецепта.
+    auto* rm = cip1.lineRecipes;
+    const auto curRec = rm->getCurrentRecipe();
+    rm->ResetRecipeToDefaults( curRec );
+    // Значение по умолчанию в рецепте должно быть 0.
+    EXPECT_EQ( 0.0f, rm->getRecipeValue( curRec,
+        TRecipeManager::RV_NO_COOL_AFTER_DESINFECTION ) );
+
+    // Устанавливаем значение 1 в рецепте и загружаем.
+    ASSERT_EQ( 0, rm->setRecipeValue( curRec,
+        TRecipeManager::RV_NO_COOL_AFTER_DESINFECTION, 1.0f ) );
+    cip1.rt_par_float[ P_SELECT_REC ] =
+        static_cast<float>( curRec + 1 );
+    EXPECT_EQ( 0, cip1.evaluate() );
+
+    // Проверяем маппинг: RV -> P.
+    EXPECT_EQ( 1.0f,
+        cip1.rt_par_float[ P_NO_COOL_AFTER_DESINFECTION ] );
+
+    // Завершение.
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
+    }

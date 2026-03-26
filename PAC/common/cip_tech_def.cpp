@@ -2170,7 +2170,12 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 64:
         case 65:
         case 66: return cur+1;
-        case 67: return LoadProgram();
+        case 67:
+            if (rt_par_float[P_NO_COOL_AFTER_DESINFECTION] != 0)
+                {
+                return 555;
+                }
+            return LoadProgram();
 
         case 71:
         case 72:

@@ -351,7 +351,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_DONT_USE_WATER_TANK, 0); 
         setRecipeValue(recipeNo, RV_PIDP_MAX_OUT, 0);
         setRecipeValue(recipeNo, RV_PIDF_MAX_OUT, 0);
-        setRecipeValue( recipeNo, RV_WATCHDOG, 0 );        
+        setRecipeValue( recipeNo, RV_WATCHDOG, 0 );
+        setRecipeValue( recipeNo, RV_NO_COOL_AFTER_DESINFECTION, 0 );
 
         for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
             {

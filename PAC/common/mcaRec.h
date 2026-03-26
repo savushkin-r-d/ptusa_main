@@ -141,6 +141,7 @@ class TRecipeManager
         RV_PIDF_MAX_OUT,                    //Верхняя граница пересчета выхода ПИД-регулятора потока
                
         RV_WATCHDOG,                        //Сторожевой таймер
+        RV_NO_COOL_AFTER_DESINFECTION,      //Не охлаждать после дезинфекции
 
         RV_RESERV_START,                    //начало резервных параметров
 
