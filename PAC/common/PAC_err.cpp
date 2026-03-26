@@ -172,38 +172,41 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     ALARM_SUBCLASS err_sub_class, int par, bool is_set )
     {
-    static char tmp[ 200 ] = "";
-    sprintf( tmp, "%d-%d-%d : ",
-        ( int ) err_class, ( int ) err_sub_class, par );
+    const auto BUFF_SIZE = 200;
+    static char tmp[ BUFF_SIZE ]{};
+    std::memset( tmp, 0, BUFF_SIZE );
 
+    int res = fmt::format_to_n( tmp, BUFF_SIZE, "{}-{}-{} : ",
+        static_cast<int>( err_class ), static_cast<int>( err_sub_class ),
+        par ).size;
+    
     switch( err_class )
         {
     case AC_UNKNOWN:
-        sprintf( tmp + strlen( tmp ), "?" );
+        res += fmt::format_to_n( tmp + res, BUFF_SIZE, "?" ).size;
         break;
 
 	case AC_SERVICE:
-		switch (err_sub_class)
-			{
-			case AS_IO_COUPLER:
-				sprintf(tmp + strlen(tmp),
-					"Узел ввода/вывода '%s' ('%s', '%s') - ",
-					G_IO_MANAGER()->get_node(par - 1)->name,
-					G_IO_MANAGER()->get_node(par - 1)->ip_address,
-                    G_CMMCTR->get_host_name_rus()
-					);
-				break;
+        switch ( err_sub_class )
+            {
+            case AS_IO_COUPLER:
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE,
+                    "Узел ввода/вывода '{}' ('{}', '{}') - ",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus() ).size;
+                break;
 
             default:
                 break;
-			}
+            }
 		if (is_set)
 			{
-			sprintf(tmp + strlen(tmp), "%s", "отключен для обслуживания");
+			sprintf(tmp + res, "%s", "отключен для обслуживания");
 			}
 		else
 			{
-			sprintf(tmp + strlen(tmp), "%s", "включен");
+			sprintf(tmp + res, "%s", "включен");
 			}
 		break;
 
@@ -211,12 +214,12 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         switch ( err_sub_class )
             {
             case AS_IO_COUPLER:
-                sprintf( tmp + strlen( tmp ),
-                    "Узел ввода/вывода '%s' ('%s', '%s') - ",
+                res += fmt::format_to_n( tmp + res,
+                    sizeof( tmp ),
+                    "Узел ввода/вывода '{}' ('{}', '{}') - ",
                     G_IO_MANAGER()->get_node( par - 1 )->name,
                     G_IO_MANAGER()->get_node( par - 1 )->ip_address,
-                    G_CMMCTR->get_host_name_rus()
-                );
+                    G_CMMCTR->get_host_name_rus() ).size;
                 break;
 
             default:
@@ -224,28 +227,30 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             }
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "активен режим конфигурирования (PP)" );
+            sprintf( tmp + res, "%s", "активен режим конфигурирования (PP)" );
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "отключен режим конфигурирования (PP)" );
+            sprintf( tmp + res, "%s", "отключен режим конфигурирования (PP)" );
             }
         break;
 
     case AC_NO_CONNECTION:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Нет связи с " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE,
+                "Нет связи с " ).size;
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Есть связь с " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE,
+                "Есть связь с " ).size;
             }
 
         switch( err_sub_class )
             {
         case AS_IO_COUPLER:
-            sprintf( tmp + strlen( tmp ),
+            sprintf( tmp + res,
                 "узлом I/O '%s' ('%s', '%s')",
                 G_IO_MANAGER()->get_node( par - 1 )->name,
                 G_IO_MANAGER()->get_node( par - 1 )->ip_address,
@@ -253,23 +258,23 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             break;
 
         case AS_PANEL:
-            sprintf( tmp + strlen( tmp ), "panel EasyView №%d.", par );
+            sprintf( tmp + res, "panel EasyView №%d.", par );
             break;
 
         case AS_MODBUS_DEVICE:
-            sprintf( tmp + strlen( tmp ), "Modbus-device №%d.", par );
+            sprintf( tmp + res, "Modbus-device №%d.", par );
             break;
 
         case AS_RFID_READER:
-            sprintf( tmp + strlen( tmp ), "RFID-reader №%d.", par );
+            sprintf( tmp + res, "RFID-reader №%d.", par );
             break;
 
         case AS_EASYSERVER:
-            sprintf( tmp + strlen( tmp ), "EasyServer." );
+            sprintf( tmp + res, "EasyServer." );
             break;
 
         case AS_REMOTE_PAC:
-            sprintf( tmp + strlen( tmp ), "remote PAC." );
+            sprintf( tmp + res, "remote PAC." );
             break;
 
         default:
@@ -294,22 +299,22 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     case AC_NET:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Network communication error : " );
+            sprintf( tmp + res, "%s", "Network communication error : " );
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Network communication OK : " );
+            sprintf( tmp + res, "%s", "Network communication OK : " );
             }
 
         switch( par )
             {
             case 0:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "master : " );
                 break;
 
             case 1:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "modbus : " );
                 break;
 
@@ -320,27 +325,27 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         switch( err_sub_class )
             {
             case AS_SOCKET_F:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "calling function socket(...) : " );
                 break;
 
             case AS_BIND_F:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "calling function bind(...) : " );
                 break;
 
             case AS_SETSOCKOPT_F:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "calling function setsockopt(...) : " );
                 break;
 
             case AS_LISTEN_F:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "calling function listen(...) : " );
                 break;
 
             default:
-                sprintf( tmp + strlen( tmp ),
+                sprintf( tmp + res,
                     "? : " );
                 break;
             }// switch( err_sub_class )
@@ -348,16 +353,16 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         if ( is_set )
             {
 #ifdef LINUX_OS
-            sprintf( tmp + strlen( tmp ), "%s.", strerror( errno ) );
+            sprintf( tmp + res, "%s.", strerror( errno ) );
 #endif // LINUX_OS
 
 #ifdef WIN_OS
-            sprintf( tmp + strlen( tmp ), "%s", WSA_Last_Err_Decode() );
+            sprintf( tmp + res, "%s", WSA_Last_Err_Decode() );
 #endif // WINDOWS_OS
             }
         else
             {
-            sprintf( tmp + strlen( tmp ) - 3, "." );
+            sprintf( tmp + res - 3, "." );
             }
         break;
     default:
