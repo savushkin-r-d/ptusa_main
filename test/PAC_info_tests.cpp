@@ -79,11 +79,14 @@ TEST( PAC_info, set_cmd )
         "Axxx", ZERO_COUNT, ZERO_COUNT,
         ZERO_COUNT, ZERO_SIZE, ZERO_COUNT, ZERO_SIZE );
 
+    tcp_communicator::init_instance( "Тест", "Test" );
     // Есть 0-й узел.
     EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 0 ) );
     EXPECT_FALSE( G_IO_MANAGER()->get_node( 0 )->is_active );
     EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 1 ) );
     EXPECT_TRUE( G_IO_MANAGER()->get_node( 0 )->is_active );
+
+    tcp_communicator::clear_instance();
     }
 
 TEST( PAC_info, reset_params )

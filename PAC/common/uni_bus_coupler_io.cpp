@@ -547,19 +547,20 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     // Проверка связи с узлом I/O.
     if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
         {
-        if ( false == node->is_set_err )
-            {
-            node->is_set_err = true;
-            PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
-            }
         // Reset PP mode alarm on communication loss.
         if ( node->is_pp_mode_alarm_set )
             {
             node->is_pp_mode_alarm_set = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_SERVICE,
+                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+            }
+
+        if ( false == node->is_set_err )
+            {
+            node->is_set_err = true;
+            PAC_critical_errors_manager::get_instance()->set_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
@@ -1010,7 +1011,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             {
             nd->is_pp_mode_alarm_set = true;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_SERVICE,
+                PAC_critical_errors_manager::AC_PP_MODE,
                 PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
             }
         }
@@ -1020,7 +1021,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         {
         nd->is_pp_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_SERVICE,
+            PAC_critical_errors_manager::AC_PP_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
 

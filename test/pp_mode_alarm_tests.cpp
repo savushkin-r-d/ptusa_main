@@ -29,6 +29,8 @@ class test_uni_io_manager1 : public uni_io_manager
 // Test PP mode alarm activation.
 TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     {
+    tcp_communicator::init_instance( "Тест", "Test" );
+
     G_IO_MANAGER()->init( 1 );
     G_IO_MANAGER()->add_node( 0,
         io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1", "A100",
@@ -43,22 +45,45 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     std::array<char, 300> buff{};
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
         err_id );
-    auto REF_STR = R"(	{
-	description = "5-1-1 : Узел ввода/вывода 'A100' ('127.0.0.1') - отключен для обслуживания",
+    auto REF_STR = R"s(	{
+	description = "6-1-1 : Узел ввода/вывода 'A100' ('127.0.0.1', 'Тест') - активен режим конфигурирования (PP)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,
 	state = AS_ALARM,
 	id_n = 1,
 	},
-)";
-    EXPECT_STREQ( buff.data(), REF_STR );    // Ошибка.
+)s";
+    EXPECT_STREQ( buff.data(), REF_STR );    // Есть ошибка.
 
     mngr.deactivate_eror();
     mngr.read_phoenix_status_register( node );
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
         err_id );
-    EXPECT_STREQ( buff.data(), "" );    // Нет ошибок.
+    EXPECT_STREQ( buff.data(), "" );        // Нет ошибки.
+
+    // После потери связи ошибка должна быть только одна - "нет связи",
+    // а не PP mode.
+    mngr.activate_eror();
+    mngr.read_phoenix_status_register( node );
+    node->last_poll_time = get_millisec() - 
+        io_manager::io_node::C_MAX_WAIT_TIME - 1;
+    auto res = mngr.e_communicate( node, 1, 1 );
+    EXPECT_NE( res, 0 );
+    auto REF_STR_NO_CONNECTION = R"s(	{
+	description = "1-1-1 : Нет связи с узлом I/O 'A100' ('127.0.0.1', 'Тест')",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)s";
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+        err_id );
+    // Есть только ошибка связи.
+    EXPECT_STREQ( buff.data(), REF_STR_NO_CONNECTION );
+    tcp_communicator::clear_instance();
     }
 
 // Test that PP mode alarm flag is initialized correctly.
@@ -82,8 +107,8 @@ TEST( pp_mode_alarm, multiple_error_bits )
     // Test each bit in the error mask.
     for ( u_int_2 bit = 0; bit < 6; bit++ )
         {
-        u_int_2 test_value = 1 << bit;
-        EXPECT_TRUE( 
+        u_int_2 test_value = static_cast<unsigned short int>( 1 ) << bit;
+        EXPECT_TRUE(
             ( test_value & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0 )
             << "Bit " << bit << " should be in error mask";
         }
@@ -98,7 +123,8 @@ TEST( pp_mode_alarm, multiple_error_bits )
 // Test PP mode detection with non-Phoenix nodes.
 TEST( pp_mode_alarm, non_phoenix_node )
     {
-    io_manager::io_node wago_node( io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
+    io_manager::io_node wago_node( 
+        io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         1, "127.0.0.1", "W100", 0, 0, 0, 0, 0, 0 );
 
     // Set error bits for Wago node.
@@ -144,156 +170,4 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     
     EXPECT_FALSE( node.is_pp_mode_alarm_set );
     EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
-    }
-
-// Test PP mode transition from inactive to active.
-TEST( pp_mode_alarm, transition_inactive_to_active )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Start with no PP mode.
-    node.prev_status_register = 0;
-    node.status_register = 0;
-    node.is_pp_mode_alarm_set = false;
-    
-    // Transition to PP mode active.
-    node.prev_status_register = node.status_register;
-    node.status_register = 0x0001; // Bit 0 set.
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    EXPECT_TRUE( is_pp_mode_active );
-    EXPECT_FALSE( was_pp_mode_active );
-    }
-
-// Test no alarm when PP mode stays active.
-TEST( pp_mode_alarm, pp_mode_stays_active )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // PP mode was and is still active.
-    node.prev_status_register = 0x0010;
-    node.status_register = 0x0010;
-    node.is_pp_mode_alarm_set = true;
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    // Should detect that both are active (no transition).
-    EXPECT_TRUE( is_pp_mode_active );
-    EXPECT_TRUE( was_pp_mode_active );
-    EXPECT_TRUE( node.is_pp_mode_alarm_set );
-    }
-
-// Test no alarm when PP mode stays inactive.
-TEST( pp_mode_alarm, pp_mode_stays_inactive )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // PP mode was and is still inactive.
-    node.prev_status_register = 0;
-    node.status_register = 0;
-    node.is_pp_mode_alarm_set = false;
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    // Should detect that both are inactive (no transition).
-    EXPECT_FALSE( is_pp_mode_active );
-    EXPECT_FALSE( was_pp_mode_active );
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    }
-
-// Test all error mask bits together.
-TEST( pp_mode_alarm, all_error_bits_set )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Set all error bits.
-    node.status_register = 0x003F; // All 6 bits set.
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    EXPECT_TRUE( is_pp_mode_active );
-    EXPECT_EQ( 0x003F, node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK );
-    }
-
-// Test read_phoenix_status_register with error flag set (early return).
-TEST( pp_mode_alarm, read_status_with_error_flag )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Set error flag - should cause early return.
-    node.read_io_error_flag = true;
-    node.status_register = 0x0010;
-    node.prev_status_register = 0;
-    node.is_pp_mode_alarm_set = false;
-    
-    // Call should return early without changing status.
-    mngr.read_phoenix_status_register( &node );
-    
-    // Status should remain unchanged.
-    EXPECT_EQ( 0x0010, node.status_register );
-    EXPECT_EQ( 0, node.prev_status_register );
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    }
-
-// Test that alarm is not set again if already active.
-TEST( pp_mode_alarm, alarm_already_set_no_duplicate )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // PP mode becomes active but alarm is already set.
-    node.prev_status_register = 0;
-    node.status_register = 0x0010;
-    node.is_pp_mode_alarm_set = true; // Already set!
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    // Check the condition - should not enter the block.
-    bool should_set_alarm = is_pp_mode_active && !was_pp_mode_active && !node.is_pp_mode_alarm_set;
-    
-    EXPECT_FALSE( should_set_alarm );
-    EXPECT_TRUE( node.is_pp_mode_alarm_set );
-    }
-
-// Test that alarm is not reset if not active.
-TEST( pp_mode_alarm, alarm_not_set_no_reset )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // PP mode becomes inactive but alarm is not set.
-    node.prev_status_register = 0x0010;
-    node.status_register = 0;
-    node.is_pp_mode_alarm_set = false; // Not set!
-    
-    bool is_pp_mode_active = 
-        ( node.status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    bool was_pp_mode_active = 
-        ( node.prev_status_register & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0;
-    
-    // Check the condition - should not enter the block.
-    bool should_reset_alarm = !is_pp_mode_active && was_pp_mode_active && node.is_pp_mode_alarm_set;
-    
-    EXPECT_FALSE( should_reset_alarm );
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
     }

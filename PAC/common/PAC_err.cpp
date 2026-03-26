@@ -187,11 +187,13 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 			{
 			case AS_IO_COUPLER:
 				sprintf(tmp + strlen(tmp),
-					"Узел ввода/вывода '%s' ('%s') - ",
+					"Узел ввода/вывода '%s' ('%s', '%s') - ",
 					G_IO_MANAGER()->get_node(par - 1)->name,
-					G_IO_MANAGER()->get_node(par - 1)->ip_address
+					G_IO_MANAGER()->get_node(par - 1)->ip_address,
+                    G_CMMCTR->get_host_name_rus()
 					);
 				break;
+
             default:
                 break;
 			}
@@ -204,6 +206,31 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 			sprintf(tmp + strlen(tmp), "%s", "включен");
 			}
 		break;
+
+    case AC_PP_MODE:
+        switch ( err_sub_class )
+            {
+            case AS_IO_COUPLER:
+                sprintf( tmp + strlen( tmp ),
+                    "Узел ввода/вывода '%s' ('%s', '%s') - ",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus()
+                );
+                break;
+
+            default:
+                break;
+            }
+        if ( is_set )
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "активен режим конфигурирования (PP)" );
+            }
+        else
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "отключен режим конфигурирования (PP)" );
+            }
+        break;
 
     case AC_NO_CONNECTION:
         if ( is_set )
