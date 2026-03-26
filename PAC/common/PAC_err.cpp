@@ -183,7 +183,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     switch( err_class )
         {
     case AC_UNKNOWN:
-        res += fmt::format_to_n( tmp + res, BUFF_SIZE, "?" ).size;
+        fmt::format_to_n( tmp + res, BUFF_SIZE, "?" ).size;
         break;
 
 	case AC_SERVICE:
