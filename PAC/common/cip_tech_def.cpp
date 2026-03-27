@@ -2170,7 +2170,12 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 64:
         case 65:
         case 66: return cur+1;
-        case 67: return LoadProgram();
+        case 67:
+            if ( rt_par_float[ P_DOP_V_OK_OP ] < 0 )
+                {
+                return 91;
+                }
+            return LoadProgram();
 
         case 71:
         case 72:
@@ -3291,20 +3296,22 @@ int cipline_tech_object::_LoadProgram( )
         }
     }
 
-void cipline_tech_object::ResetWP( )
+void cipline_tech_object::ResetWP()
     {
-    int i;
-    for (i = 1; i < P_RESERV_START; i++)
+    for ( auto i = 1; i < P_RESERV_START; i++ )
         {
-        if (i != P_CONC_RATE && (i < P_R_NO_FLOW || i > PIDF_Uk ))
+        // Некоторые параметры используются при наведении раствора,
+        // поэтому их не сбрасываем.
+        // TODO: сделать рецепты для наведения растворов.
+        if ( i != P_CONC_RATE && ( i < P_R_NO_FLOW || i > PIDF_Uk ) )
             {
-            rt_par_float[i] = 0;
+            rt_par_float[ i ] = 0;
             }
         }
-    rt_par_float[P_SELECT_PRG] = -1;
-    rt_par_float[P_SELECT_REC] = -1;
-    rt_par_float[P_CUR_REC] = 1;
-    rt_par_float[P_LOADED_RECIPE] = 0;
+    rt_par_float[ P_SELECT_PRG ] = -1;
+    rt_par_float[ P_SELECT_REC ] = -1;
+    rt_par_float[ P_CUR_REC ] = 1;
+    rt_par_float[ P_LOADED_RECIPE ] = 0;
     resetProgramName();
     resetRecipeName();
     resetProgramList();
