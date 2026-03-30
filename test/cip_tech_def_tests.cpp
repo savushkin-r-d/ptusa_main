@@ -1452,22 +1452,29 @@ TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep91From67 )
     lua_manager::get_instance()->set_Lua( lua_open() );
     cip1.initline();
 
+    // P_PROGRAM = SPROG_HOTWATER.
+    cip1.rt_par_float[ P_PROGRAM ] = SPROG_HOTWATER;
 
     // По умолчанию параметр = 0 (нет дополнительного объёма).
     EXPECT_EQ( 0.0f, cip1.rt_par_float[ P_DOP_V_OK_OP ] );
 
     // Устанавливаем параметр объёма в -1 (не охлаждать после дезинфекции).
     cip1.rt_par_float[ P_DOP_V_OK_OP ] = -1;
+    auto res = cip1.LoadProgram();
+    EXPECT_EQ( res, 61 );
     // После шага 67 при отрицательном параметре переходим на 91.
-    EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );
+    EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );    
 
     // После шага 91 переходим на 555.
     EXPECT_EQ( 555, cip1._GoToStep( 91, 0 ) );
+    cip1.ResetLinesDevicesBeforeReset();
 
     // Устанавливаем параметр в 100 - проверяем стандартное поведение.
+    cip1.rt_par_float[ P_PROGRAM ] = SPROG_HOTWATER;
     cip1.rt_par_float[ P_DOP_V_OK_OP ] = 100;
-    EXPECT_EQ( 555, cip1._GoToStep( 67, 0 ) );
-
+    res = cip1.LoadProgram();
+    EXPECT_EQ( res, 61 );
+    EXPECT_EQ( 81, cip1._GoToStep( 67, 0 ) );
 
     // Завершение.
     G_LUA_MANAGER->free_Lua();

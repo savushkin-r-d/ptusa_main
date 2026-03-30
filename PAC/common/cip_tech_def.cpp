@@ -2171,15 +2171,11 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 65:
         case 66: return cur+1;
         case 67:
-            {
-            auto res = LoadProgram();
             if ( rt_par_float[ P_DOP_V_OK_OP ] < 0 )
                 {
-                return 91;
-                }
-            return res;
-            }
-
+                disable_final_rinsing = true;
+                }            
+            return LoadProgram();
         case 71:
         case 72:
         case 73:
