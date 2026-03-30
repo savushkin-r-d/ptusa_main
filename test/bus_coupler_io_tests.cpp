@@ -227,6 +227,7 @@ TEST( io_device, check_output_DO_node_state )
 	node->is_active = true;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;
+    G_PAC_INFO()->emulation_off();
 	EXPECT_EQ( 1, dev.check_output_DO_node_state() );
 
     node->status_register = 0x0010;  // PP mode.
@@ -239,6 +240,8 @@ TEST( io_device, check_output_DO_node_state )
     node->state = io_manager::io_node::ST_OK;
     node->status_register = 0;
     EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_device, check_output_node_state_no_channels )
