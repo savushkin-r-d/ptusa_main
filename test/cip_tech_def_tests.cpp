@@ -1461,6 +1461,9 @@ TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep91From67 )
     // После шага 67 при отрицательном параметре переходим на 91.
     EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );
 
+    // После шага 91 переходим на 555.
+    EXPECT_EQ( 555, cip1._GoToStep( 91, 0 ) );
+
     // Устанавливаем параметр в 100 - проверяем стандартное поведение.
     cip1.rt_par_float[ P_DOP_V_OK_OP ] = 100;
     EXPECT_EQ( 555, cip1._GoToStep( 67, 0 ) );
