@@ -163,7 +163,7 @@ TEST( tcp_communicator, recvtimeout )
 
     auto res = tcp_communicator::recvtimeout(
         tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
-        TIME_USEC, "", "", &stat);
+        TIME_USEC, "", "", &stat );
     EXPECT_EQ( res, -2 );
     // Проверяем, что время ожидания истекло - время цикла в миллисекундах
     // должно быть не меньше чем `TIME_SEC * 1000` миллисекунд.
@@ -184,7 +184,7 @@ TEST( tcp_communicator, recvtimeout )
     // Should fail - fail with select() returns -1.
     subhook_t select_m1_hook = subhook_new( reinterpret_cast<void*>( &select ),
         reinterpret_cast<void*>( &fail_select_r1 ), SUBHOOK_64BIT_OFFSET );
-    subhook_install( select_m1_hook );    
+    subhook_install( select_m1_hook );
     res = tcp_communicator::recvtimeout(
         tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
         0, "", "", &stat );
@@ -206,7 +206,7 @@ TEST( tcp_communicator, recvtimeout )
     // Should fail - fail with recv() returns -1.
     subhook_t select_good_hook = subhook_new( reinterpret_cast<void*>( &select ),
         reinterpret_cast<void*>( &good_select ), SUBHOOK_64BIT_OFFSET );
-    subhook_install( select_good_hook );    
+    subhook_install( select_good_hook );
     res = tcp_communicator::recvtimeout(
         tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
         0, "", "", &stat );
@@ -236,7 +236,7 @@ TEST( tcp_communicator, recvtimeout )
     subhook_remove( select_good_hook );
     subhook_free( select_good_hook );
 
-    
+
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
     tcp_communicator::clear_instance();
