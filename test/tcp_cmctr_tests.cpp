@@ -159,13 +159,14 @@ TEST( tcp_communicator, recvtimeout )
     G_CMMCTR->evaluate();
 
     const auto TIME_SEC = 1;
-    const auto TIME_MILLI_SEC = 10;
+    const auto TIME_USEC = 10'000;
 
     auto res = tcp_communicator::recvtimeout(
         tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
-        TIME_MILLI_SEC, "", "", &stat);
+        TIME_USEC, "", "", &stat);
     EXPECT_EQ( res, -2 );
-    //Проверяем, что время ожидания истекло.
+    // Проверяем, что время ожидания истекло - время цикла в миллисекундах
+    // должно быть не меньше чем `TIME_SEC * 1000` миллисекунд.
     EXPECT_GE( stat.all_time, TIME_SEC * 1000 );
     EXPECT_GE( stat.cycles_cnt, 1 );
     EXPECT_GE( stat.max_iteration_cycle_time, TIME_SEC * 1000 );
@@ -176,7 +177,8 @@ TEST( tcp_communicator, recvtimeout )
     // будет уведомление.
     G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] = 0;
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, -2 );
 
     // Should fail - fail with select() returns -1.
@@ -184,7 +186,8 @@ TEST( tcp_communicator, recvtimeout )
         reinterpret_cast<void*>( &fail_select_r1 ), SUBHOOK_64BIT_OFFSET );
     subhook_install( select_m1_hook );    
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, -1 );
     subhook_remove( select_m1_hook );
     subhook_free( select_m1_hook );
@@ -194,7 +197,8 @@ TEST( tcp_communicator, recvtimeout )
         reinterpret_cast<void*>( &fail_select_r0 ), SUBHOOK_64BIT_OFFSET );
     subhook_install( select_0_hook );
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, -2 );
     subhook_remove( select_0_hook );
     subhook_free( select_0_hook );
@@ -204,7 +208,8 @@ TEST( tcp_communicator, recvtimeout )
         reinterpret_cast<void*>( &good_select ), SUBHOOK_64BIT_OFFSET );
     subhook_install( select_good_hook );    
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, -1 );
 
     // Should fail - fail with recv() returns 0.
@@ -212,7 +217,8 @@ TEST( tcp_communicator, recvtimeout )
         reinterpret_cast<void*>( &fail_recv_0 ), SUBHOOK_64BIT_OFFSET );
     subhook_install( recv_0_hook );
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, 0 );
     subhook_remove( recv_0_hook );
     subhook_free( recv_0_hook );
@@ -222,7 +228,8 @@ TEST( tcp_communicator, recvtimeout )
         reinterpret_cast<void*>( &good_recv ), SUBHOOK_64BIT_OFFSET );
     subhook_install( recv_good_hook );
     res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 0, "", "", &stat );
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        0, "", "", &stat );
     EXPECT_EQ( res, 1 );
     subhook_remove( recv_good_hook );
     subhook_free( recv_good_hook );
