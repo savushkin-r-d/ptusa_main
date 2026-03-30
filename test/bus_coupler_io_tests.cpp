@@ -59,19 +59,27 @@ TEST( io_node, get_display_state_not_active )
 
 TEST( io_node, get_display_state_not_connected )
 	{
+    G_PAC_INFO()->emulation_off();
+
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
 		"Axxx", 0, 0, 0, 0, 0, 0 );
 
-	auto node = io_manager::get_instance()->get_node( 0 );
-	node->is_active = true;
-	node->state = io_manager::io_node::ST_NO_CONNECT;
-	EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
+    auto node = io_manager::get_instance()->get_node( 0 );
+    node->is_active = true;
+    node->state = io_manager::io_node::ST_NO_CONNECT;
+    EXPECT_EQ( io_manager::io_node::ST_ERROR, node->get_display_state() );
+
+    G_PAC_INFO()->emulation_on();
+	// Should return ST_NO_CONNECT (0) instead of ST_ERROR (-1) in emulator
+    // mode.
+	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
 	}
 
 TEST( io_node, get_display_state_connected_ok )
 	{
+    G_PAC_INFO()->emulation_off();
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -82,10 +90,14 @@ TEST( io_node, get_display_state_connected_ok )
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;  // No PP mode.
 	EXPECT_EQ( io_manager::io_node::ST_OK, node->get_display_state() );
+
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_node, get_display_state_pp_mode )
 	{
+    G_PAC_INFO()->emulation_off();
+
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -96,10 +108,14 @@ TEST( io_node, get_display_state_pp_mode )
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0x0010;  // Bit 4: PP mode active.
 	EXPECT_EQ( io_manager::io_node::ST_WARNING, node->get_display_state() );
+
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_node, get_display_state_non_phoenix_node )
 	{
+    G_PAC_INFO()->emulation_off();
+
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::WAGO_750_XXX_ETHERNET, 1, "127.0.0.1",
@@ -111,10 +127,14 @@ TEST( io_node, get_display_state_non_phoenix_node )
 	node->status_register = 0x003F;  // Error bits set but not Phoenix.
 	// Non-Phoenix nodes should return ST_OK even if error bits are set.
 	EXPECT_EQ( io_manager::io_node::ST_OK, node->get_display_state() );
+
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_node, get_display_state_pp_mode_with_other_bits )
 	{
+    G_PAC_INFO()->emulation_off();
+
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -126,10 +146,13 @@ TEST( io_node, get_display_state_pp_mode_with_other_bits )
 	// PP mode bit set along with other bits.
 	node->status_register = 0x1234 | 0x0010;
 	EXPECT_EQ( io_manager::io_node::ST_WARNING, node->get_display_state() );
+
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_node, get_display_state_phoenix_not_active )
 	{
+    G_PAC_INFO()->emulation_off();
 	io_manager::get_instance()->init( 1 );
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -142,10 +165,12 @@ TEST( io_node, get_display_state_phoenix_not_active )
 	// Not active should return ST_NO_CONNECT regardless of other
 	// states.
 	EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->get_display_state() );
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_node, get_display_state_all_node_types )
 	{
+    G_PAC_INFO()->emulation_off();
 	io_manager::get_instance()->init( 3 );
 	
 	// Test PHOENIX_BK_ETH
@@ -179,6 +204,7 @@ TEST( io_node, get_display_state_all_node_types )
 		io_manager::get_instance()->get_node( 1 )->get_display_state() );
 	EXPECT_EQ( io_manager::io_node::ST_OK, 
 		io_manager::get_instance()->get_node( 2 )->get_display_state() );
+    G_PAC_INFO()->emulation_on();
 	}
 
 TEST( io_device, check_output_DO_node_state )
