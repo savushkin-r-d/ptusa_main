@@ -158,14 +158,18 @@ TEST( tcp_communicator, recvtimeout )
     tcp_communicator::init_instance( "Тест", "Test" );
     G_CMMCTR->evaluate();
 
+    const auto TIME_SEC = 1;
+    const auto TIME_MILLI_SEC = 10;
+
     auto res = tcp_communicator::recvtimeout(
-        tcp_communicator::get_master_socket(), buff, SIZE, 1, 1, "", "", &stat);
+        tcp_communicator::get_master_socket(), buff, SIZE, TIME_SEC,
+        TIME_MILLI_SEC, "", "", &stat);
     EXPECT_EQ( res, -2 );
     //Проверяем, что время ожидания истекло.
-    EXPECT_GE( stat.all_time, 1000 );
+    EXPECT_GE( stat.all_time, TIME_SEC * 1000 );
     EXPECT_GE( stat.cycles_cnt, 1 );
-    EXPECT_GE( stat.max_iteration_cycle_time, 1000 );
-    EXPECT_GE( stat.min_iteration_cycle_time, 1000 );
+    EXPECT_GE( stat.max_iteration_cycle_time, TIME_SEC * 1000 );
+    EXPECT_GE( stat.min_iteration_cycle_time, TIME_SEC * 1000 );
 
     stat.print_cycle_last_h--;
     // Устанавливаем в 0 время ожидания ответа, при превышении которого
