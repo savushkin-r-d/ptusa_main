@@ -976,11 +976,6 @@ int uni_io_manager::read_inputs()
 //-----------------------------------------------------------------------------
 void uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
-    if ( nd->read_io_error_flag )
-        {
-        return;
-        }
-    
     if ( auto result = read_input_registers( nd, 
         PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
         {
