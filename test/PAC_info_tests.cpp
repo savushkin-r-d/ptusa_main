@@ -338,4 +338,3 @@ TEST_F( PAC_info_io_test, combined_errors_both )
     
     G_PAC_INFO()->emulation_on();
     }
-
