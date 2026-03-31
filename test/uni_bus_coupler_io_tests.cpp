@@ -457,6 +457,8 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
 // different node types.
 TEST( io_node, status_register_only_for_phoenix )
     {
+    G_PAC_INFO()->emulation_off();
+
     io_manager::get_instance()->init( 2 );
     
     // Add Phoenix BK ETH node.
@@ -484,6 +486,8 @@ TEST( io_node, status_register_only_for_phoenix )
     // Only Phoenix should report PP mode.
     EXPECT_EQ( phoenix_node->get_display_state(), io_manager::io_node::ST_WARNING );
     EXPECT_EQ( wago_node->get_display_state(), io_manager::io_node::ST_OK );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 // Test status register field initialization.
@@ -503,6 +507,7 @@ TEST( io_node, status_register_initialized_to_zero )
 // Test error bits 0-5 detection with various register values.
 TEST( io_node, error_bits_detection )
     {
+    G_PAC_INFO()->emulation_off();
     io_manager::get_instance()->init( 1 );
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -546,6 +551,8 @@ TEST( io_node, error_bits_detection )
     // Test no error bits but other bits set.
     node->status_register = 0xFFC0;  // All bits except 0-5.
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 // Test read_phoenix_status_register method - successful read.
@@ -601,7 +608,10 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
         }
     
     EXPECT_EQ( node->status_register, 0x0012 );
+
+    G_PAC_INFO()->emulation_off();
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_WARNING );
+    G_PAC_INFO()->emulation_on();
     }
 
 // Test read_phoenix_status_register - communication failure
@@ -682,6 +692,8 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
             
             u_char* get_resultbuff() { return resultbuff; }
         };
+
+    G_PAC_INFO()->emulation_off();
     
     TestUniIoManager mngr;
     mngr.init( 1 );
@@ -744,4 +756,6 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x0000 );
     EXPECT_EQ( node->get_display_state(), io_manager::io_node::ST_OK );
+
+    G_PAC_INFO()->emulation_on();
     }
