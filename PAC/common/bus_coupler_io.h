@@ -324,9 +324,10 @@ class io_manager
 		///
 		struct io_node
 			{
-			io_node(int type, int number, const char *str_ip_addres, const char *name,
-				int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-				int AI_cnt, int AI_size);
+            io_node( int type, int number,
+                const char* str_ip_addres, const char* name,
+                int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+                int AI_cnt, int AI_size );
 
 			~io_node();
 
@@ -372,57 +373,62 @@ class io_manager
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
 
-			io_node::STATES state; ///< Cостояние работы с узлом.
-			TYPES   type;          ///< Тип.
-			u_int   number;        ///< Номер.
-			char    ip_address[16];///< IP-адрес.
-			char    name[20];      ///< Имя.
+            ///< Cостояние работы с узлом.
+            io_node::STATES state{ io_node::STATES::ST_NO_CONNECT };
 
-			bool is_active;                  ///< Признак работающего узла.
-            bool read_io_error_flag = false; ///< Флаг ошибки чтения узла.
+			TYPES   type;               ///< Тип.
+			u_int   number;             ///< Номер.
+            char    ip_address[ 16 ]{}; ///< IP-адрес.
+            char    name[ 20 ]{};       ///< Имя.
 
-			uint32_t last_poll_time; ///< Время последнего опроса.
-            bool is_set_err;         ///< Установлена ли ошибка связи.
-            int sock;                ///< Сокет соединения.
+            bool is_active{ true };          ///< Признак работающего узла.
+            bool read_io_error_flag{ false };///< Флаг ошибки чтения узла.
+
+            uint32_t last_poll_time{ get_millisec() }; ///< Время последнего опроса.
+            bool is_set_err{};       ///< Установлена ли ошибка связи.
+            int sock{};              ///< Сокет соединения.
 
 			// Digital outputs ( DO ).
 			u_int  DO_cnt;      ///< Amount of DO.
-			u_char *DO;         ///< Current values.
-			u_char *DO_;        ///< To write.
+            u_char* DO{};       ///< Current values.
+            u_char* DO_{};      ///< To write.
 
-			// Analog outputs ( AO ).
-			u_int AO_cnt;       			///< Amount of AO.
-            int_2 AO[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
-            int_2 AO_[ C_ANALOG_BUF_SIZE ] = { 0 };   ///< To write.
-			u_int *AO_offsets;  			///< Offsets in common data.
-			u_int *AO_types;    			///< Channels type.
-			u_int AO_size;
+            // Analog outputs ( AO ).
+            u_int AO_cnt;       			///< Amount of AO.
+            int_2 AO[ C_ANALOG_BUF_SIZE ] = {};    ///< Current values.
+            int_2 AO_[ C_ANALOG_BUF_SIZE ] = {};   ///< To write.
+            u_int* AO_offsets{};  			///< Offsets in common data.
+            u_int* AO_types{};    			///< Channels type.
+            u_int AO_size;
 
-			// Digital inputs ( DI ).
-			u_int  DI_cnt;      ///< Amount of DI.
-			u_char *DI;         ///< Current values.
+            // Digital inputs ( DI ).
+            u_int  DI_cnt;      ///< Amount of DI.
+            u_char* DI{};       ///< Current values.
 
-			// Analog inputs ( AI ).
-			u_int AI_cnt;       			///< Amount of AI.
-            int_2 AI[ C_ANALOG_BUF_SIZE ] = { 0 };    ///< Current values.
-			u_int *AI_offsets;  			///< Offsets in common data.
-			u_int *AI_types;    			///< Channels type.
-			u_int AI_size;
+            // Analog inputs ( AI ).
+            u_int AI_cnt;       			///< Amount of AI.
+            int_2 AI[ C_ANALOG_BUF_SIZE ] = {};    ///< Current values.
+            u_int* AI_offsets{};  			///< Offsets in common data.
+            u_int* AI_types{};   			///< Channels type.
+            u_int AI_size;
 
-			uint32_t last_init_time = 0; ///< Время последней попытки подключиться, мсек.
-			uint32_t delay_time;         ///< Время ожидания до попытки подключиться, мсек.
+            ///< Время последней попытки подключиться, мсек.
+            uint32_t last_init_time{};
+
+            ///< Время ожидания до попытки подключиться, мсек.
+            uint32_t delay_time{ W_CONST::C_INITIAL_RECONNECT_DELAY };
 
 			stat_time recv_stat;  ///< Статистика работы с сокетом.
 			stat_time send_stat;  ///< Статистика работы с сокетом.
 
-            bool flag_error_read_message = false; ///< Флаг для вывода сообщений об ошибке чтения.
-            bool flag_error_write_message = false; ///< Флаг для вывода сообщений об ошибке записи.
+            bool flag_error_read_message{ false }; ///< Флаг для вывода сообщений об ошибке чтения.
+            bool flag_error_write_message{ false }; ///< Флаг для вывода сообщений об ошибке записи.
 
             /// Status register (7996) for Phoenix BK ETH nodes.
             /// Used to detect error/warning conditions (bits 0-5),
             /// including PP mode, startup failures, net failures,
             /// etc. Remains 0 for other node types.
-            u_int_2 status_register = 0;
+            u_int_2 status_register{};
 
             /// Previous status register value for detecting changes.
             u_int_2 prev_status_register = 0;
