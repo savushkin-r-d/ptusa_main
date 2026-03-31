@@ -110,8 +110,10 @@ TEST( pp_mode_alarm, non_phoenix_node )
     wago_node.is_active = true;
     wago_node.state = io_manager::io_node::ST_OK;
 
+    G_PAC_INFO()->emulation_off();
     // Wago nodes should not trigger PP mode warnings.
     EXPECT_EQ( io_manager::io_node::ST_OK, wago_node.get_display_state() );
+    G_PAC_INFO()->emulation_on();
     }
 
 // Test disconnect resets PP mode alarm.
