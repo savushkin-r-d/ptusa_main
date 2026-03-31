@@ -54,8 +54,7 @@ void PAC_info::eval()
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        const io_manager::io_node* node =
-            io_manager::get_instance()->get_node( i );
+        const auto node = io_manager::get_instance()->get_node( i );
         if ( !node )
             {
             // Skip uninitialized or missing I/O nodes.
@@ -72,20 +71,21 @@ void PAC_info::eval()
         }
 
     // Check watchdog devices status.
-    watchdog_error = 0;
-    size_t dev_count = G_DEVICE_MANAGER()->get_device_count();
+    watchdog_error = 0;   
+
+    auto dev_count = G_DEVICE_MANAGER()->get_device_count();
     for ( size_t i = 0; i < dev_count; i++ )
         {
-        device* dev = G_DEVICE_MANAGER()->get_device( i );
-        if ( dev && dev->get_type() == device::DT_WATCHDOG )
+        const auto dev = G_DEVICE_MANAGER()->get_device( i );
+        if ( dev && dev->get_type() == device::DT_WATCHDOG &&
+            dev->get_state() < 0 )
             {
-            if ( dev->get_state() < 0 )
-                {
-                watchdog_error = 1;
-                break;
-                }
+            watchdog_error = 1;
+            break;
             }
         }
+
+    commun_error = nodes_comm_error || watchdog_error ? 1 : 0;
     }
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
@@ -195,6 +195,9 @@ int PAC_info::save_device( char* buff ) const
         "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tCOMMUN_ERROR={},\n", commun_error ).size;
+    
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 

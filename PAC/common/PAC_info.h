@@ -117,10 +117,18 @@ class PAC_info: public i_Lua_save_device
             }
 
         /// @brief Get watchdog error status.
-        /// @return 0 - all OK, 1 - at least one watchdog has error (state less than 0).
+        /// @return 0 - all OK, 1 - at least one watchdog has error (state
+        /// less than 0).
         int get_watchdog_error() const
             {
             return watchdog_error;
+            }
+
+        /// @brief Get communication error status.
+        /// @return 0 - all OK, 1 - at least one communication error is active.
+        int get_commun_error() const
+            {
+            return commun_error;
             }
 
     private:
@@ -160,6 +168,12 @@ class PAC_info: public i_Lua_save_device
         /// @brief Indicator: any watchdog has error state.
         /// 0 - all OK, 1 - at least one watchdog has error (state < 0).
         int watchdog_error = 0;
+
+
+        /// @brief Indicator: any watchdog has error state or any node has
+        /// communication error or warning.
+        /// 0 - all OK, 1 - is error.
+        int commun_error = 0;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();

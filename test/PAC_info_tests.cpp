@@ -142,8 +142,9 @@ TEST( PAC_info, save_device )
         "\t},\n"
         "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
         "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
-        "\tNODES_COMM_ERROR=1,\n"
+        "\tNODES_COMM_ERROR=0,\n"
         "\tWATCHDOG_ERROR=0,\n"
+        "\tCOMMUN_ERROR=0,\n"
         "\t}\n";
     char buff[ MAX_SIZE ] = { 0 };
 
@@ -184,8 +185,9 @@ TEST( PAC_info, save_device )
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
             "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
-            "\tNODES_COMM_ERROR=1,\n"
+            "\tNODES_COMM_ERROR=0,\n"
             "\tWATCHDOG_ERROR=0,\n"
+            "\tCOMMUN_ERROR=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1001 );
     G_PAC_INFO()->eval();
@@ -229,14 +231,19 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
     auto node1 = mngr.get_node( 1 );
     node1->is_active = true;
     node1->state = io_manager::io_node::ST_OK;
+    G_PAC_INFO()->emulation_off();
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
 
     node1->state = io_manager::io_node::ST_ERROR;  // Error!
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
@@ -251,9 +258,13 @@ TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
     node->status_register = 0x0010;  // PP mode active (bit 4).
+    G_PAC_INFO()->emulation_off();
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_all_ok )
@@ -261,16 +272,17 @@ TEST_F( PAC_info_io_test, watchdog_error_all_ok )
     // Setup: create watchdog devices with state >= 0.
     G_DEVICE_MANAGER()->clear_io_devices();
 
-    auto wd1 = new watchdog( "WD1" );
-    G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
-    wd1->set_state( 1 );  // OK state.
+    watchdog wd1( "WD1" );
+    G_DEVICE_MANAGER()->add_device( &wd1, device::DT_WATCHDOG );
+    wd1.set_state( 1 );  // OK state.
 
-    auto wd2 = new watchdog( "WD2" );
-    G_DEVICE_MANAGER()->add_device( wd2, device::DT_WATCHDOG );
-    wd2->set_state( 0 );  // OK state.
+    watchdog wd2( "WD2" );
+    G_DEVICE_MANAGER()->add_device( &wd2, device::DT_WATCHDOG );
+    wd2.set_state( 0 );  // OK state.
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
@@ -278,16 +290,17 @@ TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
     // Setup: create watchdog devices, one with error.
     G_DEVICE_MANAGER()->clear_io_devices();
 
-    auto wd1 = new watchdog( "WD1" );
-    G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
-    wd1->set_state( 1 );  // OK state.
+    watchdog wd1( "WD1" );
+    G_DEVICE_MANAGER()->add_device( &wd1, device::DT_WATCHDOG );
+    wd1.set_state( 1 );  // OK state.
 
-    auto wd2 = new watchdog( "WD2" );
-    G_DEVICE_MANAGER()->add_device( wd2, device::DT_WATCHDOG );
-    wd2->set_state( -1 );  // Error state!
+    watchdog wd2( "WD2" );
+    G_DEVICE_MANAGER()->add_device( &wd2, device::DT_WATCHDOG );
+    wd2.set_state( -1 );  // Error state!
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_no_watchdogs )
@@ -297,6 +310,7 @@ TEST_F( PAC_info_io_test, watchdog_error_no_watchdogs )
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, combined_errors_both )
@@ -315,9 +329,12 @@ TEST_F( PAC_info_io_test, combined_errors_both )
     auto wd = new watchdog( "WD1" );
     G_DEVICE_MANAGER()->add_device( wd, device::DT_WATCHDOG );
     wd->set_state( -1 );
+    G_PAC_INFO()->emulation_off();
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+    
+    G_PAC_INFO()->emulation_on();
     }
-
