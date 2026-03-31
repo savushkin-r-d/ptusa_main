@@ -1050,7 +1050,7 @@ void uni_io_manager::disconnect( io_node* node )
         {
         node->is_pp_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_SERVICE,
+            PAC_critical_errors_manager::AC_PP_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
         }
     }

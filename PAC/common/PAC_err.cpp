@@ -11,12 +11,10 @@ extern const char* WSA_Last_Err_Decode ();
 
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
-PAC_critical_errors_manager::PAC_critical_errors_manager(
-    ): errors_id( 0 )
+PAC_critical_errors_manager::~PAC_critical_errors_manager(
+    )
     {
-#ifndef __BORLANDC__
-    errors.clear();
-#endif // __BORLANDC__
+    reset_all_error();
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors() const
@@ -97,6 +95,12 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
         errors.emplace_back( eclass, p1, p2 );
         errors_id++;
         }
+    }
+//-----------------------------------------------------------------------------
+void PAC_critical_errors_manager::reset_all_error()
+    {
+    errors.clear();
+    errors_id = 0;
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,

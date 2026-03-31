@@ -83,7 +83,10 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
         err_id );
     // Есть только ошибка связи.
     EXPECT_STREQ( buff.data(), REF_STR_NO_CONNECTION );
+
+
     tcp_communicator::clear_instance();
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
     }
 
 // Test that PP mode alarm flag is initialized correctly.
@@ -137,17 +140,32 @@ TEST( pp_mode_alarm, disconnect_resets_alarm )
 // Test disconnect when alarm is not set.
 TEST( pp_mode_alarm, disconnect_no_alarm )
     {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+
+    tcp_communicator::init_instance( "Тест", "Test" );
+
+    G_IO_MANAGER()->init( 1 );
+    G_IO_MANAGER()->add_node( 0,
+        io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1", "A100",
+        0, 0, 0, 0, 0, 0 );
+    auto node = G_IO_MANAGER()->get_node( 0 );
+   
     // No PP mode alarm active.
-    node.is_pp_mode_alarm_set = false;
-    node.state = io_manager::io_node::ST_OK;
+    node->is_pp_mode_alarm_set = false;
+    node->state = io_manager::io_node::ST_OK;
+    test_uni_io_manager1 mngr;
+    mngr.activate_eror();
+    mngr.read_phoenix_status_register( node );
     
+    EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+
     // Disconnect should not crash when no alarm is set.
-    mngr.disconnect( &node );
+    mngr.disconnect( node );
     
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
+    EXPECT_FALSE( node->is_pp_mode_alarm_set );
+    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->state );
+
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+
+    tcp_communicator::clear_instance();
     }

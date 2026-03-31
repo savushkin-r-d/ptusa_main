@@ -66,7 +66,7 @@ class PAC_critical_errors_manager
 
             //AC_NO_CONNECTION,     ///< Ошибка связи.
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
-            AS_MODBUS_DEVICE,       ///< Ошибки Modbus-устройства.
+            AS_MODBUS_DEVICE = 2,   ///< Ошибки Modbus-устройства.
 
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
 
@@ -83,13 +83,15 @@ class PAC_critical_errors_manager
             GE_ERROR_SIZE = 3,      ///< Размер одной ошибки, байт.
             };
 
-        PAC_critical_errors_manager();
+        ~PAC_critical_errors_manager();
 
         void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
+
+        void reset_all_error();
 
         int save_as_Lua_str( char* str, u_int_2& id );
 
@@ -129,7 +131,7 @@ class PAC_critical_errors_manager
 
         std::vector< critical_error >  errors;
 
-        u_int_2 errors_id;
+        u_int_2 errors_id{};
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H
