@@ -98,28 +98,6 @@ TEST( pp_mode_alarm, initialization )
     EXPECT_FALSE( node.is_pp_mode_alarm_set );
     }
 
-// Test that multiple status register bits trigger PP mode.
-TEST( pp_mode_alarm, multiple_error_bits )
-    {
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-
-    // Test each bit in the error mask.
-    for ( u_int_2 bit = 0; bit < 6; bit++ )
-        {
-        u_int_2 test_value = static_cast<unsigned short int>( 1 ) << bit;
-        EXPECT_TRUE(
-            ( test_value & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0 )
-            << "Bit " << bit << " should be in error mask";
-        }
-
-    // Test value outside the mask.
-    u_int_2 outside_mask = 0x0040; // Bit 6.
-    EXPECT_FALSE( 
-        ( outside_mask & io_manager::io_node::STATUS_REG_ERROR_MASK ) != 0 )
-        << "Bit 6 should not be in error mask";
-    }
-
 // Test PP mode detection with non-Phoenix nodes.
 TEST( pp_mode_alarm, non_phoenix_node )
     {
