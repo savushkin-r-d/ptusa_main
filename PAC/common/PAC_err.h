@@ -55,10 +55,7 @@ class PAC_critical_errors_manager
             AC_UNKNOWN,
             AC_NO_CONNECTION, ///< Ошибка связи.
 
-            AC_COM_DRIVER,    ///< Ошибка работы с COM-портом.
-            AC_RUNTIME_ERROR, ///< Ошибки во время работы.
-
-            AC_NET,           ///< Ошибки сетевой работы.
+            AC_NET = 4,       ///< Ошибки сетевой работы.
             AC_SERVICE,		  ///< Сервисное обслуживание устройства.
             AC_PP_MODE,		  ///< Режим конфигурирования устройства (PnP).
             };
@@ -69,15 +66,9 @@ class PAC_critical_errors_manager
 
             //AC_NO_CONNECTION,     ///< Ошибка связи.
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
-            AS_PANEL,               ///< Ошибки панелей EasyView.
-            AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
-            AS_RFID_READER,         ///< Ошибки RFID-reader'а.
+            AS_MODBUS_DEVICE,       ///< Ошибки Modbus-устройства.
 
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
-            AS_REMOTE_PAC,          ///< Ошибки связи с удаленным PAC.
-
-            //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
-            AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
 
             //AC_NET,               ///< Ошибки сетевой работы.
             AS_SOCKET_F = 1,///< Функция socket.

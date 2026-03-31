@@ -46,7 +46,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
         err_id );
     auto REF_STR = R"s(	{
-	description = "6-1-1 : Узел ввода/вывода 'A100' ('127.0.0.1', 'Тест') - активен режим конфигурирования (PP)",
+	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен режим конфигурирования (PP)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,
