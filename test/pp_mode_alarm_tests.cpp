@@ -71,7 +71,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     auto res = mngr.e_communicate( node, 1, 1 );
     EXPECT_NE( res, 0 );
     auto REF_STR_NO_CONNECTION = R"s(	{
-	description = "1-1-1 : Нет связи с узлом I/O 'A100' ('127.0.0.1', 'Тест')",
+	description = "1-1-1 : Нет связи с узлом I/O 'A100' ('127.0.0.1', 'Тест').",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,

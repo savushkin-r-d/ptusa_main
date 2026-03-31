@@ -50,31 +50,26 @@ class PAC_critical_errors_manager
             ALARM_CLASS_PRIORITY = 100,
             };
 
-        enum ALARM_CLASS      ///< Класс тревоги.
+        enum ALARM_CLASS          ///< Класс тревоги.
             {
-            AC_UNKNOWN,
-            AC_NO_CONNECTION, ///< Ошибка связи.
+            AC_NO_CONNECTION = 1, ///< Ошибка связи.
 
-            AC_NET = 4,       ///< Ошибки сетевой работы.
-            AC_SERVICE,		  ///< Сервисное обслуживание устройства.
-            AC_PP_MODE,		  ///< Режим конфигурирования устройства (PnP).
+            AC_NET = 4,           ///< Ошибки сетевой работы.
+            AC_SERVICE = 5,	      ///< Сервисное обслуживание устройства.
+            AC_PP_MODE = 6,       ///< Режим конфигурирования устройства (PnP).
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
             {
-            AS_UNKNOWN,
-
-            //AC_NO_CONNECTION,     ///< Ошибка связи.
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
             AS_MODBUS_DEVICE = 2,   ///< Ошибки Modbus-устройства.
-
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
 
             //AC_NET,               ///< Ошибки сетевой работы.
-            AS_SOCKET_F = 1,///< Функция socket.
-            AS_BIND_F,              ///< Функция bind.
-            AS_SETSOCKOPT_F,
-            AS_LISTEN_F,
+            AS_SOCKET_F = 1,        ///< Функция socket.
+            AS_BIND_F = 2,          ///< Функция bind.
+            AS_SETSOCKOPT_F = 3,
+            AS_LISTEN_F = 4,
             };
 
     public:
@@ -128,6 +123,9 @@ class PAC_critical_errors_manager
             critical_error( int err_class = 0, u_int err_sub_class = 0,
                 u_int param = 0 );
             };
+
+        PAC_critical_errors_manager& 
+            operator=( PAC_critical_errors_manager&& ) = delete;
 
         std::vector< critical_error >  errors;
 
