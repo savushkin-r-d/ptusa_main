@@ -8,12 +8,12 @@ class test_uni_io_manager1 : public uni_io_manager
     public:
         ~test_uni_io_manager1() override = default;
 
-        void activate_eror()
+        void activate_error()
             {
             buff[ 1 ] = 0x10; // PP mode is active.
             }
 
-        void deactivate_eror()
+        void deactivate_error()
             {
             buff[ 1 ] = 0x0; // PP mode is inactive.
             }
@@ -38,7 +38,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     auto node = G_IO_MANAGER()->get_node( 0 );
 
     test_uni_io_manager1 mngr;
-    mngr.activate_eror();
+    mngr.activate_error();
     mngr.read_phoenix_status_register( node );
 
     u_int_2 err_id = 0;
@@ -56,7 +56,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
 )s";
     EXPECT_STREQ( buff.data(), REF_STR );    // Есть ошибка.
 
-    mngr.deactivate_eror();
+    mngr.deactivate_error();
     mngr.read_phoenix_status_register( node );
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
         err_id );
@@ -64,7 +64,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
 
     // После потери связи ошибка должна быть только одна - "нет связи",
     // а не PP mode.
-    mngr.activate_eror();
+    mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     node->last_poll_time = get_millisec() - 
         io_manager::io_node::C_MAX_WAIT_TIME - 1;
@@ -154,7 +154,7 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     node->is_pp_mode_alarm_set = false;
     node->state = io_manager::io_node::ST_OK;
     test_uni_io_manager1 mngr;
-    mngr.activate_eror();
+    mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
