@@ -449,11 +449,6 @@ class io_manager
         /// Единственный экземпляр класса.
         static auto_smart_ptr < io_manager > instance;
 
-        io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
-            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
-        const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
-            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
-
     public:
         const io_node* get_node( u_int node_n ) const;
 
@@ -488,7 +483,10 @@ class io_manager
 		/// @brief Завершает соединение с узлом
 		virtual void disconnect(io_node *node);
 
-
+        io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
+            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
+        const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
+            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

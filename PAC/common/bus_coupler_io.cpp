@@ -1196,7 +1196,7 @@ const io_manager::io_node* io_manager::get_node( u_int node_n ) const
     {
     if ( node_n < nodes_count )
         {
-        return nodes[ node_n ];
+        return nodes[ node_n ] ? nodes[ node_n ] : &IO_NODE_STUB;
         }
 
     return &IO_NODE_STUB;
@@ -1206,7 +1206,7 @@ io_manager::io_node* io_manager::get_node( u_int node_n )
     {
     if ( node_n < nodes_count )
         {
-        return nodes[ node_n ]; 
+        return nodes[ node_n ] ? nodes[ node_n ] : &io_node_stub;
         }
 
     return &io_node_stub;
