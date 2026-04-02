@@ -67,4 +67,35 @@ TEST( PAC_critical_errors_manager, set_global_error )
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NO_CONNECTION,
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     EXPECT_FALSE( mngr->is_any_error() );
+
+    // Ошибки класса `AC_NET`.
+    mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_SOCKET_F, 1 );
+    EXPECT_TRUE( mngr->is_any_error() );
+    mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_SOCKET_F, 1 );
+
+    mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_BIND_F, 1 );
+    EXPECT_TRUE( mngr->is_any_error() );
+    mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_BIND_F, 1 );
+
+    mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 1 );
+    EXPECT_TRUE( mngr->is_any_error() );
+    mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 1 );
+
+    mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_LISTEN_F, 1 );
+    EXPECT_TRUE( mngr->is_any_error() );
+    mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::AS_LISTEN_F, 1 );
+
+    mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
+    EXPECT_TRUE( mngr->is_any_error() );
+    mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
+        PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     }

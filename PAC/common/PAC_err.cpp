@@ -305,33 +305,33 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             {
             case AS_SOCKET_F:
                 res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                    "calling function socket(...) : " ).size;
+                    "calling function socket(...)" ).size;
                 break;
 
             case AS_BIND_F:
                 res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                    "calling function bind(...) : " ).size;
+                    "calling function bind(...)" ).size;
                 break;
 
             case AS_SETSOCKOPT_F:
                 res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                    "calling function setsockopt(...) : " ).size;
+                    "calling function setsockopt(...)" ).size;
                 break;
 
             case AS_LISTEN_F:
                 res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                    "calling function listen(...) : " ).size;
+                    "calling function listen(...)" ).size;
                 break;
 
             default:
                 res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                    "? : " ).size;
+                    "?" ).size;
                 break;
             }// switch( err_sub_class )
 
         if ( is_set )
             {
-            fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}.",
+            fmt::format_to_n( tmp + res, BUFF_SIZE - res, " : {}",
 #ifdef LINUX_OS
                 strerror( errno )
 #endif // LINUX_OS
@@ -343,7 +343,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             }
         else
             {
-            fmt::format_to_n( tmp + res, BUFF_SIZE - res, "?." );
+            fmt::format_to_n( tmp + res, BUFF_SIZE - res, "." );
             }
         break;
 

@@ -10,6 +10,9 @@ const char* WSA_Err_Decode ( int err_code )
     {
     switch ( err_code )
         {
+    case ERROR_SUCCESS:
+        return "The operation completed successfully.";
+
     case WSANOTINITIALISED:
         return "A successful WSAStartup must occur before using this function.";
     case WSAENETDOWN:
