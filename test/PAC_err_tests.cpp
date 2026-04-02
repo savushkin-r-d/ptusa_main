@@ -82,16 +82,16 @@ TEST( PAC_critical_errors_manager, set_global_error )
         PAC_critical_errors_manager::AS_BIND_F, 1 );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
-        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 1 );
+        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 2 );
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
-        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 1 );
+        PAC_critical_errors_manager::AS_SETSOCKOPT_F, 2 );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
-        PAC_critical_errors_manager::AS_LISTEN_F, 1 );
+        PAC_critical_errors_manager::AS_LISTEN_F, 0 );
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
-        PAC_critical_errors_manager::AS_LISTEN_F, 1 );
+        PAC_critical_errors_manager::AS_LISTEN_F, 0 );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
