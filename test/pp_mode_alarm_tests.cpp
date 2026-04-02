@@ -42,8 +42,8 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     mngr.read_phoenix_status_register( node );
 
     u_int_2 err_id = 0;
-    std::array<char, 300> buff{};
-    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+    std::array<char, 300> lua_buff{};
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
         err_id );
     auto REF_STR = R"s(	{
 	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен аварийный режим (PnP, ...)",
@@ -54,13 +54,13 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
 	id_n = 1,
 	},
 )s";
-    EXPECT_STREQ( buff.data(), REF_STR );    // Есть ошибка.
+    EXPECT_STREQ( lua_buff.data(), REF_STR );    // Есть ошибка.
 
     mngr.deactivate_error();
     mngr.read_phoenix_status_register( node );
-    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
         err_id );
-    EXPECT_STREQ( buff.data(), "" );        // Нет ошибки.
+    EXPECT_STREQ( lua_buff.data(), "" );        // Нет ошибки.
 
     // После потери связи ошибка должна быть только одна - "нет связи",
     // а не PP mode.
@@ -79,10 +79,10 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
 	id_n = 1,
 	},
 )s";
-    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
         err_id );
     // Есть только ошибка связи.
-    EXPECT_STREQ( buff.data(), REF_STR_NO_CONNECTION );
+    EXPECT_STREQ( lua_buff.data(), REF_STR_NO_CONNECTION );
 
 
     tcp_communicator::clear_instance();
