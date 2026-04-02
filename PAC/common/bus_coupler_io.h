@@ -484,9 +484,9 @@ class io_manager
 		virtual void disconnect(io_node *node);
 
         io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
-            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
+            1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
         const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
-            1, "127.0.0.1", "Axxx", 1, 1, 1, 1, 1, 1 };
+            1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

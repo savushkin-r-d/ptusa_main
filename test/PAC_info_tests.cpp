@@ -189,7 +189,7 @@ TEST( PAC_info, save_device )
             "\tWATCHDOG_ERROR=0,\n"
             "\tCOMMUN_ERROR=0,\n"
             "\t}\n";
-    DeltaMilliSecSubHooker::set_millisec( 1001 );
+    DeltaMilliSecSubHooker::set_millisec( 1010 );
     G_PAC_INFO()->eval();
     G_PAC_INFO()->save_device( buff );
     DeltaMilliSecSubHooker::set_default_time();
@@ -214,8 +214,6 @@ TEST( PAC_info, is_emulator )
 
 TEST_F( PAC_info_io_test, nodes_comm_error )
     {
-    DeltaMilliSecSubHooker::set_millisec( 1010UL );
-
     // Setup: create nodes in OK state.
     mngr.init( 2 );
     mngr.add_node( 0,
@@ -234,6 +232,7 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
     node1->is_active = true;
     node1->state = io_manager::io_node::ST_OK;
     G_PAC_INFO()->emulation_off();
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
