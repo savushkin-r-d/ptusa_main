@@ -214,6 +214,8 @@ TEST( PAC_info, is_emulator )
 
 TEST_F( PAC_info_io_test, nodes_comm_error )
     {
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
+
     // Setup: create nodes in OK state.
     mngr.init( 2 );
     mngr.add_node( 0,
@@ -246,6 +248,8 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
 
 TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
     {
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
+
     // Setup: create Phoenix node in PP mode (warning state).
     mngr.init( 1 );
     mngr.add_node( 0,
@@ -266,8 +270,6 @@ TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
 TEST_F( PAC_info_io_test, watchdog_error_all_ok )
     {
     // Setup: create watchdog devices with state >= 0.
-    G_DEVICE_MANAGER()->clear_io_devices();
-
     auto wd1 = new watchdog( "WD1" );
     G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
     wd1->set_state( 1 );  // OK state.
@@ -283,9 +285,9 @@ TEST_F( PAC_info_io_test, watchdog_error_all_ok )
 
 TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
     {
-    // Setup: create watchdog devices, one with error.
-    G_DEVICE_MANAGER()->clear_io_devices();
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
 
+    // Setup: create watchdog devices, one with error.
     auto wd1 = new watchdog( "WD1" );
     G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
     wd1->set_state( 1 );  // OK state.
@@ -301,9 +303,7 @@ TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
 
 TEST_F( PAC_info_io_test, watchdog_error_no_watchdogs )
     {
-    // Setup: no watchdog devices.
-    G_DEVICE_MANAGER()->clear_io_devices();
-
+    // No watchdog devices.
     G_PAC_INFO()->eval();
     EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
     EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
@@ -327,6 +327,12 @@ TEST_F( PAC_info_io_test, combined_errors_both )
     wd->set_state( -1 );
     G_PAC_INFO()->emulation_off();
 
+    G_PAC_INFO()->eval();
+    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
+
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
