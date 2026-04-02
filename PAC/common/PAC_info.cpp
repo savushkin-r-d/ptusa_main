@@ -51,10 +51,11 @@ void PAC_info::eval()
 
     // Check I/O nodes communication status.
     nodes_comm_error = 0;
-    unsigned int nc = io_manager::get_instance()->get_nodes_count();
+    const auto IO_MANAGER = io_manager::get_instance();
+    unsigned int nc = IO_MANAGER->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        const auto node = io_manager::get_instance()->get_node( i );        
+        const auto node = IO_MANAGER->get_node( i );
         // Error or warning (PP mode) state detected.
         if ( auto state = node->get_display_state(); 
             state == io_manager::io_node::ST_ERROR ||

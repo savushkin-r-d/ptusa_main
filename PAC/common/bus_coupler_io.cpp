@@ -1199,7 +1199,7 @@ const io_manager::io_node* io_manager::get_node( u_int node_n ) const
         return nodes[ node_n ];
         }
 
-    return nullptr;
+    return &IO_NODE_STUB;
     }
 
 io_manager::io_node* io_manager::get_node( u_int node_n )
@@ -1209,7 +1209,7 @@ io_manager::io_node* io_manager::get_node( u_int node_n )
         return nodes[ node_n ]; 
         }
 
-    return nullptr;
+    return &io_node_stub;
     }
 
 u_int io_manager::get_nodes_count()

@@ -242,8 +242,6 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
-
-    G_PAC_INFO()->emulation_on();
     }
 
 TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
@@ -263,8 +261,6 @@ TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
-
-    G_PAC_INFO()->emulation_on();
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_all_ok )
@@ -335,6 +331,4 @@ TEST_F( PAC_info_io_test, combined_errors_both )
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
     EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
-    
-    G_PAC_INFO()->emulation_on();
     }

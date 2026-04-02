@@ -19,6 +19,7 @@ class PAC_info_io_test : public ::testing::Test
             {
             io_manager::replace_instance( prev_mngr );
             G_DEVICE_MANAGER()->clear_io_devices();
+            G_PAC_INFO()->emulation_on();
             }
 
         uni_io_manager mngr;
