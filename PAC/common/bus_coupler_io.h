@@ -434,7 +434,7 @@ class io_manager
             u_int_2 prev_status_register = 0;
 
             /// Flag indicating PP mode alarm is currently active.
-            bool is_pp_mode_alarm_set = false;
+            bool is_err_mode_alarm_set = false;
 
             /// @brief Get the display state of the node.
             /// @return 1 - node connected and OK, -1 - node enabled

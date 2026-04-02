@@ -46,7 +46,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( buff.data(),
         err_id );
     auto REF_STR = R"s(	{
-	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен режим конфигурирования (PP)",
+	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен аварийный режим (PnP, ...)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,
@@ -98,7 +98,7 @@ TEST( pp_mode_alarm, initialization )
     // Verify initial state.
     EXPECT_EQ( 0, node.status_register );
     EXPECT_EQ( 0, node.prev_status_register );
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
+    EXPECT_FALSE( node.is_err_mode_alarm_set );
     }
 
 // Test PP mode detection with non-Phoenix nodes.
@@ -127,13 +127,13 @@ TEST( pp_mode_alarm, disconnect_resets_alarm )
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
     
     // Set PP mode alarm active.
-    node.is_pp_mode_alarm_set = true;
+    node.is_err_mode_alarm_set = true;
     node.state = io_manager::io_node::ST_OK;
     
     // Disconnect should reset the alarm.
     mngr.disconnect( &node );
     
-    EXPECT_FALSE( node.is_pp_mode_alarm_set );
+    EXPECT_FALSE( node.is_err_mode_alarm_set );
     EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
     }
 
@@ -151,7 +151,7 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     auto node = G_IO_MANAGER()->get_node( 0 );
    
     // No PP mode alarm active.
-    node->is_pp_mode_alarm_set = false;
+    node->is_err_mode_alarm_set = false;
     node->state = io_manager::io_node::ST_OK;
     test_uni_io_manager1 mngr;
     mngr.activate_error();
@@ -162,7 +162,7 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     // Disconnect should not crash when no alarm is set.
     mngr.disconnect( node );
     
-    EXPECT_FALSE( node->is_pp_mode_alarm_set );
+    EXPECT_FALSE( node->is_err_mode_alarm_set );
     EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->state );
 
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );

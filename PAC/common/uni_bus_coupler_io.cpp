@@ -548,12 +548,16 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
         {
         // Reset PP mode alarm on communication loss.
-        if ( node->is_pp_mode_alarm_set )
+        if ( node->is_err_mode_alarm_set )
             {
-            node->is_pp_mode_alarm_set = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AC_ERR_MODE,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+
+            // Reset PP-mode tracking state so a new transition is detected
+            // after reconnect.
+            node->prev_status_register = 0;
+            node->is_err_mode_alarm_set = false;
             }
 
         if ( false == node->is_set_err )
@@ -570,7 +574,7 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
             {
             node->is_set_err = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
@@ -996,27 +1000,27 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
 
     // Check for PP mode state changes.
     // PP mode has become active.
-    if ( auto is_pp_mode_active =
+    if ( auto is_err_mode_active =
         ( nd->status_register & io_node::STATUS_REG_ERROR_MASK ) != 0,
         was_pp_mode_active =
         ( nd->prev_status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
-        is_pp_mode_active && !was_pp_mode_active )
+        is_err_mode_active && !was_pp_mode_active )
         {
-        if ( !nd->is_pp_mode_alarm_set )
+        if ( !nd->is_err_mode_alarm_set )
             {
-            nd->is_pp_mode_alarm_set = true;
+            nd->is_err_mode_alarm_set = true;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AC_ERR_MODE,
                 PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
             }
         }
     // PP mode has become inactive.
-    else if ( !is_pp_mode_active && was_pp_mode_active &&
-        nd->is_pp_mode_alarm_set )
+    else if ( !is_err_mode_active && was_pp_mode_active &&
+        nd->is_err_mode_alarm_set )
         {
-        nd->is_pp_mode_alarm_set = false;
+        nd->is_err_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_PP_MODE,
+            PAC_critical_errors_manager::AC_ERR_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
 
@@ -1046,11 +1050,11 @@ void uni_io_manager::disconnect( io_node* node )
     node->state = io_node::ST_NO_CONNECT;
 
     // Reset PP mode alarm on disconnect.
-    if ( node->is_pp_mode_alarm_set )
+    if ( node->is_err_mode_alarm_set )
         {
-        node->is_pp_mode_alarm_set = false;
+        node->is_err_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_PP_MODE,
+            PAC_critical_errors_manager::AC_ERR_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
         }
     }

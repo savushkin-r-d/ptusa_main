@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <vector>
 #include <fmt/core.h>
+#include <cstring>
 
 #include "log.h"
 
@@ -211,7 +212,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             }
         break;
 
-    case AC_PP_MODE:
+    case AC_ERR_MODE:
         switch ( err_sub_class )
             {
             case AS_IO_COUPLER:
@@ -224,12 +225,12 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                 if ( is_set )
                     {
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        "активен режим конфигурирования (PP)" );
+                        "активен аварийный режим (PnP, ...)" );
                     }
                 else
                     {
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        "отключен режим конфигурирования (PP)" );
+                        "обычный режим" );
                     }
                 break;
             }
