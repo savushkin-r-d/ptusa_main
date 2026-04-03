@@ -105,30 +105,34 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         }
 
 #ifdef OPCUA
-    auto opc_mode = result[ "opc" ].as<std::string>();
-    if ( opc_mode == "rw" )
+    if ( result.count( "opc" ) )
         {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-        G_LOG->warning( "OPC UA server is activated (read-write)." );
-        }
-    else if ( opc_mode == "r" )
-        {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-        G_LOG->warning( "OPC UA server is activated (only read)." );
-        }
-    else if ( opc_mode == "off" )
-        {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-        G_LOG->info( "OPC UA server is disabled." );
-        }
-    else
-        {
-        G_LOG->error( "Unknown OPC UA mode: '%s'. "
-            "Valid values: off, r, rw.", opc_mode.c_str() );
-        return 1;
+        auto opc_mode = result[ "opc" ].as<std::string>();
+
+        if ( opc_mode == "rw" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
+            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            }
+        else if ( opc_mode == "r" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            G_LOG->warning( "OPC UA server is activated (only read)." );
+            }
+        else if ( opc_mode == "off" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            G_LOG->info( "OPC UA server is disabled." );
+            }
+        else
+            {
+            G_LOG->error( "Unknown OPC UA mode: '%s'. "
+                "Valid values: off, r, rw.", opc_mode.c_str() );
+            return 1;
+            }
         }
 #endif
     main_script = result[ "script" ].as<std::string>();
