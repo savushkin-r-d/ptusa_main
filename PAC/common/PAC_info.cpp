@@ -6,8 +6,9 @@
 #include "PAC_err.h"
 
 #include "lua_manager.h"
-
 #include "bus_coupler_io.h"
+#include "device/manager.h"
+
 #include "OPCUAServer.h"
 
 
@@ -44,6 +45,40 @@ void PAC_info::eval()
         auto res = fmt::format_to_n( up_time_str, C_MAX_STR_LENGTH - 1,
             "{} дн. {:02}:{:02}:{:02}", up_days, up_hours, up_mins, up_secs );
         *res.out = '\0';
+
+        // Check I/O nodes communication status.
+        nodes_comm_error = 0;
+        const auto IO_MANAGER = io_manager::get_instance();
+        unsigned int nc = IO_MANAGER->get_nodes_count();
+        for ( unsigned int i = 0; i < nc; i++ )
+            {
+            const auto node = IO_MANAGER->get_node( i );
+            // Error or warning (PP mode) state detected.
+            if ( auto state = node->get_display_state();
+                state == io_manager::io_node::ST_ERROR ||
+                state == io_manager::io_node::ST_WARNING )
+                {
+                nodes_comm_error = 1;
+                break;
+                }
+            }
+
+        // Check watchdog devices status.
+        watchdog_error = 0;
+
+        auto dev_count = G_DEVICE_MANAGER()->get_device_count();
+        for ( size_t i = 0; i < dev_count; i++ )
+            {
+            const auto dev = G_DEVICE_MANAGER()->get_device( i );
+            if ( dev && dev->get_type() == device::DT_WATCHDOG &&
+                dev->get_state() < 0 )
+                {
+                watchdog_error = 1;
+                break;
+                }
+            }
+
+        commun_error = nodes_comm_error || watchdog_error ? 1 : 0;
         }
     }
 //-----------------------------------------------------------------------------
@@ -149,6 +184,14 @@ int PAC_info::save_device( char* buff ) const
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tCOMMUN_ERROR={},\n", commun_error ).size;
+    
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
