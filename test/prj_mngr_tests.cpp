@@ -9,6 +9,9 @@ extern const char* FILES[ FILE_CNT ];
 const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
 const char* const OPC_RO = "WARNING(4) -> OPC UA server is activated (only read).\n";
 const char* const OPC_RW = "WARNING(4) -> OPC UA server is activated (read-write).\n";
+const char* const OPC_OFF = "INFO   (6) -> OPC UA server is disabled.\n";
+const char* const OPC_ERR_ST =
+    "ERROR  (3) -> Unknown OPC UA mode: 'st'. Valid values: off, r, rw.\n";
 const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
@@ -174,11 +177,39 @@ Resetting params (command line parameter "rcrc").
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 #if defined WIN_OS
-    debug += tmp.str() + OPC_RO;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug += tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    // Выключаем OPC UA.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=off", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_OFF;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+#else
+    debug = tmp.str() + "\x1B[32m" + OPC_OFF + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    // Передаем некорректный режим OPC UA.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 1, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_ERR_ST;
+#else
+    debug = tmp.str() + "\x1B[31m" + OPC_ERR_ST + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -223,12 +254,10 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + OPC_RO;
-    debug += tmp.str() + BUS_COUPLERS_ENABLED;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -241,12 +270,12 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + OPC_RO;
-    debug += tmp.str() + BUS_COUPLERS_ENABLED;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m"
+        + "WARNING(4) -> Bus couplers are read only.\n" + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -259,11 +288,9 @@ Resetting params (command line parameter "rcrc").
     ASSERT_EQ( 0, res );
 
 #if defined WIN_OS
-    debug = tmp.str() + OPC_RO;
-    debug += tmp.str() + BUS_COUPLERS_ENABLED;
+    debug = tmp.str() + BUS_COUPLERS_ENABLED;
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
