@@ -321,24 +321,23 @@ TEST( io_manager, init )
 
 TEST( io_manager, get_node )
     {
-    const io_manager *IO_MNGR = io_manager::get_instance();
+    const io_manager* IO_MNGR = io_manager::get_instance();
     io_manager::get_instance()->init( 1 );
     const auto const_res1 = IO_MNGR->get_node( 1 );
-    EXPECT_EQ( const_res1, nullptr );
+    EXPECT_EQ( const_res1, &IO_MNGR->IO_NODE_STUB );
     auto const_res2 = IO_MNGR->get_node( 0 );
-    EXPECT_EQ( const_res2, nullptr );
+    EXPECT_EQ( const_res2, &IO_MNGR->IO_NODE_STUB );
 
     auto res = io_manager::get_instance()->get_node( 1 );
-    EXPECT_EQ( res, nullptr );
+    EXPECT_EQ( res, &IO_MNGR->io_node_stub );
     res = io_manager::get_instance()->get_node( 0 );
-    EXPECT_EQ( res, nullptr );
+    EXPECT_EQ( res, &IO_MNGR->io_node_stub );
 
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
         "A100", 0, 0, 0, 0, 0, 0 );
     res = io_manager::get_instance()->get_node( 0 );
-    EXPECT_NE( res, nullptr );
+    EXPECT_NE( res, &IO_MNGR->io_node_stub );
     auto const_res3 = IO_MNGR->get_node( 0 );
-    EXPECT_NE( const_res3, nullptr );
+    EXPECT_NE( const_res3, &IO_MNGR->IO_NODE_STUB );
     }
- 
