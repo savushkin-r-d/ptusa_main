@@ -812,12 +812,15 @@ int io_device::check_output_DO_node_state( u_int index ) const
     if ( !node )
         {
         return -1; // Node not found.
-        }    
+        }
 
-    // Return error if node is not OK (error, warning/PP mode, or not
-    // connected).
-    if ( auto node_state = node->get_display_state();
-        node_state != io_manager::io_node::ST_OK )
+    if ( !node->is_active || node->state != io_manager::io_node::ST_OK )
+        {
+        return -1;
+        }
+
+    // Return error if PP mode is active.
+    if ( node->is_pp_mode_active() )
         {
         return -1;
         }
@@ -847,12 +850,15 @@ int io_device::check_output_AO_node_state( u_int index ) const
     if ( !node )
         {
         return -1; // Node not found.
-        }    
+        }
 
-    // Return error if node is not OK (error, warning/PP mode, or not
-    // connected).
-    if ( auto node_state = node->get_display_state();
-        node_state != io_manager::io_node::ST_OK )
+    if ( !node->is_active || node->state != io_manager::io_node::ST_OK )
+        {
+        return -1;
+        }
+
+    // Return error if PP mode is active.
+    if ( node->is_pp_mode_active() )
         {
         return -1;
         }
@@ -994,21 +1000,11 @@ void io_device::IO_channels::print() const
             }
 
         printf( ":%d; ", count );
-        //if ( count )
-        //    {
-        //    printf( "[ " );
-        //    for ( u_int i = 0; i < count; i++ )
-        //        {
-        //        printf("%d:%2d", tables[ i ], offsets[ i ] );
-        //        if ( i < count - 1 ) printf( "; " );
-        //        }
-        //    printf( " ]" );
-        //    }
-        //printf( "; " );
         }
     }
 //-----------------------------------------------------------------------------
-void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset, int module_offset, int logical_port )
+void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset,
+    int module_offset, int logical_port )
     {
     if ( ch_index < count )
         {
@@ -1435,25 +1431,31 @@ void io_manager::io_node::print()
         AI_cnt, AI_size, AO_cnt, AO_size );
     }
 //-----------------------------------------------------------------------------
+bool io_manager::io_node::is_pp_mode_active() const
+    {
+    return type == PHOENIX_BK_ETH &&
+        ( status_register & STATUS_REG_PP_MODE_MASK ) != 0;
+    }
+//-----------------------------------------------------------------------------
 int io_manager::io_node::get_display_state() const
     {
     if ( !is_active || G_PAC_INFO()->is_emulator() )
         {
-        return ST_NO_CONNECT;
+        return DST_NO_CONNECT;
         }
 
     if ( state != ST_OK )
         {
-        return ST_ERROR;
+        return DST_ERROR;
         }
 
     // Check error/PP mode bits (0-5) in status register for Phoenix BK ETH nodes.
     if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_ERROR_MASK ) )
         {
-        return ST_WARNING;
+        return DST_WARNING;
         }
 
-    return ST_OK;
+    return DST_OK;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

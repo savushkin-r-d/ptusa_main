@@ -386,14 +386,25 @@ class io_manager
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
-				ST_WARNING = 2,  ///< Node has error/warning (Status Register bits 0-5 set).
-				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
+
+            enum DISPLAY_STATES  ///< Отображение работы с узлом.
+                {
+                DST_ERROR = -1,  ///< Node enabled but no connection.
+                DST_NO_CONNECT = 0,
+                DST_OK = 1,
+
+                ///< Node has error/warning (Status Register bits 0-5 set).
+                DST_WARNING = 2,
+                };
 
 			/// Bits 0-5 of Status Register (7996) indicate error/PP
 			/// mode conditions. When any of these bits are set, the
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
+
+            /// Bit 4 of Status Register (7996) indicates PP mode.
+            static constexpr u_int_2 STATUS_REG_PP_MODE_MASK = 0x0010;
 
             ///< Cостояние работы с узлом.
             io_node::STATES state{ io_node::STATES::ST_NO_CONNECT };
@@ -451,6 +462,10 @@ class io_manager
             /// including PP mode, startup failures, net failures,
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
+
+            /// @brief Checks PP mode state of the node.
+            /// @return true if PP mode is active (bit 4 set), else false.
+            bool is_pp_mode_active() const;
 
             /// @brief Get the display state of the node.
             /// @return 1 - node connected and OK, -1 - node enabled
