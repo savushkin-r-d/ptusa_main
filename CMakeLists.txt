@@ -440,42 +440,36 @@ if (WIN32)
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg          The script file to execute \(default: main\.plua\)
-  -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\\O nodes \(default: true\)
-      --read_only_io_nodes  Read only from I\\O nodes \(default: true\)
-  -p, --port arg            Param port \(default: 10000\)
-  -h, --help                Print help info
-  -r, --rcrc                Reset params
-      --opc-r               Start OPC UA server with program start \(only 
-                            read\)
-      --opc-rw              Start OPC UA server with program start 
-                            \(read-write\)
-      --sys_path arg        Sys path \(default: \./sys\)
-      --path arg            Path \(default: \.\)
-      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
-      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -d, --debug            Enable debugging
+      --no_io            No communicate with I\\O nodes \(default: true\)
+      --read_only_io     Read only from I\\O nodes \(default: true\)
+  -p, --port arg         Param port \(default: 10000\)
+  -h, --help             Print help info
+  -r, --rcrc             Reset params
+      --opc arg          OPC UA server behavior \(off, r, rw\) \(default: r\)
+      --sys_path arg     Sys path \(default: \./sys\)
+      --path arg         Path \(default: \.\)
+      --extra_paths arg  Extra paths \(default: \./dairy-sys\)
+      --sleep_time arg   Sleep time, ms \(default: 2\)
 ]] )
 else()
     set_tests_properties( run_no_command_line_arguments
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg          The script file to execute \(default: main\.plua\)
-  -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\\O nodes
-      --read_only_io_nodes  Read only from I\\O nodes
-  -p, --port arg            Param port \(default: 10000\)
-  -h, --help                Print help info
-  -r, --rcrc                Reset params
-      --opc-r               Start OPC UA server with program start \(only 
-                            read\)
-      --opc-rw              Start OPC UA server with program start 
-                            \(read-write\)
-      --sys_path arg        Sys path \(default: \./sys\)
-      --path arg            Path \(default: \.\)
-      --extra_paths arg     Extra paths \(default: \./dairy-sys\)
-      --sleep_time_ms arg   Sleep time, ms \(default: 2\)
+  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -d, --debug            Enable debugging
+      --no_io            No communicate with I\\O nodes
+      --read_only_io     Read only from I\\O nodes
+  -p, --port arg         Param port \(default: 10000\)
+  -h, --help             Print help info
+  -r, --rcrc             Reset params
+      --opc arg          OPC UA server behavior \(off, r, rw\) \(default: r\)
+      --sys_path arg     Sys path \(default: \./sys\)
+      --path arg         Path \(default: \.\)
+      --extra_paths arg  Extra paths \(default: \./dairy-sys\)
+      --sleep_time arg   Sleep time, ms \(default: 2\)
 ]] )
 endif()
 
