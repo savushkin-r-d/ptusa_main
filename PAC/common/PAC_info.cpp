@@ -319,7 +319,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
             }
         }
 
-#ifdef OPCUA
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
@@ -355,8 +354,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         par.save( P_IS_OPC_UA_SERVER_CONTROL, (u_int_4)val );
         return 0;
         }
-    
-#endif
 
     return 0;
     }
