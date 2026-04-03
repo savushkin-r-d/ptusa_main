@@ -174,7 +174,7 @@ class io_device
         /// Checks if the network node associated with the output channel
         /// is available and not in error/PP mode state.
         ///
-        /// @param index - index of the channel in DO or AO channels table.
+        /// @param index - index of the channel in DO channels table.
         /// 
         /// @return 1 - node is OK, -1 - node has error or PP mode,
         ///         0 - no output channels configured.
