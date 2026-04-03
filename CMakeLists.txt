@@ -8,8 +8,6 @@ set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2026.1.28.0)
 
-option(USE_OPCUA "Use OPC UA" ON)
-
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
@@ -101,10 +99,7 @@ if(NOT MINGW)
     set(BUILD_SHARED_LIBS ON)
 endif()
 
-if(USE_OPCUA)
-    add_subdirectory(deps/open62541 EXCLUDE_FROM_ALL)
-    add_compile_definitions(OPCUA)
-endif()
+add_subdirectory(deps/open62541 EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/cxxopts EXCLUDE_FROM_ALL)
 
@@ -126,21 +121,13 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
-if(USE_OPCUA)
-    list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
-else()
-    list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
-endif()
+list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
 
 file(GLOB test_src CONFIGURE_DEPENDS
             test/*.cpp
             test/device/*.cpp
 			test/sys/*.cpp
             test/dll/*.cpp)
-
-if(NOT USE_OPCUA)
-    list(FILTER test_src EXCLUDE REGEX ".*OPCUA*")
-endif()
 
 if(LINUX)
     file(GLOB linux_src CONFIGURE_DEPENDS
@@ -225,12 +212,10 @@ elseif(WIN32)
         COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    if (USE_OPCUA)
-        add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
-            COMMAND toluapp -n OPC_UA -o PAC/common/OPCUA_tolua.cpp PAC/common/toloa++/pkg/OPC_UA.hh
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    endif()
+    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
+        COMMAND toluapp -n OPC_UA -o PAC/common/OPCUA_tolua.cpp PAC/common/toloa++/pkg/OPC_UA.hh
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
 
 add_dependencies(libptusa_main lua)
@@ -309,13 +294,11 @@ if(ARP_DEVICE)
 endif()
 
 endif ()
-        if (USE_OPCUA)
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/plugins/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/arch>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/deps>
-            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/open62541/open62541/src_generated>
-        endif ()
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/plugins/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/arch>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/open62541/open62541/deps>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/open62541/open62541/src_generated>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
@@ -376,18 +359,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static z
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
 if(ARP_DEVICE)
     target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
-    if (USE_OPCUA)
-        target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
-    endif()
+    target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
 endif()
 
-if(USE_OPCUA)
-    target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
-    target_link_libraries(libptusa_main open62541::open62541)
-    target_link_libraries(main_test open62541::open62541)
-    if(NOT MINGW)
-        target_link_libraries(main_perfomance_test open62541::open62541)
-    endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
+target_link_libraries(libptusa_main open62541::open62541)
+target_link_libraries(main_test open62541::open62541)
+if(NOT MINGW)
+    target_link_libraries(main_perfomance_test open62541::open62541)
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic GTest::gtest GTest::gmock subhook fmt::fmt)
