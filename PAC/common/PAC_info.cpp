@@ -68,7 +68,7 @@ void PAC_info::reset_params()
     par[ P_AUTO_OPERATION_WAIT_TIME ] = 60000;
     par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
 
-    par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+    par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
     par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
 
     par.save_all();

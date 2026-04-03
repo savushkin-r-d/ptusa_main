@@ -137,7 +137,7 @@ TEST( PAC_info, save_device )
         "\t{\n"
         "\t0, \n"
         "\t},\n"
-        "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
+        "\tP_IS_OPC_UA_SERVER_ACTIVE=1,\n"
         "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
         "\t}\n";
     char buff[ MAX_SIZE ] = { 0 };
@@ -177,7 +177,7 @@ TEST( PAC_info, save_device )
             "\t{\n"
             "\t0, \n"
             "\t},\n"
-            "\tP_IS_OPC_UA_SERVER_ACTIVE=0,\n"
+            "\tP_IS_OPC_UA_SERVER_ACTIVE=1,\n"
             "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1001 );
