@@ -57,7 +57,7 @@ class PAC_critical_errors_manager
             AC_NET = 4,           ///< Ошибки сетевой работы.
             AC_SERVICE = 5,	      ///< Сервисное обслуживание устройства.
             
-            /// Аварийный режим устройства (PnP, error, etc.).
+            /// Аварийный режим устройства (PP mode, error, etc.).
             AC_ERR_MODE = 6,      
             };
 

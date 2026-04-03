@@ -225,7 +225,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                 if ( is_set )
                     {
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        "активен аварийный режим (PnP, ...)" );
+                        "активен PP mode (каналы управления заблокированы)" );
                     }
                 else
                     {
