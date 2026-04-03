@@ -229,7 +229,7 @@ int project_manager::init_extra_paths( const char* paths )
 //Порядок загрузки:
 //1.Модули.
 //2.Устройства.
-//3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
+//3.Переменные для доступа к устройствам из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
     if ( G_DEBUG )
