@@ -57,7 +57,6 @@ namespace PtusaPLCnextEngineer
                 return;
                 }
 
-#ifdef OPCUA
             if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
                 {
                 UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
@@ -68,7 +67,6 @@ namespace PtusaPLCnextEngineer
                     return;
                     }
                 }
-#endif
 
             sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
                 sleep_time_ms );
@@ -83,9 +81,7 @@ namespace PtusaPLCnextEngineer
             main_cycle();
             }
 
-#ifdef OPCUA
             G_OPCUA_SERVER.shutdown();
-#endif
         }
 
     } // end of namespace PtusaPLCnextEngineer
