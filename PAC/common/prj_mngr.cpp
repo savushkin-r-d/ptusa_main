@@ -104,7 +104,6 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             }
         }
 
-#ifdef OPCUA
     if ( result.count( "opc" ) )
         {
         auto opc_mode = result[ "opc" ].as<std::string>();
@@ -134,7 +133,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             return 1;
             }
         }
-#endif
+
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
     
