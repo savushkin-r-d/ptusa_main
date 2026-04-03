@@ -2746,6 +2746,8 @@ class analog_valve_test : public ::testing::Test
             mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
                 1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
             mngr.init_node_AO( 0, 0, 555, 0 );
+            auto node = mngr.get_node( 0 );
+            node->state = io_manager::io_node::STATES::ST_OK;
 
             G_PAC_INFO()->emulation_off();
             VC1.init( 0, 0, 1, 0 );
