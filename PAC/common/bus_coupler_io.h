@@ -1,6 +1,6 @@
 /// @file bus_coupler_io.h
 /// @brief Работа с устройствами на основе данных с модулей ввода\вывода, узлы
-/// ввода\вывода.
+/// ввода\вывoda.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -114,7 +114,7 @@ class io_device
 
         /// @brief Получение состояния канала аналогового входа.
         ///
-        /// @param index - индекс канала в таблице аналоговых входных каналов
+        /// @param index - индекс канала в таблицеanalogовых входных каналов
         /// устройства.
         /// @param min_value - минимальное значение канала.
         /// @param max_value - максимальное значение канала.
@@ -179,6 +179,17 @@ class io_device
         /// @return 1 - node is OK, -1 - node has error or PP mode,
         ///         0 - no output channels configured.
         int check_output_DO_node_state( u_int index = 0 ) const;
+
+        /// @brief Check output AO channel network node state.
+        ///
+        /// Checks if the network node associated with the output channel
+        /// is available and not in error/PP mode state.
+        ///
+        /// @param index - index of the channel in AO channels table.
+        ///
+        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        ///         0 - no output channels configured.
+        int check_output_AO_node_state( u_int index = 0 ) const;
 
 #ifdef PTUSA_TEST
         public:

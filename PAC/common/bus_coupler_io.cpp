@@ -825,6 +825,41 @@ int io_device::check_output_DO_node_state( u_int index ) const
     return 1; // Node is OK.
     }
 //-----------------------------------------------------------------------------
+int io_device::check_output_AO_node_state( u_int index ) const
+    {
+    // If no channels configured or tables not initialized, skip node check.
+    if ( index >= AO_channels.count || !AO_channels.tables ||
+        !AO_channels.int_write_values || !AO_channels.int_write_values[ index ] )
+        {
+        return 0; // No output channels properly configured.
+        }
+
+    auto io_mgr = G_IO_MANAGER();
+    auto node_index = AO_channels.tables[ index ];
+
+    // Check if node index is valid.
+    if ( node_index >= io_mgr->get_nodes_count() )
+        {
+        return 0; // Invalid node index.
+        }
+
+    auto node = io_mgr->get_node( node_index );
+    if ( !node )
+        {
+        return -1; // Node not found.
+        }    
+
+    // Return error if node is not OK (error, warning/PP mode, or not
+    // connected).
+    if ( auto node_state = node->get_display_state();
+        node_state != io_manager::io_node::ST_OK )
+        {
+        return -1;
+        }
+
+    return 1; // Node is OK.
+    }
+//-----------------------------------------------------------------------------
 void io_device::init_channel( int type, int ch_inex, int node, int offset,
     int module_offset /*= -1*/, int logical_port /*= -1 */ )
     {
