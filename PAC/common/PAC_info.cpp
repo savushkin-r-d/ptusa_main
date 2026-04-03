@@ -8,10 +8,8 @@
 #include "lua_manager.h"
 
 #include "bus_coupler_io.h"
-
-#ifdef OPCUA
 #include "OPCUAServer.h"
-#endif
+
 
 extern bool G_NO_IO_NODES;
 

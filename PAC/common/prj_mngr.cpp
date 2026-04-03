@@ -58,10 +58,10 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
-#ifdef OPCUA
+
         ( "opc", "OPC UA server behavior (off, r, rw)",
             cxxopts::value<std::string>()->default_value( "r" ) )
-#endif        
+
         ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys" ) )
         ( "path", "Path", cxxopts::value<std::string>()->default_value( "." ) )
         ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )

@@ -9,9 +9,9 @@
 #include "PAC_info.h"
 #include "PAC_err.h"
 #include "iot_common.h"
-#ifdef OPCUA
+
 #include "OPCUAServer.h"
-#endif
+
 
 extern bool G_NO_IO_NODES;
 extern bool G_READ_ONLY_IO_NODES;

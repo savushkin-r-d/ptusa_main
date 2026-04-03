@@ -16,9 +16,7 @@
 #include "error.h"
 #include "tech_def.h"
 
-#ifdef OPCUA
 #include "OPCUAServer.h"
-#endif
 
 #include "main_cycle.h"
 

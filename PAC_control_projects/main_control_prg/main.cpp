@@ -35,10 +35,7 @@
 
 #include "profibus_slave.h"
 #include "iot_common.h"
-
-#ifdef OPCUA
 #include "OPCUAServer.h"
-#endif
 
 #ifdef RFID
 #include "rfid_reader.h"
