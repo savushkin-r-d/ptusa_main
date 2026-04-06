@@ -1,13 +1,24 @@
 #pragma once
 #include "includes.h"
-#include "lua_manager.h"
-#include "lauxlib.h"
-#include "lua.h"
-#include "lstate.h"
+//#include "lua_manager.h"
+//#include "lauxlib.h"
+//#include "lua.h"
+//#include "lstate.h"
 #include "mock_params_manager.h"
 #include "mock_project_manager.h"
 #include "mock_tech_object_manager.h"
 #include "mock_tcp_communicator.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "lua_manager.h"
+#include "lauxlib.h"
+#include "lua.h"
+#include "lstate.h"
+#ifdef __cplusplus
+}
+#endif
 
 using namespace std;
 

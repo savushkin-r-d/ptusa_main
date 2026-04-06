@@ -136,7 +136,7 @@ TEST_F(LuaManagerTest, init_check_file_version_failure)
 TEST_F( LuaManagerTest, init_system_scripts_execution_failure )
 {
     subhook_t hook_luaL_loadfile =
-        subhook_new( (void*)&luaL_loadfile, (void*)&mock_luaL_loadfile_failure,
+        subhook_new( (void*)&luaL_loadfilex, (void*)&mock_luaL_loadfile_failure,
         SUBHOOK_64BIT_OFFSET );
     subhook_install( hook_luaL_loadfile );
 
@@ -174,7 +174,7 @@ TEST_F(LuaManagerTest, init_lua_load_configuration_failure)
 TEST_F(LuaManagerTest, init_luaL_loadfile_failure)
 {
     subhook_t hook_luaL_loadfile =
-        subhook_new((void *)luaL_loadfile, (void *)mock_luaL_loadfile_failure_2, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)luaL_loadfilex, (void *)mock_luaL_loadfile_failure_2, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_luaL_loadfile);
     mock_project_manager* prj_mock = new mock_project_manager();
     mock_params_manager* par_mock = new mock_params_manager();
@@ -200,7 +200,7 @@ TEST_F(LuaManagerTest, init_luaL_loadfile_failure)
 TEST_F(LuaManagerTest, init_lua_pcall_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     const int EXTRA_CALLS_COUNT = 1;
     set_lua_pcall_success_calls_before_failure(FILE_CNT + EXTRA_CALLS_COUNT);
@@ -270,7 +270,7 @@ TEST_F(LuaManagerTest, init_init_objects_failure)
 void test_PAC_name( int extra_calls_count )
     {    
     subhook_t hook_lua_pcall =
-        subhook_new( (void*)lua_pcall, (void*)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET );
+        subhook_new( (void*)lua_pcallk, (void*)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET );
     subhook_install( hook_lua_pcall );
 
     set_lua_pcall_success_calls_before_failure( FILE_CNT + extra_calls_count );
@@ -325,7 +325,7 @@ TEST_F(LuaManagerTest, void_exec_lua_method_success)
 
 TEST_F(LuaManagerTest, void_exec_lua_method_failure)
 {
-    subhook_t hook_lua_pcall = subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+    subhook_t hook_lua_pcall = subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -363,7 +363,7 @@ TEST_F(LuaManagerTest, char_no_param_exec_lua_method_success)
 TEST_F(LuaManagerTest, char_no_param_exec_lua_method_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -403,7 +403,7 @@ TEST_F(LuaManagerTest, char_exec_lua_method_success)
 TEST_F(LuaManagerTest, char_exec_lua_method_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -445,7 +445,7 @@ TEST_F(LuaManagerTest, int_exec_lua_method_success)
 TEST_F(LuaManagerTest, int_exec_lua_method_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -488,7 +488,7 @@ TEST_F(LuaManagerTest, int_2_exec_lua_method_success)
 TEST_F(LuaManagerTest, int_2_exec_lua_method_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -529,7 +529,7 @@ TEST_F(LuaManagerTest, int_no_param_exec_lua_method_success)
 TEST_F(LuaManagerTest, int_no_param_exec_lua_method_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -569,7 +569,7 @@ TEST_F(LuaManagerTest, user_object_exec_lua_method_success)
 
 TEST_F(LuaManagerTest, user_object_exec_lua_method_failure)
 {
-    subhook_t hook_lua_pcall = subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+    subhook_t hook_lua_pcall = subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -601,7 +601,7 @@ TEST_F(LuaManagerTest, exec_Lua_str_success)
 TEST_F(LuaManagerTest, exec_Lua_str_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 
@@ -710,7 +710,7 @@ TEST_F(LuaManagerTest, reload_script_check_file_version_failure)
 TEST_F(LuaManagerTest, reload_script_luaL_dofile_failure)
 {
     subhook_t hook_lua_pcall =
-        subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
+        subhook_new((void *)lua_pcallk, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
     set_lua_pcall_success_calls_before_failure(0);
 

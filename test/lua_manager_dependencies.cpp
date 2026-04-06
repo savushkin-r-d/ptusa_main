@@ -8,17 +8,17 @@ void LuaManagerTest::SetUp()
 	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));	
 	lua_hooks.push_back(subhook_new((void *) lua_type,				(void *) mock_lua_type,				SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_getfield,          (void *) mock_lua_getfield,         SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) lua_remove,            (void *) mock_lua_remove,           SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) lua_pcall,             (void *) mock_lua_pcall,            SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *)lua_rotate,            (void *) mock_lua_remove,           SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *) lua_pcallk,             (void *) mock_lua_pcall,            SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_pushnumber,        (void *) mock_lua_pushnumber,       SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) tolua_tostring,        (void *) mock_tolua_tostring,       SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) tolua_tonumber,        (void *) mock_tolua_tonumber,       SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) luaL_loadstring,       (void *) mock_luaL_loadstring,      SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) tolua_tousertype,      (void *) mock_tolua_tousertype,     SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) luaL_loadfile,         (void *) mock_luaL_loadfile,        SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *) luaL_loadfilex,         (void *) mock_luaL_loadfile,        SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) luaL_newstate,         (void *) mock_luaL_newstate,        SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_gc,                (void *) mock_lua_gc,               SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) luaL_openlibs,         (void *) mock_luaL_openlibs,        SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *)luaL_openselectedlibs,         (void *) mock_luaL_openlibs,        SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) tolua_PAC_dev_open,    (void *) mock_tolua_PAC_dev_open,   SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) tolua_IOT_dev_open,    (void *) mock_tolua_IOT_dev_open,   SUBHOOK_64BIT_OFFSET));
 

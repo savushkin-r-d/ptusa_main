@@ -8,7 +8,7 @@
 
 #endif // OS_WIN
 
-#include "lua_manager.h"
+
 
 #include "prj_mngr.h"
 #include "device/device.h"
@@ -16,6 +16,23 @@
 #include "modbus_serv.h"
 
 #include "log.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "lua_manager.h"
+    int tolua_PAC_dev_open(lua_State* L)
+    {
+        return 0;
+    }
+    int tolua_IOT_dev_open(lua_State* L)
+    {
+        return 0;
+    }
+#ifdef __cplusplus
+}
+#endif
+
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
 bool lua_manager::is_print_stack_traceback = true;
@@ -55,9 +72,9 @@ int check_file( const char* file_name, char* err_str )
     if ( !f )
         {
         G_LOG->error( err_str, "File \"%s\" not found!", file_name );
-        return -1;
+            return -1;
         }
-    int version = 0;
+        int version = 0;
 
     if ( char str[ 100 ] = ""; fgets( str, sizeof( str ), f ) )
         {
@@ -65,14 +82,14 @@ int check_file( const char* file_name, char* err_str )
         }
 
     fclose( f );
-    f = nullptr;
+        f = nullptr;
 
     if ( G_DEBUG )
         {
         G_LOG->notice( "File \"%s\" version %d.", file_name, version );
         }
 
-    return version;
+        return version;
     }
 //-----------------------------------------------------------------------------
 const char *FILES[ FILE_CNT ] =
