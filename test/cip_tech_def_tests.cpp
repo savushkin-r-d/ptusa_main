@@ -1444,6 +1444,52 @@ TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
     ClearCipDevices();
     }
 
+TEST( cipline_tech_object, check_device_watchdog_fallback_no_line_prefix )
+    {
+    // When LINE1WATCHDOGn is absent but WATCHDOGn exists, check_device must
+    // fall back to the device without a line prefix.
+    InitCipDevices(); // Does not add WATCHDOG101.
+    auto dm = device_manager::get_instance();
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, "WATCHDOG101", "", "" );
+
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.rt_par_float[ P_WATCHDOG ] = 101;
+
+    device* outdev = nullptr;
+    int result = cip1.check_device( outdev, P_WATCHDOG,
+        device::DEVICE_TYPE::DT_WATCHDOG );
+
+    EXPECT_EQ( 0, result );
+    ASSERT_NE( nullptr, outdev );
+    EXPECT_STREQ( "WATCHDOG101", outdev->get_name() );
+
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, check_device_watchdog_line_prefix_takes_priority )
+    {
+    // When both LINE1WATCHDOGn and WATCHDOGn exist, LINE1WATCHDOGn must be
+    // preferred over WATCHDOGn.
+    InitCipDevices(); // Adds LINE1WATCHDOG1.
+    auto dm = device_manager::get_instance();
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, "WATCHDOG1", "", "" );
+
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.rt_par_float[ P_WATCHDOG ] = 1;
+
+    device* outdev = nullptr;
+    int result = cip1.check_device( outdev, P_WATCHDOG,
+        device::DEVICE_TYPE::DT_WATCHDOG );
+
+    EXPECT_EQ( 0, result );
+    ASSERT_NE( nullptr, outdev );
+    EXPECT_STREQ( "LINE1WATCHDOG1", outdev->get_name() );
+
+    ClearCipDevices();
+    }
+
 TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep91From67 )
     {
     // Окружение.

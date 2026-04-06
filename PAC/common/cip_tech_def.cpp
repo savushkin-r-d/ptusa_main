@@ -5864,16 +5864,31 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
 
     auto dev_no = (u_int)rt_par_float[ parno ];
     char devname[ MAX_DEV_NAME * UNICODE_MULTIPLIER ] = { 0 };
-    auto res = fmt::format_to_n( devname, 
+    auto res = fmt::format_to_n( devname,
         MAX_DEV_NAME * UNICODE_MULTIPLIER,
         "LINE{}{}{}", nmr, device::DEV_NAMES[ type ], dev_no );
     *res.out = '\0';
-    
+
     if ( auto dev = G_DEVICE_MANAGER()->get_device( devname );
         dev && dev->get_serial_n() > 0 && dev->get_type() == type )
         {
         outdev = dev;
         return 0;
+        }
+
+    if ( type == device::DEVICE_TYPE::DT_WATCHDOG )
+        {
+        auto res2 = fmt::format_to_n( devname,
+            MAX_DEV_NAME * UNICODE_MULTIPLIER,
+            "{}{}", device::DEV_NAMES[ type ], dev_no );
+        *res2.out = '\0';
+
+        if ( auto dev = G_DEVICE_MANAGER()->get_device( devname );
+            dev && dev->get_serial_n() > 0 && dev->get_type() == type )
+            {
+            outdev = dev;
+            return 0;
+            }
         }
 
     return -2;
