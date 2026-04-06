@@ -1407,25 +1407,25 @@ bool io_manager::io_node::is_pp_mode_active() const
         ( status_register & STATUS_REG_PP_MODE_MASK ) != 0;
     }
 //-----------------------------------------------------------------------------
-int io_manager::io_node::get_display_state() const
+io_manager::io_node::DISPLAY_STATES io_manager::io_node::get_display_state() const
     {
     if ( !is_active || G_PAC_INFO()->is_emulator() )
         {
-        return DST_NO_CONNECT;
+        return io_node::DISPLAY_STATES::DST_NO_CONNECT;
         }
 
     if ( state != ST_OK )
         {
-        return DST_ERROR;
+        return io_node::DISPLAY_STATES::DST_ERROR;
         }
 
     // Check error/PP mode bits (0-5) in status register for Phoenix BK ETH nodes.
     if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_ERROR_MASK ) )
         {
-        return DST_WARNING;
+        return io_node::DISPLAY_STATES::DST_WARNING;
         }
 
-    return DST_OK;
+    return io_node::DISPLAY_STATES::DST_OK;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

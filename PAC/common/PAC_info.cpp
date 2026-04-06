@@ -57,8 +57,8 @@ void PAC_info::eval()
             const auto node = IO_MANAGER->get_node( i );
             // Error or warning (PP mode) state detected.
             if ( auto state = node->get_display_state();
-                state == io_manager::io_node::DST_ERROR ||
-                state == io_manager::io_node::DST_WARNING )
+                state == io_manager::io_node::DISPLAY_STATES::DST_ERROR ||
+                state == io_manager::io_node::DISPLAY_STATES::DST_WARNING )
                 {
                 nodes_comm_error = 1;
                 break;
@@ -178,7 +178,7 @@ int PAC_info::save_device( char* buff ) const
         {
         auto wn = io_manager::get_instance()->get_node( i );
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-            "{}, ", wn->get_display_state() ).size;
+            "{}, ", static_cast<int>( wn->get_display_state() ) ).size;
         }
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 

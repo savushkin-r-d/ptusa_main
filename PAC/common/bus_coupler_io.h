@@ -388,7 +388,7 @@ class io_manager
 				ST_OK = 1,
 				};
 
-            enum DISPLAY_STATES  ///< Отображение работы с узлом.
+            enum class DISPLAY_STATES  ///< Отображение работы с узлом.
                 {
                 DST_ERROR = -1,  ///< Node enabled but no connection.
                 DST_NO_CONNECT = 0,
@@ -471,7 +471,7 @@ class io_manager
             /// @return 1 - node connected and OK, -1 - node enabled
             ///         but no connection, 2 - node has error/warning
             ///         conditions (bits 0-5 set).
-            int get_display_state() const;
+            io_node::DISPLAY_STATES get_display_state() const;
 
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.
