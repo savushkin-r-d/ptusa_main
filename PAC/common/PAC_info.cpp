@@ -55,7 +55,7 @@ void PAC_info::eval()
         for ( unsigned int i = 0; i < nc; i++ )
             {
             const auto node = IO_MANAGER->get_node( i );
-            // Error or warning (PP mode) state detected.
+            // Error or warning state detected.
             if ( auto state = node->get_display_state();
                 state == io_manager::io_node::DISPLAY_STATES::DST_ERROR ||
                 state == io_manager::io_node::DISPLAY_STATES::DST_WARNING )
