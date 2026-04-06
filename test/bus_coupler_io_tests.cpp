@@ -117,7 +117,7 @@ TEST( io_node, get_display_state_pp_mode )
     G_PAC_INFO()->emulation_on();
 	}
 
-TEST( io_node, get_pp_mode_display_state )
+TEST( io_node, is_pp_mode_active )
     {
     G_PAC_INFO()->emulation_off();
 

@@ -467,10 +467,11 @@ class io_manager
             /// @return true if PP mode is active (bit 4 set), else false.
             bool is_pp_mode_active() const;
 
-            /// @brief Get the display state of the node.
-            /// @return 1 - node connected and OK, -1 - node enabled
-            ///         but no connection, 2 - node has error/warning
-            ///         conditions (bits 0-5 set).
+            /// @return One of `io_node::DISPLAY_STATES`:
+            ///         `DISPLAY_STATE_OK` for a connected and healthy node,
+            ///         `DISPLAY_STATE_NO_CONNECTION` for an enabled node
+            ///         without connection, or `DISPLAY_STATE_WARNING` when
+            ///         error/warning conditions are present (bits 0-5 set).
             io_node::DISPLAY_STATES get_display_state() const;
 
             private:
