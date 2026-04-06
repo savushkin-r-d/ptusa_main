@@ -1595,13 +1595,27 @@ TEST( DO1, get_state )
 
     G_PAC_INFO()->emulation_off();
     // Когда отключена эмуляция, пишем в буфер обмена с модулями ввода\вывода.
-    EXPECT_EQ( do1.get_state(), 0 );
+    EXPECT_EQ( do1.get_state(), -1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 0 );
+
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    do1.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+    EXPECT_EQ( do1.get_state(), -1 );
+
     do1.on();
+    mngr.get_node( 0 )->is_active = true;
+    mngr.get_node( 0 )->state = io_manager::io_node::STATES::ST_OK;
     EXPECT_EQ( do1.get_state(), 1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
 
+    io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
+
     // Когда включена эмуляция, пишем в поле состояния объекта. Здесь буфер
     // обмена с модулями ввода\вывода не должен изменяться [ 1 ].
     EXPECT_EQ( do1.get_state(), 0 );

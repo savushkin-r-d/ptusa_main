@@ -241,10 +241,12 @@ TEST( io_node, get_display_state_all_node_types )
 TEST( io_device, check_output_DO_node_state )
 	{
 	io_device dev( "TEST_DO" );
+    EXPECT_EQ( 0, dev.check_output_DO_node_state() );
+
 	dev.init_and_alloc( 1, 0, 0, 0 );
 
 	io_manager::get_instance()->init( 0 );
-	EXPECT_EQ( 0, dev.check_output_DO_node_state() );
+	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
 
 	io_manager::get_instance()->init( 1 );
 	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
@@ -281,10 +283,12 @@ TEST( io_device, check_output_DO_node_state )
 TEST( io_device, check_output_AO_node_state )
     {
     io_device dev( "TEST_AO" );
+    EXPECT_EQ( 0, dev.check_output_AO_node_state() );
+
     dev.init_and_alloc( 0, 0, 1, 0 );
 
     io_manager::get_instance()->init( 0 );
-    EXPECT_EQ( 0, dev.check_output_AO_node_state() );
+    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
 
     io_manager::get_instance()->init( 1 );
     EXPECT_EQ( -1, dev.check_output_AO_node_state() );
