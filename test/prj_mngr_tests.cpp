@@ -127,7 +127,7 @@ Usage:
   -p, --port arg         Param port (default: 10000)
   -h, --help             Print help info
   -r, --rcrc             Reset params
-      --opc arg          OPC UA server behavior (off, r, rw) (default: r)
+      --opc arg          OPC UA server behavior (off, r, rw)
       --sys_path arg     Sys path (default: ./sys)
       --path arg         Path (default: .)
       --extra_paths arg  Extra paths (default: ./dairy-sys)
@@ -145,7 +145,7 @@ Usage:
   -p, --port arg         Param port (default: 10000)
   -h, --help             Print help info
   -r, --rcrc             Reset params
-      --opc arg          OPC UA server behavior (off, r, rw) (default: r)
+      --opc arg          OPC UA server behavior (off, r, rw)
       --sys_path arg     Sys path (default: ./sys)
       --path arg         Path (default: .)
       --extra_paths arg  Extra paths (default: ./dairy-sys)

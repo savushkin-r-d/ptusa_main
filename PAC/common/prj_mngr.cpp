@@ -46,26 +46,38 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
     options.add_options()
-        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
-        ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "s,script", "The script file to execute",
+            cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug", "Enable debugging",
+            cxxopts::value<bool>()->default_value( "false" ) )
 #if defined WIN_OS
-        ( "no_io", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
-        ( "read_only_io", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+        ( "no_io", "No communicate with I\\O nodes",
+            cxxopts::value<bool>()->default_value( "true" ) )
+        ( "read_only_io", "Read only from I\\O nodes",
+            cxxopts::value<bool>()->default_value( "true" ) )
 #else
-        ( "no_io", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
-        ( "read_only_io", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "no_io", "No communicate with I\\O nodes",
+            cxxopts::value<bool>()->default_value( "false" ) )
+        ( "read_only_io", "Read only from I\\O nodes",
+            cxxopts::value<bool>()->default_value( "false" ) )
 #endif // defined WIN_OS        
-        ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "p,port", "Param port",
+            
+            cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
 
-        ( "opc", "OPC UA server behavior (off, r, rw)",
-            cxxopts::value<std::string>()->default_value( "r" ) )
+        ( "opc", "OPC UA server behavior (off, r, rw)", 
+            cxxopts::value<std::string>() )
 
-        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys" ) )
-        ( "path", "Path", cxxopts::value<std::string>()->default_value( "." ) )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
-        ( "sleep_time", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
+        ( "sys_path", "Sys path",
+            cxxopts::value<std::string>()->default_value( "./sys" ) )
+        ( "path", "Path",
+            cxxopts::value<std::string>()->default_value( "." ) )
+        ( "extra_paths", "Extra paths",
+            cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
+        ( "sleep_time", "Sleep time, ms",
+            cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
