@@ -46,7 +46,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
         err_id );
     auto REF_STR = R"s(	{
-	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен аварийный режим (PnP, ...)",
+	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен PP mode (каналы управления заблокированы)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,
@@ -115,7 +115,8 @@ TEST( pp_mode_alarm, non_phoenix_node )
 
     G_PAC_INFO()->emulation_off();
     // Wago nodes should not trigger PP mode warnings.
-    EXPECT_EQ( io_manager::io_node::ST_OK, wago_node.get_display_state() );
+    EXPECT_EQ( io_manager::io_node::DISPLAY_STATES::DST_OK,
+        wago_node.get_display_state() );
     G_PAC_INFO()->emulation_on();
     }
 

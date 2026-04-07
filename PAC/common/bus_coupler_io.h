@@ -482,15 +482,6 @@ class io_manager
             ///         present in the Phoenix status register (bits 0-5).
             io_node::DISPLAY_STATES get_display_state() const;
 
-            /// @return One of `io_node::DISPLAY_STATES`:
-            ///         `DST_OK` for a connected and healthy node.
-            ///         `DST_NO_CONNECT` for an inactive node, emulator,
-            ///         or node without connection.
-            ///         `DST_ERROR` when `state != ST_OK`.
-            ///         `DST_WARNING` when warning/error conditions are
-            ///         present in the Phoenix status register (bits 0-5).
-            io_node::DISPLAY_STATES get_display_state() const;
-
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.
             };
