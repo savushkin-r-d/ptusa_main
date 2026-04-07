@@ -169,6 +169,28 @@ class io_device
 
         virtual void print() const;
 
+        /// @brief Check output DO channel network node state.
+        ///
+        /// Checks if the network node associated with the output channel
+        /// is available and not in error/PP mode state.
+        ///
+        /// @param index - index of the channel in DO channels table.
+        /// 
+        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        ///         0 - no output channels configured.
+        int check_output_DO_node_state( u_int index = 0 ) const;
+
+        /// @brief Check output AO channel network node state.
+        ///
+        /// Checks if the network node associated with the output channel
+        /// is available and not in error/PP mode state.
+        ///
+        /// @param index - index of the channel in AO channels table.
+        ///
+        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        ///         0 - no output channels configured.
+        int check_output_AO_node_state( u_int index = 0 ) const;
+
 #ifdef PTUSA_TEST
         public:
 #else
@@ -364,14 +386,25 @@ class io_manager
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
-				ST_WARNING = 2,  ///< Node has error/warning (Status Register bits 0-5 set).
-				ST_ERROR = -1,  ///< Node enabled but no connection.
 				};
+
+            enum class DISPLAY_STATES  ///< Отображение работы с узлом.
+                {
+                DST_ERROR = -1,  ///< Node enabled but no connection.
+                DST_NO_CONNECT = 0,
+                DST_OK = 1,
+
+                ///< Node has error/warning (Status Register bits 0-5 set).
+                DST_WARNING = 2,
+                };
 
 			/// Bits 0-5 of Status Register (7996) indicate error/PP
 			/// mode conditions. When any of these bits are set, the
 			/// node is in error/PP mode state.
 			static constexpr u_int_2 STATUS_REG_ERROR_MASK = 0x003F;
+
+            /// Bit 4 of Status Register (7996) indicates PP mode.
+            static constexpr u_int_2 STATUS_REG_PP_MODE_MASK = 0x0010;
 
             ///< Cостояние работы с узлом.
             io_node::STATES state{ io_node::STATES::ST_NO_CONNECT };
@@ -430,11 +463,18 @@ class io_manager
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
 
-            /// @brief Get the display state of the node.
-            /// @return 1 - node connected and OK, -1 - node enabled
-            ///         but no connection, 2 - node has error/warning
-            ///         conditions (bits 0-5 set).
-            int get_display_state() const;
+            /// @brief Checks PP mode state of the node.
+            /// @return true if PP mode is active (bit 4 set), else false.
+            bool is_pp_mode_active() const;
+
+            /// @return One of `io_node::DISPLAY_STATES`:
+            ///         `DST_OK` for a connected and healthy node.
+            ///         `DST_NO_CONNECT` for an inactive node, emulator,
+            ///         or node without connection.
+            ///         `DST_ERROR` when `state != ST_OK`.
+            ///         `DST_WARNING` when warning/error conditions are
+            ///         present in the Phoenix status register (bits 0-5).
+            io_node::DISPLAY_STATES get_display_state() const;
 
             private:
                 io_node( const io_node& io_node_copy ); // Not implemented.
