@@ -5866,7 +5866,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
     char devname[ MAX_DEV_NAME * UNICODE_MULTIPLIER ] = { 0 };
 	// LCOV_EXCL_START
     auto res = fmt::format_to_n( devname,
-        MAX_DEV_NAME * UNICODE_MULTIPLIER,
+        MAX_DEV_NAME * UNICODE_MULTIPLIER - 1,
         "LINE{}{}{}", nmr, device::DEV_NAMES[ type ], dev_no );
 	// LCOV_EXCL_STOP
     *res.out = '\0';
@@ -5882,7 +5882,7 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
         {
 		// LCOV_EXCL_START
         auto res2 = fmt::format_to_n( devname,
-            MAX_DEV_NAME * UNICODE_MULTIPLIER,
+            MAX_DEV_NAME * UNICODE_MULTIPLIER - 1,
             "{}{}", device::DEV_NAMES[ type ], dev_no );
 		// LCOV_EXCL_STOP
         *res2.out = '\0';
