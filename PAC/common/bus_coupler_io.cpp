@@ -790,7 +790,54 @@ void io_device::set_io_vendor( VENDOR vendor )
     this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
-void io_device::init_channel( int type, int ch_inex, int node, int offset, int module_offset /*= -1*/, int logical_port /*= -1 */ )
+int io_device::check_output_DO_node_state( u_int index ) const
+    {
+    // If no channels configured or tables not initialized, skip node check.
+    if ( index >= DO_channels.count || 
+        !DO_channels.tables ||
+        !DO_channels.char_write_values ||
+        !DO_channels.char_write_values[ index ] )
+        {
+        return 0; // No output channels configured.
+        }
+
+    auto io_mgr = G_IO_MANAGER();
+    auto node_index = DO_channels.tables[ index ];
+    if ( auto node = io_mgr->get_node( node_index ); 
+        !node->is_active || 
+        node->state != io_manager::io_node::ST_OK ||
+        node->is_pp_mode_active() )
+        {
+        return -1;
+        }
+
+    return 1; // Node is OK.
+    }
+//-----------------------------------------------------------------------------
+int io_device::check_output_AO_node_state( u_int index ) const
+    {
+    // If no channels configured or tables not initialized, skip node check.
+    if ( index >= AO_channels.count || !AO_channels.tables ||
+        !AO_channels.int_write_values || !AO_channels.int_write_values[ index ] )
+        {
+        return 0; // No output channels properly configured.
+        }
+
+    auto io_mgr = G_IO_MANAGER();
+    auto node_index = AO_channels.tables[ index ];
+    if ( auto node = io_mgr->get_node( node_index );
+        !node->is_active ||
+        node->state != io_manager::io_node::ST_OK ||
+        node->is_pp_mode_active() )
+        {
+        return -1;
+        }
+
+    return 1; // Node is OK.
+    }
+//-----------------------------------------------------------------------------
+void io_device::init_channel( int type, int ch_inex, int node, int offset,
+    int module_offset /*= -1*/, int logical_port /*= -1 */ )
     {
     switch ( type )
         {
@@ -923,21 +970,11 @@ void io_device::IO_channels::print() const
             }
 
         printf( ":%d; ", count );
-        //if ( count )
-        //    {
-        //    printf( "[ " );
-        //    for ( u_int i = 0; i < count; i++ )
-        //        {
-        //        printf("%d:%2d", tables[ i ], offsets[ i ] );
-        //        if ( i < count - 1 ) printf( "; " );
-        //        }
-        //    printf( " ]" );
-        //    }
-        //printf( "; " );
         }
     }
 //-----------------------------------------------------------------------------
-void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset, int module_offset, int logical_port )
+void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset,
+    int module_offset, int logical_port )
     {
     if ( ch_index < count )
         {
@@ -1197,20 +1234,20 @@ const io_manager::io_node* io_manager::get_node( u_int node_n ) const
     {
     if ( node_n < nodes_count )
         {
-        return nodes[ node_n ];
+        return nodes[ node_n ] ? nodes[ node_n ] : &IO_NODE_STUB;
         }
 
-    return nullptr;
+    return &IO_NODE_STUB;
     }
 
 io_manager::io_node* io_manager::get_node( u_int node_n )
     {
     if ( node_n < nodes_count )
         {
-        return nodes[ node_n ]; 
+        return nodes[ node_n ] ? nodes[ node_n ] : &io_node_stub;
         }
 
-    return nullptr;
+    return &io_node_stub;
     }
 
 u_int io_manager::get_nodes_count()
@@ -1382,25 +1419,31 @@ void io_manager::io_node::print()
         AI_cnt, AI_size, AO_cnt, AO_size );
     }
 //-----------------------------------------------------------------------------
-int io_manager::io_node::get_display_state() const
+bool io_manager::io_node::is_pp_mode_active() const
+    {
+    return type == PHOENIX_BK_ETH &&
+        ( status_register & STATUS_REG_PP_MODE_MASK ) != 0;
+    }
+//-----------------------------------------------------------------------------
+io_manager::io_node::DISPLAY_STATES io_manager::io_node::get_display_state() const
     {
     if ( !is_active || G_PAC_INFO()->is_emulator() )
         {
-        return ST_NO_CONNECT;
+        return io_node::DISPLAY_STATES::DST_NO_CONNECT;
         }
 
     if ( state != ST_OK )
         {
-        return ST_ERROR;
+        return io_node::DISPLAY_STATES::DST_ERROR;
         }
 
     // Check error/PP mode bits (0-5) in status register for Phoenix BK ETH nodes.
     if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_ERROR_MASK ) )
         {
-        return ST_WARNING;
+        return io_node::DISPLAY_STATES::DST_WARNING;
         }
 
-    return ST_OK;
+    return io_node::DISPLAY_STATES::DST_OK;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

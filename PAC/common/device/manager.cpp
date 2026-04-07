@@ -341,7 +341,7 @@ device* device_manager::get_device( const char* dev_name )
     return get_stub_device();
     }
 //-----------------------------------------------------------------------------
-device* device_manager::get_device( u_int serial_dev_n )
+device* device_manager::get_device( size_t serial_dev_n )
     {
     if ( serial_dev_n < project_devices.size() )
         {

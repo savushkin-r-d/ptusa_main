@@ -252,7 +252,7 @@ class device_manager : public i_Lua_save_device
         device* get_device( const char* dev_name );
 
         /// @brief Получение устройства.
-        device* get_device( u_int serial_dev_n );
+        device* get_device( size_t serial_dev_n );
 
         /// @brief Получение клапана по его номеру.
         i_DO_device* get_V( const char* dev_name );

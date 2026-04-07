@@ -659,6 +659,7 @@ class AO1 : public analog_io_device
         virtual float get_min_value() const = 0;
         virtual float get_max_value() const = 0;
 
+        int get_state() const override;
         float get_value() const override;
         void  direct_set_value( float new_value ) override;
 
