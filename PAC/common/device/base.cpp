@@ -562,6 +562,19 @@ AO1::AO1( const char* dev_name,
     {
     }
 //-----------------------------------------------------------------------------
+int AO1::get_state() const
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
+
+    // Check if the network node for output channel is available.
+    if ( auto node_state = check_output_AO_node_state(); node_state < 0 )
+        {
+        return -1; // Node error or PP mode.
+        }
+
+    return analog_io_device::get_state();
+    }
+//-----------------------------------------------------------------------------
 float AO1::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();

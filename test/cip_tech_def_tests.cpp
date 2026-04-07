@@ -1443,3 +1443,110 @@ TEST( cipline_tech_object, recipe_RV_WATCHDOG_mapping_and_device_init )
     G_LUA_MANAGER->free_Lua();
     ClearCipDevices();
     }
+
+TEST( cipline_tech_object, check_device_watchdog_fallback_no_line_prefix )
+    {
+    // When LINE1WATCHDOGn is absent but WATCHDOGn exists, check_device must
+    // fall back to the device without a line prefix.
+    InitCipDevices(); // Does not add WATCHDOG101.
+    auto dm = device_manager::get_instance();
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, "WATCHDOG101", "", "" );
+
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.rt_par_float[ P_WATCHDOG ] = 101;
+
+    device* outdev = nullptr;
+    int result = cip1.check_device( outdev, P_WATCHDOG,
+        device::DEVICE_TYPE::DT_WATCHDOG );
+
+    EXPECT_EQ( 0, result );
+    ASSERT_NE( nullptr, outdev );
+    EXPECT_STREQ( "WATCHDOG101", outdev->get_name() );
+
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, check_device_watchdog_line_prefix_takes_priority )
+    {
+    // When both LINE1WATCHDOGn and WATCHDOGn exist, LINE1WATCHDOGn must be
+    // preferred over WATCHDOGn.
+    InitCipDevices(); // Adds LINE1WATCHDOG1.
+    auto dm = device_manager::get_instance();
+    dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG,
+        device::DEVICE_SUB_TYPE::DST_WATCHDOG, "WATCHDOG1", "", "" );
+
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    cip1.rt_par_float[ P_WATCHDOG ] = 1;
+
+    device* outdev = nullptr;
+    int result = cip1.check_device( outdev, P_WATCHDOG,
+        device::DEVICE_TYPE::DT_WATCHDOG );
+
+    EXPECT_EQ( 0, result );
+    ASSERT_NE( nullptr, outdev );
+    EXPECT_STREQ( "LINE1WATCHDOG1", outdev->get_name() );
+
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep91From67 )
+    {
+    // Окружение.
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+    cip1.initline();
+
+    // P_PROGRAM = SPROG_HOTWATER.
+    cip1.rt_par_float[ P_PROGRAM ] = SPROG_HOTWATER;
+
+    // По умолчанию параметр = 0 (нет дополнительного объёма).
+    EXPECT_EQ( 0.0f, cip1.rt_par_float[ P_DOP_V_OK_OP ] );
+
+    // Устанавливаем параметр объёма в -1 (не охлаждать после дезинфекции).
+    cip1.rt_par_float[ P_DOP_V_OK_OP ] = -1;
+    auto res = cip1.LoadProgram();
+    EXPECT_EQ( res, 61 );
+    // После шага 67 при отрицательном параметре переходим на 91.
+    EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );    
+
+    // После шага 91 переходим на 555.
+    EXPECT_EQ( 555, cip1._GoToStep( 91, 0 ) );
+    cip1.ResetLinesDevicesBeforeReset();
+
+    // Устанавливаем параметр в 100 - проверяем стандартное поведение.
+    cip1.rt_par_float[ P_PROGRAM ] = SPROG_HOTWATER;
+    cip1.rt_par_float[ P_DOP_V_OK_OP ] = 100;
+    res = cip1.LoadProgram();
+    EXPECT_EQ( res, 61 );
+    EXPECT_EQ( 81, cip1._GoToStep( 67, 0 ) );
+
+    // Завершение.
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
+    }
+
+TEST( cipline_tech_object, ResetWP )
+    {
+    // Окружение.
+    InitCipDevices();
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+    cip1.initline();
+
+    cip1.rt_par_float[ P_ZAD_PODOGR ] = 1.0f;
+    cip1.rt_par_float[ P_CONC_RATE ] = 10.0f;
+    cip1.rt_par_float[ P_TM_R_NO_FLOW ] = 100.0f;
+    cip1.ResetWP();
+    // После сброса параметров (в 0) некоторые должны сохранить своё исходное
+    // значение
+    EXPECT_EQ( cip1.rt_par_float[ P_ZAD_PODOGR ], 0.0f );
+    EXPECT_EQ( cip1.rt_par_float[ P_CONC_RATE ], 10.0f );
+    EXPECT_EQ( cip1.rt_par_float[ P_TM_R_NO_FLOW ], 100.0f );
+
+
+    // Завершение.
+    G_LUA_MANAGER->free_Lua();
+    ClearCipDevices();
+    }

@@ -2170,8 +2170,12 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 64:
         case 65:
         case 66: return cur+1;
-        case 67: return LoadProgram();
-
+        case 67:
+            if ( rt_par_float[ P_DOP_V_OK_OP ] < 0 )
+                {
+                disable_final_rinsing = true;
+                }            
+            return LoadProgram();
         case 71:
         case 72:
         case 73:
@@ -3291,20 +3295,22 @@ int cipline_tech_object::_LoadProgram( )
         }
     }
 
-void cipline_tech_object::ResetWP( )
+void cipline_tech_object::ResetWP()
     {
-    int i;
-    for (i = 1; i < P_RESERV_START; i++)
+    for ( auto i = 1; i < P_RESERV_START; i++ )
         {
-        if (i != P_CONC_RATE && (i < P_R_NO_FLOW || i > PIDF_Uk ))
+        // Некоторые параметры используются при наведении раствора,
+        // поэтому их не сбрасываем.
+        // Необходимо сделать рецепты для наведения растворов.
+        if ( i != P_CONC_RATE && ( i < P_R_NO_FLOW || i > PIDF_Uk ) )
             {
-            rt_par_float[i] = 0;
+            rt_par_float[ i ] = 0;
             }
         }
-    rt_par_float[P_SELECT_PRG] = -1;
-    rt_par_float[P_SELECT_REC] = -1;
-    rt_par_float[P_CUR_REC] = 1;
-    rt_par_float[P_LOADED_RECIPE] = 0;
+    rt_par_float[ P_SELECT_PRG ] = -1;
+    rt_par_float[ P_SELECT_REC ] = -1;
+    rt_par_float[ P_CUR_REC ] = 1;
+    rt_par_float[ P_LOADED_RECIPE ] = 0;
     resetProgramName();
     resetRecipeName();
     resetProgramList();
@@ -5858,16 +5864,35 @@ int cipline_tech_object::check_device( device*& outdev, int parno, device::DEVIC
 
     auto dev_no = (u_int)rt_par_float[ parno ];
     char devname[ MAX_DEV_NAME * UNICODE_MULTIPLIER ] = { 0 };
-    auto res = fmt::format_to_n( devname, 
-        MAX_DEV_NAME * UNICODE_MULTIPLIER,
+	// LCOV_EXCL_START
+    auto res = fmt::format_to_n( devname,
+        MAX_DEV_NAME * UNICODE_MULTIPLIER - 1,
         "LINE{}{}{}", nmr, device::DEV_NAMES[ type ], dev_no );
+	// LCOV_EXCL_STOP
     *res.out = '\0';
-    
+
     if ( auto dev = G_DEVICE_MANAGER()->get_device( devname );
         dev && dev->get_serial_n() > 0 && dev->get_type() == type )
         {
         outdev = dev;
         return 0;
+        }
+
+    if ( type == device::DEVICE_TYPE::DT_WATCHDOG )
+        {
+		// LCOV_EXCL_START
+        auto res2 = fmt::format_to_n( devname,
+            MAX_DEV_NAME * UNICODE_MULTIPLIER - 1,
+            "{}{}", device::DEV_NAMES[ type ], dev_no );
+		// LCOV_EXCL_STOP
+        *res2.out = '\0';
+
+        if ( auto dev = G_DEVICE_MANAGER()->get_device( devname );
+            dev && dev->get_serial_n() > 0 && dev->get_type() == type )
+            {
+            outdev = dev;
+            return 0;
+            }
         }
 
     return -2;
