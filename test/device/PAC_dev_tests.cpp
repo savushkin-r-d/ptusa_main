@@ -1595,13 +1595,27 @@ TEST( DO1, get_state )
 
     G_PAC_INFO()->emulation_off();
     // Когда отключена эмуляция, пишем в буфер обмена с модулями ввода\вывода.
-    EXPECT_EQ( do1.get_state(), 0 );
+    EXPECT_EQ( do1.get_state(), -1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 0 );
+
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
+    do1.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+    EXPECT_EQ( do1.get_state(), -1 );
+
     do1.on();
+    mngr.get_node( 0 )->is_active = true;
+    mngr.get_node( 0 )->state = io_manager::io_node::STATES::ST_OK;
     EXPECT_EQ( do1.get_state(), 1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
 
+    io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
+
     // Когда включена эмуляция, пишем в поле состояния объекта. Здесь буфер
     // обмена с модулями ввода\вывода не должен изменяться [ 1 ].
     EXPECT_EQ( do1.get_state(), 0 );
@@ -2746,6 +2760,8 @@ class analog_valve_test : public ::testing::Test
             mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
                 1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
             mngr.init_node_AO( 0, 0, 555, 0 );
+            auto node = mngr.get_node( 0 );
+            node->state = io_manager::io_node::STATES::ST_OK;
 
             G_PAC_INFO()->emulation_off();
             VC1.init( 0, 0, 1, 0 );
@@ -6850,4 +6866,79 @@ TEST( timer_manager, get_count )
     const auto TIMERS_COUNT = 10;
     const timer_manager TM1( TIMERS_COUNT );
     EXPECT_EQ( TM1.get_count(), TIMERS_COUNT );
+    }
+
+
+class DO1_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            G_PAC_INFO()->emulation_off();
+
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 0, 0, 0, 0, 0 );
+
+            dev.init_and_alloc( 1, 0, 0, 0 );
+            dev.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
+
+            // Set DO channel value to 1.
+            *dev.DO_channels.char_write_values[ 0 ] = 1;
+
+            node = mngr.get_node( 0 );
+            node->is_active = true;
+            node->state = io_manager::io_node::ST_OK;
+            node->status_register = 0;
+            };
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            G_PAC_INFO()->emulation_on();
+            };
+
+        DO1 dev{ "TEST_DO", device::DT_DO, device::DST_DO };
+        io_manager::io_node* node{};
+
+    private:
+        uni_io_manager mngr;
+        io_manager* prev_mngr;
+    };
+
+TEST_F( DO1_test, get_state_with_node_check_ok )
+    {
+    // Node is OK, should return channel value.
+    EXPECT_EQ( 1, dev.get_state() );
+
+    // Set DO channel value to 0.
+    *dev.DO_channels.char_write_values[ 0 ] = 0;
+
+    // Node is OK, should return channel value.
+    EXPECT_EQ( 0, dev.get_state() );
+    }
+
+TEST_F( DO1_test, get_state_with_node_pp_mode )
+    {
+    node->status_register = 0x0010;  // PP mode active.
+
+    // Node in PP mode, should return error (-1).
+    EXPECT_EQ( -1, dev.get_state() );
+    }
+
+TEST_F( DO1_test, get_state_with_node_not_connected )
+    {
+    node->state = io_manager::io_node::ST_NO_CONNECT;
+
+    // Node not connected, should return error (-1).
+    EXPECT_EQ( -1, dev.get_state() );
+    }
+
+TEST_F( DO1_test, get_state_with_node_not_active )
+    {
+    node->is_active = false;  // Node not active.
+
+    // Node not active, should return error (-1).
+    EXPECT_EQ( -1, dev.get_state() );
     }

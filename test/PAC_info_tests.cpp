@@ -241,7 +241,7 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
     EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
     EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
 
-    node1->state = io_manager::io_node::ST_ERROR;  // Error!
+    node1->state = io_manager::io_node::ST_NO_CONNECT;  // Error!
 
     G_PAC_INFO()->eval();
     EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
@@ -321,7 +321,7 @@ TEST_F( PAC_info_io_test, combined_errors_both )
 
     auto node = mngr.get_node( 0 );
     node->is_active = true;
-    node->state = io_manager::io_node::ST_ERROR;
+    node->state = io_manager::io_node::ST_NO_CONNECT;
 
     G_DEVICE_MANAGER()->clear_io_devices();
     auto wd = new watchdog( "WD1" );
