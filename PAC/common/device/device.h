@@ -47,17 +47,31 @@
 class DO1 : public digital_io_device
     {
     public:
-        DO1( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type ):
-        digital_io_device( dev_name, type, sub_type, 0 )
+        DO1( const char* dev_name, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type ) :
+            digital_io_device( dev_name, type, sub_type,
+                ADDITIONAL_PARAMS_COUNT - 1 )
             {
+            set_par_name( P_DT, 0, "P_DT" );
             }
 
         int  get_state() const override;
         void direct_on() override;
         void direct_off() override;
 
+        virtual int get_params_count() const;
+
     private:
+        mutable int current_state{};
+        mutable uint32_t state_change_time{};
+
+        enum PARAMS
+            {
+            P_DT = 1,
+
+            ADDITIONAL_PARAMS_COUNT,
+            };
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -887,6 +901,8 @@ class analog_output : public AO1
         float get_max_value() const override;
 
     private:
+        u_int start_param_idx;
+
         enum CONSTANTS
             {
             ADDITIONAL_PARAM_COUNT = 2,
@@ -914,7 +930,7 @@ class DI1 : public digital_io_device
 
     private:
         mutable int current_state;
-        mutable uint32_t time = 0;
+        mutable uint32_t state_change_time{};
 
         enum CONSTANTS
             {

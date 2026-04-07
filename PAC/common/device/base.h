@@ -659,10 +659,22 @@ class AO1 : public analog_io_device
         float get_value() const override;
         void  direct_set_value( float new_value ) override;
 
-    protected:
+        virtual int get_params_count() const;
+
         enum CONSTANTS
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+
+    private:
+        mutable int current_state{};
+        mutable uint32_t state_change_time{};
+
+        enum PARAMS
+            {
+            P_DT = 1,
+
+            ADDITIONAL_PARAMS_COUNT,
             };
     };
 //-----------------------------------------------------------------------------

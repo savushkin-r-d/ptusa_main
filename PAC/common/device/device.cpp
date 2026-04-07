@@ -32,6 +32,11 @@ signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int DO1::get_params_count() const
+    {
+    return ADDITIONAL_PARAMS_COUNT - 1;
+    }
+//-----------------------------------------------------------------------------
 int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
@@ -1767,15 +1772,15 @@ int DI1::get_state() const
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( get_delta_millisec( time ) > dt )
+            if ( get_delta_millisec( state_change_time ) > dt )
                 {
                 current_state = get_DI( DI_INDEX );
-                time = get_millisec();
+                state_change_time = get_millisec();
                 }
             }
         else
             {
-            time = get_millisec();
+            state_change_time = get_millisec();
             }
         }
     else current_state = get_DI( DI_INDEX );
@@ -4056,18 +4061,19 @@ virtual_device::virtual_device( const char *dev_name,
 analog_output::analog_output( const char* dev_name ) :
     AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
     {
-    set_par_name( P_MIN_VALUE, 0, "P_MIN_V" );
-    set_par_name( P_MAX_VALUE, 0, "P_MAX_V" );
+    start_param_idx = AO1::get_params_count();
+    set_par_name( P_MIN_VALUE, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_VALUE, start_param_idx, "P_MAX_V" );
     }
 //-----------------------------------------------------------------------------
 float analog_output::get_min_value() const
     {
-    return get_par( P_MIN_VALUE, 0 );
+    return get_par( P_MIN_VALUE, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 float analog_output::get_max_value() const
     {
-    return get_par( P_MAX_VALUE, 0 );
+    return get_par( P_MAX_VALUE, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

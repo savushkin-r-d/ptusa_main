@@ -25,7 +25,11 @@ TEST( ao_node_state, analog_output_get_state_returns_error_on_bad_ao_node )
     ao1.set_state( 1 );
     EXPECT_EQ( 1, ao1.get_state() );
 
+    ao1.set_par( 1, 0, 100.0f );
     node->status_register = 0x0010; // PP mode.
+    EXPECT_EQ( 1, ao1.get_state() );
+
+    ao1.set_par( 1, 0, 0.0f );
     EXPECT_EQ( -1, ao1.get_state() );
 
     G_PAC_INFO()->emulation_on();
@@ -57,6 +61,10 @@ TEST( ao_node_state, analog_valve_get_state_returns_error_on_bad_ao_node )
     EXPECT_EQ( 1, vc1.get_state() );
 
     node->status_register = 0x0010; // PP mode.
+    vc1.set_par( 1, 0, 100.0f );
+    EXPECT_EQ( 1, vc1.get_state() );
+
+    vc1.set_par( 1, 0, 0.0f );
     EXPECT_EQ( -1, vc1.get_state() );
 
     G_PAC_INFO()->emulation_on();

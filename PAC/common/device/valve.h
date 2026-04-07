@@ -1218,7 +1218,11 @@ class analog_valve_iolink : public AO1
             ADDITIONAL_PARAMS_COUNT, ///Количество дополнительных параметров.
             };
 
+#ifndef PTUSA_TEST
     private:
+#endif // !PTUSA_TEST
+        u_int start_param_idx;
+
 #pragma pack(push,1)
         struct in_data
             {

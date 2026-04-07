@@ -558,8 +558,16 @@ AO1::AO1( const char* dev_name,
     device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type,
     u_int par_cnt ) :
-    analog_io_device( dev_name, type, sub_type, par_cnt )
+    analog_io_device( dev_name, type, sub_type,
+        par_cnt + ADDITIONAL_PARAMS_COUNT - 1 )
     {
+    set_par_name( P_DT, 0, "P_DT" );
+    direct_set_state( 1 );
+    }
+//-----------------------------------------------------------------------------
+int AO1::get_params_count() const
+    {
+    return ADDITIONAL_PARAMS_COUNT - 1;
     }
 //-----------------------------------------------------------------------------
 int AO1::get_state() const
@@ -569,10 +577,19 @@ int AO1::get_state() const
     // Check if the network node for output channel is available.
     if ( auto node_state = check_output_AO_node_state(); node_state < 0 )
         {
-        return -1; // Node error or PP mode.
+        auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) );
+        if ( get_delta_millisec( state_change_time ) >= dt )
+            {
+            current_state = -1;
+            }
+        }
+    else
+        {
+        state_change_time = get_millisec();
+        current_state = analog_io_device::get_state();
         }
 
-    return analog_io_device::get_state();
+    return current_state;
     }
 //-----------------------------------------------------------------------------
 float AO1::get_value() const
