@@ -668,7 +668,7 @@ class AO1 : public analog_io_device
 
     private:
         mutable int current_state{};
-        mutable uint32_t state_change_time{};
+        mutable uint32_t state_change_time{ get_millisec() };
 
         enum PARAMS
             {

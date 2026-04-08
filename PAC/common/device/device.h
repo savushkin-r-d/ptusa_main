@@ -63,7 +63,7 @@ class DO1 : public digital_io_device
 
     private:
         mutable int current_state{};
-        mutable uint32_t state_change_time{};
+        mutable uint32_t state_change_time{ get_millisec() };
 
         enum PARAMS
             {
@@ -930,7 +930,7 @@ class DI1 : public digital_io_device
 
     private:
         mutable int current_state;
-        mutable uint32_t state_change_time{};
+        mutable uint32_t state_change_time{ get_millisec() };
 
         enum CONSTANTS
             {
