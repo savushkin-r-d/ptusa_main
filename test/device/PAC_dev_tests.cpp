@@ -6898,9 +6898,8 @@ TEST_F( iolink_dev_test, analog_valve_iolink_get_state_respects_P_FB )
 
     // Отключаем обратную связь (P_FB=0) — ошибки устройства игнорируются,
     // get_state() должен вернуть 1.
-    VC1.set_par( VC1.start_param_idx +
-        static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
-        0, 0.0f );
+    VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+        VC1.start_param_idx, 0.0f );
     VC1.evaluate_io();
     EXPECT_EQ( VC1.get_state(), 1 );
 
