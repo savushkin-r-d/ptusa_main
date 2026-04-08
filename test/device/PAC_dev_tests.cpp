@@ -2168,7 +2168,17 @@ TEST( DI_signal, get_state )
 
     *DI1.DI_channels.char_read_values[ 0 ] = 0;
     DI1.set_cmd( "P_DT", 0, 1000.0f );
+    // Область чтения изменилась, но не прошло заданное время - состояние не
+    // должно изменяться.
     EXPECT_EQ( DI1.get_state(), 1 );
+
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
+    // Прошло заданное время - состояние должно измениться.
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    // Область чтения не изменилась - состояние не должно изменяться.
+    EXPECT_EQ( DI1.get_state(), 0 );
+    DeltaMilliSecSubHooker::set_default_time();
 
     G_PAC_INFO()->emulation_on();
     }
