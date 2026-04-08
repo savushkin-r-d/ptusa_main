@@ -1615,11 +1615,17 @@ TEST( DO1, get_state )
 
     auto node = mngr.get_node( 0 );
     node->status_register = 0x0010; // PP mode.
+    DeltaMilliSecSubHooker::set_millisec( 0 );
     EXPECT_EQ( do1.get_state(), -1 );
 
     do1.set_cmd( "P_DT", 0, 1000.0f );
     EXPECT_EQ( do1.get_state(), 1 );
+    DeltaMilliSecSubHooker::set_millisec( 1001 );
 
+    EXPECT_EQ( node->status_register, 0x0010 );
+    EXPECT_EQ( do1.get_state(), -1 );
+
+    DeltaMilliSecSubHooker::set_default_time();
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
 
