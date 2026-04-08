@@ -32,11 +32,6 @@ signal_column_iolink::out_data signal_column_iolink::stub_out_info{};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int DO1::get_params_count() const
-    {
-    return ADDITIONAL_PARAMS_COUNT - 1;
-    }
-//-----------------------------------------------------------------------------
 int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();

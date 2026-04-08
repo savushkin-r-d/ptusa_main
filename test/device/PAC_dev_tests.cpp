@@ -1613,6 +1613,13 @@ TEST( DO1, get_state )
     EXPECT_EQ( do1.get_state(), 1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
 
+    auto node = mngr.get_node( 0 );
+    node->status_register = 0x0010; // PP mode.
+    EXPECT_EQ( do1.get_state(), -1 );
+
+    do1.set_cmd( "P_DT", 0, 1000.0f );
+    EXPECT_EQ( do1.get_state(), 1 );
+
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
 
@@ -2157,6 +2164,10 @@ TEST( DI_signal, get_state )
     EXPECT_EQ( DI1.get_state(), 0 );
 
     *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    EXPECT_EQ( DI1.get_state(), 1 );
+
+    *DI1.DI_channels.char_read_values[ 0 ] = 0;
+    DI1.set_cmd( "P_DT", 0, 1000.0f );
     EXPECT_EQ( DI1.get_state(), 1 );
 
     G_PAC_INFO()->emulation_on();

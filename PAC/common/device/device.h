@@ -59,8 +59,6 @@ class DO1 : public digital_io_device
         void direct_on() override;
         void direct_off() override;
 
-        virtual int get_params_count() const;
-
     private:
         mutable int current_state{};
         mutable uint32_t state_change_time{ get_millisec() };
