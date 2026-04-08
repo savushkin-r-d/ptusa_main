@@ -2161,25 +2161,30 @@ TEST( DI_signal, get_state )
 
     G_PAC_INFO()->emulation_off();
     DI1.init_and_alloc( 0, 1 );
+    DI1.evaluate_io();
     EXPECT_EQ( DI1.get_state(), 0 );
 
     *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    DI1.evaluate_io();
     EXPECT_EQ( DI1.get_state(), 1 );
 
     *DI1.DI_channels.char_read_values[ 0 ] = 0;
     DI1.set_cmd( "P_DT", 0, 1000.0f );
+    DI1.evaluate_io();
     // Область чтения изменилась, но не прошло заданное время - состояние не
     // должно изменяться.
     EXPECT_EQ( DI1.get_state(), 1 );
 
     DeltaMilliSecSubHooker::set_millisec( 1010UL );
+    DI1.evaluate_io();
     // Прошло заданное время - состояние должно измениться.
     EXPECT_EQ( DI1.get_state(), 0 );
 
     // Область чтения не изменилась - состояние не должно изменяться.
+    DI1.evaluate_io();
     EXPECT_EQ( DI1.get_state(), 0 );
-    DeltaMilliSecSubHooker::set_default_time();
 
+    DeltaMilliSecSubHooker::set_default_time();
     G_PAC_INFO()->emulation_on();
     }
 
@@ -2854,21 +2859,25 @@ TEST_F( analog_valve_test, io_modules_direct_on_off )
 
     // direct_on -> 100%
     VC1.direct_on();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // direct_off -> 0%
     VC1.direct_off();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
 
     // direct_set_value -> произвольное значение
     VC1.direct_set_value( 37.5f );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 37.5f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // Повторное выключение
     VC1.direct_off();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
     }
@@ -2877,17 +2886,20 @@ TEST_F( analog_valve_test, io_modules_set_cmd_st_resets_value )
     {
     // Открыть клапан на 100% через set_cmd("V").
     VC1.set_cmd( "V", 0, 100.0 );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // Закрыть клапан через ST=0 -> значение должно сброситься в 0%.
     VC1.set_cmd( "ST", 0, 0.0 );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
 
     // Открыть клапан через ST=1 -> значение должно сброситься в 100%.
     VC1.set_cmd( "V", 0, 55.0 );
     VC1.set_cmd( "ST", 0, 1.0 );
+    VC1.evaluate_io();
     EXPECT_EQ( 1, VC1.get_state() );
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     }

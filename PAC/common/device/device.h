@@ -926,6 +926,8 @@ class DI1 : public digital_io_device
 
         int get_state() const override;
 
+        void evaluate_io() override;
+
     private:
         mutable int current_state;
         mutable uint32_t state_change_time{ get_millisec() };

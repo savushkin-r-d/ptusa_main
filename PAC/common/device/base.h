@@ -660,6 +660,8 @@ class AO1 : public analog_io_device
         void  direct_set_value( float new_value ) override;
 
         virtual int get_params_count() const;
+        
+        void evaluate_io() override;
 
         enum CONSTANTS
             {

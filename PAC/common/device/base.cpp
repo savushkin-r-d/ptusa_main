@@ -569,10 +569,8 @@ int AO1::get_params_count() const
     return ADDITIONAL_PARAMS_COUNT - 1;
     }
 //-----------------------------------------------------------------------------
-int AO1::get_state() const
+void AO1::evaluate_io()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
-
     current_state = analog_io_device::get_state();
 
     // Check if the network node for output channel is available.
@@ -588,6 +586,11 @@ int AO1::get_state() const
         {
         state_change_time = get_millisec();
         }
+    }
+//-----------------------------------------------------------------------------
+int AO1::get_state() const
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
     return current_state;
     }

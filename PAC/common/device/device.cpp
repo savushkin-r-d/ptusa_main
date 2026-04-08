@@ -1769,10 +1769,8 @@ void DI1::direct_off()
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
-int DI1::get_state() const
+void DI1::evaluate_io()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
-
     if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
         {
         if ( current_state != get_DI( DI_INDEX ) )
@@ -1789,6 +1787,11 @@ int DI1::get_state() const
             }
         }
     else current_state = get_DI( DI_INDEX );
+    }
+//-----------------------------------------------------------------------------
+int DI1::get_state() const
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
     return current_state;
     }
