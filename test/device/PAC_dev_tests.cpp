@@ -2726,12 +2726,12 @@ TEST( analog_valve, save_device )
     std::array <char, BUFF_SIZE> buff{};
 
     vc1.save_device( buff.data() );
-    EXPECT_STREQ( "VC1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_DT=0},\n",
+    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_DT=0},\n",
         buff.data() );
 
     vc1.set_cmd( "P_DT", 0, 100.1f );
     vc1.save_device( buff.data() );
-    EXPECT_STREQ( "VC1={M=0, ST=1, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
+    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
         "P_DT=100.10},\n",
         buff.data() );
     }
@@ -2829,7 +2829,7 @@ TEST_F( analog_valve_test, io_modules_direct_on_off )
     {
     // По умолчанию 0%.
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
-    EXPECT_EQ( 1, VC1.get_state() );
+    EXPECT_EQ( 0, VC1.get_state() );
 
     // direct_on -> 100%
     VC1.direct_on();
@@ -4114,7 +4114,7 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
     EXPECT_STREQ(
-        "V1={M=0, ST=1, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, "
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, "
         "P_DT=0, P_FB=1},\n",
         buff );
     }

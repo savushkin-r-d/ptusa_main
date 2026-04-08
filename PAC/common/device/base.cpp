@@ -562,7 +562,6 @@ AO1::AO1( const char* dev_name,
         par_cnt + ADDITIONAL_PARAMS_COUNT - 1 )
     {
     set_par_name( P_DT, 0, "P_DT" );
-    direct_set_state( 1 );
     }
 //-----------------------------------------------------------------------------
 int AO1::get_params_count() const
