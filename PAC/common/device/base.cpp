@@ -574,6 +574,8 @@ int AO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
+    current_state = analog_io_device::get_state();
+
     // Check if the network node for output channel is available.
     if ( auto node_state = check_output_AO_node_state(); node_state < 0 )
         {
@@ -586,7 +588,6 @@ int AO1::get_state() const
     else
         {
         state_change_time = get_millisec();
-        current_state = analog_io_device::get_state();
         }
 
     return current_state;

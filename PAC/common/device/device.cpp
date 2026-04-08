@@ -41,13 +41,23 @@ int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
+    current_state = get_DO( DO_INDEX );
+
     // Check if the network node for output channel is available.
     if ( auto node_state = check_output_DO_node_state(); node_state < 0 )
         {
-        return -1; // Node error or PP mode.
+        auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) );
+        if ( get_delta_millisec( state_change_time ) >= dt )
+            {
+            current_state = -1;
+            }
+        }
+    else
+        {
+        state_change_time = get_millisec();        
         }
 
-    return get_DO( DO_INDEX );
+    return current_state;
     }
 //-----------------------------------------------------------------------------
 void DO1::direct_on()

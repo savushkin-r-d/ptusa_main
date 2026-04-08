@@ -2794,8 +2794,9 @@ int analog_valve_iolink::get_state() const
         error_id != io_device::IOLINKSTATE::OK )
         {
         // Проверяем параметр P_FB для возможности отключения ошибок устройства.
-        if ( get_par( start_param_idx +
-            static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ), 0 ) == 0 )
+        if ( get_par( 
+            static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+            start_param_idx ) == 0 )
             {
             return 1; // Обратная связь отключена - нет ошибок.
             }
