@@ -190,7 +190,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     
     switch( err_class )
         {
-	case AC_SERVICE:
+    case AC_SERVICE:
         switch ( err_sub_class )
             {
             case AS_IO_COUPLER:
