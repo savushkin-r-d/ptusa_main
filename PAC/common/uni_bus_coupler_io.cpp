@@ -1001,9 +1001,9 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
     // Check for PP mode state changes.
     // PP mode has become active.
     if ( auto is_err_mode_active =
-        ( nd->status_register & io_node::STATUS_REG_ERROR_MASK ) != 0,
+        ( nd->status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0,
         was_err_mode_active =
-        ( nd->prev_status_register & io_node::STATUS_REG_ERROR_MASK ) != 0;
+        ( nd->prev_status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0;
         is_err_mode_active && !was_err_mode_active )
         {
         if ( !nd->is_err_mode_alarm_set )
