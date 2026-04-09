@@ -1,5 +1,6 @@
 #include "cip_tech_def_tests.h"
 #include "lua_manager.h"
+#include <cstring>
 
 using namespace ::testing;
 
@@ -951,9 +952,9 @@ TEST( cipline_tech_object, set_cmd )
     const std::string tooLongName( maxLen + 10, 'A' );
     res = cip1.set_cmd( "CUR_REC", 0, tooLongName.c_str() );
     EXPECT_EQ( res, 0 );
-    EXPECT_GT( strlen( cip1.lineRecipes->currentRecipeName ), 0u );
+    EXPECT_GT( strnlen( cip1.lineRecipes->currentRecipeName, maxLen ), 0u );
     EXPECT_LT(
-        strlen( cip1.lineRecipes->currentRecipeName ),
+        strnlen( cip1.lineRecipes->currentRecipeName, maxLen ),
         static_cast<size_t>( maxLen ) );
 
     const auto medMaxLen =
@@ -961,24 +962,24 @@ TEST( cipline_tech_object, set_cmd )
     const std::string tooLongMedName( medMaxLen + 10, 'B' );
     res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, tooLongMedName.c_str() );
     EXPECT_EQ( res, 0 );
-    EXPECT_GT( strlen( cip1.causticRecipes->currentRecipeName ), 0u );
+    EXPECT_GT( strnlen( cip1.causticRecipes->currentRecipeName, medMaxLen ), 0u );
     EXPECT_LT(
-        strlen( cip1.causticRecipes->currentRecipeName ),
+        strnlen( cip1.causticRecipes->currentRecipeName, medMaxLen ),
         static_cast<size_t>( medMaxLen ) );
 
     res = cip1.set_cmd( "ACID_PAR_NAME", 0, tooLongMedName.c_str() );
     EXPECT_EQ( res, 0 );
-    EXPECT_GT( strlen( cip1.acidRecipes->currentRecipeName ), 0u );
+    EXPECT_GT( strnlen( cip1.acidRecipes->currentRecipeName, medMaxLen ), 0u );
     EXPECT_LT(
-        strlen( cip1.acidRecipes->currentRecipeName ),
+        strnlen( cip1.acidRecipes->currentRecipeName, medMaxLen ),
         static_cast<size_t>( medMaxLen ) );
 
     const auto ncarMaxLen = CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER;
     const std::string tooLongNcarName( ncarMaxLen + 10, 'C' );
     res = cip1.set_cmd( "NCAR", 1, tooLongNcarName.c_str() );
     EXPECT_EQ( res, 0 );
-    EXPECT_GT( strlen( cip1.ncar1 ), 0u );
-    EXPECT_LT( strlen( cip1.ncar1 ), static_cast<size_t>( ncarMaxLen ) );
+    EXPECT_GT( strnlen( cip1.ncar1, ncarMaxLen ), 0u );
+    EXPECT_LT( strnlen( cip1.ncar1, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
 
     G_LUA_MANAGER->free_Lua();
     }
