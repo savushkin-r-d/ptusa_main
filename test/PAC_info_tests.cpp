@@ -217,6 +217,8 @@ TEST( PAC_info, is_emulator )
 
 TEST_F( PAC_info_io_test, nodes_comm_error )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     // Setup: create nodes in OK state.
     mngr.init( 2 );
     mngr.add_node( 0,
@@ -238,18 +240,20 @@ TEST_F( PAC_info_io_test, nodes_comm_error )
     DeltaMilliSecSubHooker::set_millisec( 1010UL );
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
-    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_any_commun_error() );
 
     node1->state = io_manager::io_node::ST_NO_CONNECT;  // Error!
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
-    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_any_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     DeltaMilliSecSubHooker::set_millisec( 1010UL );
 
     // Setup: create Phoenix node in PP mode (warning state).
@@ -265,12 +269,14 @@ TEST_F( PAC_info_io_test, nodes_comm_error_pp_mode )
     G_PAC_INFO()->emulation_off();
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
-    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_any_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_all_ok )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     // Setup: create watchdog devices with state >= 0.
     auto wd1 = new watchdog( "WD1" );
     G_DEVICE_MANAGER()->add_device( wd1, device::DT_WATCHDOG );
@@ -281,12 +287,14 @@ TEST_F( PAC_info_io_test, watchdog_error_all_ok )
     wd2->set_state( 0 );  // OK state.
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
-    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_any_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     DeltaMilliSecSubHooker::set_millisec( 1010UL );
 
     // Setup: create watchdog devices, one with error.
@@ -299,20 +307,24 @@ TEST_F( PAC_info_io_test, watchdog_error_one_has_error )
     wd2->set_state( -1 );  // Error state!
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
-    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_any_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, watchdog_error_no_watchdogs )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     // No watchdog devices.
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
-    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_any_commun_error() );
     }
 
 TEST_F( PAC_info_io_test, combined_errors_both )
     {
+    G_PAC_INFO()->reset_commun_errors();
+
     // Setup: create node error and watchdog error.
     mngr.init( 1 );
     mngr.add_node( 0,
@@ -330,13 +342,13 @@ TEST_F( PAC_info_io_test, combined_errors_both )
     G_PAC_INFO()->emulation_off();
 
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_comm_error() );
-    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_error() );
-    EXPECT_EQ( 0, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_nodes_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_watchdog_commun_error() );
+    EXPECT_EQ( 0, G_PAC_INFO()->get_any_commun_error() );
 
     DeltaMilliSecSubHooker::set_millisec( 1010UL );
     G_PAC_INFO()->eval();
-    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_comm_error() );
-    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_error() );
-    EXPECT_EQ( 1, G_PAC_INFO()->get_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_nodes_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_watchdog_commun_error() );
+    EXPECT_EQ( 1, G_PAC_INFO()->get_any_commun_error() );
     }
