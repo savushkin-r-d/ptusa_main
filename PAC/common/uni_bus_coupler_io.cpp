@@ -995,7 +995,6 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         G_LOG->debug( "Failed to read status register (%d) for node "
             "\"%s\".", PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
 #endif // DEBUG_BK
-        nd->status_register = 0;
         }
 
     // Check for PP mode state changes.
