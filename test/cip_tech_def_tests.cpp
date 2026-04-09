@@ -946,6 +946,37 @@ TEST( cipline_tech_object, set_cmd )
     res = cip1.set_cmd( "NCAR", 1, "" );
     EXPECT_EQ( res, 0 );
 
+    // Too-long name must be truncated, not ignored.
+    const auto maxLen = TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER;
+    const std::string tooLongName( maxLen + 10, 'A' );
+    res = cip1.set_cmd( "CUR_REC", 0, tooLongName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strlen( cip1.lineRecipes->currentRecipeName ), 0u );
+    EXPECT_LT(
+        strlen( cip1.lineRecipes->currentRecipeName ),
+        static_cast<size_t>( maxLen ) );
+
+    const auto medMaxLen =
+        TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER;
+    const std::string tooLongMedName( medMaxLen + 10, 'B' );
+    res = cip1.set_cmd( "CAUSTIC_PAR_NAME", 0, tooLongMedName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strlen( cip1.causticRecipes->currentRecipeName ), 0u );
+    EXPECT_LT(
+        strlen( cip1.causticRecipes->currentRecipeName ),
+        static_cast<size_t>( medMaxLen ) );
+
+    res = cip1.set_cmd( "ACID_PAR_NAME", 0, tooLongMedName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strlen( cip1.acidRecipes->currentRecipeName ), 0u );
+    EXPECT_LT(
+        strlen( cip1.acidRecipes->currentRecipeName ),
+        static_cast<size_t>( medMaxLen ) );
+
+    const auto ncarMaxLen = CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER;
+    const std::string tooLongNcarName( ncarMaxLen + 10, 'C' );
+    res = cip1.set_cmd( "NCAR", 1, tooLongNcarName.c_str() );
+    EXPECT_EQ( res, 0 );
 
     G_LUA_MANAGER->free_Lua();
     }

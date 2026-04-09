@@ -649,82 +649,91 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     {
     if (0 == strcmp(prop, "CUR_REC"))
         {
-        if ( auto slen = utf8_strlen( val );  slen < TRecipeManager::recipeNameLength )
-            {
 #ifdef WIN_OS
-            strncpy_s(lineRecipes->currentRecipeName, TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER, val, _TRUNCATE);
+        strncpy_s(lineRecipes->currentRecipeName,
+            TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
+            val, _TRUNCATE);
 #else
-            strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        strncpy( lineRecipes->currentRecipeName, val,
+            lineRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        lineRecipes->currentRecipeName[
+            lineRecipes->recipeNameLength * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-            }
         return 0;
         }
 
     if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
         {
-        if ( auto slen = utf8_strlen( val ); slen < TMediumRecipeManager::recipeNameLength )
-            {
 #ifdef WIN_OS
-            strncpy_s(causticRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
-                val, _TRUNCATE);
+        strncpy_s(causticRecipes->currentRecipeName,
+            TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
+            val, _TRUNCATE);
 #else
-            strncpy(causticRecipes->currentRecipeName, val, causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        strncpy(causticRecipes->currentRecipeName, val,
+            causticRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        causticRecipes->currentRecipeName[
+            causticRecipes->recipeNameLength * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-            }
         return 0;
         }
 
     if (0 == strcmp(prop, "ACID_PAR_NAME"))
         {
-        if ( auto slen = utf8_strlen( val ); slen < TMediumRecipeManager::recipeNameLength )
-            {
 #ifdef WIN_OS
-            strncpy_s(acidRecipes->currentRecipeName, TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
-                val, _TRUNCATE);
+        strncpy_s(acidRecipes->currentRecipeName,
+            TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER,
+            val, _TRUNCATE);
 #else
-            strncpy(acidRecipes->currentRecipeName, val, acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        strncpy(acidRecipes->currentRecipeName, val,
+            acidRecipes->recipeNameLength * UNICODE_MULTIPLIER);
+        acidRecipes->currentRecipeName[
+            acidRecipes->recipeNameLength * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-            }
         return 0;
         }
 
     if (0 == strcmp(prop, "NCAR"))
         {
-        if ( auto slen = utf8_strlen( val ); slen < CAR_NAME_MAX_LENGTH )
+        switch (idx)
             {
-            switch (idx)
-                {
-                case 0:
-                case 1:
+            case 0:
+            case 1:
 #ifdef WIN_OS
-                    strncpy_s(ncar1, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER, val, _TRUNCATE);
+                strncpy_s(ncar1, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER,
+                    val, _TRUNCATE);
 #else
-                    strncpy(ncar1, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                strncpy(ncar1, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                ncar1[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-                    objectstats = statsbase->stats_if_exists(ncar1, emptystats);
-                    break;
-                case 2:
+                objectstats = statsbase->stats_if_exists(ncar1, emptystats);
+                break;
+            case 2:
 #ifdef WIN_OS
-                    strncpy_s(ncar2, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER, val, _TRUNCATE);
+                strncpy_s(ncar2, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER,
+                    val, _TRUNCATE);
 #else
-                    strncpy(ncar2, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                strncpy(ncar2, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                ncar2[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-                    break;
-                case 3:
+                break;
+            case 3:
 #ifdef WIN_OS
-                    strncpy_s(ncar3, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER, val, _TRUNCATE);
+                strncpy_s(ncar3, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER,
+                    val, _TRUNCATE);
 #else
-                    strncpy(ncar3, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                strncpy(ncar3, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                ncar3[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-                    break;
-                case 4:
+                break;
+            case 4:
 #ifdef WIN_OS
-                    strncpy_s(ncar4, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER, val, _TRUNCATE);
+                strncpy_s(ncar4, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER,
+                    val, _TRUNCATE);
 #else
-                    strncpy(ncar4, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                strncpy(ncar4, val, CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER);
+                ncar4[CAR_NAME_MAX_LENGTH * UNICODE_MULTIPLIER - 1] = '\0';
 #endif
-                    break;
-                }
+                break;
             }
 
         return 0;

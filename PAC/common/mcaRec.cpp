@@ -552,8 +552,9 @@ int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length,
     {
     if ( is_string )
         {
-        char* tmp = new char[ length * UNICODE_MULTIPLIER ];
+        char* tmp = new char[ length + 1 ];
         memcpy( tmp, recipeMemory + startaddr, length );
+        tmp[ length ] = '\0';
         convert_windows1251_to_utf8( (char*)buf, tmp);
         delete[] tmp;
         }
@@ -570,7 +571,7 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     {
     if ( is_string )
         {
-        char* tmp = new char[ length + 1 ];
+        char* tmp = new char[ length * UNICODE_MULTIPLIER + 1 ];
         convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf));
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
@@ -952,8 +953,9 @@ int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
 {
     if (is_string)
         {
-        char* tmp = new char[length * UNICODE_MULTIPLIER];
+        char* tmp = new char[length + 1];
         memcpy(tmp, recipeMemory + startaddr, length);
+        tmp[length] = '\0';
         convert_windows1251_to_utf8((char*)buf, tmp);
         delete[] tmp;
         }
@@ -969,7 +971,7 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
 {
     if (is_string)
         {
-        char* tmp = new char[length + 1];
+        char* tmp = new char[length * UNICODE_MULTIPLIER + 1];
         convert_utf8_to_windows1251((char*)buf, tmp, length * UNICODE_MULTIPLIER);
         memcpy(recipeMemory + startaddr, tmp, length);
         delete[] tmp;
