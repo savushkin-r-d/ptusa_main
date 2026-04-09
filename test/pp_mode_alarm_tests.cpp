@@ -1,6 +1,8 @@
 #include "pp_mode_alarm_tests.h"
 #include "PAC_err.h"
 
+#include <array>
+
 using namespace ::testing;
 
 class test_uni_io_manager1 : public uni_io_manager
