@@ -977,6 +977,8 @@ TEST( cipline_tech_object, set_cmd )
     const std::string tooLongNcarName( ncarMaxLen + 10, 'C' );
     res = cip1.set_cmd( "NCAR", 1, tooLongNcarName.c_str() );
     EXPECT_EQ( res, 0 );
+    EXPECT_GT( strlen( cip1.ncar1 ), 0u );
+    EXPECT_LT( strlen( cip1.ncar1 ), static_cast<size_t>( ncarMaxLen ) );
 
     G_LUA_MANAGER->free_Lua();
     }
