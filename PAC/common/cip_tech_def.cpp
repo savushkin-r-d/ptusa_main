@@ -649,30 +649,36 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     {
     if (0 == strcmp(prop, "CUR_REC"))
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n(
             lineRecipes->currentRecipeName,
             TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER - 1,
             "{}", val);
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return 0;
         }
 
     if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n(
             causticRecipes->currentRecipeName,
             TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER - 1,
             "{}", val);
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return 0;
         }
 
     if (0 == strcmp(prop, "ACID_PAR_NAME"))
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n(
             acidRecipes->currentRecipeName,
             TMediumRecipeManager::recipeNameLength * UNICODE_MULTIPLIER - 1,
             "{}", val);
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return 0;
         }

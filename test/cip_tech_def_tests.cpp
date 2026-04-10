@@ -981,6 +981,21 @@ TEST( cipline_tech_object, set_cmd )
     EXPECT_GT( strnlen( cip1.ncar1, ncarMaxLen ), 0u );
     EXPECT_LT( strnlen( cip1.ncar1, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
 
+    res = cip1.set_cmd( "NCAR", 2, tooLongNcarName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strnlen( cip1.ncar2, ncarMaxLen ), 0u );
+    EXPECT_LT( strnlen( cip1.ncar2, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
+
+    res = cip1.set_cmd( "NCAR", 3, tooLongNcarName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strnlen( cip1.ncar3, ncarMaxLen ), 0u );
+    EXPECT_LT( strnlen( cip1.ncar3, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
+
+    res = cip1.set_cmd( "NCAR", 4, tooLongNcarName.c_str() );
+    EXPECT_EQ( res, 0 );
+    EXPECT_GT( strnlen( cip1.ncar4, ncarMaxLen ), 0u );
+    EXPECT_LT( strnlen( cip1.ncar4, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
+
     G_LUA_MANAGER->free_Lua();
     }
 
