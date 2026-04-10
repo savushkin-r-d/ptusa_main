@@ -261,7 +261,7 @@ class level_e_cyl_hor : public level
 #ifndef PTUSA_TEST
     private:
 #endif
-        enum CONSTANTS
+        enum class CONSTANTS
             {
             P_C0 = 1,       ///< Индекс параметра нулевого смещения датчика (бар).
             P_MAX_P,        ///< Индекс параметра давления настройки датчика (бар).
