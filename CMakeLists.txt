@@ -121,8 +121,6 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
-list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
-
 file(GLOB test_src CONFIGURE_DEPENDS
             test/*.cpp
             test/device/*.cpp
