@@ -986,16 +986,13 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         nd->status_register = static_cast<u_int_2>(
             BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
         }
+#ifdef DEBUG_BK
     else
         {
-        // Reset status register on read failure, don't set error
-        // flag to not disrupt normal operation if register is not
-        // available.
-#ifdef DEBUG_BK
         G_LOG->debug( "Failed to read status register (%d) for node "
             "\"%s\".", PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
-#endif // DEBUG_BK
         }
+#endif // DEBUG_BK
 
     // Check for PP mode state changes.
     // PP mode has become active.
