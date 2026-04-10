@@ -18,7 +18,7 @@ TEST( tech_object, lua_get_run_step_after_pause )
     par_mock->init( 0 );
     par_mock->final_init( 0, 0, 0 );
 
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
     G_LUA_MANAGER->set_Lua( L );
 
@@ -27,7 +27,7 @@ TEST( tech_object, lua_get_run_step_after_pause )
     ASSERT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
 
-    lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
+    lua_getglobal( L, "o1" );
     auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
     ASSERT_NE( nullptr, tank );
     const unsigned int OPER_N1 = 1;
@@ -77,7 +77,7 @@ TEST( tech_object, evaluate )
     par_mock->init( 0 );
     par_mock->final_init( 0, 0, 0 );
 
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
     G_LUA_MANAGER->set_Lua( L );
 
@@ -86,7 +86,7 @@ TEST( tech_object, evaluate )
     ASSERT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
 
-    lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
+    lua_getglobal( L, "o1" );
     auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
     ASSERT_NE( nullptr, tank );
 
@@ -165,7 +165,7 @@ FINAL ACTIVE STEP №3
 
 TEST( tech_object, lua_check_function )
     {
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
     G_LUA_MANAGER->set_Lua( L );
 
@@ -182,7 +182,7 @@ TEST( tech_object, lua_check_function )
 
 TEST( tech_object, is_any_error )
     {
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
     G_LUA_MANAGER->set_Lua( L );
 
@@ -211,7 +211,7 @@ TEST( tech_object, is_any_error )
 
 TEST( tech_object, is_check_mode )
     {
-    lua_State* L = lua_open();
+    lua_State* L = luaL_newstate();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
     G_LUA_MANAGER->set_Lua( L );
 
@@ -229,7 +229,7 @@ TEST( tech_object, is_check_mode )
 
 TEST( tech_object, save )
     {
-	lua_State* L = lua_open();
+	lua_State* L = luaL_newstate();
 	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 	G_LUA_MANAGER->set_Lua( L );
 
@@ -439,7 +439,7 @@ t.TANK1=
 
 TEST( tech_object, set_mode )
         {
-        lua_State* L = lua_open();
+        lua_State* L = luaL_newstate();
         ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
         G_LUA_MANAGER->set_Lua( L );
 
@@ -517,7 +517,7 @@ TEST( tech_object, set_mode )
 
 TEST( tech_object_manager, save_params_as_Lua_str )
     {
-	lua_State* L = lua_open();
+	lua_State* L = luaL_newstate();
 	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
 	G_LUA_MANAGER->set_Lua( L );
 

@@ -18,7 +18,7 @@ using namespace ::testing;
 
 TEST( project_manager, lua_load_configuration )
     {
-    auto L = lua_open();
+    auto L = luaL_newstate();
     G_LUA_MANAGER->set_Lua( L );
 
 
@@ -92,7 +92,7 @@ object_manager =
 
 TEST( project_manager, proc_main_params )
     {
-    auto L = lua_open();
+    auto L = luaL_newstate();
     G_LUA_MANAGER->set_Lua( L );
 
     auto res = G_PROJECT_MANAGER->proc_main_params( 1, nullptr );
