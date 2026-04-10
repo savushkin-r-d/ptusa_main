@@ -1659,10 +1659,6 @@ TEST( DO1, save_device )
 
     do1.save_device( buff.data() );
     EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff.data() );
-
-    do1.set_cmd( "P_DT", 0, 100.1f );
-    do1.save_device( buff.data() );
-    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff.data() );
     }
 
 

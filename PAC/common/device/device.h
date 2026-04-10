@@ -891,8 +891,6 @@ class analog_output : public AO1
         float get_max_value() const override;
 
     private:
-        u_int start_param_idx;
-
         enum CONSTANTS
             {
             ADDITIONAL_PARAM_COUNT = 2,
