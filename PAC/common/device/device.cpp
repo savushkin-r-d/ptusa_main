@@ -2487,6 +2487,82 @@ int level_e_cone::calc_volume() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+level_e_cyl_hor::level_e_cyl_hor( const char* dev_name ) : level(
+    dev_name, DST_LT_CYL_HOR, LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = level::get_params_count();
+    set_par_name( P_C0, start_param_idx, "P_C0" );
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    set_par_name( P_H, start_param_idx, "P_H" );
+    set_par_name( P_ANGLE, start_param_idx, "P_ANGLE" );
+    set_par_name( P_DENSITY, start_param_idx, "P_DENSITY" );
+    }
+//-----------------------------------------------------------------------------
+int level_e_cyl_hor::calc_volume() const
+    {
+    const float R = get_par( P_R, start_param_idx );
+    const float L = get_par( P_H, start_param_idx );
+    const float rho = get_par( P_DENSITY, start_param_idx );
+
+    if ( R <= 0.0f || L <= 0.0f || rho <= 0.0f ) return 0;
+
+    // Pressure in bar derived from percentage reading.
+    float p_bar = get_value() / 100.0f *
+        get_par( P_MAX_P, start_param_idx ) -
+        get_par( P_C0, start_param_idx );
+    if ( p_bar < 0.0f ) p_bar = 0.0f;
+
+    // Height at the sensor position in meters.
+    const float h = p_bar * 100000.0f / ( rho * 9.81f );
+
+    // Inclination angle in radians.
+    const float theta_rad = get_par( P_ANGLE, start_param_idx ) *
+        (float)M_PI / 180.0f;
+    const float sin_theta = sinf( theta_rad );
+
+    // Numerical integration along the cylinder axis.
+    float V = 0.0f;
+    const int NUM_SLICES = 10;
+    const float dx = L / NUM_SLICES;
+    for ( int i = 0; i < NUM_SLICES; i++ )
+        {
+        float x = ( i + 0.5f ) * dx;
+        float H_x = h - x * sin_theta;
+
+        // Clamp to physical bounds.
+        if ( H_x < 0.0f ) H_x = 0.0f;
+        if ( H_x > 2.0f * R ) H_x = 2.0f * R;
+
+        if ( H_x >= 2.0f * R )
+            {
+            V += dx * (float)M_PI * R * R;
+            }
+        else if ( H_x > 0.0f )
+            {
+            // Guard argument of acos and sqrt against floating-point
+            // imprecision near the boundary.
+            float cos_arg = ( R - H_x ) / R;
+            if ( cos_arg < -1.0f ) cos_arg = -1.0f;
+            if ( cos_arg > 1.0f ) cos_arg = 1.0f;
+            float sqrt_arg = 2.0f * R * H_x - H_x * H_x;
+            if ( sqrt_arg < 0.0f ) sqrt_arg = 0.0f;
+
+            float term1 = R * R * acosf( cos_arg );
+            float term2 = ( R - H_x ) * sqrtf( sqrt_arg );
+            V += dx * ( term1 - term2 );
+            }
+        }
+
+    // Mass in kg; round to nearest 10 kg.
+    float M = rho * V;
+
+    int v_kg = 10 * (int)( M / 10.0f + 0.5f );
+
+    return v_kg;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_DO1::valve_DO1( const char* dev_name ) : valve( dev_name, DT_V, DST_V_DO1 )
     {
     }

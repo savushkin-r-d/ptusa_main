@@ -250,6 +250,32 @@ class level_e_cone : public level
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
+/// @brief Текущий уровень для горизонтального цилиндрического танка.
+class level_e_cyl_hor : public level
+    {
+    public:
+        explicit level_e_cyl_hor( const char* dev_name );
+
+        int calc_volume() const override;
+
+#ifndef PTUSA_TEST
+    private:
+#endif
+        enum CONSTANTS
+            {
+            P_C0 = 1,       ///< Индекс параметра нулевого смещения датчика (бар).
+            P_MAX_P,        ///< Индекс параметра давления настройки датчика (бар).
+            P_R,            ///< Индекс параметра радиуса цилиндра (м).
+            P_H,            ///< Индекс параметра длины цилиндра (м).
+            P_ANGLE,        ///< Индекс параметра угла наклона (градусы).
+            P_DENSITY,      ///< Индекс параметра плотности продукта (кг/м³).
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Текущее давление.
 class pressure_e : public AI1
     {

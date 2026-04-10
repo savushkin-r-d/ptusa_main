@@ -970,6 +970,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (level_e_cone*)new_device;
                     break;
 
+                case device::DST_LT_CYL_HOR:
+                    new_device = new level_e_cyl_hor( dev_name );
+                    new_io_device = (level_e_cyl_hor*)new_device;
+                    break;
+
                 case device::DST_LT_IOLINK:
                     new_device = new level_e_iolink( dev_name );
                     new_io_device = (level_e_iolink*)new_device;
