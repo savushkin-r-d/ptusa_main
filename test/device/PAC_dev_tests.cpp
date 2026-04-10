@@ -1085,14 +1085,13 @@ void check_dev( const char* name, int type, int sub_type,
     if ( get_dev_by_n )
         {
         auto n = 0;
-        const auto name_len = strnlen( name, device::C_MAX_NAME + 1 );
-        if ( isdigit( name_len - 2 ) )
+        if ( isdigit( strlen( name ) - 2 ) )
             {
-            n = atoi( name + name_len - 2 ); // V11.
+            n = atoi( name + strlen( name ) - 2 ); // V11.
             }
         else
             {
-            n = atoi( name + name_len - 1 ); // V1.
+            n = atoi( name + strlen( name ) - 1 ); // V1.
             }
         auto device_by_n = get_dev_by_n( n );
         EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( device_by_n ) );
