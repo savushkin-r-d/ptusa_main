@@ -572,7 +572,7 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     {
     if ( is_string )
         {
-        auto tmp = new char[ length ];
+        auto tmp = new char[ length ] {};
         convert_utf8_to_windows1251( (char*)buf, tmp,
             length * UNICODE_MULTIPLIER, length );
         memcpy( recipeMemory + startaddr, tmp, length );
@@ -975,7 +975,7 @@ int TMediumRecipeManager::WriteMem( unsigned long startaddr,
     {
     if ( is_string )
         {
-        auto tmp = new char[ length ];
+        auto tmp = new char[ length ] {};
         convert_utf8_to_windows1251( (char*)buf, tmp,
             length * UNICODE_MULTIPLIER, length );
         memcpy( recipeMemory + startaddr, tmp, length );
