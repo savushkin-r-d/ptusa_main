@@ -73,12 +73,19 @@ static Letter g_letters[] = {
 int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n,
     size_t buff_size )
     {
+    if ( !buff_size )
+        {
+        *windows1251 = '\0';
+        return 0;
+        }
+    buff_size -= 1; // Оставляем последний символ для сохранения '\0'.
+
     size_t j = 0;
     int first5bit;
     int sec6bit;
     int unicode_char;
 
-    for ( size_t i = 0; i < n && utf8[i] != 0, j < buff_size; ++i) {
+    for ( size_t i = 0; i < n && utf8[i] != 0 && j < buff_size; ++i) {
         char prefix = utf8[i];
         char suffix = utf8[i + 1];
         if (prefix == '\xE2' && suffix == '\x84' && utf8[i + 2] == '\x96')
