@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC  -fPIC -g -Wl,--dependency-file=CMakeFiles/luasql_odbc.dir/link.d -shared -Wl,-soname,odbc.so -o ../../../Debug/luasql/odbc.so CMakeFiles/luasql_odbc.dir/luasql/src/luasql.c.o CMakeFiles/luasql_odbc.dir/luasql/src/ls_odbc.c.o  -Wl,-rpath,/home/runner/work/ptusa_main/ptusa_main/build-debug/Debug ../../../Debug/liblua.so -lm /usr/lib/x86_64-linux-gnu/libdl.a

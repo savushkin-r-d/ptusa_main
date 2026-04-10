@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC  -fPIC -g -Wl,--dependency-file=CMakeFiles/term_core.dir/link.d -shared -Wl,-soname,core.so -o ../../../Debug/term/core.so CMakeFiles/term_core.dir/term/core.c.o  -Wl,-rpath,/home/runner/work/ptusa_main/ptusa_main/build-debug/Debug ../../../Debug/liblua.so -lm /usr/lib/x86_64-linux-gnu/libdl.a

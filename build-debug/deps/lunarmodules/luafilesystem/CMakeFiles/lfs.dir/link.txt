@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC  -fPIC -g -Wl,--dependency-file=CMakeFiles/lfs.dir/link.d -shared -Wl,-soname,lfs.so -o ../../../Debug/lfs.so CMakeFiles/lfs.dir/luafilesystem/src/lfs.c.o  -Wl,-rpath,/home/runner/work/ptusa_main/ptusa_main/build-debug/Debug ../../../Debug/liblua.so -lm /usr/lib/x86_64-linux-gnu/libdl.a

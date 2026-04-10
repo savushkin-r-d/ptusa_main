@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC -g -rdynamic -Wl,--dependency-file=CMakeFiles/toluapp.dir/link.d CMakeFiles/toluapp.dir/src/bin/tolua.c.o CMakeFiles/toluapp.dir/src/bin/toluabind.c.o -o ../../../Debug/toluapp  -Wl,-rpath,/home/runner/work/ptusa_main/ptusa_main/build-debug/Debug: ../../../Debug/libtoluapp.so ../../../Debug/liblua.so -lm -Wl,-Bstatic -ldl -Wl,-Bdynamic
