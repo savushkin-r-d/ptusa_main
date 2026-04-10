@@ -5,10 +5,10 @@
 
 using namespace ::testing;
 
-class test_uni_io_manager1 : public uni_io_manager
+class test_uni_io_manager_PP_mode : public uni_io_manager
     {
     public:
-        ~test_uni_io_manager1() override = default;
+        ~test_uni_io_manager_PP_mode() override = default;
 
         void activate_error()
             {
@@ -39,7 +39,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
         0, 0, 0, 0, 0, 0 );
     auto node = G_IO_MANAGER()->get_node( 0 );
 
-    test_uni_io_manager1 mngr;
+    test_uni_io_manager_PP_mode mngr;
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
 
@@ -143,6 +143,8 @@ TEST( pp_mode_alarm, disconnect_resets_alarm )
 // Test disconnect when alarm is not set.
 TEST( pp_mode_alarm, disconnect_no_alarm )
     {
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
+
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
     tcp_communicator::init_instance( "Тест", "Test" );
@@ -156,7 +158,7 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     // No PP mode alarm active.
     node->is_err_mode_alarm_set = false;
     node->state = io_manager::io_node::ST_OK;
-    test_uni_io_manager1 mngr;
+    test_uni_io_manager_PP_mode mngr;
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     
