@@ -12,6 +12,20 @@
 
 #if LUA_VERSION_NUM >= 502
 
+/* Lua 5.4+ invokes __gc on tables (not just userdata).  toluapp's
+** class_gc_event does *((void**)lua_touserdata(L,1)) which segfaults
+** when arg 1 is a table (lua_touserdata returns NULL).
+** Provide a safe wrapper: when the value is not userdata, return a
+** pointer to a static NULL so the dereference yields NULL instead of
+** crashing.  The rest of class_gc_event handles a NULL 'u' safely. */
+static void* _lua51compat_null_ud = (void*)0;
+static inline void* _lua_touserdata_safe(lua_State* L, int idx)
+    {
+    void *p = (lua_touserdata)(L, idx);
+    return p ? p : &_lua51compat_null_ud;
+    }
+#define lua_touserdata(L, idx) _lua_touserdata_safe(L, idx)
+
 /* luaL_getn() was removed in Lua 5.2; use lua_rawlen() instead. */
 #ifndef luaL_getn
 #define luaL_getn(L, i) ((int)(lua_rawlen)(L, i))
