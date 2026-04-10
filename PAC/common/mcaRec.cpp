@@ -572,7 +572,8 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     if ( is_string )
         {
         char* tmp = new char[ length * UNICODE_MULTIPLIER + 1 ];
-        convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf));
+        convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf),
+            length * UNICODE_MULTIPLIER + 1 );
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
         }
@@ -972,7 +973,8 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
     if (is_string)
         {
         char* tmp = new char[length * UNICODE_MULTIPLIER + 1];
-        convert_utf8_to_windows1251((char*)buf, tmp, strlen((char*)buf));
+        convert_utf8_to_windows1251((char*)buf, tmp, strlen((char*)buf),
+            length * UNICODE_MULTIPLIER + 1 );
         memcpy(recipeMemory + startaddr, tmp, length);
         delete[] tmp;
         }

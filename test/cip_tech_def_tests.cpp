@@ -949,7 +949,8 @@ TEST( cipline_tech_object, set_cmd )
 
     // Too-long name must be truncated, not ignored.
     const auto maxLen = TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER;
-    const std::string tooLongName( maxLen + 10, 'A' );
+    std::string tooLongName;
+    for ( auto i = 0; i < maxLen + 10; i++ ) tooLongName += "Ж";
     res = cip1.set_cmd( "CUR_REC", 0, tooLongName.c_str() );
     EXPECT_EQ( res, 0 );
     EXPECT_GT( strnlen( cip1.lineRecipes->currentRecipeName, maxLen ), 0u );
@@ -995,6 +996,8 @@ TEST( cipline_tech_object, set_cmd )
     EXPECT_EQ( res, 0 );
     EXPECT_GT( strnlen( cip1.ncar4, ncarMaxLen ), 0u );
     EXPECT_LT( strnlen( cip1.ncar4, ncarMaxLen ), static_cast<size_t>( ncarMaxLen ) );
+
+    cip1.lineRecipes->SaveToFile( "tmp4.txt" );
 
     G_LUA_MANAGER->free_Lua();
     }
