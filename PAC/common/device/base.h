@@ -659,8 +659,6 @@ class AO1 : public analog_io_device
         float get_value() const override;
         void  direct_set_value( float new_value ) override;
 
-        virtual int get_params_count() const;
-        
         void evaluate_io() override;
 
         enum CONSTANTS
@@ -670,14 +668,6 @@ class AO1 : public analog_io_device
 
     private:
         mutable int current_state{};
-        mutable uint32_t state_change_time{ get_millisec() };
-
-        enum PARAMS
-            {
-            P_DT = 1,
-
-            ADDITIONAL_PARAMS_COUNT,
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода

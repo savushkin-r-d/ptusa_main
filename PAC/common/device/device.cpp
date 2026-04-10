@@ -36,23 +36,22 @@ int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
-    current_state = get_DO( DO_INDEX );
-
-    // Check if the network node for output channel is available.
-    if ( auto node_state = check_output_DO_node_state(); node_state < 0 )
-        {
-        auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) );
-        if ( get_delta_millisec( state_change_time ) >= dt )
-            {
-            current_state = -1;
-            }
-        }
-    else
-        {
-        state_change_time = get_millisec();        
-        }
-
     return current_state;
+    }
+//-----------------------------------------------------------------------------
+void DO1::evaluate_io()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        // Ничего не делаем.
+        return;
+        }
+
+    current_state = get_DO( DO_INDEX );
+    if ( auto node_state = check_output_DO_node_PP_state(); node_state < 0 )
+        {
+        current_state = -1;
+        }
     }
 //-----------------------------------------------------------------------------
 void DO1::direct_on()
@@ -4069,19 +4068,18 @@ virtual_device::virtual_device( const char *dev_name,
 analog_output::analog_output( const char* dev_name ) :
     AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
     {
-    start_param_idx = AO1::get_params_count();
-    set_par_name( P_MIN_VALUE, start_param_idx, "P_MIN_V" );
-    set_par_name( P_MAX_VALUE, start_param_idx, "P_MAX_V" );
+    set_par_name( P_MIN_VALUE, 0, "P_MIN_V" );
+    set_par_name( P_MAX_VALUE, 0, "P_MAX_V" );
     }
 //-----------------------------------------------------------------------------
 float analog_output::get_min_value() const
     {
-    return get_par( P_MIN_VALUE, start_param_idx );
+    return get_par( P_MIN_VALUE, 0 );
     }
 //-----------------------------------------------------------------------------
 float analog_output::get_max_value() const
     {
-    return get_par( P_MAX_VALUE, start_param_idx );
+    return get_par( P_MAX_VALUE, 0 );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

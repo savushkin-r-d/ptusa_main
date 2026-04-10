@@ -1595,7 +1595,7 @@ TEST( DO1, get_state )
 
     G_PAC_INFO()->emulation_off();
     // Когда отключена эмуляция, пишем в буфер обмена с модулями ввода\вывода.
-    EXPECT_EQ( do1.get_state(), -1 );
+    EXPECT_EQ( do1.get_state(), 0 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 0 );
 
     uni_io_manager mngr;
@@ -1605,27 +1605,24 @@ TEST( DO1, get_state )
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     do1.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
 
-    EXPECT_EQ( do1.get_state(), -1 );
+    EXPECT_EQ( do1.get_state(), 0 );
 
     do1.on();
     mngr.get_node( 0 )->is_active = true;
     mngr.get_node( 0 )->state = io_manager::io_node::STATES::ST_OK;
+    do1.evaluate_io();
     EXPECT_EQ( do1.get_state(), 1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
 
     auto node = mngr.get_node( 0 );
     node->status_register = 0x0010; // PP mode.
-    DeltaMilliSecSubHooker::set_millisec( 0 );
+    do1.evaluate_io();
     EXPECT_EQ( do1.get_state(), -1 );
 
-    do1.set_cmd( "P_DT", 0, 1000.0f );
-    EXPECT_EQ( do1.get_state(), 1 );
-    DeltaMilliSecSubHooker::set_millisec( 1001 );
-
+    do1.evaluate_io();
     EXPECT_EQ( node->status_register, 0x0010 );
     EXPECT_EQ( do1.get_state(), -1 );
 
-    DeltaMilliSecSubHooker::set_default_time();
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
 
@@ -1661,11 +1658,11 @@ TEST( DO1, save_device )
     std::array <char, BUFF_SIZE> buff{};
 
     do1.save_device( buff.data() );
-    EXPECT_STREQ( "DO1={M=0, ST=0, P_DT=0},\n", buff.data() );
+    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff.data() );
 
     do1.set_cmd( "P_DT", 0, 100.1f );
     do1.save_device( buff.data() );
-    EXPECT_STREQ( "DO1={M=0, ST=0, P_DT=100.10},\n", buff.data() );
+    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff.data() );
     }
 
 
@@ -2121,7 +2118,7 @@ TEST( analog_output, save_device )
 
     AO01.save_device( buff.data() );
     EXPECT_STREQ( "AO1={M=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
-        "P_DT=0, P_MIN_V=0, P_MAX_V=0},\n",
+        "P_MIN_V=0, P_MAX_V=0},\n",
         buff.data() );
     }
 
@@ -2219,7 +2216,7 @@ TEST( DO_signal, DO_signal )
     DO_signal DO1( "DO1" );
 
     DO1.save_device( buff );
-    EXPECT_STREQ( "DO1={M=0, ST=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff );
     }
 
 TEST( DO_signal, get_type_name )
@@ -2236,7 +2233,7 @@ TEST( siren, siren )
     siren S1( "S1" );
 
     S1.save_device( buff );
-    EXPECT_STREQ( "S1={M=0, ST=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( "S1={M=0, ST=0},\n", buff );
     }
 
 TEST( siren, get_type_name )
@@ -2253,7 +2250,7 @@ TEST( lamp, lamp )
     lamp L1( "L1" );
 
     L1.save_device( buff );
-    EXPECT_STREQ( "L1={M=0, ST=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( "L1={M=0, ST=0},\n", buff );
     }
 
 TEST( lamp, get_type_name )
@@ -2758,13 +2755,7 @@ TEST( analog_valve, save_device )
     std::array <char, BUFF_SIZE> buff{};
 
     vc1.save_device( buff.data() );
-    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_DT=0},\n",
-        buff.data() );
-
-    vc1.set_cmd( "P_DT", 0, 100.1f );
-    vc1.save_device( buff.data() );
-    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
-        "P_DT=100.10},\n",
+    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2},\n",
         buff.data() );
     }
 
@@ -4153,9 +4144,8 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
     EXPECT_STREQ(
-        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, "
-        "P_DT=0, P_FB=1},\n",
-        buff );
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, "
+        "BLINK=0, P_FB=1},\n", buff );
     }
 
 
@@ -6905,7 +6895,7 @@ TEST_F( iolink_dev_test, analog_valve_iolink_get_state_respects_P_FB )
     // Отключаем обратную связь (P_FB=0) — ошибки устройства игнорируются,
     // get_state() должен вернуть 1.
     VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
-        VC1.start_param_idx, 0.0f );
+        0, 0.0f );
     VC1.evaluate_io();
     EXPECT_EQ( VC1.get_state(), 1 );
 
@@ -6993,10 +6983,12 @@ class DO1_test : public ::testing::Test
 TEST_F( DO1_test, get_state_with_node_check_ok )
     {
     // Node is OK, should return channel value.
+    dev.evaluate_io();
     EXPECT_EQ( 1, dev.get_state() );
 
     // Set DO channel value to 0.
     *dev.DO_channels.char_write_values[ 0 ] = 0;
+    dev.evaluate_io();
 
     // Node is OK, should return channel value.
     EXPECT_EQ( 0, dev.get_state() );
@@ -7005,6 +6997,7 @@ TEST_F( DO1_test, get_state_with_node_check_ok )
 TEST_F( DO1_test, get_state_with_node_pp_mode )
     {
     node->status_register = 0x0010;  // PP mode active.
+    dev.evaluate_io();
 
     // Node in PP mode, should return error (-1).
     EXPECT_EQ( -1, dev.get_state() );
@@ -7013,15 +7006,17 @@ TEST_F( DO1_test, get_state_with_node_pp_mode )
 TEST_F( DO1_test, get_state_with_node_not_connected )
     {
     node->state = io_manager::io_node::ST_NO_CONNECT;
+    dev.evaluate_io();
 
-    // Node not connected, should return error (-1).
-    EXPECT_EQ( -1, dev.get_state() );
+    // Node not connected, should not return error (-1).
+    EXPECT_EQ( 1, dev.get_state() );
     }
 
 TEST_F( DO1_test, get_state_with_node_not_active )
     {
     node->is_active = false;  // Node not active.
+    dev.evaluate_io();
 
-    // Node not active, should return error (-1).
-    EXPECT_EQ( -1, dev.get_state() );
+    // Node not active, should not return error (-1).
+    EXPECT_EQ( 1, dev.get_state() );
     }
