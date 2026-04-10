@@ -8,6 +8,7 @@ void LuaManagerTest::SetUp()
 	lua_hooks.push_back(subhook_new((void *) lua_gettop,               (void *) mock_lua_gettop,              SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_type,                 (void *) mock_lua_type,                SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_getfield,             (void *) mock_lua_getfield,            SUBHOOK_64BIT_OFFSET));
+	lua_hooks.push_back(subhook_new((void *) lua_getglobal,            (void *) mock_lua_getglobal,           SUBHOOK_64BIT_OFFSET));
 	/* lua_remove is now a macro: (lua_rotate + lua_pop). Hook lua_rotate;
 	** lua_pop expands to lua_settop which is hooked separately below. */
 	lua_hooks.push_back(subhook_new((void *) lua_rotate,              (void *) mock_lua_rotate,              SUBHOOK_64BIT_OFFSET));
@@ -90,6 +91,11 @@ int mock_lua_type(lua_State* L, int idx)
 
 void mock_lua_getfield(lua_State *L, int idx, const char *k)
 {}
+
+int mock_lua_getglobal(lua_State *L, const char *name)
+{
+    return 0; // LUA_TNIL.
+}
 
 /* lua_remove(L, idx) is now a macro: (lua_rotate(L, idx, -1), lua_pop(L, 1)).
 ** Hook lua_rotate as a no-op; lua_pop/lua_settop is hooked separately. */

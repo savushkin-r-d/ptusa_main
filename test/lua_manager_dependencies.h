@@ -31,6 +31,7 @@ void        mock_lua_pushcclosure(lua_State *L, lua_CFunction fn, int n);
 int         mock_lua_gettop(lua_State *L);
 int         mock_lua_type( lua_State* L, int idx );
 void        mock_lua_getfield(lua_State *L, int idx, const char *k);
+int         mock_lua_getglobal(lua_State *L, const char *name);
 void        mock_lua_rotate(lua_State *L, int idx, int n);
 int         mock_lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc,
                 lua_KContext ctx, lua_KFunction k);
