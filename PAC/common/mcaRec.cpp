@@ -191,7 +191,8 @@ void TRecipeManager::SaveRecipeName()
 #ifdef MSAPANEL
     MsaPanel::UpdateRecipes();
 #endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName,
+        true );
     }
 
 
@@ -572,8 +573,8 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     if ( is_string )
         {
         auto tmp = new char[ length ];
-        convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf),
-            length );
+        convert_utf8_to_windows1251( (char*)buf, tmp,
+            length * UNICODE_MULTIPLIER, length );
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
         }
@@ -809,7 +810,7 @@ int TMediumRecipeManager::setValue(int valueNo, float newValue)
 
 void TMediumRecipeManager::SaveRecipeName()
 {
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName );
 }
 
 
@@ -975,8 +976,8 @@ int TMediumRecipeManager::WriteMem( unsigned long startaddr,
     if ( is_string )
         {
         auto tmp = new char[ length ];
-        convert_utf8_to_windows1251( (char*)buf, tmp, strlen( (char*)buf ),
-            length );
+        convert_utf8_to_windows1251( (char*)buf, tmp,
+            length * UNICODE_MULTIPLIER, length );
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
         }
