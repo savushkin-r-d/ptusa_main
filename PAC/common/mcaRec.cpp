@@ -35,7 +35,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     recipeMemory = new unsigned char[recipeMemorySize];
     LoadFromFile(defaultfilename);
     lastEvalTime = get_millisec();
-    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER + 1];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
     strcpy(recipeList,"");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
