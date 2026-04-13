@@ -300,6 +300,7 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/toluapp/include>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua>
