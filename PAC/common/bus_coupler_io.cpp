@@ -790,7 +790,7 @@ void io_device::set_io_vendor( VENDOR vendor )
     this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
-int io_device::check_output_DO_node_state( u_int index ) const
+int io_device::check_output_DO_node_PP_state( u_int index ) const
     {
     // If no channels configured or tables not initialized, skip node check.
     if ( index >= DO_channels.count || 
@@ -803,10 +803,7 @@ int io_device::check_output_DO_node_state( u_int index ) const
 
     auto io_mgr = G_IO_MANAGER();
     auto node_index = DO_channels.tables[ index ];
-    if ( auto node = io_mgr->get_node( node_index ); 
-        !node->is_active || 
-        node->state != io_manager::io_node::ST_OK ||
-        node->is_pp_mode_active() )
+    if ( auto node = io_mgr->get_node( node_index ); node->is_pp_mode_active() )
         {
         return -1;
         }
@@ -814,7 +811,7 @@ int io_device::check_output_DO_node_state( u_int index ) const
     return 1; // Node is OK.
     }
 //-----------------------------------------------------------------------------
-int io_device::check_output_AO_node_state( u_int index ) const
+int io_device::check_output_AO_node_PP_state( u_int index ) const
     {
     // If no channels configured or tables not initialized, skip node check.
     if ( index >= AO_channels.count || !AO_channels.tables ||
@@ -825,10 +822,7 @@ int io_device::check_output_AO_node_state( u_int index ) const
 
     auto io_mgr = G_IO_MANAGER();
     auto node_index = AO_channels.tables[ index ];
-    if ( auto node = io_mgr->get_node( node_index );
-        !node->is_active ||
-        node->state != io_manager::io_node::ST_OK ||
-        node->is_pp_mode_active() )
+    if ( auto node = io_mgr->get_node( node_index ); node->is_pp_mode_active() )
         {
         return -1;
         }

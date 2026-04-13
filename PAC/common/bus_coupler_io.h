@@ -176,9 +176,9 @@ class io_device
         ///
         /// @param index - index of the channel in DO channels table.
         /// 
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_DO_node_state( u_int index = 0 ) const;
+        int check_output_DO_node_PP_state( u_int index = 0 ) const;
 
         /// @brief Check output AO channel network node state.
         ///
@@ -187,9 +187,9 @@ class io_device
         ///
         /// @param index - index of the channel in AO channels table.
         ///
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_AO_node_state( u_int index = 0 ) const;
+        int check_output_AO_node_PP_state( u_int index = 0 ) const;
 
 #ifdef PTUSA_TEST
         public:
