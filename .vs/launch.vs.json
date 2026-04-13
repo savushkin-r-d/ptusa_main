@@ -7,7 +7,7 @@
       "project": "CMakeLists.txt",
       "projectTarget": "ptusa_main.exe (Debug\\ptusa_main.exe)",
       "name": "ptusa_main.exe (Debug\\ptusa_main.exe)",
-      "currentDir": "demo_projects/T1-PLCnext-Demo",
+      "currentDir": "${workspaceRoot}/demo_projects/T1-PLCnext-Demo",
       "args": [
         "--path",
         "./",
@@ -17,6 +17,30 @@
         "--no_io=false",
         "--read_only_io=false",
         "./main.plua"
+      ]
+    },
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "lua.exe (Debug\\lua.exe)",
+      "name": "lua.exe (Debug\\lua.exe)",
+      "currentDir": "${workspaceRoot}/demo_projects/T1-PLCnext-Demo",
+      "args": [
+        "-e package.path='./?.lua;../../deps/lunarmodules/busted/?/init.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/busted/?.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/penlight/lua/?.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/penlight/lua/?.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/luasystem/luasystem/?/init.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/mediator/src/?.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/term/term/?/init.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/term/term/?.lua;'",
+        "-e package.path=package.path..';../../bin/build/windows-VS2022-debug/Debug/?.lua;'",
+        "-e package.path=package.path..';../../bin/build/windows-VS2022-debug/Debug/?/init.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/say/say/src/?/init.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/dkjson/?.lua;'",
+        "-e package.path=package.path..';../../deps/lunarmodules/cliargs/src/?.lua'",
+        "-e package.cpath='../../bin/build/windows-VS2022-debug/Debug/?.dll'",
+        "spec/ptusa_main.lua"
       ]
     }
   ]
