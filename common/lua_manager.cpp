@@ -143,17 +143,17 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     if ( !dir_str.empty() && dir_str.back() != '\\' && dir_str.back() != '/' )
         {
-        dir_str += std::filesystem::path::preferred_separator;
+        dir_str += '/';
         }
     if ( !sys_dir_str.empty() && 
         sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
         {
-        sys_dir_str += std::filesystem::path::preferred_separator;
+        sys_dir_str += '/';
         }
     if ( !extra_dirs_str.empty() && 
         extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
         {
-        extra_dirs_str += std::filesystem::path::preferred_separator;
+        extra_dirs_str += '/';
         }
 
     if ( 0 == lua_state )
