@@ -23,9 +23,12 @@ TEST( ao_node_state, analog_output_get_state_returns_error_on_bad_ao_node )
     node->status_register = 0;
 
     ao1.set_state( 1 );
+    ao1.evaluate_io();
     EXPECT_EQ( 1, ao1.get_state() );
 
+    ao1.set_par( 1, 0, 100.0f );
     node->status_register = 0x0010; // PP mode.
+    ao1.evaluate_io();
     EXPECT_EQ( -1, ao1.get_state() );
 
     G_PAC_INFO()->emulation_on();
@@ -54,11 +57,15 @@ TEST( ao_node_state, analog_valve_get_state_returns_error_on_bad_ao_node )
     node->status_register = 0;
 
     vc1.direct_on();
+    vc1.evaluate_io();
     EXPECT_EQ( 1, vc1.get_state() );
-
+    
     node->status_register = 0x0010; // PP mode.
+    vc1.set_par( 1, 0, 0.0f );
+    vc1.evaluate_io();
     EXPECT_EQ( -1, vc1.get_state() );
 
+    DeltaMilliSecSubHooker::set_default_time();
     G_PAC_INFO()->emulation_on();
     io_manager::replace_instance( prev_mngr );
     }
