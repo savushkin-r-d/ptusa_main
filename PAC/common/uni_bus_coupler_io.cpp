@@ -547,6 +547,19 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     // Проверка связи с узлом I/O.
     if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
         {
+        // Reset PP mode alarm on communication loss.
+        if ( node->is_err_mode_alarm_set )
+            {
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+
+            // Reset PP-mode tracking state so a new transition is detected
+            // after reconnect.
+            node->prev_status_register = 0;
+            node->is_err_mode_alarm_set = false;
+            }
+
         if ( false == node->is_set_err )
             {
             node->is_set_err = true;
@@ -561,7 +574,7 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
             {
             node->is_set_err = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
@@ -620,7 +633,8 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     return 0;
     }
 
-int uni_io_manager::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
+int uni_io_manager::read_input_registers(io_node* node, unsigned int address,
+    unsigned int quantity, unsigned char station /*= 0*/)
     {
     buff[0] = 's';
     buff[1] = 's';
@@ -650,7 +664,8 @@ int uni_io_manager::read_input_registers(io_node* node, unsigned int address, un
     return -1;
     }
 
-int uni_io_manager::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
+int uni_io_manager::write_holding_registers(io_node* node,
+    unsigned int address, unsigned int quantity, unsigned char station)
     {
     unsigned int bytes_cnt = quantity * 2;
     buff[0] = 's';
@@ -965,23 +980,47 @@ int uni_io_manager::read_inputs()
 //-----------------------------------------------------------------------------
 void uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
-    int result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
-    if ( result > 0 )
+    if ( auto result = read_input_registers( nd, 
+        PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
         {
         nd->status_register = static_cast<u_int_2>(
             BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
         }
+#ifdef DEBUG_BK
     else
         {
-        // Reset status register on read failure, don't set error
-        // flag to not disrupt normal operation if register is not
-        // available.
-#ifdef DEBUG_BK
         G_LOG->debug( "Failed to read status register (%d) for node "
             "\"%s\".", PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
-#endif // DEBUG_BK
-        nd->status_register = 0;
         }
+#endif // DEBUG_BK
+
+    // Check for PP mode state changes.
+    // PP mode has become active.
+    if ( auto is_err_mode_active =
+        ( nd->status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0,
+        was_err_mode_active =
+        ( nd->prev_status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0;
+        is_err_mode_active && !was_err_mode_active )
+        {
+        if ( !nd->is_err_mode_alarm_set )
+            {
+            nd->is_err_mode_alarm_set = true;
+            PAC_critical_errors_manager::get_instance()->set_global_error(
+                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+            }
+        }
+    // PP mode has become inactive.
+    else if ( !is_err_mode_active && was_err_mode_active &&
+        nd->is_err_mode_alarm_set )
+        {
+        nd->is_err_mode_alarm_set = false;
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_PP_MODE,
+            PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
+        }
+
+    nd->prev_status_register = nd->status_register;
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )
@@ -1005,6 +1044,16 @@ void uni_io_manager::disconnect( io_node* node )
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
+
+    // Reset PP mode alarm on disconnect.
+    if ( node->is_err_mode_alarm_set )
+        {
+        node->is_err_mode_alarm_set = false;
+        node->prev_status_register = 0;
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_PP_MODE,
+            PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+        }
     }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
