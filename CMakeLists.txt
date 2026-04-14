@@ -531,7 +531,8 @@ set(TCP_SOCKET_LOCKED_FILTER
     "pp_mode_alarm.disconnect_no_alarm:"
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
-	"LuaManagerTest.init_success")
+	"LuaManagerTest.init_success:"
+    "PAC_critical_errors_manager.set_global_error")
 
 set(TCP_SOCKET_UNLOCKED_FILTER "*-${TCP_SOCKET_LOCKED_FILTER}")
 
