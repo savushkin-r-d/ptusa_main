@@ -35,10 +35,7 @@
 
 #include "profibus_slave.h"
 #include "iot_common.h"
-
-#ifdef OPCUA
 #include "OPCUAServer.h"
-#endif
 
 #ifdef RFID
 #include "rfid_reader.h"
@@ -139,7 +136,6 @@ int main( int argc, const char *argv[] )
     argv_utf8 = 0;
 #endif
 
-#ifdef OPCUA
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         UA_StatusCode retval = G_OPCUA_SERVER.init_all_and_start();
@@ -150,7 +146,6 @@ int main( int argc, const char *argv[] )
             return EXIT_FAILURE;
             }
         }
-#endif
 
     //Инициализация дополнительных устройств
     IOT_INIT();
@@ -162,9 +157,9 @@ int main( int argc, const char *argv[] )
         {
         main_cycle();
         }
-#ifdef OPCUA
+
     G_OPCUA_SERVER.shutdown();
-#endif
+
     //Деинициализация дополнительных устройств.
     IOT_FINAL();
 

@@ -9,6 +9,9 @@ extern const char* FILES[ FILE_CNT ];
 const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
 const char* const OPC_RO = "WARNING(4) -> OPC UA server is activated (only read).\n";
 const char* const OPC_RW = "WARNING(4) -> OPC UA server is activated (read-write).\n";
+const char* const OPC_OFF = "INFO   (6) -> OPC UA server is disabled.\n";
+const char* const OPC_ERR_ST =
+    "ERROR  (3) -> Unknown OPC UA mode: 'st'. Valid values: off, r, rw.\n";
 const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
 
 using namespace ::testing;
@@ -117,42 +120,36 @@ TEST( project_manager, proc_main_params )
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg          The script file to execute (default: main.plua)
-  -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\O nodes (default: true)
-      --read_only_io_nodes  Read only from I\O nodes (default: true)
-  -p, --port arg            Param port (default: 10000)
-  -h, --help                Print help info
-  -r, --rcrc                Reset params
-      --opc-r               Start OPC UA server with program start (only 
-                            read)
-      --opc-rw              Start OPC UA server with program start 
-                            (read-write)
-      --sys_path arg        Sys path (default: ./sys)
-      --path arg            Path (default: .)
-      --extra_paths arg     Extra paths (default: ./dairy-sys)
-      --sleep_time_ms arg   Sleep time, ms (default: 2)
+  -s, --script arg       The script file to execute (default: main.plua)
+  -d, --debug            Enable debugging
+      --no_io            No communicate with I\O nodes (default: true)
+      --read_only_io     Read only from I\O nodes (default: true)
+  -p, --port arg         Param port (default: 10000)
+  -h, --help             Print help info
+  -r, --rcrc             Reset params
+      --opc arg          OPC UA server behavior (off, r, rw)
+      --sys_path arg     Sys path (default: ./sys)
+      --path arg         Path (default: .)
+      --extra_paths arg  Extra paths (default: ./dairy-sys)
+      --sleep_time arg   Sleep time, ms (default: 2)
 )";
 #else
         R"(Main control program
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg          The script file to execute (default: main.plua)
-  -d, --debug               Enable debugging
-      --no_io_nodes         No communicate with I\O nodes
-      --read_only_io_nodes  Read only from I\O nodes
-  -p, --port arg            Param port (default: 10000)
-  -h, --help                Print help info
-  -r, --rcrc                Reset params
-      --opc-r               Start OPC UA server with program start (only 
-                            read)
-      --opc-rw              Start OPC UA server with program start 
-                            (read-write)
-      --sys_path arg        Sys path (default: ./sys)
-      --path arg            Path (default: .)
-      --extra_paths arg     Extra paths (default: ./dairy-sys)
-      --sleep_time_ms arg   Sleep time, ms (default: 2)
+  -s, --script arg       The script file to execute (default: main.plua)
+  -d, --debug            Enable debugging
+      --no_io            No communicate with I\O nodes
+      --read_only_io     Read only from I\O nodes
+  -p, --port arg         Param port (default: 10000)
+  -h, --help             Print help info
+  -r, --rcrc             Reset params
+      --opc arg          OPC UA server behavior (off, r, rw)
+      --sys_path arg     Sys path (default: ./sys)
+      --path arg         Path (default: .)
+      --extra_paths arg  Extra paths (default: ./dairy-sys)
+      --sleep_time arg   Sleep time, ms (default: 2)
 )";
 #endif // defined WIN_OS
 
@@ -187,8 +184,38 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
+    // Выключаем OPC UA.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=off", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_OFF;
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+#else
+    debug = tmp.str() + "\x1B[32m" + OPC_OFF + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
+    // Передаем некорректный режим OPC UA.
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 1, res );
+
+#if defined WIN_OS
+    debug = tmp.str() + OPC_ERR_ST;
+#else
+    debug = tmp.str() + "\x1B[31m" + OPC_ERR_ST + "\x1B[0m";
+#endif
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, debug );
+
     // Включаем OPC UA в режиме чтения.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-r", "" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=r", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
@@ -200,11 +227,12 @@ Resetting params (command line parameter "rcrc").
     debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
+
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем OPC UA в режиме чтения и записи.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--opc-rw", "" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--opc=rw", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
@@ -220,7 +248,7 @@ Resetting params (command line parameter "rcrc").
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false", "" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io=false", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
@@ -235,8 +263,8 @@ Resetting params (command line parameter "rcrc").
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода, включаем только чтение.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false",
-        "--read_only_io_nodes" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io=false",
+        "--read_only_io" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
@@ -246,14 +274,15 @@ Resetting params (command line parameter "rcrc").
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
     debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33mWARNING(4) -> Bus couplers are read only.\n\x1B[0m";
+    debug += tmp.str() + "\x1B[33m"
+        + "WARNING(4) -> Bus couplers are read only.\n" + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода, отключаем только чтение.
-    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io_nodes=false",
-        "--read_only_io_nodes=false" };
+    argv_ex = { "ptusa_main.exe", "main.plua", "--no_io=false",
+        "--read_only_io=false" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
@@ -268,7 +297,7 @@ Resetting params (command line parameter "rcrc").
 
     std::array<const char*, 14> argv_path{ "ptusa_main.exe", "--port", "20000",
         "--sys_path", "./sys/", "--path", "./", "--extra_paths", "./dairy_sys/",
-        "--sleep_time_ms", "5", "--no_io_nodes", "--read_only_io_nodes", "main.plua" };
+        "--sleep_time", "5", "--no_io", "--read_only_io", "main.plua" };
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
 
