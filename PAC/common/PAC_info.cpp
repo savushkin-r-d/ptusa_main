@@ -6,13 +6,11 @@
 #include "PAC_err.h"
 
 #include "lua_manager.h"
-
 #include "bus_coupler_io.h"
 #include "device/manager.h"
 
-#ifdef OPCUA
 #include "OPCUAServer.h"
-#endif
+
 
 extern bool G_NO_IO_NODES;
 
@@ -103,7 +101,7 @@ void PAC_info::reset_params()
     par[ P_AUTO_OPERATION_WAIT_TIME ] = 60000;
     par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
 
-    par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+    par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
     par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
 
     par.save_all();
@@ -364,7 +362,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
             }
         }
 
-#ifdef OPCUA
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
@@ -400,8 +397,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         par.save( P_IS_OPC_UA_SERVER_CONTROL, (u_int_4)val );
         return 0;
         }
-    
-#endif
 
     return 0;
     }

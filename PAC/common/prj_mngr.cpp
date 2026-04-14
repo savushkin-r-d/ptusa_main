@@ -46,26 +46,38 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
     options.add_options()
-        ( "s,script", "The script file to execute", cxxopts::value<std::string>()->default_value( "main.plua" ) )
-        ( "d,debug", "Enable debugging", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "s,script", "The script file to execute",
+            cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "d,debug", "Enable debugging",
+            cxxopts::value<bool>()->default_value( "false" ) )
 #if defined WIN_OS
-        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
-        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "true" ) )
+        ( "no_io", "No communicate with I\\O nodes",
+            cxxopts::value<bool>()->default_value( "true" ) )
+        ( "read_only_io", "Read only from I\\O nodes",
+            cxxopts::value<bool>()->default_value( "true" ) )
 #else
-        ( "no_io_nodes", "No communicate with I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
-        ( "read_only_io_nodes", "Read only from I\\O nodes", cxxopts::value<bool>()->default_value( "false" ) )
+        ( "no_io", "No communicate with I\\O nodes",
+            cxxopts::value<bool>()->default_value( "false" ) )
+        ( "read_only_io", "Read only from I\\O nodes",
+            cxxopts::value<bool>()->default_value( "false" ) )
 #endif // defined WIN_OS        
-        ( "p,port", "Param port", cxxopts::value<int>()->default_value( "10000" ) )
+        ( "p,port", "Param port",
+            
+            cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
-#ifdef OPCUA
-        ("opc-r", "Start OPC UA server with program start (only read)" )
-        ("opc-rw", "Start OPC UA server with program start (read-write)" )
-#endif        
-        ( "sys_path", "Sys path", cxxopts::value<std::string>()->default_value( "./sys" ) )
-        ( "path", "Path", cxxopts::value<std::string>()->default_value( "." ) )
-        ( "extra_paths", "Extra paths", cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
-        ( "sleep_time_ms", "Sleep time, ms", cxxopts::value<unsigned int>()->default_value( "2" ) );
+
+        ( "opc", "OPC UA server behavior (off, r, rw)", 
+            cxxopts::value<std::string>() )
+
+        ( "sys_path", "Sys path",
+            cxxopts::value<std::string>()->default_value( "./sys" ) )
+        ( "path", "Path",
+            cxxopts::value<std::string>()->default_value( "." ) )
+        ( "extra_paths", "Extra paths",
+            cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
+        ( "sleep_time", "Sleep time, ms",
+            cxxopts::value<unsigned int>()->default_value( "2" ) );
 
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
@@ -104,29 +116,45 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             }
         }
 
-#ifdef OPCUA
-    if ( result[ "opc-rw" ].as<bool>() )
+    if ( result.count( "opc" ) )
         {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-        G_LOG->warning( "OPC UA server is activated (read-write)." );
+        auto opc_mode = result[ "opc" ].as<std::string>();
+
+        if ( opc_mode == "rw" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
+            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            }
+        else if ( opc_mode == "r" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            G_LOG->warning( "OPC UA server is activated (only read)." );
+            }
+        else if ( opc_mode == "off" )
+            {
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            G_LOG->info( "OPC UA server is disabled." );
+            }
+        else
+            {
+            G_LOG->error( "Unknown OPC UA mode: '%s'. "
+                "Valid values: off, r, rw.", opc_mode.c_str() );
+            return 1;
+            }
         }
-    else if( result[ "opc-r" ].as<bool>())
-        {
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-        G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-        G_LOG->warning( "OPC UA server is activated (only read)." );
-        }
-#endif
+
     main_script = result[ "script" ].as<std::string>();
-    sleep_time_ms = result[ "sleep_time_ms" ].as<unsigned int>();
+    sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
     
     path = result[ "path" ].as<std::string>();
     sys_path = result[ "sys_path" ].as<std::string>();
     extra_paths = result[ "extra_paths" ].as<std::string>();
 
     // Отключить/включить обмен с модулями ввода/вывода.
-    if ( result[ "no_io_nodes" ].as<bool>() )
+    if ( result[ "no_io" ].as<bool>() )
         {
         G_NO_IO_NODES = true;
         }
@@ -135,7 +163,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_NO_IO_NODES = false;
         }
     // Только чтение/запись+чтение данных с модулей ввода/вывода.
-    if ( result[ "read_only_io_nodes" ].as<bool>() )
+    if ( result[ "read_only_io" ].as<bool>() )
         {
         G_READ_ONLY_IO_NODES = true;
         }
@@ -216,7 +244,7 @@ int project_manager::init_extra_paths( const char* paths )
 //Порядок загрузки:
 //1.Модули.
 //2.Устройства.
-//3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
+//3.Переменные для доступа к устройствам из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
     if ( G_DEBUG )

@@ -9,9 +9,9 @@
 #include "PAC_info.h"
 #include "PAC_err.h"
 #include "iot_common.h"
-#ifdef OPCUA
+
 #include "OPCUAServer.h"
-#endif
+
 
 extern bool G_NO_IO_NODES;
 extern bool G_READ_ONLY_IO_NODES;
@@ -51,12 +51,12 @@ int main_cycle()
     sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     G_CMMCTR->evaluate();
-#ifdef OPCUA
+
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         G_OPCUA_SERVER.evaluate();
         }
-#endif
+
     //Основной цикл работы с дополнительными устройствами
     if ( !G_NO_IO_NODES && !G_READ_ONLY_IO_NODES )
         {
