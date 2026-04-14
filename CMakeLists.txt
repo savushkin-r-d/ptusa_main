@@ -532,7 +532,8 @@ set(TCP_SOCKET_LOCKED_FILTER
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
 	"LuaManagerTest.init_success:"
-    "PAC_critical_errors_manager.set_global_error")
+    "PAC_critical_errors_manager.set_global_error:"
+	"project_manager.proc_main_params")
 
 set(TCP_SOCKET_UNLOCKED_FILTER "*-${TCP_SOCKET_LOCKED_FILTER}")
 
