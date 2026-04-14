@@ -31,6 +31,9 @@ class test_uni_io_manager_PP_mode : public uni_io_manager
 // Test PP mode alarm activation.
 TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     {
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+
     tcp_communicator::init_instance( "Тест", "Test" );
 
     G_IO_MANAGER()->init( 1 );
@@ -145,7 +148,6 @@ TEST( pp_mode_alarm, disconnect_resets_alarm )
 TEST( pp_mode_alarm, disconnect_no_alarm )
     {
     PAC_critical_errors_manager::get_instance()->reset_all_error();
-
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
     tcp_communicator::init_instance( "Тест", "Test" );
