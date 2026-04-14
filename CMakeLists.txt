@@ -530,7 +530,8 @@ set(TCP_SOCKET_LOCKED_FILTER
     "pp_mode_alarm.pp_mode_activation_deactivation:"
     "pp_mode_alarm.disconnect_no_alarm:"
     "main_cycle.main_cycle:"
-	"PAC_info.set_cmd")
+	"PAC_info.set_cmd:"
+	"LuaManagerTest.init_success")
 
 set(TCP_SOCKET_UNLOCKED_FILTER "*-${TCP_SOCKET_LOCKED_FILTER}")
 

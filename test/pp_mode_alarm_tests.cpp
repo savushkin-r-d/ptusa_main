@@ -93,7 +93,6 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     DeltaMilliSecSubHooker::set_default_time();
     tcp_communicator::clear_instance();
     PAC_critical_errors_manager::get_instance()->reset_all_error();
-    tcp_communicator::clear_instance();
     }
 
 // Test that PP mode alarm flag is initialized correctly.
