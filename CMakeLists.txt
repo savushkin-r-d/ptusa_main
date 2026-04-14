@@ -522,4 +522,25 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
+
+set(TCP_SOCKET_LOCKED_FILTER
+    "tcp_communicator.evaluate:"
+	"tcp_communicator.recvtimeout:"
+    "device_communicator.write_devices_states_service:"
+    "pp_mode_alarm.pp_mode_activation_deactivation:"
+    "pp_mode_alarm.disconnect_no_alarm:"
+    "main_cycle.main_cycle:"
+	"PAC_info.set_cmd")
+
+set(TCP_SOCKET_UNLOCKED_FILTER "*-${TCP_SOCKET_LOCKED_FILTER}")
+
+# Discover tests that use shared tcp_communicator socket and serialize them.
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER}
+    PROPERTIES RESOURCE_LOCK tcp_socket)
+
+# Discover all remaining tests.
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${TCP_SOCKET_UNLOCKED_FILTER})
