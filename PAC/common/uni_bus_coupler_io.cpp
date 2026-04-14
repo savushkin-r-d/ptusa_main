@@ -551,7 +551,7 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
         if ( node->is_err_mode_alarm_set )
             {
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_ERR_MODE,
+                PAC_critical_errors_manager::AC_PP_MODE,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
 
             // Reset PP-mode tracking state so a new transition is detected
@@ -1006,7 +1006,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             {
             nd->is_err_mode_alarm_set = true;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_ERR_MODE,
+                PAC_critical_errors_manager::AC_PP_MODE,
                 PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
             }
         }
@@ -1016,7 +1016,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         {
         nd->is_err_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_ERR_MODE,
+            PAC_critical_errors_manager::AC_PP_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
 
@@ -1049,8 +1049,9 @@ void uni_io_manager::disconnect( io_node* node )
     if ( node->is_err_mode_alarm_set )
         {
         node->is_err_mode_alarm_set = false;
+        node->prev_status_register = 0;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
-            PAC_critical_errors_manager::AC_ERR_MODE,
+            PAC_critical_errors_manager::AC_PP_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
         }
     }

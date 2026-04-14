@@ -57,8 +57,8 @@ class PAC_critical_errors_manager
             AC_NET = 4,           ///< Ошибки сетевой работы.
             AC_SERVICE = 5,	      ///< Сервисное обслуживание устройства.
             
-            /// Аварийный режим устройства (PP mode, error, etc.).
-            AC_ERR_MODE = 6,      
+            /// Режим конфигурирования устройства (PP mode).
+            AC_PP_MODE = 6,      
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.

@@ -212,7 +212,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             }
         break;
 
-    case AC_ERR_MODE:
+    case AC_PP_MODE:
         switch ( err_sub_class )
             {
             case AS_IO_COUPLER:

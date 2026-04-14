@@ -464,7 +464,7 @@ class io_manager
             u_int_2 status_register{};
 
             /// Previous status register value for detecting changes.
-            u_int_2 prev_status_register = 0;
+            u_int_2 prev_status_register{};
 
             /// Flag indicating PP mode alarm is currently active.
             bool is_err_mode_alarm_set = false;

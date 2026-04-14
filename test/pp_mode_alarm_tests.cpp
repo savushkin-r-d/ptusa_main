@@ -68,8 +68,8 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     // а не PP mode.
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
-    node->last_poll_time = get_millisec() - 
-        io_manager::io_node::C_MAX_WAIT_TIME - 1;
+    DeltaMilliSecSubHooker::set_millisec(
+        io_manager::io_node::C_MAX_WAIT_TIME + 100 );
     auto res = mngr.e_communicate( node, 1, 1 );
     EXPECT_NE( res, 0 );
     auto REF_STR_NO_CONNECTION = R"s(	{
@@ -87,6 +87,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     EXPECT_STREQ( lua_buff.data(), REF_STR_NO_CONNECTION );
 
 
+    DeltaMilliSecSubHooker::set_default_time();
     tcp_communicator::clear_instance();
     PAC_critical_errors_manager::get_instance()->reset_all_error();
     }

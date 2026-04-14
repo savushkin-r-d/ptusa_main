@@ -1,4 +1,5 @@
 #include "PAC_err_tests.h"
+#include <array>
 
 using namespace ::testing;
 
