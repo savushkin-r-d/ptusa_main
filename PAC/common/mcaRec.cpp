@@ -6,6 +6,12 @@
 #include "dtime.h"
 #endif // MSAPANEL
 
+#ifdef PAC_PLCNEXT
+#include <cstdlib>
+#include <string>
+using namespace std::string_literals;
+#endif
+
 #include "utf2cp1251.h"
 
 int TRecipeManager::startRecipeBlock = 0;
@@ -601,6 +607,10 @@ int TRecipeManager::SaveToFile( const char* filename )
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
         fclose( memFile );
+#ifdef PAC_PLCNEXT
+        std::string syscommand = "chmod 777 "s + fname;
+        system( syscommand.c_str() );
+#endif
         }
     return 0;
     }
@@ -995,6 +1005,10 @@ int TMediumRecipeManager::SaveToFile( const char* filename )
         fseek( memFile, 0, SEEK_SET );
         fwrite( recipeMemory, 1, recipeMemorySize, memFile );
         fclose( memFile );
+#ifdef PAC_PLCNEXT
+        std::string syscommand = "chmod 777 "s + fname;
+        system( syscommand.c_str() );
+#endif
         }
     return 0;
     }
