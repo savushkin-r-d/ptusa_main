@@ -36,13 +36,22 @@ int DO1::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
-    // Check if the network node for output channel is available.
-    if ( auto node_state = check_output_DO_node_state(); node_state < 0 )
+    return current_state;
+    }
+//-----------------------------------------------------------------------------
+void DO1::evaluate_io()
+    {
+    if ( G_PAC_INFO()->is_emulator() )
         {
-        return -1; // Node error or PP mode.
+        // Ничего не делаем.
+        return;
         }
 
-    return get_DO( DO_INDEX );
+    current_state = get_DO( DO_INDEX );
+    if ( auto node_state = check_output_DO_node_PP_state(); node_state < 0 )
+        {
+        current_state = -1;
+        }
     }
 //-----------------------------------------------------------------------------
 void DO1::direct_on()
@@ -1759,26 +1768,29 @@ void DI1::direct_off()
     if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::direct_off();
     }
 //-----------------------------------------------------------------------------
-int DI1::get_state() const
+void DI1::evaluate_io()
     {
-    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
-
     if ( auto dt = static_cast<u_int_4>( get_par( P_DT, 0 ) ); dt > 0 )
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( get_delta_millisec( time ) > dt )
+            if ( get_delta_millisec( state_change_time ) > dt )
                 {
                 current_state = get_DI( DI_INDEX );
-                time = get_millisec();
+                state_change_time = get_millisec();
                 }
             }
         else
             {
-            time = get_millisec();
+            state_change_time = get_millisec();
             }
         }
     else current_state = get_DI( DI_INDEX );
+    }
+//-----------------------------------------------------------------------------
+int DI1::get_state() const
+    {
+    if ( G_PAC_INFO()->is_emulator() ) return digital_io_device::get_state();
 
     return current_state;
     }

@@ -660,11 +660,15 @@ class AO1 : public analog_io_device
         float get_value() const override;
         void  direct_set_value( float new_value ) override;
 
-    protected:
+        void evaluate_io() override;
+
         enum CONSTANTS
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
+
+    private:
+        mutable int current_state{};
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода

@@ -176,9 +176,9 @@ class io_device
         ///
         /// @param index - index of the channel in DO channels table.
         /// 
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_DO_node_state( u_int index = 0 ) const;
+        int check_output_DO_node_PP_state( u_int index = 0 ) const;
 
         /// @brief Check output AO channel network node state.
         ///
@@ -187,9 +187,9 @@ class io_device
         ///
         /// @param index - index of the channel in AO channels table.
         ///
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_AO_node_state( u_int index = 0 ) const;
+        int check_output_AO_node_PP_state( u_int index = 0 ) const;
 
 #ifdef PTUSA_TEST
         public:
@@ -462,6 +462,12 @@ class io_manager
             /// including PP mode, startup failures, net failures,
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
+
+            /// Previous status register value for detecting changes.
+            u_int_2 prev_status_register{};
+
+            /// Flag indicating PP mode alarm is currently active.
+            bool is_err_mode_alarm_set = false;
 
             /// @brief Checks PP mode state of the node.
             /// @return true if PP mode is active (bit 4 set), else false.

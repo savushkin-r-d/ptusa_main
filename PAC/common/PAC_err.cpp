@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <vector>
+#include <fmt/core.h>
+#include <cstring>
 
 #include "log.h"
 
@@ -11,12 +13,10 @@ extern const char* WSA_Last_Err_Decode ();
 
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
-PAC_critical_errors_manager::PAC_critical_errors_manager(
-    ): errors_id( 0 )
+PAC_critical_errors_manager::~PAC_critical_errors_manager(
+    )
     {
-#ifndef __BORLANDC__
-    errors.clear();
-#endif // __BORLANDC__
+    reset_all_error();
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors() const
@@ -99,6 +99,12 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
         }
     }
 //-----------------------------------------------------------------------------
+void PAC_critical_errors_manager::reset_all_error()
+    {
+    errors.clear();
+    errors_id = 0;
+    }
+//-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
     ALARM_SUBCLASS p1, unsigned long p2 )
     {
@@ -128,7 +134,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     int res = 0;
-
+    str[ 0 ] = 0;
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
@@ -172,167 +178,177 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     ALARM_SUBCLASS err_sub_class, int par, bool is_set )
     {
-    static char tmp[ 200 ] = "";
-    sprintf( tmp, "%d-%d-%d : ",
-        ( int ) err_class, ( int ) err_sub_class, par );
+    const auto BUFF_SIZE = 200;
+    static char tmp[ BUFF_SIZE ]{};
+    std::memset( tmp, 0, BUFF_SIZE );
 
+    // LCOV_EXCL_START
+    auto res = fmt::format_to_n( tmp, BUFF_SIZE, "{}-{}-{}",
+        static_cast<int>( err_class ), static_cast<int>( err_sub_class ),
+        par ).size;
+    // LCOV_EXCL_STOP
+    
     switch( err_class )
         {
-    case AC_UNKNOWN:
-        sprintf( tmp + strlen( tmp ), "?" );
+    case AC_SERVICE:
+        switch ( err_sub_class )
+            {
+            case AS_IO_COUPLER:
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    " : Узел I/O '{}' ('{}', '{}') - ",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus() ).size;
+                if ( is_set )
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, 
+                        "отключен для обслуживания" );
+                    }
+                else
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, "включен" );
+                    }
+                break;
+            }
         break;
 
-	case AC_SERVICE:
-		switch (err_sub_class)
-			{
-			case AS_IO_COUPLER:
-				sprintf(tmp + strlen(tmp),
-					"Узел ввода/вывода '%s' ('%s') - ",
-					G_IO_MANAGER()->get_node(par - 1)->name,
-					G_IO_MANAGER()->get_node(par - 1)->ip_address
-					);
-				break;
-            default:
+    case AC_PP_MODE:
+        switch ( err_sub_class )
+            {
+            case AS_IO_COUPLER:
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    " : Узел I/O '{}' ('{}', '{}') - ",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus() ).size;
+
+                if ( is_set )
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                        "активен PP mode (каналы управления заблокированы)" );
+                    }
+                else
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                        "обычный режим" );
+                    }
                 break;
-			}
-		if (is_set)
-			{
-			sprintf(tmp + strlen(tmp), "%s", "отключен для обслуживания");
-			}
-		else
-			{
-			sprintf(tmp + strlen(tmp), "%s", "включен");
-			}
-		break;
+            }
+        break;
 
     case AC_NO_CONNECTION:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Нет связи с " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                " : Нет связи с " ).size;
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Есть связь с " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                " : Есть связь с " ).size;
             }
 
-        switch( err_sub_class )
+        switch ( err_sub_class )
             {
-        case AS_IO_COUPLER:
-            sprintf( tmp + strlen( tmp ),
-                "узлом I/O '%s' ('%s', '%s')",
-                G_IO_MANAGER()->get_node( par - 1 )->name,
-                G_IO_MANAGER()->get_node( par - 1 )->ip_address,
-                G_CMMCTR->get_host_name_rus() );
-            break;
+            case AS_IO_COUPLER:
+                fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "узлом I/O '{}' ('{}', '{}').",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus() );
+                break;
 
-        case AS_PANEL:
-            sprintf( tmp + strlen( tmp ), "panel EasyView №%d.", par );
-            break;
+            case AS_MODBUS_DEVICE:
+                fmt::format_to_n( tmp + res, BUFF_SIZE - res, 
+                    "Modbus-device №{}.", par );
+                break;
 
-        case AS_MODBUS_DEVICE:
-            sprintf( tmp + strlen( tmp ), "Modbus-device №%d.", par );
-            break;
+            case AS_EASYSERVER:
+                fmt::format_to_n( tmp + res, BUFF_SIZE - res, "EasyServer." );
+                break;
 
-        case AS_RFID_READER:
-            sprintf( tmp + strlen( tmp ), "RFID-reader №%d.", par );
-            break;
-
-        case AS_EASYSERVER:
-            sprintf( tmp + strlen( tmp ), "EasyServer." );
-            break;
-
-        case AS_REMOTE_PAC:
-            sprintf( tmp + strlen( tmp ), "remote PAC." );
-            break;
-
-        default:
-        	break;
-            }//switch( err_sub_class )
-        break;
-
-    case AC_COM_DRIVER:
-        return "?";
-
-    case AC_RUNTIME_ERROR:
-        switch( err_sub_class )
-            {
-        case AS_EMERGENCY_BUTTON:
-            break;
-
-        default:
-            break;
-            }// switch( err_sub_class )
+            default:
+                fmt::format_to_n( tmp + res, BUFF_SIZE - res, "?." );
+                break;
+            }
         break;
 
     case AC_NET:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Network communication error : " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                " : Network communication error : " ).size;
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Network communication OK : " );
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                " : Network communication OK : " ).size;
             }
 
         switch( par )
             {
             case 0:
-                sprintf( tmp + strlen( tmp ),
-                    "master : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "master : " ).size;
                 break;
 
             case 1:
-                sprintf( tmp + strlen( tmp ),
-                    "modbus : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "modbus : " ).size;
                 break;
 
             default:
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "? : " ).size;
                 break;
             }
 
         switch( err_sub_class )
             {
             case AS_SOCKET_F:
-                sprintf( tmp + strlen( tmp ),
-                    "calling function socket(...) : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "calling function socket(...)" ).size;
                 break;
 
             case AS_BIND_F:
-                sprintf( tmp + strlen( tmp ),
-                    "calling function bind(...) : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "calling function bind(...)" ).size;
                 break;
 
             case AS_SETSOCKOPT_F:
-                sprintf( tmp + strlen( tmp ),
-                    "calling function setsockopt(...) : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "calling function setsockopt(...)" ).size;
                 break;
 
             case AS_LISTEN_F:
-                sprintf( tmp + strlen( tmp ),
-                    "calling function listen(...) : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "calling function listen(...)" ).size;
                 break;
 
             default:
-                sprintf( tmp + strlen( tmp ),
-                    "? : " );
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    "?" ).size;
                 break;
             }// switch( err_sub_class )
 
         if ( is_set )
             {
+            fmt::format_to_n( tmp + res, BUFF_SIZE - res, " : {}",
 #ifdef LINUX_OS
-            sprintf( tmp + strlen( tmp ), "%s.", strerror( errno ) );
+                strerror( errno )
 #endif // LINUX_OS
 
 #ifdef WIN_OS
-            sprintf( tmp + strlen( tmp ), "%s", WSA_Last_Err_Decode() );
+                WSA_Last_Err_Decode()
 #endif // WINDOWS_OS
+            );
             }
         else
             {
-            sprintf( tmp + strlen( tmp ) - 3, "." );
+            fmt::format_to_n( tmp + res, BUFF_SIZE - res, "." );
             }
         break;
+
     default:
         break;
         }
