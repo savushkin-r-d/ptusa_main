@@ -583,6 +583,12 @@ i_AO_device* device_manager::get_EY( const char* dev_name )
     return get_device( device::DT_EY, dev_name );
     }
 //-----------------------------------------------------------------------------
+/// @brief Получение узла I/O по имени.
+node_dev* device_manager::get_node( const char* dev_name )
+    {
+    return (node_dev*)get_device( device::DT_NODE, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     const char* dev_name, const char* descr, const char* article )
     {
