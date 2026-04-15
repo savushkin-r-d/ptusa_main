@@ -2531,7 +2531,7 @@ int level_e_cyl_hor::calc_volume() const
 
     // Pressure in bar derived from percentage reading.
     float p_bar = get_value() / 100.0f *
-        get_par( static_cast<int>( CONSTANTS::P_MAX_P ), start_param_idx ) -
+        get_par( static_cast<int>( CONSTANTS::P_MAX_P ), start_param_idx ) +
         get_par( static_cast<int>( CONSTANTS::P_C0 ), start_param_idx );
     if ( p_bar < 0.0f ) p_bar = 0.0f;
 
