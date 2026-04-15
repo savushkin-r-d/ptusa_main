@@ -3,8 +3,11 @@
 #pragma warning(disable: 4996)
 #endif // WIN_OS
 #include "cip_stats.h"
+
 #ifdef PAC_PLCNEXT
-#include "stdlib.h"
+#include <cstdlib>
+#include <string>
+using namespace std::string_literals;
 #endif
 
 cip_object_stats::cip_object_stats(const char* objname)
@@ -178,10 +181,10 @@ void cip_stats::saveToFile(const char * filename)
     std::ofstream ofs(fname, std::ios::binary);
     serialize(ofs);
     ofs.close();
+
 #ifdef PAC_PLCNEXT
-	char syscommand[] = "chmod 777 ";
-	strcat(syscommand, fname);
-	system(syscommand);
+    std::string syscommand = "chmod 777 "s + fname;
+    system( syscommand.c_str() );
 #endif
     }
 

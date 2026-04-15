@@ -111,7 +111,7 @@ class PAC_info: public i_Lua_save_device
 
         /// @brief Get nodes communication error status.
         /// @return 0 - all OK, 1 - at least one node has error or PP mode.
-        int get_nodes_comm_error() const
+        int get_nodes_commun_error() const
             {
             return nodes_comm_error;
             }
@@ -119,17 +119,27 @@ class PAC_info: public i_Lua_save_device
         /// @brief Get watchdog error status.
         /// @return 0 - all OK, 1 - at least one watchdog has error (state
         /// less than 0).
-        int get_watchdog_error() const
+        int get_watchdog_commun_error() const
             {
             return watchdog_error;
             }
 
         /// @brief Get communication error status.
         /// @return 0 - all OK, 1 - at least one communication error is active.
-        int get_commun_error() const
+        int get_any_commun_error() const
             {
             return commun_error;
             }
+
+#ifdef PTUSA_TEST
+        /// @brief Reset communication error status.
+        void reset_commun_errors()
+            {
+            commun_error = false;
+            nodes_comm_error = false;
+            watchdog_error = false;
+            }
+#endif
 
     private:
         PAC_info() = default;

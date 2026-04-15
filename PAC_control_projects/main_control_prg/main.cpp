@@ -37,10 +37,6 @@
 #include "iot_common.h"
 #include "OPCUAServer.h"
 
-#ifdef RFID
-#include "rfid_reader.h"
-#endif
-
 #include "main_cycle.h"
 
 int G_DEBUG = 0;                //Вывод дополнительной отладочной информации.
