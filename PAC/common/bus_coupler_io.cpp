@@ -1055,7 +1055,6 @@ void io_manager::init( int new_nodes_count )
 
     if ( nodes_count )
         {
-        nodes_count = new_nodes_count;
         nodes = new io_node*[ nodes_count ];
         for ( u_int i = 0; i < nodes_count; i++ )
             {
