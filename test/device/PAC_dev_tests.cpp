@@ -6966,6 +6966,8 @@ TEST( node_dev, basic_functionality )
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
 
+    G_PAC_INFO()->emulation_off();
+
     // Проверка evaluate_io().
     node->evaluate_io();
 
@@ -6980,6 +6982,7 @@ TEST( node_dev, basic_functionality )
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     io_manager::replace_instance( prev_mngr );
+    G_PAC_INFO()->emulation_on();
     }
 
 
