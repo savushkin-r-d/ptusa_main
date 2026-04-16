@@ -70,10 +70,22 @@ static Letter g_letters[] = {
         {'\xBF', 0x0457} // CYRILLIC SMALL LETTER YI
     };
 
-int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
+int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n,
+    size_t buff_size )
     {
-    int j = 0, first5bit, sec6bit, unicode_char;
-    for (int i = 0; i < (int)n && utf8[i] != 0; ++i) {
+    if ( !buff_size )
+        {
+        *windows1251 = '\0';
+        return 0;
+        }
+    buff_size -= 1; // Оставляем последний символ для сохранения '\0'.
+
+    size_t j = 0;
+    int first5bit;
+    int sec6bit;
+    int unicode_char;
+
+    for ( size_t i = 0; i < n && utf8[i] != 0 && j < buff_size; ++i) {
         char prefix = utf8[i];
         char suffix = utf8[i + 1];
         if (prefix == '\xE2' && suffix == '\x84' && utf8[i + 2] == '\x96')
@@ -112,6 +124,7 @@ int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
                         }
                     }
                 // can't convert this char
+                windows1251[ j ] = 0;
                 return 0;
                 }
         NEXT_LETTER:
@@ -120,6 +133,7 @@ int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
             }
         else {
             // can't convert this chars
+            windows1251[ j ] = 0;
             return 0;
             }
         }

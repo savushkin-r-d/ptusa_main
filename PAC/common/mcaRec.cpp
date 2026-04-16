@@ -37,7 +37,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     recipeMemory = new unsigned char[recipeMemorySize];
     LoadFromFile(defaultfilename);
     lastEvalTime = get_millisec();
-    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER];
+    currentRecipeName = new char[recipeNameLength * UNICODE_MULTIPLIER + 1];
     recipeList = new char[(recipeNameLength * UNICODE_MULTIPLIER + 12) * recipePerLine];
     strcpy(recipeList,"");
     ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
@@ -193,7 +193,8 @@ void TRecipeManager::SaveRecipeName()
 #ifdef MSAPANEL
     MsaPanel::UpdateRecipes();
 #endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName,
+        true );
     }
 
 
@@ -554,9 +555,10 @@ int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length,
     {
     if ( is_string )
         {
-        char* tmp = new char[ length * UNICODE_MULTIPLIER ];
+        auto tmp = new char[ length + 1 ];
         memcpy( tmp, recipeMemory + startaddr, length );
-        convert_windows1251_to_utf8( (char*)buf, tmp);
+        tmp[ length ] = '\0';
+        convert_windows1251_to_utf8( (char*)buf, tmp );
         delete[] tmp;
         }
     else
@@ -572,8 +574,9 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
     {
     if ( is_string )
         {
-        char* tmp = new char[ length + 1 ];
-        convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf));
+        auto tmp = new char[ length ] {};
+        convert_utf8_to_windows1251( (char*)buf, tmp,
+            length * UNICODE_MULTIPLIER, length );
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
         }
@@ -808,7 +811,7 @@ int TMediumRecipeManager::setValue(int valueNo, float newValue)
 
 void TMediumRecipeManager::SaveRecipeName()
 {
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName );
 }
 
 
@@ -949,39 +952,43 @@ void TMediumRecipeManager::NullifyRecipe()
     LoadRecipeName();
 }
 
-int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
-{
-    if (is_string)
+int TMediumRecipeManager::ReadMem( unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string )
+    {
+    if ( is_string )
         {
-        char* tmp = new char[length * UNICODE_MULTIPLIER];
-        memcpy(tmp, recipeMemory + startaddr, length);
-        convert_windows1251_to_utf8((char*)buf, tmp);
+        auto tmp = new char[ length + 1 ];
+        memcpy( tmp, recipeMemory + startaddr, length );
+        tmp[ length ] = '\0';
+        convert_windows1251_to_utf8( (char*)buf, tmp );
         delete[] tmp;
         }
     else
         {
-        memcpy(buf, recipeMemory + startaddr, length);
+        memcpy( buf, recipeMemory + startaddr, length );
         }
 
     return 0;
-}
+    }
 
-int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
-{
-    if (is_string)
+int TMediumRecipeManager::WriteMem( unsigned long startaddr,
+    unsigned long length, unsigned char* buf, bool is_string )
+    {
+    if ( is_string )
         {
-        char* tmp = new char[length + 1];
-        convert_utf8_to_windows1251((char*)buf, tmp, length * UNICODE_MULTIPLIER);
-        memcpy(recipeMemory + startaddr, tmp, length);
+        auto tmp = new char[ length ] {};
+        convert_utf8_to_windows1251( (char*)buf, tmp,
+            length * UNICODE_MULTIPLIER, length );
+        memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
         }
     else
         {
-        memcpy(recipeMemory + startaddr, buf, length);
+        memcpy( recipeMemory + startaddr, buf, length );
         }
 
     return 0;
-}
+    }
 
 int TMediumRecipeManager::SaveToFile( const char* filename )
     {
