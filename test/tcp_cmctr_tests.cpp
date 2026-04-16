@@ -9,7 +9,6 @@ using namespace ::testing;
 
 TEST( tcp_communicator, evaluate )
     {    
-    tcp_communicator::set_port( 30000, 30001 );
     tcp_communicator::init_instance( "Тест", "Test" );    
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
@@ -154,7 +153,6 @@ TEST( tcp_communicator, recvtimeout )
     u_char buff[ SIZE ] = { 0 };
     auto stat = stat_time();
 
-    tcp_communicator::set_port( 30010, 30011 );
     tcp_communicator::init_instance( "Тест", "Test" );
     G_CMMCTR->evaluate();
 
