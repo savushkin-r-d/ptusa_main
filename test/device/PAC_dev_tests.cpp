@@ -1881,13 +1881,13 @@ TEST( level_e_cyl_hor, get_volume_half_full )
 
     // Half-full horizontal cylinder: V = π * R² * L / 2 ≈ π m³.
     // Mass ≈ 1000 * π ≈ 3142 kg.
-    EXPECT_NEAR( test_dev.get_volume(), 3140, 50 );
+    EXPECT_EQ( test_dev.get_volume(), 3140 );
 
-    // Apply P_CO.
+    // Apply P_C0.
     test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_C0 ),
         test_dev.start_param_idx, 0.1f );
     test_dev.direct_set_value( 25.0f );
-    EXPECT_NEAR( test_dev.get_volume(), 5120.0f, 1.0f );
+    EXPECT_EQ( test_dev.get_volume(), 5120 );
     }
 
 TEST( level_e_cyl_hor, get_volume_full )
