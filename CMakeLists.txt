@@ -536,15 +536,18 @@ set(TCP_SOCKET_LOCKED_FILTER
 	"project_manager.proc_main_params:"
 	"project_manager.lua_load_configuration")
 
-set(TCP_SOCKET_UNLOCKED_FILTER "*-${TCP_SOCKET_LOCKED_FILTER}")
+# Join list into a single GTest filter string (elements already end with ':').
+string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
+	"${TCP_SOCKET_LOCKED_FILTER}")
+set(TCP_SOCKET_UNLOCKED_FILTER_STR "*-${TCP_SOCKET_LOCKED_FILTER_STR}")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
-    TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER}
+    TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER_STR}
     PROPERTIES RESOURCE_LOCK tcp_socket)
 
 # Discover all remaining tests.
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
-    TEST_FILTER ${TCP_SOCKET_UNLOCKED_FILTER})
+    TEST_FILTER ${TCP_SOCKET_UNLOCKED_FILTER_STR})
