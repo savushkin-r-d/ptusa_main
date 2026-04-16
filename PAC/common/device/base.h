@@ -310,10 +310,9 @@ class device : public i_DO_AO_device, public par_device
             DST_LT_CYL,    ///Текущий уровень для цилиндрического танка.
             DST_LT_CONE,   ///Текущий уровень для танка с конусом в основании.
             DST_LT_TRUNC,  ///Текущий уровень для танка с усеченным цилиндром в основании.
-
             DST_LT_IOLINK, ///Текущий IOLInk уровень без дополнительных параметров.
-
             DST_LT_VIRT,   ///< Виртуальный текущий уровень.
+            DST_LT_CYL_HOR,///< Текущий уровень для горизонтального цилиндрического танка.
 
             //DO
             DST_DO = 1,    ///Обычный дискретный выход с привязкой к модулям
@@ -786,14 +785,16 @@ class level : public AI1
 
         int get_start_param_idx() const;
 
-        enum CONSTANTS
+        int get_err_volume() const;
+
+    private:
+        enum class CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
 
             LAST_PARAM_IDX,
             };
 
-    private:
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------

@@ -167,7 +167,8 @@ class TRecipeManager
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
-        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
+        int WriteMem(unsigned long startaddr, unsigned long length,
+            unsigned char* buf, bool is_string = false );
     public:
         ///@brief Имя файла с рецептами
         char* defaultfilename;

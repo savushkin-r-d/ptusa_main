@@ -39,6 +39,7 @@ TEST( TRecipeManager, LoadFromFile )
 
     auto recipeNo = 0;
     mngr.ResetRecipeToDefaults( recipeNo );
+
     auto fileName = "tmp2.txt";
     EXPECT_EQ( 0, mngr.SaveToFile( fileName ) );
     EXPECT_EQ( 0, mngr.LoadFromFile( fileName ) );
