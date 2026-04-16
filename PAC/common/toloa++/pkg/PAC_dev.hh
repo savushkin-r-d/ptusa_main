@@ -294,6 +294,8 @@ class device : public i_DO_AO_device
             DT_TS,      ///< Сигнальный датчик температуры.
             DT_G,       ///< Блок питания.
             DT_WATCHDOG, ///< Устройство проверки связи.
+            DT_EY,       ///< Конвертер IO-Link.
+            DT_NODE,     ///< Узел сетевых настроек.
             };
 
         /// Подтипы устройств.
@@ -482,13 +484,19 @@ class device : public i_DO_AO_device
             //DT_REGULATOR
             DST_REGULATOR_PID = 1,
             DST_REGULATOR_THLD,
-  
+
             //DT_G
             DST_G_IOL_4 = 1,    ///< 4 канала.
             DST_G_IOL_8,        ///< 8 каналов.
 
             //DT_WATCHDOG
             DST_WATCHDOG = 1,
+
+            //DT_EY
+            DST_CONV_AO2 = 1,    ///< Конвертер IO-Link -> AO (2 канала).
+
+            //DT_NODE
+            DST_NODE = 1,        ///< Узел сетевых настроек.
             };
     };
 //-----------------------------------------------------------------------------
@@ -618,6 +626,11 @@ class signal_column : public device
 #ifdef _MSC_VER
 #pragma endregion
 #endif
+    };
+//-----------------------------------------------------------------------------
+class node_dev : public device
+    {
+    void set_io_node( io_manager::io_node* io_node );
     };
 //-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
@@ -1351,6 +1364,12 @@ class device_manager
         /// @brief Получение устройства по его номеру.
         device* get_device( int dev_type,
             const char *dev_name );
+
+        /// @brief Получение устройства.
+        device* get_device( const char* dev_name );
+
+        /// @brief Получение узла I/O по имени.
+        node_dev* get_node( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода.
@@ -1547,8 +1566,9 @@ class io_manager
         /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
-        void add_node(  unsigned int index, int ntype, int address,
-            char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+        io_manager::io_node* add_node( unsigned int index, int ntype,
+            int address, char* IP_address, char *name,
+            int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
             int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.

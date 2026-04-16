@@ -505,14 +505,15 @@ class io_manager
         /// @brief Установка числа модулей.
         ///
         /// Вызывается из Lua.
-        void init( int nodes_count );
+        void init( int new_nodes_count );
 
         /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
-        void add_node( u_int index, int ntype, int address, const char* IP_address,
-            const char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-            int AI_cnt, int AI_size );
+        io_manager::io_node* add_node( u_int index, int ntype, int address,
+            const char* IP_address, const char *name,
+            int DO_cnt, int DI_cnt,
+            int AO_cnt, int AO_size, int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
         ///
@@ -527,12 +528,15 @@ class io_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
+		virtual void disconnect(io_node *node) = 0;
 
         io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
         const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
+#ifdef PTUSA_TEST
+        void clear_nodes();
+#endif
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

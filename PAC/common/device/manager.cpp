@@ -583,6 +583,12 @@ i_AO_device* device_manager::get_EY( const char* dev_name )
     return get_device( device::DT_EY, dev_name );
     }
 //-----------------------------------------------------------------------------
+/// @brief Получение узла I/O по имени.
+node_dev* device_manager::get_node( const char* dev_name )
+    {
+    return dynamic_cast<node_dev*>( get_device( device::DT_NODE, dev_name ) );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     const char* dev_name, const char* descr, const char* article )
     {
@@ -1432,6 +1438,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         printf( "Unknown Y device subtype %d!\n", dev_sub_type );
                         }
                     break;
+                }
+            break;
+
+        case device::DT_NODE:
+            if ( dev_sub_type == device::DST_NODE )
+                {
+                new_device = new node_dev( dev_name );
+                }
+            else
+                {
+                G_LOG->alert( "Unknown NODE device subtype %d!\n",
+                    dev_sub_type );
                 }
             break;
 
