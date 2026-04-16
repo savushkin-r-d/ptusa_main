@@ -262,9 +262,7 @@ class level_e_cyl_hor : public level
 
         int calc_volume() const override;
 
-#ifndef PTUSA_TEST
     private:
-#endif
         enum class CONSTANTS
             {
             P_C0 = 1,       ///< Индекс параметра нулевого смещения датчика (бар).

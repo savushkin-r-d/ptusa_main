@@ -1867,15 +1867,12 @@ TEST( level_e_cyl_hor, get_volume_half_full )
     level_e_cyl_hor test_dev( "test_LT1" );
 
     // Set R=1m, L=2m, density=1000 kg/m³, no angle, no offset.
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_R ),
-        test_dev.start_param_idx, 1.0f );
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_H ),
-        test_dev.start_param_idx, 2.0f );
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_DENSITY ),
-        test_dev.start_param_idx, 1000.0f );
+    test_dev.set_cmd( "P_R", 0, 1.0f );
+    test_dev.set_cmd( "P_H", 0, 2.0f );
+    test_dev.set_cmd( "P_DENSITY", 0, 1000.0f );
     // P_MAX_P = 0.1962 bar → h = 0.5 * P_MAX_P * 1e5 / (rho*g) = 1m = R.
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_MAX_P ),
-        test_dev.start_param_idx, 0.1962f );
+    test_dev.set_cmd( "P_MAX_P", 0, 0.1962f );
+
     // 50% fill → pressure = 0.0981 bar → h = 1m = R (half full).
     test_dev.direct_set_value( 50.0f );
 
@@ -1884,8 +1881,7 @@ TEST( level_e_cyl_hor, get_volume_half_full )
     EXPECT_EQ( test_dev.get_volume(), 3140 );
 
     // Apply P_C0.
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_C0 ),
-        test_dev.start_param_idx, 0.1f );
+    test_dev.set_cmd( "P_C0", 0, 0.1f );
     test_dev.direct_set_value( 25.0f );
     EXPECT_EQ( test_dev.get_volume(), 5120 );
     }
@@ -1894,19 +1890,15 @@ TEST( level_e_cyl_hor, get_volume_full )
     {
     level_e_cyl_hor test_dev( "test_LT1" );
 
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_R ),
-        test_dev.start_param_idx, 1.0f );
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_H ),
-        test_dev.start_param_idx, 2.0f );
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_DENSITY ),
-        test_dev.start_param_idx, 1000.0f );
+    test_dev.set_cmd( "P_R", 0, 1.0f );
+    test_dev.set_cmd( "P_H", 0, 2.0f );
+    test_dev.set_cmd( "P_DENSITY", 0, 1000.0f );
     // P_MAX_P = 0.4 bar → h = P_MAX_P * 1e5 / (rho*g) ≈ 4 m > 2R at 100%.
-    test_dev.set_par( static_cast<int>( level_e_cyl_hor::CONSTANTS::P_MAX_P ),
-        test_dev.start_param_idx, 0.4f );
+    test_dev.set_cmd( "P_MAX_P", 0, 0.4f );
     test_dev.direct_set_value( 100.0f );
 
     // Full cylinder: V = π * R² * L ≈ 2π m³, M ≈ 6283 kg.
-    EXPECT_NEAR( test_dev.get_volume(), 6280, 100 );
+    EXPECT_EQ( test_dev.get_volume(), 6280 );
     }
 
 

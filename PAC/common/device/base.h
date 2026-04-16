@@ -781,14 +781,16 @@ class level : public AI1
 
         int get_start_param_idx() const;
 
-        enum CONSTANTS
+        int get_err_volume() const;
+
+    private:
+        enum class CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
 
             LAST_PARAM_IDX,
             };
 
-    private:
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------

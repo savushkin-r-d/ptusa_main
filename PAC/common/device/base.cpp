@@ -844,20 +844,28 @@ float AI1::get_min_val() const
 //-----------------------------------------------------------------------------
 level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
     u_int par_cnt ) :AI1(
-    dev_name, DT_LT, sub_type, par_cnt + LAST_PARAM_IDX - 1 )
+        dev_name, DT_LT, sub_type,
+        par_cnt + static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
     start_param_idx = AI1::get_params_count();
-    set_par_name( P_ERR, start_param_idx, "P_ERR" );
+    set_par_name( static_cast<int>( CONSTANTS::P_ERR ),
+        start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 int level::get_volume() const
     {
     if ( get_state() < 0 )
         {
-        return (int)get_par( P_ERR, start_param_idx );
+        return get_err_volume();
         }
 
     return calc_volume();
+    }
+//-----------------------------------------------------------------------------
+int level::get_err_volume() const
+    {
+    return static_cast<int>( get_par( static_cast<int>( CONSTANTS::P_ERR ),
+        start_param_idx ) );
     }
 //-----------------------------------------------------------------------------
 int level::calc_volume() const
@@ -884,7 +892,7 @@ float level::get_min_val() const
 //-----------------------------------------------------------------------------
 int level::get_params_count() const
     {
-    return start_param_idx + LAST_PARAM_IDX - 1;
+    return start_param_idx + static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1;
     }
 //-----------------------------------------------------------------------------
 int level::get_start_param_idx() const

@@ -3215,9 +3215,9 @@ float level_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_value();
 
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par( level::P_ERR, get_start_param_idx() );
+        return static_cast<float>( get_err_volume() );
         }
     else
         {
@@ -3229,10 +3229,10 @@ int level_e_iolink::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return AI1::get_state();
 
-    IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
-    if (res != io_device::IOLINKSTATE::OK)
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
         {
-        return -(int)res;
+        return -static_cast<int>( res );
         }
     else
         {
