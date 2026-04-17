@@ -1,7 +1,34 @@
 #include "OPCUAServer_tests.h"
 #include "g_errors.h"
+#include <chrono>
 
 using namespace ::testing;
+
+class OPCUA_server_test : public Test
+    {
+    protected:
+        void TearDown() override
+            {
+            G_OPCUA_SERVER.shutdown();
+            }
+    };
+
+TEST_F( OPCUA_server_test, evaluate_non_blocking )
+    {
+    auto res = G_OPCUA_SERVER.init_all_and_start();
+    ASSERT_EQ( UA_STATUSCODE_GOOD, res );
+
+    constexpr auto ITERATIONS = 200;
+    const auto start = std::chrono::steady_clock::now();
+    for ( auto i = 0; i < ITERATIONS; ++i )
+        {
+        G_OPCUA_SERVER.evaluate();
+        }
+    const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - start );
+
+    EXPECT_LT( elapsed.count(), 1000 );
+    }
 
 TEST( OPCUA_server, evaluate )
     {    

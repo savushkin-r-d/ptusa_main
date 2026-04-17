@@ -212,12 +212,13 @@ void OPCUA_server::shutdown()
         server = nullptr;
 
         is_dev_objects_created = false;
+        is_PAC_info_created = false;
         }
     }
 
 void OPCUA_server::evaluate()
     {
-    if ( server ) UA_Server_run_iterate( server, true );
+    if ( server ) UA_Server_run_iterate( server, false );
     }
 
 UA_StatusCode OPCUA_server::read_state( UA_Server*, const UA_NodeId*, void*,
