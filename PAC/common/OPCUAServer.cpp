@@ -212,6 +212,7 @@ void OPCUA_server::shutdown()
         server = nullptr;
 
         is_dev_objects_created = false;
+        is_PAC_info_created = false;
         }
     }
 
