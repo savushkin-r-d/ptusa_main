@@ -3,6 +3,7 @@
 #include "base.h"
 #include "valve.h"
 #include "life_device.h"
+#include "node_dev.h"
 #include "device.h"
 
 class dev_stub;
@@ -337,6 +338,10 @@ class device_manager : public i_Lua_save_device
 
         /// @brief Получение конвертера IO-Link по имени.
         i_AO_device* get_EY( const char* dev_name );
+
+        /// @brief Получение узла I/O по имени.
+        node_dev* get_node( const char* dev_name );
+
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();

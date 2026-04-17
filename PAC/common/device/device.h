@@ -47,9 +47,9 @@
 class DO1 : public digital_io_device
     {
     public:
-        DO1( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type ):
-        digital_io_device( dev_name, type, sub_type, 0 )
+        DO1( const char* dev_name, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type ) :
+            digital_io_device( dev_name, type, sub_type, 0 )
             {
             }
 
@@ -57,7 +57,11 @@ class DO1 : public digital_io_device
         void direct_on() override;
         void direct_off() override;
 
+        void evaluate_io() override;
+
     private:
+        mutable int current_state{};
+
         enum CONSTANTS
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -243,6 +247,30 @@ class level_e_cone : public level
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
             P_R,         ///< Индекс параметра радиуса танка (м).
             P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущий уровень для горизонтального цилиндрического танка.
+class level_e_cyl_hor : public level
+    {
+    public:
+        explicit level_e_cyl_hor( const char* dev_name );
+
+        int calc_volume() const override;
+
+    private:
+        enum class CONSTANTS
+            {
+            P_C0 = 1,       ///< Индекс параметра нулевого смещения датчика (бар).
+            P_MAX_P,        ///< Индекс параметра давления настройки датчика (бар).
+            P_R,            ///< Индекс параметра радиуса цилиндра (м).
+            P_H,            ///< Индекс параметра длины цилиндра (м).
+            P_ANGLE,        ///< Индекс параметра угла наклона (градусы).
+            P_DENSITY,      ///< Индекс параметра плотности продукта (кг/м³).
 
             LAST_PARAM_IDX,
             };
@@ -912,9 +940,11 @@ class DI1 : public digital_io_device
 
         int get_state() const override;
 
+        void evaluate_io() override;
+
     private:
         mutable int current_state;
-        mutable uint32_t time = 0;
+        mutable uint32_t state_change_time{ get_millisec() };
 
         enum CONSTANTS
             {

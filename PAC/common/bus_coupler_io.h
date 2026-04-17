@@ -176,9 +176,9 @@ class io_device
         ///
         /// @param index - index of the channel in DO channels table.
         /// 
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_DO_node_state( u_int index = 0 ) const;
+        int check_output_DO_node_PP_state( u_int index = 0 ) const;
 
         /// @brief Check output AO channel network node state.
         ///
@@ -187,9 +187,9 @@ class io_device
         ///
         /// @param index - index of the channel in AO channels table.
         ///
-        /// @return 1 - node is OK, -1 - node has error or PP mode,
+        /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
-        int check_output_AO_node_state( u_int index = 0 ) const;
+        int check_output_AO_node_PP_state( u_int index = 0 ) const;
 
 #ifdef PTUSA_TEST
         public:
@@ -463,6 +463,12 @@ class io_manager
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
 
+            /// Previous status register value for detecting changes.
+            u_int_2 prev_status_register{};
+
+            /// Flag indicating PP mode alarm is currently active.
+            bool is_err_mode_alarm_set = false;
+
             /// @brief Checks PP mode state of the node.
             /// @return true if PP mode is active (bit 4 set), else false.
             bool is_pp_mode_active() const;
@@ -499,14 +505,15 @@ class io_manager
         /// @brief Установка числа модулей.
         ///
         /// Вызывается из Lua.
-        void init( int nodes_count );
+        void init( int new_nodes_count );
 
         /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
-        void add_node( u_int index, int ntype, int address, const char* IP_address,
-            const char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-            int AI_cnt, int AI_size );
+        io_manager::io_node* add_node( u_int index, int ntype, int address,
+            const char* IP_address, const char *name,
+            int DO_cnt, int DI_cnt,
+            int AO_cnt, int AO_size, int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
         ///
@@ -521,12 +528,15 @@ class io_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(io_node *node);
+		virtual void disconnect(io_node *node) = 0;
 
         io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
         const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
+#ifdef PTUSA_TEST
+        void clear_nodes();
+#endif
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

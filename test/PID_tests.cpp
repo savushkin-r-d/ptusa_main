@@ -145,8 +145,8 @@ TEST( PID, save_device )
         "\t\t{\n"
         "\t\t0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, \n"
         "\t\t},\n"
-        "\tRT_PAR_F={ 0.00, 0.00 }\n\t"
-        "}\n";
+        "\tRT_PAR_F={ 0.00, 0.00 }\n"
+        "\t}\n";
 
     PID pid1( 1 );
     pid1.save_device( buff );

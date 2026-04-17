@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2026.04.02.0)
+project(ptusa_main VERSION 2026.04.02.1)
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -119,8 +119,6 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/common/device/*.cpp
         PAC/IoT/*.cpp)
 
-list(FILTER common_src EXCLUDE REGEX ".*rfid*|snprintf\\.c")
-
 file(GLOB test_src CONFIGURE_DEPENDS
             test/*.cpp
             test/device/*.cpp
@@ -216,7 +214,10 @@ elseif(WIN32)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
 
-add_dependencies(libptusa_main lua)
+if(NOT ARP_DEVICE)
+    add_dependencies(libptusa_main lua)
+endif()
+
 add_dependencies(lua lfs luasystem term_core luassert_copy luasql_odbc)
 
 if(MSVC)
@@ -522,4 +523,32 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
+
+set(TCP_SOCKET_LOCKED_FILTER
+    "tcp_communicator.evaluate:"
+	"tcp_communicator.recvtimeout:"
+    "device_communicator.write_devices_states_service:"
+    "pp_mode_alarm.pp_mode_activation_deactivation:"
+    "pp_mode_alarm.disconnect_no_alarm:"
+    "main_cycle.main_cycle:"
+	"PAC_info.set_cmd:"
+	"LuaManagerTest.init_success:"
+    "PAC_critical_errors_manager.set_global_error:"
+	"project_manager.proc_main_params:"
+	"project_manager.lua_load_configuration:")
+
+# Join list into a single GTest filter string (elements already end with ':').
+string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
+	"${TCP_SOCKET_LOCKED_FILTER}")
+set(TCP_SOCKET_UNLOCKED_FILTER_STR "*-${TCP_SOCKET_LOCKED_FILTER_STR}")
+
+# Discover tests that use shared tcp_communicator socket and serialize them.
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER_STR}
+    PROPERTIES RESOURCE_LOCK tcp_socket)
+
+# Discover all remaining tests.
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${TCP_SOCKET_UNLOCKED_FILTER_STR})

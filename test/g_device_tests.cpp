@@ -53,6 +53,7 @@ TEST( device_communicator, write_devices_states_service )
     EXPECT_EQ('x', out_data[0]);
 
     G_LUA_MANAGER->free_Lua();
+    tcp_communicator::clear_instance();
     }
 
 TEST( device_communicator, print )

@@ -246,18 +246,18 @@ TEST( io_node, get_display_state_all_node_types )
     G_PAC_INFO()->emulation_on();
 	}
 
-TEST( io_device, check_output_DO_node_state )
+TEST( io_device, check_output_DO_node_PP_state )
 	{
 	io_device dev( "TEST_DO" );
-    EXPECT_EQ( 0, dev.check_output_DO_node_state() );
+    EXPECT_EQ( 0, dev.check_output_DO_node_PP_state() );
 
 	dev.init_and_alloc( 1, 0, 0, 0 );
 
 	io_manager::get_instance()->init( 0 );
-	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( 1, dev.check_output_DO_node_PP_state() );
 
 	io_manager::get_instance()->init( 1 );
-	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( 1, dev.check_output_DO_node_PP_state() );
 
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -269,37 +269,37 @@ TEST( io_device, check_output_DO_node_state )
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;
 	G_PAC_INFO()->emulation_off();
-	EXPECT_EQ( 1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( 1, dev.check_output_DO_node_PP_state() );
 
     node->status_register = 0x0001;  // Non-PP warning bit.
-    EXPECT_EQ( 1, dev.check_output_DO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_DO_node_PP_state() );
 
 	node->status_register = 0x0010;  // PP mode.
-	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( -1, dev.check_output_DO_node_PP_state() );
 
 	node->state = io_manager::io_node::ST_NO_CONNECT;
-	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( -1, dev.check_output_DO_node_PP_state() );
 	
 	node->is_active = false;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;
-	EXPECT_EQ( -1, dev.check_output_DO_node_state() );
+	EXPECT_EQ( 1, dev.check_output_DO_node_PP_state() );
 
 	G_PAC_INFO()->emulation_on();
 	}
 
-TEST( io_device, check_output_AO_node_state )
+TEST( io_device, check_output_AO_node_PP_state )
     {
     io_device dev( "TEST_AO" );
-    EXPECT_EQ( 0, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 0, dev.check_output_AO_node_PP_state() );
 
     dev.init_and_alloc( 0, 0, 1, 0 );
 
     io_manager::get_instance()->init( 0 );
-    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_AO_node_PP_state() );
 
     io_manager::get_instance()->init( 1 );
-    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_AO_node_PP_state() );
 
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
@@ -311,21 +311,21 @@ TEST( io_device, check_output_AO_node_state )
     node->state = io_manager::io_node::ST_OK;
     node->status_register = 0;
     G_PAC_INFO()->emulation_off();
-    EXPECT_EQ( 1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_AO_node_PP_state() );
 
     node->status_register = 0x0001;  // Non-PP warning bit.
-    EXPECT_EQ( 1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_AO_node_PP_state() );
 
     node->status_register = 0x0010;  // PP mode.
-    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( -1, dev.check_output_AO_node_PP_state() );
 
     node->state = io_manager::io_node::ST_NO_CONNECT;
-    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( -1, dev.check_output_AO_node_PP_state() );
 
     node->is_active = false;
     node->state = io_manager::io_node::ST_OK;
     node->status_register = 0;
-    EXPECT_EQ( -1, dev.check_output_AO_node_state() );
+    EXPECT_EQ( 1, dev.check_output_AO_node_PP_state() );
 
     G_PAC_INFO()->emulation_on();
     }

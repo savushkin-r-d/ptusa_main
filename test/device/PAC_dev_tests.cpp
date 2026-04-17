@@ -1253,6 +1253,15 @@ TEST( device_manager, add_io_device )
         "Test watchdog", "Art_1" );
     EXPECT_EQ( nullptr, res );
 
+    // Проверка устройства управления узлом сетевых настроек.
+    auto* node1 = G_DEVICE_MANAGER()->add_io_device( 
+        device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
+    EXPECT_EQ( nullptr, node1 );
+    // Тестирование несуществующего подтипа.
+    res = G_DEVICE_MANAGER()->add_io_device( device::DT_NODE,
+        device::DST_NODE + 1, "NODE2", "Test invalid node", "" );
+    EXPECT_EQ( nullptr, res );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
@@ -1469,6 +1478,10 @@ TEST( device, get_type_str )
     device dev3( "DEV3", device::DEVICE_TYPE::DT_WATCHDOG,
         device::DEVICE_SUB_TYPE::DST_WATCHDOG, 0 );
     EXPECT_STREQ( dev3.get_type_str(), "WATCHDOG" );
+
+    device dev4( "DEV4", device::DEVICE_TYPE::DT_NODE,
+        device::DEVICE_SUB_TYPE::DST_NODE, 0 );
+    EXPECT_STREQ( dev4.get_type_str(), "NODE" );
     }
 
 TEST( device, get_name_in_Lua )
@@ -1595,7 +1608,7 @@ TEST( DO1, get_state )
 
     G_PAC_INFO()->emulation_off();
     // Когда отключена эмуляция, пишем в буфер обмена с модулями ввода\вывода.
-    EXPECT_EQ( do1.get_state(), -1 );
+    EXPECT_EQ( do1.get_state(), 0 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 0 );
 
     uni_io_manager mngr;
@@ -1605,13 +1618,23 @@ TEST( DO1, get_state )
         1, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
     do1.init_channel( io_device::IO_channels::CT_DO, 0, 0, 0 );
 
-    EXPECT_EQ( do1.get_state(), -1 );
+    EXPECT_EQ( do1.get_state(), 0 );
 
     do1.on();
     mngr.get_node( 0 )->is_active = true;
     mngr.get_node( 0 )->state = io_manager::io_node::STATES::ST_OK;
+    do1.evaluate_io();
     EXPECT_EQ( do1.get_state(), 1 );
     EXPECT_EQ( do1.DO_channels.char_write_values[ 0 ][ 0 ], 1 );
+
+    auto node = mngr.get_node( 0 );
+    node->status_register = 0x0010; // PP mode.
+    do1.evaluate_io();
+    EXPECT_EQ( do1.get_state(), -1 );
+
+    do1.evaluate_io();
+    EXPECT_EQ( node->status_register, 0x0010 );
+    EXPECT_EQ( do1.get_state(), -1 );
 
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
@@ -1639,6 +1662,16 @@ TEST( DO1, set_cmd )
 
     do1.set_cmd( "ST", 0, 1 );
     EXPECT_EQ( do1.get_state(), 1 );
+    }
+
+TEST( DO1, save_device )
+    {
+    DO1 do1( "DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO );
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff{};
+
+    do1.save_device( buff.data() );
+    EXPECT_STREQ( "DO1={M=0, ST=0},\n", buff.data() );
     }
 
 
@@ -1833,6 +1866,52 @@ TEST( level_e_cone, get_volume )
     {
     level_e_cone test_dev( "test_LT1" );
     EXPECT_EQ( test_dev.get_volume(), 0.f );
+    }
+
+
+TEST( level_e_cyl_hor, get_volume_zero )
+    {
+    level_e_cyl_hor test_dev( "test_LT1" );
+    EXPECT_EQ( test_dev.get_volume(), 0 );
+    }
+
+TEST( level_e_cyl_hor, get_volume_half_full )
+    {
+    level_e_cyl_hor test_dev( "test_LT1" );
+
+    // Set R=1m, L=2m, density=1000 kg/m³, no angle, no offset.
+    test_dev.set_cmd( "P_R", 0, 1.0f );
+    test_dev.set_cmd( "P_H", 0, 2.0f );
+    test_dev.set_cmd( "P_DENSITY", 0, 1000.0f );
+    // P_MAX_P = 0.1962 bar → h = 0.5 * P_MAX_P * 1e5 / (rho*g) = 1m = R.
+    test_dev.set_cmd( "P_MAX_P", 0, 0.1962f );
+
+    // 50% fill → pressure = 0.0981 bar → h = 1m = R (half full).
+    test_dev.direct_set_value( 50.0f );
+
+    // Half-full horizontal cylinder: V = π * R² * L / 2 ≈ π m³.
+    // Mass ≈ 1000 * π ≈ 3142 kg.
+    EXPECT_EQ( test_dev.get_volume(), 3140 );
+
+    // Apply P_C0.
+    test_dev.set_cmd( "P_C0", 0, 0.1f );
+    test_dev.direct_set_value( 25.0f );
+    EXPECT_EQ( test_dev.get_volume(), 5120 );
+    }
+
+TEST( level_e_cyl_hor, get_volume_full )
+    {
+    level_e_cyl_hor test_dev( "test_LT1" );
+
+    test_dev.set_cmd( "P_R", 0, 1.0f );
+    test_dev.set_cmd( "P_H", 0, 2.0f );
+    test_dev.set_cmd( "P_DENSITY", 0, 1000.0f );
+    // P_MAX_P = 0.4 bar → h = P_MAX_P * 1e5 / (rho*g) ≈ 4 m > 2R at 100%.
+    test_dev.set_cmd( "P_MAX_P", 0, 0.4f );
+    test_dev.direct_set_value( 100.0f );
+
+    // Full cylinder: V = π * R² * L ≈ 2π m³, M ≈ 6283 kg.
+    EXPECT_EQ( test_dev.get_volume(), 6280 );
     }
 
 
@@ -2086,6 +2165,18 @@ TEST( analog_output, get_value )
     io_manager::replace_instance( prev_mngr );
     }
 
+TEST( analog_output, save_device )
+    {
+    analog_output AO01( "AO1" );
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff{};
+
+    AO01.save_device( buff.data() );
+    EXPECT_STREQ( "AO1={M=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
+        "P_MIN_V=0, P_MAX_V=0},\n",
+        buff.data() );
+    }
+
 
 TEST( flow_s, flow_s )
     {
@@ -2128,11 +2219,30 @@ TEST( DI_signal, get_state )
 
     G_PAC_INFO()->emulation_off();
     DI1.init_and_alloc( 0, 1 );
+    DI1.evaluate_io();
     EXPECT_EQ( DI1.get_state(), 0 );
 
     *DI1.DI_channels.char_read_values[ 0 ] = 1;
+    DI1.evaluate_io();
     EXPECT_EQ( DI1.get_state(), 1 );
 
+    *DI1.DI_channels.char_read_values[ 0 ] = 0;
+    DI1.set_cmd( "P_DT", 0, 1000.0f );
+    DI1.evaluate_io();
+    // Область чтения изменилась, но не прошло заданное время - состояние не
+    // должно изменяться.
+    EXPECT_EQ( DI1.get_state(), 1 );
+
+    DeltaMilliSecSubHooker::set_millisec( 1010UL );
+    DI1.evaluate_io();
+    // Прошло заданное время - состояние должно измениться.
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    // Область чтения не изменилась - состояние не должно изменяться.
+    DI1.evaluate_io();
+    EXPECT_EQ( DI1.get_state(), 0 );
+
+    DeltaMilliSecSubHooker::set_default_time();
     G_PAC_INFO()->emulation_on();
     }
 
@@ -2693,6 +2803,17 @@ TEST( valve_mix_proof, direct_set_state )
     }
 
 
+TEST( analog_valve, save_device )
+    {
+    analog_valve vc1( "VC1" );
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff{};
+
+    vc1.save_device( buff.data() );
+    EXPECT_STREQ( "VC1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2},\n",
+        buff.data() );
+    }
+
 TEST( analog_valve, get_min_value )
     {
     const analog_valve VC1( "VC1" );
@@ -2790,21 +2911,25 @@ TEST_F( analog_valve_test, io_modules_direct_on_off )
 
     // direct_on -> 100%
     VC1.direct_on();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // direct_off -> 0%
     VC1.direct_off();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
 
     // direct_set_value -> произвольное значение
     VC1.direct_set_value( 37.5f );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 37.5f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // Повторное выключение
     VC1.direct_off();
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
     }
@@ -2813,17 +2938,20 @@ TEST_F( analog_valve_test, io_modules_set_cmd_st_resets_value )
     {
     // Открыть клапан на 100% через set_cmd("V").
     VC1.set_cmd( "V", 0, 100.0 );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     EXPECT_EQ( 1, VC1.get_state() );
 
     // Закрыть клапан через ST=0 -> значение должно сброситься в 0%.
     VC1.set_cmd( "ST", 0, 0.0 );
+    VC1.evaluate_io();
     EXPECT_FLOAT_EQ( 0.0f, VC1.get_value() );
     EXPECT_EQ( 0, VC1.get_state() );
 
     // Открыть клапан через ST=1 -> значение должно сброситься в 100%.
     VC1.set_cmd( "V", 0, 55.0 );
     VC1.set_cmd( "ST", 0, 1.0 );
+    VC1.evaluate_io();
     EXPECT_EQ( 1, VC1.get_state() );
     EXPECT_FLOAT_EQ( 100.0f, VC1.get_value() );
     }
@@ -4071,8 +4199,8 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
     EXPECT_STREQ(
-        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, BLINK=0, P_FB=1},\n",
-        buff );
+        "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, "
+        "BLINK=0, P_FB=1},\n", buff );
     }
 
 
@@ -6861,6 +6989,49 @@ TEST( device_manager, get_EY )
     }
 
 
+TEST( node_dev, basic_functionality )
+    {
+    // Инициализация io_manager с одним узлом.
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+
+    // Добавление устройства node_dev.
+    auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "A100", "Test node device", "" );
+    ASSERT_EQ( io_dev, nullptr );
+
+    // Получение указателя на @node_dev для доступа к специфическим методам.
+    auto node = dynamic_cast<node_dev*>( 
+        G_DEVICE_MANAGER()->get_device( "A100" ) );
+    ASSERT_NE( node, nullptr );
+    node->set_io_node( nd );
+
+    // Проверка получения IP-адреса.
+    EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
+
+    G_PAC_INFO()->emulation_off();
+
+    // Проверка evaluate_io().
+    node->evaluate_io();
+
+    // Сохранение устройства.
+    const int BUFF_SIZE = 200;
+    std::array <char, BUFF_SIZE> buff {};
+    node->save_device( buff.data() );
+    EXPECT_STREQ( buff.data(), 
+        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
+
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    io_manager::replace_instance( prev_mngr );
+    G_PAC_INFO()->emulation_on();
+    }
+
+
 TEST( timer_manager, get_count )
     {
     const auto TIMERS_COUNT = 10;
@@ -6910,10 +7081,12 @@ class DO1_test : public ::testing::Test
 TEST_F( DO1_test, get_state_with_node_check_ok )
     {
     // Node is OK, should return channel value.
+    dev.evaluate_io();
     EXPECT_EQ( 1, dev.get_state() );
 
     // Set DO channel value to 0.
     *dev.DO_channels.char_write_values[ 0 ] = 0;
+    dev.evaluate_io();
 
     // Node is OK, should return channel value.
     EXPECT_EQ( 0, dev.get_state() );
@@ -6922,6 +7095,7 @@ TEST_F( DO1_test, get_state_with_node_check_ok )
 TEST_F( DO1_test, get_state_with_node_pp_mode )
     {
     node->status_register = 0x0010;  // PP mode active.
+    dev.evaluate_io();
 
     // Node in PP mode, should return error (-1).
     EXPECT_EQ( -1, dev.get_state() );
@@ -6930,15 +7104,17 @@ TEST_F( DO1_test, get_state_with_node_pp_mode )
 TEST_F( DO1_test, get_state_with_node_not_connected )
     {
     node->state = io_manager::io_node::ST_NO_CONNECT;
+    dev.evaluate_io();
 
-    // Node not connected, should return error (-1).
-    EXPECT_EQ( -1, dev.get_state() );
+    // Node not connected, should not return error (-1).
+    EXPECT_EQ( 1, dev.get_state() );
     }
 
 TEST_F( DO1_test, get_state_with_node_not_active )
     {
     node->is_active = false;  // Node not active.
+    dev.evaluate_io();
 
-    // Node not active, should return error (-1).
-    EXPECT_EQ( -1, dev.get_state() );
+    // Node not active, should not return error (-1).
+    EXPECT_EQ( 1, dev.get_state() );
     }
