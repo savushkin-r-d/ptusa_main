@@ -1,7 +1,27 @@
 #include "OPCUAServer_tests.h"
 #include "g_errors.h"
+#include <chrono>
 
 using namespace ::testing;
+
+TEST( OPCUA_server, evaluate_non_blocking )
+    {
+    auto res = G_OPCUA_SERVER.init_all_and_start();
+    ASSERT_EQ( UA_STATUSCODE_GOOD, res );
+
+    constexpr int ITERATIONS = 200;
+    const auto start = std::chrono::steady_clock::now();
+    for ( int i = 0; i < ITERATIONS; ++i )
+        {
+        G_OPCUA_SERVER.evaluate();
+        }
+    const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - start );
+
+    EXPECT_LT( elapsed.count(), 1000 );
+
+    G_OPCUA_SERVER.shutdown();
+    }
 
 TEST( OPCUA_server, evaluate )
     {    
@@ -130,7 +150,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( 10, *state );
     UA_Variant_clear( &out );
     // Вызывать UA_Variant_clear( &val ); не надо, так как значение храниться в
-    // локальной переменной new_state.
+    // локальной переменной new_state;
 
 
     UA_Float new_value = 100.f;
