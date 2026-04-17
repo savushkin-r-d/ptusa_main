@@ -4,7 +4,16 @@
 
 using namespace ::testing;
 
-TEST( OPCUA_server, evaluate_non_blocking )
+class OPCUA_server_test : public Test
+    {
+    protected:
+        void TearDown() override
+            {
+            G_OPCUA_SERVER.shutdown();
+            }
+    };
+
+TEST_F( OPCUA_server_test, evaluate_non_blocking )
     {
     auto res = G_OPCUA_SERVER.init_all_and_start();
     ASSERT_EQ( UA_STATUSCODE_GOOD, res );
@@ -19,8 +28,6 @@ TEST( OPCUA_server, evaluate_non_blocking )
         std::chrono::steady_clock::now() - start );
 
     EXPECT_LT( elapsed.count(), 1000 );
-
-    G_OPCUA_SERVER.shutdown();
     }
 
 TEST( OPCUA_server, evaluate )
