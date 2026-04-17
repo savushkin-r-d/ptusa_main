@@ -217,7 +217,7 @@ void OPCUA_server::shutdown()
 
 void OPCUA_server::evaluate()
     {
-    if ( server ) UA_Server_run_iterate( server, true );
+    if ( server ) UA_Server_run_iterate( server, false );
     }
 
 UA_StatusCode OPCUA_server::read_state( UA_Server*, const UA_NodeId*, void*,
