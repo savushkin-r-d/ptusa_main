@@ -1688,6 +1688,8 @@ class dev_stub final : public i_counter, public valve, public i_wages,
 
         void off() override;
         void on() override;
+        void instant_off() override;
+        void instant_on();
 
         void direct_on() override;
         void direct_off() override;

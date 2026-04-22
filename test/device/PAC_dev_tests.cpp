@@ -1363,6 +1363,20 @@ TEST( dev_stub, direct_on )
     EXPECT_EQ( STUB()->get_state(), 0 );
     }
 
+TEST( dev_stub, instant_on )
+    {
+    // Ничего не происходит.
+    STUB()->instant_on();
+    EXPECT_EQ( STUB()->get_state(), 0 );
+    }
+
+TEST( dev_stub, instant_off )
+    {
+    // Ничего не происходит.
+    STUB()->instant_off();
+    EXPECT_EQ( STUB()->get_state(), 0 );
+    }
+
 TEST( dev_stub, get_valve_state )
     {
     EXPECT_EQ( STUB()->get_valve_state(), valve::VALVE_STATE::V_OFF );
