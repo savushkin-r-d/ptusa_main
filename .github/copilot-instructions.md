@@ -266,7 +266,7 @@ The project uses GitHub Actions for continuous integration:
 
 ### Documentation and Comments
 - Limit line length to 80 characters
-- End all comment lines (single-line, multi-line, and block) with a period.
+- Write comments as complete sentences and end them with a period
 
 ## Advanced Usage
 
