@@ -1363,13 +1363,6 @@ TEST( dev_stub, direct_on )
     EXPECT_EQ( STUB()->get_state(), 0 );
     }
 
-TEST( dev_stub, instant_on )
-    {
-    // Ничего не происходит.
-    STUB()->instant_on();
-    EXPECT_EQ( STUB()->get_state(), 0 );
-    }
-
 TEST( dev_stub, instant_off )
     {
     // Ничего не происходит.

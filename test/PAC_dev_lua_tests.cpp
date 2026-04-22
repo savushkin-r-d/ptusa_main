@@ -442,7 +442,6 @@ TEST( toLuapp, STUB )
     ASSERT_EQ( active, 0 );
 
     ASSERT_EQ( 0, luaL_dostring( L, "dev:instant_off()" ) );
-    ASSERT_EQ( 0, luaL_dostring( L, "dev:instant_on()" ) );
 
     lua_close( L );
     }
