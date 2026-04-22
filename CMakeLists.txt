@@ -542,15 +542,21 @@ set(TCP_SOCKET_LOCKED_FILTER
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
-set(TCP_SOCKET_UNLOCKED_FILTER_STR "*-${TCP_SOCKET_LOCKED_FILTER_STR}")
+set(UNLOCKED_FILTER_STR 
+	"*-${TCP_SOCKET_LOCKED_FILTER_STR}cipline_tech_object.save_device:")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER_STR}
     PROPERTIES RESOURCE_LOCK tcp_socket)
+	
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER "cipline_tech_object.save_device"
+    PROPERTIES RUN_SERIAL 1)	
 
 # Discover all remaining tests.
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
-    TEST_FILTER ${TCP_SOCKET_UNLOCKED_FILTER_STR})
+    TEST_FILTER ${UNLOCKED_FILTER_STR})
