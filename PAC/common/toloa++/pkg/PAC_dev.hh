@@ -866,6 +866,8 @@ class dev_stub : public i_counter
         /// @brief Выключение устройства. Ничего не делает.
         void off();
 
+        /// @brief Немедленное выключение устройства. Ничего не делает.
+        void instant_off();
 
         /// @brief Установка состояния устройства. Ничего не делает.
         void set_state( int new_state );
