@@ -230,6 +230,9 @@ TEST( OPCUA_server, methods_callbacks )
     res = G_OPCUA_SERVER.method_off( nullptr, nullptr, nullptr,
         nullptr, dev, nullptr, nullptr, 0, nullptr, 0, nullptr );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    // Вызываем evaluate() для обработки задержки выключения клапана.
+    sleep_ms( 1 );
+    valve::evaluate();
     EXPECT_EQ( 0, dev->get_state() );
 
     res = G_OPCUA_SERVER.method_on( nullptr, nullptr, nullptr,
