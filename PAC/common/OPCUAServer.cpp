@@ -125,9 +125,95 @@ void OPCUA_server::create_dev_objects()
         stateDataSource.write = write_state;
         UA_Server_setVariableNode_dataSource( server, stateNodeId, stateDataSource );
         UA_NodeId_clear( &stateNodeId );
+
+        add_device_methods( deviceId, dev );
         }
 
     is_dev_objects_created = true;
+    }
+
+void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
+    {
+    if ( !server || !dev )
+        {
+        return;
+        }
+
+    UA_MethodAttributes methodAttr = UA_MethodAttributes_default;
+    methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "set_state" );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Set device state." );
+    methodAttr.executable = true;
+    methodAttr.userExecutable = true;
+
+    UA_Argument inputState;
+    UA_Argument_init( &inputState );
+    inputState.description = UA_LOCALIZEDTEXT_ALLOC( "en-US", "New state." );
+    inputState.name = UA_STRING_ALLOC( "state" );
+    inputState.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
+    inputState.valueRank = UA_VALUERANK_SCALAR;
+
+    UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "set_state" );
+    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        qn, methodAttr, method_set_state,
+        1, &inputState, 0, nullptr, dev, nullptr );
+
+    UA_MethodAttributes_clear( &methodAttr );
+    UA_Argument_clear( &inputState );
+    UA_QualifiedName_clear( &qn );
+
+    methodAttr = UA_MethodAttributes_default;
+    methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "set_value" );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Set device value." );
+    methodAttr.executable = true;
+    methodAttr.userExecutable = true;
+
+    UA_Argument inputValue;
+    UA_Argument_init( &inputValue );
+    inputValue.description = UA_LOCALIZEDTEXT_ALLOC( "en-US", "New value." );
+    inputValue.name = UA_STRING_ALLOC( "value" );
+    inputValue.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
+    inputValue.valueRank = UA_VALUERANK_SCALAR;
+
+    qn = UA_QUALIFIEDNAME_ALLOC( 1, "set_value" );
+    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        qn, methodAttr, method_set_value,
+        1, &inputValue, 0, nullptr, dev, nullptr );
+
+    UA_MethodAttributes_clear( &methodAttr );
+    UA_Argument_clear( &inputValue );
+    UA_QualifiedName_clear( &qn );
+
+    methodAttr = UA_MethodAttributes_default;
+    methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "on" );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Turn device on." );
+    methodAttr.executable = true;
+    methodAttr.userExecutable = true;
+
+    qn = UA_QUALIFIEDNAME_ALLOC( 1, "on" );
+    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        qn, methodAttr, method_on,
+        0, nullptr, 0, nullptr, dev, nullptr );
+
+    UA_MethodAttributes_clear( &methodAttr );
+    UA_QualifiedName_clear( &qn );
+
+    methodAttr = UA_MethodAttributes_default;
+    methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "off" );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Turn device off." );
+    methodAttr.executable = true;
+    methodAttr.userExecutable = true;
+
+    qn = UA_QUALIFIEDNAME_ALLOC( 1, "off" );
+    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+        UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
+        qn, methodAttr, method_off,
+        0, nullptr, 0, nullptr, dev, nullptr );
+
+    UA_MethodAttributes_clear( &methodAttr );
+    UA_QualifiedName_clear( &qn );
     }
 
 void OPCUA_server::create_PAC_info()
@@ -309,6 +395,122 @@ UA_StatusCode OPCUA_server::read_PAC_info_value( UA_Server*, const UA_NodeId*, v
     UA_Variant_setScalar( &dataValue->value, &value, &UA_TYPES[ UA_TYPES_STRING ] );
     dataValue->value.storageType = UA_VARIANT_DATA_NODELETE;
     dataValue->hasValue = true;
+
+    return UA_STATUSCODE_GOOD;
+    }
+
+UA_StatusCode OPCUA_server::method_set_state( UA_Server*,
+    const UA_NodeId*, void*,
+    const UA_NodeId*, void* methodContext,
+    const UA_NodeId*, void*,
+    size_t inputSize, const UA_Variant* input,
+    size_t, UA_Variant* )
+    {
+    if ( !methodContext )
+        {
+        return UA_STATUSCODE_BADINTERNALERROR;
+        }
+
+    if ( inputSize != 1 ||
+        !UA_Variant_hasScalarType( &input[ 0 ], &UA_TYPES[ UA_TYPES_INT32 ] ) )
+        {
+        return UA_STATUSCODE_BADINVALIDARGUMENT;
+        }
+
+    if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
+        {
+        return UA_STATUSCODE_BADUSERACCESSDENIED;
+        }
+
+    auto dev = static_cast<device*>( methodContext );
+    const auto state = *static_cast<UA_Int32*>( input[ 0 ].data );
+    dev->set_state( state );
+
+    return UA_STATUSCODE_GOOD;
+    }
+
+UA_StatusCode OPCUA_server::method_set_value( UA_Server*,
+    const UA_NodeId*, void*,
+    const UA_NodeId*, void* methodContext,
+    const UA_NodeId*, void*,
+    size_t inputSize, const UA_Variant* input,
+    size_t, UA_Variant* )
+    {
+    if ( !methodContext )
+        {
+        return UA_STATUSCODE_BADINTERNALERROR;
+        }
+
+    if ( inputSize != 1 ||
+        !UA_Variant_hasScalarType( &input[ 0 ], &UA_TYPES[ UA_TYPES_FLOAT ] ) )
+        {
+        return UA_STATUSCODE_BADINVALIDARGUMENT;
+        }
+
+    if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
+        {
+        return UA_STATUSCODE_BADUSERACCESSDENIED;
+        }
+
+    auto dev = static_cast<device*>( methodContext );
+    const auto value = *static_cast<UA_Float*>( input[ 0 ].data );
+    dev->set_value( value );
+
+    return UA_STATUSCODE_GOOD;
+    }
+
+UA_StatusCode OPCUA_server::method_on( UA_Server*,
+    const UA_NodeId*, void*,
+    const UA_NodeId*, void* methodContext,
+    const UA_NodeId*, void*,
+    size_t inputSize, const UA_Variant*,
+    size_t, UA_Variant* )
+    {
+    if ( !methodContext )
+        {
+        return UA_STATUSCODE_BADINTERNALERROR;
+        }
+
+    if ( inputSize != 0 )
+        {
+        return UA_STATUSCODE_BADINVALIDARGUMENT;
+        }
+
+    if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
+        {
+        return UA_STATUSCODE_BADUSERACCESSDENIED;
+        }
+
+    auto dev = static_cast<device*>( methodContext );
+    dev->on();
+
+    return UA_STATUSCODE_GOOD;
+    }
+
+UA_StatusCode OPCUA_server::method_off( UA_Server*,
+    const UA_NodeId*, void*,
+    const UA_NodeId*, void* methodContext,
+    const UA_NodeId*, void*,
+    size_t inputSize, const UA_Variant*,
+    size_t, UA_Variant* )
+    {
+    if ( !methodContext )
+        {
+        return UA_STATUSCODE_BADINTERNALERROR;
+        }
+
+    if ( inputSize != 0 )
+        {
+        return UA_STATUSCODE_BADINVALIDARGUMENT;
+        }
+
+    if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
+        {
+        return UA_STATUSCODE_BADUSERACCESSDENIED;
+        }
+
+    auto dev = static_cast<device*>( methodContext );
+    dev->off();
 
     return UA_STATUSCODE_GOOD;
     }

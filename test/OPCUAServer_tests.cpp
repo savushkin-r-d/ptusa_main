@@ -202,3 +202,102 @@ TEST( OPCUA_server, evaluate )
 
     G_DEVICE_MANAGER()->clear_io_devices();
     }
+
+TEST( OPCUA_server, methods_callbacks )
+    {
+    G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
+        "ValveM", "Test Valve", "" );
+    auto dev = G_DEVICE_MANAGER()->get_device( "ValveM" );
+    ASSERT_NE( nullptr, dev );
+
+    UA_StatusCode res = UA_STATUSCODE_BAD;
+
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+    res = G_OPCUA_SERVER.method_on( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+
+    res = G_OPCUA_SERVER.method_off( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 1;
+    res = G_OPCUA_SERVER.method_on( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    EXPECT_EQ( 1, dev->get_state() );
+
+    res = G_OPCUA_SERVER.method_off( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    EXPECT_EQ( 0, dev->get_state() );
+
+    res = G_OPCUA_SERVER.method_on( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    res = G_OPCUA_SERVER.method_off( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    res = G_OPCUA_SERVER.method_on( nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
+
+    res = G_OPCUA_SERVER.method_off( nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, 0, nullptr, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
+
+    UA_Variant in;
+    UA_Variant_init( &in );
+
+    res = G_OPCUA_SERVER.method_set_state( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    UA_Float wrong_state = 1.0f;
+    UA_Variant_setScalar( &in, &wrong_state, &UA_TYPES[ UA_TYPES_FLOAT ] );
+    res = G_OPCUA_SERVER.method_set_state( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    UA_Int32 new_state = 5;
+    UA_Variant_setScalar( &in, &new_state, &UA_TYPES[ UA_TYPES_INT32 ] );
+    res = G_OPCUA_SERVER.method_set_state( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    EXPECT_EQ( 5, dev->get_state() );
+
+    res = G_OPCUA_SERVER.method_set_value( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 0, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    UA_Int32 wrong_value = 1;
+    UA_Variant_setScalar( &in, &wrong_value, &UA_TYPES[ UA_TYPES_INT32 ] );
+    res = G_OPCUA_SERVER.method_set_value( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
+
+    UA_Float new_value = 55.f;
+    UA_Variant_setScalar( &in, &new_value, &UA_TYPES[ UA_TYPES_FLOAT ] );
+    res = G_OPCUA_SERVER.method_set_value( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_GOOD, res );
+    EXPECT_EQ( 55.f, dev->get_value() );
+
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+
+    UA_Int32 denied_state = 7;
+    UA_Variant_setScalar( &in, &denied_state, &UA_TYPES[ UA_TYPES_INT32 ] );
+    res = G_OPCUA_SERVER.method_set_state( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+
+    UA_Float denied_value = 77.f;
+    UA_Variant_setScalar( &in, &denied_value, &UA_TYPES[ UA_TYPES_FLOAT ] );
+    res = G_OPCUA_SERVER.method_set_value( nullptr, nullptr, nullptr,
+        nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
