@@ -354,7 +354,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
-                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );                
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
                 }
             if ( 100 == val ) //Сброс ошибки.
                 {
