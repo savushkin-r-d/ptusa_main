@@ -451,6 +451,9 @@ UA_StatusCode OPCUA_server::method_set_state( UA_Server*,
     const auto state = *static_cast<UA_Int32*>( input[ 0 ].data );
     dev->set_state( state );
 
+    G_LOG->debug( "%s\t OPCUA_server::method_set_state( %d )", 
+        dev->get_name(), state );
+
     return UA_STATUSCODE_GOOD;
     }
 
@@ -481,6 +484,9 @@ UA_StatusCode OPCUA_server::method_set_value( UA_Server*,
     const auto value = *static_cast<UA_Float*>( input[ 0 ].data );
     dev->set_value( value );
 
+    G_LOG->debug( "%s\t OPCUA_server::method_set_value( %f )",
+        dev->get_name(), value );
+
     return UA_STATUSCODE_GOOD;
     }
 
@@ -509,6 +515,8 @@ UA_StatusCode OPCUA_server::method_on( UA_Server*,
     auto dev = static_cast<device*>( methodContext );
     dev->on();
 
+    G_LOG->debug( "%s\t OPCUA_server::method_on()", dev->get_name() );
+
     return UA_STATUSCODE_GOOD;
     }
 
@@ -536,6 +544,8 @@ UA_StatusCode OPCUA_server::method_off( UA_Server*,
 
     auto dev = static_cast<device*>( methodContext );
     dev->off();
+
+    G_LOG->debug( "%s\t OPCUA_server::method_off()", dev->get_name() );
 
     return UA_STATUSCODE_GOOD;
     }
