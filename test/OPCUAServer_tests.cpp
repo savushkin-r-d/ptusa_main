@@ -203,6 +203,12 @@ TEST( OPCUA_server, evaluate )
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
+TEST( OPCUA_server, add_device_methods )
+    {
+    UA_NodeId deviceId{};
+    G_OPCUA_SERVER.add_device_methods( deviceId, nullptr );
+    }    
+
 TEST( OPCUA_server, methods_callbacks )
     {
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
@@ -256,6 +262,10 @@ TEST( OPCUA_server, methods_callbacks )
     UA_Variant_init( &in );
 
     res = OPCUA_server::method_set_state( nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, 0, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
+
+    res = OPCUA_server::method_set_state( nullptr, nullptr, nullptr,
         nullptr, dev, nullptr, nullptr, 0, &in, 0, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BADINVALIDARGUMENT, res );
 
@@ -271,6 +281,10 @@ TEST( OPCUA_server, methods_callbacks )
         nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     EXPECT_EQ( 5, dev->get_state() );
+
+    res = OPCUA_server::method_set_value( nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, 0, &in, 0, nullptr );
+    EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
 
     res = OPCUA_server::method_set_value( nullptr, nullptr, nullptr,
         nullptr, dev, nullptr, nullptr, 0, &in, 0, nullptr );
