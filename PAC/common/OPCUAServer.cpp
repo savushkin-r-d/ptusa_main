@@ -22,7 +22,8 @@ void OPCUA_server::init( short int port )
         {
         server = UA_Server_new();
         UA_Int16 portNumber = port;
-        UA_ServerConfig_setMinimal( UA_Server_getConfig( server ), portNumber, nullptr );
+        UA_ServerConfig_setMinimal( UA_Server_getConfig( server ),
+            portNumber, nullptr );
         }
     }
 
@@ -46,15 +47,18 @@ void OPCUA_server::create_dev_objects()
     UA_ObjectAttributes_clear( &oAttr );
     UA_QualifiedName_clear( &qn );
 
-    auto deviceCount = static_cast<u_int>( G_DEVICE_MANAGER()->get_device_count() );
+    auto deviceCount = static_cast<u_int>(
+        G_DEVICE_MANAGER()->get_device_count() );
     for ( u_int i = 0; i < deviceCount; i++ )
         {
         UA_NodeId deviceId;
         auto dev = G_DEVICE_MANAGER()->get_device( i );
 
         //Create object node.
-        oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", dev->get_name() );
-        oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", dev->get_description() );
+        oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+            dev->get_name() );
+        oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru",
+            dev->get_description() );
         qn = UA_QUALIFIEDNAME_ALLOC( 1, dev->get_name() );
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
             dev_root,
@@ -67,15 +71,18 @@ void OPCUA_server::create_dev_objects()
 
         //Creating value variable node.
         UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
-        valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ |
+            UA_ACCESSLEVELMASK_WRITE;
         UA_Float value = 0;
-        UA_Variant_setScalarCopy( &valueAttr.value, &value, &UA_TYPES[ UA_TYPES_FLOAT ] );
+        UA_Variant_setScalarCopy( &valueAttr.value, &value,
+            &UA_TYPES[ UA_TYPES_FLOAT ] );
 
         const std::string VALUE = "value";
         std::string node_name = dev->get_name();
         node_name += "." + VALUE;
 
-        valueAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", VALUE.c_str() );
+        valueAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+            VALUE.c_str() );
         valueAttr.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
         UA_NodeId valueNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
@@ -93,20 +100,24 @@ void OPCUA_server::create_dev_objects()
         UA_DataSource valueDataSource;
         valueDataSource.read = read_value;
         valueDataSource.write = write_value;
-        UA_Server_setVariableNode_dataSource( server, valueNodeId, valueDataSource );
+        UA_Server_setVariableNode_dataSource( server, valueNodeId,
+            valueDataSource );
         UA_NodeId_clear( &valueNodeId );
 
         //Creating state variable node.
         UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
-        stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ |
+            UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 state = 0;
-        UA_Variant_setScalarCopy( &stateAttr.value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
+        UA_Variant_setScalarCopy( &stateAttr.value, &state,
+            &UA_TYPES[ UA_TYPES_INT32 ] );
 
         const std::string STATE = "state";
         node_name = dev->get_name();
         node_name += "." + STATE;
 
-        stateAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", STATE.c_str() );
+        stateAttr.displayName = UA_LOCALIZEDTEXT_ALLOC(
+            "en-US", STATE.c_str() );
         stateAttr.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
         UA_NodeId stateNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
@@ -123,7 +134,8 @@ void OPCUA_server::create_dev_objects()
         UA_DataSource stateDataSource;
         stateDataSource.read = read_state;
         stateDataSource.write = write_state;
-        UA_Server_setVariableNode_dataSource( server, stateNodeId, stateDataSource );
+        UA_Server_setVariableNode_dataSource( server, stateNodeId,
+            stateDataSource );
         UA_NodeId_clear( &stateNodeId );
 
         add_device_methods( deviceId, dev );
@@ -141,13 +153,15 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     UA_MethodAttributes methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "set_state" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Set device state." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
+        "Установить новое состояние." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
     UA_Argument inputState;
     UA_Argument_init( &inputState );
-    inputState.description = UA_LOCALIZEDTEXT_ALLOC( "en-US", "New state." );
+    inputState.description = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+        "Новое состояние." );
     inputState.name = UA_STRING_ALLOC( "state" );
     inputState.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
     inputState.valueRank = UA_VALUERANK_SCALAR;
@@ -164,13 +178,15 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "set_value" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Set device value." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
+        "Установить новое значение." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
     UA_Argument inputValue;
     UA_Argument_init( &inputValue );
-    inputValue.description = UA_LOCALIZEDTEXT_ALLOC( "en-US", "New value." );
+    inputValue.description = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+        "Новое значение." );
     inputValue.name = UA_STRING_ALLOC( "value" );
     inputValue.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
     inputValue.valueRank = UA_VALUERANK_SCALAR;
@@ -187,7 +203,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "on" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Turn device on." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Включение." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
@@ -202,7 +218,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "off" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Turn device off." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Выключение." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
@@ -225,8 +241,10 @@ void OPCUA_server::create_PAC_info()
 
     //Create object node.
     UA_ObjectAttributes PAC_InfoObjAttr = UA_ObjectAttributes_default;
-    PAC_InfoObjAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "PAC_info" );
-    PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", "PAC_info" );
+    PAC_InfoObjAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+        "PAC_info" );
+    PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru",
+        "PAC_info" );
     UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "PAC_info" );
     UA_Server_addObjectNode( server, UA_NODEID_NULL,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
@@ -240,7 +258,8 @@ void OPCUA_server::create_PAC_info()
     //Uptime variable.
     UA_VariableAttributes uptimeVarAttr = UA_VariableAttributes_default;
     UA_String value = UA_String_fromChars( "0 дн. " );
-    UA_Variant_setScalarCopy( &uptimeVarAttr.value, &value, &UA_TYPES[ UA_TYPES_STRING ] );
+    UA_Variant_setScalarCopy( &uptimeVarAttr.value, &value,
+        &UA_TYPES[ UA_TYPES_STRING ] );
     std::string node_name = "PAC_info.uptime";
     uptimeVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "uptime" );
     uptimeVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
@@ -258,7 +277,8 @@ void OPCUA_server::create_PAC_info()
     //PRODUCT_VERSION_FULL_STR variable.
     UA_VariableAttributes versionVarAttr = UA_VariableAttributes_default;
     UA_String version = UA_String_fromChars( PRODUCT_VERSION_FULL_STR );
-    UA_Variant_setScalarCopy( &versionVarAttr.value, &version, &UA_TYPES[ UA_TYPES_STRING ] );
+    UA_Variant_setScalarCopy( &versionVarAttr.value, &version,
+        &UA_TYPES[ UA_TYPES_STRING ] );
     node_name = "PAC_info.version";
     versionVarAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "version" );
     versionVarAttr.dataType = UA_TYPES[ UA_TYPES_STRING ].typeId;
@@ -278,7 +298,8 @@ void OPCUA_server::create_PAC_info()
     // Creating Uptime variable read callback.
     UA_DataSource uptimeDataSource{ read_PAC_info_value, nullptr };
     uptimeDataSource.read = read_PAC_info_value;
-    UA_Server_setVariableNode_dataSource( server, uptimeNodeId, uptimeDataSource );
+    UA_Server_setVariableNode_dataSource( server, uptimeNodeId,
+        uptimeDataSource );
     UA_NodeId_clear( &uptimeNodeId );
 
     is_PAC_info_created = true;
@@ -315,7 +336,8 @@ UA_StatusCode OPCUA_server::read_state( UA_Server*, const UA_NodeId*, void*,
         {
         auto dev = (device*)nodeContext;
         UA_Int32 state = dev->get_state();
-        UA_Variant_setScalarCopy( &dataValue->value, &state, &UA_TYPES[ UA_TYPES_INT32 ] );
+        UA_Variant_setScalarCopy( &dataValue->value, &state,
+            &UA_TYPES[ UA_TYPES_INT32 ] );
         dataValue->hasValue = true;
         return UA_STATUSCODE_GOOD;
         }
@@ -357,7 +379,8 @@ UA_StatusCode OPCUA_server::read_value( UA_Server*, const UA_NodeId*, void*,
         {
         auto dev = (device*)nodeContext;
         UA_Float newvalue = dev->get_value();
-        UA_Variant_setScalarCopy( &dataValue->value, &newvalue, &UA_TYPES[ UA_TYPES_FLOAT ] );
+        UA_Variant_setScalarCopy( &dataValue->value, &newvalue,
+            &UA_TYPES[ UA_TYPES_FLOAT ] );
         return UA_STATUSCODE_GOOD;
         }
     return UA_STATUSCODE_BAD;
@@ -387,12 +410,14 @@ UA_StatusCode OPCUA_server::write_value( UA_Server*,
     return UA_STATUSCODE_BAD;
     }
 
-UA_StatusCode OPCUA_server::read_PAC_info_value( UA_Server*, const UA_NodeId*, void*,
-    const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
-    UA_DataValue* dataValue )
+UA_StatusCode OPCUA_server::read_PAC_info_value( UA_Server*, const UA_NodeId*,
+    void*, const UA_NodeId*, void* nodeContext, UA_Boolean,
+    const UA_NumericRange*, UA_DataValue* dataValue )
     {
-    static auto value = UA_STRING( const_cast<char*>( G_PAC_INFO()->get_up_time_str() ) );
-    UA_Variant_setScalar( &dataValue->value, &value, &UA_TYPES[ UA_TYPES_STRING ] );
+    static auto value = UA_STRING( const_cast<char*>(
+        G_PAC_INFO()->get_up_time_str() ) );
+    UA_Variant_setScalar( &dataValue->value, &value,
+        &UA_TYPES[ UA_TYPES_STRING ] );
     dataValue->value.storageType = UA_VARIANT_DATA_NODELETE;
     dataValue->hasValue = true;
 
