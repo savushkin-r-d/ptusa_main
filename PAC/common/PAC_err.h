@@ -84,9 +84,9 @@ class PAC_critical_errors_manager
 
         void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned long param );
+            unsigned int param );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned long param );
+            unsigned int param, bool is_print_msg = true );
 
         void reset_all_error();
 
@@ -111,7 +111,7 @@ class PAC_critical_errors_manager
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class,
-            ALARM_SUBCLASS err_sub_class, int par, bool is_set );
+            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set );
 
 
         static auto_smart_ptr < PAC_critical_errors_manager > instance;

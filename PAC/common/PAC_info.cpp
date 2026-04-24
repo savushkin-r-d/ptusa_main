@@ -341,23 +341,31 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     io_manager::get_instance()->disconnect( wn );
                     wn->is_active = 0;
                     }
+                // Если с узлом ранее не было связи и мы его хотим
+                // отключить для обслуживания, то активная ошибка отсутствия
+                // связи удаляется без записи в лог сообщения о том, что с
+                // узлом появилась связь.
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                    false );
+                wn->is_set_err = false;
+
+                // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
-                PAC_critical_errors_manager::get_instance()->reset_global_error(
-                    PAC_critical_errors_manager::AC_NO_CONNECTION,
-                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
-                wn->is_set_err = false;
                 }
             if ( 100 == val ) //Сброс ошибки.
                 {
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
+                wn->is_set_err = false;
+
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
-                PAC_critical_errors_manager::get_instance()->reset_global_error(
-                    PAC_critical_errors_manager::AC_NO_CONNECTION,
-                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
-                wn->is_set_err = false;
                 }
             }
         }

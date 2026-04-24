@@ -38,6 +38,15 @@ TEST( PAC_critical_errors_manager, set_global_error )
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     EXPECT_FALSE( mngr->is_any_error() );
 
+    // Сброс ошибки без записи в лог.
+    mngr->set_global_error( PAC_critical_errors_manager::ALARM_CLASS( 0 ),
+        PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
+    testing::internal::CaptureStdout();
+    mngr->reset_global_error( PAC_critical_errors_manager::ALARM_CLASS( 0 ),
+        PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1, false );
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, "" );
+
     // Пробуем сбросить ошибку, которой нет.
     mngr->reset_global_error( PAC_critical_errors_manager::ALARM_CLASS( 0 ),
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
@@ -81,22 +90,26 @@ TEST( PAC_critical_errors_manager, set_global_error )
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::AS_BIND_F, 1 );
+    EXPECT_FALSE( mngr->is_any_error() );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::AS_SETSOCKOPT_F, 2 );
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::AS_SETSOCKOPT_F, 2 );
+    EXPECT_FALSE( mngr->is_any_error() );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::AS_LISTEN_F, 0 );
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::AS_LISTEN_F, 0 );
+    EXPECT_FALSE( mngr->is_any_error() );
 
     mngr->set_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     EXPECT_TRUE( mngr->is_any_error() );
     mngr->reset_global_error( PAC_critical_errors_manager::AC_NET,
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
+    EXPECT_FALSE( mngr->is_any_error() );
     }
