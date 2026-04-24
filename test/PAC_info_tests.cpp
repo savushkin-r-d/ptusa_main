@@ -84,6 +84,13 @@ TEST( PAC_info, set_cmd )
     EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 1 ) );
     EXPECT_TRUE( G_IO_MANAGER()->get_node( 0 )->is_active );
 
+    // Отключаем узел для обслуживания.
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 0 ) );
+    EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    // Сбрасываем данную ошибку узла.
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 100 ) );
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+
     tcp_communicator::clear_instance();
     }
 
