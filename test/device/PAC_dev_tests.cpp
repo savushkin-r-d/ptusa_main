@@ -7038,6 +7038,74 @@ TEST( node_dev, basic_functionality )
     G_PAC_INFO()->emulation_on();
     }
 
+TEST( node_dev, set_cmd )
+    {
+    // Инициализация io_manager с одним узлом.
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+
+    // Добавление устройства node_dev.
+    auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_NODE, device::DST_NODE, "A100", "Test node device", "" );
+    ASSERT_EQ( io_dev, nullptr );
+
+    // Получение указателя на @node_dev для доступа к специфическим методам.
+    auto node = dynamic_cast<node_dev*>(
+        G_DEVICE_MANAGER()->get_device( "A100" ) );
+    ASSERT_NE( node, nullptr );
+    node->set_io_node( nd );
+
+    node->set_cmd( "WEB", 0, 1 );
+
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    G_ERRORS_MANAGER->clear();
+    io_manager::replace_instance( prev_mngr );
+    G_PAC_INFO()->emulation_on();
+    }
+
+class node_dev_set_cmd_test : public ::testing::Test
+    {
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            node = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            }
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            }
+
+        uni_io_manager mngr;
+        io_manager* prev_mngr{};
+        io_manager::io_node* node{};
+    };
+
+TEST( node_dev, set_cmd_returns_error_without_node )
+    {
+    node_dev dev( "A100" );
+
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web_is_noop_on_non_linux )
+    {
+    node_dev dev( "N1" );
+    dev.set_io_node( node );
+
+#ifndef LINUX_OS
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+#endif
+    }
+
 
 TEST( timer_manager, get_count )
     {
