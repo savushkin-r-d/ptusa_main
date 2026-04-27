@@ -7011,7 +7011,7 @@ TEST( node_dev, basic_functionality )
     ASSERT_EQ( io_dev, nullptr );
 
     // Получение указателя на @node_dev для доступа к специфическим методам.
-    auto node = dynamic_cast<node_dev*>( 
+    auto node = dynamic_cast<node_dev*>(
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
     node->set_io_node( nd );
@@ -7026,9 +7026,9 @@ TEST( node_dev, basic_functionality )
 
     // Сохранение устройства.
     const int BUFF_SIZE = 200;
-    std::array <char, BUFF_SIZE> buff {};
+    std::array <char, BUFF_SIZE> buff{};
     node->save_device( buff.data() );
-    EXPECT_STREQ( buff.data(), 
+    EXPECT_STREQ( buff.data(),
         "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
 
     // Очистка после теста.
@@ -7036,6 +7036,67 @@ TEST( node_dev, basic_functionality )
     G_ERRORS_MANAGER->clear();
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
+    }
+
+class node_dev_set_cmd_test : public ::testing::Test
+    {
+    public:
+
+        static int run_cmd_exit_code_0( const std::string& cmd,
+            int expected = 0 )
+            {
+            return expected;
+            }
+
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            node = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            }
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            }
+
+        uni_io_manager mngr;
+        io_manager* prev_mngr{};
+        io_manager::io_node* node{};
+    };
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web )
+    {
+    node_dev dev( "N1" );
+
+    // Команда WEB должна работать только для индекса 0 (второй параметр).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 1, 1 ) );
+
+    // Нет узла, команда должна вернуть ошибку.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
+
+    dev.set_io_node( node );
+
+#ifdef WIN_OS
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов на Windows нет (пустые строки).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+#else
+    auto run_cmd_0_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::run_cmd_exit_code_0 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( run_cmd_0_hook );
+
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
+
+    subhook_remove( run_cmd_0_hook );
+    subhook_free( run_cmd_0_hook );
+#endif // WIN_OS
     }
 
 

@@ -29,6 +29,8 @@ class node_dev : public device
 
         int save_device( char* buff ) const override;
 
+        int set_cmd( const char* prop, u_int idx, double val ) override;
+
 		const char* get_name_in_Lua() const override;
 
 		/// @brief Получение IP-адреса узла.
@@ -36,12 +38,29 @@ class node_dev : public device
 		/// @return - IP-адрес узла в виде строки.
 		const char* get_ip() const;
 
+        static int run_cmd_exit_code( const std::string& cmd, int expected = 0 );
+
 #ifndef PTUSA_TEST
 	private:
 #endif
+        static std::string get_local_ipv4();
+        std::string ip_controller;
+
         int web_value{};      ///< Состояние проброса порта 80.
         int startup_value{};  ///< Состояние проброса порта 1962.
 
         io_manager::io_node* node{ nullptr };
-	};
 
+        inline static const char* PORT_NODE_WEB{ "80" };
+        inline static constexpr int EXTERNAL_WEB_PORT_BASE = 10'000;
+
+        int port_controller_web{};
+
+        std::string dnat{};
+        std::string forward_in{};
+        std::string masq{};
+
+        std::string dnat_delete{};
+        std::string forward_in_delete{};
+        std::string masq_delete{};
+	};
