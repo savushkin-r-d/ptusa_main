@@ -38,6 +38,8 @@ class node_dev : public device
 		/// @return - IP-адрес узла в виде строки.
 		const char* get_ip() const;
 
+        static int run_cmd_exit_code( const std::string& cmd );
+
 #ifndef PTUSA_TEST
 	private:
 #endif
@@ -61,6 +63,4 @@ class node_dev : public device
         std::string dnat_delete{};
         std::string forward_in_delete{};
         std::string masq_delete{};
-
-        static bool run_cmd( const std::string& cmd );
 	};

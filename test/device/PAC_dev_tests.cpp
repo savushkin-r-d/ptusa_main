@@ -7042,9 +7042,9 @@ class node_dev_set_cmd_test : public ::testing::Test
     {
     public:
 
-        static bool run_cmd_0( const std::string& cmd )
+        static int run_cmd_exit_code_0( const std::string& cmd )
             {
-            return true;
+            return 0;
             }
 
     protected:
@@ -7085,8 +7085,8 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
 #else
     auto run_cmd_0_hook = subhook_new(
-        reinterpret_cast<void*>( &node_dev::run_cmd ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::run_cmd_0 ),
+        reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::run_cmd_exit_code_0 ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( run_cmd_0_hook );
 

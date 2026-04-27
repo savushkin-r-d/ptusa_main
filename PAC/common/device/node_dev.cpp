@@ -161,21 +161,65 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-bool node_dev::run_cmd( const std::string& cmd )
+int node_dev::run_cmd_exit_code( const std::string& cmd )
     {
     const int rc = std::system( cmd.c_str() );
-    if ( rc == -1 ) return false;
+    if ( rc == -1 ) return -1;
 #ifdef LINUX_OS
-    return WIFEXITED( rc ) && WEXITSTATUS( rc ) == 0;
+    return WIFEXITED( rc ) ? WEXITSTATUS( rc ) : -1;
 #else
-    return rc == 0;
+    return rc;
 #endif
+    }
+
+static std::string replace_action( const std::string& cmd,
+    const char* from, const char* to )
+    {
+    std::string out = cmd;
+    const auto pos = out.find( from );
+    if ( pos != std::string::npos )
+        {
+        out.replace( pos, std::strlen( from ), to );
+        }
+    return out;
+    }
+
+static bool ensure_rule( const std::string& append_cmd )
+    {
+    const auto check_cmd = replace_action( append_cmd, " -A ", " -C " );
+    const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
+    if ( check_rc == 0 )
+        {
+        return true;
+        }
+
+    return node_dev::run_cmd_exit_code( append_cmd ) == 0;
+    }
+
+static bool delete_all_matches( const std::string& delete_cmd )
+    {
+    const auto check_cmd = replace_action( delete_cmd, " -D ", " -C " );
+
+    for ( ;; )
+        {
+        const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
+        if ( check_rc != 0 )
+            {
+            return true;
+            }
+
+        if ( node_dev::run_cmd_exit_code( delete_cmd ) != 0 )
+            {
+            return false;
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 int node_dev::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "WEB" ) == 0 )
         {
+
         if ( idx != 0 )
             {
             G_LOG->warning( "Invalid index %u for property '%s' of node '%s'.",
@@ -183,13 +227,13 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             return 1;
             }
 
-        auto new_web_value = static_cast<int>( val );
-
         if ( !node )
             {
             G_LOG->warning( "Node '%s' is not initialized.", get_name() );
             return 1;
             }
+
+        auto new_web_value = static_cast<int>( val );
 
         if ( new_web_value == 1 && web_value == 0 )
             {
@@ -200,9 +244,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = run_cmd( dnat ) &&
-                run_cmd( forward_in ) &&
-                run_cmd( masq );
+            auto res = ensure_rule( dnat ) &&
+                ensure_rule( forward_in ) &&
+                ensure_rule( masq );
 
             if ( !res )
                 {
@@ -227,9 +271,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = run_cmd( dnat_delete ) &&
-                run_cmd( forward_in_delete ) &&
-                run_cmd( masq_delete );
+            auto res = delete_all_matches( dnat_delete ) &&
+                delete_all_matches( forward_in_delete ) &&
+                delete_all_matches( masq_delete );
 
             if ( !res )
                 {
@@ -243,7 +287,10 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             web_value = 0;
             return 0;
             }
+        
+        return 0;
         }
+
     else if ( strcmp( prop, "STARTUP" ) == 0 )
         {
         startup_value = static_cast<int>( val );
