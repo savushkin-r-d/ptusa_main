@@ -50,6 +50,8 @@ class node_dev : public device
         io_manager::io_node* node{ nullptr };
 
         inline static const char* PORT_NODE_WEB{ "80" };
+        inline static constexpr int EXTERNAL_WEB_PORT_BASE = 10'000;
+
         int port_controller_web{};
 
         std::string dnat{};

@@ -7011,7 +7011,7 @@ TEST( node_dev, basic_functionality )
     ASSERT_EQ( io_dev, nullptr );
 
     // Получение указателя на @node_dev для доступа к специфическим методам.
-    auto node = dynamic_cast<node_dev*>( 
+    auto node = dynamic_cast<node_dev*>(
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
     node->set_io_node( nd );
@@ -7026,39 +7026,10 @@ TEST( node_dev, basic_functionality )
 
     // Сохранение устройства.
     const int BUFF_SIZE = 200;
-    std::array <char, BUFF_SIZE> buff {};
+    std::array <char, BUFF_SIZE> buff{};
     node->save_device( buff.data() );
-    EXPECT_STREQ( buff.data(), 
+    EXPECT_STREQ( buff.data(),
         "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
-
-    // Очистка после теста.
-    G_DEVICE_MANAGER()->clear_io_devices();
-    G_ERRORS_MANAGER->clear();
-    io_manager::replace_instance( prev_mngr );
-    G_PAC_INFO()->emulation_on();
-    }
-
-TEST( node_dev, set_cmd )
-    {
-    // Инициализация io_manager с одним узлом.
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-
-    // Добавление устройства node_dev.
-    auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_NODE, device::DST_NODE, "A100", "Test node device", "" );
-    ASSERT_EQ( io_dev, nullptr );
-
-    // Получение указателя на @node_dev для доступа к специфическим методам.
-    auto node = dynamic_cast<node_dev*>(
-        G_DEVICE_MANAGER()->get_device( "A100" ) );
-    ASSERT_NE( node, nullptr );
-    node->set_io_node( nd );
-
-    node->set_cmd( "WEB", 0, 1 );
 
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
@@ -7088,22 +7059,23 @@ class node_dev_set_cmd_test : public ::testing::Test
         io_manager::io_node* node{};
     };
 
-TEST( node_dev, set_cmd_returns_error_without_node )
-    {
-    node_dev dev( "A100" );
-
-    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
-    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
-    }
-
-TEST_F( node_dev_set_cmd_test, set_cmd_web_is_noop_on_non_linux )
+TEST_F( node_dev_set_cmd_test, set_cmd_web )
     {
     node_dev dev( "N1" );
+
+    // Команда WEB должна работать только для индекса 0 (второй параметр).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 1, 1 ) );
+
+    // Нет узла, команда должна вернуть ошибку.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
+
     dev.set_io_node( node );
 
-#ifndef LINUX_OS
+#ifdef WIN_OS
+    // Узел есть, но команда должна выполниться неуспешно.
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
-#endif
+#endif // WIN_OS
     }
 
 

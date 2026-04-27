@@ -11,7 +11,10 @@
 #include <netinet/in.h>
 
 #include <sys/wait.h>
+#else
+#include <ws2tcpip.h>
 #endif
+
 
 #ifdef LINUX_OS
 namespace
@@ -77,8 +80,25 @@ node_dev::node_dev( const char* name ) : device( name,
 //-----------------------------------------------------------------------------
 void node_dev::set_io_node( io_manager::io_node* io_node )
     {
-    node = io_node;
-    port_controller_web = 10'000 + node->number + 80;
+    if ( !io_node )
+        {
+        G_LOG->warning( "Null pointer passed as io_node for node '%s'.",
+            get_name() );
+        return;
+        }
+
+    // Check IPv4.
+    struct in_addr ipv4_addr;
+    if ( inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
+        {
+        G_LOG->warning( "Invalid IPv4 address ('%s') for node '%s'.",
+            io_node->ip_address, get_name() );
+        return;
+        }
+
+    node = io_node;    
+    port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
+
     ip_controller = get_local_ipv4();
 
     if ( ip_controller.empty() )
@@ -109,6 +129,22 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
 
     masq_delete = IPTABLES + " -t nat -D POSTROUTING -p tcp -d " +
         node->ip_address + " --dport " + PORT_NODE_WEB + " -j MASQUERADE";
+
+    // Для отладки. Просмотр входящих правил.
+    // sudo /usr/sbin/iptables -t nat -S; sudo /usr/sbin/iptables -S FORWARD
+    // 
+    // Это команды просмотра текущих правил, без изменения конфигурации.
+    //    •	sudo /usr/sbin/iptables -t nat -S
+    //    Показать все правила таблицы nat в “скриптовом” виде ( -A ... ):
+    //      • PREROUTING (обычно DNAT),
+    //      • POSTROUTING (обычно SNAT/MASQUERADE),
+    //      • OUTPUT (локально сгенерированный трафик).
+    // 
+    //    • sudo /usr/sbin/iptables -S FORWARD
+    //    Показать правила только цепочки FORWARD (таблица filter по
+    //    умолчанию), то есть что разрешено/запрещено для транзитного трафика
+    //    между интерфейсами.
+
 #endif // LINUX_OS
     }
 //-----------------------------------------------------------------------------
@@ -141,6 +177,13 @@ static bool run_cmd( const std::string& cmd )
 int node_dev::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( !node ) return 1;
+
+    if ( idx != 0 )
+        {
+        G_LOG->warning( "Invalid index %u for property '%s' of node '%s'.",
+            idx, prop, get_name() );
+        return 1;
+        }
 
     if ( strcmp( prop, "WEB" ) == 0 )
         {
