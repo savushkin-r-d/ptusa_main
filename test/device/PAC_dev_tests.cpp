@@ -7040,6 +7040,13 @@ TEST( node_dev, basic_functionality )
 
 class node_dev_set_cmd_test : public ::testing::Test
     {
+    public:
+
+        static bool run_cmd_0( const std::string& cmd )
+            {
+            return true;
+            }
+
     protected:
         void SetUp() override
             {
@@ -7073,8 +7080,20 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     dev.set_io_node( node );
 
 #ifdef WIN_OS
-    // Узел есть, но команда должна выполниться неуспешно.
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов на Windows нет (пустые строки).
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+#else
+    auto run_cmd_0_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::run_cmd ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::run_cmd_0 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( run_cmd_0_hook );
+
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+
+    subhook_remove( run_cmd_0_hook );
+    subhook_free( run_cmd_0_hook );
 #endif // WIN_OS
     }
 

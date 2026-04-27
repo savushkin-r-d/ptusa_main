@@ -61,5 +61,6 @@ class node_dev : public device
         std::string dnat_delete{};
         std::string forward_in_delete{};
         std::string masq_delete{};
-	};
 
+        static bool run_cmd( const std::string& cmd );
+	};

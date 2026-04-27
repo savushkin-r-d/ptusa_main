@@ -4,6 +4,8 @@
 #include "bus_coupler_io.h"
 #include "log.h"
 
+#include <cstdlib>
+
 #ifdef LINUX_OS
 #include <arpa/inet.h>
 #include <ifaddrs.h>
@@ -96,18 +98,18 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
-    node = io_node;    
-    port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
+    node = io_node;
 
+    port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
     ip_controller = get_local_ipv4();
 
+#ifdef LINUX_OS
     if ( ip_controller.empty() )
         {
         G_LOG->warning( "Controller IPv4 address was not detected." );
         return;
         }
 
-#ifdef LINUX_OS
     const std::string IPTABLES = "sudo -n /usr/sbin/iptables";
     dnat = IPTABLES + " -t nat -A PREROUTING -p tcp -d " + ip_controller +
         " --dport " + std::to_string( port_controller_web ) +
@@ -163,7 +165,7 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-static bool run_cmd( const std::string& cmd )
+bool node_dev::run_cmd( const std::string& cmd )
     {
     const int rc = std::system( cmd.c_str() );
     if ( rc == -1 ) return false;
@@ -173,21 +175,25 @@ static bool run_cmd( const std::string& cmd )
     return rc == 0;
 #endif
     }
-
+//-----------------------------------------------------------------------------
 int node_dev::set_cmd( const char* prop, u_int idx, double val )
     {
-    if ( !node ) return 1;
-
-    if ( idx != 0 )
-        {
-        G_LOG->warning( "Invalid index %u for property '%s' of node '%s'.",
-            idx, prop, get_name() );
-        return 1;
-        }
-
     if ( strcmp( prop, "WEB" ) == 0 )
         {
+        if ( idx != 0 )
+            {
+            G_LOG->warning( "Invalid index %u for property '%s' of node '%s'.",
+                idx, prop, get_name() );
+            return 1;
+            }
+
         auto new_web_value = static_cast<int>( val );
+
+        if ( !node )
+            {
+            G_LOG->warning( "Node '%s' is not initialized.", get_name() );
+            return 1;
+            }
 
         if ( new_web_value == 1 && web_value == 0 )
             {
@@ -212,6 +218,7 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             G_LOG->warning( "Web port forwarding enabled for node '%s'.",
                 get_name() );
             web_value = 1;
+            return 0;
             }
 
         else if ( new_web_value == 0 && web_value == 1 )
@@ -238,14 +245,16 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             G_LOG->warning( "Web port forwarding disabled for node '%s'.",
                 get_name() );
             web_value = 0;
+            return 0;
             }
         }
-    else if ( strcmp( prop, "startup" ) == 0 )
+    else if ( strcmp( prop, "STARTUP" ) == 0 )
         {
         startup_value = static_cast<int>( val );
+        return 0;
         }
 
-    return 0;
+    return device::set_cmd( prop, idx, val );
     }
 //-----------------------------------------------------------------------------
 int node_dev::save_device( char* buff ) const
@@ -271,3 +280,4 @@ const char* node_dev::get_ip() const
     return "";
     }
 //-----------------------------------------------------------------------------
+
