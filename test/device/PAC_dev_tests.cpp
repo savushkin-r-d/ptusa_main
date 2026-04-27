@@ -7091,6 +7091,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     subhook_install( run_cmd_0_hook );
 
     EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
 
     subhook_remove( run_cmd_0_hook );
     subhook_free( run_cmd_0_hook );
