@@ -7042,9 +7042,10 @@ class node_dev_set_cmd_test : public ::testing::Test
     {
     public:
 
-        static int run_cmd_exit_code_0( const std::string& cmd )
+        static int run_cmd_exit_code_0( const std::string& cmd,
+            int expected = 0 )
             {
-            return 0;
+            return expected;
             }
 
     protected:

@@ -161,7 +161,7 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-int node_dev::run_cmd_exit_code( const std::string& cmd )
+int node_dev::run_cmd_exit_code( const std::string& cmd, int expected )
     {
     const int rc = std::system( cmd.c_str() );
     if ( rc == -1 ) return -1;
@@ -202,7 +202,7 @@ static bool delete_all_matches( const std::string& delete_cmd )
 
     for ( ;; )
         {
-        const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
+        const int check_rc = node_dev::run_cmd_exit_code( check_cmd, 1 );
         if ( check_rc != 0 )
             {
             return true;
