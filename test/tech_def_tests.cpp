@@ -515,6 +515,45 @@ TEST( tech_object, set_mode )
         G_LUA_MANAGER->free_Lua();
         }
 
+TEST( tech_object, set_cmd_to_step )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    tech_object tank( "TANK", 1, 1, "TANK1", 1, 1, 10, 10, 10, 10 );
+    tank.get_modes_manager()->add_operation( "Test operation" );
+
+    constexpr auto OPER_N1 = 1u;
+    constexpr auto STEP_N1 = 1u;
+    constexpr auto STEP_N2 = 2u;
+    constexpr auto STEP_N3 = 3u;
+    auto operation_1 = ( *tank.get_modes_manager() )[ OPER_N1 ];
+
+    operation_1->add_step( "Init", 2, -1 );
+    operation_1->add_step( "Process #1", 3, -1 );
+    operation_1->add_step( "Process #2", -1, -1 );
+
+    EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400102 ) );
+    EXPECT_EQ( 0u, operation_1->active_step() );
+
+    EXPECT_EQ( 0, tank.set_mode( OPER_N1, operation::RUN ) );
+    EXPECT_EQ( STEP_N1, operation_1->active_step() );
+
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 400103 ) );
+    EXPECT_EQ( STEP_N3, operation_1->active_step() );
+
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 400102 ) );
+    EXPECT_EQ( STEP_N2, operation_1->active_step() );
+
+    tank.set_mode( OPER_N1, operation::IDLE );
+    EXPECT_EQ( operation::IDLE, operation_1->get_state() );
+    EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400101 ) );
+    EXPECT_EQ( 0u, operation_1->active_step() );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( tech_object_manager, save_params_as_Lua_str )
     {
 	lua_State* L = lua_open();
