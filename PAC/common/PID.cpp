@@ -29,6 +29,8 @@ PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
     {
     out_value = 0;
     set_value = 0;
+    in_value_name[ 0 ] = 0;
+    out_value_name[ 0 ] = 0;
 
     set_par_name( P_k, 0, "P_k" );
     set_par_name( P_Ti, 0, "P_Ti" );
@@ -441,11 +443,29 @@ void PID::set_string_property( const char* field, const char* value )
         {
         //IN_VALUE
         case 'I':
+            if ( value )
+                {
+                strncpy( in_value_name, value, C_MAX_NAME );
+                in_value_name[ C_MAX_NAME ] = 0;
+                }
+            else
+                {
+                in_value_name[ 0 ] = 0;
+                }
             sensor = G_DEVICE_MANAGER()->get_device( value );
             break;
 
         //OUT_VALUE
         case 'O':
+            if ( value )
+                {
+                strncpy( out_value_name, value, C_MAX_NAME );
+                out_value_name[ C_MAX_NAME ] = 0;
+                }
+            else
+                {
+                out_value_name[ 0 ] = 0;
+                }
             actuator = G_DEVICE_MANAGER()->get_device( value );
             if ( this == actuator )
                 {
@@ -473,6 +493,16 @@ int PID::get_state() const
 int PID::save_device_ex( char* buff ) const
     {
     int answer_size = sprintf( buff, "Z=%.2f, ", set_value );
+    if ( in_value_name[ 0 ] )
+        {
+        answer_size += sprintf( buff + answer_size, "IN_VALUE='%s', ",
+            in_value_name );
+        }
+    if ( out_value_name[ 0 ] )
+        {
+        answer_size += sprintf( buff + answer_size, "OUT_VALUE='%s', ",
+            out_value_name );
+        }
     return answer_size;
     }
 //-----------------------------------------------------------------------------

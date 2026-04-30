@@ -1749,6 +1749,8 @@ class threshold_regulator :public device
 
         void direct_set_value( float val ) override;
 
+        int save_device_ex( char* buff ) const override;
+
         void set_string_property( const char* field, const char* value ) override;
 
     private:
@@ -1764,6 +1766,8 @@ class threshold_regulator :public device
 
         device* sensor = nullptr;
         device* actuator = nullptr;
+        char in_value_name[ C_MAX_NAME + 1 ] = { 0 };
+        char out_value_name[ C_MAX_NAME + 1 ] = { 0 };
     };
 //-----------------------------------------------------------------------------
 /// @brief Блок питания.
