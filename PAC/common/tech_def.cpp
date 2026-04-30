@@ -131,7 +131,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         switch ( newm )
             {
             case operation::PAUSE:
-                // Ignore if operation is not active.
+                // Ignore if operation is in IDLE state.
                 if ( ( *operations_manager )[ operation_n ]->get_state() ==
                     operation::IDLE )
                     {
@@ -152,7 +152,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             case operation::STOP:
-                // Ignore if operation is not active.
+                // Ignore if operation is in IDLE state.
                 if ( ( *operations_manager )[ operation_n ]->get_state() ==
                     operation::IDLE )
                     {
