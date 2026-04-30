@@ -163,6 +163,69 @@ FINAL ACTIVE STEP №3
     test_params_manager::removeObject();
     }
 
+TEST( tech_object, set_mode_stop_pause_ignored_when_idle )
+    {
+    char* res = 0;
+    mock_params_manager* par_mock = new mock_params_manager();
+    test_params_manager::replaceEntity( par_mock );
+
+    EXPECT_CALL( *par_mock, init( _ ) );
+    EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+        .Times( AtLeast( 2 ) )
+        .WillRepeatedly( Return( res ) );
+
+    par_mock->init( 0 );
+    par_mock->final_init( 0, 0, 0 );
+
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    ASSERT_EQ( 0,
+        luaL_dostring( L, "o1=tech_object( 'O1', 1, 1, 'o1', 1, 1, 10, 10, 1, 1 )" ) );
+    ASSERT_EQ( 0,
+        luaL_dostring( L, "o1:get_modes_manager():add_operation('Test operation')" ) );
+
+    lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
+    auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
+    ASSERT_NE( nullptr, tank );
+
+    const unsigned int OPER_N1 = 1;
+    auto operation_1 = ( *tank->get_modes_manager() )[ OPER_N1 ];
+
+    // Operation starts in IDLE state.
+    ASSERT_EQ( operation::IDLE, operation_1->get_state() );
+    ASSERT_EQ( 0, tank->get_mode( OPER_N1 ) );
+
+    // PAUSE command on an IDLE operation must be ignored.
+    tank->set_mode( OPER_N1, operation::PAUSE );
+    EXPECT_EQ( 0, tank->get_mode( OPER_N1 ) );
+    EXPECT_EQ( operation::IDLE, operation_1->get_state() );
+
+    // STOP command on an IDLE operation must be ignored.
+    tank->set_mode( OPER_N1, operation::STOP );
+    EXPECT_EQ( 0, tank->get_mode( OPER_N1 ) );
+    EXPECT_EQ( operation::IDLE, operation_1->get_state() );
+
+    // Start the operation, then verify PAUSE and STOP work normally.
+    tank->set_mode( OPER_N1, operation::RUN );
+    EXPECT_EQ( 1, tank->get_mode( OPER_N1 ) );
+    EXPECT_EQ( operation::RUN, operation_1->get_state() );
+
+    tank->set_mode( OPER_N1, operation::PAUSE );
+    EXPECT_EQ( 1, tank->get_mode( OPER_N1 ) );
+    EXPECT_EQ( operation::PAUSE, operation_1->get_state() );
+
+    // STOP command on a paused operation must work.
+    tank->set_mode( OPER_N1, operation::STOP );
+    EXPECT_EQ( 1, tank->get_mode( OPER_N1 ) );
+    EXPECT_EQ( operation::STOP, operation_1->get_state() );
+
+    G_LUA_MANAGER->free_Lua();
+    test_params_manager::removeObject();
+    }
+
 TEST( tech_object, lua_check_function )
     {
     lua_State* L = lua_open();

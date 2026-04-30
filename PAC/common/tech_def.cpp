@@ -131,6 +131,13 @@ int tech_object::set_mode( u_int operation_n, int newm )
         switch ( newm )
             {
             case operation::PAUSE:
+                // Ignore if operation is not active.
+                if ( ( *operations_manager )[ operation_n ]->get_state() ==
+                    operation::IDLE )
+                    {
+                    res = 1;
+                    break;
+                    }
                 // Check if possible.
                 if ( ( res = lua_check_on_pause( operation_n ) ) == 0 )
                     {
@@ -145,6 +152,13 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             case operation::STOP:
+                // Ignore if operation is not active.
+                if ( ( *operations_manager )[ operation_n ]->get_state() ==
+                    operation::IDLE )
+                    {
+                    res = 1;
+                    break;
+                    }
                 // Check if possible.
                 if ( ( res = lua_check_on_stop( operation_n ) ) == 0 )
                     {
