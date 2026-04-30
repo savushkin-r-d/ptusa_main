@@ -7047,7 +7047,7 @@ class node_dev_set_cmd_test : public ::testing::Test
     {
     public:
 
-        static int run_cmd_exit_code_0( const std::string& cmd,
+        static int run_cmd_exit_code_expected( std::string_view cmd,
             int expected = 0 )
             {
             return expected;
@@ -7103,7 +7103,8 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 #else
     auto run_cmd_0_hook = subhook_new(
         reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::run_cmd_exit_code_0 ),
+        reinterpret_cast<void*>( 
+            &node_dev_set_cmd_test::run_cmd_exit_code_expected ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( run_cmd_0_hook );
 
@@ -7112,9 +7113,10 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 
     subhook_remove( run_cmd_0_hook );
     subhook_free( run_cmd_0_hook );
+#endif // WIN_OS
+
     subhook_remove( get_local_ipv4_hook );
     subhook_free( get_local_ipv4_hook );
-#endif // WIN_OS
     }
 
 

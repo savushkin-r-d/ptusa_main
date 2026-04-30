@@ -77,11 +77,11 @@ node_dev::node_dev( const char* name ) : device( name,
     {}
 //-----------------------------------------------------------------------------
 static std::string replace_action( const std::string& cmd,
-    const std::string& from, const char* to )
+    std::string_view from, std::string_view to )
     {
-    std::string out = cmd;
-    const auto pos = out.find( from );
-    if ( pos != std::string::npos )
+    std::string out{ cmd };
+    
+    if ( const auto pos = out.find( from ); pos != std::string::npos )
         {
         out.replace( pos, from.length(), to );
         }
@@ -97,9 +97,9 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
-    // Check IPv4.
-    struct in_addr ipv4_addr;
-    if ( inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
+    // Check IPv4.    
+    if ( struct in_addr ipv4_addr;
+        inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
         {
         G_LOG->warning( "Invalid IPv4 address ('%s') for node '%s'.",
             io_node->ip_address, get_name() );
@@ -170,13 +170,13 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-int node_dev::run_cmd_exit_code( const std::string& cmd
+int node_dev::run_cmd_exit_code( std::string_view cmd
 #ifdef PTUSA_TEST
-    , int expected
+    , [[maybe_unused]] int expected
 #endif
     )
     {
-    const int rc = std::system( cmd.c_str() );
+    const int rc = std::system( cmd.data() );
     if ( rc == -1 ) return -1;
 #ifdef LINUX_OS
     return WIFEXITED( rc ) ? WEXITSTATUS( rc ) : -1;
@@ -185,11 +185,11 @@ int node_dev::run_cmd_exit_code( const std::string& cmd
 #endif
     }
 
-static bool ensure_rule( const std::string& check_cmd, 
-    const std::string& append_cmd )
-    {
-    const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
-    if ( check_rc == 0 )
+static bool ensure_rule( std::string_view check_cmd, 
+    std::string_view append_cmd )
+    {    
+    if ( const auto check_rc = node_dev::run_cmd_exit_code( check_cmd );
+        check_rc == 0 )
         {
         return true;
         }
@@ -197,8 +197,8 @@ static bool ensure_rule( const std::string& check_cmd,
     return node_dev::run_cmd_exit_code( append_cmd ) == 0;
     }
 
-static bool delete_all_matches( const std::string& check_cmd,
-    const std::string& delete_cmd )
+static bool delete_all_matches( std::string_view check_cmd, 
+    std::string_view delete_cmd )
     {
     for ( ;; )
         {
@@ -242,9 +242,8 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             return 1;
             }
 
-        auto new_web_value = static_cast<int>( val );
-
-        if ( new_web_value != 0 && web_value == 0 )
+        if ( auto new_web_value = static_cast<int>( val );
+            new_web_value != 0 && web_value == 0 )
             {
             if ( dnat.empty() || forward_in.empty() || masq.empty() )
                 {
@@ -253,11 +252,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = ensure_rule( dnat_check, dnat ) &&
+            if ( auto res = ensure_rule( dnat_check, dnat ) &&
                 ensure_rule( forward_in_check, forward_in ) &&
-                ensure_rule( masq_check, masq );
-
-            if ( !res )
+                ensure_rule( masq_check, masq ); !res )
                 {
                 G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
                     get_name() );
@@ -280,11 +277,10 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = delete_all_matches( dnat_check, dnat_delete ) &&
+            if ( auto res = delete_all_matches( dnat_check, dnat_delete ) &&
                 delete_all_matches( forward_in_check, forward_in_delete ) &&
                 delete_all_matches( masq_check, masq_delete );
-
-            if ( !res )
+                !res )
                 {
                 G_LOG->error( "Failed to disable web port forwarding for node '%s'.",
                     get_name() );
