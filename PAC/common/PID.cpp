@@ -1,5 +1,6 @@
 #include "PID.h"
 #include "string.h"
+#include <fmt/core.h>
 //-----------------------------------------------------------------------------
 PID::PID( int n ): PID( ( "PID" + std::to_string( n ) ).c_str() )
     {
@@ -445,8 +446,7 @@ void PID::set_string_property( const char* field, const char* value )
         case 'I':
             if ( value )
                 {
-                strncpy( in_value_name, value, C_MAX_NAME );
-                in_value_name[ C_MAX_NAME ] = 0;
+                snprintf( in_value_name, sizeof( in_value_name ), "%s", value );
                 }
             else
                 {
@@ -459,8 +459,7 @@ void PID::set_string_property( const char* field, const char* value )
         case 'O':
             if ( value )
                 {
-                strncpy( out_value_name, value, C_MAX_NAME );
-                out_value_name[ C_MAX_NAME ] = 0;
+                snprintf( out_value_name, sizeof( out_value_name ), "%s", value );
                 }
             else
                 {
@@ -492,16 +491,24 @@ int PID::get_state() const
 //-----------------------------------------------------------------------------
 int PID::save_device_ex( char* buff ) const
     {
-    int answer_size = sprintf( buff, "Z=%.2f, ", set_value );
+    auto remaining_size = [&]( int size )
+        {
+        return size < MAX_COPY_SIZE ? MAX_COPY_SIZE - size : 0;
+        };
+
+    int answer_size = static_cast<int>( fmt::format_to_n( buff, MAX_COPY_SIZE,
+        "Z={:.2f}, ", set_value ).size );
     if ( in_value_name[ 0 ] )
         {
-        answer_size += sprintf( buff + answer_size, "IN_VALUE='%s', ",
-            in_value_name );
+        answer_size += static_cast<int>( fmt::format_to_n(
+            buff + answer_size, remaining_size( answer_size ), "IN_VALUE='{}', ",
+            in_value_name ).size );
         }
     if ( out_value_name[ 0 ] )
         {
-        answer_size += sprintf( buff + answer_size, "OUT_VALUE='%s', ",
-            out_value_name );
+        answer_size += static_cast<int>( fmt::format_to_n(
+            buff + answer_size, remaining_size( answer_size ), "OUT_VALUE='{}', ",
+            out_value_name ).size );
         }
     return answer_size;
     }

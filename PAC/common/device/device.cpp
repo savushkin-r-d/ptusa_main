@@ -658,8 +658,7 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         case 'I':
             if ( value )
                 {
-                strncpy( in_value_name, value, C_MAX_NAME );
-                in_value_name[ C_MAX_NAME ] = 0;
+                snprintf( in_value_name, sizeof( in_value_name ), "%s", value );
                 }
             else
                 {
@@ -672,8 +671,7 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         case 'O':
             if ( value )
                 {
-                strncpy( out_value_name, value, C_MAX_NAME );
-                out_value_name[ C_MAX_NAME ] = 0;
+                snprintf( out_value_name, sizeof( out_value_name ), "%s", value );
                 }
             else
                 {
