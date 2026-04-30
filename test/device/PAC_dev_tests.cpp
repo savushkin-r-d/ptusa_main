@@ -1517,6 +1517,47 @@ TEST( device, set_article )
     EXPECT_STREQ( IFM_TE, T1.get_article() );
     }
 
+TEST( device, set_string_property_article )
+    {
+    temperature_e_analog T1( "T1" );
+
+    // Setting article via set_string_property should work correctly.
+    const auto IFM_TE = "IFM.TE11";
+    T1.set_string_property( "ARTICLE", IFM_TE );
+    EXPECT_STREQ( IFM_TE, T1.get_article() );
+
+    // Setting article to empty string should not crash.
+    T1.set_string_property( "ARTICLE", "" );
+    EXPECT_STREQ( "", T1.get_article() );
+
+    // Setting other property should not change the article.
+    T1.set_string_property( "ARTICLE", IFM_TE );
+    T1.set_string_property( "OTHER", "value" );
+    EXPECT_STREQ( IFM_TE, T1.get_article() );
+
+    // Null field and value should not crash.
+    T1.set_string_property( nullptr, nullptr );
+    }
+
+TEST( device, save_device_article )
+    {
+    pressure_e_iolink P1( "P1" );
+    const int BUFF_SIZE = 200;
+    std::array<char, BUFF_SIZE> buff{ '\0' };
+
+    // When article is not set (default), ARTICLE should not appear.
+    P1.save_device( buff.data() );
+    EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, P_ERR=0},\n",
+        buff.data() );
+
+    // When article is set, ARTICLE should appear in save_device output.
+    const auto IFM_PM1706 = "IFM.PM1706";
+    P1.set_string_property( "ARTICLE", IFM_PM1706 );
+    P1.save_device( buff.data() );
+    EXPECT_STREQ( "P1={M=0, ST=0, V=0, E=0, M_EXP=1.0, S_DEV=0.2, "
+        "ARTICLE=\"IFM.PM1706\", P_ERR=0},\n", buff.data() );
+    }
+
 TEST( device, get_type_name )
     {
     device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
@@ -2054,6 +2095,22 @@ TEST( pressure_e_iolink, read_article )
     test_dev.set_article( EH_PMP23_CA7N1KB3CJ );
     EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::EH_PMP23 );
     EXPECT_STREQ( test_dev.get_article(), EH_PMP23_CA7N1KB3CJ );
+    }
+
+TEST( pressure_e_iolink, set_string_property_article )
+    {
+    pressure_e_iolink test_dev( "P1" );
+
+    // Setting article via set_string_property correctly configures the device.
+    const auto IFM_PM1706 = "IFM.PM1706";
+    test_dev.set_string_property( "ARTICLE", IFM_PM1706 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::IFM_PM1706 );
+    EXPECT_STREQ( test_dev.get_article(), IFM_PM1706 );
+
+    const auto EH_PMP23 = "E&H.PMP23-CA7N2KB3CJ";
+    test_dev.set_string_property( "ARTICLE", EH_PMP23 );
+    EXPECT_EQ( test_dev.get_article_n(), pressure_e_iolink::ARTICLE::EH_PMP23 );
+    EXPECT_STREQ( test_dev.get_article(), EH_PMP23 );
     }
 
 TEST_F( iolink_dev_test, pressure_e_iolink_evaluate_io )
