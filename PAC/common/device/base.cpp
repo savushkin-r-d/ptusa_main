@@ -301,7 +301,10 @@ int device::save_device( char* buff ) const
 
     res += save_device_ex( buff + res );
     auto art = get_article();
-    if ( art && strlen( art ) > 1 )
+    // Include article when it has meaningful content; the default unset
+    // article is a single space character.
+    constexpr size_t C_MIN_ARTICLE_LENGTH = 2;
+    if ( art && strlen( art ) >= C_MIN_ARTICLE_LENGTH )
         {
         res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
             "ARTICLE=\"{}\", ", art ).size;
