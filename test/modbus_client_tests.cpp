@@ -55,6 +55,11 @@ class test_modbus_client : public modbus_client
             return tcpclient;
             }
 
+        int get_prev_connected_state() const
+            {
+            return prev_connected_state;
+            }
+
         void test_init_frame( unsigned int address, unsigned int value,
             unsigned int function_code )
             {
@@ -360,4 +365,49 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
 
     const int_4 expected = from_bytes( kD, kC, kB, kA );
     test_bytes( expected, "res = cli:get_int4_dc_ba(ADDR)\n" );
+    }
+
+// ------------------------------
+// TEST_F: connection state change tracking
+// ------------------------------
+
+// Test fixture reusing test_modbus_client.
+class ModbusClientConnectionStateTest : public ::testing::Test
+    {
+    protected:
+        test_modbus_client m_client{ 1, "127.0.0.1" };
+    };
+
+TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
+    {
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
+    }
+
+TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
+    {
+    // Simulate connection established.
+    m_client.get_tcp_client()->set_connected_state(
+        tcp_client::ACS_CONNECTED );
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_CONNECTED );
+
+    // Simulate connection lost.
+    m_client.get_tcp_client()->set_connected_state(
+        tcp_client::ACS_DISCONNECTED );
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
+    }
+
+TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
+    {
+    // State stays disconnected — prev should remain ACS_DISCONNECTED.
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
     }
