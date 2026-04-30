@@ -7014,7 +7014,12 @@ TEST( node_dev, basic_functionality )
     auto node = dynamic_cast<node_dev*>(
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
+
+    // Проверка получения IP-адреса в случае, когда нет привязанного узла.
+    EXPECT_STREQ( node->get_ip(), "" );
+
     node->set_io_node( nd );
+
 
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
@@ -7048,7 +7053,7 @@ class node_dev_set_cmd_test : public ::testing::Test
             return expected;
             }
 
-        std::string get_local_ipv4()
+        static std::string get_local_ipv4()
             {
             return "127.0.0.1";
             }
