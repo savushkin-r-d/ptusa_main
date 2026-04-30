@@ -2401,7 +2401,8 @@ TEST_F( iolink_dev_test, concentration_e_iolink_evaluate_io )
     init_channels( test_dev );
     set_iol_state_to_OK( test_dev );
 
-    // Set raw conductivity value (5000 raw = 5.0 mS/cm after * 0.001).
+    // Set raw conductivity value to 5000 (converts to 5.0 mS/cm
+    // when multiplied by 0.001).
     test_dev.info->conductivity = 5000;
 
     // Without P_MAX_V set (0), value should pass through unchanged.
