@@ -3014,6 +3014,15 @@ void level_s_iolink::evaluate_io()
             break;
             }
 
+        case ARTICLE::EH_FTW33:     //E&H.FTW33
+            {
+            rev_LS_data info{};
+            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
+            v = 0.1f * info.v;
+            st = info.st1;
+            break;
+            }
+
         case ARTICLE::DEFAULT:
             v = get_par( P_ERR, 0 );
             st = 0;
@@ -3079,6 +3088,12 @@ void level_s_iolink::set_article( const char* new_article )
     if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
         {
         n_article = ARTICLE::EH_FTL33;
+        return;
+        }
+
+    if ( strcmp( article, "E&H.FTW33" ) == 0 )
+        {
+        n_article = ARTICLE::EH_FTW33;
         return;
         }
 

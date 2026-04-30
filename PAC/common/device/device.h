@@ -1163,6 +1163,7 @@ class level_s_iolink : public analog_io_device
             IFM_LMT202,
 
             EH_FTL33,
+            EH_FTW33,
             };
         ARTICLE n_article = ARTICLE::DEFAULT;
 
