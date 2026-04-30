@@ -405,7 +405,7 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
 TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
     {
-    // State stays disconnected — prev should remain ACS_DISCONNECTED.
+    // State stays disconnected -- prev should remain ACS_DISCONNECTED.
     m_client.get_async_result();
 
     EXPECT_EQ( m_client.get_prev_connected_state(),
