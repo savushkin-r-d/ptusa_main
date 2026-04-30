@@ -5,7 +5,8 @@ using namespace ::testing;
 
 /// @brief Helper to init PID parameters for output scaling tests.
 ///        P_out_min and P_out_max are now in engineering units.
-void init_PID_scaling_parameters( PID& test_PID, float out_min, float out_max )
+void init_PID_scaling_parameters( PID& test_PID, float out_min,
+    float out_max )
     {
     test_PID.init_param( PID::P_k, 1 );
     test_PID.init_param( PID::P_Ti, 15 );

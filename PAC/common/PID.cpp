@@ -190,9 +190,8 @@ float PID::eval( float currentValue, int deltaSign )
         {
         prev_manual_mode = 1;
         // Сохраняем текущий выход в % (0..100) для последующего восстановления.
-        ( *par )[ P_U_manual ] = ( out_max - out_min ) > 0
-            ? ( out_value - out_min ) / ( out_max - out_min ) * MAX_OUT_VALUE
-            : MIN_OUT_VALUE;
+        ( *par )[ P_U_manual ] =
+            ( out_value - out_min ) / ( out_max - out_min ) * MAX_OUT_VALUE;
         }
 
     // Выключили ручной режим.
