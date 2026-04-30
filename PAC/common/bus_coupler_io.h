@@ -478,7 +478,9 @@ class io_manager
             /// Flag indicating PP mode alarm is currently active.
             bool is_err_mode_alarm_set = false;
 
-            /// Flag indicating configuration/bus alarm is active.
+            /// Flag indicating configuration/bus error alarm is currently
+            /// active for diagnostic status register errors (bits 2 and 8
+            /// of register 7997).
             bool is_cfg_bus_error_alarm_set = false;
 
             /// @brief Checks PP mode state of the node.
