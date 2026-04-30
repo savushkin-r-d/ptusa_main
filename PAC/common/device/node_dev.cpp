@@ -76,6 +76,18 @@ node_dev::node_dev( const char* name ) : device( name,
     device::DEVICE_TYPE::DT_NODE, device::DEVICE_SUB_TYPE::DST_NODE, 0 )
     {}
 //-----------------------------------------------------------------------------
+static std::string replace_action( const std::string& cmd,
+    const std::string& from, const char* to )
+    {
+    std::string out = cmd;
+    const auto pos = out.find( from );
+    if ( pos != std::string::npos )
+        {
+        out.replace( pos, from.length(), to );
+        }
+    return out;
+    }
+//-----------------------------------------------------------------------------
 void node_dev::set_io_node( io_manager::io_node* io_node )
     {
     if ( !io_node )
@@ -116,17 +128,14 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
 
     masq = IPTABLES + " -t nat -A POSTROUTING -p tcp -d " +
         node->ip_address + " --dport " + PORT_NODE_WEB + " -j MASQUERADE";
+    
+    dnat_delete = replace_action( dnat, " -A ", " -D " );
+    forward_in_delete = replace_action( forward_in, " -A ", " -D " );
+    masq_delete = replace_action( masq, " -A ", " -D " );
 
-    dnat_delete = IPTABLES + " -t nat -D PREROUTING -p tcp -d " +
-        ip_controller +
-        " --dport " + std::to_string( port_controller_web ) +
-        " -j DNAT --to-destination " + node->ip_address + ":" + PORT_NODE_WEB;
-
-    forward_in_delete = IPTABLES + " -D FORWARD -p tcp -d " +
-        node->ip_address + " --dport " + PORT_NODE_WEB + " -j ACCEPT";
-
-    masq_delete = IPTABLES + " -t nat -D POSTROUTING -p tcp -d " +
-        node->ip_address + " --dport " + PORT_NODE_WEB + " -j MASQUERADE";
+    dnat_check = replace_action( dnat, " -A ", " -C " );
+    forward_in_check = replace_action( forward_in, " -A ", " -C " );
+    masq_check = replace_action( masq, " -A ", " -C " );
 
     // Для отладки. Просмотр входящих правил.
     // sudo /usr/sbin/iptables -t nat -S; sudo /usr/sbin/iptables -S FORWARD
@@ -161,7 +170,11 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-int node_dev::run_cmd_exit_code( const std::string& cmd, int expected )
+int node_dev::run_cmd_exit_code( const std::string& cmd
+#ifdef PTUSA_TEST
+    , int expected
+#endif
+    )
     {
     const int rc = std::system( cmd.c_str() );
     if ( rc == -1 ) return -1;
@@ -172,21 +185,9 @@ int node_dev::run_cmd_exit_code( const std::string& cmd, int expected )
 #endif
     }
 
-static std::string replace_action( const std::string& cmd,
-    const char* from, const char* to )
+static bool ensure_rule( const std::string& check_cmd, 
+    const std::string& append_cmd )
     {
-    std::string out = cmd;
-    const auto pos = out.find( from );
-    if ( pos != std::string::npos )
-        {
-        out.replace( pos, std::strlen( from ), to );
-        }
-    return out;
-    }
-
-static bool ensure_rule( const std::string& append_cmd )
-    {
-    const auto check_cmd = replace_action( append_cmd, " -A ", " -C " );
     const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
     if ( check_rc == 0 )
         {
@@ -196,16 +197,24 @@ static bool ensure_rule( const std::string& append_cmd )
     return node_dev::run_cmd_exit_code( append_cmd ) == 0;
     }
 
-static bool delete_all_matches( const std::string& delete_cmd )
+static bool delete_all_matches( const std::string& check_cmd,
+    const std::string& delete_cmd )
     {
-    const auto check_cmd = replace_action( delete_cmd, " -D ", " -C " );
-
     for ( ;; )
         {
-        const int check_rc = node_dev::run_cmd_exit_code( check_cmd, 1 );
-        if ( check_rc != 0 )
+        const int check_rc = node_dev::run_cmd_exit_code( check_cmd
+#ifdef PTUSA_TEST
+            , 1
+#endif
+        );
+        if ( check_rc == 1 )
             {
             return true;
+            }
+
+        if ( check_rc != 0 )
+            {
+            return false;
             }
 
         if ( node_dev::run_cmd_exit_code( delete_cmd ) != 0 )
@@ -235,7 +244,7 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
 
         auto new_web_value = static_cast<int>( val );
 
-        if ( new_web_value == 1 && web_value == 0 )
+        if ( new_web_value != 0 && web_value == 0 )
             {
             if ( dnat.empty() || forward_in.empty() || masq.empty() )
                 {
@@ -244,9 +253,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = ensure_rule( dnat ) &&
-                ensure_rule( forward_in ) &&
-                ensure_rule( masq );
+            auto res = ensure_rule( dnat_check, dnat ) &&
+                ensure_rule( forward_in_check, forward_in ) &&
+                ensure_rule( masq_check, masq );
 
             if ( !res )
                 {
@@ -271,9 +280,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
                 return 1;
                 }
 
-            auto res = delete_all_matches( dnat_delete ) &&
-                delete_all_matches( forward_in_delete ) &&
-                delete_all_matches( masq_delete );
+            auto res = delete_all_matches( dnat_check, dnat_delete ) &&
+                delete_all_matches( forward_in_check, forward_in_delete ) &&
+                delete_all_matches( masq_check, masq_delete );
 
             if ( !res )
                 {

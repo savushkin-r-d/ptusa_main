@@ -7048,6 +7048,11 @@ class node_dev_set_cmd_test : public ::testing::Test
             return expected;
             }
 
+        std::string get_local_ipv4()
+            {
+            return "127.0.0.1";
+            }
+
     protected:
         void SetUp() override
             {
@@ -7078,6 +7083,12 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
 
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_local_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_local_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
     dev.set_io_node( node );
 
 #ifdef WIN_OS
@@ -7096,6 +7107,8 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 
     subhook_remove( run_cmd_0_hook );
     subhook_free( run_cmd_0_hook );
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
 #endif // WIN_OS
     }
 
