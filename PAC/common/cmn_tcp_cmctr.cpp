@@ -353,16 +353,15 @@ int tcp_communicator_impl::evaluate()
         }
     // Инициализация сети, при необходимости.-!>
 
-    int count_cycles   = 0;
-    int max_sock_number = 0;
+    int count_cycles = 0;
     while ( count_cycles < max_cycles )
         {
         /* service loop */
         count_cycles++;
 #ifndef WIN_OS
         sleep_ms( 1 );
+        int max_sock_number = 0;
 #endif
-        max_sock_number = 0;
 
         FD_ZERO( &rfds );
         for ( u_int i = 0; i < sst.size(); i++ )

@@ -319,7 +319,7 @@ int tcp_communicator::remove_async_client( tcp_client* client )
     return 0;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator::sendall( int s, u_char* buf, int len,
+int tcp_communicator::sendall( int sockfd, u_char* buf, int len,
     int sec, int usec, const char* IP, const char* name,
     stat_time* stat )
     {
@@ -341,7 +341,7 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
             G_LOG->debug(
                 R"(Network performance : send : s%d->"%s":"%s" )"
                 "avg = %lu, min = %lu, max = %lu, tresh = %u (ms).",
-                s, name, IP, avg_time,
+                sockfd, name, IP, avg_time,
                 stat->min_iteration_cycle_time,
                 stat->max_iteration_cycle_time, t );
 
@@ -350,7 +350,7 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
                 G_LOG->alert(
                     R"(Network performance : send : s%d->"%s":"%s" )"
                     "avg %lu > tresh %u (ms).",
-                    s, name, IP, avg_time, t );
+                    sockfd, name, IP, avg_time, t );
                 }
 
             stat->clear();
@@ -362,7 +362,7 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
     // Настраиваем file descriptor set.
     fd_set fds;
     FD_ZERO( &fds );
-    FD_SET( s, &fds );
+    FD_SET( sockfd, &fds );
 
     // Настраиваем время на таймаут.
     timeval rec_tv;
@@ -377,14 +377,14 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
     for ( int i = len; i > 0; )
         {
         // Ждем таймаута или возможности отсылки данных.
-        res = select( s + 1, NULL, &fds, NULL, &rec_tv );
+        res = select( sockfd + 1, NULL, &fds, NULL, &rec_tv );
 
         if ( 0 == res )
             {
             G_LOG->error(
                 R"(Network device : s%d->"%s":"%s")"
                 " disconnected on select write try : timeout (%d ms).",
-                s, name, IP, sec * 1000 + usec / 1000 );
+                sockfd, name, IP, sec * 1000 + usec / 1000 );
             return -2; // timeout!
             }
 
@@ -397,7 +397,7 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
                 "."
 #endif
                 ,
-                s, name, IP,
+                sockfd, name, IP,
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
@@ -407,11 +407,12 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
             return -1; // error
             }
 
-        auto n = send( s, reinterpret_cast<char*>( p ), i,
+        int n = static_cast<int>( send( sockfd,
+            reinterpret_cast<char*>( p ), i,
 #ifdef WIN_OS
-            0 );
+            0 ) );
 #else
-            MSG_NOSIGNAL );
+            MSG_NOSIGNAL ) );
 #endif
 
         if ( n < 0 )
@@ -423,7 +424,7 @@ int tcp_communicator::sendall( int s, u_char* buf, int len,
                 "."
 #endif
                 ,
-                s, name, IP,
+                sockfd, name, IP,
 #ifdef WIN_OS
                 WSA_Last_Err_Decode()
 #else
