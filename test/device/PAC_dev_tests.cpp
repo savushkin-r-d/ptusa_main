@@ -7018,9 +7018,17 @@ TEST( node_dev, basic_functionality )
     // Проверка получения IP-адреса в случае, когда нет привязанного узла.
     EXPECT_STREQ( node->get_ip(), "" );
 
+    // Проверка при передаче пустого указателя.
+    node->set_io_node( nullptr );
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче узла с некорректным IP-адресом.
+    strcpy( nd->ip_address, "34" );
     node->set_io_node( nd );
+    EXPECT_STREQ( node->get_ip(), "" );
 
-
+    strcpy( nd->ip_address, "127.0.0.1" );
+    node->set_io_node( nd );
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
 

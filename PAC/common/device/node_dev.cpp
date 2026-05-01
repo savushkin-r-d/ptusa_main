@@ -106,17 +106,19 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
-    node = io_node;
-
-    port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
-    ip_controller = get_local_ipv4();
-
 #ifdef LINUX_OS
+    ip_controller = get_local_ipv4();
     if ( ip_controller.empty() )
         {
         G_LOG->warning( "Controller IPv4 address was not detected." );
         return;
         }
+#endif // LINUX_OS
+
+    node = io_node;
+
+#ifdef LINUX_OS
+    port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
 
     const std::string IPTABLES = "sudo -n /usr/sbin/iptables";
     dnat = IPTABLES + " -t nat -A PREROUTING -p tcp -d " + ip_controller +
