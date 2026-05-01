@@ -7048,7 +7048,7 @@ class node_dev_set_cmd_test : public ::testing::Test
     public:
 
         static int run_cmd_exit_code_expected(
-            [[maybe_unused]] std::string_view cmd, int expected = 0 )
+            [[maybe_unused]] const char* cmd, int expected = 0 )
             {
             return expected;
             }

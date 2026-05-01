@@ -170,13 +170,13 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-int node_dev::run_cmd_exit_code( std::string_view cmd
+int node_dev::run_cmd_exit_code( const char* cmd
 #ifdef PTUSA_TEST
     , [[maybe_unused]] int expected
 #endif
 )
     {
-    const int rc = std::system( cmd.data() );
+    const int rc = std::system( cmd );
     if ( rc == -1 ) return -1;
 #ifdef LINUX_OS
     return WIFEXITED( rc ) ? WEXITSTATUS( rc ) : -1;
@@ -185,8 +185,7 @@ int node_dev::run_cmd_exit_code( std::string_view cmd
 #endif
     }
 
-static bool ensure_rule( std::string_view check_cmd,
-    std::string_view append_cmd )
+static bool ensure_rule( const char* check_cmd, const char* append_cmd )
     {
     if ( const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
         check_rc == 0 )
@@ -201,8 +200,7 @@ static bool ensure_rule( std::string_view check_cmd,
     return node_dev::run_cmd_exit_code( append_cmd ) == 0;
     }
 
-static bool delete_all_matches( std::string_view check_cmd, 
-    std::string_view delete_cmd )
+static bool delete_all_matches( const char* check_cmd, const char* delete_cmd )
     {
     for ( ;; )
         {
@@ -239,9 +237,9 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        if ( auto res = ensure_rule( dnat_check, dnat ) &&
-            ensure_rule( forward_in_check, forward_in ) &&
-            ensure_rule( masq_check, masq ); !res )
+        if ( auto res = ensure_rule( dnat_check.c_str(), dnat.c_str() ) &&
+            ensure_rule( forward_in_check.c_str(), forward_in.c_str() ) &&
+            ensure_rule( masq_check.c_str(), masq.c_str() ); !res )
             {
             G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
                 get_name() );
@@ -264,9 +262,10 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        if ( auto res = delete_all_matches( dnat_check, dnat_delete ) &&
-            delete_all_matches( forward_in_check, forward_in_delete ) &&
-            delete_all_matches( masq_check, masq_delete );
+        if ( auto res = 
+            delete_all_matches( dnat_check.c_str(), dnat_delete.c_str() ) &&
+            delete_all_matches( forward_in_check.c_str(), forward_in_delete.c_str() ) &&
+            delete_all_matches( masq_check.c_str(), masq_delete.c_str() );
             !res )
             {
             G_LOG->error( "Failed to disable web port forwarding for node '%s'.",
