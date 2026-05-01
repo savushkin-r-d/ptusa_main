@@ -9,6 +9,8 @@
 #include "device/device.h"
 #include "bus_coupler_io.h"
 
+#include <string_view> 
+
 //-----------------------------------------------------------------------------
 /// @brief Устройство управления узлом сетевых настроек.
 ///
@@ -47,6 +49,8 @@ class node_dev : public device
 #ifndef PTUSA_TEST
 	private:
 #endif
+        int process_web_cmd( int new_web_value );
+
         static std::string get_local_ipv4();
         std::string ip_controller;
 

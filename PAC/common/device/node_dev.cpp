@@ -174,7 +174,7 @@ int node_dev::run_cmd_exit_code( std::string_view cmd
 #ifdef PTUSA_TEST
     , [[maybe_unused]] int expected
 #endif
-    )
+)
     {
     const int rc = std::system( cmd.data() );
     if ( rc == -1 ) return -1;
@@ -185,13 +185,17 @@ int node_dev::run_cmd_exit_code( std::string_view cmd
 #endif
     }
 
-static bool ensure_rule( std::string_view check_cmd, 
+static bool ensure_rule( std::string_view check_cmd,
     std::string_view append_cmd )
-    {    
-    if ( const auto check_rc = node_dev::run_cmd_exit_code( check_cmd );
+    {
+    if ( const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
         check_rc == 0 )
         {
         return true;
+        }
+    else if ( check_rc != 1 )
+        {
+        return false;
         }
 
     return node_dev::run_cmd_exit_code( append_cmd ) == 0;
@@ -224,11 +228,65 @@ static bool delete_all_matches( std::string_view check_cmd,
         }
     }
 //-----------------------------------------------------------------------------
+int node_dev::process_web_cmd( int new_web_value )
+    {
+    if ( new_web_value != 0 && web_value == 0 )
+        {
+        if ( dnat.empty() || forward_in.empty() || masq.empty() )
+            {
+            G_LOG->warning(
+                "No iptables rules defined for web port forwarding." );
+            return 1;
+            }
+
+        if ( auto res = ensure_rule( dnat_check, dnat ) &&
+            ensure_rule( forward_in_check, forward_in ) &&
+            ensure_rule( masq_check, masq ); !res )
+            {
+            G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
+                get_name() );
+            return 1;
+            }
+
+        G_LOG->warning( "Web port forwarding enabled for node '%s'.",
+            get_name() );
+        web_value = 1;
+        return 0;
+        }
+
+    else if ( new_web_value == 0 && web_value == 1 )
+        {
+        if ( dnat_delete.empty() || forward_in_delete.empty() ||
+            masq_delete.empty() )
+            {
+            G_LOG->warning(
+                "No iptables rules defined for web port forwarding." );
+            return 1;
+            }
+
+        if ( auto res = delete_all_matches( dnat_check, dnat_delete ) &&
+            delete_all_matches( forward_in_check, forward_in_delete ) &&
+            delete_all_matches( masq_check, masq_delete );
+            !res )
+            {
+            G_LOG->error( "Failed to disable web port forwarding for node '%s'.",
+                get_name() );
+            return 1;
+            }
+
+        G_LOG->warning( "Web port forwarding disabled for node '%s'.",
+            get_name() );
+        web_value = 0;
+        return 0;
+        }
+
+    return 0;
+    }
+
 int node_dev::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "WEB" ) == 0 )
         {
-
         if ( idx != 0 )
             {
             G_LOG->warning( "Invalid index %u for property '%s' of node '%s'.",
@@ -242,58 +300,7 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
             return 1;
             }
 
-        if ( auto new_web_value = static_cast<int>( val );
-            new_web_value != 0 && web_value == 0 )
-            {
-            if ( dnat.empty() || forward_in.empty() || masq.empty() )
-                {
-                G_LOG->warning(
-                    "No iptables rules defined for web port forwarding." );
-                return 1;
-                }
-
-            if ( auto res = ensure_rule( dnat_check, dnat ) &&
-                ensure_rule( forward_in_check, forward_in ) &&
-                ensure_rule( masq_check, masq ); !res )
-                {
-                G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
-                    get_name() );
-                return 1;
-                }
-
-            G_LOG->warning( "Web port forwarding enabled for node '%s'.",
-                get_name() );
-            web_value = 1;
-            return 0;
-            }
-
-        else if ( new_web_value == 0 && web_value == 1 )
-            {
-            if ( dnat_delete.empty() || forward_in_delete.empty() ||
-                masq_delete.empty() )
-                {
-                G_LOG->warning(
-                    "No iptables rules defined for web port forwarding." );
-                return 1;
-                }
-
-            if ( auto res = delete_all_matches( dnat_check, dnat_delete ) &&
-                delete_all_matches( forward_in_check, forward_in_delete ) &&
-                delete_all_matches( masq_check, masq_delete );
-                !res )
-                {
-                G_LOG->error( "Failed to disable web port forwarding for node '%s'.",
-                    get_name() );
-                return 1;
-                }
-
-            G_LOG->warning( "Web port forwarding disabled for node '%s'.",
-                get_name() );
-            web_value = 0;
-            return 0;
-            }
-        
-        return 0;
+        return process_web_cmd( static_cast<int>( val ) );
         }
 
     else if ( strcmp( prop, "STARTUP" ) == 0 )
