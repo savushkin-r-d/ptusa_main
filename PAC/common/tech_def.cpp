@@ -110,7 +110,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.))",
+        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.)",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -128,21 +128,21 @@ int tech_object::set_mode( u_int operation_n, int newm )
     int i = operation_n - 1;
     if ( 0 == res )
         {
+        operation* op = ( *operations_manager )[ operation_n ];
         switch ( newm )
             {
             case operation::PAUSE:
                 // Ignore if operation is in IDLE state.
-                if ( ( *operations_manager )[ operation_n ]->get_state() ==
-                    operation::IDLE )
+                if ( op->get_state() == operation::IDLE )
                     {
-                    res = 1;
+                    res = 5;
                     break;
                     }
                 // Check if possible.
                 if ( ( res = lua_check_on_pause( operation_n ) ) == 0 )
                     {
                     state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                    ( *operations_manager )[ operation_n ]->pause();
+                    op->pause();
                     lua_on_pause( operation_n );
                     }
                 else
@@ -153,17 +153,16 @@ int tech_object::set_mode( u_int operation_n, int newm )
 
             case operation::STOP:
                 // Ignore if operation is in IDLE state.
-                if ( ( *operations_manager )[ operation_n ]->get_state() ==
-                    operation::IDLE )
+                if ( op->get_state() == operation::IDLE )
                     {
-                    res = 1;
+                    res = 6;
                     break;
                     }
                 // Check if possible.
                 if ( ( res = lua_check_on_stop( operation_n ) ) == 0 )
                     {
                     state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                    ( *operations_manager )[ operation_n ]->stop();
+                    op->stop();
                     lua_on_stop( operation_n );
                     }
                 else
@@ -173,8 +172,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             default:
-                if ( newm != 0 ) newm = 1;
-                operation* op = ( *operations_manager )[ operation_n ];
+                if ( newm != 0 ) newm = 1;                
 
                 if ( get_mode( operation_n ) == newm )
                     {
@@ -296,6 +294,14 @@ int tech_object::set_mode( u_int operation_n, int newm )
             case 4:
                 printf( " (mode index must be in [1..%d], got 0).",
                     operations_count );
+                break;
+
+            case 5:
+                printf( " (IDLE --> PAUSE is not possible)." );
+                break;
+
+            case 6:
+                printf( " (IDLE --> STOP is not possible)." );
                 break;
 
              default:
