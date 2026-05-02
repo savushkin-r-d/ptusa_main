@@ -7133,8 +7133,6 @@ TEST( node_dev, basic_functionality )
 
 TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
     {
-    node_dev dev( "A100" );
-    
 #ifdef WIN_OS
     // На Windows проверяем, что при ошибке получения IP-адреса возвращается
     // пустая строка.
@@ -7217,6 +7215,23 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 
     subhook_remove( get_local_ipv4_hook );
     subhook_free( get_local_ipv4_hook );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_startup )
+    {
+    node_dev dev( "A100" );
+
+    // Команда STARTUP должна работать.
+    EXPECT_EQ( 0, dev.set_cmd( "STARTUP", 0, 1 ) );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_to_device )
+    {
+    node_dev dev( "A100" );
+
+    // Команды, которые не обрабатываются устройством, передаются дальше.
+    // Команды 'TEST' нет, должна вернуться ошибка.
+    EXPECT_EQ( 1, dev.set_cmd( "TEST", 0, 1 ) );
     }
 
 
