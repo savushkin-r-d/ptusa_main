@@ -5,6 +5,7 @@
 #include "log.h"
 
 #include <cstdlib>
+#include <string_view>
 
 #ifdef LINUX_OS
 #include <arpa/inet.h>
@@ -88,21 +89,45 @@ static std::string replace_action( const std::string& cmd,
     return out;
     }
 //-----------------------------------------------------------------------------
+void node_dev::clear()
+    {
+    node = nullptr;
+    web_value = 0;
+    startup_value = 0;
+
+    ip_controller.clear();
+
+    dnat.clear();
+    forward_in.clear();
+    masq.clear();
+
+    dnat_delete.clear();
+    forward_in_delete.clear();
+    masq_delete.clear();
+
+    dnat_check.clear();
+    forward_in_check.clear();
+    masq_check.clear();
+    }
+//-----------------------------------------------------------------------------
 void node_dev::set_io_node( io_manager::io_node* io_node )
     {
     if ( !io_node )
         {
-        G_LOG->warning( "Null pointer passed as io_node for node '%s'.",
+        G_LOG->warning( "Null pointer passed as io_node for node '%s'. "
+            "Clearing existing I/O node binding.",
             get_name() );
+        clear();
         return;
         }
 
-    // Check IPv4.    
+    // Check IPv4.
     if ( struct in_addr ipv4_addr;
         inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
         {
         G_LOG->warning( "Invalid IPv4 address ('%s') for node '%s'.",
             io_node->ip_address, get_name() );
+        clear();
         return;
         }
 
@@ -111,6 +136,7 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
     if ( ip_controller.empty() )
         {
         G_LOG->warning( "Controller IPv4 address was not detected." );
+        clear();
         return;
         }
 #endif // LINUX_OS
