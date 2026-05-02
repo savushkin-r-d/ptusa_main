@@ -1,8 +1,6 @@
 #include "PAC_dev_tests.h"
 #include "uni_bus_coupler_io.h"
 
-using namespace ::testing;
-
 #include <cstring>
 #include <iomanip>
 #include <time.h>
@@ -12,8 +10,8 @@ using namespace ::testing;
 #include <ifaddrs.h>
 #endif
 
+using namespace ::testing;
 using B = std::byte;
-
 
 class iolink_dev_test : public ::testing::Test
     {
@@ -7038,6 +7036,7 @@ class node_dev_set_cmd_test : public ::testing::Test
 
         static void freeifaddrs_noop( [[maybe_unused]] struct ifaddrs* )
             {
+            // Do nothing, since we are using a static item in getifaddrs_null.
             }
 #endif
 
@@ -7142,7 +7141,7 @@ TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
 #else
     // На Linux проверяем разные ошибочные сценарии получения IP-адреса.
     auto getifaddrs_hook_1 = subhook_new(
-        reinterpret_cast<void*>( getifaddrs ),
+        reinterpret_cast<void*>( &getifaddrs ),
         reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_1 ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( getifaddrs_hook_1 );
@@ -7155,12 +7154,12 @@ TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
 
 
     auto getifaddrs_hook_2 = subhook_new(
-        reinterpret_cast<void*>( getifaddrs ),
+        reinterpret_cast<void*>( &getifaddrs ),
         reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_null ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( getifaddrs_hook_2 );
     auto getifaddrs_hook_3 = subhook_new(
-        reinterpret_cast<void*>( freeifaddrs ),
+        reinterpret_cast<void*>( &freeifaddrs ),
         reinterpret_cast<void*>( &node_dev_set_cmd_test::freeifaddrs_noop ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( getifaddrs_hook_3 );
@@ -7206,7 +7205,15 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( run_cmd_0_hook );
 
+    // Включаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
     EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+    
+    // Команда должна работать повторно, возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+
+    // Выключаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
     EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
 
     subhook_remove( run_cmd_0_hook );
