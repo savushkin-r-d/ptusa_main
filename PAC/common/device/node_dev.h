@@ -49,7 +49,6 @@ class node_dev : public device
 #ifndef PTUSA_TEST
 	private:
 #endif
-        void clear();
 
         int process_web_cmd( int new_web_value );
 

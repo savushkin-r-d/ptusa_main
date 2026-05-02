@@ -72,7 +72,7 @@ std::string node_dev::get_local_ipv4()
 
     return result;
     }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 node_dev::node_dev( const char* name ) : device( name,
     device::DEVICE_TYPE::DT_NODE, device::DEVICE_SUB_TYPE::DST_NODE, 0 )
     {}
@@ -89,35 +89,19 @@ static std::string replace_action( const std::string& cmd,
     return out;
     }
 //-----------------------------------------------------------------------------
-void node_dev::clear()
-    {
-    node = nullptr;
-    web_value = 0;
-    startup_value = 0;
-
-    ip_controller.clear();
-
-    dnat.clear();
-    forward_in.clear();
-    masq.clear();
-
-    dnat_delete.clear();
-    forward_in_delete.clear();
-    masq_delete.clear();
-
-    dnat_check.clear();
-    forward_in_check.clear();
-    masq_check.clear();
-    }
-//-----------------------------------------------------------------------------
 void node_dev::set_io_node( io_manager::io_node* io_node )
     {
+    if ( node )
+        {
+        G_LOG->info( "Node '%s' already has an I/O node assigned ('%s').",
+            get_name(), node->ip_address );
+        return;
+        }
+
     if ( !io_node )
         {
-        G_LOG->warning( "Null pointer passed as io_node for node '%s'. "
-            "Clearing existing I/O node binding.",
+        G_LOG->warning( "Null pointer passed as I/O node for node '%s'.",
             get_name() );
-        clear();
         return;
         }
 
@@ -127,7 +111,6 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         {
         G_LOG->warning( "Invalid IPv4 address ('%s') for node '%s'.",
             io_node->ip_address, get_name() );
-        clear();
         return;
         }
 
@@ -136,7 +119,6 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
     if ( ip_controller.empty() )
         {
         G_LOG->warning( "Controller IPv4 address was not detected." );
-        clear();
         return;
         }
 #endif // LINUX_OS
