@@ -1829,7 +1829,7 @@ temperature_e_virtual::temperature_e_virtual( const char* dev_name ) :
     {
     start_param_idx = AI1::get_params_count();
     set_par_name( P_ERR, start_param_idx, "P_ERR" );
-    param_emulator( 20, 2 );    //Average room temperature.
+    param_emulator( 20, 2 );    // Average room temperature.
     }
 //-----------------------------------------------------------------------------
 void temperature_e_virtual::direct_set_value( float new_value )
@@ -1893,10 +1893,10 @@ void temperature_e_virtual::set_string_property( const char* field,
         return;
         }
 
-    auto dev = G_DEVICE_MANAGER()->get_device( value );
-    if ( dev != G_DEVICE_MANAGER()->get_stub_device() )
+    auto source_device = G_DEVICE_MANAGER()->get_device( value );
+    if ( source_device != G_DEVICE_MANAGER()->get_stub_device() )
         {
-        source = dev;
+        source = source_device;
         return;
         }
 
