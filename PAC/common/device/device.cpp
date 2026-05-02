@@ -3006,23 +3006,17 @@ void level_s_iolink::evaluate_io()
             }
 
         case ARTICLE::EH_FTL33:     //E&H.FTL33-GR7N2ABW5J
-            {
-            rev_LS_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
-            v = 0.1f *info.v;
-            st = info.st1;
-            break;
-            }
-
         case ARTICLE::EH_FTW33:     //E&H.FTW33
             {
             rev_LS_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
+            std::reverse_copy( data, data + sizeof( info ),
+                reinterpret_cast<char*>(&info) );
             v = 0.1f * info.v;
             st = info.st1;
             break;
             }
 
+        
         case ARTICLE::DEFAULT:
             v = get_par( P_ERR, 0 );
             st = 0;
