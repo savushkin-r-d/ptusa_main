@@ -85,24 +85,26 @@ void PAC_info::eval()
 void PAC_info::reset_params()
     {
     par[ P_MIX_FLIP_PERIOD ] = 180;
-    par[ P_MIX_FLIP_UPPER_TIME ] = 2000;
-    par[ P_MIX_FLIP_LOWER_TIME ] = 1000;
-    par[ P_V_OFF_DELAY_TIME ] = 1000;
-    par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
+    par[ P_MIX_FLIP_UPPER_TIME ] = 2'000;
+    par[ P_MIX_FLIP_LOWER_TIME ] = 1'000;
+    par[ P_V_OFF_DELAY_TIME ] = 1'000;
+    par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1'200;
 
     par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] = 50;
     par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] = 300;
 
     par[ P_RESTRICTIONS_MODE ] = 0;
-    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1000; // 2 min
+    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1'000; // 2 minuntes.
 
     par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
 
-    par[ P_AUTO_OPERATION_WAIT_TIME ] = 60000;
-    par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
+    par[ P_AUTO_OPERATION_WAIT_TIME ] = 60'000;
+    par[ P_AUTO_OPERATION_WARN_TIME ] = 20'000;
 
     par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
     par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+
+    par[ P_BK_ANSWER_MAX_WAIT_TIME ] = 6'000;   // 6 seconds.
 
     par.save_all();
     }
@@ -184,6 +186,9 @@ int PAC_info::save_device( char* buff ) const
         "\tP_IS_OPC_UA_SERVER_ACTIVE={},\n", par[ P_IS_OPC_UA_SERVER_ACTIVE ] ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_BK_ANSWER_MAX_WAIT_TIME={},\n", par[ P_BK_ANSWER_MAX_WAIT_TIME ] ).size;    
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
@@ -290,7 +295,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         par.save( P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME, (u_int_4)val );
         return 0;
         }
-
 
     if ( strcmp( prop, "P_RESTRICTIONS_MODE" ) == 0 )
         {
@@ -403,6 +407,12 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_CONTROL" ) == 0 )
         {
         par.save( P_IS_OPC_UA_SERVER_CONTROL, (u_int_4)val );
+        return 0;
+        }
+
+    if ( strcmp( prop, "P_BK_ANSWER_MAX_WAIT_TIME" ) == 0 )
+        {
+        par.save( P_BK_ANSWER_MAX_WAIT_TIME, static_cast<u_int_4>( val ) );
         return 0;
         }
 
