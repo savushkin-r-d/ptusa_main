@@ -236,6 +236,30 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             }
         break;
 
+    case AC_CFG_BUS_ERROR:
+        switch ( err_sub_class )
+            {
+            case AS_IO_COUPLER:
+                res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                    " : Узел I/O '{}' ('{}', '{}') - ",
+                    G_IO_MANAGER()->get_node( par - 1 )->name,
+                    G_IO_MANAGER()->get_node( par - 1 )->ip_address,
+                    G_CMMCTR->get_host_name_rus() ).size;
+
+                if ( is_set )
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                        "Ошибка конфигурации / шины" );
+                    }
+                else
+                    {
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+                        "конфигурация и шина в норме" );
+                    }
+                break;
+            }
+        break;
+
     case AC_NO_CONNECTION:
         if ( is_set )
             {
