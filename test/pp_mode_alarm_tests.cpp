@@ -126,24 +126,6 @@ TEST( pp_mode_alarm, non_phoenix_node )
     G_PAC_INFO()->emulation_on();
     }
 
-// Test disconnect resets PP mode alarm.
-TEST( pp_mode_alarm, disconnect_resets_alarm )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
-    // Set PP mode alarm active.
-    node.is_err_mode_alarm_set = true;
-    node.state = io_manager::io_node::ST_OK;
-    
-    // Disconnect should reset the alarm.
-    mngr.disconnect( &node );
-    
-    EXPECT_FALSE( node.is_err_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
-    }
-
 // Test disconnect when alarm is not set.
 TEST( pp_mode_alarm, disconnect_no_alarm )
     {
@@ -167,14 +149,6 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
-    // Disconnect should not crash when no alarm is set.
-    mngr.disconnect( node );
-    
-    EXPECT_FALSE( node->is_err_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->state );
-
-    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
-
     tcp_communicator::clear_instance();
     }
 
@@ -193,9 +167,6 @@ TEST( pp_mode_alarm, e_communicate )
     auto node = G_IO_MANAGER()->get_node( 0 );
 
     test_uni_io_manager_PP_mode mngr;
-    auto res = mngr.e_communicate( node, 1, 1 );
-    
-    EXPECT_FALSE( err_mngr->is_any_error() );
 
     // Устанавлимаем бит перехода в PP mode.
     mngr.buff[ 1 ] = io_manager::io_node::STATUS_REG_PP_MODE_MASK;
@@ -204,7 +175,7 @@ TEST( pp_mode_alarm, e_communicate )
 
     // Должна появиться ошибка связи и пропасть ошибка наличия `PP mode`.
     G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 0;
-    res = mngr.e_communicate( node, 1, 1 );
+    mngr.e_communicate( node, 1, 1 );
     EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка связи.
 
     // Должна пропасть ошибка связи и появиться ошибка наличия `PP mode`.

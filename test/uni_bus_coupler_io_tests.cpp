@@ -361,6 +361,7 @@ TEST( uni_io_manager, e_communicate )
     io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1000, "127.0.0.1", "A100", 1, 1, 1, 1, 1, 1 );
 
+    G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 10'000;
     auto res = mngr.e_communicate( &node, 1, 1 );
     EXPECT_NE( res, 0 );
     }
