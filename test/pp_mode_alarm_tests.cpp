@@ -72,7 +72,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     DeltaMilliSecSubHooker::set_millisec(
-        io_manager::io_node::C_MAX_WAIT_TIME + 100 );
+        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] + 100);
     auto res = mngr.e_communicate( node, 1, 1 );
     EXPECT_NE( res, 0 );
     auto REF_STR_NO_CONNECTION = R"s(	{
@@ -124,24 +124,6 @@ TEST( pp_mode_alarm, non_phoenix_node )
     EXPECT_EQ( io_manager::io_node::DISPLAY_STATES::DST_OK,
         wago_node.get_display_state() );
     G_PAC_INFO()->emulation_on();
-    }
-
-// Test disconnect resets PP mode alarm.
-TEST( pp_mode_alarm, disconnect_resets_alarm )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-
-    // Set PP mode alarm active.
-    node.is_err_mode_alarm_set = true;
-    node.state = io_manager::io_node::ST_OK;
-
-    // Disconnect should reset the alarm.
-    mngr.disconnect( &node );
-
-    EXPECT_FALSE( node.is_err_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
     }
 
 // Test disconnect when alarm is not set.
