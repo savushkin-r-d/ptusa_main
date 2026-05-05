@@ -4338,10 +4338,22 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
 
     DeltaMilliSecSubHooker::set_millisec(
         static_cast<unsigned long>( CHECK_TIME + 1.f ) );
-    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0111'0000'0000;
     test_dev_max.evaluate_io();
     EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    auto value = test_dev_max.get_value();
+    const auto EXPECTED_VALUE = 1.f;
+    EXPECT_EQ( value, EXPECTED_VALUE );
+
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0001'1100'0000;
+    test_dev_max.set_article( "E&H.FTW33-GR7NW5J" );
+    test_dev_max.evaluate_io();
+    EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    value = test_dev_max.get_value();
+    EXPECT_EQ( value, 0.1f * EXPECTED_VALUE );
+
     DeltaMilliSecSubHooker::set_default_time();
+
 
     G_PAC_INFO()->emulation_on();
     }
