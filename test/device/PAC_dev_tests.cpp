@@ -4264,7 +4264,6 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
 
     for ( const auto& testCase : testCases )
         {
-        device->reset_article();
         device->set_article( testCase.article );
         EXPECT_EQ( device->get_article_n(), testCase.expected )
             << "Failed for article: " << testCase.article;

@@ -3102,17 +3102,13 @@ void level_s_iolink::set_article( const char* new_article )
         G_LOG->warning( "%s unknown article \"%s\"",
             get_name(), new_article );
         }
+    n_article = ARTICLE::DEFAULT;
     }
 
 #ifdef PTUSA_TEST
 level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
     {
     return n_article;
-    }
-
-void level_s_iolink::reset_article()
-    {
-    n_article = ARTICLE::DEFAULT;
     }
 #endif
 
