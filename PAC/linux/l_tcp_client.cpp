@@ -273,7 +273,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     if ( !checkConnection() ) return 0;
 
     int res = tcp_communicator_linux::sendall( socket_number, ( unsigned char* ) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0 );
-    
+
 
     if (res < 0)
         {

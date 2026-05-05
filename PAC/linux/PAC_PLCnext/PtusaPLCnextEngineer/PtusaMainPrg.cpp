@@ -23,7 +23,7 @@
 int G_DEBUG = 1;    //Вывод дополнительной отладочной информации.
 
 // В Linux по умолчанию обмен с модулями ввода/вывода включен.
-bool G_NO_IO_NODES = false;     
+bool G_NO_IO_NODES = false;
 bool G_READ_ONLY_IO_NODES = false;
 
 namespace PtusaPLCnextEngineer

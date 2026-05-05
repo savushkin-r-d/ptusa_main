@@ -66,13 +66,13 @@ class action
             }
 
         /// @brief Инициализация действия.
-        virtual void init() 
+        virtual void init()
             {
             // По умолчанию ничего не делаем.
             }
 
         /// @brief Выполнение действия.
-        virtual void evaluate() 
+        virtual void evaluate()
             {
             // По умолчанию ничего не делаем.
             }
@@ -372,7 +372,7 @@ class checked_devices_action final : public action
 
         /// @brief Инициализация действия.
         ///
-        /// Если в устройствах присутствуют счётчики, то для них выполняем 
+        /// Если в устройствах присутствуют счётчики, то для них выполняем
         /// вначале метод `start()` для запуска счёта (после паузы или аварии).
         void init() override;
     };
@@ -795,7 +795,7 @@ class operation
 
             STARTING = 10,  //Запускается.
             PAUSING,        //Становится в паузу.
-            UNPAUSING,      //Выходит из паузы.            
+            UNPAUSING,      //Выходит из паузы.
             STOPPING,       //Останавливается.
             COMPLETING,     //Завершается.
 
@@ -883,7 +883,7 @@ class operation
             }
 
         step* add_step( const char* step_name, int next_step_n = -1,
-            int step_duration_par_n = -1, int step_max_duration_par_n = -1, 
+            int step_duration_par_n = -1, int step_max_duration_par_n = -1,
             state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
@@ -932,7 +932,7 @@ class operation
 
         /// @brief Обработка перехода по умолчанию - переход к остановке
         /// или к следующему состоянию.
-        /// 
+        ///
         /// @param next_state - новое состояние.
         /// @param def_state - новое состояние по умолчанию.
         int default_process_new_state( state_idx next_state, state_idx def_state );
@@ -1027,7 +1027,7 @@ class operation_manager
 
     private:
         std::vector< operation* > operations; ///< Операции.
-        
+
         ///< Операция-заглушка.
         operation oper_stub{ "Операция-заглушка", this, -1 };
 

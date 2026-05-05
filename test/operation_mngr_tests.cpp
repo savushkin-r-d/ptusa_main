@@ -64,7 +64,7 @@ TEST( action, check_devices )
 	virtual_valve v3( "TEST1_V3" );
 	tech_dev_error err_v3( &v3 );
 	v3.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
-	
+
 	a1.add_dev( &v1 );
 
 	const auto MAX_SIZE = 20;
@@ -119,7 +119,7 @@ TEST( open_seat_action, evaluate )
     operation->start( 1 );
 	action->init();
     auto w_time = reinterpret_cast<open_seat_action*>( action )->get_wait_time();
-    // Время интервалов должно быть равно 2000 мс (для двух групп и времени 
+    // Время интервалов должно быть равно 2000 мс (для двух групп и времени
     // шага 10 с (10'000 мс)).
     EXPECT_EQ( w_time, 2000 );
 
@@ -216,7 +216,7 @@ TEST( off_action, evaluate )
 	EXPECT_FALSE( V2.is_active() );
 	EXPECT_TRUE( V3.is_active() );
 	EXPECT_FALSE( DO1.is_active() );
-	
+
 	action.finalize();
 	EXPECT_FALSE( V1.is_active() );
 	EXPECT_FALSE( V2.is_active() );
@@ -332,7 +332,7 @@ TEST( operation_state, is_empty )
 	auto operation_mngr = test_tank.get_modes_manager();
 	auto operation = ( *operation_mngr )[ 1 ];
 	operation->add_step( "Тестовый шаг", -1, -1 );
-	auto operation_state = ( *operation )[ 1 ];	
+	auto operation_state = ( *operation )[ 1 ];
 	EXPECT_EQ( true, operation_state->is_empty() );
 
 	auto step = ( *operation_state )[ -1 ];
@@ -357,7 +357,7 @@ TEST( operation_state, check_devices )
 		( *additional_step_in_run )[ step::ACTIONS::A_ON ] );
 
 	virtual_valve v1( "TEST1_V1" );
-	tech_dev_error err_v1( &v1 );	
+	tech_dev_error err_v1( &v1 );
 	a1->add_dev( &v1 );
 	const auto MAX_SIZE = 20;
 	std::string buff( MAX_SIZE, '\0' );
@@ -417,7 +417,7 @@ TEST( operation_state, check_devices_multiple_extra_steps )
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto extra_step_1 = operation_run_state->add_step( "Extra_Step_1" );
 	auto extra_step_2 = operation_run_state->add_step( "Extra_Step_2" );
-	auto a1 = dynamic_cast<on_action*>( 
+	auto a1 = dynamic_cast<on_action*>(
         ( *extra_step_1 )[ step::ACTIONS::A_ON ] );
     ASSERT_NE( a1, nullptr );
 	auto a2 = dynamic_cast<on_action*>(
@@ -443,13 +443,13 @@ TEST( operation_state, check_devices_multiple_extra_steps )
 	test_op->on_extra_step( EXTRA_STEP_2_NUM );
 	EXPECT_TRUE( test_op->is_active_run_extra_step( EXTRA_STEP_1_NUM ) );
 	EXPECT_TRUE( test_op->is_active_run_extra_step( EXTRA_STEP_2_NUM ) );
-	
+
 	// Устройство в первом доп. шаге переводим в состояние аварии.
 	v1.direct_set_state( valve::VALVE_STATE_EX::VX_ON_FB_ERR );
 	auto r = operation_run_state->check_devices( &buff[ 0 ], MAX_SIZE );
 	EXPECT_NE( 0, r );
 	EXPECT_STREQ( "'TEST1_V1'", buff.c_str() );
-	
+
 	// Восстанавливаем первое устройство, авария во втором доп. шаге.
 	v1.direct_set_state( valve::VALVE_STATE_EX::VX_LOWER_SEAT );
 	std::fill( buff.begin(), buff.end(), '\0' );
@@ -472,7 +472,7 @@ TEST( operation_state, to_next_step )
 	//Корректный переход по шагам должен быть таким: 1 -> 3 -> 2 -> 3.
 	test_op->start();
 	EXPECT_EQ( 1, test_op->active_step() );
-	test_op->evaluate();	
+	test_op->evaluate();
 	test_op->to_next_step();
 	EXPECT_EQ( 3, test_op->active_step() );
 	test_op->evaluate();
@@ -540,7 +540,7 @@ R"("Танк1" operation 1 "RUN" to_step() -> 2, step time 10000 ms, next step 3
     EXPECT_EQ( STEP2, test_op->active_step() );
     G_DEBUG = 0;
 
-    // Шаг 2 должен отключиться через заданное время, так как переходим к 
+    // Шаг 2 должен отключиться через заданное время, так как переходим к
     // шагу 1 с задержкой.
     const auto DELAY_1000MS = 1'000;
     test_op->to_step( STEP1, DELAY_1000MS );
@@ -594,7 +594,7 @@ TEST( operation, add_step )
 	{
 	tech_object test_tank( "Танк1", 1, 1, "T", 0, 10, 10, 0, 0, 0 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
-	
+
 	// Добавляем шаг для несуществующего состояния операции - должно корректно
 	// отработать.
 	auto res = test_op->add_step( "Init", -1, -1, -1, operation::STATES_MAX );
@@ -634,7 +634,7 @@ TEST( operation, check_max_step_time )
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
     const auto RES_STR = "превышено макс. t (10 с) шага 1 'Тестовый пер...'";
     EXPECT_STREQ( RES_STR, err_str );
-        
+
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 	DeltaMilliSecSubHooker::set_default_time();
@@ -651,7 +651,7 @@ TEST( operation, check_max_step_time )
 	DeltaMilliSecSubHooker::set_millisec(10'001UL);
     test_op->check_max_step_time( err_str, ERR_STR_SIZE );
     const auto RES_STR_EX = "превышено макс. t (10 с) шага 2 'Работа рецепта'";
-    EXPECT_STREQ( RES_STR_EX, err_str );    
+    EXPECT_STREQ( RES_STR_EX, err_str );
 	test_tank.evaluate();
 	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 	DeltaMilliSecSubHooker::set_default_time();
@@ -716,7 +716,7 @@ TEST( operation, operator_at )
 
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
-	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );	
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 	auto stub = ( *test_op )[ operation::STATES_MAX ];
 	ASSERT_STREQ( "заглушка", stub->get_name() );
 
@@ -734,7 +734,7 @@ TEST( operation, start )
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
-	
+
 	EXPECT_EQ( -1, test_op->get_run_step() );
 
 	EXPECT_EQ( 0, test_op->get_run_steps_count() );
@@ -826,7 +826,7 @@ TEST( operation, on_extra_step )
 	EXPECT_FALSE( test_op->is_active_run_extra_step( ANOTHER_EXTRA_STEP ) );
 	EXPECT_FALSE( test_op->is_active_extra_step( EXTRA_STEP ) );
 	EXPECT_FALSE( test_op->is_active_extra_step( ANOTHER_EXTRA_STEP ) );
-	
+
 
 	G_LUA_MANAGER->free_Lua();
 	}
@@ -931,11 +931,11 @@ TEST( operation, evaluate )
 	test_op->add_step( "Init", 2, -1 );
 	test_op->add_step( "Process #1", 3, -1 );
 	test_op->add_step( "Process #2", 2, -1 );
-	
+
 	test_op->add_step( "Safe stop #1", 2, -1, -1, operation::PAUSE );
 	test_op->add_step( "Safe stop #2", 3, -1, -1, operation::PAUSE );
 	test_op->add_step( "Idle", -1, -1, -1, operation::PAUSE );
-	
+
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
@@ -945,7 +945,7 @@ TEST( operation, evaluate )
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->finalize();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
-		
+
 	test_op->start();
 	EXPECT_EQ( operation::RUN, test_op->get_state() );
 	test_op->evaluate();
@@ -999,7 +999,7 @@ TEST( operation, evaluate )
 
 	test_op->switch_off();
 
-	//Корректное автовключение/автоотключение.	
+	//Корректное автовключение/автоотключение.
 	auto operation_idle_state = ( *test_op )[ operation::IDLE ];
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto operation_pause_state = ( *test_op )[ operation::PAUSE ];
@@ -1020,7 +1020,7 @@ TEST( operation, evaluate )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	if_action_in_idle->add_dev( &test_DI_one );
     if_action_in_idle->set_int_property( "next_state_n", 0, operation::RUN );
-	
+
 	auto if_action_in_run = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_run )[ step::ACTIONS::A_JUMP_IF ] );
 	if_action_in_run->add_dev( &test_DI_one, 0, 1 );
@@ -1028,7 +1028,7 @@ TEST( operation, evaluate )
 
 	//По умолчанию все сигналы неактивны, операция не должна включиться.
 	test_op->evaluate();
-	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
 	//Сигнал активен, операция должна включиться.
 	test_DI_one.on();
@@ -1066,14 +1066,14 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
-	//Сигнал активен, но операция не должна включиться, так как автовключение 
+	//Сигнал активен, но операция не должна включиться, так как автовключение
 	//было отключено.
 	test_DI_one.on();
 	test_DI_two.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
-	//Сигнал активен, операция должна включиться, так как автовключение 
+	//Сигнал активен, операция должна включиться, так как автовключение
 	//было опять включено.
 	test_DI_one.off();
 	test_DI_two.on();
@@ -1136,7 +1136,7 @@ TEST( operation, evaluate )
 	//При отсутствии описания следующего состояние, остаемся в текущем.
 	auto if_action_in_starting = reinterpret_cast<jump_if_action*>
 		( ( *main_step_in_starting )[ step::ACTIONS::A_JUMP_IF ] );
-	if_action_in_starting->add_dev( &test_DI_one );    
+	if_action_in_starting->add_dev( &test_DI_one );
 	test_DI_one.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::STARTING, test_op->get_state() );
@@ -1317,7 +1317,7 @@ TEST( operation, evaluate_PID )
 	p1->evaluate_io();
 	//ПИД-регулятор должен выключиться.
 	EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1->get_state() );
-		
+
 
 	test_op->finalize();
 
@@ -1336,7 +1336,7 @@ TEST( operation, evaluate_from_run_to_pause )
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
 
-	//Корректный переход к паузе.	
+	//Корректный переход к паузе.
 	auto operation_run_state = ( *test_op )[ operation::RUN ];
 	auto main_step_in_run = ( *operation_run_state )[ -1 ];
 
@@ -1367,8 +1367,8 @@ TEST( operation, evaluate_from_run_to_pause )
 	if_action_in_run->set_int_property( "next_state_n", 0,
 		operation::state_idx::PAUSE );
 	test_DI_one.on();
-    testing::internal::CaptureStdout();    
-	test_op->evaluate();    
+    testing::internal::CaptureStdout();
+	test_op->evaluate();
     G_DEBUG = 0;
 
     auto output = testing::internal::GetCapturedStdout();
@@ -1382,7 +1382,7 @@ TEST( operation, evaluate_from_run_to_pause )
                          R"(Событие -> 'Танк1 1' - авария операции 1 'Test operation' - пауза по активности 'test_DI1'.)" "\n";
 
     EXPECT_EQ( output, reference_out );
-	EXPECT_EQ( operation::PAUSE, test_op->get_state() );		
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
 	test_op->finalize();
 
     G_DEBUG = 1;
@@ -1401,7 +1401,7 @@ TEST( operation, evaluate_enable_step_by_signal )
     test_op->add_step( "Тестовый шаг 1", -1, -1 );
     auto step2 = test_op->add_step( "Тестовый шаг 2", -1, -1 );
     const auto STEP2 = 2;
-    auto action = reinterpret_cast<enable_step_by_signal*>( 
+    auto action = reinterpret_cast<enable_step_by_signal*>(
         ( *step2 )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
     DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
@@ -1461,7 +1461,7 @@ TEST( operation, evaluate_off_last_step )
 
     //Прошло заданное время, операция должна отключиться.
     DeltaMilliSecSubHooker::set_millisec( 1000UL * DELAY_TIME_S + 1 );
-    test_op->evaluate();    
+    test_op->evaluate();
     EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
     test_op->finalize();
@@ -1488,7 +1488,7 @@ TEST( AI_AO_action, check )
     auto operation_state = ( *operation )[ 1 ];
 	auto step = ( *operation_state )[ 1 ];
 
-	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];	
+	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];
 	std::string buff( MAX_STR_SIZE, '\0' );
 
 	EXPECT_EQ( 0, action->check( &buff[ 0 ], MAX_STR_SIZE ) );
@@ -1510,12 +1510,12 @@ TEST( checked_devices_action, finalize )
         device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	auto action = checked_devices_action();
 	action.add_dev( &test_DO );
-	
+
 	test_DO.on();
 	action.init();
 	action.evaluate();
 	EXPECT_EQ( 1, test_DO.get_state() );
-	
+
 	action.finalize();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
@@ -1546,7 +1546,7 @@ TEST( checked_devices_action, init )
     sleep_ms( 2 );
     //Прошло заданное время, задан минимальный расход, счетчик не считает -
     //есть ошибка.
-    FQT1.evaluate_io();    
+    FQT1.evaluate_io();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, FQT1.get_state() );
 
     // После старта действия ошибка счётчика сбрасывается, но она возникнет
@@ -1678,7 +1678,7 @@ TEST( DI_DO_action, check )
 
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
-	
+
 	// Test with invalid device type (AI instead of DI/DO).
 	AI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
 		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
@@ -1688,7 +1688,7 @@ TEST( DI_DO_action, check )
 	std::string msg( MAX_STR_SIZE, '\0' );
 	auto res = action.check( &msg[ 0 ], MAX_STR_SIZE );
 	EXPECT_EQ( 1, res );
-	const std::string EXPECTED_STR = 
+	const std::string EXPECTED_STR =
 		"в поле 'Группы DIs->DOs' устройство 'test_AI1 (Test AI)'"
 		" не является допустимым сигналом (DI, SB, GS, LS, FS, DO)";
 	EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str());
@@ -1781,7 +1781,7 @@ TEST( DI_DO_action, check_multiple_devices )
 
 	test_DO.set_descr( "Test DO" );
 	auto action = DI_DO_action();
-	
+
 	action.add_dev( &test_DI1 );
 	action.add_dev( &test_DI2 );
 	action.add_dev( &test_DO );
@@ -1793,7 +1793,7 @@ TEST( DI_DO_action, check_multiple_devices )
     action.add_dev( &test_DI1 );
     res = action.check( &msg[ 0 ], MAX_STR_SIZE );
     EXPECT_EQ( 1, res );
-    const std::string EXPECTED_STR = 
+    const std::string EXPECTED_STR =
         "в поле 'Группы DIs->DOs' устройство 'test_DI1 ()' расположено "
         "неправильно: DI сигналы должны быть описаны перед DO сигналами";
     EXPECT_STREQ( EXPECTED_STR.c_str(), msg.c_str() );
@@ -1912,15 +1912,15 @@ TEST( DI_DO_action, evaluate_multiple_subgroups )
 TEST( DI_DO_action, set_int_property )
 	{
 	auto action = DI_DO_action();
-	
+
 	// Test setting to AND logic.
 	auto res = action.set_int_property( "logic_type", 0, 1 );
 	EXPECT_EQ( 0, res );
-	
+
 	// Test setting to OR logic.
 	res = action.set_int_property( "logic_type", 1, 0 );
 	EXPECT_EQ( 0, res );
-	
+
 	// Test unknown property.
 	res = action.set_int_property( "unknown_property", 2, 1 );
 	EXPECT_EQ( 1, res );
@@ -2171,7 +2171,7 @@ TEST( enable_step_by_signal, is_any_group_active_with_empty_group )
     DI1 test_DI1( "test_DI1", device::DEVICE_TYPE::DT_DI,
         device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
     action.add_dev( &test_DI1, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );
-    EXPECT_FALSE( action.is_any_group_active() );	//No active group.  
+    EXPECT_FALSE( action.is_any_group_active() );	//No active group.
     }
 
 TEST( enable_step_by_signal, is_any_group_active )
@@ -2192,7 +2192,7 @@ TEST( enable_step_by_signal, is_any_group_active )
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action.add_dev( &test_DI2 );
 	EXPECT_FALSE( action.is_any_group_active() );	//No active group.
-	
+
 	DI1 test_DI3( "test_DI3", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action.add_dev( &test_DI3, action::MAIN_GROUP, action::MAIN_SUBGROUP + 1 );

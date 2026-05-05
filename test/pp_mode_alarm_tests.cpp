@@ -110,7 +110,7 @@ TEST( pp_mode_alarm, initialization )
 // Test PP mode detection with non-Phoenix nodes.
 TEST( pp_mode_alarm, non_phoenix_node )
     {
-    io_manager::io_node wago_node( 
+    io_manager::io_node wago_node(
         io_manager::io_node::TYPES::WAGO_750_XXX_ETHERNET,
         1, "127.0.0.1", "W100", 0, 0, 0, 0, 0, 0 );
 
@@ -132,14 +132,14 @@ TEST( pp_mode_alarm, disconnect_resets_alarm )
     uni_io_manager mngr;
     io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     // Set PP mode alarm active.
     node.is_err_mode_alarm_set = true;
     node.state = io_manager::io_node::ST_OK;
-    
+
     // Disconnect should reset the alarm.
     mngr.disconnect( &node );
-    
+
     EXPECT_FALSE( node.is_err_mode_alarm_set );
     EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
     }
@@ -157,19 +157,19 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
         io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1", "A100",
         0, 0, 0, 0, 0, 0 );
     auto node = G_IO_MANAGER()->get_node( 0 );
-   
+
     // No PP mode alarm active.
     node->is_err_mode_alarm_set = false;
     node->state = io_manager::io_node::ST_OK;
     test_uni_io_manager_PP_mode mngr;
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
-    
+
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
     // Disconnect should not crash when no alarm is set.
     mngr.disconnect( node );
-    
+
     EXPECT_FALSE( node->is_err_mode_alarm_set );
     EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->state );
 

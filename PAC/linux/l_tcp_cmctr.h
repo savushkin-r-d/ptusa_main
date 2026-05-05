@@ -57,7 +57,7 @@ class tcp_communicator_linux : public tcp_communicator
 
     private:
             sockaddr_in ssin;       ///< Адрес клиента.
-            u_int sin_len;    	    ///< Длина адреса.            
+            u_int sin_len;    	    ///< Длина адреса.
 
             int modbus_socket = 0;  ///< Модбас сокет.
             int slave_socket = 0;   ///< Слейв-сокет, получаемый при подключении клиента.
