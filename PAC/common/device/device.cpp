@@ -3016,7 +3016,6 @@ void level_s_iolink::evaluate_io()
             break;
             }
 
-        
         case ARTICLE::DEFAULT:
             v = get_par( P_ERR, 0 );
             st = 0;
