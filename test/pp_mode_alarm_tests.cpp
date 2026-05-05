@@ -149,6 +149,7 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
     tcp_communicator::clear_instance();
     }
 

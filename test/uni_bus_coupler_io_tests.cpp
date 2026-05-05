@@ -364,6 +364,8 @@ TEST( uni_io_manager, e_communicate )
     G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 10'000;
     auto res = mngr.e_communicate( &node, 1, 1 );
     EXPECT_NE( res, 0 );
+
+    G_PAC_INFO()->reset_params();
     }
 
 
