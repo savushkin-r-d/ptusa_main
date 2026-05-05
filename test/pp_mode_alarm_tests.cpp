@@ -168,7 +168,7 @@ TEST( pp_mode_alarm, e_communicate )
 
     test_uni_io_manager_PP_mode mngr;
 
-    // Устанавлимаем бит перехода в PP mode.
+    // Устанавливаем бит перехода в PP mode.
     mngr.buff[ 1 ] = io_manager::io_node::STATUS_REG_PP_MODE_MASK;
     mngr.read_phoenix_status_register( node );
     EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка наличия `PP mode`.
@@ -185,5 +185,7 @@ TEST( pp_mode_alarm, e_communicate )
     mngr.read_phoenix_status_register( node );
     EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка наличия `PP mode`.
 
+    G_PAC_INFO()->reset_params();
+    err_mngr->reset_all_error();
     tcp_communicator::clear_instance();
     }

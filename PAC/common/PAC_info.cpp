@@ -94,7 +94,7 @@ void PAC_info::reset_params()
     par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] = 300;
 
     par[ P_RESTRICTIONS_MODE ] = 0;
-    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1'000; // 2 minuntes.
+    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1'000; // 2 minutes.
 
     par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
 
