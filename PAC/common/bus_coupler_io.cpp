@@ -278,14 +278,14 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
         }
 
     if ( G_DEBUG )
-        {        
+        {
         // LCOV_EXCL_START
         fmt::print( "'{}' (", name );
         io_device::print();
         fmt::print( ") io_device->get_AO(...) error: " );
         fmt::print( "index = {}, AO_channels.count = {}, "
             "AO_channels.int_write_values = {}",
-            index, AO_channels.count, 
+            index, AO_channels.count,
             static_cast<void*>( AO_channels.int_write_values ) );
         // LCOV_EXCL_STOP
         if ( index < AO_channels.count && AO_channels.int_write_values )
@@ -295,7 +295,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value ) const
                 static_cast<void*>( AO_channels.int_write_values[ index ] ) );
             // LCOV_EXCL_STOP
             }
-        fmt::print( "\n" );        
+        fmt::print( "\n" );
         }
 
     return 0.0f;
@@ -793,7 +793,7 @@ void io_device::set_io_vendor( VENDOR vendor )
 int io_device::check_output_DO_node_PP_state( u_int index ) const
     {
     // If no channels configured or tables not initialized, skip node check.
-    if ( index >= DO_channels.count || 
+    if ( index >= DO_channels.count ||
         !DO_channels.tables ||
         !DO_channels.char_write_values ||
         !DO_channels.char_write_values[ index ] )

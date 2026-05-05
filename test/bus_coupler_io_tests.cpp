@@ -211,17 +211,17 @@ TEST( io_node, get_display_state_all_node_types )
 	{
     G_PAC_INFO()->emulation_off();
 	io_manager::get_instance()->init( 3 );
-	
+
 	// Test PHOENIX_BK_ETH
 	io_manager::get_instance()->add_node( 0,
 		io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
 		"A100", 0, 0, 0, 0, 0, 0 );
-	
+
 	// Test WAGO_750_XXX_ETHERNET
 	io_manager::get_instance()->add_node( 1,
 		io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
 		"A200", 0, 0, 0, 0, 0, 0 );
-	
+
 	// Test WAGO_750_820x
 	io_manager::get_instance()->add_node( 2,
 		io_manager::io_node::WAGO_750_820x, 3, "127.0.0.1",
@@ -235,7 +235,7 @@ TEST( io_node, get_display_state_all_node_types )
 		node->state = io_manager::io_node::ST_OK;
 		node->status_register = 0x0010;  // Bit 4 set
 		}
-	
+
 	// Only Phoenix should report PP mode.
 	EXPECT_EQ( io_manager::io_node::DISPLAY_STATES::DST_WARNING,
 		io_manager::get_instance()->get_node( 0 )->get_display_state() );
@@ -279,7 +279,7 @@ TEST( io_device, check_output_DO_node_PP_state )
 
 	node->state = io_manager::io_node::ST_NO_CONNECT;
 	EXPECT_EQ( -1, dev.check_output_DO_node_PP_state() );
-	
+
 	node->is_active = false;
 	node->state = io_manager::io_node::ST_OK;
 	node->status_register = 0;
@@ -333,7 +333,7 @@ TEST( io_device, check_output_AO_node_PP_state )
 TEST( io_device, get_AO )
     {
     io_device dev1( "D1" );
-    
+
     testing::internal::CaptureStdout();
     auto res = dev1.get_AO( 0, 0.0f, 100.0f );
     auto output = testing::internal::GetCapturedStdout();
@@ -370,7 +370,7 @@ TEST( io_device, get_AO_IOLINK_state )
     dev1.init_and_alloc( 0, 0, 2, 0 );
     dev1.init_channel( io_device::IO_channels::CT_AO, 0, 0, 0, 1, 1 );
     const io_device& DEV1 = dev1;
-    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ), 
+    EXPECT_EQ( DEV1.get_AO_IOLINK_state( 0 ),
         io_device::IOLINKSTATE::NOTCONNECTED );
 
     // Bit 0 - IOLink connected.

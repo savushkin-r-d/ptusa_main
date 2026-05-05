@@ -80,7 +80,7 @@ int uni_io_manager::net_init( io_node* node ) const
             reinterpret_cast<char*>( &timeout ), vlen)
 #else
         setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
-#endif // WIN_OS        
+#endif // WIN_OS
         )
         {
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -109,8 +109,8 @@ int uni_io_manager::net_init( io_node* node ) const
     err = ioctlsocket( sock, FIONBIO, &mode );
 #else
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
-#endif // WIN_OS    
-    
+#endif // WIN_OS
+
     if ( err != 0 )
         {
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -203,7 +203,7 @@ int uni_io_manager::net_init( io_node* node ) const
             reinterpret_cast<char*>( &error ),
 #else
             &error,
-#endif // WIN_OS            
+#endif // WIN_OS
             &err_len ) < 0 || error != 0 )
             {
             if ( node->is_set_err == false )
@@ -245,7 +245,7 @@ int uni_io_manager::net_init( io_node* node ) const
 //-----------------------------------------------------------------------------
 int uni_io_manager::write_outputs()
     {
-    if ( 0 == nodes_count ) 
+    if ( 0 == nodes_count )
         {
         return 0;
         }
@@ -265,7 +265,7 @@ int uni_io_manager::write_outputs()
             if ( nd->read_io_error_flag )
                 {
                 res = 1;
-                continue;                
+                continue;
                 }
 
             if ( nd->DO_cnt > 0 )
@@ -983,7 +983,7 @@ int uni_io_manager::read_inputs()
 //-----------------------------------------------------------------------------
 void uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
-    if ( auto result = read_input_registers( nd, 
+    if ( auto result = read_input_registers( nd,
         PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
         {
         nd->status_register = static_cast<u_int_2>(
@@ -1040,7 +1040,7 @@ void uni_io_manager::disconnect( io_node* node )
 #else
         close( node->sock );
 #endif // WIN_OS
-        
+
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;

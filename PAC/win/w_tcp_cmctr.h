@@ -32,7 +32,7 @@ struct socket_state
     };
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор для Windows - обмен данными PAC<->сервер.
-class tcp_communicator_win : public tcp_communicator 
+class tcp_communicator_win : public tcp_communicator
     {
         public:
             tcp_communicator_win( const char *name_rus, const char *name_eng );
@@ -54,7 +54,7 @@ class tcp_communicator_win : public tcp_communicator
             ///
             /// @param skt - сокет.
             int do_echo( int skt );
-            
+
             uint32_t glob_last_transfer_time; ///< Время последней успешной передачи данных.
 
             timeval tv;                       ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
@@ -71,5 +71,5 @@ class tcp_communicator_win : public tcp_communicator
             /// @brief Закрытие сети.
             void net_terminate();
     };
-    
+
 #endif //TCP_CMCTR_LINUX

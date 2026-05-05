@@ -110,7 +110,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.))",
+        printf( R"(%sBEGIN "%s %d" (%s) set operation № %u ("%s") --> %s.)",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -128,14 +128,21 @@ int tech_object::set_mode( u_int operation_n, int newm )
     int i = operation_n - 1;
     if ( 0 == res )
         {
+        operation* op = ( *operations_manager )[ operation_n ];
         switch ( newm )
             {
             case operation::PAUSE:
+                // Ignore if operation is in IDLE state.
+                if ( op->get_state() == operation::IDLE )
+                    {
+                    res = 5;
+                    break;
+                    }
                 // Check if possible.
                 if ( ( res = lua_check_on_pause( operation_n ) ) == 0 )
                     {
                     state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                    ( *operations_manager )[ operation_n ]->pause();
+                    op->pause();
                     lua_on_pause( operation_n );
                     }
                 else
@@ -145,11 +152,17 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             case operation::STOP:
+                // Ignore if operation is in IDLE state.
+                if ( op->get_state() == operation::IDLE )
+                    {
+                    res = 6;
+                    break;
+                    }
                 // Check if possible.
                 if ( ( res = lua_check_on_stop( operation_n ) ) == 0 )
                     {
                     state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                    ( *operations_manager )[ operation_n ]->stop();
+                    op->stop();
                     lua_on_stop( operation_n );
                     }
                 else
@@ -159,8 +172,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             default:
-                if ( newm != 0 ) newm = 1;
-                operation* op = ( *operations_manager )[ operation_n ];
+                if ( newm != 0 ) newm = 1;                
 
                 if ( get_mode( operation_n ) == newm )
                     {
@@ -169,7 +181,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         // Check if possible.
                         if ( ( res = lua_check_on_start( operation_n ) ) == 0 )
                             {
-                            auto run_step = 
+                            auto run_step =
                                 lua_get_run_step_after_pause( operation_n );
                             op->start( run_step );
                             lua_on_start( operation_n );
@@ -266,7 +278,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
             operation::en_state_str.at( current_op_state ) : "?";
 
         printf( "%sEND \"%s %d\" set operation № %u --> %s, res = %d",
-            white_spaces, name, number, operation_n, str, res);        
+            white_spaces, name, number, operation_n, str, res);
 
         switch ( res )
             {
@@ -282,6 +294,14 @@ int tech_object::set_mode( u_int operation_n, int newm )
             case 4:
                 printf( " (mode index must be in [1..%d], got 0).",
                     operations_count );
+                break;
+
+            case 5:
+                printf( " (IDLE --> PAUSE is not possible)." );
+                break;
+
+            case 6:
+                printf( " (IDLE --> STOP is not possible)." );
                 break;
 
              default:
@@ -434,7 +454,7 @@ int tech_object::lua_check_function( const char* function_name,
 //-----------------------------------------------------------------------------
 int tech_object::lua_get_run_step_after_pause( u_int mode ) const
     {
-    if ( auto function_name = "get_run_step_after_pause"; 
+    if ( auto function_name = "get_run_step_after_pause";
         G_LUA_MANAGER->is_exist_lua_function( name_Lua, function_name ) )
         {
         return G_LUA_MANAGER->int_exec_lua_method( name_Lua,
@@ -562,7 +582,7 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
 
     //TODO. Устаревшее название функции. Оставлено для совместимости.
     //Проверка на наличии функции check_on_mode.
-    if ( auto old_function_name = "check_on_mode"; 
+    if ( auto old_function_name = "check_on_mode";
         G_LUA_MANAGER->is_exist_lua_function( name_Lua, old_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
@@ -571,7 +591,7 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
         }
 
     //Проверка на наличии функции user_check_operation_on.
-    if ( auto new_function_name = "user_check_operation_on"; 
+    if ( auto new_function_name = "user_check_operation_on";
         G_LUA_MANAGER->is_exist_lua_function( name_Lua, new_function_name ) )
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
@@ -723,7 +743,7 @@ int tech_object::lua_init_params()
     {
     init_params();
 
-    static const auto LUA_INIT_FUNCTIONS = 
+    static const auto LUA_INIT_FUNCTIONS =
         {
         "init_params_uint",
         "init_params_float",
@@ -822,7 +842,7 @@ int tech_object::save_device( char *buff ) const
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    //Время простоя или текущей активной операции.    
+    //Время простоя или текущей активной операции.
     auto duration = operations_manager->get_idle_time_sec();
     res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
         "\tACTIVE_OPERATION_OR_IDLE_TIME={},\n", duration ).size;
@@ -844,7 +864,7 @@ int tech_object::save_device( char *buff ) const
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
     for ( u_int i = 0; i < operations_count; i++ )
         {
-        auto op = ( *operations_manager )[ i + 1 ];    
+        auto op = ( *operations_manager )[ i + 1 ];
         auto t = op->evaluation_time() / 1000;
         res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "{}, ", t ).size;
         }
@@ -1283,7 +1303,7 @@ bool tech_object::is_any_error() const
     auto iter = errors.begin();
     while ( iter != errors.end() )
         {
-        if ( auto error = *iter; 
+        if ( auto error = *iter;
             tech_obj_error::get_priority( error->type ) ==
             ALARM_CLASS_PRIORITY::P_ALARM )
             return true;

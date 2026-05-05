@@ -198,7 +198,7 @@ elseif(WIN32)
 
     if(NOT MINGW)
         add_executable(main_perfomance_test ${common_src} ${win_src}
-               test/perfomance/main_perfomance_test.cpp           
+               test/perfomance/main_perfomance_test.cpp
                PAC_control_projects/main_control_prg/version.rc)
     endif()
 
@@ -455,9 +455,9 @@ endif()
 
 # Общие пути в Lua package.path
 set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
-set(LUA_BUSTED_PATH_INIT_CMD  
+set(LUA_BUSTED_PATH_INIT_CMD
     "package.path = package.path..';${LUA_MODULES_PATH}/busted/?/init.lua'")
-set(LUA_BUSTED_PATH_FILES_CMD 
+set(LUA_BUSTED_PATH_FILES_CMD
     "package.path = package.path..';${LUA_MODULES_PATH}/busted/?.lua'")
 set(LUA_LIBRARIES_PATH "${PROJECT_BINARY_DIR}/$<CONFIG>/?${CMAKE_SHARED_LIBRARY_SUFFIX}")
 set(DEMO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo")
@@ -542,7 +542,7 @@ set(TCP_SOCKET_LOCKED_FILTER
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
-set(UNLOCKED_FILTER_STR 
+set(UNLOCKED_FILTER_STR
 	"*-${TCP_SOCKET_LOCKED_FILTER_STR}cipline_tech_object.save_device:")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
@@ -550,11 +550,11 @@ gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER ${TCP_SOCKET_LOCKED_FILTER_STR}
     PROPERTIES RESOURCE_LOCK tcp_socket)
-	
+
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER "cipline_tech_object.save_device"
-    PROPERTIES RUN_SERIAL 1)	
+    PROPERTIES RUN_SERIAL 1)
 
 # Discover all remaining tests.
 gtest_discover_tests(main_test

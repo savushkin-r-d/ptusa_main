@@ -40,7 +40,7 @@ void modbus_client::init_frame( unsigned int address, unsigned int value,
 int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned int quantity )
     {
     this->init_frame(start_address, quantity, 2);
-    if (unsigned int res = tcpclient->Communicate(12); 
+    if (unsigned int res = tcpclient->Communicate(12);
         res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
@@ -55,7 +55,7 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 int modbus_client::read_coils( unsigned int start_address, unsigned int quantity )
     {
     this->init_frame(start_address, quantity, 1);
-    if (unsigned int res = tcpclient->Communicate(12); 
+    if (unsigned int res = tcpclient->Communicate(12);
         res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
         {
         if ( G_DEBUG )
@@ -70,7 +70,7 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 int modbus_client::read_holding_registers( unsigned int address, unsigned int quantity )
     {
     this->init_frame(address, quantity, 3);
-    if (unsigned int res = tcpclient->Communicate(12); 
+    if (unsigned int res = tcpclient->Communicate(12);
         res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
@@ -85,7 +85,7 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 int modbus_client::read_input_registers( unsigned int address, unsigned int quantity )
     {
     this->init_frame(address, quantity, 4);
-    if (unsigned int res = tcpclient->Communicate(12); 
+    if (unsigned int res = tcpclient->Communicate(12);
         res != 9 + quantity * 2)
         {
         if ( G_DEBUG )
@@ -344,7 +344,7 @@ float modbus_client::get_float( unsigned int address )
     if (address * 2 > tcpclient->buff_size - read_buff_start - sizeof(float))
         {
         return 0;
-        } 
+        }
     float result;
     ((char*)&result)[0] = tcpclient->buff[read_buff_start + 1 + address * 2];
     ((char*)&result)[1] = tcpclient->buff[read_buff_start + address * 2];
@@ -551,7 +551,7 @@ int modbus_client::async_read_input_registers( unsigned int address, unsigned in
             }
         return 0;
         }
-    
+
     }
 
 int modbus_client::async_write_coil( unsigned int address, unsigned char value )
@@ -651,7 +651,7 @@ int modbus_client::async_read_write_multiply_registers(unsigned int readaddress,
             if (ar == modbus_expected_length)
             {
                 return 1;
-            } 
+            }
             else
             {
                 return -1;

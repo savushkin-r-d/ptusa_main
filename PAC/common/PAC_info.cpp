@@ -196,7 +196,7 @@ int PAC_info::save_device( char* buff ) const
         "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tCOMMUN_ERROR={},\n", commun_error ).size;
-    
+
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 

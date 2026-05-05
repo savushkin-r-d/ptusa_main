@@ -2,7 +2,7 @@
 #define modbus_client_h__
 #include "tcp_client.h"
 
-class modbus_client 
+class modbus_client
     {
     protected:
         tcp_client* tcpclient;

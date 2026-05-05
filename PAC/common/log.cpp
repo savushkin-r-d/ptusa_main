@@ -22,7 +22,7 @@ i_log* log_mngr::get_log()
 //-----------------------------------------------------------------------------
 log_mngr::log_mngr(): lg( nullptr )
     {
-#if defined WIN_OS        
+#if defined WIN_OS
     lg = new w_log();
 #elif defined LINUX_OS
     lg = new l_log();

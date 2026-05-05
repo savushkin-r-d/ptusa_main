@@ -30,11 +30,11 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
 
     net_init();
 
-    if ( G_DEBUG ) 
+    if ( G_DEBUG )
         {
         char tmp_host_name[ TC_MAX_HOST_NAME + 1 ] = { 0 };
         gethostname( tmp_host_name, TC_MAX_HOST_NAME );
-        printf ( "Host name - \"%s\".\n", tmp_host_name );    
+        printf ( "Host name - \"%s\".\n", tmp_host_name );
         hostent *server = gethostbyname( tmp_host_name );
         if ( server )
             {
@@ -43,7 +43,7 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
                 struct in_addr addr;
                 addr.s_addr = *( u_long * ) ( server->h_addr_list[ 0 ] );
                 printf( "Host socket - \"%s\":%d.\n", inet_ntoa( addr ), port );
-                }       
+                }
             }
         else
             {
@@ -89,11 +89,11 @@ int tcp_communicator_win::net_init()
     int type     = SOCK_STREAM;
     int protocol = 0;        /* всегда 0 */
     //-Cоздание мастер-сокета.
-    master_socket = socket( PF_INET, type, protocol ); 
+    master_socket = socket( PF_INET, type, protocol );
 
     if ( master_socket < 0 )
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "tcp_communicator_windows:net_init() - can't create master socket: %s\n",
                 WSA_Last_Err_Decode() );
@@ -101,7 +101,7 @@ int tcp_communicator_win::net_init()
         return -4;
         }
 
-    if ( G_DEBUG ) 
+    if ( G_DEBUG )
         {
         printf( "tcp_communicator_windows:net_init() - master socket [ %d ] created.\n",
             master_socket );
@@ -111,7 +111,7 @@ int tcp_communicator_win::net_init()
     u_long mode = 0;
     int res = ioctlsocket( master_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
-        { 
+        {
         printf( "tcp_communicator_windows:net_init() - ошибка  вызова  ioctlsocket: %s\n",
             WSA_Last_Err_Decode() );
         closesocket( master_socket );
@@ -138,17 +138,17 @@ int tcp_communicator_win::net_init()
     //реализовать проверку на максимальное ожидание запросов от сервера.
     //
     //const int on = 1;
-    //if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
+    //if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR,
     //    ( char* ) &on, sizeof( on ) ) )
     //    {
     //    printf( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
-    //        WSA_Last_Err_Decode() );        
+    //        WSA_Last_Err_Decode() );
     //    closesocket( master_socket );
     //    return -5;
     //    }
 
     //-Привязка сокета.
-    int err = bind( master_socket, ( struct sockaddr * ) 
+    int err = bind( master_socket, ( struct sockaddr * )
         & master_socket_state.sin, sizeof( master_socket_state.sin ) );
     if ( err < 0 )
         {
@@ -156,7 +156,7 @@ int tcp_communicator_win::net_init()
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_BIND_F,
             0 );                                        //Мастер сокет.
-                
+
         closesocket( master_socket );
         return -5;
         }
@@ -172,22 +172,22 @@ int tcp_communicator_win::net_init()
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( master_socket );
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "tcp_communicator_windows:net_init() - listen: %s\n",
-                WSA_Last_Err_Decode() );        
+                WSA_Last_Err_Decode() );
             }
         return -6;
         }
 
     int val = 1;
-    setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
+    setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR,
         ( char* ) &val, sizeof( val ) );
 #ifdef MODBUS
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
-    if ( G_DEBUG ) 
+    if ( G_DEBUG )
         {
         printf( "tcp_communicator_windows:net_init() - modbus socket created. Has number %d\n\r",
             modbus_socket );
@@ -195,7 +195,7 @@ int tcp_communicator_win::net_init()
 
     if ( modbus_socket < 0 )
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             perror( "tcp_communicator_windows:net_init() - can't create modbus socket" );
             }
@@ -220,7 +220,7 @@ int tcp_communicator_win::net_init()
         sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "tcp_communicator_windows:net_init() - can't bind modbus socket to port %d : %s\n",
                 10502, WSA_Last_Err_Decode() );
@@ -233,7 +233,7 @@ int tcp_communicator_win::net_init()
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( modbus_socket );
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             perror( "tcp_communicator_windows:net_init() - listen" );
             }
@@ -266,8 +266,8 @@ int tcp_communicator_win::evaluate()
             {
             glob_cmctr_ok = 0;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_NO_CONNECTION, 
-                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_EASYSERVER,
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
@@ -278,7 +278,7 @@ int tcp_communicator_win::evaluate()
             glob_cmctr_ok = 1;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AS_EASYSERVER,
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
@@ -301,7 +301,7 @@ int tcp_communicator_win::evaluate()
         FD_ZERO( &rfds );
         for ( u_int i = 0; i < sst.size(); i++ )
             {
-            if ( sst[ i ].active && 
+            if ( sst[ i ].active &&
                 sst[ i ].is_listener &&
                 !sst[ i ].evaluated )
                 {
@@ -322,14 +322,14 @@ int tcp_communicator_win::evaluate()
 
         if ( rc < 0 )
             {
-            if ( G_DEBUG ) 
-                {     
+            if ( G_DEBUG )
+                {
                 printf( "Ошибка select: %s\n", WSA_Last_Err_Decode() );
                 }
 
             net_terminate();
             WSACleanup();
-            return -1;           
+            return -1;
             }
 
         for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
@@ -340,27 +340,27 @@ int tcp_communicator_win::evaluate()
 #ifndef MODBUS
                 if ( sst[ i ].socket == master_socket )
 #else
-                if ( sst[ i ].socket == master_socket || 
+                if ( sst[ i ].socket == master_socket ||
                     sst[ i ].socket == modbus_socket )
 #endif
                     {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
-                    int slave_socket = accept ( sst[ i ].socket, 
+                    int slave_socket = accept ( sst[ i ].socket,
                         ( struct sockaddr * ) &ssin, &sin_len );
 
                     if ( slave_socket <= 0 )    // Ошибка.
                         {
-                        if ( G_DEBUG ) 
+                        if ( G_DEBUG )
                             {
                             printf( "Ошибка accept(): %s\n",
-                                WSA_Last_Err_Decode() );                        
-                            }                       
-                        continue;   
+                                WSA_Last_Err_Decode() );
+                            }
+                        continue;
                         }
                     // Установка сокета в неблокирующий режим.
                     u_long mode = 0;
-                    if ( ioctlsocket( slave_socket, FIONBIO, &mode ) == SOCKET_ERROR ) 
+                    if ( ioctlsocket( slave_socket, FIONBIO, &mode ) == SOCKET_ERROR )
                         {
                         printf( "Ошибка перевода клиентского сокета в неблокирующий режим: %s\n",
                             WSA_Last_Err_Decode() );
@@ -369,7 +369,7 @@ int tcp_communicator_win::evaluate()
                         closesocket( slave_socket );
                         continue;
                         }
-                    if ( G_DEBUG ) 
+                    if ( G_DEBUG )
                         {
 #ifndef MODBUS
                         // Определение имени клиента.
@@ -493,11 +493,11 @@ int tcp_communicator_win::do_echo( int idx )
     memset( buf, 0, BUFSIZE );
 
     // Ожидаем данные с таймаутом 1 сек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 1, 0 ); 
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 1, 0 );
 
     if ( err <= 0 )               /* read error */
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             switch ( err )
                 {
@@ -531,10 +531,10 @@ int tcp_communicator_win::do_echo( int idx )
         return err;
         }
 
-    if ( G_DEBUG ) 
+    if ( G_DEBUG )
         {
         if ( in_buffer_count > max_buffer_use )
-            {            
+            {
             max_buffer_use = in_buffer_count + in_buffer_count / 10;
             printf( "Max buffer use %u\n", max_buffer_use );
             }
@@ -558,7 +558,7 @@ int tcp_communicator_win::do_echo( int idx )
         switch ( buf[ 2 ] )
             {
             case FRAME_SINGLE:
-                res = services[ buf[ 1 ] ] ( 
+                res = services[ buf[ 1 ] ] (
                     ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
 
                 if ( res == 0 )
@@ -568,7 +568,7 @@ int tcp_communicator_win::do_echo( int idx )
                 else
                     {
                     _AknData( res );
-                    if ( G_DEBUG ) 
+                    if ( G_DEBUG )
                         {
                         if ( ( unsigned int ) res > max_buffer_use )
                             {
@@ -581,7 +581,7 @@ int tcp_communicator_win::do_echo( int idx )
 
             default:
                 _ErrorAkn( ERR_WRONG_CMD );
-                if ( G_DEBUG ) 
+                if ( G_DEBUG )
                     {
                     printf( "Wrong command received on socket %d->\"%s\"\n",
                         sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
@@ -607,10 +607,10 @@ int tcp_communicator_win::do_echo( int idx )
         else
             {
             _ErrorAkn( ERR_WRONG_SERVICE );
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf( "No such service %d at socket %d->\"%s\"\n",
-                    buf[ 1 ], sock_state.socket, 
+                    buf[ 1 ], sock_state.socket,
                     inet_ntoa( sock_state.sin.sin_addr ) );
                 }
             }
@@ -620,7 +620,7 @@ int tcp_communicator_win::do_echo( int idx )
 
     if ( err <= 0 )               /* write error */
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "Socket %d->\"%s\" disconnected on write try : %s\n",
                 sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),

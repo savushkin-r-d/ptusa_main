@@ -135,7 +135,7 @@ TEST( uni_io_manager, net_init )
     subhook_free( ioctlsocket_hook );
 #else
     subhook_free( fcntl_hook );
-#endif    
+#endif
     subhook_free( select_m1_hook );
     subhook_free( select_0_hook );
     subhook_free( getsockopt_1_hook );
@@ -268,9 +268,9 @@ TEST( uni_io_manager, write_outputs )
 
     // Должна быть успешная запись.
     res = mngr.write_outputs();
-    EXPECT_EQ( res, 0 ); 
+    EXPECT_EQ( res, 0 );
 
-    // Должна быть неуспешная запись (e_communicate() возвращает 1 - 
+    // Должна быть неуспешная запись (e_communicate() возвращает 1 -
     // неуспешная сетевая операция). Сообщений не должно быть.
     std::string expectedOutput = "";
     testing::internal::CaptureStdout();
@@ -297,7 +297,7 @@ TEST( uni_io_manager, write_outputs )
         "\x1B[0m" +
 #endif
         EXP_TIME +
-#if defined LINUX_OS        
+#if defined LINUX_OS
         "\x1B[31m" +
 #endif
         R"(ERROR  (3) -> Write AO:bus coupler returned error. "A100":"127.0.0.1" )"
@@ -395,7 +395,7 @@ class MockUniIoManager : public uni_io_manager
 class UniBusCouplerIoTest : public ::testing::Test
     {
     protected:
-        void SetUp() override 
+        void SetUp() override
             {
             mngr.init( 1 );
             mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
@@ -415,7 +415,7 @@ class UniBusCouplerIoTest : public ::testing::Test
     };
 
 TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
-    {    
+    {
     //Проверяем обработку неуспешной записи выходов (сетевая ошибка).
     ON_CALL( mngr, e_communicate( _, _, _ ) ).WillByDefault(
         []( const io_manager::io_node*, int, int )
@@ -436,11 +436,11 @@ TEST_F( UniBusCouplerIoTest, write_outputs_PHOENIX_BK_ETH )
         {
         mngr.buff[ 7 ] = 0x11; // Любое значение, кроме 0x10.
         return 0;
-        } );   
+        } );
     uni_io_manager real_mngr;
     EXPECT_CALL( mngr, add_err_to_log( ::testing::StrEq( "Write AO" ),
         _, _, 0x11, 0x10, 35, 6 ) )
-        .WillRepeatedly( Invoke( &real_mngr, &uni_io_manager::add_err_to_log ) );    
+        .WillRepeatedly( Invoke( &real_mngr, &uni_io_manager::add_err_to_log ) );
     testing::internal::CaptureStdout();
     res = mngr.write_outputs();
     auto output = testing::internal::GetCapturedStdout();
@@ -463,12 +463,12 @@ TEST( io_node, status_register_only_for_phoenix )
     G_PAC_INFO()->emulation_off();
 
     io_manager::get_instance()->init( 2 );
-    
+
     // Add Phoenix BK ETH node.
     io_manager::get_instance()->add_node( 0,
         io_manager::io_node::PHOENIX_BK_ETH, 1, "127.0.0.1",
         "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     // Add WAGO node.
     io_manager::get_instance()->add_node( 1,
         io_manager::io_node::WAGO_750_XXX_ETHERNET, 2, "127.0.0.1",
@@ -476,16 +476,16 @@ TEST( io_node, status_register_only_for_phoenix )
 
     auto phoenix_node = io_manager::get_instance()->get_node( 0 );
     auto wago_node = io_manager::get_instance()->get_node( 1 );
-    
+
     // Set same status register for both.
     phoenix_node->status_register = 0x0010;  // Bit 4 set.
     wago_node->status_register = 0x0010;  // Bit 4 set.
-    
+
     phoenix_node->is_active = true;
     phoenix_node->state = io_manager::io_node::ST_OK;
     wago_node->is_active = true;
     wago_node->state = io_manager::io_node::ST_OK;
-    
+
     // Only Phoenix should report PP mode.
     EXPECT_EQ( phoenix_node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
@@ -504,7 +504,7 @@ TEST( io_node, status_register_initialized_to_zero )
         "A100", 0, 0, 0, 0, 0, 0 );
 
     auto node = io_manager::get_instance()->get_node( 0 );
-    
+
     // Status register should be initialized to 0.
     EXPECT_EQ( node->status_register, 0 );
     }
@@ -521,50 +521,50 @@ TEST( io_node, error_bits_detection )
     auto node = io_manager::get_instance()->get_node( 0 );
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
-    
+
     // Test no error bits set.
     node->status_register = 0x0000;
     EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_OK );
-    
+
     // Test each individual error bit (0-5).
     node->status_register = 0x0001;  // Bit 0: Error occurred.
     EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     node->status_register = 0x0002;  // Bit 1: Net Fail.
     EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     node->status_register = 0x0004;  // Bit 2: Config mismatch.
     EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     node->status_register = 0x0008;  // Bit 3: Startup fault.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     node->status_register = 0x0010;  // Bit 4: PP mode.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     node->status_register = 0x0020;  // Bit 5: Startup not completed.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     // Test multiple error bits.
     node->status_register = 0x003F;  // All error bits 0-5.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     // Test error bits with higher bits set.
     node->status_register = 0xFF10;  // Bit 4 + other high bits.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     // Test no error bits but other bits set.
     node->status_register = 0xFFC0;  // All bits except 0-5.
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_OK );
 
     G_PAC_INFO()->emulation_on();
@@ -590,28 +590,28 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
                 buff[10] = 0x12;
                 return 0;  // Success.
                 }
-            
+
             u_char* get_resultbuff() { return resultbuff; }
         };
-    
+
     TestUniIoManager mngr;
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     auto node = mngr.get_node( 0 );
     node->read_io_error_flag = false;
     node->status_register = 0;
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
-    
+
     // Simulate calling read_inputs which calls
     // read_phoenix_status_register. For testing, we'll directly
     // test the logic.
     int result = mngr.read_input_registers( node,
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
     EXPECT_GT( result, 0 );  // Should succeed.
-    
+
     // The read_phoenix_status_register logic would be:
     // Get resultbuff pointer and convert bytes.
     const u_char* rbuff = mngr.get_resultbuff();
@@ -621,11 +621,11 @@ TEST( uni_io_manager, read_phoenix_status_register_success )
             uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
             rbuff[ 1 ] );
         }
-    
+
     EXPECT_EQ( node->status_register, 0x0012 );
 
     G_PAC_INFO()->emulation_off();
-    EXPECT_EQ( node->get_display_state(), 
+    EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
     G_PAC_INFO()->emulation_on();
     }
@@ -642,27 +642,27 @@ TEST( uni_io_manager, read_phoenix_status_register_failure )
                 return -1;  // Communication failure.
                 }
         };
-    
+
     TestUniIoManager mngr;
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     auto node = mngr.get_node( 0 );
     node->read_io_error_flag = false;
     node->status_register = 0x00FF;  // Set to non-zero initially.
-    
+
     // Try to read - should fail.
     int result = mngr.read_input_registers( node,
         uni_io_manager::PHOENIX_STATUS_REGISTER_ADDRESS, 1 );
     EXPECT_LE( result, 0 );  // Should fail.
-    
+
     // The read_phoenix_status_register logic on failure.
     if ( result <= 0 )
         {
         node->status_register = 0;
         }
-    
+
     EXPECT_EQ( node->status_register, 0 );
     }
 
@@ -674,12 +674,12 @@ TEST( uni_io_manager, read_phoenix_status_register_error_flag_set )
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     auto node = mngr.get_node( 0 );
     node->read_io_error_flag = true;  // Error flag is set.
     u_int_2 initial_value = 0x00AB;
     node->status_register = initial_value;
-    
+
     // When read_io_error_flag is set, read_phoenix_status_register
     // should return early and not attempt to read the register. The
     // status_register value should remain unchanged. We verify this by
@@ -695,7 +695,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         public:
             u_char test_high_byte = 0;
             u_char test_low_byte = 0;
-            
+
             int e_communicate( io_node* node, int bytes_to_send,
                 int bytes_to_receive ) override
                 {
@@ -705,22 +705,22 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
                 buff[10] = test_low_byte;
                 return 0;
                 }
-            
+
             u_char* get_resultbuff() { return resultbuff; }
         };
 
     G_PAC_INFO()->emulation_off();
-    
+
     TestUniIoManager mngr;
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-    
+
     auto node = mngr.get_node( 0 );
     node->read_io_error_flag = false;
     node->is_active = true;
     node->state = io_manager::io_node::ST_OK;
-    
+
     // Test 1: High byte = 0x12, Low byte = 0x34 -> 0x1234.
     mngr.test_high_byte = 0x12;
     mngr.test_low_byte = 0x34;
@@ -732,7 +732,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
         rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0x1234 );
-    
+
     // Test 2: High byte = 0x00, Low byte = 0x3F (all error
     // bits) -> 0x003F.
     mngr.test_high_byte = 0x00;
@@ -747,7 +747,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
     EXPECT_EQ( node->status_register, 0x003F );
     EXPECT_EQ( node->get_display_state(),
         io_manager::io_node::DISPLAY_STATES::DST_WARNING );
-    
+
     // Test 3: High byte = 0xFF, Low byte = 0xFF -> 0xFFFF.
     mngr.test_high_byte = 0xFF;
     mngr.test_low_byte = 0xFF;
@@ -759,7 +759,7 @@ TEST( uni_io_manager, read_phoenix_status_register_byte_order_conversion )
         uni_io_manager::BYTE_SHIFT_MULTIPLIER * rbuff[ 0 ] +
         rbuff[ 1 ] );
     EXPECT_EQ( node->status_register, 0xFFFF );
-    
+
     // Test 4: All zeros -> 0x0000.
     mngr.test_high_byte = 0x00;
     mngr.test_low_byte = 0x00;
