@@ -4246,7 +4246,7 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         level_s_iolink::ARTICLE expected;
         };
 
-    const std::array<TestCase, 9> testCases =
+    const std::array<TestCase, 11> testCases =
         { {
         {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
         {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
@@ -4257,10 +4257,14 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
         {"E&H.FTW33-GR7NWVJ", level_s_iolink::ARTICLE::EH_FTW33},
         {"E&H.FTW33-GR7NW5J", level_s_iolink::ARTICLE::EH_FTW33},
+        {"E&H.FTW33-XXXXX", level_s_iolink::ARTICLE::EH_FTW33},
+
+        {"E&H.FTW00", level_s_iolink::ARTICLE::DEFAULT}
         } };
 
     for ( const auto& testCase : testCases )
         {
+        device->reset_article();
         device->set_article( testCase.article );
         EXPECT_EQ( device->get_article_n(), testCase.expected )
             << "Failed for article: " << testCase.article;

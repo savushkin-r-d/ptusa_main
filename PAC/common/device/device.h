@@ -1169,6 +1169,8 @@ class level_s_iolink : public analog_io_device
 
 #ifdef PTUSA_TEST
         ARTICLE get_article_n() const;
+
+        void reset_article();
 #endif
 
         struct LS_data

@@ -3109,6 +3109,11 @@ level_s_iolink::ARTICLE level_s_iolink::get_article_n() const
     {
     return n_article;
     }
+
+void level_s_iolink::reset_article()
+    {
+    n_article = ARTICLE::DEFAULT;
+    }
 #endif
 
 float level_s_iolink::get_value() const
