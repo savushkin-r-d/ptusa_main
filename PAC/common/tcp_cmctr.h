@@ -79,7 +79,7 @@ class tcp_communicator
         virtual int remove_async_client(tcp_client* client);
 
         virtual ~tcp_communicator();
-        
+
         static void set_port( int new_port, int new_port_modbus );
 
         static int get_port();

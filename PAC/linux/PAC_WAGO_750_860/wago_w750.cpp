@@ -84,7 +84,7 @@ int wago_manager_w750::read_inputs()
                     case 450:
                         val = pstPabIN->uc.Pab[ offset + 2 ] + 256 * pstPabIN->uc.Pab[ offset + 3 ];
                         offset += 4;
-                        break;                    
+                        break;
                     case 638:
                         val = pstPabIN->uc.Pab[ offset + 2 ] + 256 * pstPabIN->uc.Pab[ offset + 3 ];
                         offset += 4;
@@ -160,7 +160,7 @@ int wago_manager_w750::write_outputs()
 
                 switch ( nd->AO_types[ j ] ) //More than one word.
                     {
-                    case 450:                    
+                    case 450:
                     case 638:
                         pstPabOUT->uc.Pab[ offset     ] = 0;
                         pstPabOUT->uc.Pab[ offset + 1 ] = 0;

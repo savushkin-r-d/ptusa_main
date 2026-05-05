@@ -87,7 +87,7 @@ void OPCUA_server::create_dev_objects()
             valueAttr, dev, nullptr );
         UA_VariableAttributes_clear( &valueAttr );
         UA_QualifiedName_clear( &qn );
-        
+
 
         //Creating value variable read/write callbacks.
         UA_DataSource valueDataSource;
@@ -167,7 +167,7 @@ void OPCUA_server::create_PAC_info()
         uptimeVarAttr, nullptr, nullptr );
     UA_VariableAttributes_clear( &uptimeVarAttr );
     UA_QualifiedName_clear( &qn );
-    UA_String_clear( &value );    
+    UA_String_clear( &value );
 
     //PRODUCT_VERSION_FULL_STR variable.
     UA_VariableAttributes versionVarAttr = UA_VariableAttributes_default;
