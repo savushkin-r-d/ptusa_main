@@ -145,7 +145,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
     //Network performance info.
     if ( stat )
         {
-        auto timeInfo_ = get_time();        
+        auto timeInfo_ = get_time();
 
         //Once per hour writes performance info.
         if ( stat->print_cycle_last_h != timeInfo_.tm_hour )
@@ -164,14 +164,14 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             if ( t < avg_time )
                 {
                 G_LOG->alert( R"(Network performance : recv : s%d->"%s":"%s" )"
-                    "avg %lu > tresh %u (ms).", 
+                    "avg %lu > tresh %u (ms).",
                     s, name, IP, avg_time, t );
                 }
 
             stat->clear();
             }
         }
- 
+
     errno = 0;
 
     // Настраиваем  file descriptor set.
@@ -226,9 +226,9 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             " disconnected on select read try : %s"
 #ifndef WIN_OS
             "."
-#endif            
+#endif
             ,
-            s, name, IP, 
+            s, name, IP,
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
@@ -260,7 +260,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
             "."
 #endif
             ,
-            s, name, IP, 
+            s, name, IP,
 #ifdef WIN_OS
             WSA_Last_Err_Decode()
 #else
@@ -268,7 +268,7 @@ int tcp_communicator::recvtimeout( int s, u_char* buf,
 #endif // WIN_OS
         );
         }
-    
+
     update_stat_time();
     return
 #ifdef WIN_OS

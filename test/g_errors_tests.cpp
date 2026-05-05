@@ -9,7 +9,7 @@ TEST( errors_manager, evaluate )
     G_ERRORS_MANAGER->evaluate();
     EXPECT_EQ( 0, G_ERRORS_MANAGER->get_errors_id() ); //No devices - no errors.
 
-    //Add counter to produce and check errors.    
+    //Add counter to produce and check errors.
     auto name = std::string( "FQT3" );
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_F, name.c_str(), "Test counter", "IFM" );
@@ -29,7 +29,7 @@ TEST( errors_manager, evaluate )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, dev->get_state() );
     DeltaMilliSecSubHooker::set_millisec( 1001UL );
     dev->evaluate_io();
-    DeltaMilliSecSubHooker::set_default_time();    
+    DeltaMilliSecSubHooker::set_default_time();
     EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
 
     //Should get an error.
@@ -90,7 +90,7 @@ TEST( siren_lights_manager, set_cmd )
     G_SIREN_LIGHTS_MANAGER()->save_device( buff );
     // Do nothing.
     G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, "1" );
-    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );    
+    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );
 
     // Switch on manual mode.
     G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, 1 );

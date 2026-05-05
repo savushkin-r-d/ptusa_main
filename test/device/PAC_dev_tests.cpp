@@ -1257,7 +1257,7 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
 
     // Проверка устройства управления узлом сетевых настроек.
-    auto* node1 = G_DEVICE_MANAGER()->add_io_device( 
+    auto* node1 = G_DEVICE_MANAGER()->add_io_device(
         device::DT_NODE, device::DST_NODE, "NODE1", "Test node device", "" );
     EXPECT_EQ( nullptr, node1 );
     // Тестирование несуществующего подтипа.
@@ -1287,11 +1287,11 @@ TEST( device_manager, get_device )
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
-    
+
     // Search should find device.
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_device( static_cast<size_t>( 0 ) ) );
-    
+
     // Search shouldn't find device.
     EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
         G_DEVICE_MANAGER()->get_device( 1 ) );
@@ -1595,7 +1595,7 @@ TEST( analog_io_device, set_cmd )
         "\x1B[0m" +
 #endif
         tmp.str() +
-#if defined LINUX_OS        
+#if defined LINUX_OS
         "\x1B[37m" +
 #endif
         "DEBUG  (7) -> OBJ1\t device::set_cmd() - prop = M, idx = 0, val = 100.000000\n"
@@ -1770,7 +1770,7 @@ TEST( AI1, get_state )
         } };
 
     test_m( 461, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-461 Pt100/RTD
-    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable     
+    test_m( 450, 100, 10.f, -2001, -1000, 8501, -1000 );// 750-450 R Adjustable
     test_m_no_over_range( 496, 29488, 18.4f, 3, -1 );   // 750-496 8AI 0/4-20mA S.E.
     test_value( 1000, 10.31f, NO_ERR, ABS_ERR, MIN_V, MAX_V );
     test_m_no_over_range( 466, 29488, 18.4f, 3, -1 );   // 750-466 2AI 4-20mA
@@ -1985,7 +1985,7 @@ TEST_F( iolink_dev_test, level_e_iolink_set_string_property )
     test_dev.set_string_property( "PT", "PT1" );
     ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( test_dev.PT_extra ) );
     ASSERT_EQ( PT1, test_dev.PT_extra );
-    
+
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
@@ -3066,7 +3066,7 @@ TEST( valve_mini_flushing, get_fb_state )
     EXPECT_FALSE( V1.get_off_fb_value() );
     EXPECT_FALSE( V1.get_on_fb_value() );
 
-    // Устанавливаем сигнал обратной связи.    
+    // Устанавливаем сигнал обратной связи.
     *V1.DI_channels.char_read_values[
         valve_mini_flushing::CONSTANTS_DI::DI_INDEX_CLOSE ] = 1;
     EXPECT_TRUE( V1.get_fb_state() );
@@ -3090,9 +3090,9 @@ TEST( valve_DO2_DI2_bistable, get_fb_state )
 
     check_fb( &V1 );
 
-    *V1.DO_channels.char_write_values[ 
+    *V1.DO_channels.char_write_values[
         valve_DO2_DI2_bistable::CONSTANTS::DO_INDEX_OPEN ] = 1;
-    *V1.DO_channels.char_write_values[ 
+    *V1.DO_channels.char_write_values[
         valve_DO2_DI2_bistable::CONSTANTS::DO_INDEX_CLOSE ] = 0;
     *V1.DI_channels.char_read_values[
         valve_DO2_DI2_bistable::CONSTANTS::DI_INDEX_OPEN ] = 1;
@@ -3663,7 +3663,7 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( 
+    EXPECT_STREQ(
         "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n",
         buff );
 
@@ -3707,7 +3707,7 @@ TEST( valve_iol_terminal_mixproof_DO3_DI2, get_fb_state )
     EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 0 ][ 0 ] );//Все биты 0.
     EXPECT_EQ( 0b0, V1.AO_channels.int_write_values[ 1 ][ 0 ] );//Все биты 0.
     EXPECT_EQ( 0b1,
-        V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Бит включения нижнего седла 1.    
+        V1.AO_channels.int_write_values[ 2 ][ 0 ] );//Бит включения нижнего седла 1.
     EXPECT_EQ( true,
         V1.get_fb_state() ); //Открыто нижнее седло - должно вернуться "истина".
 
@@ -3732,7 +3732,7 @@ TEST( valve_iol_terminal_DO1_DI2, get_fb_state )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     V1.save_device( buff );
-    EXPECT_STREQ( 
+    EXPECT_STREQ(
         "V1={M=0, ST=0, FB_ON_ST=0, FB_OFF_ST=1, P_ON_TIME=0, P_FB=0},\n",
         buff );
 
@@ -3793,7 +3793,7 @@ TEST( valve_AS_DO1_DI2, get_fb_state )
     EXPECT_FALSE( v1.get_fb_state() );
     EXPECT_EQ( v1.get_valve_state(), valve::VALVE_STATE::V_OFF );
     EXPECT_FALSE( v1.get_off_fb_value() );
-    EXPECT_FALSE( v1.get_on_fb_value() );    
+    EXPECT_FALSE( v1.get_on_fb_value() );
 
     G_PAC_INFO()->emulation_on();
     }
@@ -3876,7 +3876,7 @@ TEST( valve_iolink_mix_proof, seat_switching_timing )
         "Upper seat should return error after a timeout after switching";
     DeltaMilliSecSubHooker::set_default_time();
 
-    // Test lower seat switching timing.  
+    // Test lower seat switching timing.
     V1.open_lower_seat();
     state = V1.get_state();
 
@@ -3997,7 +3997,7 @@ TEST( valve_iolink_mix_proof, get_state_with_feedback_disabled_and_al_error )
     // Simulate AL IO-Link error.
     V1.set_err( 16 );  // Some internal error.
 
-    // When feedback is disabled and there's an error, 
+    // When feedback is disabled and there's an error,
     // the valve should NOT report error state.
     auto state = V1.get_state();
     EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled";
@@ -4016,7 +4016,7 @@ TEST( valve_iolink_mix_proof, get_state_with_feedback_enabled_and_al_error )
     // Simulate AL IO-Link error.
     V1.set_err( 16 );  // Some internal error.
 
-    // When feedback is enabled and there's an AL error, 
+    // When feedback is enabled and there's an AL error,
     // the valve SHOULD report error state (normal behavior).
     int state = V1.get_state();
 
@@ -4074,7 +4074,7 @@ TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_disabled_and_al_er
     // Simulate AL IO-Link error.
     V1.set_err( 16 );  // Some internal error.
 
-    // When feedback is disabled and there's an error, 
+    // When feedback is disabled and there's an error,
     // the valve should NOT report error state.
     auto state = V1.get_state();
     EXPECT_GE( state, 0 ) << "Valve should not report error state when feedback is disabled.";
@@ -4093,7 +4093,7 @@ TEST( valve_iolink_shut_off_thinktop, get_state_with_feedback_enabled_and_al_err
     // Simulate AL IO-Link error.
     V1.set_err( 16 );  // Some internal error.
 
-    // When feedback is enabled and there's an AL error, 
+    // When feedback is enabled and there's an AL error,
     // the valve SHOULD report error state (normal behavior).
     int state = V1.get_state();
 
@@ -4127,7 +4127,7 @@ TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_disabled
     V1.set_cmd( "P_FB", 0, 0 );
     V1.evaluate_io();
 
-    // When feedback is disabled and there's a module error, 
+    // When feedback is disabled and there's a module error,
     // the valve should NOT report error state.
     int state = V1.get_state();
 
@@ -4148,7 +4148,7 @@ TEST_F( iolink_dev_test, valve_iolink_mix_proof_get_state_with_feedback_enabled_
     V1.set_cmd( "P_FB", 0, 1 );
     V1.evaluate_io();
 
-    // When feedback is enabled and there's a module error, 
+    // When feedback is enabled and there's a module error,
     // the valve SHOULD report error state (normal behavior).
     int state = V1.get_state();
 
@@ -4169,7 +4169,7 @@ TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_
     V1.set_cmd( "P_FB", 0, 0 );
     V1.evaluate_io();
 
-    // When feedback is disabled and there's a module error, 
+    // When feedback is disabled and there's a module error,
     // the valve should NOT report error state.
     int state = V1.get_state();
 
@@ -4190,7 +4190,7 @@ TEST_F( iolink_dev_test, valve_iolink_shut_off_thinktop_get_state_with_feedback_
     V1.set_cmd( "P_FB", 0, 1 );
     V1.evaluate_io();
 
-    // When feedback is enabled and there's a module error, 
+    // When feedback is enabled and there's a module error,
     // the valve SHOULD report error state (normal behavior).
     int state = V1.get_state();
 
@@ -4249,7 +4249,7 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         level_s_iolink::ARTICLE expected;
         };
 
-    std::array<TestCase, 7> testCases =
+    const std::array<TestCase, 11> testCases =
         { {
         {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
         {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
@@ -4258,6 +4258,11 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         {"IFM.LMT121", level_s_iolink::ARTICLE::IFM_LMT121},
         {"IFM.LMT202", level_s_iolink::ARTICLE::IFM_LMT202},
         {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
+        {"E&H.FTW33-GR7NWVJ", level_s_iolink::ARTICLE::EH_FTW33},
+        {"E&H.FTW33-GR7NW5J", level_s_iolink::ARTICLE::EH_FTW33},
+        {"E&H.FTW33-XXXXX", level_s_iolink::ARTICLE::EH_FTW33},
+
+        {"E&H.FTW00", level_s_iolink::ARTICLE::DEFAULT}
         } };
 
     for ( const auto& testCase : testCases )
@@ -4335,10 +4340,22 @@ TEST_F( iolink_dev_test, level_s_iolink_evaluate_io )
 
     DeltaMilliSecSubHooker::set_millisec(
         static_cast<unsigned long>( CHECK_TIME + 1.f ) );
-    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0011'0000'0000;
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0111'0000'0000;
     test_dev_max.evaluate_io();
     EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    auto value = test_dev_max.get_value();
+    const auto EXPECTED_VALUE = 1.f;
+    EXPECT_EQ( value, EXPECTED_VALUE );
+
+    *test_dev_max.AI_channels.int_read_values[ 0 ] = 0b0000'0001'1100'0000;
+    test_dev_max.set_article( "E&H.FTW33-GR7NW5J" );
+    test_dev_max.evaluate_io();
+    EXPECT_TRUE( test_dev_max.is_active() ); // Read 1 from I/O data.
+    value = test_dev_max.get_value();
+    EXPECT_EQ( value, 0.1f * EXPECTED_VALUE );
+
     DeltaMilliSecSubHooker::set_default_time();
+
 
     G_PAC_INFO()->emulation_on();
     }
@@ -5392,7 +5409,7 @@ TEST( wages_RS232, get_value_from_wages )
     //4, 5 - Некорректные данные, возвращает 0
     //6 - Если в первом байте 1, буффер не пустой. Переключение в режим
     // чтения данных. Возвращает старое значение (в данном случае 0)
-    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение 
+    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение
     //(в данном случае 0).
     w1.AI_channels.int_read_values[ 0 ] = nullptr;                         //1
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
@@ -5408,7 +5425,7 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    strcpy( tmp_str, "   +0012.34k" );                                     //3   
+    strcpy( tmp_str, "   +0012.34k" );                                     //3
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -6004,13 +6021,13 @@ TEST( threshold_regulator, set_value )
     dev->set_cmd( "P_is_reverse", 0, .0 );
     dev->off();
 
-    //Regulator switched off.    
+    //Regulator switched off.
     dev->set_value( SET_VALUE );
     EXPECT_EQ( 0, M1->get_state() );
 
     dev->on();
 
-    //Use counter as a sensor.    
+    //Use counter as a sensor.
     auto name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_FQT, device::DST_FQT_VIRT, name.c_str(), "Test counter", "F" );

@@ -31,7 +31,7 @@ TEST( project_manager, lua_load_configuration )
 system =
     {
     create_io = function( self )
-        return 0  
+        return 0
     end
     }
 )";

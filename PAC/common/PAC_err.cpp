@@ -187,7 +187,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         static_cast<int>( err_class ), static_cast<int>( err_sub_class ),
         par ).size;
     // LCOV_EXCL_STOP
-    
+
     switch( err_class )
         {
     case AC_SERVICE:
@@ -201,7 +201,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                     G_CMMCTR->get_host_name_rus() ).size;
                 if ( is_set )
                     {
-                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, 
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
                         "отключен для обслуживания" );
                     }
                 else
@@ -259,7 +259,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                 break;
 
             case AS_MODBUS_DEVICE:
-                fmt::format_to_n( tmp + res, BUFF_SIZE - res, 
+                fmt::format_to_n( tmp + res, BUFF_SIZE - res,
                     "Modbus-device №{}.", par );
                 break;
 

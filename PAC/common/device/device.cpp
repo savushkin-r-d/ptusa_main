@@ -658,7 +658,7 @@ power_unit::power_unit( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type  ) :
     analog_io_device( dev_name, device::DT_G, sub_type, 0 )
     {
-    memset( &p_data_in, 0, sizeof( p_data_in ) );    
+    memset( &p_data_in, 0, sizeof( p_data_in ) );
 
     static_assert( sizeof( process_data_in ) == 18,
         "Struct `process_data_in` must be the 18 bytes size." );
@@ -678,7 +678,7 @@ int power_unit::get_state() const
 //-----------------------------------------------------------------------------
 void power_unit::direct_set_value( float val )
     {
-    // Здесь нет возможности управлять состоянием - управляем через отдельные 
+    // Здесь нет возможности управлять состоянием - управляем через отдельные
     // каналы.
     }
 //-----------------------------------------------------------------------------
@@ -819,7 +819,7 @@ int power_unit::save_device_ex( char* buff ) const
         decode_nominal_current( p_data_in.nominal_current_ch5 ),
         decode_nominal_current( p_data_in.nominal_current_ch6 ),
         decode_nominal_current( p_data_in.nominal_current_ch7 ),
-        decode_nominal_current( p_data_in.nominal_current_ch8 ) );    
+        decode_nominal_current( p_data_in.nominal_current_ch8 ) );
     auto size = static_cast<int>( res.size );
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
@@ -836,7 +836,7 @@ int power_unit::save_device_ex( char* buff ) const
         +p_data_in.status_ch3, +p_data_in.status_ch4,
         +p_data_in.status_ch5, +p_data_in.status_ch6,
         +p_data_in.status_ch7, +p_data_in.status_ch8 );
-    size += res.size;    
+    size += res.size;
 
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "SUM_CURRENTS={:.1f}, ", v );
@@ -848,7 +848,7 @@ int power_unit::save_device_ex( char* buff ) const
     size += res.size;
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "OUT_POWER_90={}, ", +p_data_in.out_power_90 );
-    size += res.size;    
+    size += res.size;
     res = fmt::format_to_n( buff + size, MAX_COPY_SIZE, "ERR={}, ", err );
     // LCOV_EXCL_STOP
     size += res.size;
@@ -938,7 +938,7 @@ int power_unit::set_cmd( const char* prop, u_int idx, double val )
         return 0;
         }
     auto new_st = static_cast<bool>( val );
-    auto status = static_cast<int8_t>( val );    
+    auto status = static_cast<int8_t>( val );
 
     if ( strcmp( prop, "ST_CH" ) == 0 )
         {
@@ -1139,7 +1139,7 @@ float base_counter::calculate_quantity( float& val, float& last_read_val,
         }
     else
         {
-        
+
         if ( current < last_read_val )
             {
             delta = get_max_raw_value() - last_read_val + current;
@@ -1196,7 +1196,7 @@ void base_counter::pause()
 void base_counter::start()
     {
     if ( static_cast<int>( STATES::S_PAUSE ) == device::get_state() )
-        {        
+        {
         last_read_value = get_raw_value();
         non_working_pump_flag = false;
         min_flow_detected_flag = false;
@@ -1307,7 +1307,7 @@ void base_counter::check_connected_pumps()
     // Насос работает.
     if ( non_working_pump_flag )
         {
-        // Фиксируем время и показания момента включения насоса. 
+        // Фиксируем время и показания момента включения насоса.
         start_pump_working_time = get_millisec();
         counter_prev_value = get_abs_quantity();
         non_working_pump_flag = false;
@@ -1340,7 +1340,7 @@ void base_counter::evaluate_io()
         {
         calculate_quantity( value, last_read_value, is_first_read );
         }
-    
+
     auto delta = calculate_quantity( abs_value, abs_last_read_value,
         abs_is_first_read );
 
@@ -1372,9 +1372,9 @@ void base_counter::evaluate_io()
         min_flow_detected_flag = false;
         return;                     // Не изменяем данное состояние.
         }
-        
+
     check_self_flow();          // Проверка на самотёк.
-    check_connected_pumps();    // Проверяем на работу связанных насосов.  
+    check_connected_pumps();    // Проверяем на работу связанных насосов.
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const
@@ -1398,7 +1398,7 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
             break;
 
         default:
-            if ( strcmp( prop, "PREV_DAY_T1" ) == 0 ) 
+            if ( strcmp( prop, "PREV_DAY_T1" ) == 0 )
                 prev_day_t1_value = f_value;
             else if ( strcmp( prop, "PREV_DAY_T2" ) == 0 )
                 prev_day_t2_value = f_value;
@@ -1502,7 +1502,7 @@ counter_f::counter_f( const char *dev_name ) :
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );
-    set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
+    set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );
     }
 //-----------------------------------------------------------------------------
 int counter_f::get_state() const
@@ -1571,7 +1571,7 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
     set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
-        "P_ERR_MIN_FLOW" );    
+        "P_ERR_MIN_FLOW" );
     };
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
@@ -1616,7 +1616,7 @@ int counter_iolink::get_state() const
     {
     if ( !G_PAC_INFO()->is_emulator() )
         {
-        IOLINKSTATE res = get_AI_IOLINK_state( 
+        IOLINKSTATE res = get_AI_IOLINK_state(
             static_cast<u_int>( CONSTANTS::AI_INDEX ) );
         if ( res != io_device::IOLINKSTATE::OK )
             {
@@ -1673,12 +1673,12 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
             return base_counter::set_cmd( prop, idx, val / mL_in_L );
 
         case 'F':
-            in_info.flow = static_cast<int16_t>( 
+            in_info.flow = static_cast<int16_t>(
                 round( val / get_flow_gradient() ) );
             break;
 
         case 'T':
-            in_info.temperature = static_cast<int16_t>( 
+            in_info.temperature = static_cast<int16_t>(
                 round( val / TE_GRADIENT ) );
             break;
 
@@ -1705,7 +1705,7 @@ float counter_iolink::get_value() const
     }
 //-----------------------------------------------------------------------------
 const char* counter_iolink::get_error_description()
-    {    
+    {
     switch ( auto error_id = get_error_id() )
         {
         case -static_cast<int>( io_device::IOLINKSTATE::NOTCONNECTED ) :
@@ -1754,7 +1754,7 @@ float counter_iolink::get_flow_gradient() const
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 DI1::DI1( const char* dev_name, device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, 
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
     int current_state_init_val ) :
     digital_io_device( dev_name, type, sub_type,
     ADDITIONAL_PARAMS_COUNT + par_cnt ),
@@ -2002,7 +2002,7 @@ const char* temperature_e_iolink_tm311::get_error_description()
                 "значение установлено как постоянное (например, симуляция)";
             }
 
-        if ( !msg.empty() ) return msg.c_str();        
+        if ( !msg.empty() ) return msg.c_str();
         }
 
     return iol_dev.get_error_description( err_id );
@@ -2115,7 +2115,7 @@ void wages_RS232::set_command( int new_state )
     if ( !out ) return;
 
     auto new_st = static_cast<STATES>( new_state );
-    if ( new_st == STATES::BUFFER_MOD )                                    //1                                      
+    if ( new_st == STATES::BUFFER_MOD )                                    //1
         {
         *out = 0;
         }
@@ -2147,13 +2147,13 @@ void wages_RS232::evaluate_io()
 
 void wages_RS232::direct_set_value( float new_value )
     {
-    if ( G_PAC_INFO()->is_emulator() ) 
+    if ( G_PAC_INFO()->is_emulator() )
         return analog_io_device::direct_set_value( new_value );
     }
 
 void wages_RS232::tare()
     {
-    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается
     //в качестве нулевого).
     }
 //-----------------------------------------------------------------------------
@@ -2198,7 +2198,7 @@ void wages_eth::evaluate_io()
 
 void wages_eth::tare()
     {
-    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается
     //в качестве нулевого).
     }
 
@@ -2391,7 +2391,7 @@ float wages::get_weight() const
         float uref = get_AI(C_AI_Uref);
         if (0 == uref) return -1002;
         float filterval = get_par(P_DT, 0);
-        if ( auto now_weight = 
+        if ( auto now_weight =
             get_AI( C_AI_Ud ) / rkp / uref * get_par( P_NOMINAL_W, 0 );
             fabs( now_weight - weight ) > filterval )
             {
@@ -2768,7 +2768,7 @@ int motor::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
-    int o = get_DO( DO_INDEX );    
+    int o = get_DO( DO_INDEX );
 
     if ( auto sub_type = get_sub_type();
         sub_type == device::M_REV_2_ERROR ||
@@ -2801,7 +2801,7 @@ int motor::get_state() const
 
     int i = get_DI( DI_INDEX );
 
-    if ( auto sub_type = get_sub_type(); 
+    if ( auto sub_type = get_sub_type();
         sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
@@ -2966,7 +2966,7 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
 level_s_iolink::level_s_iolink( const char *dev_name,
     device::DEVICE_SUB_TYPE sub_type ):
     analog_io_device( dev_name, DT_LS, sub_type, LAST_PARAM_IDX - 1 ),
-    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 )    
+    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 )
     {
     set_par_name( P_DT, 0, "P_DT" );
     set_par_name( P_ERR, 0, "P_ERR" );
@@ -3006,13 +3006,16 @@ void level_s_iolink::evaluate_io()
             }
 
         case ARTICLE::EH_FTL33:     //E&H.FTL33-GR7N2ABW5J
+        case ARTICLE::EH_FTW33:     //E&H.FTW33
             {
             rev_LS_data info{};
-            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
-            v = 0.1f *info.v;
+            std::reverse_copy( data, data + sizeof( info ),
+                reinterpret_cast<char*>(&info) );
+            v = 0.1f * info.v;
             st = info.st1;
             break;
             }
+
 
         case ARTICLE::DEFAULT:
             v = get_par( P_ERR, 0 );
@@ -3045,41 +3048,53 @@ void level_s_iolink::set_article( const char* new_article )
     device::set_article( new_article );
 
     auto article = get_article();
-    if ( strcmp( article, "IFM.LMT100" ) == 0 )
+    if ( article[ 0 ] == 'I' )
         {
-        n_article = ARTICLE::IFM_LMT100;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT102") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT102;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT104") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT104;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT105") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT105;
-        return;
-        }
-    if ( strcmp( article, "IFM.LMT121" ) == 0 )
-        {
-        n_article = ARTICLE::IFM_LMT121;
-        return;
-        }
-    if ( strcmp( article, "IFM.LMT202" ) == 0 )
-        {
-        n_article = ARTICLE::IFM_LMT202;
-        return;
+        if ( strcmp( article, "IFM.LMT100" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT100;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT102" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT102;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT104" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT104;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT105" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT105;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT121" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT121;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT202" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT202;
+            return;
+            }
         }
 
-    if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
+    if ( article[ 0 ] == 'E' )
         {
-        n_article = ARTICLE::EH_FTL33;
-        return;
+        if ( strstr( article, "E&H.FTL33" ) != nullptr )
+            {
+            n_article = ARTICLE::EH_FTL33;
+            return;
+            }
+
+        if ( strstr( article, "E&H.FTW33" ) != nullptr )
+            {
+            n_article = ARTICLE::EH_FTW33;
+            return;
+            }
         }
 
     if ( G_DEBUG )
@@ -3087,6 +3102,7 @@ void level_s_iolink::set_article( const char* new_article )
         G_LOG->warning( "%s unknown article \"%s\"",
             get_name(), new_article );
         }
+    n_article = ARTICLE::DEFAULT;
     }
 
 #ifdef PTUSA_TEST
@@ -3412,7 +3428,7 @@ const pressure_e_iolink::article_info& pressure_e_iolink::get_article_info( ARTI
         {
         return it->second;
         }
-    
+
     static const article_info default_info = { 1.0f, PT_DATA_TYPE };
     return default_info;
     }
@@ -3433,9 +3449,9 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = 0;
         st = 0;
         return;
-        }    
-   
-    if ( const auto& info = get_article_info( n_article ); 
+        }
+
+    if ( const auto& info = get_article_info( n_article );
         info.processing_type == PT_DATA_TYPE )
         {
         PT_data pt_info{};
@@ -3443,7 +3459,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         v = pt_info.v;
         st = 0;
         }
-    else if ( info.processing_type == EX_PT_DATA_TYPE ) 
+    else if ( info.processing_type == EX_PT_DATA_TYPE )
         {
         ex_PT_data ex_info{};
         auto data_ptr = ( (char*)&ex_info );
@@ -3551,7 +3567,7 @@ int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
     {
     if (G_DEBUG)
         {
-        G_LOG->debug( 
+        G_LOG->debug(
             "%s\t circuit_breaker::set_cmd() - prop = %s, idx = %d, val = %f",
             get_name(), prop, idx, val);
         }
@@ -3894,7 +3910,7 @@ float analog_input::get_min_val() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-analog_io_device::analog_io_device( const char* dev_name, 
+analog_io_device::analog_io_device( const char* dev_name,
     device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
     u_int par_cnt ) : device( dev_name, type, sub_type, par_cnt ),
     io_device( dev_name )
@@ -3951,7 +3967,7 @@ int analog_io_device::save_device_ex( char* buff ) const
 float analog_io_device::get_value() const
     {
     if ( is_emulation() ) return get_emulator().get_value();
-    
+
     return device::get_value();
     }
 //-----------------------------------------------------------------------------
@@ -4360,7 +4376,7 @@ int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
             }
         }
 
-    return device::set_cmd( prop, idx, val );    
+    return device::set_cmd( prop, idx, val );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4400,7 +4416,7 @@ converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
     {
 #ifdef PTUSA_TEST
     stub_p_data_out = {};
-#endif    
+#endif
 
     static_assert( sizeof( process_data_in ) == PROCESS_DATA_IN_SIZE,
         "Struct `process_data_in` must be the 1 byte size." );
@@ -4491,7 +4507,7 @@ void converter_iolink_ao::evaluate_io()
     p_data_out = reinterpret_cast<process_data_out*>(
         get_AO_write_data( C_AIAO_INDEX ) );
 
-    if ( auto iol_st = get_AI_IOLINK_state( C_AIAO_INDEX ); 
+    if ( auto iol_st = get_AI_IOLINK_state( C_AIAO_INDEX );
         iol_st == io_device::IOLINKSTATE::OK )
         {
         // Проверка статуса устройства (0 = OK согласно IODD).
@@ -4549,7 +4565,7 @@ const char* converter_iolink_ao::get_error_description()
 
         default:
             return iol_dev.get_error_description( err_id );
-        }    
+        }
     }
 
 #ifdef WIN_OS

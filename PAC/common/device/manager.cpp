@@ -699,7 +699,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
                         new_io_device = (valve_iolink_shut_off_sorio*)new_device;
                         }
-                    else if (strcmp(article, valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str()) == 0) 
+                    else if (strcmp(article, valve_iolink_gea_tvis_a15_ss::GEA_TVIS_A15_SINGLE_SEAT_ARTICLE.c_str()) == 0)
                         {
                         new_device = new valve_iolink_gea_tvis_a15_ss(dev_name);
                         new_io_device = (valve_iolink_gea_tvis_a15_ss*)new_device;
@@ -1585,7 +1585,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_
 
         // Store comparison result to avoid calling strcmp twice
         int cmp = strcmp( dev_name, project_devices[ i ]->get_name() );
-        
+
         if ( cmp == 0 )
             {
             return i;
