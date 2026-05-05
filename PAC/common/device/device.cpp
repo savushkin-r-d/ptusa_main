@@ -3048,47 +3048,53 @@ void level_s_iolink::set_article( const char* new_article )
     device::set_article( new_article );
 
     auto article = get_article();
-    if ( strcmp( article, "IFM.LMT100" ) == 0 )
+    if ( article[ 0 ] == 'I' )
         {
-        n_article = ARTICLE::IFM_LMT100;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT102") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT102;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT104") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT104;
-        return;
-        }
-    if (strcmp(article, "IFM.LMT105") == 0)
-        {
-        n_article = ARTICLE::IFM_LMT105;
-        return;
-        }
-    if ( strcmp( article, "IFM.LMT121" ) == 0 )
-        {
-        n_article = ARTICLE::IFM_LMT121;
-        return;
-        }
-    if ( strcmp( article, "IFM.LMT202" ) == 0 )
-        {
-        n_article = ARTICLE::IFM_LMT202;
-        return;
-        }
-
-    if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
-        {
-        n_article = ARTICLE::EH_FTL33;
-        return;
+        if ( strcmp( article, "IFM.LMT100" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT100;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT102" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT102;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT104" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT104;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT105" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT105;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT121" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT121;
+            return;
+            }
+        if ( strcmp( article, "IFM.LMT202" ) == 0 )
+            {
+            n_article = ARTICLE::IFM_LMT202;
+            return;
+            }
         }
 
-    if ( strcmp( article, "E&H.FTW33" ) == 0 )
+    if ( article[ 0 ] == 'E' )
         {
-        n_article = ARTICLE::EH_FTW33;
-        return;
+        if ( strstr( article, "E&H.FTL33" ) != nullptr )
+            {
+            n_article = ARTICLE::EH_FTL33;
+            return;
+            }
+
+        if ( strstr( article, "E&H.FTW33" ) != nullptr )
+            {
+            n_article = ARTICLE::EH_FTW33;
+            return;
+            }
         }
 
     if ( G_DEBUG )

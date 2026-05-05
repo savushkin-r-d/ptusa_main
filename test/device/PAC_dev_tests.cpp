@@ -4246,7 +4246,7 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         level_s_iolink::ARTICLE expected;
         };
 
-    std::array<TestCase, 8> testCases =
+    const std::array<TestCase, 9> testCases =
         { {
         {"IFM.LMT100", level_s_iolink::ARTICLE::IFM_LMT100},
         {"IFM.LMT102", level_s_iolink::ARTICLE::IFM_LMT102},
@@ -4255,7 +4255,8 @@ TEST_F( LevelSIOLinkTest, SetArticle_ValidArticles )
         {"IFM.LMT121", level_s_iolink::ARTICLE::IFM_LMT121},
         {"IFM.LMT202", level_s_iolink::ARTICLE::IFM_LMT202},
         {"E&H.FTL33-GR7N2ABW5J", level_s_iolink::ARTICLE::EH_FTL33},
-        {"E&H.FTW33", level_s_iolink::ARTICLE::EH_FTW33},
+        {"E&H.FTW33-GR7NWVJ", level_s_iolink::ARTICLE::EH_FTW33},
+        {"E&H.FTW33-GR7NW5J", level_s_iolink::ARTICLE::EH_FTW33},
         } };
 
     for ( const auto& testCase : testCases )
