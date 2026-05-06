@@ -35,6 +35,8 @@ class project_manager
         /// @param argv - массив параметров.
         int proc_main_params( int argc, const char *argv[] );
 
+        int apply_opc_mode( bool show_msg = true );
+
         /// @brief Загрузка системной конфигурации проекта на основе скрипта.
         ///
         /// Системная конфигурация была предварительно загружена из файла
@@ -63,6 +65,16 @@ class project_manager
         unsigned int sleep_time_ms = 0;
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
+
+        enum OPC_MODE
+            {
+            OPC_MODE_UNDEFINED,
+            OPC_MODE_OFF,
+            OPC_MODE_READ_ONLY,
+            OPC_MODE_READ_WRITE
+            };
+
+        OPC_MODE opc_mode = OPC_MODE_UNDEFINED;
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < project_manager > instance;

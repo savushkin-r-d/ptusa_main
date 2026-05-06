@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include "prj_mngr_tests.h"
+#include "PAC_info.h"
 #include "lua_manager.h"
 #include "dtime.h"
 
@@ -199,6 +200,18 @@ Resetting params (command line parameter "rcrc").
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
+
+    G_PAC_INFO()->reset_params();
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->apply_opc_mode( false );
+    ASSERT_EQ( 0, res );
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
 
     // Передаем некорректный режим OPC UA.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };

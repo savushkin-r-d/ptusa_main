@@ -42,6 +42,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     {
     if ( !argc || !argv || !argv[ 0 ] ) return 2;
 
+    opc_mode = OPC_MODE_UNDEFINED;
+
     //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
@@ -118,32 +120,28 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "opc" ) )
         {
-        auto opc_mode = result[ "opc" ].as<std::string>();
+        auto opc_mode_arg = result[ "opc" ].as<std::string>();
 
-        if ( opc_mode == "rw" )
+        if ( opc_mode_arg == "rw" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            opc_mode = OPC_MODE_READ_WRITE;
             }
-        else if ( opc_mode == "r" )
+        else if ( opc_mode_arg == "r" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            G_LOG->warning( "OPC UA server is activated (only read)." );
+            opc_mode = OPC_MODE_READ_ONLY;
             }
-        else if ( opc_mode == "off" )
+        else if ( opc_mode_arg == "off" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            G_LOG->info( "OPC UA server is disabled." );
+            opc_mode = OPC_MODE_OFF;
             }
         else
             {
             G_LOG->error( "Unknown OPC UA mode: '%s'. "
-                "Valid values: off, r, rw.", opc_mode.c_str() );
+                "Valid values: off, r, rw.", opc_mode_arg.c_str() );
             return 1;
             }
+
+        apply_opc_mode();
         }
 
     main_script = result[ "script" ].as<std::string>();
@@ -179,6 +177,44 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         G_LOG->warning( "Bus couplers are enabled." );
         if ( G_READ_ONLY_IO_NODES )
             G_LOG->warning( "Bus couplers are read only." );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int project_manager::apply_opc_mode( bool show_msg /* = true */ )
+    {
+    switch ( opc_mode )
+        {
+        case OPC_MODE_OFF:
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            if ( show_msg )
+                {
+                G_LOG->info( "OPC UA server is disabled." );
+                }
+            break;
+
+        case OPC_MODE_READ_ONLY:
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            if ( show_msg )
+                {
+                G_LOG->warning( "OPC UA server is activated (only read)." );
+                }
+            break;
+
+        case OPC_MODE_READ_WRITE:
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
+            if ( show_msg )
+                {
+                G_LOG->warning( "OPC UA server is activated (read-write)." );
+                }
+            break;
+
+        case OPC_MODE_UNDEFINED:
+            break;
         }
 
     return 0;
