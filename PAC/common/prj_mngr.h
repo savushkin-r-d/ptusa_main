@@ -40,7 +40,7 @@ class project_manager
         /// @param show_msg - выводить ли сообщение о примененном режиме.
         ///
         /// @return 0 - ОК.
-        int apply_opc_mode( bool show_msg = true );
+        int apply_opc_mode( bool show_msg = true ) const;
 
         /// @brief Загрузка системной конфигурации проекта на основе скрипта.
         ///
@@ -71,15 +71,15 @@ class project_manager
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
 
-        enum OPC_MODE
+        enum class OPC_MODE
             {
-            OPC_MODE_UNDEFINED,
-            OPC_MODE_OFF,
-            OPC_MODE_READ_ONLY,
-            OPC_MODE_READ_WRITE
+            UNDEFINED,
+            OFF,
+            READ_ONLY,
+            READ_WRITE
             };
 
-        OPC_MODE opc_mode = OPC_MODE_UNDEFINED;
+        OPC_MODE opc_mode = OPC_MODE::UNDEFINED;
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < project_manager > instance;

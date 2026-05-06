@@ -42,7 +42,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     {
     if ( !argc || !argv || !argv[ 0 ] ) return 2;
 
-    opc_mode = OPC_MODE_UNDEFINED;
+    opc_mode = OPC_MODE::UNDEFINED;
 
     //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[ 0 ], "Main control program" );
@@ -120,19 +120,18 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "opc" ) )
         {
-        auto opc_mode_arg = result[ "opc" ].as<std::string>();
-
-        if ( opc_mode_arg == "rw" )
+        if ( auto opc_mode_arg = result[ "opc" ].as<std::string>();
+            opc_mode_arg == "rw" )
             {
-            opc_mode = OPC_MODE_READ_WRITE;
+            opc_mode = OPC_MODE::READ_WRITE;
             }
         else if ( opc_mode_arg == "r" )
             {
-            opc_mode = OPC_MODE_READ_ONLY;
+            opc_mode = OPC_MODE::READ_ONLY;
             }
         else if ( opc_mode_arg == "off" )
             {
-            opc_mode = OPC_MODE_OFF;
+            opc_mode = OPC_MODE::OFF;
             }
         else
             {
@@ -182,11 +181,11 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int project_manager::apply_opc_mode( bool show_msg /* = true */ )
+int project_manager::apply_opc_mode( bool show_msg /* = true */ ) const
     {
     switch ( opc_mode )
         {
-        case OPC_MODE_OFF:
+        case OPC_MODE::OFF:
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
             if ( show_msg )
@@ -195,7 +194,7 @@ int project_manager::apply_opc_mode( bool show_msg /* = true */ )
                 }
             break;
 
-        case OPC_MODE_READ_ONLY:
+        case OPC_MODE::READ_ONLY:
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
             if ( show_msg )
@@ -204,7 +203,7 @@ int project_manager::apply_opc_mode( bool show_msg /* = true */ )
                 }
             break;
 
-        case OPC_MODE_READ_WRITE:
+        case OPC_MODE::READ_WRITE:
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
             G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
             if ( show_msg )
@@ -213,7 +212,7 @@ int project_manager::apply_opc_mode( bool show_msg /* = true */ )
                 }
             break;
 
-        case OPC_MODE_UNDEFINED:
+        case OPC_MODE::UNDEFINED:
             break;
         }
 
