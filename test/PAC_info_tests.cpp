@@ -58,6 +58,8 @@ TEST( PAC_info, OPCUA_server_start_fail )
 
 TEST( PAC_info, set_cmd )
     {
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
+
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::RELOAD_RESTRICTIONS );
 
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );

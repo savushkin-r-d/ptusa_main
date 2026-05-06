@@ -355,7 +355,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     false );
                 wn->is_set_err = false;
 
-                // Если была активна данная ошибка, уделяем её аналогично.
+                // Если была активна данная ошибка, удаляем её аналогично.
                 if ( wn->is_err_mode_alarm_set )
                     {
                     PAC_critical_errors_manager::get_instance()->reset_global_error(
