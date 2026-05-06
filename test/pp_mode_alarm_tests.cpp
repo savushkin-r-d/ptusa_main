@@ -126,8 +126,7 @@ TEST( pp_mode_alarm, non_phoenix_node )
     G_PAC_INFO()->emulation_on();
     }
 
-// Test disconnect when alarm is not set.
-TEST( pp_mode_alarm, disconnect_no_alarm )
+TEST( pp_mode_alarm, disable_node_no_alarm )
     {
     PAC_critical_errors_manager::get_instance()->reset_all_error();
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
@@ -148,6 +147,35 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     mngr.read_phoenix_status_register( node );
 
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    u_int_2 err_id = 0;
+    std::array<char, 300> lua_buff{};
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
+        err_id );
+    auto REF_STR_1 = R"s(	{
+	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен PP mode (каналы управления заблокированы)",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)s";
+    EXPECT_STREQ( lua_buff.data(), REF_STR_1 );
+
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 0 ) );
+    EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
+        err_id );
+    auto REF_STR_2 = R"s(	{
+	description = "5-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - отключен для обслуживания",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)s";
+    EXPECT_STREQ( lua_buff.data(), REF_STR_2 );
 
     PAC_critical_errors_manager::get_instance()->reset_all_error();
     tcp_communicator::clear_instance();

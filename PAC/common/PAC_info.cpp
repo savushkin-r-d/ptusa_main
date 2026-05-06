@@ -188,7 +188,7 @@ int PAC_info::save_device( char* buff ) const
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-        "\tP_BK_ANSWER_MAX_WAIT_TIME={},\n", par[ P_BK_ANSWER_MAX_WAIT_TIME ] ).size;    
+        "\tP_BK_ANSWER_MAX_WAIT_TIME={},\n", par[ P_BK_ANSWER_MAX_WAIT_TIME ] ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
@@ -355,6 +355,17 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     false );
                 wn->is_set_err = false;
 
+                // Если была активна данная ошибка, уделяем её аналогично.
+                if ( wn->is_err_mode_alarm_set )
+                    {
+                    PAC_critical_errors_manager::get_instance()->reset_global_error(
+                        PAC_critical_errors_manager::AC_PP_MODE,
+                        PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                        false );
+                    wn->is_err_mode_alarm_set = false;
+                    wn->prev_status_register = 0;
+                    }
+
                 // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
@@ -371,6 +382,8 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
                 }
+
+            return 0;
             }
         }
 
