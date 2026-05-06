@@ -35,6 +35,11 @@ class project_manager
         /// @param argv - массив параметров.
         int proc_main_params( int argc, const char *argv[] );
 
+        /// @brief Применение сохраненного режима OPC UA.
+        ///
+        /// @param show_msg - выводить ли сообщение о примененном режиме.
+        ///
+        /// @return 0 - ОК.
         int apply_opc_mode( bool show_msg = true );
 
         /// @brief Загрузка системной конфигурации проекта на основе скрипта.
