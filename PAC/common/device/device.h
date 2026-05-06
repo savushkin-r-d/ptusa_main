@@ -605,7 +605,9 @@ class concentration_e_iolink : public analog_io_device
 
         const char* get_error_description() override;
 
+#ifndef PTUSA_TEST
     private:
+#endif
 
 #pragma pack(push,1)
         struct QT_data
@@ -627,6 +629,7 @@ class concentration_e_iolink : public analog_io_device
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
 
             P_ERR,              ///< Аварийное значение.
+            P_MAX_V,            ///< Максимальное значение.
 
             LAST_PARAM_IDX,
             };

@@ -3805,6 +3805,7 @@ concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_ERR, 0, "P_ERR" );
+    set_par_name( P_MAX_V, 0, "P_MAX_V" );
     };
 //-----------------------------------------------------------------------------
 concentration_e_iolink::~concentration_e_iolink()
@@ -3838,7 +3839,13 @@ float concentration_e_iolink::get_value() const
         }
     else
         {
-        return 0.001f * info->conductivity;
+        auto v = 0.001f * info->conductivity;
+        auto max_v = get_par( P_MAX_V, 0 );
+        if ( max_v > 0 && v > max_v )
+            {
+            return max_v;
+            }
+        return v;
         }
     }
 //-----------------------------------------------------------------------------
