@@ -259,6 +259,11 @@ void device::set_string_property( const char* field, const char* new_value )
     {
     G_LOG->debug( R"(%s (%s) set string property "%s" to "%s")",
         name, get_type_str(), field, new_value );
+
+    if ( field && strcmp( field, "ARTICLE" ) == 0 && new_value )
+        {
+        set_article( new_value );
+        }
     }
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff ) const
@@ -295,6 +300,15 @@ int device::save_device( char* buff ) const
         }
 
     res += save_device_ex( buff + res );
+    auto art = get_article();
+    // Include article when it has meaningful content; the default unset
+    // article is a single space character.
+    constexpr size_t C_MIN_ARTICLE_LENGTH = 2;
+    if ( art && strlen( art ) >= C_MIN_ARTICLE_LENGTH )
+        {
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+            "ARTICLE=\"{}\", ", art ).size;
+        }
     res += par_device::save_device( buff + res );
 
     if ( const auto extra_symbols_length = 2;
