@@ -125,6 +125,8 @@ void tech_dev_error::evaluate( bool &is_new_state )
                 break;
 
             case AS_RETURN:
+                // Condition resolved, but not yet acknowledged.
+                is_any_no_ack_error = true;
                 break;
 
             case AS_ACCEPT:
@@ -135,6 +137,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
             case AS_ALARM:
                 error_state = AS_RETURN;
                 is_new_state = true;
+                is_any_no_ack_error = true;
                 break;
             }
         }
@@ -518,7 +521,8 @@ void siren_lights_manager::eval()
     //Красный свет - аварии и тревоги.
     red->off();
     if ( PAC_critical_errors_manager::get_instance()->is_any_error() ||
-        tech_dev_error::is_any_error )
+        tech_dev_error::is_any_error ||
+        tech_dev_error::is_any_no_ack_error )
         {
         if ( is_red_built_in_blink )
             {
