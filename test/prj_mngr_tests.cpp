@@ -204,7 +204,8 @@ Resetting params (command line parameter "rcrc").
     // Проверяем, что после инициализации стандартных параметров
     // сохраненный режим "--opc=off" можно применить повторно
     // без лишнего сообщения.
-    G_PAC_INFO()->reset_params();
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
     EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
 

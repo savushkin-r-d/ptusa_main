@@ -71,6 +71,8 @@ class project_manager
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
 
+        void log_opc_mode() const;
+
         enum class OPC_MODE
             {
             UNDEFINED,

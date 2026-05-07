@@ -140,7 +140,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             return 1;
             }
 
-        apply_opc_mode();
+        log_opc_mode();
         }
 
     main_script = result[ "script" ].as<std::string>();
@@ -181,39 +181,73 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int project_manager::apply_opc_mode( bool show_msg /* = true */ ) const
+void project_manager::log_opc_mode() const
     {
     switch ( opc_mode )
         {
         case OPC_MODE::OFF:
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            if ( show_msg )
+            G_LOG->info( "OPC UA server is disabled." );
+            break;
+
+        case OPC_MODE::READ_ONLY:
+            G_LOG->warning( "OPC UA server is activated (only read)." );
+            break;
+
+        case OPC_MODE::READ_WRITE:
+            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            break;
+
+        case OPC_MODE::UNDEFINED:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int project_manager::apply_opc_mode( bool show_msg /* = true */ ) const
+    {
+    auto info = G_PAC_INFO();
+
+    switch ( opc_mode )
+        {
+        case OPC_MODE::OFF:
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 0 )
                 {
-                G_LOG->info( "OPC UA server is disabled." );
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+                }
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 0 )
+                {
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
                 }
             break;
 
         case OPC_MODE::READ_ONLY:
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            if ( show_msg )
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 1 )
                 {
-                G_LOG->warning( "OPC UA server is activated (only read)." );
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+                }
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 0 )
+                {
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
                 }
             break;
 
         case OPC_MODE::READ_WRITE:
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-            if ( show_msg )
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 1 )
                 {
-                G_LOG->warning( "OPC UA server is activated (read-write)." );
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+                }
+            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
+                {
+                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
                 }
             break;
 
         case OPC_MODE::UNDEFINED:
             break;
+        }
+
+    if ( show_msg )
+        {
+        log_opc_mode();
         }
 
     return 0;
