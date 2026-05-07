@@ -322,3 +322,26 @@ Resetting params (command line parameter "rcrc").
     subhook_free( get_time_hook );
     G_LUA_MANAGER->free_Lua();
     }
+
+
+TEST( project_manager, apply_opc_mode )
+    {
+    auto ua_server_active =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ];
+    auto ua_server_control =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ];
+
+    testing::internal::CaptureStdout();
+
+    // Используемый режим OPC UA по умолчанию - UNDEFINED, при его применении
+    // сохранённые параметры не изменяются и нет никаких сообщений.
+    auto res = G_PROJECT_MANAGER->apply_opc_mode();
+    ASSERT_EQ( 0, res );
+
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( ua_server_active,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( ua_server_control,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+    }
