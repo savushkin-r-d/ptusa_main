@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include "prj_mngr_tests.h"
+#include "PAC_info.h"
 #include "lua_manager.h"
 #include "dtime.h"
 
@@ -200,6 +201,23 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
+    // Проверяем, что после инициализации стандартных параметров
+    // сохраненный режим "--opc=off" можно применить повторно
+    // без лишнего сообщения. Меняем только OPC UA параметры,
+    // чтобы не вызывать глобальный reset_params() и лишние save_all().
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->apply_opc_mode( false );
+    ASSERT_EQ( 0, res );
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
     // Передаем некорректный режим OPC UA.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };
     testing::internal::CaptureStdout();
@@ -305,4 +323,27 @@ Resetting params (command line parameter "rcrc").
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
     G_LUA_MANAGER->free_Lua();
+    }
+
+
+TEST( project_manager, apply_opc_mode )
+    {
+    auto ua_server_active =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ];
+    auto ua_server_control =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ];
+
+    testing::internal::CaptureStdout();
+
+    // Используемый режим OPC UA по умолчанию - UNDEFINED, при его применении
+    // сохранённые параметры не изменяются и нет никаких сообщений.
+    auto res = G_PROJECT_MANAGER->apply_opc_mode();
+    ASSERT_EQ( 0, res );
+
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( ua_server_active,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( ua_server_control,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
     }

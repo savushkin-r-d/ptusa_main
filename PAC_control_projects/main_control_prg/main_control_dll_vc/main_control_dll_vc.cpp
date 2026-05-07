@@ -86,6 +86,8 @@ int lua_init( lua_State* L )
         return 1;
         }
 
+    G_PROJECT_MANAGER->apply_opc_mode( false );
+
     lua_pushnumber( L, 0 );
     return 1;
     }
