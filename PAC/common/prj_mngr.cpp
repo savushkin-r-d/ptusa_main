@@ -204,41 +204,31 @@ void project_manager::log_opc_mode() const
 //-----------------------------------------------------------------------------
 int project_manager::apply_opc_mode( bool show_msg /* = true */ ) const
     {
-    auto info = G_PAC_INFO();
+    auto pac_info = G_PAC_INFO();
+    auto save_param_if_changed = [ pac_info ]( unsigned int param_idx,
+        u_int_4 value )
+        {
+        if ( pac_info->par[ param_idx ] != value )
+            {
+            pac_info->par.save( param_idx, value );
+            }
+        };
 
     switch ( opc_mode )
         {
         case OPC_MODE::OFF:
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 0 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-                }
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 0 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-                }
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
             break;
 
         case OPC_MODE::READ_ONLY:
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 1 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-                }
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 0 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-                }
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
             break;
 
         case OPC_MODE::READ_WRITE:
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] != 1 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-                }
-            if ( info->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] != 1 )
-                {
-                info->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-                }
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
             break;
 
         case OPC_MODE::UNDEFINED:
