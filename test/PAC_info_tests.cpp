@@ -58,6 +58,8 @@ TEST( PAC_info, OPCUA_server_start_fail )
 
 TEST( PAC_info, set_cmd )
     {
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
+
     G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::RELOAD_RESTRICTIONS );
 
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );
@@ -83,6 +85,13 @@ TEST( PAC_info, set_cmd )
     EXPECT_FALSE( G_IO_MANAGER()->get_node( 0 )->is_active );
     EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 1 ) );
     EXPECT_TRUE( G_IO_MANAGER()->get_node( 0 )->is_active );
+
+    // Отключаем узел для обслуживания.
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 0 ) );
+    EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    // Сбрасываем данную ошибку узла.
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 100 ) );
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
     tcp_communicator::clear_instance();
     }
@@ -143,6 +152,7 @@ TEST( PAC_info, save_device )
         "\t},\n"
         "\tP_IS_OPC_UA_SERVER_ACTIVE=1,\n"
         "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+        "\tP_BK_ANSWER_MAX_WAIT_TIME=6000,\n"
         "\tNODES_COMM_ERROR=0,\n"
         "\tWATCHDOG_ERROR=0,\n"
         "\tCOMMUN_ERROR=0,\n"
@@ -186,6 +196,7 @@ TEST( PAC_info, save_device )
             "\t},\n"
             "\tP_IS_OPC_UA_SERVER_ACTIVE=1,\n"
             "\tP_IS_OPC_UA_SERVER_CONTROL=0,\n"
+            "\tP_BK_ANSWER_MAX_WAIT_TIME=6000,\n"
             "\tNODES_COMM_ERROR=0,\n"
             "\tWATCHDOG_ERROR=0,\n"
             "\tCOMMUN_ERROR=0,\n"
