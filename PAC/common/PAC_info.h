@@ -58,6 +58,9 @@ class PAC_info: public i_Lua_save_device
             /// 0 - нет, 1 - да.
             P_IS_OPC_UA_SERVER_CONTROL,
 
+            ///< Время до установки ошибки связи с сетевым узлом, мсек.
+            P_BK_ANSWER_MAX_WAIT_TIME,
+
             ///< Количество параметров.
             P_PARAMS_COUNT
             };
