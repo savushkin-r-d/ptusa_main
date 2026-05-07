@@ -1,14 +1,17 @@
 #include "PAC_dev_tests.h"
 #include "uni_bus_coupler_io.h"
 
-using namespace ::testing;
-
 #include <cstring>
 #include <iomanip>
 #include <time.h>
 
-using B = std::byte;
+#ifdef LINUX_OS
+#include <sys/types.h>
+#include <ifaddrs.h>
+#endif
 
+using namespace ::testing;
+using B = std::byte;
 
 class iolink_dev_test : public ::testing::Test
     {
@@ -7013,6 +7016,66 @@ TEST( device_manager, get_EY )
     }
 
 
+class node_dev_set_cmd_test : public ::testing::Test
+    {
+    public:
+
+        static int run_cmd_exit_code_expected(
+            [[maybe_unused]] const char* cmd, int expected = 0 )
+            {
+            return expected;
+            }
+
+        static std::string get_local_ipv4()
+            {
+            return "127.0.0.1";
+            }
+
+#ifdef LINUX_OS
+        static int getifaddrs_1( [[maybe_unused]] struct ifaddrs** ifap )
+            {
+            return 1;
+            }
+
+        static int getifaddrs_null( struct ifaddrs** ifap )
+            {
+            static ifaddrs item{};
+            static char name[] = "eth0";
+            std::memset( &item, 0, sizeof( item ) );
+            item.ifa_name = name;
+            item.ifa_flags = 0; // не loopback
+            item.ifa_addr = nullptr;
+            item.ifa_next = nullptr;
+
+            *ifap = &item;
+            return 0;
+            }
+
+        static void freeifaddrs_noop( [[maybe_unused]] struct ifaddrs* )
+            {
+            // Do nothing, since we are using a static item in getifaddrs_null.
+            }
+#endif
+
+    protected:
+        void SetUp() override
+            {
+            mngr.init( 1 );
+            prev_mngr = io_manager::replace_instance( &mngr );
+            node = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            }
+
+        void TearDown() override
+            {
+            io_manager::replace_instance( prev_mngr );
+            }
+
+        uni_io_manager mngr;
+        io_manager* prev_mngr{};
+        io_manager::io_node* node{};
+    };
+
 TEST( node_dev, basic_functionality )
     {
     // Инициализация io_manager с одним узлом.
@@ -7020,7 +7083,10 @@ TEST( node_dev, basic_functionality )
     mngr.init( 1 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+        1, "127.0.0.10", "A100", 0, 0, 0, 0, 0, 0 );
+
+    auto nd_2 = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.11", "A200", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
     auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
@@ -7031,10 +7097,33 @@ TEST( node_dev, basic_functionality )
     auto node = dynamic_cast<node_dev*>(
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
-    node->set_io_node( nd );
 
+    // Проверка получения IP-адреса в случае, когда нет привязанного узла.
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче пустого указателя.
+    node->set_io_node( nullptr );
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче узла с некорректным IP-адресом.
+    strcpy( nd->ip_address, "34" );
+    node->set_io_node( nd );
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_local_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_local_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
+    strcpy( nd->ip_address, "127.0.0.10" );
+    node->set_io_node( nd );
     // Проверка получения IP-адреса.
-    EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
+    EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
+
+    // Проверка при повторной привязке узла.
+    node->set_io_node( nd_2 );
+    EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
 
     G_PAC_INFO()->emulation_off();
 
@@ -7043,16 +7132,130 @@ TEST( node_dev, basic_functionality )
 
     // Сохранение устройства.
     const int BUFF_SIZE = 200;
-    std::array <char, BUFF_SIZE> buff {};
+    std::array <char, BUFF_SIZE> buff{};
     node->save_device( buff.data() );
     EXPECT_STREQ( buff.data(),
-        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
+        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.10'},\n" );
 
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
+
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
+    }
+
+TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
+    {
+#ifdef WIN_OS
+    // На Windows проверяем, что при ошибке получения IP-адреса возвращается
+    // пустая строка.
+    auto res = node_dev::get_local_ipv4();
+    EXPECT_TRUE( res.empty() );
+
+#else
+    // На Linux проверяем разные ошибочные сценарии получения IP-адреса.
+    auto getifaddrs_hook_1 = subhook_new(
+        reinterpret_cast<void*>( &getifaddrs ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_1 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( getifaddrs_hook_1 );
+
+    auto res = node_dev::get_local_ipv4();
+    EXPECT_TRUE( res.empty() );
+
+    subhook_remove( getifaddrs_hook_1 );
+    subhook_free( getifaddrs_hook_1 );
+
+
+    auto getifaddrs_hook_2 = subhook_new(
+        reinterpret_cast<void*>( &getifaddrs ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_null ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( getifaddrs_hook_2 );
+    auto getifaddrs_hook_3 = subhook_new(
+        reinterpret_cast<void*>( &freeifaddrs ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::freeifaddrs_noop ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( getifaddrs_hook_3 );
+
+    res = node_dev::get_local_ipv4();
+    EXPECT_TRUE( res.empty() );
+
+    subhook_remove( getifaddrs_hook_2 );
+    subhook_free( getifaddrs_hook_2 );
+    subhook_remove( getifaddrs_hook_3 );
+    subhook_free( getifaddrs_hook_3 );
+#endif
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web )
+    {
+    node_dev dev( "A100" );
+
+    // Команда WEB должна работать только для индекса 0 (второй параметр).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 1, 1 ) );
+
+    // Нет узла, команда должна вернуть ошибку.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
+
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_local_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_local_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
+    dev.set_io_node( node );
+
+#ifdef WIN_OS
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов на Windows нет (пустые строки).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+#else
+    auto run_cmd_0_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
+        reinterpret_cast<void*>( 
+            &node_dev_set_cmd_test::run_cmd_exit_code_expected ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( run_cmd_0_hook );
+
+    // Включаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+    
+    // Команда должна работать повторно, возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+
+    // Выключаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
+
+    subhook_remove( run_cmd_0_hook );
+    subhook_free( run_cmd_0_hook );
+#endif // WIN_OS
+
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_startup )
+    {
+    node_dev dev( "A100" );
+
+    // Команда STARTUP должна работать.
+    EXPECT_EQ( 0, dev.set_cmd( "STARTUP", 0, 1 ) );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_to_device )
+    {
+    node_dev dev( "A100" );
+
+    // Команды, которые не обрабатываются устройством, передаются дальше.
+    // Команды 'TEST' нет, должна вернуться ошибка.
+    EXPECT_EQ( 1, dev.set_cmd( "TEST", 0, 1 ) );
     }
 
 
