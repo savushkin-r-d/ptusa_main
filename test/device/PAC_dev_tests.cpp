@@ -7147,7 +7147,7 @@ TEST( node_dev, basic_functionality )
     subhook_free( get_local_ipv4_hook );
     }
 
-TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
+TEST( node_dev, get_local_ipv4 )
     {
     // Инициализация io_manager.
     uni_io_manager mngr;

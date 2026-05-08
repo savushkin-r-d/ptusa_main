@@ -20,23 +20,13 @@
 #endif
 
 
-#ifdef LINUX_OS
-namespace
-    {
-    std::string to_ipv4_string( const sockaddr_in* sa )
-        {
-        char buff[ INET_ADDRSTRLEN ]{};
-        inet_ntop( AF_INET, &sa->sin_addr, buff, sizeof( buff ) );
-        return buff;
-        }
-    }
-#endif
 //-----------------------------------------------------------------------------
 std::string node_dev::get_local_ipv4()
     {
     std::string result;
 
-    // Получаем IP-адрес на основе адреса узла контроллера `A1`.
+    // Получаем IP-адрес узла контроллера, который в текущей реализации
+    // хранится по индексу `0`.
     const auto NODE_A1 = std::as_const( *G_IO_MANAGER() ).get_node( 0 );
     if ( NODE_A1 != &io_manager::IO_NODE_STUB )
         {
@@ -83,7 +73,7 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
         {
         G_LOG->warning( "Node '%s' - invalid IPv4 address ('%s').",
-            io_node->ip_address, get_name() );
+            get_name(), io_node->ip_address );
         return;
         }
 
@@ -92,6 +82,14 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         {
         G_LOG->warning( "Node '%s' - controller IPv4 address was not detected.",
             get_name() );
+        return;
+        }
+    if ( struct in_addr ipv4_addr;
+        inet_pton( AF_INET, ip_controller.c_str(), &ipv4_addr ) != 1 )
+        {
+        G_LOG->warning(
+            "Node '%s' - invalid controller IPv4 address ('%s').",
+            get_name(), ip_controller.c_str() );
         return;
         }
 
@@ -228,7 +226,7 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        G_LOG->warning( "Web port forwarding enabled for node '%s'.",
+        G_LOG->info( "Web port forwarding enabled for node '%s'.",
             get_name() );
         web_value = 1;
         return 0;
@@ -255,7 +253,7 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        G_LOG->warning( "Web port forwarding disabled for node '%s'.",
+        G_LOG->info( "Web port forwarding disabled for node '%s'.",
             get_name() );
         web_value = 0;
         return 0;
