@@ -7080,12 +7080,12 @@ TEST( node_dev, basic_functionality )
     {
     // Инициализация io_manager с одним узлом.
     uni_io_manager mngr;
-    mngr.init( 1 );
+    mngr.init( 2 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
     auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.10", "A100", 0, 0, 0, 0, 0, 0 );
 
-    auto nd_2 = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+    auto nd_2 = mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.11", "A200", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
@@ -7149,46 +7149,28 @@ TEST( node_dev, basic_functionality )
 
 TEST_F( node_dev_set_cmd_test, get_local_ipv4 )
     {
-#ifdef WIN_OS
-    // На Windows проверяем, что при ошибке получения IP-адреса возвращается
-    // пустая строка.
+    // Инициализация io_manager.
+    uni_io_manager mngr;
+    mngr.init( 2 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+
+
+    // Если нет узла "А1", то при получении IP-адреса возвращается пустая
+    // строка.
     auto res = node_dev::get_local_ipv4();
     EXPECT_TRUE( res.empty() );
 
-#else
-    // На Linux проверяем разные ошибочные сценарии получения IP-адреса.
-    auto getifaddrs_hook_1 = subhook_new(
-        reinterpret_cast<void*>( &getifaddrs ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_1 ),
-        SUBHOOK_64BIT_OFFSET );
-    subhook_install( getifaddrs_hook_1 );
-
-    auto res = node_dev::get_local_ipv4();
-    EXPECT_TRUE( res.empty() );
-
-    subhook_remove( getifaddrs_hook_1 );
-    subhook_free( getifaddrs_hook_1 );
-
-
-    auto getifaddrs_hook_2 = subhook_new(
-        reinterpret_cast<void*>( &getifaddrs ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::getifaddrs_null ),
-        SUBHOOK_64BIT_OFFSET );
-    subhook_install( getifaddrs_hook_2 );
-    auto getifaddrs_hook_3 = subhook_new(
-        reinterpret_cast<void*>( &freeifaddrs ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::freeifaddrs_noop ),
-        SUBHOOK_64BIT_OFFSET );
-    subhook_install( getifaddrs_hook_3 );
+    const std::string TEST_IP_10 = "127.0.0.10";
+    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, TEST_IP_10.c_str(), "A1", 0, 0, 0, 0, 0, 0 );
 
     res = node_dev::get_local_ipv4();
-    EXPECT_TRUE( res.empty() );
+    EXPECT_EQ( res, TEST_IP_10 );
 
-    subhook_remove( getifaddrs_hook_2 );
-    subhook_free( getifaddrs_hook_2 );
-    subhook_remove( getifaddrs_hook_3 );
-    subhook_free( getifaddrs_hook_3 );
-#endif
+
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    io_manager::replace_instance( prev_mngr );
     }
 
 TEST_F( node_dev_set_cmd_test, set_cmd_web )
@@ -7217,7 +7199,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 #else
     auto run_cmd_0_hook = subhook_new(
         reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
-        reinterpret_cast<void*>( 
+        reinterpret_cast<void*>(
             &node_dev_set_cmd_test::run_cmd_exit_code_expected ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( run_cmd_0_hook );
@@ -7225,7 +7207,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     // Включаем проброс портов, команда должна выполниться успешно,
     // возвращая 0.
     EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
-    
+
     // Команда должна работать повторно, возвращая 0.
     EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
 

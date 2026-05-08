@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <string_view>
+#include <utility>
 
 #ifdef LINUX_OS
 #include <arpa/inet.h>
@@ -35,40 +36,12 @@ std::string node_dev::get_local_ipv4()
     {
     std::string result;
 
-#ifdef LINUX_OS
-    ifaddrs* ifaddr = nullptr;
-    if ( getifaddrs( &ifaddr ) != 0 )
+    // Получаем IP-адрес на основе адреса узла контроллера `A1`.
+    const auto NODE_A1 = std::as_const( *G_IO_MANAGER() ).get_node( 0 );
+    if ( NODE_A1 != &io_manager::IO_NODE_STUB )
         {
-        return {};
+        result = NODE_A1->ip_address;
         }
-
-    for ( auto* it = ifaddr; it != nullptr; it = it->ifa_next )
-        {
-        if ( it->ifa_addr == nullptr )
-            {
-            continue;
-            }
-
-        if ( it->ifa_addr->sa_family != AF_INET )
-            {
-            continue;
-            }
-
-        if ( ( it->ifa_flags & IFF_LOOPBACK ) != 0 )
-            {
-            continue;
-            }
-
-        result = to_ipv4_string(
-            reinterpret_cast<sockaddr_in*>( it->ifa_addr ) );
-        if ( !result.empty() )
-            {
-            break;
-            }
-        }
-
-    freeifaddrs( ifaddr );
-#endif
 
     return result;
     }
@@ -81,7 +54,7 @@ static std::string replace_action( const std::string& cmd,
     std::string_view from, std::string_view to )
     {
     std::string out{ cmd };
-    
+
     if ( const auto pos = out.find( from ); pos != std::string::npos )
         {
         out.replace( pos, from.length(), to );
@@ -93,14 +66,14 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
     {
     if ( node )
         {
-        G_LOG->info( "Node '%s' already has an I/O node assigned ('%s').",
+        G_LOG->info( "Node '%s' - already has an I/O node assigned ('%s').",
             get_name(), node->ip_address );
         return;
         }
 
     if ( !io_node )
         {
-        G_LOG->warning( "Null pointer passed as I/O node for node '%s'.",
+        G_LOG->warning( "Node '%s' - null pointer passed as I/O node.",
             get_name() );
         return;
         }
@@ -109,19 +82,18 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
     if ( struct in_addr ipv4_addr;
         inet_pton( AF_INET, io_node->ip_address, &ipv4_addr ) != 1 )
         {
-        G_LOG->warning( "Invalid IPv4 address ('%s') for node '%s'.",
+        G_LOG->warning( "Node '%s' - invalid IPv4 address ('%s').",
             io_node->ip_address, get_name() );
         return;
         }
 
-#ifdef LINUX_OS
     ip_controller = get_local_ipv4();
     if ( ip_controller.empty() )
         {
-        G_LOG->warning( "Controller IPv4 address was not detected." );
+        G_LOG->warning( "Node '%s' - controller IPv4 address was not detected.",
+            get_name() );
         return;
         }
-#endif // LINUX_OS
 
     node = io_node;
 
@@ -138,7 +110,7 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
 
     masq = IPTABLES + " -t nat -A POSTROUTING -p tcp -d " +
         node->ip_address + " --dport " + PORT_NODE_WEB + " -j MASQUERADE";
-    
+
     dnat_delete = replace_action( dnat, " -A ", " -D " );
     forward_in_delete = replace_action( forward_in, " -A ", " -D " );
     masq_delete = replace_action( masq, " -A ", " -D " );
@@ -149,14 +121,14 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
 
     // Для отладки. Просмотр входящих правил.
     // sudo /usr/sbin/iptables -t nat -S; sudo /usr/sbin/iptables -S FORWARD
-    // 
+    //
     // Это команды просмотра текущих правил, без изменения конфигурации.
     //    •	sudo /usr/sbin/iptables -t nat -S
     //    Показать все правила таблицы nat в “скриптовом” виде ( -A ... ):
     //      • PREROUTING (обычно DNAT),
     //      • POSTROUTING (обычно SNAT/MASQUERADE),
     //      • OUTPUT (локально сгенерированный трафик).
-    // 
+    //
     //    • sudo /usr/sbin/iptables -S FORWARD
     //    Показать правила только цепочки FORWARD (таблица filter по
     //    умолчанию), то есть что разрешено/запрещено для транзитного трафика
@@ -272,7 +244,7 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        if ( auto res = 
+        if ( auto res =
             delete_all_matches( dnat_check.c_str(), dnat_delete.c_str() ) &&
             delete_all_matches( forward_in_check.c_str(), forward_in_delete.c_str() ) &&
             delete_all_matches( masq_check.c_str(), masq_delete.c_str() );

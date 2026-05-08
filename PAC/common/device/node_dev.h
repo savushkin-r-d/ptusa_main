@@ -43,7 +43,7 @@ class node_dev : public device
         static int run_cmd_exit_code( const char* cmd
 #ifdef PTUSA_TEST
             , int expected = 0
-#endif        
+#endif
         );
 
 #ifndef PTUSA_TEST
