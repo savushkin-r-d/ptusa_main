@@ -94,8 +94,10 @@ class uni_io_manager : public io_manager
 
         ~uni_io_manager() override = default;
 
-        /// @brief Данные класс является неперемещаемым (unmovable).
-        uni_io_manager& operator=( uni_io_manager&& ) = delete;
+        /// @brief Данный класс является некопируемым и неперемещаемым.
+        uni_io_manager( const uni_io_manager& ) = delete;
+        uni_io_manager& operator=( const uni_io_manager& ) = delete;
+        uni_io_manager( uni_io_manager&& ) = delete;
 
         /// @brief Инициализация соединения с узлом I/O.
         ///

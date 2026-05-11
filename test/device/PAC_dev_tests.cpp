@@ -7026,7 +7026,7 @@ class node_dev_set_cmd_test : public ::testing::Test
             return expected;
             }
 
-        static std::string get_local_ipv4()
+        static std::string get_A1_ipv4()
             {
             return "127.0.0.1";
             }
@@ -7085,8 +7085,8 @@ TEST( node_dev, basic_functionality )
     EXPECT_STREQ( node->get_ip(), "" );
 
     auto get_local_ipv4_hook = subhook_new(
-        reinterpret_cast<void*>( &node_dev::get_local_ipv4 ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_local_ipv4 ),
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 
@@ -7121,7 +7121,7 @@ TEST( node_dev, basic_functionality )
     subhook_free( get_local_ipv4_hook );
     }
 
-TEST( node_dev, get_local_ipv4 )
+TEST( node_dev, get_A1_ipv4 )
     {
     // Инициализация io_manager.
     uni_io_manager mngr;
@@ -7131,14 +7131,14 @@ TEST( node_dev, get_local_ipv4 )
 
 
     // Если нет узлов, то при получении IP-адреса возвращается пустая строка.
-    auto res = node_dev::get_local_ipv4();
+    auto res = node_dev::get_A1_ipv4();
     EXPECT_TRUE( res.empty() );
 
     // Если первый узел не "А1", то при получении IP-адреса возвращается пустая
     // строка.
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
         TEST_IP_10, "A11", 0, 0, 0, 0, 0, 0 );
-    res = node_dev::get_local_ipv4();
+    res = node_dev::get_A1_ipv4();
     EXPECT_TRUE( res.empty() );
 
     // Используем корректное для контроллера название: "A1".
@@ -7146,7 +7146,7 @@ TEST( node_dev, get_local_ipv4 )
     mngr.init( 1 );
     mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
         TEST_IP_10, "A1", 0, 0, 0, 0, 0, 0 );
-    res = node_dev::get_local_ipv4();
+    res = node_dev::get_A1_ipv4();
     EXPECT_STREQ( res.c_str(), TEST_IP_10);
 
 
@@ -7167,8 +7167,8 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
     EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
 
     auto get_local_ipv4_hook = subhook_new(
-        reinterpret_cast<void*>( &node_dev::get_local_ipv4 ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_local_ipv4 ),
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 

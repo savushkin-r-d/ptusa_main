@@ -21,7 +21,7 @@
 
 
 //-----------------------------------------------------------------------------
-std::string node_dev::get_local_ipv4()
+std::string node_dev::get_A1_ipv4()
     {
     std::string result;
 
@@ -78,7 +78,7 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
-    ip_controller = get_local_ipv4();
+    ip_controller = get_A1_ipv4();
     if ( ip_controller.empty() )
         {
         G_LOG->warning( "Node '%s' - controller IPv4 address was not detected.",
@@ -294,11 +294,9 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int node_dev::save_device( char* buff ) const
     {
-    // LCOV_EXCL_START
     auto res_n = fmt::format_to_n( buff, MAX_COPY_SIZE,
         "{}={{ST={}, WEB={}, STARTUP={}, IP='{}'}},\n",
         get_name(), get_state(), web_value, startup_value, get_ip() );
-    // LCOV_EXCL_STOP
 
     return static_cast<int>( res_n.size );
     }

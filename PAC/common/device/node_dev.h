@@ -52,7 +52,7 @@ class node_dev : public device
 
         int process_web_cmd( int new_web_value );
 
-        static std::string get_local_ipv4();
+        static std::string get_A1_ipv4();
         std::string ip_controller;
 
         int web_value{};      ///< Состояние проброса порта 80.
