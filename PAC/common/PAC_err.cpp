@@ -73,7 +73,7 @@ void PAC_critical_errors_manager::show_errors() const
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
-    ALARM_SUBCLASS p1, unsigned long p2 )
+    ALARM_SUBCLASS p1, unsigned int p2 )
     {
     int b = 0;
 
@@ -81,8 +81,8 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if ( errors[ i ].err_class == eclass &&
-            ( unsigned int ) p1 == errors[ i ].err_sub_class &&
-            ( unsigned int ) p2 == errors[ i ].param )
+            static_cast<unsigned int>( p1 ) == errors[ i ].err_sub_class &&
+            p2 == errors[ i ].param )
             {
             b = 1;
             break;
@@ -106,14 +106,14 @@ void PAC_critical_errors_manager::reset_all_error()
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
-    ALARM_SUBCLASS p1, unsigned long p2 )
+    ALARM_SUBCLASS p1, unsigned int p2, bool is_print_msg /* = true */ )
     {
     int idx = -1;
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if ( errors[ i ].err_class == eclass &&
-            ( unsigned int ) p1 == errors[ i ].err_sub_class &&
-            ( unsigned int ) p2 == errors[ i ].param )
+            static_cast<unsigned int>( p1 ) == errors[ i ].err_sub_class &&
+            p2 == errors[ i ].param )
             {
             idx = i;
             break;
@@ -124,8 +124,11 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         {
         errors.erase( errors.begin() + idx );
 
-        sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false ) );
-        G_LOG->write_log( i_log::P_INFO );
+        if ( is_print_msg )
+            {
+            sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false ) );
+            G_LOG->write_log( i_log::P_INFO );
+            }
 
         errors_id++;
         }
@@ -176,7 +179,7 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
-    ALARM_SUBCLASS err_sub_class, int par, bool is_set )
+    ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set )
     {
     const auto BUFF_SIZE = 200;
     static char tmp[ BUFF_SIZE ]{};

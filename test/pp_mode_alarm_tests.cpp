@@ -72,7 +72,7 @@ TEST( pp_mode_alarm, pp_mode_activation_deactivation )
     mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     DeltaMilliSecSubHooker::set_millisec(
-        io_manager::io_node::C_MAX_WAIT_TIME + 100 );
+        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] + 100);
     auto res = mngr.e_communicate( node, 1, 1 );
     EXPECT_NE( res, 0 );
     auto REF_STR_NO_CONNECTION = R"s(	{
@@ -126,26 +126,7 @@ TEST( pp_mode_alarm, non_phoenix_node )
     G_PAC_INFO()->emulation_on();
     }
 
-// Test disconnect resets PP mode alarm.
-TEST( pp_mode_alarm, disconnect_resets_alarm )
-    {
-    uni_io_manager mngr;
-    io_manager::io_node node( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
-
-    // Set PP mode alarm active.
-    node.is_err_mode_alarm_set = true;
-    node.state = io_manager::io_node::ST_OK;
-
-    // Disconnect should reset the alarm.
-    mngr.disconnect( &node );
-
-    EXPECT_FALSE( node.is_err_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node.state );
-    }
-
-// Test disconnect when alarm is not set.
-TEST( pp_mode_alarm, disconnect_no_alarm )
+TEST( pp_mode_alarm, disable_node_no_alarm )
     {
     PAC_critical_errors_manager::get_instance()->reset_all_error();
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
@@ -166,14 +147,74 @@ TEST( pp_mode_alarm, disconnect_no_alarm )
     mngr.read_phoenix_status_register( node );
 
     EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    u_int_2 err_id = 0;
+    std::array<char, 300> lua_buff{};
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
+        err_id );
+    auto REF_STR_1 = R"s(	{
+	description = "6-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - активен PP mode (каналы управления заблокированы)",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)s";
+    EXPECT_STREQ( lua_buff.data(), REF_STR_1 );
 
-    // Disconnect should not crash when no alarm is set.
-    mngr.disconnect( node );
+    EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 0 ) );
+    EXPECT_TRUE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str( lua_buff.data(),
+        err_id );
+    auto REF_STR_2 = R"s(	{
+	description = "5-1-1 : Узел I/O 'A100' ('127.0.0.1', 'Тест') - отключен для обслуживания",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 100,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)s";
+    EXPECT_STREQ( lua_buff.data(), REF_STR_2 );
 
-    EXPECT_FALSE( node->is_err_mode_alarm_set );
-    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, node->state );
+    PAC_critical_errors_manager::get_instance()->reset_all_error();
+    tcp_communicator::clear_instance();
+    }
 
-    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
+TEST( pp_mode_alarm, e_communicate )
+    {
+    auto err_mngr = PAC_critical_errors_manager::get_instance();
+    err_mngr->reset_all_error();
+    EXPECT_FALSE( err_mngr->is_any_error() );
 
+    tcp_communicator::init_instance( "Тест", "Test" );
+
+    G_IO_MANAGER()->init( 1 );
+    G_IO_MANAGER()->add_node( 0,
+        io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1", "A100",
+        0, 0, 0, 0, 0, 0 );
+    auto node = G_IO_MANAGER()->get_node( 0 );
+
+    test_uni_io_manager_PP_mode mngr;
+
+    // Устанавливаем бит перехода в PP mode.
+    mngr.buff[ 1 ] = io_manager::io_node::STATUS_REG_PP_MODE_MASK;
+    mngr.read_phoenix_status_register( node );
+    EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка наличия `PP mode`.
+
+    // Должна появиться ошибка связи и пропасть ошибка наличия `PP mode`.
+    G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 0;
+    mngr.e_communicate( node, 1, 1 );
+    EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка связи.
+
+    // Должна пропасть ошибка связи и появиться ошибка наличия `PP mode`.
+    G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 10'000;
+    mngr.e_communicate( node, 1, 1 );
+    EXPECT_FALSE( err_mngr->is_any_error() );
+    mngr.read_phoenix_status_register( node );
+    EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка наличия `PP mode`.
+
+    G_PAC_INFO()->reset_params();
+    err_mngr->reset_all_error();
     tcp_communicator::clear_instance();
     }
