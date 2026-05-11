@@ -7031,32 +7031,6 @@ class node_dev_set_cmd_test : public ::testing::Test
             return "127.0.0.1";
             }
 
-#ifdef LINUX_OS
-        static int getifaddrs_1( [[maybe_unused]] struct ifaddrs** ifap )
-            {
-            return 1;
-            }
-
-        static int getifaddrs_null( struct ifaddrs** ifap )
-            {
-            static ifaddrs item{};
-            static char name[] = "eth0";
-            std::memset( &item, 0, sizeof( item ) );
-            item.ifa_name = name;
-            item.ifa_flags = 0; // не loopback
-            item.ifa_addr = nullptr;
-            item.ifa_next = nullptr;
-
-            *ifap = &item;
-            return 0;
-            }
-
-        static void freeifaddrs_noop( [[maybe_unused]] struct ifaddrs* )
-            {
-            // Do nothing, since we are using a static item in getifaddrs_null.
-            }
-#endif
-
     protected:
         void SetUp() override
             {
@@ -7151,21 +7125,29 @@ TEST( node_dev, get_local_ipv4 )
     {
     // Инициализация io_manager.
     uni_io_manager mngr;
-    mngr.init( 2 );
+    mngr.init( 1 );
     io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    const auto TEST_IP_10 = "127.0.0.10";
 
 
-    // Если нет узла "А1", то при получении IP-адреса возвращается пустая
-    // строка.
+    // Если нет узлов, то при получении IP-адреса возвращается пустая строка.
     auto res = node_dev::get_local_ipv4();
     EXPECT_TRUE( res.empty() );
 
-    const std::string TEST_IP_10 = "127.0.0.10";
-    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, TEST_IP_10.c_str(), "A1", 0, 0, 0, 0, 0, 0 );
-
+    // Если первый узел не "А1", то при получении IP-адреса возвращается пустая
+    // строка.
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
+        TEST_IP_10, "A11", 0, 0, 0, 0, 0, 0 );
     res = node_dev::get_local_ipv4();
-    EXPECT_EQ( res, TEST_IP_10 );
+    EXPECT_TRUE( res.empty() );
+
+    // Используем корректное для контроллера название: "A1".
+    mngr.clear_nodes();
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
+        TEST_IP_10, "A1", 0, 0, 0, 0, 0, 0 );
+    res = node_dev::get_local_ipv4();
+    EXPECT_STREQ( res.c_str(), TEST_IP_10);
 
 
     // Очистка после теста.

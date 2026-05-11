@@ -94,6 +94,9 @@ class uni_io_manager : public io_manager
 
         ~uni_io_manager() override = default;
 
+        /// @brief Данные класс является неперемещаемым (unmovable).
+        uni_io_manager& operator=( uni_io_manager&& ) = delete;
+
         /// @brief Инициализация соединения с узлом I/O.
         ///
         /// @param node - узел I/O, с которым осуществляется соединение.

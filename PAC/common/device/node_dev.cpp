@@ -26,9 +26,10 @@ std::string node_dev::get_local_ipv4()
     std::string result;
 
     // Получаем IP-адрес узла контроллера, который в текущей реализации
-    // хранится по индексу `0`.
-    const auto NODE_A1 = std::as_const( *G_IO_MANAGER() ).get_node( 0 );
-    if ( NODE_A1 != &io_manager::IO_NODE_STUB )
+    // хранится по индексу `0` и имеет имя `A1`.
+    if ( const auto NODE_A1 = std::as_const( *G_IO_MANAGER() ).get_node( 0 );
+        NODE_A1 != &io_manager::IO_NODE_STUB &&
+        strcmp( NODE_A1->name, "A1" ) == 0 )
         {
         result = NODE_A1->ip_address;
         }
