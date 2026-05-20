@@ -17,6 +17,34 @@ body:
         или датчика в ptusa_main. Это помогает стандартизировать запросы
         устройств и гарантирует предоставление всей необходимой информации.
 
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "Выберите приоритет задачи"
+      options:
+        - Low
+        - Long-term plans
+        - Medium
+        - High
+        - Critical
+      default: 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: planned_iteration
+    attributes:
+      label: "Планируемая итерация"
+      description: "Выберите, в какой итерации должна быть задача"
+      options:
+        - Current iteration - put into the current sprint
+        - Next iteration - put into the next sprint
+        - Backlog - do not assign to an iteration
+      default: 0
+    validations:
+      required: true
+
   - type: input
     id: device_name
     attributes:
@@ -236,19 +264,6 @@ body:
         - Error conditions: timeout, conflicting feedback
     validations:
       required: false
-
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority / Приоритет
-      description: How urgent is this device addition?
-      options:
-        - Low / Низкий
-        - Medium / Средний
-        - High / Высокий
-        - Critical / Критический
-    validations:
-      required: true
 
   - type: textarea
     id: implementation_notes

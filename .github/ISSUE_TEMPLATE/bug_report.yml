@@ -15,6 +15,34 @@ body:
         Спасибо за сообщение об ошибке! Пожалуйста, заполните разделы ниже,
         чтобы помочь нам понять и воспроизвести проблему.
 
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "Выберите приоритет задачи"
+      options:
+        - Low
+        - Long-term plans
+        - Medium
+        - High
+        - Critical
+      default: 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: planned_iteration
+    attributes:
+      label: "Планируемая итерация"
+      description: "Выберите, в какой итерации должна быть задача"
+      options:
+        - Current iteration - put into the current sprint
+        - Next iteration - put into the next sprint
+        - Backlog - do not assign to an iteration
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: description
     attributes:
