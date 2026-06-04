@@ -319,6 +319,7 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
 
+    G_PAC_INFO()->reset_params();
 
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
