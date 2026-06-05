@@ -94,7 +94,7 @@ class PAC_info: public i_Lua_save_device
             return up_time_str;
             }
 
-        enum COMMANDS
+        enum class COMMANDS
             {
             CLEAR_RESULT_CMD = 0,
 

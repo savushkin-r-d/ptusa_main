@@ -224,34 +224,31 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
         {
-        switch ((COMMANDS)(int)val)
+        switch ( static_cast<COMMANDS>( val ) )
             {
-            case CLEAR_RESULT_CMD:
+            case COMMANDS::CLEAR_RESULT_CMD:
                 cmd = 0;
                 break;
 
-            case RELOAD_RESTRICTIONS:
+            case COMMANDS::RELOAD_RESTRICTIONS:
                 {
-                if (G_DEBUG)
-                    {
-                    G_LOG->notice("Reload restrictions (remote monitor client command).");
-                    }
+                G_LOG->notice( "Reload restrictions (remote monitor "
+                    "client command)." );
                 const int SCRIPT_N = 7;
                 cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
                     cmd_answer, sizeof( cmd_answer ) );
                 return cmd;
                 }
 
-            case RESET_PARAMS:
+            case COMMANDS::RESET_PARAMS:
                 auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
-                if ( G_DEBUG )
-                    {
-                    G_LOG->notice( "Resetting params (remote monitor client command)." );
-                    }
+                G_LOG->notice( "Resetting parameters (remote monitor "
+                    "client command)." );
                 params_manager::get_instance()->reset_params_size();
                 params_manager::get_instance()->final_init();
+                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
 
-                proc_OPC( prev_val, static_cast<int>( val ), false );
+                proc_OPC( prev_val, new_val, false );
                 break;
             }
 
