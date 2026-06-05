@@ -424,11 +424,11 @@ int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
         }
     else if ( val == 1 && prev_val == 0 )
         {
-        auto retval = G_OPCUA_SERVER.init_all_and_start();
-        if ( retval != UA_STATUSCODE_GOOD )
+        if ( auto retval = G_OPCUA_SERVER.init_all_and_start();
+            retval != UA_STATUSCODE_GOOD )
             {
-            G_LOG->error( "OPC UA server start failed. Returned error code 0x%X!",
-                retval );
+            G_LOG->error( "OPC UA server start failed (0x%X). %s",
+                retval, UA_StatusCode_name( retval ) );
 
             G_OPCUA_SERVER.shutdown();
             return 1;

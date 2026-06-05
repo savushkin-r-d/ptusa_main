@@ -84,7 +84,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     options.positional_help( "<script>" );
     options.parse_positional( { "script" } );
     options.show_positional_help();
-    options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
+    options.allow_unrecognised_options(); //Unrecognized arguments are allowed.
     auto result = options.parse( argc, argv );
 
     if ( result.count( "help" ) || argc < 2 )
