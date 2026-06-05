@@ -224,7 +224,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
         {
-        switch ( static_cast<COMMANDS>( val ) )
+        switch ( static_cast<COMMANDS>( static_cast<int>( val ) ) )
             {
             case COMMANDS::CLEAR_RESULT_CMD:
                 cmd = 0;
@@ -412,6 +412,11 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
 int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
     {
+    if ( val == prev_val )
+        {
+        return 0;
+        }
+
     if ( val == 0 && prev_val == 1 )
         {
         G_OPCUA_SERVER.shutdown();

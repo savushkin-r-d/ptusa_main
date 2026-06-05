@@ -351,7 +351,8 @@ TEST( project_manager, apply_opc_mode )
     // Отключаем работу OPC UA.
     const auto NO_SHOW_LOG_MESSAGE = false;
     std::array<const char*, 2> argv_ex = { "ptusa_main.exe", "--opc=off" };
-    G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
     res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
     ASSERT_EQ( 0, res );
 
@@ -360,7 +361,8 @@ TEST( project_manager, apply_opc_mode )
 
     // Включаем работу OPC UA.
     argv_ex[ 1 ] = "--opc=rw";
-    G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
     res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
     ASSERT_EQ( 0, res );
 
@@ -369,7 +371,8 @@ TEST( project_manager, apply_opc_mode )
 
     // Включаем только чтение для OPC UA.
     argv_ex[ 1 ] = "--opc=r";
-    G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
     res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
     ASSERT_EQ( 0, res );
 
