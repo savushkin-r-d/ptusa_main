@@ -8,8 +8,8 @@ using namespace ::testing;
 #endif
 
 TEST( tcp_communicator, evaluate )
-    {    
-    tcp_communicator::init_instance( "Тест", "Test" );    
+    {
+    tcp_communicator::init_instance( "Тест", "Test" );
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
@@ -32,7 +32,7 @@ TEST( tcp_communicator, evaluate )
         cnt++;
         }
     ASSERT_EQ( tcp_client::ASYNCCONNECTSTATE::ACS_CONNECTED,
-        cl.get_connected_state() );    
+        cl.get_connected_state() );
 
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     //Должен быть получен ответ на подключение.
@@ -121,7 +121,7 @@ int __stdcall good_select( int, const fd_set*, const fd_set*,
     return 1;
     }
 
-int __stdcall good_recv( 
+int __stdcall good_recv(
 #ifdef WIN_OS
     SOCKET,
 #else
@@ -132,12 +132,12 @@ int __stdcall good_recv(
     return 1;
     }
 
-int __stdcall fail_recv_0( 
+int __stdcall fail_recv_0(
 #ifdef WIN_OS
     SOCKET,
 #else
     int,
-#endif    
+#endif
     const char*, int len, int flags )
     {
     return 0;

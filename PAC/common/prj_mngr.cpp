@@ -60,14 +60,14 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             cxxopts::value<bool>()->default_value( "false" ) )
         ( "read_only_io", "Read only from I\\O nodes",
             cxxopts::value<bool>()->default_value( "false" ) )
-#endif // defined WIN_OS        
+#endif // defined WIN_OS
         ( "p,port", "Param port",
-            
+
             cxxopts::value<int>()->default_value( "10000" ) )
         ( "h,help", "Print help info" )
         ( "r,rcrc", "Reset params" )
 
-        ( "opc", "OPC UA server behavior (off, r, rw)", 
+        ( "opc", "OPC UA server behavior (off, r, rw)",
             cxxopts::value<std::string>() )
 
         ( "sys_path", "Sys path",
@@ -148,7 +148,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
-    
+
     path = result[ "path" ].as<std::string>();
     sys_path = result[ "sys_path" ].as<std::string>();
     extra_paths = result[ "extra_paths" ].as<std::string>();
@@ -178,7 +178,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         {
         G_LOG->warning( "Bus couplers are enabled." );
         if ( G_READ_ONLY_IO_NODES )
-            G_LOG->warning( "Bus couplers are read only." );           
+            G_LOG->warning( "Bus couplers are read only." );
         }
 
     return 0;

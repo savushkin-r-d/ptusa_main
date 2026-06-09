@@ -4,7 +4,7 @@
     !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
 	!( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
-#endif 
+#endif
 
 #include "led.h"
 #include "smart_ptr.h"
@@ -47,7 +47,7 @@ led* get_led()
 #if defined LINUX_OS && defined PAC_WAGO_750_860
         led_instance = new led_W750();
 #endif
-        
+
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
         led_instance = new led_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860

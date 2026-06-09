@@ -395,7 +395,7 @@ valve_DO1_DI1_off::valve_DO1_DI1_off( const char* dev_name ) :
 void valve_DO1_DI1_off::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
-    
+
     if ( auto o = get_DO( DO_INDEX ); 0 == o )
         {
         start_switch_time = get_millisec();
@@ -406,7 +406,7 @@ void valve_DO1_DI1_off::direct_on()
 void valve_DO1_DI1_off::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
-    
+
     if ( auto o = get_DO( DO_INDEX ); o != 0 )
         {
         start_switch_time = get_millisec();
@@ -561,7 +561,7 @@ bool valve_DO1_DI2::get_fb_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
-    if ( auto o = get_DO( DO_INDEX ), i1 = get_DI( DI_INDEX_1 ), 
+    if ( auto o = get_DO( DO_INDEX ), i1 = get_DI( DI_INDEX_1 ),
         i0 = get_DI( DI_INDEX_2 );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
@@ -1127,7 +1127,7 @@ bool valve_bottom_mix_proof::get_fb_state() const
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     int o = get_DO( DO_INDEX );
-    
+
     if ( auto i0 = get_DI( DI_INDEX_CLOSE ), i1 = get_DI( DI_INDEX_OPEN );
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
@@ -1839,7 +1839,7 @@ void valve_iolink_gea_tvis_a15::direct_off()
     out_info->pv_y3 = false;
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_gea_tvis_a15::direct_on() 
+void valve_iolink_gea_tvis_a15::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() )
         {
@@ -1885,8 +1885,8 @@ bool valve_iolink_gea_tvis_a15::get_fb_state() const
     if ( in_info.pv_y1_on &&
         in_info.s2 ) return true;                       // Активное состяние.
     if ( in_info.pv_y2_on ) return true;                // Нижнее седло.
-    if ( in_info.pv_y3_on && 
-        in_info.s1 && in_info.s4 ) return true;         // Верхнее седло.    
+    if ( in_info.pv_y3_on &&
+        in_info.s1 && in_info.s4 ) return true;         // Верхнее седло.
 
     return false;
     }
@@ -2299,7 +2299,7 @@ bool valve_iol_terminal::check_config() const
     auto idx = 0;
     return std::all_of( std::begin( terminal_id ), std::end( terminal_id ),
         [&]( const unsigned int& id )
-        {        
+        {
         if ( const auto data = get_AO_write_data( static_cast<u_int>
             ( IO_CONSTANT::AO_INDEX_1 ) + idx++ );
             !data )
@@ -2389,7 +2389,7 @@ void valve_iol_terminal::direct_off()
     {
     if ( !check_config() ) return;
 
-    if ( auto st = get_valve_state(); 
+    if ( auto st = get_valve_state();
         valve::VALVE_STATE::V_OFF != st )
         {
         start_switch_time = get_millisec();
@@ -2652,7 +2652,7 @@ float analog_valve_ey::get_value() const
 int analog_valve_ey::get_state() const
     {
     if ( !conv ) return -200;
-    else return conv->get_state();    
+    else return conv->get_state();
     }
 //-----------------------------------------------------------------------------
 void analog_valve_ey::set_rt_par( u_int idx, float value )
@@ -2679,7 +2679,7 @@ void analog_valve_ey::set_rt_par( u_int idx, float value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
-    dev_name, DT_VC, DST_VC_IOLINK, 
+    dev_name, DT_VC, DST_VC_IOLINK,
     static_cast<int>( PAR_CONSTANTS::ADDITIONAL_PARAMS_COUNT ) - 1 )
     {
     in_info.closed = true;
@@ -2793,7 +2793,7 @@ int analog_valve_iolink::get_state() const
         error_id != io_device::IOLINKSTATE::OK )
         {
         // Проверяем параметр P_FB для возможности отключения ошибок устройства.
-        if ( get_par( static_cast<int>( 
+        if ( get_par( static_cast<int>(
             analog_valve_iolink::PAR_CONSTANTS::P_FB ), 0 ) == 0 )
             {
             return 1; // Обратная связь отключена - нет ошибок.
@@ -3097,7 +3097,7 @@ bool valve_AS::get_fb_state() const
 
     auto AI_data = (const char*)get_AI_data( AI_INDEX );
     auto AI_state = get_state_data( AI_data );
-    
+
     if ( auto i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0,
         i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
         ( o == 0 && i0 == 1 && i1 == 0 ) ||
@@ -3465,7 +3465,7 @@ valve::VALVE_STATE valve_mini_flushing::get_valve_state() const
 
 bool valve_mini_flushing::get_fb_state() const
     {
-    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();    
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_fb_state();
 
     if ( auto o = get_DO( DO_INDEX ),
         i0 = get_DI( DI_INDEX_CLOSE ),

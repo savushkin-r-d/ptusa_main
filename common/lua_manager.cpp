@@ -130,7 +130,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     std::string dir_str( dir );
     std::string sys_dir_str( sys_dir );
     std::string extra_dirs_str( extra_dirs );
-    
+
 
     if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
         {
@@ -145,12 +145,12 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         {
         dir_str += std::filesystem::path::preferred_separator;
         }
-    if ( !sys_dir_str.empty() && 
+    if ( !sys_dir_str.empty() &&
         sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
         {
         sys_dir_str += std::filesystem::path::preferred_separator;
         }
-    if ( !extra_dirs_str.empty() && 
+    if ( !extra_dirs_str.empty() &&
         extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
         {
         extra_dirs_str += std::filesystem::path::preferred_separator;
@@ -491,15 +491,15 @@ int lua_manager::exec_lua_method_var( const char* object_name,
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
         if ( lua_type( L, -1 ) == LUA_TNIL )
             {
-            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            lua_pop( L, 1 ); //Удаляем функцию error_trace.
             return 1;
             }
 
         lua_getfield( L, -1, function_name );
         if ( lua_type( L, -1 ) == LUA_TNIL )
             {
-            lua_pop( L, 1 ); //Удаляем object_name. 
-            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            lua_pop( L, 1 ); //Удаляем object_name.
+            lua_pop( L, 1 ); //Удаляем функцию error_trace.
             return 1;
             }
 

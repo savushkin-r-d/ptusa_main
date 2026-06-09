@@ -12,7 +12,7 @@
 #include "fcntl.h"
 #include <codecvt>
 
-#include <fmt/core.h> 
+#include <fmt/core.h>
 
 #include "dtime.h"
 

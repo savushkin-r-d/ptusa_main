@@ -13,7 +13,7 @@ TEST( PID, get_actuator )
     ASSERT_NE( nullptr, p1_dev );
     auto p1 = dynamic_cast<PID*>( p1_dev );
     ASSERT_NE( nullptr, p1 );
-    
+
     ASSERT_EQ( nullptr, p1->get_actuator() );
 
     p1->set_string_property( "OUT_VALUE", "TC1" );
@@ -113,7 +113,7 @@ TEST( PID, direct_set_value )
     //состояния "Работа".
     p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
     EXPECT_EQ( static_cast<int>( PID::STATE::STOPPING ), p1_dev->get_state() );
-    //ПИД-регулятор переходит в состояние "Выключено" при выключении из 
+    //ПИД-регулятор переходит в состояние "Выключено" при выключении из
     //состояни "Выключаюсь".
     p1_dev->set_state( static_cast<int>( PID::STATE::OFF ) );
     EXPECT_EQ( static_cast<int>( PID::STATE::OFF ), p1_dev->get_state() );
@@ -127,7 +127,7 @@ TEST( PID, direct_set_value )
         "P_dt=1000, P_max=100, P_min=0, P_acceleration_time=30, "
         "P_is_manual_mode=0, P_U_manual=65, P_k2=0, P_Ti2=0, P_Td2=0, "
         "P_out_max=100, P_out_min=0, P_is_reverse=0, P_is_zero_start=1},\n",
-        buff );        
+        buff );
 
     G_DEVICE_MANAGER()->clear_io_devices();
     }
@@ -136,7 +136,7 @@ TEST( PID, save_device )
     {
     const int BUFF_SIZE = 512;
     char buff[ BUFF_SIZE ] = { 0 };
-     
+
     auto REF_STR =
         "t.PID1=\n"
         "\t{\n"
