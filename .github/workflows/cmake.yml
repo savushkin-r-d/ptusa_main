@@ -63,7 +63,6 @@ jobs:
             os: windows-latest,
             cc: "cl",
             cxx: "cl",
-            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat",
             targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
@@ -242,24 +241,21 @@ jobs:
       run: |
         set(ENV{CC} ${{ matrix.config.cc }})
         set(ENV{CXX} ${{ matrix.config.cxx }})
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
-          set(_env_script "${{ matrix.config.environment_script }}")
-          if (NOT EXISTS "${_env_script}")
-            set(_vswhere_exe
-              "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
-            execute_process(
-              COMMAND "${_vswhere_exe}" -latest -property installationPath
-              OUTPUT_VARIABLE _vs_path
-              OUTPUT_STRIP_TRAILING_WHITESPACE
-              ERROR_QUIET
-              RESULT_VARIABLE _vswhere_result
-            )
-            if (_vswhere_result EQUAL 0 AND _vs_path)
-              string(REPLACE "\\" "/" _vs_path "${_vs_path}")
-              set(_env_script
-                "${_vs_path}/VC/Auxiliary/Build/vcvars32.bat")
-            endif()
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(_vswhere_exe
+            "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
+          execute_process(
+            COMMAND "${_vswhere_exe}" -latest -property installationPath
+            OUTPUT_VARIABLE _vs_path
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+            RESULT_VARIABLE _vswhere_result
+          )
+          if (_vswhere_result EQUAL 0 AND _vs_path)
+            string(REPLACE "\\" "/" _vs_path "${_vs_path}")
+            set(_env_script "${_vs_path}/VC/Auxiliary/Build/vcvars32.bat")
           endif()
+
           execute_process(
             COMMAND "${_env_script}" && set
             OUTPUT_FILE environment_script_output.txt
@@ -301,7 +297,7 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+        if ("${{ runner.os }}" STREQUAL "Windows")
           file(STRINGS environment_script_output.txt output_lines)
           foreach(line IN LISTS output_lines)
             if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
