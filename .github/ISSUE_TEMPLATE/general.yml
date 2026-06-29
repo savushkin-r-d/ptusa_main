@@ -16,6 +16,44 @@ body:
         общей помощи с ptusa_main.
 
   - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "Выберите приоритет задачи"
+      options:
+        - Low
+        - Long-term plans
+        - Medium
+        - High
+        - Critical
+      default: 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: planned_iteration
+    attributes:
+      label: "Планируемая итерация"
+      description: "Выберите, в какой итерации должна быть задача"
+      options:
+        - Current iteration - put into the current sprint
+        - Next iteration - put into the next sprint
+        - Backlog - do not assign to an iteration
+      default: 0
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 📅 Информация о текущем спринте
+        
+        **Текущая дата:** 21 мая 2026  
+        **Текущий спринт:** Спринт #15: 15 мая 2026 - 28 мая 2026  
+        
+        <!-- AUTO-UPDATED: sprint-info -->
+
+  - type: dropdown
     id: category
     attributes:
       label: Category / Категория
