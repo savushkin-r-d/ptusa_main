@@ -300,7 +300,7 @@ jobs:
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
         if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
           file(STRINGS environment_script_output.txt output_lines)
-          foreach(line IN LISTS output_lines)`
+          foreach(line IN LISTS output_lines)
             if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
               set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
             endif()
