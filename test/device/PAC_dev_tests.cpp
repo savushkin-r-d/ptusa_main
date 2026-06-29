@@ -2384,13 +2384,39 @@ TEST( concentration_e_iolink, concentration_e_iolink )
     concentration_e_iolink Q1( "Q1" );
 
     Q1.save_device( buff );
-    EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0},\n", buff );
+    EXPECT_STREQ( "Q1={M=0, ST=0, V=0, T=0.0, P_ERR=0, P_MAX_V=0},\n", buff );
     }
 
 TEST_F( iolink_dev_test, concentration_e_iolink_get_error_description )
     {
     concentration_e_iolink test_dev( "TestDevice" );
     test_dev_err( test_dev, test_dev, 0 );
+    }
+
+TEST_F( iolink_dev_test, concentration_e_iolink_evaluate_io )
+    {
+    concentration_e_iolink test_dev( "Q1" );
+
+    G_PAC_INFO()->emulation_off();
+    init_channels( test_dev );
+    set_iol_state_to_OK( test_dev );
+
+    // Set raw conductivity value to 5000 (converts to 5.0 mS/cm
+    // when multiplied by 0.001).
+    test_dev.info->conductivity = 5000;
+
+    // Without P_MAX_V set (0), value should pass through unchanged.
+    EXPECT_NEAR( test_dev.get_value(), 5.0f, .001f );
+
+    // Set P_MAX_V to 3.0 to clamp value.
+    test_dev.set_par( concentration_e_iolink::CONSTANTS::P_MAX_V, 0, 3.0f );
+    EXPECT_NEAR( test_dev.get_value(), 3.0f, .001f );
+
+    // When value is within range, P_MAX_V should not affect the result.
+    test_dev.set_par( concentration_e_iolink::CONSTANTS::P_MAX_V, 0, 10.0f );
+    EXPECT_NEAR( test_dev.get_value(), 5.0f, .001f );
+
+    G_PAC_INFO()->emulation_on();
     }
 
 
