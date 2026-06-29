@@ -63,6 +63,7 @@ jobs:
             os: windows-latest,
             cc: "cl",
             cxx: "cl",
+            environment_script: "vcvars32.bat",
             targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
@@ -241,7 +242,7 @@ jobs:
       run: |
         set(ENV{CC} ${{ matrix.config.cc }})
         set(ENV{CXX} ${{ matrix.config.cxx }})
-        if ("${{ runner.os }}" STREQUAL "Windows")
+        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
           set(_vswhere_exe
             "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
           execute_process(
@@ -297,9 +298,9 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
-        if ("${{ runner.os }}" STREQUAL "Windows")
+        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
           file(STRINGS environment_script_output.txt output_lines)
-          foreach(line IN LISTS output_lines)
+          foreach(line IN LISTS output_lines)`
             if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
               set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
             endif()
