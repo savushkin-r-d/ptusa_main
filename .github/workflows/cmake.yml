@@ -243,8 +243,25 @@ jobs:
         set(ENV{CC} ${{ matrix.config.cc }})
         set(ENV{CXX} ${{ matrix.config.cxx }})
         if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+          set(_env_script "${{ matrix.config.environment_script }}")
+          if (NOT EXISTS "${_env_script}")
+            set(_vswhere_exe
+              "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
+            execute_process(
+              COMMAND "${_vswhere_exe}" -latest -property installationPath
+              OUTPUT_VARIABLE _vs_path
+              OUTPUT_STRIP_TRAILING_WHITESPACE
+              ERROR_QUIET
+              RESULT_VARIABLE _vswhere_result
+            )
+            if (_vswhere_result EQUAL 0 AND _vs_path)
+              string(REPLACE "\\" "/" _vs_path "${_vs_path}")
+              set(_env_script
+                "${_vs_path}/VC/Auxiliary/Build/vcvars32.bat")
+            endif()
+          endif()
           execute_process(
-            COMMAND "${{ matrix.config.environment_script }}" && set
+            COMMAND "${_env_script}" && set
             OUTPUT_FILE environment_script_output.txt
           )
           file(STRINGS environment_script_output.txt output_lines)
