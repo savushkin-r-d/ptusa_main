@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Apr 15 13:08:05 2026.
+** Generated automatically by tolua++-1.0.92 on Thu Jun  4 17:07:01 2026.
 */
 
 #ifndef __cplusplus
@@ -3714,8 +3714,7 @@ static int tolua_PAC_dev_dev_stub_instant_off00(lua_State* tolua_S)
  {
   dev_stub* self = (dev_stub*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'instant_off'",
-      NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'instant_off'", NULL);
 #endif
   {
    self->instant_off();
@@ -15905,8 +15904,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"is_active",tolua_PAC_dev_dev_stub_is_active00);
    tolua_function(tolua_S,"on",tolua_PAC_dev_dev_stub_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_dev_stub_off00);
-   tolua_function(tolua_S,"instant_off",
-      tolua_PAC_dev_dev_stub_instant_off00);
+   tolua_function(tolua_S,"instant_off",tolua_PAC_dev_dev_stub_instant_off00);
    tolua_function(tolua_S,"set_state",tolua_PAC_dev_dev_stub_set_state00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_dev_stub_get_state00);
   tolua_endmodule(tolua_S);
@@ -16204,6 +16202,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"P_RESTRICTIONS_MODE",PAC_info::P_RESTRICTIONS_MODE);
    tolua_constant(tolua_S,"P_RESTRICTIONS_MANUAL_TIME",PAC_info::P_RESTRICTIONS_MANUAL_TIME);
    tolua_constant(tolua_S,"P_AUTO_PAUSE_OPER_ON_DEV_ERR",PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR);
+   tolua_constant(tolua_S,"P_AUTO_OPERATION_WAIT_TIME",PAC_info::P_AUTO_OPERATION_WAIT_TIME);
+   tolua_constant(tolua_S,"P_AUTO_OPERATION_WARN_TIME",PAC_info::P_AUTO_OPERATION_WARN_TIME);
+   tolua_constant(tolua_S,"P_IS_OPC_UA_SERVER_ACTIVE",PAC_info::P_IS_OPC_UA_SERVER_ACTIVE);
+   tolua_constant(tolua_S,"P_IS_OPC_UA_SERVER_CONTROL",PAC_info::P_IS_OPC_UA_SERVER_CONTROL);
+   tolua_constant(tolua_S,"P_BK_ANSWER_MAX_WAIT_TIME",PAC_info::P_BK_ANSWER_MAX_WAIT_TIME);
    tolua_variable(tolua_S,"par",tolua_get_PAC_info_par,tolua_set_PAC_info_par);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PAC_info_set_cmd00);
    tolua_function(tolua_S,"is_emulator",tolua_PAC_dev_PAC_info_is_emulator00);
@@ -16483,3 +16486,4 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
  return tolua_PAC_dev_open(tolua_S);
 };
 #endif
+

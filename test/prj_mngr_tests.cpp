@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include "prj_mngr_tests.h"
+#include "PAC_info.h"
 #include "lua_manager.h"
 #include "dtime.h"
 
@@ -200,6 +201,23 @@ Resetting params (command line parameter "rcrc").
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
+    // Проверяем, что после инициализации стандартных параметров
+    // сохраненный режим "--opc=off" можно применить повторно
+    // без лишнего сообщения. Меняем только OPC UA параметры,
+    // чтобы не вызывать глобальный reset_params() и лишние save_all().
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->apply_opc_mode( false );
+    ASSERT_EQ( 0, res );
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
     // Передаем некорректный режим OPC UA.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };
     testing::internal::CaptureStdout();
@@ -301,8 +319,63 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_path.size(), argv_path.data() );
     ASSERT_EQ( 0, res );
 
+    G_PAC_INFO()->reset_params();
 
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
     G_LUA_MANAGER->free_Lua();
+    }
+
+
+TEST( project_manager, apply_opc_mode )
+    {
+    auto ua_server_active =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ];
+    auto ua_server_control =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ];
+
+    // Используемый режим OPC UA по умолчанию - UNDEFINED, при его применении
+    // сохранённые параметры не изменяются и нет никаких сообщений.
+    testing::internal::CaptureStdout();
+    auto res = G_PROJECT_MANAGER->apply_opc_mode();
+    ASSERT_EQ( 0, res );
+
+    auto output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE( output.empty() );
+    EXPECT_EQ( ua_server_active,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( ua_server_control,
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+
+    // Отключаем работу OPC UA.
+    const auto NO_SHOW_LOG_MESSAGE = false;
+    std::array<const char*, 2> argv_ex = { "ptusa_main.exe", "--opc=off" };
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+    res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
+    ASSERT_EQ( 0, res );
+
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    // Включаем работу OPC UA.
+    argv_ex[ 1 ] = "--opc=rw";
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+    res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
+    ASSERT_EQ( 0, res );
+
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    // Включаем только чтение для OPC UA.
+    argv_ex[ 1 ] = "--opc=r";
+    res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    ASSERT_EQ( 0, res );
+    res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );
+    ASSERT_EQ( 0, res );
+
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
     }
