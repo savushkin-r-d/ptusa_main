@@ -529,9 +529,9 @@ class io_manager
 		/// @brief Завершает соединение с узлом
 		virtual void disconnect(io_node *node) = 0;
 
-        io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
+        inline static io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
-        const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
+        inline static const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
 #ifdef PTUSA_TEST
         void clear_nodes();
