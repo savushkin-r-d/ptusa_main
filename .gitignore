@@ -10,6 +10,10 @@ build
 cmake-build-*
 CMakeSettings.json
 nvram.txt
+*.serialized
+*.lua
+test*.txt
+tmp*.txt
 
 Debug
 _codeql_build_dir

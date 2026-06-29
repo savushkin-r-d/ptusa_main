@@ -268,6 +268,12 @@ class tech_dev_error: public base_error
         /// @brief Выполнение команды над ошибкой.
         int set_cmd( int cmd, int object_alarm_number );
 
+        /// @brief Проверка наличия неподтверждённых тревог.
+        static bool get_is_any_no_ack_error()
+            {
+            return is_any_no_ack_error;
+            }
+
     protected:
         bool static is_any_error;        ///< Наличие тревоги.
         bool static is_any_no_ack_error; ///< Наличие неподтвержденной тревоги.

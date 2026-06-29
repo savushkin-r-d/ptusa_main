@@ -58,10 +58,63 @@ TEST( errors_manager, evaluate )
     dev->set_cmd( "ABS_V", 0, 100 );
     dev->set_cmd( "P_DT", 0, 1000 );
     dev->set_cmd( "ST", 0, 1 );   //Сбрасываем ошибку счетчика.
-    G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_ALARM -> AS_RETURN.
+    G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_ACCEPT -> AS_NORMAL.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
-    G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_RETURN.
+    G_ERRORS_MANAGER->evaluate(); //Process  ALARM_STATE::AS_NORMAL.
     EXPECT_EQ( 4, G_ERRORS_MANAGER->get_errors_id() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
+
+TEST( errors_manager, evaluate_alarm_return_state )
+    {
+    G_ERRORS_MANAGER->clear();
+
+    //Add counter to produce and check errors.
+    auto name = std::string( "FQT4" );
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_F, name.c_str(), "Test counter", "IFM" );
+    EXPECT_NE( nullptr, res );
+    auto dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+
+    //Generate error.
+    dev->set_cmd( "F", 0, 1 );
+    dev->set_cmd( "P_DT", 0, 1000 );
+    dev->set_cmd( "P_ERR_MIN_FLOW", 0, .1 );
+    dev->evaluate_io();
+    DeltaMilliSecSubHooker::set_millisec( 1001UL );
+    dev->evaluate_io();
+    DeltaMilliSecSubHooker::set_default_time();
+    EXPECT_EQ( (int)i_counter::STATES::S_FLOW_ERROR, dev->get_state() );
+
+    //Alarm becomes active and unacknowledged.
+    G_ERRORS_MANAGER->evaluate(); //AS_NORMAL -> AS_ALARM.
+    EXPECT_EQ( 1, G_ERRORS_MANAGER->get_errors_id() );
+    EXPECT_TRUE( tech_dev_error::get_is_any_no_ack_error() );
+
+    //Remove error without acknowledging.
+    dev->set_cmd( "ABS_V", 0, 100 );
+    dev->set_cmd( "P_DT", 0, 1000 );
+    dev->set_cmd( "ST", 0, 1 ); //Reset counter error.
+    G_ERRORS_MANAGER->evaluate(); //AS_ALARM -> AS_RETURN.
+    EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );
+
+    //Alarm is in AS_RETURN - still unacknowledged, siren must keep sounding.
+    EXPECT_TRUE( tech_dev_error::get_is_any_no_ack_error() );
+    G_ERRORS_MANAGER->evaluate(); //Stays AS_RETURN.
+    EXPECT_EQ( 2, G_ERRORS_MANAGER->get_errors_id() );
+    EXPECT_TRUE( tech_dev_error::get_is_any_no_ack_error() );
+
+    //Acknowledge the return-to-normal alarm: AS_RETURN -> AS_NORMAL.
+    G_ERRORS_MANAGER->set_cmd( base_error::C_CMD_ACCEPT, 7, 0, 1 );
+    EXPECT_EQ( 3, G_ERRORS_MANAGER->get_errors_id() );
+
+    //After acknowledgment, no more unacknowledged errors.
+    G_ERRORS_MANAGER->evaluate();
+    EXPECT_EQ( 3, G_ERRORS_MANAGER->get_errors_id() );
+    EXPECT_FALSE( tech_dev_error::get_is_any_no_ack_error() );
 
     G_DEVICE_MANAGER()->clear_io_devices();
     }
