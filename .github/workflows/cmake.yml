@@ -254,7 +254,7 @@ jobs:
           )
           if (_vswhere_result EQUAL 0 AND _vs_path)
             string(REPLACE "\\" "/" _vs_path "${_vs_path}")
-            set(_env_script "${_vs_path}/VC/Auxiliary/Build/vcvars32.bat")
+            set(_env_script "${_vs_path}/VC/Auxiliary/Build/${{ matrix.config.environment_script }}")
           endif()
 
           execute_process(
