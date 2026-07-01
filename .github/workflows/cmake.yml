@@ -154,7 +154,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        path: .ccache
+        path: ${{ runner.os == 'Windows' && format('{0}/ccache', runner.temp) || '.ccache' }}
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
@@ -273,6 +273,19 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          file(TO_CMAKE_PATH "$ENV{RUNNER_TEMP}" runner_temp)
+          set(ccache_dir "${runner_temp}/ccache")
+          set(ccache_temp_dir "${runner_temp}/ccache-tmp")
+          file(MAKE_DIRECTORY "${ccache_dir}" "${ccache_temp_dir}")
+          set(ENV{CCACHE_TEMPDIR} "${ccache_temp_dir}")
+        else()
+          set(ccache_dir "${ccache_basedir}/.ccache")
+          file(MAKE_DIRECTORY "${ccache_dir}")
+        endif()
+        set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
+        set(ENV{CCACHE_DIR} "${ccache_dir}")
 
         if ("${{ runner.os }}" STREQUAL "Linux")
             set(ENV{CODE_COVERAGE} "ON")
@@ -307,8 +320,18 @@ jobs:
           endforeach()
         endif()
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+        set(ccache_dir "${ccache_basedir}/.ccache")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          file(TO_CMAKE_PATH "$ENV{RUNNER_TEMP}" runner_temp)
+          set(ccache_dir "${runner_temp}/ccache")
+          set(ccache_temp_dir "${runner_temp}/ccache-tmp")
+          file(MAKE_DIRECTORY "${ccache_dir}" "${ccache_temp_dir}")
+          set(ENV{CCACHE_TEMPDIR} "${ccache_temp_dir}")
+        else()
+          file(MAKE_DIRECTORY "${ccache_dir}")
+        endif()
         set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
-        set(ENV{CCACHE_DIR} "${ccache_basedir}/.ccache")
+        set(ENV{CCACHE_DIR} "${ccache_dir}")
         set(ENV{CCACHE_COMPRESS} "true")
         set(ENV{CCACHE_COMPRESSLEVEL} "6")
         set(ENV{CCACHE_MAXSIZE} "400M")
