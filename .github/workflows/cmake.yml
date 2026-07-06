@@ -91,7 +91,7 @@ jobs:
       with:
         egress-policy: audit
 
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
@@ -152,7 +152,7 @@ jobs:
         file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
     - name: ccache cache files
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ runner.os == 'Windows' && format('{0}/ccache', runner.temp) || '.ccache' }}
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -184,7 +184,7 @@ jobs:
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: mingw_cache
         key: mingw-archive-${{ env.MINGW_GCC_VERSION }}-${{ env.MINGW_W64_VERSION }}-${{ env.MINGW_REV }}-${{ env.MINGW_THREAD }}-${{ env.MINGW_EXCEPT }}-${{ env.MINGW_CRT }}
