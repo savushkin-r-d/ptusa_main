@@ -59,7 +59,7 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           submodules: 'recursive'
           ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true'
+          allow-unsafe-pr-checkout: 'true'
 
       # Disable man-db cache. Install unixodbc-dev.
       - name: Install unixodbc-dev

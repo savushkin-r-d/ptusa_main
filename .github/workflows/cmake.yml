@@ -102,7 +102,7 @@ jobs:
         #
         # Default: false
         submodules: 'recursive'
-        allow-unsafe-pr-checkout: true'
+        allow-unsafe-pr-checkout: 'true'
 
     - name: Download Ninja and CMake
       shell: cmake -P {0}
