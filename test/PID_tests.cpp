@@ -216,7 +216,7 @@ void init_PID_for_output_limit_test( PID& pid, float out_min, float out_max )
 
 TEST( PID, eval_immediate_response_after_output_saturation )
     {
-    constexpr float OUT_MAX = 50.f;
+    constexpr float OUT_MAX = 51.f;
     constexpr float OUT_MIN = 20.f;
     constexpr uint32_t STEP_MS = 1001UL;
 
