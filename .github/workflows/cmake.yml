@@ -63,7 +63,7 @@ jobs:
             os: windows-latest,
             cc: "cl",
             cxx: "cl",
-            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat",
+            environment_script: "vcvars32.bat",
             targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
           }
@@ -154,7 +154,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        path: .ccache
+        path: ${{ runner.os == 'Windows' && format('{0}/ccache', runner.temp) || '.ccache' }}
         key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
@@ -243,8 +243,22 @@ jobs:
         set(ENV{CC} ${{ matrix.config.cc }})
         set(ENV{CXX} ${{ matrix.config.cxx }})
         if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+          set(_vswhere_exe
+            "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe")
           execute_process(
-            COMMAND "${{ matrix.config.environment_script }}" && set
+            COMMAND "${_vswhere_exe}" -latest -property installationPath
+            OUTPUT_VARIABLE _vs_path
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+            RESULT_VARIABLE _vswhere_result
+          )
+          if (_vswhere_result EQUAL 0 AND _vs_path)
+            string(REPLACE "\\" "/" _vs_path "${_vs_path}")
+            set(_env_script "${_vs_path}/VC/Auxiliary/Build/${{ matrix.config.environment_script }}")
+          endif()
+
+          execute_process(
+            COMMAND "${_env_script}" && set
             OUTPUT_FILE environment_script_output.txt
           )
           file(STRINGS environment_script_output.txt output_lines)
@@ -259,6 +273,19 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          file(TO_CMAKE_PATH "$ENV{RUNNER_TEMP}" runner_temp)
+          set(ccache_dir "${runner_temp}/ccache")
+          set(ccache_temp_dir "${runner_temp}/ccache-tmp")
+          file(MAKE_DIRECTORY "${ccache_dir}" "${ccache_temp_dir}")
+          set(ENV{CCACHE_TEMPDIR} "${ccache_temp_dir}")
+        else()
+          set(ccache_dir "${ccache_basedir}/.ccache")
+          file(MAKE_DIRECTORY "${ccache_dir}")
+        endif()
+        set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
+        set(ENV{CCACHE_DIR} "${ccache_dir}")
 
         if ("${{ runner.os }}" STREQUAL "Linux")
             set(ENV{CODE_COVERAGE} "ON")
@@ -293,8 +320,18 @@ jobs:
           endforeach()
         endif()
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+        set(ccache_dir "${ccache_basedir}/.ccache")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          file(TO_CMAKE_PATH "$ENV{RUNNER_TEMP}" runner_temp)
+          set(ccache_dir "${runner_temp}/ccache")
+          set(ccache_temp_dir "${runner_temp}/ccache-tmp")
+          file(MAKE_DIRECTORY "${ccache_dir}" "${ccache_temp_dir}")
+          set(ENV{CCACHE_TEMPDIR} "${ccache_temp_dir}")
+        else()
+          file(MAKE_DIRECTORY "${ccache_dir}")
+        endif()
         set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
-        set(ENV{CCACHE_DIR} "${ccache_basedir}/.ccache")
+        set(ENV{CCACHE_DIR} "${ccache_dir}")
         set(ENV{CCACHE_COMPRESS} "true")
         set(ENV{CCACHE_COMPRESSLEVEL} "6")
         set(ENV{CCACHE_MAXSIZE} "400M")
@@ -387,7 +424,7 @@ jobs:
 
     - name: Upload coverage to Codecov (Linux only)
       if: runner.os == 'Linux'
-      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         fail_ci_if_error: true
         verbose: true
