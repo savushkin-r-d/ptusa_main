@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #ifdef WIN_OS
 #include <Windows.h>

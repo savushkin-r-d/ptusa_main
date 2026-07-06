@@ -3,7 +3,7 @@
 #pragma warning(disable: 4244)
 #endif // WIN_OS
 
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #include "cip_tech_def.h"
 #include "lua_manager.h"
