@@ -231,10 +231,10 @@ TEST( PID, eval_immediate_response_after_output_saturation )
     uint32_t step = 1;
 
     // Нагоняем выход на P_out_max при положительной ошибке.
-    for ( float current = 0.f; current <= 90.f; current += 10.f, ++step )
+    for ( int current = 0; current <= 90; current += 10, ++step )
         {
         DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-        test_PID.eval( current );
+        test_PID.eval( static_cast<float>( current ) );
         }
 
     DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
@@ -252,10 +252,10 @@ TEST( PID, eval_immediate_response_after_output_saturation )
     test_PID.on();
 
     step = 1;
-    for ( float current = 100.f; current >= 10.f; current -= 10.f, ++step )
+    for ( int current = 100; current >= 10; current -= 10, ++step )
         {
         DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-        test_PID.eval( current );
+        test_PID.eval( static_cast<float>( current ) );
         }
 
     DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
