@@ -3,7 +3,8 @@
 #include "uni_bus_coupler_io.h"
 #include "log.h"
 
-#include <fmt/core.h>
+#include "fmt/format.h"
+#include <cstring>
 
 #ifdef WIN_OS
 const char* WSA_Last_Err_Decode();

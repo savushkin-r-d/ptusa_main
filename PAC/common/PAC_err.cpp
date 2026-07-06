@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <vector>
-#include <fmt/core.h>
+#include "fmt/format.h"
 #include <cstring>
 
 #include "log.h"

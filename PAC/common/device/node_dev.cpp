@@ -1,4 +1,4 @@
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #include "node_dev.h"
 #include "bus_coupler_io.h"

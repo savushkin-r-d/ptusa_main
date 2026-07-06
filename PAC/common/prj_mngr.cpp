@@ -7,7 +7,7 @@
 #include <filesystem>
 
 #include <cxxopts.hpp>
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #include "prj_mngr.h"
 #include "bus_coupler_io.h"
