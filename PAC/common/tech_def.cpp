@@ -172,7 +172,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                 break;
 
             default:
-                if ( newm != 0 ) newm = 1;                
+                if ( newm != 0 ) newm = 1;
 
                 if ( get_mode( operation_n ) == newm )
                     {

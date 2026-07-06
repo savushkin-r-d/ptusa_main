@@ -37,7 +37,7 @@ const std::map<int, const char*> ERR_MSG =
     { ERR_WATCHDOG, "Ошибка сторожевого таймера" },
 
     { ERR_NO_DESINFECTION_MEDIUM, "Нет дезинфицирующего средства" },
-    { ERR_DESINFECTION_MEDIUM_MAX_TIME, 
+    { ERR_DESINFECTION_MEDIUM_MAX_TIME,
         "Превышено максимальное время дозирования дезинфицирующего средства" },
     { ERR_DESINFECTION_MEDIUM_INSUFFICIENT_TIME,
         "Недостаточное время дозирования дезинфицирующего средства" },
@@ -2166,7 +2166,7 @@ int cipline_tech_object::_GoToStep( int cur, int param )
             if ( rt_par_float[ P_DOP_V_OK_OP ] < 0 )
                 {
                 disable_final_rinsing = true;
-                }            
+                }
             return LoadProgram();
         case 71:
         case 72:
@@ -2672,7 +2672,7 @@ int cipline_tech_object::EvalCipInProgress()
             state = res;
 
             auto err_msg_it = ERR_MSG.find( res );
-            const char* err_msg = 
+            const char* err_msg =
                 ( err_msg_it != ERR_MSG.end() ) ? err_msg_it->second : UNKNOWN_ERR_MSG;
             std::string formatted_err_msg = fmt::format( "ошибка '{}' ({})", err_msg, res );
             set_err_msg( formatted_err_msg.c_str(), 0, 0, ERR_MSG_TYPES::ERR_ALARM );
@@ -2776,7 +2776,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     (
                         steps_additional_rinse.count(step_to_do) ||
                         (use_circulation_on_v2_supply && steps_v2_supply.count(step_to_do))
-                    ) 
+                    )
                 )
             )
             {
@@ -5778,7 +5778,7 @@ int cipline_tech_object::init_object_devices()
         }
     // Сторожевой таймер связи.
     if ( check_device( dev_watchdog, P_WATCHDOG, device::DEVICE_TYPE::DT_WATCHDOG ) ) return -1;
-    
+
     //Обратная связь
     if (check_DI(dev_os_object, P_OS)) return -1;
     //Обратная связь №2(готовность объекта к мойке)
