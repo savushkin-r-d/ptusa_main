@@ -193,3 +193,78 @@ TEST( PID, eval )
     EXPECT_GT( res, MIN_VALUE );
     DeltaMilliSecSubHooker::set_default_time();
     }
+
+namespace {
+
+void init_PID_for_output_limit_test( PID& pid, float out_min, float out_max )
+    {
+    pid.init_param( PID::P_k, 1.f );
+    pid.init_param( PID::P_Ti, 15.f );
+    pid.init_param( PID::P_Td, 0.01f );
+    pid.init_param( PID::P_dt, 1000.f );
+    pid.init_param( PID::P_max, 100.f );
+    pid.init_param( PID::P_min, 0.f );
+    pid.init_param( PID::P_acceleration_time, 0.f );
+    pid.init_param( PID::P_is_manual_mode, 0.f );
+    pid.init_param( PID::P_out_min, out_min );
+    pid.init_param( PID::P_out_max, out_max );
+    pid.init_param( PID::P_is_zero_start, 1.f );
+    pid.save_param();
+    }
+
+} // namespace
+
+TEST( PID, eval_immediate_response_after_output_saturation )
+    {
+    constexpr float OUT_MAX = 50.f;
+    constexpr float OUT_MIN = 20.f;
+    constexpr uint32_t STEP_MS = 1001UL;
+
+    PID test_PID( "PID_saturation" );
+    init_PID_for_output_limit_test( test_PID, 0.f, OUT_MAX );
+
+    test_PID.set( 100.f );
+    test_PID.on();
+    test_PID.reset();
+    test_PID.on();
+
+    uint32_t step = 1;
+
+    // Нагоняем выход на P_out_max при положительной ошибке.
+    for ( float current = 0.f; current <= 90.f; current += 10.f, ++step )
+        {
+        DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
+        test_PID.eval( current );
+        }
+
+    DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
+    ASSERT_FLOAT_EQ( OUT_MAX, test_PID.eval( 90.f ) );
+
+    // Смена знака ошибки: процесс превысил уставку.
+    test_PID.set( 100.f );
+    DeltaMilliSecSubHooker::set_millisec( ++step * STEP_MS );
+    EXPECT_LT( test_PID.eval( 110.f ), OUT_MAX );
+
+    // Нагоняем выход на P_out_min при отрицательной ошибке.
+    init_PID_for_output_limit_test( test_PID, OUT_MIN, 100.f );
+    test_PID.set( 0.f );
+    test_PID.reset();
+    test_PID.on();
+
+    step = 1;
+    for ( float current = 100.f; current >= 10.f; current -= 10.f, ++step )
+        {
+        DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
+        test_PID.eval( current );
+        }
+
+    DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
+    ASSERT_FLOAT_EQ( OUT_MIN, test_PID.eval( 10.f ) );
+
+    // Смена знака ошибки: уставка выше текущего значения.
+    test_PID.set( 21.f );
+    DeltaMilliSecSubHooker::set_millisec( ++step * STEP_MS );
+    EXPECT_GT( test_PID.eval( 10.f ), OUT_MIN );
+
+    DeltaMilliSecSubHooker::set_default_time();
+    }
