@@ -2393,7 +2393,7 @@ TEST_F( iolink_dev_test, concentration_e_iolink_get_error_description )
     test_dev_err( test_dev, test_dev, 0 );
     }
 
-TEST_F( iolink_dev_test, concentration_e_iolink_evaluate_io )
+TEST_F( iolink_dev_test, concentration_e_iolink_get_value_clamps_to_p_max_v )
     {
     concentration_e_iolink test_dev( "Q1" );
 
