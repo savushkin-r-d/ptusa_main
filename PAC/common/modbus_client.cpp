@@ -496,7 +496,8 @@ void modbus_client::check_connection_state_changed()
         {
         G_LOG->info( "Modbus client %d: connected to \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
-        PAC_critical_errors_manager::get_instance()->reset_global_error(
+        auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
+        pac_err_mngr->reset_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
             tcpclient->get_id() );
@@ -505,7 +506,8 @@ void modbus_client::check_connection_state_changed()
         {
         G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
-        PAC_critical_errors_manager::get_instance()->set_global_error(
+        auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
+        pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
             tcpclient->get_id() );
