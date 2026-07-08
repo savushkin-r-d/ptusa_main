@@ -232,7 +232,7 @@ TEST( PID, anti_windup_on_output_limits )
     test_PID.reset();
 
     // Фиксируем шаг времени один раз для всего теста.
-    DeltaMilliSecSubHooker::set_millisec( STEP_MS );
+    DeltaMilliSecSubHooker delta_ms_hooker( STEP_MS );
 
     // Фаза 1: Нагоняем выход на OUT_MAX при положительной ошибке.
     for ( auto i = 0; i <= 10; ++i )
@@ -285,6 +285,4 @@ TEST( PID, anti_windup_on_output_limits )
 
     EXPECT_GT( output_after_reversal_2, OUT_MIN )
         << "При смене знака ошибки выход должен СРАЗУ вырасти выше OUT_MIN";
-
-    DeltaMilliSecSubHooker::set_default_time();
     }
