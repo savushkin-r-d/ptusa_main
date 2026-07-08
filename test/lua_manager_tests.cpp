@@ -268,7 +268,7 @@ TEST_F(LuaManagerTest, init_init_objects_failure)
 }
 
 void test_PAC_name( int extra_calls_count )
-    {    
+    {
     subhook_t hook_lua_pcall =
         subhook_new( (void *) lua_pcallk, (void *) mock_lua_pcallk_failure, SUBHOOK_64BIT_OFFSET );
     subhook_install( hook_lua_pcall );
@@ -281,7 +281,7 @@ void test_PAC_name( int extra_calls_count )
 
     set_file_counter( 0 );
     test_project_manager::removeObject();
-    test_params_manager::removeObject();    
+    test_params_manager::removeObject();
     delete tech_mock;
 
     subhook_remove( hook_lua_pcall );
@@ -739,7 +739,7 @@ TEST( lua_manager, error_trace )
     auto L = luaL_newstate();
     G_LUA_MANAGER->set_Lua( L );
     lua_manager::use_print_stack_traceback();
-    
+
     EXPECT_EQ( 0, luaL_dostring( L, "t = {}" ) );
     EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist1 = 1" ) );
     EXPECT_EQ( 0, luaL_dostring( L, "t.no_exist2 = {}" ) );

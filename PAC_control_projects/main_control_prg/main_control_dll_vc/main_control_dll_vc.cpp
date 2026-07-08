@@ -30,7 +30,7 @@ int lua_init( lua_State* L )
     int top = lua_gettop( L );
     int p_size = !top ? 1 : top;
     auto argv = new const char* [ p_size ] { nullptr };
-    
+
     int argc = 0;
     for ( int i = 1; i <= top; i++ )
         {
