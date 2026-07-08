@@ -157,7 +157,7 @@ class temperature_e_iolink : public AI1
 
 #ifndef PTUSA_TEST
     private:
-#endif 
+#endif
 
         struct TE_data
             {
@@ -370,7 +370,7 @@ class pressure_e_iolink : public analog_io_device
             {
             PT_DATA_TYPE,       ///< Use PT_data with reverse_copy
             EX_PT_DATA_TYPE,    ///< Use ex_PT_data with byte swapping
-            
+
             EH_PT_DATA_TYPE,    ///< Use EH_PT_data with byte swapping
             };
 
@@ -763,11 +763,11 @@ class wages_eth : public analog_io_device, public i_wages
         void evaluate_io() override;
 
         void direct_set_value( float new_value ) override;
-        
+
         void direct_set_state( int state ) override;
 
         void direct_off() override;
-        
+
         void direct_on() override;
 
         void tare() override;
@@ -854,7 +854,7 @@ class wages_pxc_axl : public analog_io_device, public i_wages
             P_K,            ///< Коэффициент пропорциональности.
             LAST_PARAM_IDX,
             };
-    
+
     private:
         float w = .0f;
         int st = 0;
@@ -1196,6 +1196,7 @@ class level_s_iolink : public analog_io_device
             IFM_LMT202,
 
             EH_FTL33,
+            EH_FTW33,
             };
         ARTICLE n_article = ARTICLE::DEFAULT;
 
@@ -1544,7 +1545,7 @@ class counter_iolink : public base_counter
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
 
-            MAX_OVERFLOW = 300, ///< Максимальное переполнение за цикл   
+            MAX_OVERFLOW = 300, ///< Максимальное переполнение за цикл
 
             P_CZ = 1,
             P_DT,
@@ -1644,7 +1645,7 @@ class camera : public i_camera, public device, public io_device
         /// @brief Получение состояние готовности.
         virtual bool is_ready() const;
 
-#ifndef PTUSA_TEST      
+#ifndef PTUSA_TEST
     private:
 #endif
         std::string ip;
@@ -1803,7 +1804,7 @@ class threshold_regulator :public device
 class power_unit : public analog_io_device
     {
     public:
-        power_unit( const char* dev_name, 
+        power_unit( const char* dev_name,
             device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_G_IOL_4 );
 
         void direct_on() override;
@@ -1847,7 +1848,7 @@ class power_unit : public analog_io_device
             {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
             };
-        
+
         bool is_processing_cmd = false;
         uint32_t cmd_time = 0;
 
@@ -1871,7 +1872,7 @@ class power_unit : public analog_io_device
             int8_t status_ch2 : 2;
             int8_t status_ch1 : 2;
             int8_t status_ch8 : 2;              // Byte 5.
-            int8_t status_ch7 : 2;     
+            int8_t status_ch7 : 2;
             int8_t status_ch6 : 2;
             int8_t status_ch5 : 2;
 
@@ -1886,7 +1887,7 @@ class power_unit : public analog_io_device
             uint8_t                     : 2;
             uint8_t nominal_current_ch8 : 3;    // Byte 9.
             uint8_t nominal_current_ch7 : 3;
-            uint8_t                     : 2;    
+            uint8_t                     : 2;
 
             uint8_t load_current_ch1 : 8;       // Byte 10.
             uint8_t load_current_ch2 : 8;       // Byte 11.
@@ -1998,7 +1999,7 @@ class converter_iolink_ao : public analog_io_device
 
 #pragma pack(push, 1)
         struct process_data_in
-            {            
+            {
             uint8_t reserved : 4;	    // Зарезервированные биты.
             uint8_t device_status : 4;	// Статус устройства.
             };
@@ -2019,7 +2020,7 @@ class converter_iolink_ao : public analog_io_device
     };
 ///-----------------------------------------------------------------------------
 /// Предоставляет функциональность таймера.
-/// 
+///
 class timer
     {
     public:

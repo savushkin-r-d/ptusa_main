@@ -136,7 +136,6 @@ float PID::eval( float currentValue, int deltaSign )
         if ( Uk > MAX_OUT_VALUE ) Uk = MAX_OUT_VALUE;
         if ( Uk < MIN_OUT_VALUE ) Uk = MIN_OUT_VALUE;
 
-        uk_1 = Uk;
         ek_2 = ek_1;
         ek_1 = ek;
 
@@ -222,6 +221,8 @@ float PID::eval( float currentValue, int deltaSign )
         {
         Uk = out_max;
         }
+
+    uk_1 = Uk;
 
     out_value = Uk;
 
