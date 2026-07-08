@@ -38,7 +38,7 @@ tm get_fixed_time()
 #endif
 //-----------------------------------------------------------------------------
 inline auto get_duration()
-    {    
+    {
     auto now = std::chrono::steady_clock::now();
     auto duration = now - START_POINT;
     return duration;
@@ -53,7 +53,7 @@ uint32_t get_sec()
 //-----------------------------------------------------------------------------
 uint32_t get_millisec()
     {
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( 
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         get_duration() ).count();
 
     return static_cast<uint32_t>( ms );

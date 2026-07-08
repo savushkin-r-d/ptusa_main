@@ -22,7 +22,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
 
     if (send(socket_number, buff, bytestosend, 0 ) == SOCKET_ERROR)
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf("tcp_client_%d Ошибка %d отсылки сообщения.\n", id, WSAGetLastError());
             }
@@ -36,7 +36,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
 
     if (res <= 0)
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf("tcp_client_%d Ошибка получения ответа\n", id);
             }
@@ -48,7 +48,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
 
     if (0 == res)
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf("tcp_client_%d Сервер закрыл соединение\n", id);
             }
@@ -60,14 +60,14 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
         {
         if (res == -1)
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d Ошибка %d получения ответа\n", id, WSAGetLastError());
                 }
             }
         else
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d Ошибка получения ответа, истекло время ожидания\n", id);
                 }
@@ -79,8 +79,8 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
     return res;
     }
 
-win_tcp_client::win_tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id, 
-                               unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, 
+win_tcp_client::win_tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id,
+                               unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/,
                                uint32_t send_receive_timeout /*= 100*/ ):	tcp_client(
                                client_ip, client_port, client_id, alarm_subclass, exchange_buf_size, send_receive_timeout)
     {
@@ -98,7 +98,7 @@ int win_tcp_client::InitLib()
         {
         if ( WSAStartup( 0x202, &tmpWSAData ) )
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d Ошибка %d инициализации сетевой библиотеки.\n", id, WSAGetLastError());
                 }
@@ -128,9 +128,9 @@ int win_tcp_client::Connect()
     socket_number = socket(AF_INET,SOCK_STREAM,IPPROTO_IP);
     if (socket_number == INVALID_SOCKET)
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
-            printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());    
+            printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());
             }
 
         return 0;
@@ -141,9 +141,9 @@ int win_tcp_client::Connect()
     if ( setsockopt(socket_number, SOL_SOCKET, SO_SNDTIMEO, ( char* )&timeout, vlen) == SOCKET_ERROR ||
         setsockopt(socket_number, SOL_SOCKET, SO_RCVTIMEO, ( char* )&timeout, vlen) == SOCKET_ERROR)
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
-            printf("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());        
+            printf("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());
             }
         return 0;
         }
@@ -153,9 +153,9 @@ int win_tcp_client::Connect()
     res = ioctlsocket( socket_number, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
-            printf("tcp_client_%d: Ошибка перевода сокета в неблокирующий режим %d!\n", id, WSAGetLastError());     
+            printf("tcp_client_%d: Ошибка перевода сокета в неблокирующий режим %d!\n", id, WSAGetLastError());
             }
 
 
@@ -180,14 +180,14 @@ int win_tcp_client::Connect()
         {
         if (0 == res)
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d: Ошибка соединения. Таймаут\n", id);
                 }
             }
         else
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
                 }
@@ -205,7 +205,7 @@ int win_tcp_client::Connect()
         res = getsockopt(socket_number, SOL_SOCKET, SO_ERROR, (char*)&sock_error, &sock_err_len);
         if (res < 0 || sock_error != 0)
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf("tcp_client_%d: Ошибка соединения(select) %d!\n", id, sock_error);
                 }
@@ -402,7 +402,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
     int res = send( socket_number, buff, bytestosend, 0 );
     if ( res == SOCKET_ERROR )
         {
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "tcp_client_%d Ошибка %d отсылки сообщения.\n", id, WSAGetLastError() );
             }

@@ -15,7 +15,7 @@ namespace PtusaPLCnextEngineer
     class PtusaMainPrg: public ProgramBase, private Loggable<PtusaMainPrg>
         {
     public:
-        // typedefs        
+        // typedefs
 
     public:
         // construction/destruction
@@ -41,7 +41,7 @@ namespace PtusaPLCnextEngineer
 
     private:
         // fields
-        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;       
+        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;
         };
 
     ///////////////////////////////////////////////////////////////////////////////

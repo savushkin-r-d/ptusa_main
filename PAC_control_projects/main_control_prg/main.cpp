@@ -9,10 +9,10 @@
 
 #include <stdlib.h>
 #include <signal.h>
-#include "fcntl.h"
+#include <fcntl.h>
 #include <codecvt>
 
-#include <fmt/core.h> 
+#include "fmt/format.h"
 
 #include "dtime.h"
 

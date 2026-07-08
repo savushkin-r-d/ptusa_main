@@ -1,4 +1,4 @@
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #include "life_device.h"
 
@@ -36,7 +36,7 @@ void watchdog::evaluate_io()
             start_in_check_time = get_millisec();
             }
         }
-    
+
     if ( auto set_dt = static_cast<unsigned long>(
         get_par( static_cast<u_int>( PARAM::P_T_ERR ) ) );
         set_dt > 0 && get_delta_millisec( start_in_check_time ) > set_dt )
@@ -50,7 +50,7 @@ void watchdog::evaluate_io()
         get_delta_millisec( start_out_check_time ) > set_dt )
         {
         start_out_check_time = get_millisec();
-        
+
         if ( DO_dev ) DO_dev->set_state( !DO_dev->is_active() );
         if ( AO_dev )
             {
@@ -138,7 +138,7 @@ const char* watchdog::get_error_description()
     {
     if ( auto err_id = get_error_id(); err_id < 0 )
         {
-        return error_description.c_str();        
+        return error_description.c_str();
         }
 
     return "нет ошибок";
