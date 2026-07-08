@@ -376,6 +376,16 @@ class ModbusClientConnectionStateTest : public ::testing::Test
     {
     protected:
         test_modbus_client m_client{ 1, "127.0.0.1" };
+
+        void SetUp() override
+            {
+            PAC_critical_errors_manager::get_instance()->reset_all_error();
+            }
+
+        void TearDown() override
+            {
+            PAC_critical_errors_manager::get_instance()->reset_all_error();
+            }
     };
 
 TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
@@ -386,6 +396,8 @@ TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
 
 TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     {
+    auto* mngr = PAC_critical_errors_manager::get_instance();
+
     // Simulate connection established.
     m_client.get_tcp_client()->set_connected_state(
         tcp_client::ACS_CONNECTED );
@@ -393,6 +405,7 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
     EXPECT_EQ( m_client.get_prev_connected_state(),
         tcp_client::ACS_CONNECTED );
+    EXPECT_FALSE( mngr->is_any_error() );
 
     // Simulate connection lost.
     m_client.get_tcp_client()->set_connected_state(
@@ -401,13 +414,17 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
     EXPECT_EQ( m_client.get_prev_connected_state(),
         tcp_client::ACS_DISCONNECTED );
+    EXPECT_TRUE( mngr->is_any_error() );
     }
 
 TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
     {
+    auto* mngr = PAC_critical_errors_manager::get_instance();
+
     // State stays disconnected -- prev should remain ACS_DISCONNECTED.
     m_client.get_async_result();
 
     EXPECT_EQ( m_client.get_prev_connected_state(),
         tcp_client::ACS_DISCONNECTED );
+    EXPECT_FALSE( mngr->is_any_error() );
     }

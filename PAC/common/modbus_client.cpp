@@ -496,11 +496,19 @@ void modbus_client::check_connection_state_changed()
         {
         G_LOG->info( "Modbus client %d: connected to \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NO_CONNECTION,
+            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+            tcpclient->get_id() );
         }
     else if ( prev_connected_state == tcp_client::ACS_CONNECTED )
         {
         G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NO_CONNECTION,
+            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+            tcpclient->get_id() );
         }
 
     prev_connected_state = current_state;
