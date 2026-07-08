@@ -160,7 +160,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     UA_Argument inputState;
     UA_Argument_init( &inputState );
-    inputState.description = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+    inputState.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "Новое состояние." );
     inputState.name = UA_STRING_ALLOC( "state" );
     inputState.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
@@ -185,7 +185,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     UA_Argument inputValue;
     UA_Argument_init( &inputValue );
-    inputValue.description = UA_LOCALIZEDTEXT_ALLOC( "en-US",
+    inputValue.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "Новое значение." );
     inputValue.name = UA_STRING_ALLOC( "value" );
     inputValue.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
