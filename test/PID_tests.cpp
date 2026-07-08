@@ -199,7 +199,7 @@ namespace {
 void init_PID_for_output_limit_test( PID& pid, float out_min, float out_max )
     {
     pid.init_param( PID::P_k, 1.f );
-    pid.init_param( PID::P_Ti, 15.f );
+    pid.init_param( PID::P_Ti, 6.f );
     pid.init_param( PID::P_Td, 0.01f );
     pid.init_param( PID::P_dt, 1000.f );
     pid.init_param( PID::P_max, 100.f );
@@ -214,57 +214,77 @@ void init_PID_for_output_limit_test( PID& pid, float out_min, float out_max )
 
 } // namespace
 
-TEST( PID, eval_immediate_response_after_output_saturation )
+TEST( PID, anti_windup_on_output_limits )
     {
-    constexpr float OUT_MAX = 51.f;
-    constexpr float OUT_MIN = 20.f;
-    constexpr uint32_t STEP_MS = 1001UL;
+    // Тест проверяет, что при ограничении выхода (P_out_min/P_out_max),
+    // интегратор не накапливает значения ниже/выше, и регулятор мгновенно
+    // реагирует на смену знака ошибки.
 
-    PID test_PID( "PID_saturation" );
-    init_PID_for_output_limit_test( test_PID, 0.f, OUT_MAX );
+    constexpr auto OUT_MAX = 50.f;
+    constexpr auto OUT_MIN = 20.f;
+    constexpr auto STEP_MS = 1001UL;
 
-    test_PID.set( 100.f );
+    PID test_PID( "PID_antiwindup" );
+    init_PID_for_output_limit_test( test_PID, OUT_MIN, OUT_MAX );
+
+    test_PID.set( 100.f );  // Уставка = 100
     test_PID.on();
     test_PID.reset();
-    test_PID.on();
 
-    uint32_t step = 1;
+    // Фиксируем шаг времени один раз для всего теста.
+    DeltaMilliSecSubHooker::set_millisec( STEP_MS );
 
-    // Нагоняем выход на P_out_max при положительной ошибке.
-    for ( int current = 0; current <= 90; current += 10, ++step )
+    // Фаза 1: Нагоняем выход на OUT_MAX при положительной ошибке.
+    for ( auto i = 0; i <= 10; ++i )
         {
-        DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-        test_PID.eval( static_cast<float>( current ) );
+        auto res = test_PID.eval( 80.f );
+        EXPECT_LE( res, OUT_MAX ) << "Выход должен быть <= OUT_MAX";
         }
 
-    DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-    ASSERT_FLOAT_EQ( OUT_MAX, test_PID.eval( 90.f ) );
+    auto output_at_max = test_PID.eval( 80.f );
+    ASSERT_FLOAT_EQ( OUT_MAX, output_at_max )
+        << "Выход должен достичь OUT_MAX при положительной ошибке";
 
-    // Смена знака ошибки: процесс превысил уставку.
-    test_PID.set( 100.f );
-    DeltaMilliSecSubHooker::set_millisec( ++step * STEP_MS );
-    EXPECT_LT( test_PID.eval( 110.f ), OUT_MAX );
+    // Фаза 2: Смена направления.
+    auto output_after_reversal = test_PID.eval( 110.f );  // Ошибка = -10
 
-    // Нагоняем выход на P_out_min при отрицательной ошибке.
-    init_PID_for_output_limit_test( test_PID, OUT_MIN, 100.f );
+    EXPECT_LT( output_after_reversal, OUT_MAX )
+        << "При смене знака ошибки выход должен СРАЗУ упасть ниже OUT_MAX. "
+        << "Если это не срабатывает, интегратор может ещё содержать wind-up.";
+
+    for ( auto i = 0; i < 3; ++i )
+        {
+        auto res = test_PID.eval( 110.f );
+        EXPECT_LE( res, OUT_MAX ) << "Выход должен оставаться <= OUT_MAX";
+        if ( i > 0 )
+            {
+            EXPECT_LE( res, output_after_reversal )
+                << "Выход должен продолжить уменьшаться";
+            output_after_reversal = res;
+            }
+        }
+
+    // Фаза 3: Проверка на нижнем ограничении.
+    init_PID_for_output_limit_test( test_PID, OUT_MIN, OUT_MAX );
     test_PID.set( 0.f );
     test_PID.reset();
     test_PID.on();
 
-    step = 1;
-    for ( int current = 100; current >= 10; current -= 10, ++step )
+    for ( auto i = 0; i <= 10; ++i )
         {
-        DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-        test_PID.eval( static_cast<float>( current ) );
+        auto res = test_PID.eval( 110.f );
+        EXPECT_GE( res, OUT_MIN ) << "Выход должен быть >= OUT_MIN";
         }
 
-    DeltaMilliSecSubHooker::set_millisec( step * STEP_MS );
-    ASSERT_FLOAT_EQ( OUT_MIN, test_PID.eval( 10.f ) );
+    auto output_at_min = test_PID.eval( 110.f );
+    ASSERT_FLOAT_EQ( OUT_MIN, output_at_min )
+        << "Выход должен достичь OUT_MIN при отрицательной ошибке";
 
-    // Смена знака ошибки: уставка выше текущего значения.
-    test_PID.set( 21.f );
-    DeltaMilliSecSubHooker::set_millisec( ++step * STEP_MS );
-    EXPECT_GT( test_PID.eval( 10.f ), OUT_MIN );
+    test_PID.set( 50.f );
+    auto output_after_reversal_2 = test_PID.eval( 5.f );  // Ошибка = +45
+
+    EXPECT_GT( output_after_reversal_2, OUT_MIN )
+        << "При смене знака ошибки выход должен СРАЗУ вырасти выше OUT_MIN";
 
     DeltaMilliSecSubHooker::set_default_time();
     }
