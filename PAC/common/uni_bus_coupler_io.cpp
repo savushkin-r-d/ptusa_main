@@ -3,7 +3,8 @@
 #include "uni_bus_coupler_io.h"
 #include "log.h"
 
-#include <fmt/core.h>
+#include "fmt/format.h"
+#include <cstring>
 
 #ifdef WIN_OS
 const char* WSA_Last_Err_Decode();
@@ -80,7 +81,7 @@ int uni_io_manager::net_init( io_node* node ) const
             reinterpret_cast<char*>( &timeout ), vlen)
 #else
         setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
-#endif // WIN_OS        
+#endif // WIN_OS
         )
         {
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -109,8 +110,8 @@ int uni_io_manager::net_init( io_node* node ) const
     err = ioctlsocket( sock, FIONBIO, &mode );
 #else
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
-#endif // WIN_OS    
-    
+#endif // WIN_OS
+
     if ( err != 0 )
         {
         auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
@@ -203,7 +204,7 @@ int uni_io_manager::net_init( io_node* node ) const
             reinterpret_cast<char*>( &error ),
 #else
             &error,
-#endif // WIN_OS            
+#endif // WIN_OS
             &err_len ) < 0 || error != 0 )
             {
             if ( node->is_set_err == false )
@@ -245,7 +246,7 @@ int uni_io_manager::net_init( io_node* node ) const
 //-----------------------------------------------------------------------------
 int uni_io_manager::write_outputs()
     {
-    if ( 0 == nodes_count ) 
+    if ( 0 == nodes_count )
         {
         return 0;
         }
@@ -265,7 +266,7 @@ int uni_io_manager::write_outputs()
             if ( nd->read_io_error_flag )
                 {
                 res = 1;
-                continue;                
+                continue;
                 }
 
             if ( nd->DO_cnt > 0 )
@@ -545,27 +546,30 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
     // Проверка связи с узлом I/O.
-    if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
+    if ( get_delta_millisec( node->last_poll_time ) >=
+        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] )
         {
-        // Reset PP mode alarm on communication loss.
-        if ( node->is_err_mode_alarm_set )
-            {
-            PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_PP_MODE,
-                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
-
-            // Reset PP-mode tracking state so a new transition is detected
-            // after reconnect.
-            node->prev_status_register = 0;
-            node->is_err_mode_alarm_set = false;
-            }
-
+        // Если связь была, но сейчас пропала, то выставляем ошибку связи.
         if ( false == node->is_set_err )
             {
             node->is_set_err = true;
             PAC_critical_errors_manager::get_instance()->set_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+            }
+
+        // Reset PP mode alarm on communication loss.
+        if ( node->is_err_mode_alarm_set )
+            {
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_PP_MODE,
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number,
+                false );
+
+            // Reset PP-mode tracking state so a new transition is detected
+            // after reconnect.
+            node->prev_status_register = 0;
+            node->is_err_mode_alarm_set = false;
             }
         }
     else
@@ -980,19 +984,16 @@ int uni_io_manager::read_inputs()
 //-----------------------------------------------------------------------------
 void uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
-    if ( auto result = read_input_registers( nd, 
+    if ( auto result = read_input_registers( nd,
         PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
         {
         nd->status_register = static_cast<u_int_2>(
             BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
         }
-#ifdef DEBUG_BK
     else
         {
-        G_LOG->debug( "Failed to read status register (%d) for node "
-            "\"%s\".", PHOENIX_STATUS_REGISTER_ADDRESS, nd->name );
+        return;
         }
-#endif // DEBUG_BK
 
     if ( auto result = read_input_registers( nd,
         PHOENIX_DIAGNOSTIC_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
@@ -1073,7 +1074,7 @@ void uni_io_manager::disconnect( io_node* node )
 #else
         close( node->sock );
 #endif // WIN_OS
-        
+
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
