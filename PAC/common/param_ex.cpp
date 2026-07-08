@@ -186,7 +186,7 @@ char* params_manager::get_params_data( int size, int &start_pos )
     }
 //-----------------------------------------------------------------------------
 params_manager* params_manager::get_instance()
-    {    
+    {
     if ( 0 == is_init )
         {
         is_init = 1;

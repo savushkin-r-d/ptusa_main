@@ -29,7 +29,7 @@ See Appendix A.
 
 // When using Unicode Windows functions, use Unicode C-Runtime functions too.
 #ifdef UNICODE
-#ifndef UNICODE 
+#ifndef _UNICODE
 #define _UNICODE
 #endif
 #endif
@@ -241,7 +241,7 @@ inline void chSETDLGICONS(HWND hwnd, int idi) {
 
 // This is accomplished by creating a global C++ object. Its constructor is
 // executed before WinMain.
- 
+
 #ifdef UNICODE
 
 class CUnicodeSupported {

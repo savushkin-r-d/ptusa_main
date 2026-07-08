@@ -32,9 +32,9 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
         {
         printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
         }
-    
+
     glob_last_transfer_time = get_millisec();
-    net_init();    
+    net_init();
     }
 //------------------------------------------------------------------------------
 void tcp_communicator_linux::killsockets()
@@ -443,7 +443,7 @@ int tcp_communicator_linux::evaluate()
                  {
                  if ( int err = recvtimeout(it->second->get_socket(),
                      (unsigned char*)it->second->buff, it->second->buff_size,
-                     1, 0, it->second->ip, "async client", 0); 
+                     1, 0, it->second->ip, "async client", 0);
                      err <= 0 ) //Ошибка чтения
                      {
                      it->second->Disconnect();

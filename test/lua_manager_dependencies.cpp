@@ -5,7 +5,7 @@ void LuaManagerTest::SetUp()
     ASSERT_EQ( G_LUA_MANAGER->get_Lua(), nullptr );
 
 	lua_hooks.push_back(subhook_new((void *) lua_pushcclosure,      (void *) mock_lua_pushcclosure,     SUBHOOK_64BIT_OFFSET));
-	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));	
+	lua_hooks.push_back(subhook_new((void *) lua_gettop,            (void *) mock_lua_gettop,           SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_type,				(void *) mock_lua_type,				SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_getfield,          (void *) mock_lua_getfield,         SUBHOOK_64BIT_OFFSET));
 	lua_hooks.push_back(subhook_new((void *) lua_remove,            (void *) mock_lua_remove,           SUBHOOK_64BIT_OFFSET));
@@ -47,7 +47,7 @@ void LuaManagerTest::TearDown()
 
     if ( need_free_Lua_state )
         {
-        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate 
+        // Так как Lua создавали с помощью new lua_state в mock_luaL_newstate
         // (или сразу с помощью new lua_state),
         // то удаляем с помощью delete.
         delete G_LUA_MANAGER->get_Lua();

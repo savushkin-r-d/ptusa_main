@@ -19,7 +19,7 @@ class watchdog : public device
         inline static const float MAX_OUT_VALUE = 32'767;
 
         /// @param name - имя.
-        explicit watchdog( const char* name, 
+        explicit watchdog( const char* name,
             device::DEVICE_SUB_TYPE sub_type = device::DEVICE_SUB_TYPE::DST_WATCHDOG );
 
         ~watchdog() override = default;
@@ -46,7 +46,7 @@ class watchdog : public device
 
         int prev_dev_state = 0;     ///< Предыдущее состояние устройства.
         float prev_dev_value = 0.f; ///< Предыдущее значение устройства.
-        
+
         uint32_t start_in_check_time = get_millisec();
         uint32_t start_out_check_time = get_millisec();
 
