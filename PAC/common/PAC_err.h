@@ -56,9 +56,9 @@ class PAC_critical_errors_manager
 
             AC_NET = 4,           ///< Ошибки сетевой работы.
             AC_SERVICE = 5,	      ///< Сервисное обслуживание устройства.
-            
+
             /// Режим конфигурирования устройства (PP mode).
-            AC_PP_MODE = 6,      
+            AC_PP_MODE = 6,
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
@@ -84,9 +84,9 @@ class PAC_critical_errors_manager
 
         void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned long param );
+            unsigned int param );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned long param );
+            unsigned int param, bool is_print_msg = true );
 
         void reset_all_error();
 
@@ -111,7 +111,7 @@ class PAC_critical_errors_manager
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class,
-            ALARM_SUBCLASS err_sub_class, int par, bool is_set );
+            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set );
 
 
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
@@ -126,7 +126,7 @@ class PAC_critical_errors_manager
                 u_int param = 0 );
             };
 
-        PAC_critical_errors_manager& 
+        PAC_critical_errors_manager&
             operator=( PAC_critical_errors_manager&& ) = delete;
 
         std::vector< critical_error >  errors;
