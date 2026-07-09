@@ -1468,6 +1468,8 @@ class counter_iolink : public base_counter
 
         float get_temperature() const;
 
+        float get_conductivity() const;
+
         int save_device_ex( char* buff ) const override;
 
         int get_state() const override;
@@ -1500,12 +1502,14 @@ class counter_iolink : public base_counter
             DEFAULT,
             IFM_SM6100,
             IFM_SM4000,
+            IFM_SMFx20,
             };
 
     private:
         ARTICLE n_article = ARTICLE::DEFAULT;
 
         inline static const float TE_GRADIENT{ 0.1f };
+        inline static const float CONDUCTIVITY_GRADIENT{ 1.0f };
 
         float get_flow_gradient() const;
         enum class CONSTANTS
@@ -1532,7 +1536,18 @@ class counter_iolink : public base_counter
             int16_t temperature : 14;   //Current temperature.
             };
 
+        /// @brief Process data for IFM.SMFx20 devices (SMF420, SMF320, ...).
+        struct in_data_smfx20
+            {
+            float totalizer;        ///< Totalizer value (volumetric flow).
+            int16_t flow;           ///< Current flow.
+            int16_t temperature;    ///< Current temperature.
+            uint16_t conductivity;  ///< Current conductivity (µS/cm).
+            uint16_t status;        ///< Device status.
+            };
+
         in_data in_info{ 0, 0, 0, 0, 0 };
+        in_data_smfx20 smfx20_in_info{ 0, 0, 0, 0, 0 };
 
         io_link_device iol_dev;
     };
