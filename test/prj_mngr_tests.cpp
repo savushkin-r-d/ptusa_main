@@ -378,4 +378,8 @@ TEST( project_manager, apply_opc_mode )
 
     EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
+
+    // Возвращаем предыдущие значения.
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = ua_server_active;
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = ua_server_control;
     }
