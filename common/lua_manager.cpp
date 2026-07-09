@@ -197,7 +197,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     if ( !package_path.empty() )
         {
         package_path += "'";
-        luaL_dostring( L, ( cmd + package_path ).c_str() );
+        if ( luaL_dostring( L, ( cmd + package_path ).c_str() ) != 0 )
+            {
+            sprintf( G_LOG->msg,
+                "Error during C++ call - \"lua_manager::init\" - %s",
+                lua_tostring( L, -1 ) );
+            G_LOG->write_log( i_log::P_ERR );
+            lua_pop( L, 1 );
+            return 1;
+            }
         }
 
     //I

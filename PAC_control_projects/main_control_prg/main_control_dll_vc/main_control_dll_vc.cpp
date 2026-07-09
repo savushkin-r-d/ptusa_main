@@ -55,7 +55,7 @@ int lua_init( lua_State* L )
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
     int res = G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
-    for ( int i = 0; i < p_size; i++ )
+    for ( int i = 0; i < argc; i++ )
         {
         delete[] argv[ i ];
         argv[ i ] = nullptr;
@@ -88,7 +88,7 @@ int lua_init( lua_State* L )
 
     G_PROJECT_MANAGER->apply_opc_mode( false );
 
-    lua_pushnumber( L, 0 );
+    lua_pushnumber( L, EXIT_SUCCESS );
     return 1;
     }
 
