@@ -246,10 +246,9 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     "client command)." );
                 params_manager::get_instance()->reset_params_size();
                 params_manager::get_instance()->final_init();
-                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
 
-                proc_OPC( prev_val, new_val, false );
-                break;
+                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                return proc_OPC( prev_val, new_val, false );
             }
 
         return 0;
@@ -390,9 +389,15 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
-
-        auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
-        return proc_OPC( prev_val, static_cast<int>( val ), true );
+        if ( val == 0.0f || val == 1.f )
+            {
+            auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+            return proc_OPC( prev_val, static_cast<int>( val ), true );
+            }
+        else
+            {
+            return 10;
+            }
         }
 
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_CONTROL" ) == 0 )
@@ -431,6 +436,9 @@ int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
             {
             G_LOG->error( "OPC UA server start failed (0x%X). %s",
                 retval, UA_StatusCode_name( retval ) );
+            auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
+                "{}", G_LOG->msg );
+            *r.out = '\0';
 
             G_OPCUA_SERVER.shutdown();
             return 1;
