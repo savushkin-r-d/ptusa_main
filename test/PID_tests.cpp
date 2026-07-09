@@ -193,3 +193,96 @@ TEST( PID, eval )
     EXPECT_GT( res, MIN_VALUE );
     DeltaMilliSecSubHooker::set_default_time();
     }
+
+namespace {
+
+void init_PID_for_output_limit_test( PID& pid, float out_min, float out_max )
+    {
+    pid.init_param( PID::P_k, 1.f );
+    pid.init_param( PID::P_Ti, 6.f );
+    pid.init_param( PID::P_Td, 0.01f );
+    pid.init_param( PID::P_dt, 1000.f );
+    pid.init_param( PID::P_max, 100.f );
+    pid.init_param( PID::P_min, 0.f );
+    pid.init_param( PID::P_acceleration_time, 0.f );
+    pid.init_param( PID::P_is_manual_mode, 0.f );
+    pid.init_param( PID::P_out_min, out_min );
+    pid.init_param( PID::P_out_max, out_max );
+    pid.init_param( PID::P_is_zero_start, 1.f );
+    pid.save_param();
+    }
+
+} // namespace
+
+TEST( PID, anti_windup_on_output_limits )
+    {
+    // Тест проверяет, что при ограничении выхода (P_out_min/P_out_max),
+    // интегратор не накапливает значения ниже/выше, и регулятор мгновенно
+    // реагирует на смену знака ошибки.
+
+    constexpr auto OUT_MAX = 50.f;
+    constexpr auto OUT_MIN = 20.f;
+    constexpr auto STEP_MS = 1001UL;
+
+    PID test_PID( "PID_antiwindup" );
+    init_PID_for_output_limit_test( test_PID, OUT_MIN, OUT_MAX );
+
+    test_PID.set( 100.f );  // Уставка = 100
+    test_PID.on();
+    test_PID.reset();
+
+    // Фиксируем шаг времени один раз для всего теста.
+    DeltaMilliSecSubHooker delta_ms_hooker( STEP_MS );
+
+    // Фаза 1: Нагоняем выход на OUT_MAX при положительной ошибке.
+    for ( auto i = 0; i <= 10; ++i )
+        {
+        auto res = test_PID.eval( 80.f );
+        EXPECT_LE( res, OUT_MAX ) << "Выход должен быть <= OUT_MAX";
+        }
+
+    auto output_at_max = test_PID.eval( 80.f );
+    ASSERT_FLOAT_EQ( OUT_MAX, output_at_max )
+        << "Выход должен достичь OUT_MAX при положительной ошибке";
+
+    // Фаза 2: Смена направления.
+    auto output_after_reversal = test_PID.eval( 110.f );  // Ошибка = -10
+
+    EXPECT_LT( output_after_reversal, OUT_MAX )
+        << "При смене знака ошибки выход должен СРАЗУ упасть ниже OUT_MAX. "
+        << "Если это не срабатывает, интегратор может ещё содержать wind-up.";
+
+    for ( auto i = 0; i < 3; ++i )
+        {
+        auto res = test_PID.eval( 110.f );
+        EXPECT_LE( res, OUT_MAX ) << "Выход должен оставаться <= OUT_MAX";
+        if ( i > 0 )
+            {
+            EXPECT_LE( res, output_after_reversal )
+                << "Выход должен продолжить уменьшаться";
+            output_after_reversal = res;
+            }
+        }
+
+    // Фаза 3: Проверка на нижнем ограничении.
+    init_PID_for_output_limit_test( test_PID, OUT_MIN, OUT_MAX );
+    test_PID.set( 0.f );
+    test_PID.reset();
+    test_PID.on();
+
+    for ( auto i = 0; i <= 10; ++i )
+        {
+        auto res = test_PID.eval( 110.f );
+        EXPECT_GE( res, OUT_MIN ) << "Выход должен быть >= OUT_MIN";
+        }
+
+    auto output_at_min = test_PID.eval( 110.f );
+    ASSERT_FLOAT_EQ( OUT_MIN, output_at_min )
+        << "Выход должен достичь OUT_MIN при отрицательной ошибке";
+
+    test_PID.set( 50.f );
+    auto output_after_reversal_2 = test_PID.eval( 5.f );  // Ошибка = +45
+
+    EXPECT_GT( output_after_reversal_2, OUT_MIN )
+        << "При смене знака ошибки выход должен СРАЗУ вырасти выше OUT_MIN";
+    }
