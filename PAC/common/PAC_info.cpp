@@ -224,32 +224,31 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
         {
-        switch ((COMMANDS)(int)val)
+        switch ( static_cast<COMMANDS>( static_cast<int>( val ) ) )
             {
-            case CLEAR_RESULT_CMD:
+            case COMMANDS::CLEAR_RESULT_CMD:
                 cmd = 0;
                 break;
 
-            case RELOAD_RESTRICTIONS:
+            case COMMANDS::RELOAD_RESTRICTIONS:
                 {
-                if (G_DEBUG)
-                    {
-                    G_LOG->notice("Reload restrictions (remote monitor client command).");
-                    }
+                G_LOG->notice( "Reload restrictions (remote monitor "
+                    "client command)." );
                 const int SCRIPT_N = 7;
                 cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
                     cmd_answer, sizeof( cmd_answer ) );
                 return cmd;
                 }
 
-            case RESET_PARAMS:
-                if ( G_DEBUG )
-                    {
-                    G_LOG->notice( "Resetting params (remote monitor client command)." );
-                    }
+            case COMMANDS::RESET_PARAMS:
+                auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                G_LOG->notice( "Resetting parameters (remote monitor "
+                    "client command)." );
                 params_manager::get_instance()->reset_params_size();
                 params_manager::get_instance()->final_init();
-                break;
+
+                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                return proc_OPC( prev_val, new_val, false );
             }
 
         return 0;
@@ -390,30 +389,14 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
-
-        auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
-        if ( val == 0 && prev_val == 1 )
+        if ( val == 0.0f || val == 1.f )
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-
-            G_OPCUA_SERVER.shutdown();
+            auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+            return proc_OPC( prev_val, static_cast<int>( val ), true );
             }
-        else if ( val == 1 && prev_val == 0 )
+        else
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            auto retval = G_OPCUA_SERVER.init_all_and_start();
-            if ( retval != UA_STATUSCODE_GOOD )
-                {
-                G_LOG->error( "OPC UA server start failed. Returned error code 0x%X!",
-                    retval );
-
-                auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
-                    "{}", G_LOG->msg );
-                *r.out = '\0';
-
-                G_OPCUA_SERVER.shutdown();
-                return 1;
-                }
+            return 10;
             }
         }
 
@@ -430,6 +413,42 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         }
 
     return 0;
+    }
+
+int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
+    {
+    if ( val == prev_val )
+        {
+        return 0;
+        }
+
+    if ( val == 0 && prev_val == 1 )
+        {
+        G_OPCUA_SERVER.shutdown();
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+        return 0;
+        }
+    else if ( val == 1 && prev_val == 0 )
+        {
+        if ( auto retval = G_OPCUA_SERVER.init_all_and_start();
+            retval != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->error( "OPC UA server start failed (0x%X). %s",
+                retval, UA_StatusCode_name( retval ) );
+            auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
+                "{}", G_LOG->msg );
+            *r.out = '\0';
+
+            G_OPCUA_SERVER.shutdown();
+            return 1;
+            }
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+        return 0;
+        }
+
+    return 10;
     }
 
 bool PAC_info::is_emulator() const

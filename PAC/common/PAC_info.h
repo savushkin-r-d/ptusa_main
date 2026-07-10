@@ -82,6 +82,8 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, double val );
 
+        int proc_OPC( int prev_val, int val, bool is_save );
+
         const char* get_name_in_Lua() const
             {
             return "SYSTEM";
@@ -92,7 +94,7 @@ class PAC_info: public i_Lua_save_device
             return up_time_str;
             }
 
-        enum COMMANDS
+        enum class COMMANDS
             {
             CLEAR_RESULT_CMD = 0,
 
