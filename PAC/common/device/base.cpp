@@ -8,7 +8,7 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
-const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DEV_NAMES = 
+const std::array<const char*, device::DEVICE_TYPE::C_DEVICE_TYPE_CNT> device::DEV_NAMES =
     {
     "V",       ///< Клапан.
     "VC",      ///< Управляемый клапан.
@@ -317,17 +317,6 @@ const char* device::get_name_in_Lua() const
     return get_name();
     }
 //-----------------------------------------------------------------------------
-int device::set_cmd( const char* prop, u_int idx, const char* val )
-    {
-    if ( G_DEBUG )
-        {
-        printf( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %s\n",
-            name, prop, idx, val );
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 int device::set_cmd( const char* prop, u_int idx, double val )
     {
     G_LOG->debug( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f",
@@ -387,7 +376,7 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
 
     article = new char[ 2 ];
     article[ 0 ] = ' ';
-    article[ 1 ] = '\0';    
+    article[ 1 ] = '\0';
     }
 //-----------------------------------------------------------------------------
 const char* device::get_type_str() const
@@ -546,7 +535,7 @@ void digital_io_device::direct_set_state( int new_state )
         default:
             if ( G_DEBUG )
                 {
-                G_LOG->warning( 
+                G_LOG->warning(
                     "%s\t digital_io_device::direct_set_state() - new_state = %d",
                     get_name(), new_state );
                 }
@@ -707,7 +696,7 @@ void virtual_counter::set( u_int new_value, u_int new_abs_value, float flow )
 //-----------------------------------------------------------------------------
 void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     float read_flow = 0 )
-    {    
+    {
     if ( !is_first_read )
         {
         if ( read_value > last_read_value )
@@ -725,7 +714,7 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     else
         {
         is_first_read = false;
-        }    
+        }
     last_read_value = read_value;
     abs_last_read_value = abs_read_value;
     flow_value = read_flow;
@@ -932,7 +921,7 @@ void signal_column::direct_on()
     turn_off_green();
     turn_off_blue();
 
-    turn_off_siren();    
+    turn_off_siren();
 
     turn_on_green();
     }

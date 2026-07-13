@@ -536,6 +536,12 @@ class io_manager
 #ifdef PTUSA_TEST
         void clear_nodes();
 #endif
+
+        // Explicitly delete the copy constructors.
+        io_manager( io_manager const& ) = delete;
+        io_manager( io_manager&& ) = delete;
+        io_manager& operator=( io_manager const& ) = delete;
+        io_manager& operator=( io_manager&& ) = delete;
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

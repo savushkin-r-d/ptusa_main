@@ -1539,14 +1539,6 @@ TEST( device, set_property )
     T1.set_property( "site", nullptr );
     }
 
-TEST( device, set_cmd )
-    {
-    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
-        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
-    auto res = dev1.set_cmd( "PROPERTY", 1, "value" );
-    EXPECT_EQ( res, 0 );
-    }
-
 
 TEST( analog_io_device, set_cmd )
     {
@@ -7080,7 +7072,10 @@ TEST( node_dev, basic_functionality )
     EXPECT_STREQ( node->get_ip(), "" );
 
     // Проверка при передаче узла с некорректным IP-адресом.
-    strcpy( nd->ip_address, "34" );
+    auto r = fmt::format_to_n( nd->ip_address, sizeof( nd->ip_address ) - 1,
+        "34" );
+    *r.out = 0;
+
     node->set_io_node( nd );
     EXPECT_STREQ( node->get_ip(), "" );
 
@@ -7090,7 +7085,9 @@ TEST( node_dev, basic_functionality )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 
-    strcpy( nd->ip_address, "127.0.0.10" );
+    r = fmt::format_to_n( nd->ip_address, sizeof( nd->ip_address ) - 1,
+        "127.0.0.10" );
+    *r.out = 0;
     node->set_io_node( nd );
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
