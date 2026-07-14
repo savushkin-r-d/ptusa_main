@@ -40,11 +40,10 @@ class node_dev : public device
 		/// @return - IP-адрес узла в виде строки.
 		const char* get_ip() const;
 
-        static int run_cmd_exit_code( const char* cmd
-#ifdef PTUSA_TEST
-            , int expected = 0
-#endif
-        );
+        static int run_cmd_exit_code( const char* cmd,
+            int expected = 0 );
+
+        static bool check_sudo_available();
 
 #ifndef PTUSA_TEST
 	private:

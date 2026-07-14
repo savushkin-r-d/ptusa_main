@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <time.h>
 
+#include <fstream>
+#include <iostream>
+
 #ifdef LINUX_OS
 #include <sys/types.h>
 #include <ifaddrs.h>
@@ -7023,6 +7026,11 @@ class node_dev_set_cmd_test : public ::testing::Test
             return "127.0.0.1";
             }
 
+        static std::string get_bad_A1_ipv4()
+            {
+            return "127.0.0.344";
+            }
+
     protected:
         void SetUp() override
             {
@@ -7200,6 +7208,74 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 
     subhook_remove( get_local_ipv4_hook );
     subhook_free( get_local_ipv4_hook );
+
+#ifdef LINUX_OS
+    // В Linux проброс портов должен работать, так как команда для проброса
+    // портов есть.
+    // Проверяем на права.
+    auto res = node_dev::check_sudo_available();
+    if ( !res )
+        {
+        // Получаем ошибку: `sudo is not available without a password`
+        // и завершаем тест.
+        // Пишем соответствующее сообщение в тестовом отчете.
+        GTEST_SKIP() << "sudo is not available without a password";
+
+        return;
+        }
+    else
+        {
+        GTEST_LOG_( INFO ) <<
+            "Выполняется реальный проброс портов через sudo /usr/sbin/iptables";
+        // Проверяем, что команды выполняется успешно.
+        EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+        EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
+        }
+#endif // LINUX_OS
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_IP )
+    {
+#ifdef WIN_OS
+    GTEST_SKIP() << "Linux only test";
+#endif
+
+    node_dev dev( "A100" );
+
+    auto get_local_bad_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_bad_A1_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_bad_ipv4_hook );
+
+    dev.set_io_node( node );
+
+#ifdef LINUX_OS
+    // В Linux проброс портов должен работать, так как команда для проброса
+    // портов есть.
+    // Проверяем на права.
+    auto res = node_dev::check_sudo_available();
+    if ( !res )
+        {
+        // Получаем ошибку: `sudo is not available without a password`
+        // и завершаем тест.
+        // Пишем соответствующее сообщение в тестовом отчете.
+        GTEST_SKIP() << "sudo is not available without a password";
+
+        return;
+        }
+    else
+        {
+        GTEST_LOG_( INFO ) <<
+            "Выполняется ошибочный проброс портов через sudo /usr/sbin/iptables";
+
+        // Проверяем, что команды выполняется неуспешно.
+        EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+        }
+
+    subhook_remove( get_local_bad_ipv4_hook );
+    subhook_free( get_local_bad_ipv4_hook );
+#endif // LINUX_OS
     }
 
 TEST_F( node_dev_set_cmd_test, set_cmd_startup )
@@ -7217,6 +7293,37 @@ TEST_F( node_dev_set_cmd_test, set_cmd_to_device )
     // Команды, которые не обрабатываются устройством, передаются дальше.
     // Команды 'TEST' нет, должна вернуться ошибка.
     EXPECT_EQ( 1, dev.set_cmd( "TEST", 0, 1 ) );
+    }
+
+TEST( node_dev, run_cmd_exit_code )
+    {
+    node_dev dev( "A100" );
+#ifdef WIN_OS
+    SetConsoleOutputCP( CP_UTF8 ); // 65001
+    SetConsoleCP( CP_UTF8 );
+    setlocale( LC_ALL, ".UTF-8" );
+#else
+    setlocale( LC_ALL, "en_US.UTF-8" );
+#endif
+
+    testing::internal::CaptureStdout();
+    auto res = dev.run_cmd_exit_code( "lls" );
+    auto output = testing::internal::GetCapturedStdout();
+
+    std::tm tm = get_time();
+    std::stringstream tmp;
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+    // Verify output contains the expected debug message pattern with time.
+    auto reference_out =
+        tmp.str() + ANSI_COLOR_RED + "ERROR  (3) -> "
+#ifdef WIN_OS
+        "'lls' is not recognized as an internal or external command,\n"
+        "operable program or batch file.\n\n";
+#else
+        "sh: 1: lls: not found\n\n" + ANSI_COLOR_RESET;
+#endif
+    EXPECT_EQ( output, reference_out );
+    EXPECT_NE( 0, res );
     }
 
 

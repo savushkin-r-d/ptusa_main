@@ -7,6 +7,10 @@
 #include <cstdlib>
 #include <string_view>
 #include <utility>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <string>
 
 #ifdef LINUX_OS
 #include <arpa/inet.h>
@@ -151,58 +155,78 @@ void node_dev::evaluate_io()
         }
     }
 //-----------------------------------------------------------------------------
-int node_dev::run_cmd_exit_code( const char* cmd
-#ifdef PTUSA_TEST
-    , [[maybe_unused]] int expected
-#endif
-)
+int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     {
-    const int rc = std::system( cmd );
-    if ( rc == -1 ) return -1;
+    std::string cmd_debug = cmd;
+    cmd_debug += " > output.txt 2>&1 ";
+
+    int rc = std::system( cmd_debug.c_str() );
 #ifdef LINUX_OS
-    return WIFEXITED( rc ) ? WEXITSTATUS( rc ) : -1;
-#else
+    rc = WIFEXITED( rc ) ? WEXITSTATUS( rc ) : -1;
+#endif
+
+    if ( rc != 0 && rc != expected )
+        {
+        std::filesystem::path file_path = "output.txt";
+        if ( !std::filesystem::exists( file_path ) )
+            {
+            G_LOG->error(
+                "Результат выполнения команды (файл output.txt) не найден." );
+            }
+        else
+            {
+            std::ifstream file( file_path );
+            std::string content( ( std::istreambuf_iterator<char>( file ) ),
+                std::istreambuf_iterator<char>() );
+            G_LOG->error( content.c_str() );
+            }
+        }
+
     return rc;
-#endif
     }
 
-static bool ensure_rule( const char* check_cmd, const char* append_cmd )
+/// Checks if sudo is available without a password prompt.
+bool node_dev::check_sudo_available()
     {
-    if ( const int check_rc = node_dev::run_cmd_exit_code( check_cmd );
-        check_rc == 0 )
-        {
-        return true;
-        }
-    else if ( check_rc != 1 )
-        {
-        return false;
-        }
-
-    return node_dev::run_cmd_exit_code( append_cmd ) == 0;
+    return node_dev::run_cmd_exit_code( "sudo -n /usr/sbin/iptables -h" ) == 0;
     }
 
-static bool delete_all_matches( const char* check_cmd, const char* delete_cmd )
+namespace
     {
-    for ( ;; )
+    bool ensure_rule( const char* check_cmd, const char* append_cmd )
         {
-        const int check_rc = node_dev::run_cmd_exit_code( check_cmd
-#ifdef PTUSA_TEST
-            , 1
-#endif
-        );
-        if ( check_rc == 1 )
+        if ( const int check_rc = node_dev::run_cmd_exit_code( check_cmd, 1 );
+            check_rc == 0 )
             {
             return true;
             }
-
-        if ( check_rc != 0 )
+        else if ( check_rc != 1 )
             {
             return false;
             }
 
-        if ( node_dev::run_cmd_exit_code( delete_cmd ) != 0 )
+        return node_dev::run_cmd_exit_code( append_cmd ) == 0;
+        }
+
+    bool delete_all_matches( const char* check_cmd, const char* delete_cmd )
+        {
+        for ( ;; )
             {
-            return false;
+            const int check_rc = node_dev::run_cmd_exit_code( check_cmd, 1 );
+            if ( check_rc == 1 )
+                {
+                return true;
+                }
+
+            if ( check_rc != 0 )
+                {
+                return false;
+                }
+
+            if ( node_dev::run_cmd_exit_code( delete_cmd ) != 0 )
+                {
+                return false;
+                }
             }
         }
     }
@@ -218,11 +242,28 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        if ( auto res = ensure_rule( dnat_check.c_str(), dnat.c_str() ) &&
-            ensure_rule( forward_in_check.c_str(), forward_in.c_str() ) &&
-            ensure_rule( masq_check.c_str(), masq.c_str() ); !res )
+        if ( !check_sudo_available() )
+            {
+            G_LOG->error( "sudo is not available without a password." );
+            return 1;
+            }
+
+        if ( auto res = ensure_rule( dnat_check.c_str(), dnat.c_str() ); !res )
+            {
+            G_LOG->error( "Failed to enable web port checking for node '%s'.",
+                get_name() );
+            return 1;
+            }
+        if ( auto res =
+            ensure_rule( forward_in_check.c_str(), forward_in.c_str() ); !res )
             {
             G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
+                get_name() );
+            return 1;
+            }
+        if ( auto res = ensure_rule( masq_check.c_str(), masq.c_str() ); !res )
+            {
+            G_LOG->error( "Failed to enable web port masquerading for node '%s'.",
                 get_name() );
             return 1;
             }
