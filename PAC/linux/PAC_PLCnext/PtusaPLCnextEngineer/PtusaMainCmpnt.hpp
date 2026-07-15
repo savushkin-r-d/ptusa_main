@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Arp/System/Core/Arp.h"
 #include "Arp/System/Acf/ComponentBase.hpp"
-#include "Arp/System/Acf/IApplication.hpp"
 #include "Arp/Plc/Commons/Esm/ProgramComponentBase.hpp"
 #include "PtusaMainCmpntProgramProvider.hpp"
 #include "PtusaPLCnextEngineerLibrary.hpp"
@@ -11,6 +10,17 @@
 #include "Arp/System/Acf/IControllerComponent.hpp"
 
 #include "log.h"
+
+namespace Arp
+    {
+    namespace System
+        {
+        namespace Acf
+            {
+            class IApplication;
+            }
+        }
+    }
 
 namespace PtusaPLCnextEngineer
     {

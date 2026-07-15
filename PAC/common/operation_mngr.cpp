@@ -912,7 +912,7 @@ int required_DI_action::check( char* reason, unsigned int max_len ) const
         {
         if ( !d->is_active() )
             {
-            auto f_str = "нет сигнала \'{:.25} ({:.50})\'";
+            constexpr const char* f_str = "нет сигнала \'{:.25} ({:.50})\'";
             auto out = fmt::format_to_n( reason, max_len - 1, f_str,
                 d->get_name(), d->get_description() );
             *out.out = '\0';
@@ -1160,7 +1160,8 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
             if ( !is_di_device_type( device_type ) &&
                 device_type != device::DT_DO )
                 {
-                auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                constexpr const char* format_str =
+                    R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                     R"(не является допустимым сигналом (DI, SB, GS, LS, FS, DO))";
                 auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                     device_ptr->get_name(), device_ptr->get_description() );
@@ -1179,7 +1180,8 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
             else if ( is_di_type && found_do )
                 {
                 // Найден DI сигнал после DO сигнала - ошибка порядка
-                auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+                constexpr const char* format_str =
+                    R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                     R"(расположено неправильно: DI сигналы должны быть описаны перед DO сигналами)";
                 auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                     device_ptr->get_name(), device_ptr->get_description() );
@@ -1406,7 +1408,8 @@ int AI_AO_action::check( char* reason, unsigned int max_len ) const
             do_device->get_type() != device::DT_QT &&
             do_device->get_type() != device::DT_TE )
             {
-            auto format_str = R"(в поле '{}' устройство '{:.25} ({:.50})' )"
+            constexpr const char* format_str =
+                R"(в поле '{}' устройство '{:.25} ({:.50})' )"
                 R"(не является входным сигналом (АI, PT, LT, FQT, QT, TE))";
             auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
                 do_device->get_name(), do_device->get_description() );

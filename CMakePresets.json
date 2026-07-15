@@ -107,6 +107,18 @@
       }
     },
     {
+      "name": "build-windows-AXCF2152-2026-LTS-Release",
+      "displayName": "Windows AXCF2152 2026 LTS Release",
+      "description": "Using Windows OS",
+      "inherits": "windows-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_VERSION": "2026.0.2 LTS (26.0.2.93)",
+        "ARP_DEVICE_SHORT_VERSION": "2026_0",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-w64-mingw32"
+      }
+    },
+    {
       "name": "build-windows-AXCF2152-2022-LTS-Release",
       "displayName": "Windows AXCF2152 2022 LTS Release",
       "description": "Using Windows OS",
@@ -191,6 +203,17 @@
         "ARP_DEVICE": "AXCF2152",
         "ARP_DEVICE_SHORT_VERSION": "2024_0",
         "ARP_DEVICE_VERSION": "2024.0.0 LTS (24.0.0.102)"
+      }
+    },
+    {
+      "name": "build-linux-AXCF2152-2026-LTS-Release",
+      "displayName": "Linux AXCF2152 2026.0 LTS Release",
+      "description": "Using Linux OS",
+      "inherits": "linux-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF2152",
+        "ARP_DEVICE_SHORT_VERSION": "2026_0",
+        "ARP_DEVICE_VERSION": "2026.0.2 LTS (26.0.2.93)"
       }
     },
     {
@@ -299,6 +322,11 @@
       "configurePreset": "build-windows-AXCF2152-2024-LTS-Release"
     },
     {
+      "name": "build-windows-AXCF2152-2026-LTS-Release",
+      "displayName": "AXCF2152 2026 LTS",
+      "configurePreset": "build-windows-AXCF2152-2026-LTS-Release"
+    },
+    {
       "name": "build-windows-AXCF2152-2022-LTS-Release",
       "displayName": "AXCF2152 2022 LTS",
       "configurePreset": "build-windows-AXCF2152-2022-LTS-Release"
@@ -326,6 +354,11 @@
       "name": "build-linux-AXCF2152-2024-LTS-Release",
       "displayName": "AXCF2152 2024 LTS [Linux]",
       "configurePreset": "build-linux-AXCF2152-2024-LTS-Release"
+    },
+    {
+      "name": "build-linux-AXCF2152-2026-LTS-Release",
+      "displayName": "AXCF2152 2026 LTS [Linux]",
+      "configurePreset": "build-linux-AXCF2152-2026-LTS-Release"
     },
 
 

@@ -167,8 +167,9 @@ int PAC_info::save_device( char* buff ) const
     for ( unsigned int i = 0; i < nc; i++ )
         {
         auto wn = io_manager::get_instance()->get_node( i );
+        const char* active_str = wn->is_active ? "1, " : "0, ";
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-            wn->is_active ? "1, " : "0, " ).size;
+            "{}", active_str ).size;
         }
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 
