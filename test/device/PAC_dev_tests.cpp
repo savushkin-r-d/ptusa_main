@@ -7293,14 +7293,14 @@ TEST( node_dev, run_cmd_exit_code )
     setlocale( LC_ALL, "en_US.UTF-8" );
 #endif
 
-    testing::internal::CaptureStdout();
-    auto res = dev.run_cmd_exit_code( "lls" );
-    auto output = testing::internal::GetCapturedStdout();
-
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
         reinterpret_cast<void*>( &get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
+
+    testing::internal::CaptureStdout();
+    auto res = dev.run_cmd_exit_code( "lls" );
+    auto output = testing::internal::GetCapturedStdout();
 
     std::tm tm = get_time();
     std::stringstream tmp;
