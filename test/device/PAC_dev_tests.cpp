@@ -7034,19 +7034,17 @@ class node_dev_set_cmd_test : public ::testing::Test
     protected:
         void SetUp() override
             {
-            mngr.init( 1 );
-            prev_mngr = io_manager::replace_instance( &mngr );
-            node = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-                1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 );
+            node = new io_manager::io_node(
+                io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1",
+                "A100", 1, 1, 1, 32, 1, 1 );
             }
 
         void TearDown() override
             {
-            io_manager::replace_instance( prev_mngr );
+            delete node;
+            node = nullptr;
             }
 
-        uni_io_manager mngr;
-        io_manager* prev_mngr{};
         io_manager::io_node* node{};
     };
 
