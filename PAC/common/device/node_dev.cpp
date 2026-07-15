@@ -82,19 +82,20 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
-    ip_controller = get_A1_ipv4();
-    if ( ip_controller.empty() )
+    controller_ip = get_A1_ipv4();
+    if ( controller_ip.empty() )
         {
         G_LOG->warning( "Node '%s' - controller IPv4 address was not detected.",
             get_name() );
         return;
         }
     if ( struct in_addr ipv4_addr;
-        inet_pton( AF_INET, ip_controller.c_str(), &ipv4_addr ) != 1 )
+        inet_pton( AF_INET, controller_ip.c_str(), &ipv4_addr ) != 1 )
         {
         G_LOG->warning(
             "Node '%s' - invalid controller IPv4 address ('%s').",
-            get_name(), ip_controller.c_str() );
+            get_name(), controller_ip.c_str() );
+        controller_ip = "";
         return;
         }
 
@@ -104,7 +105,7 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
     port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;
 
     const std::string IPTABLES = "sudo -n /usr/sbin/iptables";
-    dnat = IPTABLES + " -t nat -A PREROUTING -p tcp -d " + ip_controller +
+    dnat = IPTABLES + " -t nat -A PREROUTING -p tcp -d " + controller_ip +
         " --dport " + std::to_string( port_controller_web ) +
         " -j DNAT --to-destination " + node->ip_address + ":" + PORT_NODE_WEB;
 
@@ -178,7 +179,7 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
             std::ifstream file( file_path );
             std::string content( ( std::istreambuf_iterator<char>( file ) ),
                 std::istreambuf_iterator<char>() );
-            G_LOG->error( content.c_str() );
+            G_LOG->error( "%s", content.c_str() );
             }
         }
 
@@ -357,4 +358,8 @@ const char* node_dev::get_ip() const
     return "";
     }
 //-----------------------------------------------------------------------------
-
+const char* node_dev::get_controller_ip() const
+    {
+    return controller_ip.c_str();
+    }
+//-----------------------------------------------------------------------------

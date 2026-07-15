@@ -7208,8 +7208,26 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
 
     subhook_remove( get_local_ipv4_hook );
     subhook_free( get_local_ipv4_hook );
+    }
 
-#ifdef LINUX_OS
+TEST_F( node_dev_set_cmd_test, set_cmd_web_sudo_available )
+    {
+#ifdef WIN_OS
+    GTEST_SKIP() << "Linux only test";
+#else
+    node_dev dev( "A100" );
+
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
+    dev.set_io_node( node );
+
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
+
     // В Linux проброс портов должен работать, так как команда для проброса
     // портов есть.
     // Проверяем на права.
@@ -7231,10 +7249,10 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
         EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
         EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
         }
-#endif // LINUX_OS
+#endif // WIN_OS
     }
 
-TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_IP )
+TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
     {
 #ifdef WIN_OS
     GTEST_SKIP() << "Linux only test";
@@ -7249,33 +7267,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_IP )
     subhook_install( get_local_bad_ipv4_hook );
 
     dev.set_io_node( node );
-
-#ifdef LINUX_OS
-    // В Linux проброс портов должен работать, так как команда для проброса
-    // портов есть.
-    // Проверяем на права.
-    auto res = node_dev::check_sudo_available();
-    if ( !res )
-        {
-        // Получаем ошибку: `sudo is not available without a password`
-        // и завершаем тест.
-        // Пишем соответствующее сообщение в тестовом отчете.
-        GTEST_SKIP() << "sudo is not available without a password";
-
-        return;
-        }
-    else
-        {
-        GTEST_LOG_( INFO ) <<
-            "Выполняется ошибочный проброс портов через sudo /usr/sbin/iptables";
-
-        // Проверяем, что команды выполняется неуспешно.
-        EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
-        }
-
-    subhook_remove( get_local_bad_ipv4_hook );
-    subhook_free( get_local_bad_ipv4_hook );
-#endif // LINUX_OS
+    EXPECT_STREQ( dev.get_controller_ip(), "" );
     }
 
 TEST_F( node_dev_set_cmd_test, set_cmd_startup )

@@ -40,6 +40,11 @@ class node_dev : public device
 		/// @return - IP-адрес узла в виде строки.
 		const char* get_ip() const;
 
+        /// @brief Получение IP-адреса контроллера (узел `А1`).
+        ///
+        /// @return - IP-адрес узла в виде строки.
+        const char* get_controller_ip() const;
+
         static int run_cmd_exit_code( const char* cmd,
             int expected = 0 );
 
@@ -52,7 +57,7 @@ class node_dev : public device
         int process_web_cmd( int new_web_value );
 
         static std::string get_A1_ipv4();
-        std::string ip_controller;
+        std::string controller_ip;
 
         int web_value{};      ///< Состояние проброса порта 80.
         int startup_value{};  ///< Состояние проброса порта 1962.
