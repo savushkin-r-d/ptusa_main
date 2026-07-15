@@ -82,6 +82,10 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         return;
         }
 
+    // Bind the node once the node IPv4 is validated. Controller IPv4 detection
+    // is needed only for WEB forwarding rules.
+    node = io_node;
+
     controller_ip = get_A1_ipv4();
     if ( controller_ip.empty() )
         {
@@ -98,8 +102,6 @@ void node_dev::set_io_node( io_manager::io_node* io_node )
         controller_ip = "";
         return;
         }
-
-    node = io_node;
 
 #ifdef LINUX_OS
     port_controller_web = EXTERNAL_WEB_PORT_BASE + node->number;

@@ -7050,14 +7050,9 @@ class node_dev_set_cmd_test : public ::testing::Test
 
 TEST( node_dev, basic_functionality )
     {
-    // Инициализация io_manager с одним узлом.
-    uni_io_manager mngr;
-    mngr.init( 2 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+    io_manager::io_node nd( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.10", "A100", 0, 0, 0, 0, 0, 0 );
-
-    auto nd_2 = mngr.add_node( 1, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+    io_manager::io_node nd_2( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
         1, "127.0.0.11", "A200", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
@@ -7078,11 +7073,11 @@ TEST( node_dev, basic_functionality )
     EXPECT_STREQ( node->get_ip(), "" );
 
     // Проверка при передаче узла с некорректным IP-адресом.
-    auto r = fmt::format_to_n( nd->ip_address, sizeof( nd->ip_address ) - 1,
+    auto r = fmt::format_to_n( nd.ip_address, sizeof( nd.ip_address ) - 1,
         "34" );
     *r.out = 0;
 
-    node->set_io_node( nd );
+    node->set_io_node( &nd );
     EXPECT_STREQ( node->get_ip(), "" );
 
     auto get_local_ipv4_hook = subhook_new(
@@ -7091,15 +7086,15 @@ TEST( node_dev, basic_functionality )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 
-    r = fmt::format_to_n( nd->ip_address, sizeof( nd->ip_address ) - 1,
+    r = fmt::format_to_n( nd.ip_address, sizeof( nd.ip_address ) - 1,
         "127.0.0.10" );
     *r.out = 0;
-    node->set_io_node( nd );
+    node->set_io_node( &nd );
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
 
     // Проверка при повторной привязке узла.
-    node->set_io_node( nd_2 );
+    node->set_io_node( &nd_2 );
     EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
 
     G_PAC_INFO()->emulation_off();
@@ -7117,7 +7112,6 @@ TEST( node_dev, basic_functionality )
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
-    io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
 
     subhook_remove( get_local_ipv4_hook );
@@ -7266,6 +7260,9 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
 
     dev.set_io_node( node );
     EXPECT_STREQ( dev.get_controller_ip(), "" );
+
+    subhook_remove( get_local_bad_ipv4_hook );
+    subhook_free( get_local_bad_ipv4_hook );
     }
 
 TEST_F( node_dev_set_cmd_test, set_cmd_startup )
@@ -7300,6 +7297,11 @@ TEST( node_dev, run_cmd_exit_code )
     auto res = dev.run_cmd_exit_code( "lls" );
     auto output = testing::internal::GetCapturedStdout();
 
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
     std::tm tm = get_time();
     std::stringstream tmp;
     tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
@@ -7314,6 +7316,9 @@ TEST( node_dev, run_cmd_exit_code )
 #endif
     EXPECT_EQ( output, reference_out );
     EXPECT_NE( 0, res );
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     }
 
 
