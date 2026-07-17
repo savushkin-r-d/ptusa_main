@@ -7293,32 +7293,20 @@ TEST( node_dev, run_cmd_exit_code )
     setlocale( LC_ALL, "en_US.UTF-8" );
 #endif
 
-    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
-        reinterpret_cast<void*>( &get_fixed_time ),
-        SUBHOOK_64BIT_OFFSET );
-    subhook_install( get_time_hook );
-
     testing::internal::CaptureStdout();
     auto res = dev.run_cmd_exit_code( "lls" );
     auto output = testing::internal::GetCapturedStdout();
-
-    std::tm tm = get_time();
-    std::stringstream tmp;
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
     // Verify output contains the expected debug message pattern with time.
     auto reference_out =
-        tmp.str() + ANSI_COLOR_RED + "ERROR  (3) -> "
 #ifdef WIN_OS
+        "command result ('lls'): "
         "'lls' is not recognized as an internal or external command,\n"
-        "operable program or batch file.\n\n";
+        "operable program or batch file.";
 #else
-        "sh: 1: lls: not found\n\n" + ANSI_COLOR_RESET;
+        "sh: 1: lls: not found\n\n";
 #endif
-    EXPECT_EQ( output, reference_out );
+    EXPECT_STREQ( node_dev::get_cmd_output(), reference_out );
     EXPECT_NE( 0, res );
-
-    subhook_remove( get_time_hook );
-    subhook_free( get_time_hook );
     }
 
 

@@ -160,8 +160,12 @@ void node_dev::evaluate_io()
 //-----------------------------------------------------------------------------
 int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     {
+    res_msg[ 0 ] = '\0';
+
     std::string cmd_debug = cmd;
     cmd_debug += " > output.txt 2>&1 ";
+
+    G_LOG->debug( "node_dev::run_cmd - '%s'", cmd_debug.c_str() );
 
     int rc = std::system( cmd_debug.c_str() );
 #ifdef LINUX_OS
@@ -173,21 +177,24 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
         std::filesystem::path file_path = "output.txt";
         if ( !std::filesystem::exists( file_path ) )
             {
-            G_LOG->error(
-                "Результат выполнения команды (файл output.txt) не найден." );
+            auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
+                "command result ('{}') not found", cmd );
+            *( res.out - 1 ) = '\0'; // Удаляем последний символ новой строки.
             }
         else
             {
             std::ifstream file( file_path );
             std::string content( ( std::istreambuf_iterator<char>( file ) ),
                 std::istreambuf_iterator<char>() );
-            G_LOG->error( "%s", content.c_str() );
+            auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
+                "command result ('{}'): {}", cmd, content );
+            *( res.out - 1 ) = '\0'; // Удаляем последний символ новой строки.
             }
         }
 
     return rc;
     }
-
+//-----------------------------------------------------------------------------
 /// Checks if sudo is available without a password prompt.
 bool node_dev::check_sudo_available()
     {
@@ -234,44 +241,98 @@ namespace
         }
     }
 //-----------------------------------------------------------------------------
+bool node_dev::check_ip_forward()
+    {
+    res_msg[ 0 ] = '\0';
+
+#ifdef LINUX_OS
+    std::ifstream f( "/proc/sys/net/ipv4/ip_forward" );
+    if ( !f )
+        {
+        auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
+            "cannot open '/proc/sys/net/ipv4/ip_forward'" );
+        *res.out = '\0';
+        return false;
+        }
+
+    auto ip_forward = 0;
+    f >> ip_forward;
+    if ( !f )
+        {
+        auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
+            "cannot read value from '/proc/sys/net/ipv4/ip_forward'" );
+        *res.out = '\0';
+        return false;
+        }
+
+    G_LOG->debug( "node_dev::check_ip_forward - net.ipv4.ip_forward=%d",
+        ip_forward );
+
+    if ( ip_forward != 1 )
+        {
+        auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
+            "IP forwarding is disabled ('net.ipv4.ip_forward=0')" );
+        *res.out = '\0';
+        return false;
+        }
+#endif // LINUX_OS
+
+    return true;
+    }
+//-----------------------------------------------------------------------------
+const char* node_dev::get_cmd_output()
+    {
+    return res_msg;
+    }
+//-----------------------------------------------------------------------------
 int node_dev::process_web_cmd( int new_web_value )
     {
+    if ( dnat_delete.empty() || forward_in_delete.empty() ||
+        masq_delete.empty() )
+        {
+        G_LOG->warning(
+            "'%s': no iptables rules defined for web port forwarding.",
+            get_name() );
+        return 1;
+        }
+
+    if ( !check_sudo_available() )
+        {
+        G_LOG->error( "'%s': web port command failed - %s.",
+            get_name(), node_dev::get_cmd_output() );
+        return 1;
+        }
+
+    if ( !check_ip_forward() )
+        {
+        G_LOG->error( "'%s': web port command failed - %s.",
+            get_name(), node_dev::get_cmd_output() );
+        return 1;
+        }
+
     if ( new_web_value != 0 && web_value == 0 )
         {
-        if ( dnat.empty() || forward_in.empty() || masq.empty() )
-            {
-            G_LOG->warning(
-                "No iptables rules defined for web port forwarding." );
-            return 1;
-            }
-
-        if ( !check_sudo_available() )
-            {
-            G_LOG->error( "sudo is not available without a password." );
-            return 1;
-            }
-
         if ( auto res = ensure_rule( dnat_check.c_str(), dnat.c_str() ); !res )
             {
-            G_LOG->error( "Failed to enable web port checking for node '%s'.",
-                get_name() );
+            G_LOG->error( "'%s': failed to enable web port checking - %s.",
+                get_name(), node_dev::get_cmd_output() );
             return 1;
             }
         if ( auto res =
             ensure_rule( forward_in_check.c_str(), forward_in.c_str() ); !res )
             {
-            G_LOG->error( "Failed to enable web port forwarding for node '%s'.",
-                get_name() );
+            G_LOG->error( "'%s': failed to enable web port forwarding - %s.",
+                get_name(), node_dev::get_cmd_output() );
             return 1;
             }
         if ( auto res = ensure_rule( masq_check.c_str(), masq.c_str() ); !res )
             {
-            G_LOG->error( "Failed to enable web port masquerading for node '%s'.",
-                get_name() );
+            G_LOG->error( "'%s': failed to enable web port masquerading - %s.",
+                get_name(), node_dev::get_cmd_output() );
             return 1;
             }
 
-        G_LOG->info( "Web port forwarding enabled for node '%s'.",
+        G_LOG->info( "'%s': %s", get_name(), "web port forwarding enabled.",
             get_name() );
         web_value = 1;
         return 0;
@@ -279,27 +340,29 @@ int node_dev::process_web_cmd( int new_web_value )
 
     else if ( new_web_value == 0 && web_value == 1 )
         {
-        if ( dnat_delete.empty() || forward_in_delete.empty() ||
-            masq_delete.empty() )
-            {
-            G_LOG->warning(
-                "No iptables rules defined for web port forwarding." );
-            return 1;
-            }
-
-        if ( auto res =
-            delete_all_matches( dnat_check.c_str(), dnat_delete.c_str() ) &&
-            delete_all_matches( forward_in_check.c_str(), forward_in_delete.c_str() ) &&
-            delete_all_matches( masq_check.c_str(), masq_delete.c_str() );
+        if ( auto res = delete_all_matches( dnat_check.c_str(), dnat_delete.c_str() );
             !res )
             {
-            G_LOG->error( "Failed to disable web port forwarding for node '%s'.",
-                get_name() );
+            G_LOG->error( "'%s': failed to disable web port forwarding (dnat) - %s.",
+                get_name(), node_dev::get_cmd_output() );
+            return 1;
+            }
+        if ( auto res = delete_all_matches( forward_in_check.c_str(), forward_in_delete.c_str() );
+            !res )
+            {
+            G_LOG->error( "'%s': failed to disable web port forwarding (forward_in) - %s.",
+                get_name(), node_dev::get_cmd_output() );
+            return 1;
+            }
+        if ( auto res = delete_all_matches( masq_check.c_str(), masq_delete.c_str() );
+            !res )
+            {
+            G_LOG->error( "'%s': failed to disable web port forwarding (masq) - %s.",
+                get_name(), node_dev::get_cmd_output() );
             return 1;
             }
 
-        G_LOG->info( "Web port forwarding disabled for node '%s'.",
-            get_name() );
+        G_LOG->info( "'%s': web port forwarding disabled.", get_name() );
         web_value = 0;
         return 0;
         }

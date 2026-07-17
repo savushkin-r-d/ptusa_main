@@ -50,6 +50,10 @@ class node_dev : public device
 
         static bool check_sudo_available();
 
+        static bool check_ip_forward();
+
+        static const char* get_cmd_output();
+
 #ifndef PTUSA_TEST
 	private:
 #endif
@@ -80,4 +84,6 @@ class node_dev : public device
         std::string dnat_check{};
         std::string forward_in_check{};
         std::string masq_check{};
+
+        inline static char res_msg[ i_log::C_BUFF_SIZE ]{};
 	};
