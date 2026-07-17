@@ -51,15 +51,13 @@ set(BUILD_SHARED_LIBS ON)
 
 add_subdirectory(deps/lua EXCLUDE_FROM_ALL)
 
-# Use the standard Windows Lua 5.1 DLL name (lua51.dll) so that ptusa_main.dll
-# is compatible with external Lua 5.1 runtimes (e.g., EPLANner) that use
-# lua51.dll instead of lua.dll.
+# Use the standard Windows Lua 5.5 DLL name (lua55.dll).
 if(WIN32)
-    set_target_properties(liblua PROPERTIES OUTPUT_NAME lua51)
+    set_target_properties(liblua PROPERTIES OUTPUT_NAME lua55)
 endif()
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src;${CMAKE_BINARY_DIR}/deps/lua/lua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua)
 
 add_subdirectory(deps/toluapp EXCLUDE_FROM_ALL)
 
@@ -303,10 +301,10 @@ endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/toluapp/toluapp/include>
 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/lua/lua>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/lua/lua>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/zlib/zlib>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/deps/zlib/zlib>

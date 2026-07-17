@@ -86,10 +86,19 @@ int mock_lua_type(lua_State* L, int idx)
 void mock_lua_getfield(lua_State *L, int idx, const char *k)
 {}
 
-void mock_lua_remove(lua_State *L, int idx)
+int mock_lua_getglobal(lua_State *L, const char *name)
+{
+    return 0; // LUA_TNIL.
+}
+
+/* lua_remove(L, idx) is now a macro: (lua_rotate(L, idx, -1), lua_pop(L, 1)).
+** Hook lua_rotate as a no-op; lua_pop/lua_settop is hooked separately. */
+void mock_lua_rotate(lua_State *L, int idx, int n)
 {}
 
-int mock_lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
+/* lua_pcall(L,n,r,f) is now a macro calling lua_pcallk(L,n,r,f,0,NULL). */
+int mock_lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc,
+    lua_KContext ctx, lua_KFunction k)
 {
 	return 0;
 }
@@ -117,7 +126,8 @@ void* mock_tolua_tousertype(lua_State* L, int narg, void* def)
 	return (void*) "Test passed";
 }
 
-int	mock_luaL_loadfile(lua_State *L, const char *filename)
+/* luaL_loadfile(L,f) is now a macro calling luaL_loadfilex(L,f,NULL). */
+int mock_luaL_loadfilex(lua_State *L, const char *filename, const char *mode)
 {
 	return 0;
 }
@@ -132,7 +142,8 @@ int	mock_lua_gc(lua_State *L, int what, int data)
 	return 0;
 }
 
-void mock_luaL_openlibs(lua_State *L)
+/* luaL_openlibs(L) is now a macro calling luaL_openselectedlibs(L, ~0, 0). */
+void mock_luaL_openselectedlibs(lua_State *L, int load, int preload)
 {}
 
 int	mock_tolua_PAC_dev_open(lua_State* tolua_S)
@@ -172,14 +183,17 @@ lua_State * mock_luaL_newstate_failure(void)
     return NULL;
 }
 
-int mock_luaL_loadfile_failure(lua_State * L, const char * filename)
+/* Special failure mock for luaL_loadfilex (replaces luaL_loadfile). */
+int mock_luaL_loadfilex_failure(lua_State * L, const char * filename,
+    const char * mode)
 {
     return 1;
 }
 
-int mock_luaL_loadfile_failure_2(lua_State * L, const char * filename)
+int mock_luaL_loadfilex_failure_2(lua_State * L, const char * filename,
+    const char * mode)
 {
-    // return 0 (success) when called less then FILE_CNT times, and than always return 1 (fail)
+    // return 0 (success) when called less then FILE_CNT times, then fail.
     return (file_counter++ < FILE_CNT ? 0 : 1);
 }
 
@@ -202,7 +216,9 @@ int mock_check_file_failure_2(const char * file_name, char * err_str)
     return INT_MAX;
 }
 
-int mock_lua_pcall_failure(lua_State * L, int nargs, int nresults, int errfunc)
+/* Special failure mock for lua_pcallk (replaces lua_pcall). */
+int mock_lua_pcallk_failure(lua_State * L, int nargs, int nresults, int errfunc,
+    lua_KContext ctx, lua_KFunction k)
 {
     return ( --lua_pcall_state < 0 ? 1 : 0 );
 }
