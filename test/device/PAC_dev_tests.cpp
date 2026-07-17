@@ -7303,7 +7303,7 @@ TEST( node_dev, run_cmd_exit_code )
         "'lls' is not recognized as an internal or external command,\n"
         "operable program or batch file.";
 #else
-        "sh: 1: lls: not found\n\n";
+        "command result ('lls'): sh: 1: lls: not found";
 #endif
     EXPECT_STREQ( node_dev::get_cmd_output(), reference_out );
     EXPECT_NE( 0, res );
