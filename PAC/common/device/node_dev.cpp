@@ -162,8 +162,7 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     {
     *res_msg = '\0';
 
-    const std::filesystem::path file_path =
-        std::filesystem::temp_directory_path() / "ptusa_cmd_output.txt";
+    const std::filesystem::path file_path = "ptusa_cmd_output.txt";
     std::string cmd_debug{ cmd };
     cmd_debug += " > \"" + file_path.string() + "\" 2>&1";
 
