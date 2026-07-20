@@ -160,10 +160,12 @@ void node_dev::evaluate_io()
 //-----------------------------------------------------------------------------
 int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     {
-    res_msg[ 0 ] = '\0';
+    *res_msg = '\0';
 
-    std::string cmd_debug = cmd;
-    cmd_debug += " > output.txt 2>&1 ";
+    const std::filesystem::path file_path =
+        std::filesystem::temp_directory_path() / "ptusa_cmd_output.txt";
+    std::string cmd_debug{ cmd };
+    cmd_debug += " > \"" + file_path.string() + "\" 2>&1";
 
     G_LOG->debug( "node_dev::run_cmd - '%s'", cmd_debug.c_str() );
 
@@ -174,12 +176,11 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
 
     if ( rc != 0 && rc != expected )
         {
-        std::filesystem::path file_path = "output.txt";
         if ( !std::filesystem::exists( file_path ) )
             {
             auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
                 "command result ('{}') not found", cmd );
-            *( res.out - 1 ) = '\0'; // Удаляем последний символ новой строки.
+            *res.out = '\0';
             }
         else
             {
