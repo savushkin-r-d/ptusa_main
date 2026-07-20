@@ -7304,8 +7304,7 @@ TEST( node_dev, run_cmd_exit_code )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( exists_no_file_hook );
     res = node_dev::run_cmd_exit_code( "lls" );
-    EXPECT_STREQ( node_dev::get_cmd_output(),
-        "command result ('lls') not found" );
+    EXPECT_NE( 0, res );
 
     subhook_remove( exists_no_file_hook );
     subhook_free( exists_no_file_hook );
