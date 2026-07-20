@@ -7203,7 +7203,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_sudo_available )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 
-    dev.set_io_node( node );
+    dev.set_io_node( &node );
 
     subhook_remove( get_local_ipv4_hook );
     subhook_free( get_local_ipv4_hook );

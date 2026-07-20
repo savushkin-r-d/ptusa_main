@@ -189,7 +189,12 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
                 std::istreambuf_iterator<char>() );
             auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
                 "command result ('{}'): {}", cmd, content );
-            *( res.out - 1 ) = '\0'; // Удаляем последний символ новой строки.
+            *res.out = '\0';
+            if ( res.out != res_msg && *( res.out - 1 ) == '\n' )
+                {
+                // Удаляем последний символ новой строки.
+                *( res.out - 1 ) = '\0';
+                }
             }
         }
 
@@ -338,32 +343,34 @@ int node_dev::process_web_cmd( int new_web_value )
             return 1;
             }
 
-        G_LOG->info( "'%s': %s", get_name(), "web port forwarding enabled.",
-            get_name() );
+        G_LOG->info( "'%s': web port forwarding enabled.", get_name() );
         web_value = 1;
         return 0;
         }
 
     else if ( new_web_value == 0 && web_value == 1 )
         {
-        if ( auto res = delete_all_matches( dnat_check.c_str(), dnat_delete.c_str() );
-            !res )
+        if ( auto res = delete_all_matches( dnat_check.c_str(),
+            dnat_delete.c_str() ); !res )
             {
-            G_LOG->error( "'%s': failed to disable web port forwarding (dnat) - %s.",
+            G_LOG->error(
+                "'%s': failed to disable web port forwarding (dnat) - %s.",
                 get_name(), node_dev::get_cmd_output() );
             return 1;
             }
-        if ( auto res = delete_all_matches( forward_in_check.c_str(), forward_in_delete.c_str() );
-            !res )
+        if ( auto res = delete_all_matches( forward_in_check.c_str(),
+            forward_in_delete.c_str() ); !res )
             {
-            G_LOG->error( "'%s': failed to disable web port forwarding (forward_in) - %s.",
+            G_LOG->error(
+                "'%s': failed to disable web port forwarding (forward_in) - %s.",
                 get_name(), node_dev::get_cmd_output() );
             return 1;
             }
-        if ( auto res = delete_all_matches( masq_check.c_str(), masq_delete.c_str() );
-            !res )
+        if ( auto res = delete_all_matches( masq_check.c_str(),
+            masq_delete.c_str() ); !res )
             {
-            G_LOG->error( "'%s': failed to disable web port forwarding (masq) - %s.",
+            G_LOG->error(
+                "'%s': failed to disable web port forwarding (masq) - %s.",
                 get_name(), node_dev::get_cmd_output() );
             return 1;
             }
