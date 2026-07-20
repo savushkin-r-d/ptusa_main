@@ -4,4 +4,6 @@ endif()
 
 set(SKIP_TESTING TRUE)
 
+set(LUA_USE_CURSES OFF)
+
 add_subdirectory(lua)
