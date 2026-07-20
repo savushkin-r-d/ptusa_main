@@ -160,7 +160,7 @@ void node_dev::evaluate_io()
 //-----------------------------------------------------------------------------
 int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     {
-    *res_msg = '\0';
+    res_msg[ 0 ] = '\0';
 
     const std::filesystem::path file_path = "ptusa_cmd_output.txt";
     std::string cmd_debug{ cmd };
