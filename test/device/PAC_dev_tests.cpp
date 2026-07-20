@@ -7231,10 +7231,6 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_sudo_available )
 
 TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
     {
-#ifdef WIN_OS
-    GTEST_SKIP() << "Linux only test";
-#endif
-
     node_dev dev( "A100" );
 
     auto get_local_bad_ipv4_hook = subhook_new(
@@ -7245,6 +7241,10 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
 
     dev.set_io_node( &node );
     EXPECT_STREQ( dev.get_controller_ip(), "" );
+
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов - пустые строки.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
 
     subhook_remove( get_local_bad_ipv4_hook );
     subhook_free( get_local_bad_ipv4_hook );
