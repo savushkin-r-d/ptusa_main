@@ -1571,15 +1571,15 @@ TEST( analog_io_device, set_cmd )
 
     // Проверка включения ручного режима - только на 1 должен включиться.
     testing::internal::CaptureStdout();
-    struct tm t_info;
-    auto t = time( nullptr );
-#ifdef LINUX_OS
-    localtime_r( &t, &t_info );
-#else
-    localtime_s( &t_info, &t );
-#endif // LINUX_OS
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
+    auto tm = get_time();
     std::stringstream tmp;
-    tmp << std::put_time( &t_info, "%Y-%m-%d %H.%M.%S " );
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+
     obj.set_cmd( "M", 0, 100 );
     auto output = testing::internal::GetCapturedStdout();
     auto exp_output = tmp.str() +
@@ -1602,6 +1602,9 @@ TEST( analog_io_device, set_cmd )
     EXPECT_EQ( output, exp_output );
     obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     }
 
 
