@@ -7068,18 +7068,14 @@ TEST( node_dev, basic_functionality )
     node->set_io_node( &nd );
     EXPECT_STREQ( node->get_ip(), "" );
 
-    auto get_local_ipv4_hook = subhook_new(
-        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
-        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
-        SUBHOOK_64BIT_OFFSET );
-    subhook_install( get_local_ipv4_hook );
-
+    // Проверка при передаче узла с корректным IP-адресом.
     r = fmt::format_to_n( nd.ip_address, sizeof( nd.ip_address ) - 1,
         "127.0.0.10" );
     *r.out = 0;
     node->set_io_node( &nd );
     // Проверка получения IP-адреса.
     EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
+    EXPECT_TRUE( node_dev::get_A1_ipv4().empty() );
 
     // Проверка при повторной привязке узла.
     node->set_io_node( &nd_2 );
@@ -7101,9 +7097,6 @@ TEST( node_dev, basic_functionality )
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
     G_PAC_INFO()->emulation_on();
-
-    subhook_remove( get_local_ipv4_hook );
-    subhook_free( get_local_ipv4_hook );
     }
 
 TEST( node_dev, get_A1_ipv4 )
