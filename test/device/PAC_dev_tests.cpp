@@ -7032,20 +7032,8 @@ class node_dev_set_cmd_test : public ::testing::Test
             }
 
     protected:
-        void SetUp() override
-            {
-            node = new io_manager::io_node(
-                io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1, "127.0.0.1",
-                "A100", 1, 1, 1, 32, 1, 1 );
-            }
-
-        void TearDown() override
-            {
-            delete node;
-            node = nullptr;
-            }
-
-        io_manager::io_node* node{};
+        io_manager::io_node node{ io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+            1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 };
     };
 
 TEST( node_dev, basic_functionality )
@@ -7169,7 +7157,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_ipv4_hook );
 
-    dev.set_io_node( node );
+    dev.set_io_node( &node );
 
 #ifdef WIN_OS
     // Узел есть, но команда должна выполниться неуспешно, так как команды для
@@ -7258,7 +7246,7 @@ TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_local_bad_ipv4_hook );
 
-    dev.set_io_node( node );
+    dev.set_io_node( &node );
     EXPECT_STREQ( dev.get_controller_ip(), "" );
 
     subhook_remove( get_local_bad_ipv4_hook );
@@ -7294,7 +7282,7 @@ TEST( node_dev, run_cmd_exit_code )
 #endif
 
     testing::internal::CaptureStdout();
-    auto res = dev.run_cmd_exit_code( "lls" );
+    auto res = node_dev::run_cmd_exit_code( "lls" );
     auto output = testing::internal::GetCapturedStdout();
     // Verify output contains the expected debug message pattern with time.
     auto reference_out =
