@@ -7281,9 +7281,7 @@ TEST( node_dev, run_cmd_exit_code )
     setlocale( LC_ALL, "en_US.UTF-8" );
 #endif
 
-    testing::internal::CaptureStdout();
     auto res = node_dev::run_cmd_exit_code( "lls" );
-    auto output = testing::internal::GetCapturedStdout();
     // Verify output contains the expected debug message pattern with time.
     auto reference_out =
 #ifdef WIN_OS
