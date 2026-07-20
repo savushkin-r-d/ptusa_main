@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #ifdef LINUX_OS
 #include <sys/types.h>
@@ -7254,6 +7255,14 @@ TEST_F( node_dev_set_cmd_test, set_cmd_startup )
     EXPECT_EQ( 0, dev.set_cmd( "STARTUP", 0, 1 ) );
     }
 
+namespace
+    {
+    bool exists_no_file( const std::filesystem::path& p )
+        {
+        return false;
+        }
+    }
+
 TEST_F( node_dev_set_cmd_test, set_cmd_to_device )
     {
     node_dev dev( "A100" );
@@ -7286,6 +7295,20 @@ TEST( node_dev, run_cmd_exit_code )
 #endif
     EXPECT_STREQ( node_dev::get_cmd_output(), reference_out );
     EXPECT_NE( 0, res );
+
+    // Check "command result ('cmd') not found" error.
+    auto exists_no_file_hook = subhook_new(
+        reinterpret_cast<void*>( static_cast<bool( * )
+            ( const std::filesystem::path& )>( &std::filesystem::exists ) ),
+        reinterpret_cast<void*>( &exists_no_file ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( exists_no_file_hook );
+    res = node_dev::run_cmd_exit_code( "lls" );
+    EXPECT_STREQ( node_dev::get_cmd_output(),
+        "command result ('lls') not found" );
+
+    subhook_remove( exists_no_file_hook );
+    subhook_free( exists_no_file_hook );
     }
 
 
