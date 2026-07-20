@@ -342,6 +342,7 @@ endif()
 ###############################################################################
 if(LINUX)
     target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
+	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--as-needed)
 endif()
 ###############################################################################
 
@@ -352,17 +353,28 @@ endif()
 ################# add link targets ############################################
 if(ARP_DEVICE)
     find_package(ArpDevice REQUIRED)
-    find_package(ArpProgramming REQUIRED)
+
+    message(STATUS "ARP_DEVICE_VERSION=${ARP_DEVICE_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION=${ARP_DEVICE_SHORT_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION_BUILD=${ARP_DEVICE_SHORT_VERSION_BUILD}")
+
+	if(${ARP_VERSION_MAJOR} GREATER_EQUAL "25")
+		find_package(Arp REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE Arp::ALL)
+	else()
+		find_package(ArpProgramming REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming)
+	endif()
+
+    target_link_libraries(PtusaPLCnextEngineer PRIVATE
+		liblua_static toluapp_lib_static zlibstatic
+		fmt::fmt open62541::open62541)
 endif()
 
 ################# add link targets ############################################
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
-if(ARP_DEVICE)
-    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
-    target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
-endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
 target_link_libraries(libptusa_main open62541::open62541)

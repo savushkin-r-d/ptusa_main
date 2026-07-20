@@ -1,39 +1,31 @@
 ﻿#pragma once
 #include "Arp/System/Core/Arp.h"
+#if ARP_ABI_VERSION_MAJOR < 2
 #include "Arp/System/Acf/ComponentBase.hpp"
+#include "Arp/System/Acf/IApplication.hpp"
+#else
+#include "Arp/Base/Acf/Commons/ComponentBase.hpp"
+#endif
 #include "Arp/Plc/Commons/Esm/ProgramComponentBase.hpp"
 #include "PtusaMainCmpntProgramProvider.hpp"
-#include "PtusaPLCnextEngineerLibrary.hpp"
 #include "Arp/Plc/Commons/Meta/MetaLibraryBase.hpp"
 #include "Arp/System/Commons/Logging.h"
 
-#include "Arp/System/Acf/IControllerComponent.hpp"
-
 #include "log.h"
-
-namespace Arp
-    {
-    namespace System
-        {
-        namespace Acf
-            {
-            class IApplication;
-            }
-        }
-    }
 
 namespace PtusaPLCnextEngineer
     {
     using namespace Arp;
+#if ARP_ABI_VERSION_MAJOR < 2
     using namespace Arp::System::Acf;
+#else
+    using namespace Arp::Base::Acf::Commons;
+#endif
     using namespace Arp::Plc::Commons::Esm;
     using namespace Arp::Plc::Commons::Meta;
 
     //#component
-    class PtusaMainCmpnt: public ComponentBase,
-            public ProgramComponentBase,
-            private Loggable<PtusaMainCmpnt>,
-            public IControllerComponent
+    class PtusaMainCmpnt : public ComponentBase, public ProgramComponentBase, private Loggable<PtusaMainCmpnt>
         {
     public:
         // typedefs
@@ -56,8 +48,12 @@ namespace PtusaPLCnextEngineer
             };
 
         // construction/destruction
-        PtusaMainCmpnt(IApplication& application, const String& name);
+#if ARP_ABI_VERSION_MAJOR < 2
+        PtusaMainCmpnt( IApplication& application, const String& name );
         virtual ~PtusaMainCmpnt() = default;
+#else
+        PtusaMainCmpnt( ILibrary& library, const String& name );
+#endif
 
     public:
         // IComponent operations
@@ -71,15 +67,15 @@ namespace PtusaPLCnextEngineer
         void RegisterComponentPorts() override;
 
     private:
-        // methods
-        PtusaMainCmpnt(const PtusaMainCmpnt& arg) = delete;
-        PtusaMainCmpnt& operator=(const PtusaMainCmpnt& arg) = delete;
 
-    public:
-        // static factory operations
-        static IComponent::Ptr Create(
-                Arp::System::Acf::IApplication& application,
-                const String& name);
+#if ARP_ABI_VERSION_MAJOR < 2
+        PtusaMainCmpnt( const PtusaMainCmpnt& arg ) = delete;
+        PtusaMainCmpnt& operator= ( const PtusaMainCmpnt& arg ) = delete;
+
+    public: // static factory operations
+        static IComponent::Ptr Create( Arp::System::Acf::IApplication& application, const String& name );
+#endif
+
 
     private:
         // fields
@@ -107,19 +103,11 @@ namespace PtusaPLCnextEngineer
 
     ///////////////////////////////////////////////////////////////////////////////
     // inline methods of class PtusaMainCmpnt
-    inline PtusaMainCmpnt::PtusaMainCmpnt(IApplication& application,
-            const String& name) :
-            ComponentBase(application,
-                    ::PtusaPLCnextEngineer::PtusaPLCnextEngineerLibrary::GetInstance(),
-                    name, ComponentCategory::Custom), programProvider(*this), ProgramComponentBase(
-                    ::PtusaPLCnextEngineer::PtusaPLCnextEngineerLibrary::GetInstance().GetNamespace(),
-                    programProvider)
-        {
-        }
-
+#if ARP_ABI_VERSION_MAJOR < 2
     inline IComponent::Ptr PtusaMainCmpnt::Create(
             Arp::System::Acf::IApplication& application, const String& name)
         {
         return IComponent::Ptr(new PtusaMainCmpnt(application, name));
         }
+#endif
     } // end of namespace PtusaPLCnextEngineer
