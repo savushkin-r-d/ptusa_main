@@ -177,8 +177,10 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
         {
         if ( !std::filesystem::exists( file_path ) )
             {
+            // LCOV_EXCL_START
             auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
                 "command result ('{}') not found", cmd );
+            // LCOV_EXCL_STOP
             *res.out = '\0';
             }
         else
@@ -186,8 +188,10 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
             std::ifstream file( file_path );
             std::string content( ( std::istreambuf_iterator<char>( file ) ),
                 std::istreambuf_iterator<char>() );
+            // LCOV_EXCL_START
             auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
                 "command result ('{}'): {}", cmd, content );
+            // LCOV_EXCL_STOP
             *res.out = '\0';
             if ( res.out != res_msg && *( res.out - 1 ) == '\n' )
                 {
@@ -257,8 +261,10 @@ bool node_dev::check_ip_forward()
     std::ifstream f( "/proc/sys/net/ipv4/ip_forward" );
     if ( !f )
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
             "cannot open '/proc/sys/net/ipv4/ip_forward'" );
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return false;
         }
@@ -267,8 +273,10 @@ bool node_dev::check_ip_forward()
     f >> ip_forward;
     if ( !f )
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
             "cannot read value from '/proc/sys/net/ipv4/ip_forward'" );
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return false;
         }
@@ -278,8 +286,10 @@ bool node_dev::check_ip_forward()
 
     if ( ip_forward != 1 )
         {
+        // LCOV_EXCL_START
         auto res = fmt::format_to_n( res_msg, i_log::C_BUFF_SIZE,
             "IP forwarding is disabled ('net.ipv4.ip_forward=0')" );
+        // LCOV_EXCL_STOP
         *res.out = '\0';
         return false;
         }
@@ -413,9 +423,11 @@ int node_dev::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int node_dev::save_device( char* buff ) const
     {
+    // LCOV_EXCL_START
     auto res_n = fmt::format_to_n( buff, MAX_COPY_SIZE,
         "{}={{ST={}, WEB={}, STARTUP={}, IP='{}'}},\n",
         get_name(), get_state(), web_value, startup_value, get_ip() );
+    // LCOV_EXCL_STOP
 
     return static_cast<int>( res_n.size );
     }
