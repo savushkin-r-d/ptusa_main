@@ -196,12 +196,14 @@ int node_dev::run_cmd_exit_code( const char* cmd, int expected )
     return rc;
     }
 //-----------------------------------------------------------------------------
+#ifdef LINUX_OS
 /// Checks if sudo is available without a password prompt.
 bool node_dev::check_sudo_available()
     {
     return node_dev::run_cmd_exit_code( "sudo -n /usr/sbin/iptables -h" ) == 0;
     }
-
+#endif // LINUX_OS
+//-----------------------------------------------------------------------------
 namespace
     {
     bool ensure_rule( const char* check_cmd, const char* append_cmd )
@@ -242,11 +244,12 @@ namespace
         }
     }
 //-----------------------------------------------------------------------------
+#ifdef LINUX_OS
 bool node_dev::check_ip_forward()
     {
     res_msg[ 0 ] = '\0';
 
-#ifdef LINUX_OS
+
     std::ifstream f( "/proc/sys/net/ipv4/ip_forward" );
     if ( !f )
         {
@@ -276,10 +279,10 @@ bool node_dev::check_ip_forward()
         *res.out = '\0';
         return false;
         }
-#endif // LINUX_OS
 
     return true;
     }
+#endif // LINUX_OS
 //-----------------------------------------------------------------------------
 const char* node_dev::get_cmd_output()
     {
@@ -297,6 +300,7 @@ int node_dev::process_web_cmd( int new_web_value )
         return 1;
         }
 
+#ifdef LINUX_OS
     if ( !check_sudo_available() )
         {
         G_LOG->error( "'%s': web port command failed - %s.",
@@ -310,6 +314,7 @@ int node_dev::process_web_cmd( int new_web_value )
             get_name(), node_dev::get_cmd_output() );
         return 1;
         }
+#endif // LINUX_OS
 
     if ( new_web_value != 0 && web_value == 0 )
         {

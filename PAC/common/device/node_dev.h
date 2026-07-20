@@ -48,9 +48,11 @@ class node_dev : public device
         static int run_cmd_exit_code( const char* cmd,
             int expected = 0 );
 
+#ifdef LINUX_OS
         static bool check_sudo_available();
 
         static bool check_ip_forward();
+#endif // LINUX_OS
 
         static const char* get_cmd_output();
 
