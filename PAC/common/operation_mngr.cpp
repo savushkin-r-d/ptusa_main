@@ -912,9 +912,11 @@ int required_DI_action::check( char* reason, unsigned int max_len ) const
         {
         if ( !d->is_active() )
             {
-            constexpr const char* f_str = "нет сигнала \'{:.25} ({:.50})\'";
-            auto out = fmt::format_to_n( reason, max_len - 1, f_str,
+            // LCOV_EXCL_START
+            auto out = fmt::format_to_n( reason, max_len - 1,
+                "нет сигнала '{:.25} ({:.50})'",
                 d->get_name(), d->get_description() );
+            // LCOV_EXCL_STOP
             *out.out = '\0';
             return 1;
             }
@@ -1160,11 +1162,13 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
             if ( !is_di_device_type( device_type ) &&
                 device_type != device::DT_DO )
                 {
-                constexpr const char* format_str =
-                    R"(в поле '{}' устройство '{:.25} ({:.50})' )"
-                    R"(не является допустимым сигналом (DI, SB, GS, LS, FS, DO))";
-                auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
+                // LCOV_EXCL_START
+                auto out = fmt::format_to_n( reason, max_len - 1,
+                    "в поле '{}' устройство '{:.25} ({:.50})' "
+                    "не является допустимым сигналом (DI, SB, GS, LS, FS, DO)",
+                    name.c_str(),
                     device_ptr->get_name(), device_ptr->get_description() );
+                // LCOV_EXCL_STOP
                 *out.out = '\0';
                 return 1;
                 }
@@ -1180,11 +1184,14 @@ int DI_DO_action::check( char* reason, unsigned int max_len ) const
             else if ( is_di_type && found_do )
                 {
                 // Найден DI сигнал после DO сигнала - ошибка порядка
-                constexpr const char* format_str =
-                    R"(в поле '{}' устройство '{:.25} ({:.50})' )"
-                    R"(расположено неправильно: DI сигналы должны быть описаны перед DO сигналами)";
-                auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
-                    device_ptr->get_name(), device_ptr->get_description() );
+                // LCOV_EXCL_START
+                auto out = fmt::format_to_n( reason, max_len - 1,
+                    "в поле '{}' устройство '{:.25} ({:.50})' "
+                    "расположено неправильно: DI сигналы должны быть описаны "
+                    "перед DO сигналами",
+                    name.c_str(), device_ptr->get_name(),
+                    device_ptr->get_description() );
+                // LCOV_EXCL_STOP
                 *out.out = '\0';
                 return 1;
                 }
@@ -1408,11 +1415,13 @@ int AI_AO_action::check( char* reason, unsigned int max_len ) const
             do_device->get_type() != device::DT_QT &&
             do_device->get_type() != device::DT_TE )
             {
-            constexpr const char* format_str =
-                R"(в поле '{}' устройство '{:.25} ({:.50})' )"
-                R"(не является входным сигналом (АI, PT, LT, FQT, QT, TE))";
-            auto out = fmt::format_to_n( reason, max_len - 1, format_str, name.c_str(),
-                do_device->get_name(), do_device->get_description() );
+            // LCOV_EXCL_START
+            auto out = fmt::format_to_n( reason, max_len - 1,
+                "в поле '{}' устройство '{:.25} ({:.50})' "
+                "не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
+                name.c_str(), do_device->get_name(),
+                do_device->get_description() );
+            // LCOV_EXCL_STOP
             *out.out = '\0';
             return 1;
             }
