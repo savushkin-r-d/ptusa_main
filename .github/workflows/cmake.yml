@@ -118,6 +118,7 @@ jobs:
         allow-unsafe-pr-checkout: 'true'
 
     - name: Download Ninja and CMake
+      if: ${{ ! matrix.config.preset }}
       shell: cmake -P {0}
       run: |
         set(cmake_version ${CMAKE_VERSION})
