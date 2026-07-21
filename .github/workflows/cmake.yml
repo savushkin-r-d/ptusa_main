@@ -30,7 +30,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     if: >-
-      ${{        
+      ${{
           (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
@@ -198,9 +198,15 @@ jobs:
 
     - name: Install PLCnext SDK (Linux only)
       if: runner.os == 'Linux' && matrix.config.preset
+      env:
+        GITHUB_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
       shell: bash
       run: |
-        curl -L -O "https://github.com/idzm/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
+        curl -L \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -o ${{ matrix.config.sdk }}.sh \
+          "https://github.com/idzm/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
+
         chmod +x ${{ matrix.config.sdk }}.sh
         ./${{ matrix.config.sdk }}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
         echo "export PATH=/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin:$PATH" >> $GITHUB_ENV
