@@ -31,21 +31,21 @@ jobs:
     name: ${{ matrix.config.name }}
     if: >-
       ${{
-        github.repository == 'savushkin-r-d/ptusa_main' && 
+        github.repository == 'savushkin-r-d/ptusa_main' &&
           (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
           github.event_name == 'merge_group' ||
-          github.event_name == 'workflow_dispatch' || 
+          github.event_name == 'workflow_dispatch' ||
             (
             github.event_name == 'pull_request_target' &&
-            github.event.pull_request.head.repo.full_name != github.repository && 
+            github.event.pull_request.head.repo.full_name != github.repository &&
               (
               contains(github.event.pull_request.labels.*.name, 'safe to test') ||
               github.event.pull_request.author_association == 'MEMBER' ||
               github.event.pull_request.author_association == 'OWNER'
               )
-            ) || 
+            ) ||
               (
               github.event_name == 'pull_request' &&
               github.event.pull_request.head.repo.full_name == github.repository
@@ -84,6 +84,20 @@ jobs:
             cxx: "g++",
             targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
+          }
+        - {
+            name: "Linux AXCF2152 2026 LTS",
+            artifact: "Linux-AXCF2152-2026.7z",
+            os: ubuntu-latest,
+            cc: "gcc",
+            cxx: "g++",
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF2152",
+            preset: "build-linux-AXCF2152-2026-LTS-Release",
+            sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
+            dir: "2026.0"
           }
     steps:
     - name: Harden the runner (Audit all outbound calls)
@@ -182,6 +196,15 @@ jobs:
     - name: Install unixodbc-dev (Linux only)
       if: runner.os == 'Linux'
       run: sudo apt-get install -y unixodbc-dev
+
+    - name: Install PLCnext SDK (Linux only)
+      if: runner.os == 'Linux' && matrix.config.preset
+      shell: bash
+      run: |
+        curl -L -O "https://github.com/idzm/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
+        chmod +x ${{ matrix.config.sdk }}.sh
+        ./${{ matrix.config.sdk }}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
+        echo "export PATH=/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin:$PATH" >> $GITHUB_ENV
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
@@ -292,18 +315,25 @@ jobs:
             set(ENV{CODE_COVERAGE} "ON")
         endif()
 
-        execute_process(
-          COMMAND cmake
-            -S .
-            -B build
-            -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
-            -G Ninja
-            -D CMAKE_MAKE_PROGRAM=ninja
-            -D CMAKE_C_COMPILER_LAUNCHER=ccache
-            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
-            -D CODE_COVERAGE=$ENV{CODE_COVERAGE}
-          RESULT_VARIABLE result
-        )
+        if (NOT "x${{ matrix.config.preset }}" STREQUAL "x")
+          execute_process(
+            COMMAND cmake --preset ${{ matrix.config.preset }}
+            RESULT_VARIABLE result
+          )
+        else()
+          execute_process(
+            COMMAND cmake
+              -S .
+              -B build
+              -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
+              -G Ninja
+              -D CMAKE_MAKE_PROGRAM=ninja
+              -D CMAKE_C_COMPILER_LAUNCHER=ccache
+              -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -D CODE_COVERAGE=$ENV{CODE_COVERAGE}
+            RESULT_VARIABLE result
+          )
+        endif()
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
@@ -341,13 +371,23 @@ jobs:
         endif()
         execute_process(COMMAND ccache -p)
         execute_process(COMMAND ccache -z)
-        execute_process(
-          COMMAND cmake --build build --target ${{ matrix.config.targets }}
-          RESULT_VARIABLE result
-          OUTPUT_VARIABLE output
-          ERROR_VARIABLE output
-          ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
-        )
+        if (NOT "x${{ matrix.config.preset }}" STREQUAL "x")
+          execute_process(
+            COMMAND cmake --build --preset ${{ matrix.config.preset }} --target ${{ matrix.config.targets }}
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+        else()
+          execute_process(
+            COMMAND cmake --build build --target ${{ matrix.config.targets }}
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+        endif()
         if (NOT result EQUAL 0)
           string(REGEX MATCH "FAILED:.*$" error_message "${output}")
           string(REPLACE "\n" "%0A" error_message "${error_message}")
