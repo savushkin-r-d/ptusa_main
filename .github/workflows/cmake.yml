@@ -96,6 +96,7 @@ jobs:
             axc: "AXCF2152",
             preset: "build-linux-AXCF2152-2026-LTS-Release",
             sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
+            sdk_asset_id: "1307396913",
             dir: "2026.0"
           }
     steps:
@@ -203,10 +204,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
       shell: bash
       run: |
-        curl -L \
+        curl -L --fail \
           -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/octet-stream" \
           -o ${{ matrix.config.sdk }}.sh \
-          "https://github.com/idzm/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
+          "https://api.github.com/repos/idzm/PLCnext_bin/releases/assets/${{ matrix.config.sdk_asset_id }}"
 
         chmod +x ${{ matrix.config.sdk }}.sh
         ./${{ matrix.config.sdk }}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
