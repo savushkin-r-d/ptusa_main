@@ -153,6 +153,7 @@ jobs:
         endif()
 
     - name: Download ccache
+      if: ${{ ! matrix.config.preset }}
       id: ccache
       shell: cmake -P {0}
       run: |
@@ -161,6 +162,7 @@ jobs:
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
 
     - name: Prepare ccache timestamp
+      if: ${{ ! matrix.config.preset }}
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
@@ -168,6 +170,7 @@ jobs:
         file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
     - name: ccache cache files
+      if: ${{ ! matrix.config.preset }}
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ runner.os == 'Windows' && format('{0}/ccache', runner.temp) || '.ccache' }}
@@ -180,6 +183,7 @@ jobs:
       run: echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
 
     - name: Install yasm
+      if: ${{ ! matrix.config.preset }}
       shell: cmake -P {0}
       run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
@@ -406,7 +410,7 @@ jobs:
 
     # Install valgrind
     - name: Install valgrind on Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         sudo apt-get update
