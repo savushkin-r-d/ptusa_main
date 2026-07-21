@@ -144,8 +144,7 @@ endif()
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_cycle.cpp
-            PAC_control_projects/main_control_prg/main.cpp
-            PAC_control_projects/main_control_prg/version.rc )
+            PAC_control_projects/main_control_prg/main.cpp )
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
