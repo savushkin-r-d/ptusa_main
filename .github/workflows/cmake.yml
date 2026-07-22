@@ -96,7 +96,21 @@ jobs:
             axc: "AXCF2152",
             preset: "build-linux-AXCF2152-2026-LTS-Release",
             sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
-            sdk_asset_id: "484392703",
+            dir: "2026.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
+          }
+          {
+            name: "Linux AXCF3152 2026 LTS",
+            artifact: "Linux-AXCF3152-2026.7z",
+            os: ubuntu-latest,
+            cc: "gcc",
+            cxx: "g++",
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF3152",
+            preset: "build-linux-AXCF3152-2026-LTS-Release",
+            sdk: "axcf3152-linux_sdk-2026.0.3_LTS-26.0.3.88",
             dir: "2026.0",
             plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
