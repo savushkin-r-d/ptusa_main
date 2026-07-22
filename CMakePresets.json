@@ -202,7 +202,7 @@
       "environment": {
         "ARP_DEVICE": "AXCF3152",
         "ARP_DEVICE_SHORT_VERSION": "2026.0",
-        "ARP_DEVICE_VERSION": "2026.0.3 (26.0.3.88)",
+        "ARP_DEVICE_VERSION": "2026.0.3 LTS (26.0.3.88)",
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
     },
