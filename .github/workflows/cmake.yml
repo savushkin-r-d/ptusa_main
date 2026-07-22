@@ -515,8 +515,12 @@ jobs:
 
 
     - name: Install Strip
-      run: cmake --install build --prefix instdir --strip
-
+      run: |
+        if [ -n "${{ matrix.config.preset }}" ]; then
+          cmake --install bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }} --prefix instdir --strip
+        else
+          cmake --install build --prefix instdir --strip
+        fi
 
     - name: Pack
       working-directory: instdir
