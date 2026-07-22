@@ -412,16 +412,16 @@ jobs:
         execute_process(COMMAND ccache -z)
 
         if (NOT "x${{ matrix.config.preset }}" STREQUAL "x")
-          set(preset "--preset ${{ matrix.config.preset }}")
+          set(preset --preset ${{ matrix.config.preset }})
           file(APPEND "$ENV{GITHUB_OUTPUT}"
             "build_dir=bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }}\n")
         else()
-          set(preset "")
+          set(preset)
           file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=build\n")
         endif()
 
         execute_process(
-          COMMAND cmake --build "${preset}" --target ${{ matrix.config.targets }}
+          COMMAND cmake --build ${preset} --target ${{ matrix.config.targets }}
           RESULT_VARIABLE result
           OUTPUT_VARIABLE output
           ERROR_VARIABLE output
