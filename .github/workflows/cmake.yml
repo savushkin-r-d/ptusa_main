@@ -419,6 +419,8 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=build\n")
         endif()
 
+        message("Build directory: ${build_dir}")
+
         execute_process(
           COMMAND cmake --build build ${preset} --target ${{ matrix.config.targets }}
           RESULT_VARIABLE result
@@ -528,7 +530,9 @@ jobs:
         alert-comment-cc-users: '@idzm'
 
     - name: Install Strip
-      run: cmake --install ${{ steps.cmake_build.outputs.build_dir }} --prefix instdir --strip
+      run: |
+        echo "Build directory: ${{ steps.cmake_build.outputs.build_dir }}"
+        cmake --install ${{ steps.cmake_build.outputs.build_dir }} --prefix instdir --strip
 
     - name: Pack
       working-directory: instdir
