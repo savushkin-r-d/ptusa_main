@@ -206,26 +206,26 @@ jobs:
     - name: Install plcncli and PLCnext SDK (Linux only)
       if: runner.os == 'Linux' && matrix.config.preset
       env:
-        GITHUB_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
+        GH_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
 
-        sdk = "${{ matrix.config.sdk }}"
+        sdk="${{ matrix.config.sdk }}"
         echo "Downloading PLCnext SDK: $sdk"
-        gh release download $sdk \
+        gh release download "$sdk" \
           --repo savushkin-r-d/PLCnext_bin \
           --pattern "$sdk.sh"
-        chmod +x $sdk.sh
-        ./$sdk.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
+        chmod +x "$sdk.sh"
+        ./${sdk}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
         echo "export PATH=/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin:$PATH" >> $GITHUB_ENV
 
-        plcncli = "${{ matrix.config.plcncli }}"
+        plcncli="${{ matrix.config.plcncli }}"
         echo "Downloading plcncli: $plcncli"
-        gh release download $plcncli \
+        gh release download "$plcncli" \
           --repo savushkin-r-d/PLCnext_bin \
           --pattern "$plcncli.sh"
-        chmod +x $plcncli.sh
+        chmod +x "$plcncli.sh"
         ./$plcncli.sh
 
     - name: Cache MinGW archive
