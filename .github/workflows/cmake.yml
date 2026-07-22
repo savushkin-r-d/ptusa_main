@@ -200,7 +200,7 @@ jobs:
         endif()
 
     - name: Install unixodbc-dev (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       run: sudo apt-get install -y unixodbc-dev
 
     - name: Install plcncli and PLCnext SDK (Linux only)
@@ -226,7 +226,9 @@ jobs:
           --repo savushkin-r-d/PLCnext_bin \
           --pattern "$plcncli.sh"
         chmod +x "$plcncli.sh"
-        ./$plcncli.sh --accept
+        ./$plcncli.sh --quiet --accept
+        sudo ln -sf "$GITHUB_WORKSPACE/PLCnext_Toolchain/plcncli" /bin/plcncli
+        plcncli --version
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
@@ -471,14 +473,14 @@ jobs:
         endif()
 
     - name: Install lcov (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install -y lcov
 
     - name: Create lcov report (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         lcov --capture --directory . --ignore-errors mismatch --output-file coverage.info
@@ -486,7 +488,7 @@ jobs:
         lcov --list coverage.info # debug info
 
     - name: Upload coverage to Codecov (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         fail_ci_if_error: true
@@ -494,7 +496,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Store benchmark result (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
       with:
         name: C++ Benchmark
