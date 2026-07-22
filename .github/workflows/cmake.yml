@@ -363,6 +363,7 @@ jobs:
         endif()
 
     - name: Build
+      id: build
       shell: cmake -P {0}
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
@@ -403,6 +404,7 @@ jobs:
             ERROR_VARIABLE output
             ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
           )
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=build\n")
         else()
           execute_process(
             COMMAND cmake --build build --target ${{ matrix.config.targets }}
@@ -411,6 +413,7 @@ jobs:
             ERROR_VARIABLE output
             ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
           )
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }}\n")
         endif()
         if (NOT result EQUAL 0)
           string(REGEX MATCH "FAILED:.*$" error_message "${output}")
@@ -513,14 +516,8 @@ jobs:
         fail-on-alert: false
         alert-comment-cc-users: '@idzm'
 
-
     - name: Install Strip
-      run: |
-        if [ -n "${{ matrix.config.preset }}" ]; then
-          cmake --install bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }} --prefix instdir --strip
-        else
-          cmake --install build --prefix instdir --strip
-        fi
+      run: cmake --install "${{ steps.build.outputs.build_dir }}" --prefix instdir --strip
 
     - name: Pack
       working-directory: instdir
