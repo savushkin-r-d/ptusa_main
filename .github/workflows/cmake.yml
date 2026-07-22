@@ -416,7 +416,10 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}"
             "build_dir=bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }}\n")
         else()
+          message("GITHUB_OUTPUT path: $ENV{GITHUB_OUTPUT}")
           file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=build\n")
+          file(READ "$ENV{GITHUB_OUTPUT}" github_output_contents)
+          message("GITHUB_OUTPUT content: ${github_output_contents}")
         endif()
 
         execute_process(
@@ -529,7 +532,7 @@ jobs:
 
     - name: Install Strip
       run: |
-        cmake --install ${{ steps.cmake_build.outputs.build_dir || 'build'}} --prefix instdir --strip
+        cmake --install ${{ steps.cmake_build.outputs.build_dir }} --prefix instdir --strip
 
     - name: Pack
       working-directory: instdir
