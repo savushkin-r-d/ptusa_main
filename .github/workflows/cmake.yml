@@ -226,7 +226,7 @@ jobs:
           --repo savushkin-r-d/PLCnext_bin \
           --pattern "$plcncli.sh"
         chmod +x "$plcncli.sh"
-        ./$plcncli.sh
+        ./$plcncli.sh --accept
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
