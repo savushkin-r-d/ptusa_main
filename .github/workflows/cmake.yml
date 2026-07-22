@@ -377,7 +377,7 @@ jobs:
         endif()
 
     - name: Build
-      id: build
+      id: cmake_build
       shell: cmake -P {0}
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
@@ -528,7 +528,7 @@ jobs:
         alert-comment-cc-users: '@idzm'
 
     - name: Install Strip
-      run: cmake --install "${{ steps.build.outputs.build_dir }}" --prefix instdir --strip
+      run: cmake --install ${{ steps.cmake_build.outputs.build_dir }} --prefix instdir --strip
 
     - name: Pack
       working-directory: instdir
