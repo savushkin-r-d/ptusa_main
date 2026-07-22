@@ -99,7 +99,7 @@ jobs:
             dir: "2026.0",
             plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
-          {
+        - {
             name: "Linux AXCF3152 2026 LTS",
             artifact: "Linux-AXCF3152-2026.7z",
             os: ubuntu-latest,
