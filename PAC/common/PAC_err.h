@@ -58,7 +58,10 @@ class PAC_critical_errors_manager
             AC_SERVICE = 5,	      ///< Сервисное обслуживание устройства.
 
             /// Режим конфигурирования устройства (PP mode).
-            AC_PP_MODE = 6,
+            AC_PP_MODE = 6,      
+
+            /// Ошибка конфигурации или локальной шины.
+            AC_CFG_BUS_ERROR = 7,
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
