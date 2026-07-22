@@ -96,7 +96,7 @@ jobs:
             axc: "AXCF2152",
             preset: "build-linux-AXCF2152-2026-LTS-Release",
             sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
-            sdk_asset_id: "1307396913",
+            sdk_asset_id: "484392703",
             dir: "2026.0"
           }
     steps:
