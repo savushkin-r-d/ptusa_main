@@ -416,12 +416,11 @@ jobs:
           file(APPEND "$ENV{GITHUB_OUTPUT}"
             "build_dir=bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }}\n")
         else()
-          set(preset)
           file(APPEND "$ENV{GITHUB_OUTPUT}" "build_dir=build\n")
         endif()
 
         execute_process(
-          COMMAND cmake --build ${preset} --target ${{ matrix.config.targets }}
+          COMMAND cmake --build build ${preset} --target ${{ matrix.config.targets }}
           RESULT_VARIABLE result
           OUTPUT_VARIABLE output
           ERROR_VARIABLE output
