@@ -97,7 +97,8 @@ jobs:
             preset: "build-linux-AXCF2152-2026-LTS-Release",
             sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
             sdk_asset_id: "484392703",
-            dir: "2026.0"
+            dir: "2026.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
     steps:
     - name: Harden the runner (Audit all outbound calls)
@@ -202,21 +203,30 @@ jobs:
       if: runner.os == 'Linux'
       run: sudo apt-get install -y unixodbc-dev
 
-    - name: Install PLCnext SDK (Linux only)
+    - name: Install plcncli and PLCnext SDK (Linux only)
       if: runner.os == 'Linux' && matrix.config.preset
       env:
         GITHUB_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
-        curl -L --fail \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          -o ${{ matrix.config.sdk }}.sh \
-          "https://github.com/savushkin-r-d/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
 
-        chmod +x ${{ matrix.config.sdk }}.sh
-        ./${{ matrix.config.sdk }}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
+        sdk = "${{ matrix.config.sdk }}"
+        echo "Downloading PLCnext SDK: $sdk"
+        gh release download $sdk \
+          --repo savushkin-r-d/PLCnext_bin \
+          --pattern "$sdk.sh"
+        chmod +x $sdk.sh
+        ./$sdk.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
         echo "export PATH=/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin:$PATH" >> $GITHUB_ENV
+
+        plcncli = "${{ matrix.config.plcncli }}"
+        echo "Downloading plcncli: $plcncli"
+        gh release download $plcncli \
+          --repo savushkin-r-d/PLCnext_bin \
+          --pattern "$plcncli.sh"
+        chmod +x $plcncli.sh
+        ./$plcncli.sh
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
