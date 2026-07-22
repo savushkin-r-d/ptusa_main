@@ -208,11 +208,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
       shell: bash
       run: |
+        set -euo pipefail
         curl -L --fail \
           -H "Authorization: token $GITHUB_TOKEN" \
-          -H "Accept: application/octet-stream" \
           -o ${{ matrix.config.sdk }}.sh \
-          "https://api.github.com/repos/savushkin-r-d/PLCnext_bin/releases/assets/${{ matrix.config.sdk_asset_id }}"
+          "https://github.com/savushkin-r-d/PLCnext_bin/releases/download/${{ matrix.config.sdk }}/${{ matrix.config.sdk }}.sh"
 
         chmod +x ${{ matrix.config.sdk }}.sh
         ./${{ matrix.config.sdk }}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
