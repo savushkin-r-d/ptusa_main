@@ -238,8 +238,8 @@
       "inherits": "linux-AXCF-default",
       "environment": {
         "ARP_DEVICE": "AXCF2152",
-        "ARP_DEVICE_SHORT_VERSION": "2024_0",
-        "ARP_DEVICE_VERSION": "2024.0.0 LTS (24.0.0.102)"
+        "ARP_DEVICE_SHORT_VERSION": "2024.0",
+        "ARP_DEVICE_VERSION": "2024.0.17 LTS (24.0.17.244)"
       }
     },
     {
