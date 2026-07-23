@@ -86,7 +86,7 @@ jobs:
           }
 
         - {
-            name: "Linux AXCF2152 2024 LTS",
+            name: "Ubuntu Latest AXCF2152 2024 LTS",
             artifact: "Linux-AXCF2152-2024.7z",
             os: ubuntu-latest,
             targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
@@ -96,10 +96,10 @@ jobs:
             preset: "build-linux-AXCF2152-2024-LTS-Release",
             sdk: "axcf2152-linux_sdk-2024.0.17_LTS-24.0.17.244",
             dir: "2024.0",
-            plcncli: "PLCnext_Toolchain_Linux_2024.0-LTS"
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
         - {
-            name: "Linux AXCF2152 2026 LTS",
+            name: "Ubuntu Latest AXCF2152 2026 LTS",
             artifact: "Linux-AXCF2152-2026.7z",
             os: ubuntu-latest,
             targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
@@ -113,7 +113,7 @@ jobs:
           }
 
         - {
-            name: "Linux AXCF3152 2024 LTS",
+            name: "Ubuntu Latest AXCF3152 2024 LTS",
             artifact: "Linux-AXCF3152-2024.7z",
             os: ubuntu-latest,
             targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
@@ -123,10 +123,10 @@ jobs:
             preset: "build-linux-AXCF3152-2024-LTS-Release",
             sdk: "axcf3152-linux_sdk-2024.0.9_LTS-24.0.9.163",
             dir: "2024.0",
-            plcncli: "PLCnext_Toolchain_Linux_2024.0-LTS"
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
         - {
-            name: "Linux AXCF3152 2026 LTS",
+            name: "Ubuntu Latest AXCF3152 2026 LTS",
             artifact: "Linux-AXCF3152-2026.7z",
             os: ubuntu-latest,
             targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
