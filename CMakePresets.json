@@ -206,6 +206,18 @@
         "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
       }
     },
+    {
+      "name": "build-linux-AXCF3152-2024-LTS-Release",
+      "displayName": "Linux AXCF3152 2024.0 LTS Release",
+      "description": "Using Linux OS",
+      "inherits": "linux-AXCF-default",
+      "environment": {
+        "ARP_DEVICE": "AXCF3152",
+        "ARP_DEVICE_SHORT_VERSION": "2024.0",
+        "ARP_DEVICE_VERSION": "2024.0.9 LTS (24.0.9.163)",
+        "ARP_SDK_PACKAGE_NAME": "x86_64-pokysdk-mingw32"
+      }
+    },
 
 
     {
@@ -307,7 +319,11 @@
       "configuration": "Debug"
     },
 
-
+    {
+      "name": "build-linux-AXCF3152-2024-LTS-Release",
+      "displayName": "AXCF3152 2024 LTS",
+      "configurePreset": "build-linux-AXCF3152-2024-LTS-Release"
+    },
     {
       "name": "build-linux-AXCF3152-2026-LTS-Release",
       "displayName": "AXCF3152 2026 LTS",
