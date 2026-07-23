@@ -256,7 +256,7 @@ jobs:
           --pattern "$sdk.sh"
         chmod +x "$sdk.sh"
         ./${sdk}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
-        echo "export PATH=/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin:$PATH" >> $GITHUB_ENV
+        echo "/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin" >> "$GITHUB_PATH"
 
         plcncli="${{ matrix.config.plcncli }}"
         echo "Downloading plcncli: $plcncli"
