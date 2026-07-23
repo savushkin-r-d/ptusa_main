@@ -8,6 +8,10 @@ set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2026.04.02.1)
 
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "CMake executable: ${CMAKE_COMMAND}")
+message(STATUS "CMake configured from: ${CMAKE_BINARY_DIR}")
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
