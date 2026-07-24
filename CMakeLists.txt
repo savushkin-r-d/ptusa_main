@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.31)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2026.04.02.1)
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "CMake executable: ${CMAKE_COMMAND}")
+message(STATUS "CMake configured from: ${CMAKE_BINARY_DIR}")
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -144,7 +148,7 @@ endif()
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_cycle.cpp
-            PAC_control_projects/main_control_prg/main.cpp)
+            PAC_control_projects/main_control_prg/main.cpp )
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
@@ -341,6 +345,7 @@ endif()
 ###############################################################################
 if(LINUX)
     target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
+	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--as-needed)
 endif()
 ###############################################################################
 
@@ -351,17 +356,28 @@ endif()
 ################# add link targets ############################################
 if(ARP_DEVICE)
     find_package(ArpDevice REQUIRED)
-    find_package(ArpProgramming REQUIRED)
+
+    message(STATUS "ARP_DEVICE_VERSION=${ARP_DEVICE_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION=${ARP_DEVICE_SHORT_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION_BUILD=${ARP_DEVICE_SHORT_VERSION_BUILD}")
+
+	if(${ARP_VERSION_MAJOR} GREATER_EQUAL "25")
+		find_package(Arp REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE Arp::ALL)
+	else()
+		find_package(ArpProgramming REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming)
+	endif()
+
+    target_link_libraries(PtusaPLCnextEngineer PRIVATE
+		liblua_static toluapp_lib_static zlibstatic
+		fmt::fmt open62541::open62541)
 endif()
 
 ################# add link targets ############################################
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
-if(ARP_DEVICE)
-    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
-    target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
-endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
 target_link_libraries(libptusa_main open62541::open62541)
