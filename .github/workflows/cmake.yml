@@ -31,21 +31,21 @@ jobs:
     name: ${{ matrix.config.name }}
     if: >-
       ${{
-        github.repository == 'savushkin-r-d/ptusa_main' && 
+        github.repository == 'savushkin-r-d/ptusa_main' &&
           (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
           github.event_name == 'merge_group' ||
-          github.event_name == 'workflow_dispatch' || 
+          github.event_name == 'workflow_dispatch' ||
             (
             github.event_name == 'pull_request_target' &&
-            github.event.pull_request.head.repo.full_name != github.repository && 
+            github.event.pull_request.head.repo.full_name != github.repository &&
               (
               contains(github.event.pull_request.labels.*.name, 'safe to test') ||
               github.event.pull_request.author_association == 'MEMBER' ||
               github.event.pull_request.author_association == 'OWNER'
               )
-            ) || 
+            ) ||
               (
               github.event_name == 'pull_request' &&
               github.event.pull_request.head.repo.full_name == github.repository
@@ -84,6 +84,60 @@ jobs:
             cxx: "g++",
             targets: "ptusa_main libptusa_main main_test main_perfomance_test",
             run_tests: "true"
+          }
+
+        - {
+            name: "Ubuntu Latest AXCF2152 2024 LTS",
+            artifact: "Linux-AXCF2152-2024.7z",
+            os: ubuntu-latest,
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF2152",
+            preset: "build-linux-AXCF2152-2024-LTS-Release",
+            sdk: "axcf2152-linux_sdk-2024.0.17_LTS-24.0.17.244",
+            dir: "2024.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
+          }
+        - {
+            name: "Ubuntu Latest AXCF2152 2026 LTS",
+            artifact: "Linux-AXCF2152-2026.7z",
+            os: ubuntu-latest,
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF2152",
+            preset: "build-linux-AXCF2152-2026-LTS-Release",
+            sdk: "axcf2152-linux_sdk-2026.0.5_LTS-26.0.5.124",
+            dir: "2026.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
+          }
+
+        - {
+            name: "Ubuntu Latest AXCF3152 2024 LTS",
+            artifact: "Linux-AXCF3152-2024.7z",
+            os: ubuntu-latest,
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF3152",
+            preset: "build-linux-AXCF3152-2024-LTS-Release",
+            sdk: "axcf3152-linux_sdk-2024.0.9_LTS-24.0.9.163",
+            dir: "2024.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
+          }
+        - {
+            name: "Ubuntu Latest AXCF3152 2026 LTS",
+            artifact: "Linux-AXCF3152-2026.7z",
+            os: ubuntu-latest,
+            targets: "ptusa_main libptusa_main PtusaPLCnextEngineer",
+            run_tests: "false",
+
+            axc: "AXCF3152",
+            preset: "build-linux-AXCF3152-2026-LTS-Release",
+            sdk: "axcf3152-linux_sdk-2026.0.3_LTS-26.0.3.88",
+            dir: "2026.0",
+            plcncli: "PLCnext_Toolchain_Linux_2026.0-LTS"
           }
     steps:
     - name: Harden the runner (Audit all outbound calls)
@@ -138,6 +192,7 @@ jobs:
         endif()
 
     - name: Download ccache
+      if: ${{ ! matrix.config.preset }}
       id: ccache
       shell: cmake -P {0}
       run: |
@@ -146,6 +201,7 @@ jobs:
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
 
     - name: Prepare ccache timestamp
+      if: ${{ ! matrix.config.preset }}
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
@@ -153,6 +209,7 @@ jobs:
         file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}\n")
 
     - name: ccache cache files
+      if: ${{ ! matrix.config.preset }}
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ runner.os == 'Windows' && format('{0}/ccache', runner.temp) || '.ccache' }}
@@ -165,6 +222,7 @@ jobs:
       run: echo 'man-db man-db/auto-update boolean false' | sudo debconf-set-selections && sudo dpkg-reconfigure man-db
 
     - name: Install yasm
+      if: ${{ ! matrix.config.preset }}
       shell: cmake -P {0}
       run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
@@ -180,8 +238,35 @@ jobs:
         endif()
 
     - name: Install unixodbc-dev (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       run: sudo apt-get install -y unixodbc-dev
+
+    - name: Install plcncli and PLCnext SDK (Linux only)
+      if: runner.os == 'Linux' && matrix.config.preset
+      env:
+        GH_TOKEN: ${{ secrets.PLCNEXT_SDK_TOKEN }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        sdk="${{ matrix.config.sdk }}"
+        echo "Downloading PLCnext SDK: $sdk"
+        gh release download "$sdk" \
+          --repo savushkin-r-d/PLCnext_bin \
+          --pattern "$sdk.sh"
+        chmod +x "$sdk.sh"
+        ./${sdk}.sh -y -d /opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}
+        echo "/opt/pxc/sdks/${{ matrix.config.axc }}/${{ matrix.config.dir }}/bin" >> "$GITHUB_PATH"
+
+        plcncli="${{ matrix.config.plcncli }}"
+        echo "Downloading plcncli: $plcncli"
+        gh release download "$plcncli" \
+          --repo savushkin-r-d/PLCnext_bin \
+          --pattern "$plcncli.sh"
+        chmod +x "$plcncli.sh"
+        ./$plcncli.sh --quiet --accept
+        sudo ln -sf "$GITHUB_WORKSPACE/PLCnext_Toolchain/plcncli" /bin/plcncli
+        plcncli --version
 
     - name: Cache MinGW archive
       if: runner.os == 'Windows' && matrix.config.name == 'Windows Latest MinGW'
@@ -292,23 +377,31 @@ jobs:
             set(ENV{CODE_COVERAGE} "ON")
         endif()
 
-        execute_process(
-          COMMAND cmake
-            -S .
-            -B build
-            -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
-            -G Ninja
-            -D CMAKE_MAKE_PROGRAM=ninja
-            -D CMAKE_C_COMPILER_LAUNCHER=ccache
-            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
-            -D CODE_COVERAGE=$ENV{CODE_COVERAGE}
-          RESULT_VARIABLE result
-        )
+        if (NOT "x${{ matrix.config.preset }}" STREQUAL "x")
+          execute_process(
+            COMMAND cmake --preset ${{ matrix.config.preset }}
+            RESULT_VARIABLE result
+          )
+        else()
+          execute_process(
+            COMMAND cmake
+              -S .
+              -B build
+              -D CMAKE_BUILD_TYPE=$ENV{BUILD_TYPE}
+              -G Ninja
+              -D CMAKE_MAKE_PROGRAM=ninja
+              -D CMAKE_C_COMPILER_LAUNCHER=ccache
+              -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -D CODE_COVERAGE=$ENV{CODE_COVERAGE}
+            RESULT_VARIABLE result
+          )
+        endif()
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
 
     - name: Build
+      id: cmake_build
       shell: cmake -P {0}
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
@@ -339,26 +432,45 @@ jobs:
         if ("${{ matrix.config.cxx }}" STREQUAL "cl")
           set(ENV{CCACHE_MAXSIZE} "600M")
         endif()
-        execute_process(COMMAND ccache -p)
-        execute_process(COMMAND ccache -z)
-        execute_process(
-          COMMAND cmake --build build --target ${{ matrix.config.targets }}
-          RESULT_VARIABLE result
-          OUTPUT_VARIABLE output
-          ERROR_VARIABLE output
-          ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
-        )
+
+        if (NOT "x${{ matrix.config.preset }}" STREQUAL "x")
+          file(APPEND "$ENV{GITHUB_OUTPUT}"
+            "build_dir=bin/build/${{ matrix.config.axc }}_${{ matrix.config.dir }}\n")
+
+          execute_process(
+            COMMAND cmake --build --preset ${{ matrix.config.preset }} --target ${{ matrix.config.targets }}
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+        else()
+          execute_process(COMMAND ccache -p)
+          execute_process(COMMAND ccache -z)
+
+          execute_process(
+            COMMAND cmake --build build --target ${{ matrix.config.targets }}
+            RESULT_VARIABLE result
+            OUTPUT_VARIABLE output
+            ERROR_VARIABLE output
+            ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
+          )
+        endif()
+
         if (NOT result EQUAL 0)
           string(REGEX MATCH "FAILED:.*$" error_message "${output}")
           string(REPLACE "\n" "%0A" error_message "${error_message}")
           message("::error::${error_message}")
           message(FATAL_ERROR "Build failed")
         endif()
-        execute_process(COMMAND ccache -s)
+
+        if ("x${{ matrix.config.preset }}" STREQUAL "x")
+          execute_process(COMMAND ccache -s)
+        endif()
 
     # Install valgrind
     - name: Install valgrind on Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         sudo apt-get update
@@ -409,14 +521,14 @@ jobs:
         endif()
 
     - name: Install lcov (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install -y lcov
 
     - name: Create lcov report (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       shell: bash
       run: |
         lcov --capture --directory . --ignore-errors mismatch --output-file coverage.info
@@ -424,7 +536,7 @@ jobs:
         lcov --list coverage.info # debug info
 
     - name: Upload coverage to Codecov (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         fail_ci_if_error: true
@@ -432,7 +544,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Store benchmark result (Linux only)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && !matrix.config.preset
       uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
       with:
         name: C++ Benchmark
@@ -449,10 +561,9 @@ jobs:
         fail-on-alert: false
         alert-comment-cc-users: '@idzm'
 
-
     - name: Install Strip
-      run: cmake --install build --prefix instdir --strip
-
+      run: |
+        cmake --install ${{ steps.cmake_build.outputs.build_dir || 'build'}} --prefix instdir --strip
 
     - name: Pack
       working-directory: instdir
