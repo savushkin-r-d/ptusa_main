@@ -31,6 +31,7 @@ jobs:
     name: ${{ matrix.config.name }}
     if: >-
       ${{
+        github.repository == 'savushkin-r-d/ptusa_main' &&
           (
           github.event_name == 'push' ||
           github.event_name == 'schedule' ||
