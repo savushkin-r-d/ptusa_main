@@ -654,11 +654,6 @@ int siren_lights_manager::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int siren_lights_manager::set_cmd( const char *prop, u_int idx, const char *val )
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 siren_lights_manager::siren_lights_manager() : par( run_time_params_u_int_4( 1 ) ),
     green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
     is_red_built_in_blink( 0 ), critical_error_n( 0 )

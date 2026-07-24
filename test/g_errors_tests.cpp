@@ -88,9 +88,6 @@ TEST( siren_lights_manager, set_cmd )
     char buff[ BUFF_SIZE ] = { 0 };
 
     G_SIREN_LIGHTS_MANAGER()->save_device( buff );
-    // Do nothing.
-    G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, "1" );
-    EXPECT_STREQ( buff, "t.G_SIREN_MNGR = \n\t{\n\tMANUAL_MODE=0,\n\t}\n" );
 
     // Switch on manual mode.
     G_SIREN_LIGHTS_MANAGER()->set_cmd( "MANUAL_MODE", 0, 1 );
