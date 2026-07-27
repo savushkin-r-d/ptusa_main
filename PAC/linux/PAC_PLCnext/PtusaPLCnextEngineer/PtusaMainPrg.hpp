@@ -19,10 +19,12 @@ namespace PtusaPLCnextEngineer
 
     public:
         // construction/destruction
-        PtusaMainPrg(PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpntArg,
-                const String& name);
-        PtusaMainPrg(const PtusaMainPrg& arg) = delete;
+        PtusaMainPrg( PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpntArg, const String& name );
+#if ARP_ABI_VERSION_MAJOR < 2
+        PtusaMainPrg( const PtusaMainPrg& arg ) = delete;
         virtual ~PtusaMainPrg() = default;
+#endif
+
 
     public:
         // operators

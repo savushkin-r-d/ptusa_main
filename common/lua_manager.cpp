@@ -197,7 +197,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     if ( !package_path.empty() )
         {
         package_path += "'";
-        luaL_dostring( L, ( cmd + package_path ).c_str() );
+        if ( luaL_dostring( L, ( cmd + package_path ).c_str() ) != 0 )
+            {
+            G_LOG->critical(
+                "Error during C++ call - \"lua_manager::init\" - %s",
+                lua_tostring( L, -1 ) );
+
+            lua_pop( L, 1 );
+            return 1;
+            }
         }
 
     //I
@@ -258,8 +266,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( luaL_dofile( L, path ) != 0 )
             {
-            sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-            G_LOG->write_log( i_log::P_CRIT );
+            G_LOG->critical( "%s", lua_tostring( L, -1 ) );
             lua_pop( L, 1 );
 
             return 1;
@@ -308,18 +315,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     if( luaL_loadfile( L, script_name ) != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
 
     if ( int i_line = lua_pcall(L, 0, LUA_MULTRET, 0); i_line != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
@@ -341,9 +344,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_rus", "lua_manager::init" );
     if ( 0 == PAC_name_rus )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (rus)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (rus)." );
         return 1;
         }
     const char *PAC_name_eng =
@@ -351,9 +352,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_eng", "lua_manager::init" );
     if ( 0 == PAC_name_eng )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (eng)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (eng)." );
         return 1;
         }
 
