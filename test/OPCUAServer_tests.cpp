@@ -207,10 +207,15 @@ TEST( OPCUA_server, add_device_methods )
     {
     UA_NodeId deviceId{};
     G_OPCUA_SERVER.add_device_methods( deviceId, nullptr );
-    }    
+    }
 
 TEST( OPCUA_server, methods_callbacks )
     {
+    const auto PREV_P_V_OFF_DELAY_TIME_VALUE = G_PAC_INFO()->par[
+        PAC_info::PARAMETERS::P_V_OFF_DELAY_TIME ];
+    const auto PREV_P_IS_OPC_UA_SERVER_CONTROL_VALUE =
+        G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ];
+
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
         "ValveM", "Test Valve", "" );
     auto dev = G_DEVICE_MANAGER()->get_device( "ValveM" );
@@ -317,5 +322,10 @@ TEST( OPCUA_server, methods_callbacks )
         nullptr, dev, nullptr, nullptr, 1, &in, 0, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BADUSERACCESSDENIED, res );
 
+
+    G_PAC_INFO()->par[ PAC_info::PARAMETERS::P_V_OFF_DELAY_TIME ] =
+        PREV_P_V_OFF_DELAY_TIME_VALUE;
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] =
+        PREV_P_IS_OPC_UA_SERVER_CONTROL_VALUE;
     G_DEVICE_MANAGER()->clear_io_devices();
     }

@@ -151,7 +151,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
         return;
         }
 
-    UA_MethodAttributes methodAttr = UA_MethodAttributes_default;
+    auto methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "set_state" );
     methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "Установить новое состояние." );
@@ -166,11 +166,19 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     inputState.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
     inputState.valueRank = UA_VALUERANK_SCALAR;
 
-    UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "set_state" );
-    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+    auto qn = UA_QUALIFIEDNAME_ALLOC( 1, "set_state" );
+    auto addMethodStatus = UA_Server_addMethodNode( server,
+        UA_NODEID_NULL, deviceId,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         qn, methodAttr, method_set_state,
         1, &inputState, 0, nullptr, dev, nullptr );
+    if ( addMethodStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
+            "failed for set_state: `%s` (0x%08x)",
+            UA_StatusCode_name( addMethodStatus ),
+            static_cast<unsigned int>( addMethodStatus ) );
+        }
 
     UA_MethodAttributes_clear( &methodAttr );
     UA_Argument_clear( &inputState );
@@ -192,10 +200,18 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     inputValue.valueRank = UA_VALUERANK_SCALAR;
 
     qn = UA_QUALIFIEDNAME_ALLOC( 1, "set_value" );
-    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+    addMethodStatus = UA_Server_addMethodNode( server,
+        UA_NODEID_NULL, deviceId,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         qn, methodAttr, method_set_value,
         1, &inputValue, 0, nullptr, dev, nullptr );
+    if ( addMethodStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
+            "failed for set_state: `%s` (0x%08x)",
+            UA_StatusCode_name( addMethodStatus ),
+            static_cast<unsigned int>( addMethodStatus ) );
+        }
 
     UA_MethodAttributes_clear( &methodAttr );
     UA_Argument_clear( &inputValue );
@@ -208,10 +224,18 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     methodAttr.userExecutable = true;
 
     qn = UA_QUALIFIEDNAME_ALLOC( 1, "on" );
-    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+    addMethodStatus = UA_Server_addMethodNode( server,
+        UA_NODEID_NULL, deviceId,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         qn, methodAttr, method_on,
         0, nullptr, 0, nullptr, dev, nullptr );
+    if ( addMethodStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
+            "failed for set_state: `%s` (0x%08x)",
+            UA_StatusCode_name( addMethodStatus ),
+            static_cast<unsigned int>( addMethodStatus ) );
+        }
 
     UA_MethodAttributes_clear( &methodAttr );
     UA_QualifiedName_clear( &qn );
@@ -223,10 +247,18 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     methodAttr.userExecutable = true;
 
     qn = UA_QUALIFIEDNAME_ALLOC( 1, "off" );
-    UA_Server_addMethodNode( server, UA_NODEID_NULL, deviceId,
+    is_dev_objects_created = UA_Server_addMethodNode( server,
+        UA_NODEID_NULL, deviceId,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         qn, methodAttr, method_off,
         0, nullptr, 0, nullptr, dev, nullptr );
+    if ( addMethodStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
+            "failed for set_state: `%s` (0x%08x)",
+            UA_StatusCode_name( addMethodStatus ),
+            static_cast<unsigned int>( addMethodStatus ) );
+        }
 
     UA_MethodAttributes_clear( &methodAttr );
     UA_QualifiedName_clear( &qn );
@@ -451,7 +483,7 @@ UA_StatusCode OPCUA_server::method_set_state( UA_Server*,
     const auto state = *static_cast<UA_Int32*>( input[ 0 ].data );
     dev->set_state( state );
 
-    G_LOG->debug( "%s\t OPCUA_server::method_set_state( %d )", 
+    G_LOG->debug( "%s\t OPCUA_server::method_set_state( %d )",
         dev->get_name(), state );
 
     return UA_STATUSCODE_GOOD;
