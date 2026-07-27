@@ -36,7 +36,7 @@ void OPCUA_server::create_dev_objects()
     //Create root object node.
     UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
     oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "devices" );
-    oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru", "devices" );
+    oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "devices" );
     UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "devices" );
     UA_Server_addObjectNode( server, UA_NODEID_NULL,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
@@ -57,7 +57,7 @@ void OPCUA_server::create_dev_objects()
         //Create object node.
         oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
             dev->get_name() );
-        oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru",
+        oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
             dev->get_description() );
         qn = UA_QUALIFIEDNAME_ALLOC( 1, dev->get_name() );
         UA_Server_addObjectNode( server, UA_NODEID_NULL,
@@ -275,7 +275,7 @@ void OPCUA_server::create_PAC_info()
     UA_ObjectAttributes PAC_InfoObjAttr = UA_ObjectAttributes_default;
     PAC_InfoObjAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
         "PAC_info" );
-    PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-ru",
+    PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "PAC_info" );
     UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "PAC_info" );
     UA_Server_addObjectNode( server, UA_NODEID_NULL,
