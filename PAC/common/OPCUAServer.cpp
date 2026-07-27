@@ -219,7 +219,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "on" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Включение." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Включить." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
@@ -242,7 +242,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
 
     methodAttr = UA_MethodAttributes_default;
     methodAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "off" );
-    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Выключение." );
+    methodAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "Выключить." );
     methodAttr.executable = true;
     methodAttr.userExecutable = true;
 
