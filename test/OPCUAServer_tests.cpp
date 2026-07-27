@@ -243,8 +243,11 @@ TEST( OPCUA_server, methods_callbacks )
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     // Вызываем evaluate() для обработки задержки выключения клапана.
     G_PAC_INFO()->par[ PAC_info::PARAMETERS::P_V_OFF_DELAY_TIME ] = 0;
-    sleep_ms( 1 );
-    valve::evaluate();
+    for ( auto i = 0; i < 10 && dev->get_state() != 0; ++i )
+        {
+        sleep_ms( 1 );
+        valve::evaluate();
+        }
     EXPECT_EQ( 0, dev->get_state() );
 
     res = OPCUA_server::method_on( nullptr, nullptr, nullptr,
