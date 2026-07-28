@@ -203,7 +203,7 @@ TEST( OPCUA_server, evaluate )
     G_DEVICE_MANAGER()->clear_io_devices();
     }
 
-TEST( OPCUA_server, add_device_methods )
+TEST( OPCUA_server, add_device_methods_nullptr )
     {
     UA_NodeId deviceId{};
     G_OPCUA_SERVER.add_device_methods( deviceId, nullptr );
