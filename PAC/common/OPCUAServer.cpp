@@ -46,10 +46,11 @@ void OPCUA_server::create_dev_objects()
         oAttr, nullptr, &dev_root );
     if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
         {
-        G_LOG->debug( "OPCUA_server::UA_Server_addObjectNode "
-            "failed: `%s` (0x%08x)",
+        G_LOG->error( "OPCUA_server::UA_Server_addObjectNode "
+            "failed create root object node: `%s` (0x%08x)",
             UA_StatusCode_name( addObjectNodeStatus ),
             static_cast<unsigned int>( addObjectNodeStatus ) );
+        return;
         }
 
     UA_ObjectAttributes_clear( &oAttr );
@@ -76,10 +77,12 @@ void OPCUA_server::create_dev_objects()
             oAttr, nullptr, &deviceId );
         if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
             {
-            G_LOG->debug( "OPCUA_server::UA_Server_addObjectNode "
-                "failed: `%s` (0x%08x)",
+            G_LOG->error( "OPCUA_server::UA_Server_addObjectNode "
+                "failed add device node (`%s`): `%s` (0x%08x)",
+                dev->get_name(),
                 UA_StatusCode_name( addObjectNodeStatus ),
                 static_cast<unsigned int>( addObjectNodeStatus ) );
+            continue;
             }
         UA_ObjectAttributes_clear( &oAttr );
         UA_QualifiedName_clear( &qn );
@@ -309,12 +312,20 @@ void OPCUA_server::create_PAC_info()
     PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "PAC_info" );
     UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "PAC_info" );
-    UA_Server_addObjectNode( server, UA_NODEID_NULL,
+    auto addObjectNodeStatus = UA_Server_addObjectNode( server, UA_NODEID_NULL,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
         UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
         qn,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
         PAC_InfoObjAttr, nullptr, &PAC_NodeId );
+    if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->error( "OPCUA_server::UA_Server_addObjectNode "
+            "failed create PAC info node: `%s` (0x%08x)",
+            UA_StatusCode_name( addObjectNodeStatus ),
+            static_cast<unsigned int>( addObjectNodeStatus ) );
+        return;
+        }
     UA_ObjectAttributes_clear( &PAC_InfoObjAttr );
     UA_QualifiedName_clear( &qn );
 
