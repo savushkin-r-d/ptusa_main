@@ -34,16 +34,24 @@ void OPCUA_server::create_dev_objects()
 
     UA_NodeId dev_root;
     //Create root object node.
-    UA_ObjectAttributes oAttr = UA_ObjectAttributes_default;
+    auto oAttr = UA_ObjectAttributes_default;
     oAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US", "devices" );
     oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU", "devices" );
-    UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "devices" );
-    UA_Server_addObjectNode( server, UA_NODEID_NULL,
+    auto qn = UA_QUALIFIEDNAME_ALLOC( 1, "devices" );
+    auto addObjectNodeStatus = UA_Server_addObjectNode( server, UA_NODEID_NULL,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
         UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
         qn,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
         oAttr, nullptr, &dev_root );
+    if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
+        {
+        G_LOG->debug( "OPCUA_server::UA_Server_addObjectNode "
+            "failed: `%s` (0x%08x)",
+            UA_StatusCode_name( addObjectNodeStatus ),
+            static_cast<unsigned int>( addObjectNodeStatus ) );
+        }
+
     UA_ObjectAttributes_clear( &oAttr );
     UA_QualifiedName_clear( &qn );
 
@@ -60,17 +68,24 @@ void OPCUA_server::create_dev_objects()
         oAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
             dev->get_description() );
         qn = UA_QUALIFIEDNAME_ALLOC( 1, dev->get_name() );
-        UA_Server_addObjectNode( server, UA_NODEID_NULL,
+        addObjectNodeStatus= UA_Server_addObjectNode( server, UA_NODEID_NULL,
             dev_root,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
             qn,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
             oAttr, nullptr, &deviceId );
+        if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->debug( "OPCUA_server::UA_Server_addObjectNode "
+                "failed: `%s` (0x%08x)",
+                UA_StatusCode_name( addObjectNodeStatus ),
+                static_cast<unsigned int>( addObjectNodeStatus ) );
+            }
         UA_ObjectAttributes_clear( &oAttr );
         UA_QualifiedName_clear( &qn );
 
         //Creating value variable node.
-        UA_VariableAttributes valueAttr = UA_VariableAttributes_default;
+        auto valueAttr = UA_VariableAttributes_default;
         valueAttr.accessLevel = UA_ACCESSLEVELMASK_READ |
             UA_ACCESSLEVELMASK_WRITE;
         UA_Float value = 0;
@@ -84,14 +99,22 @@ void OPCUA_server::create_dev_objects()
         valueAttr.displayName = UA_LOCALIZEDTEXT_ALLOC( "en-US",
             VALUE.c_str() );
         valueAttr.dataType = UA_TYPES[ UA_TYPES_FLOAT ].typeId;
-        UA_NodeId valueNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
+        auto valueNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         qn = UA_QUALIFIEDNAME_ALLOC( 1, VALUE.c_str() );
-        UA_Server_addVariableNode( server, valueNodeId, deviceId,
+        auto addVariableNodeStatus = UA_Server_addVariableNode( server,
+            valueNodeId, deviceId,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
             qn,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
             valueAttr, dev, nullptr );
+        if ( addVariableNodeStatus != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->debug( "OPCUA_server::UA_Server_addVariableNode "
+                "failed: `%s` (0x%08x)",
+                UA_StatusCode_name( addVariableNodeStatus ),
+                static_cast<unsigned int>( addVariableNodeStatus ) );
+            }
         UA_VariableAttributes_clear( &valueAttr );
         UA_QualifiedName_clear( &qn );
 
@@ -105,7 +128,7 @@ void OPCUA_server::create_dev_objects()
         UA_NodeId_clear( &valueNodeId );
 
         //Creating state variable node.
-        UA_VariableAttributes stateAttr = UA_VariableAttributes_default;
+        auto stateAttr = UA_VariableAttributes_default;
         stateAttr.accessLevel = UA_ACCESSLEVELMASK_READ |
             UA_ACCESSLEVELMASK_WRITE;
         UA_Int32 state = 0;
@@ -119,14 +142,22 @@ void OPCUA_server::create_dev_objects()
         stateAttr.displayName = UA_LOCALIZEDTEXT_ALLOC(
             "en-US", STATE.c_str() );
         stateAttr.dataType = UA_TYPES[ UA_TYPES_INT32 ].typeId;
-        UA_NodeId stateNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
+        auto stateNodeId = UA_NODEID_STRING_ALLOC( 0, node_name.c_str() );
 
         qn = UA_QUALIFIEDNAME_ALLOC( 1, STATE.c_str() );
-        UA_Server_addVariableNode( server, stateNodeId, deviceId,
+        addVariableNodeStatus = UA_Server_addVariableNode( server,
+            stateNodeId, deviceId,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
             qn,
             UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEDATAVARIABLETYPE ),
             stateAttr, dev, nullptr );
+        if ( addVariableNodeStatus != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->debug( "OPCUA_server::UA_Server_addVariableNode "
+                "failed: `%s` (0x%08x)",
+                UA_StatusCode_name( addVariableNodeStatus ),
+                static_cast<unsigned int>( addVariableNodeStatus ) );
+            }
         UA_VariableAttributes_clear( &stateAttr );
         UA_QualifiedName_clear( &qn );
 
