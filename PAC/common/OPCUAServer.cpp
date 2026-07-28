@@ -278,7 +278,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     methodAttr.userExecutable = true;
 
     qn = UA_QUALIFIEDNAME_ALLOC( 1, "off" );
-    is_dev_objects_created = UA_Server_addMethodNode( server,
+    addMethodStatus = UA_Server_addMethodNode( server,
         UA_NODEID_NULL, deviceId,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_HASCOMPONENT ),
         qn, methodAttr, method_off,
