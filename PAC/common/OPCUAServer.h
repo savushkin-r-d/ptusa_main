@@ -61,7 +61,7 @@ class OPCUA_server
 
 
         static UA_StatusCode read_PAC_info_value( UA_Server*, const UA_NodeId*, void*,
-            const UA_NodeId*, void* nodeContext, UA_Boolean, const UA_NumericRange*,
+            const UA_NodeId*, void*, UA_Boolean, const UA_NumericRange*,
             UA_DataValue* dataValue );
 
         static UA_StatusCode method_set_state( UA_Server* server,

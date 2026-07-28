@@ -474,7 +474,7 @@ UA_StatusCode OPCUA_server::write_value( UA_Server*,
     }
 
 UA_StatusCode OPCUA_server::read_PAC_info_value( UA_Server*, const UA_NodeId*,
-    void*, const UA_NodeId*, void* nodeContext, UA_Boolean,
+    void*, const UA_NodeId*, void*, UA_Boolean,
     const UA_NumericRange*, UA_DataValue* dataValue )
     {
     static auto value = UA_STRING( const_cast<char*>(
