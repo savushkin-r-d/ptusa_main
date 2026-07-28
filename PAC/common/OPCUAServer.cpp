@@ -312,13 +312,15 @@ void OPCUA_server::create_PAC_info()
     PAC_InfoObjAttr.description = UA_LOCALIZEDTEXT_ALLOC( "ru-RU",
         "PAC_info" );
     UA_QualifiedName qn = UA_QUALIFIEDNAME_ALLOC( 1, "PAC_info" );
-    auto addObjectNodeStatus = UA_Server_addObjectNode( server, UA_NODEID_NULL,
+
+    if ( auto addObjectNodeStatus = UA_Server_addObjectNode( server,
+        UA_NODEID_NULL,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER ),
         UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES ),
         qn,
         UA_NODEID_NUMERIC( 0, UA_NS0ID_BASEOBJECTTYPE ),
         PAC_InfoObjAttr, nullptr, &PAC_NodeId );
-    if ( addObjectNodeStatus != UA_STATUSCODE_GOOD )
+        addObjectNodeStatus != UA_STATUSCODE_GOOD )
         {
         G_LOG->error( "OPCUA_server::UA_Server_addObjectNode "
             "failed create PAC info node: `%s` (0x%08x)",
