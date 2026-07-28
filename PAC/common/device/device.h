@@ -624,7 +624,7 @@ class concentration_e_iolink : public analog_io_device
 
         QT_data* info = new QT_data();
 
-        enum CONSTANTS
+        enum class CONSTANTS
             {
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
 

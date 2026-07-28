@@ -2409,11 +2409,15 @@ TEST_F( iolink_dev_test, concentration_e_iolink_get_value_clamps_to_p_max_v )
     EXPECT_NEAR( test_dev.get_value(), 5.0f, .001f );
 
     // Set P_MAX_V to 3.0 to clamp value.
-    test_dev.set_par( concentration_e_iolink::CONSTANTS::P_MAX_V, 0, 3.0f );
+    test_dev.set_par(
+        static_cast<int>( concentration_e_iolink::CONSTANTS::P_MAX_V ),
+        0, 3.0f );
     EXPECT_NEAR( test_dev.get_value(), 3.0f, .001f );
 
     // When value is within range, P_MAX_V should not affect the result.
-    test_dev.set_par( concentration_e_iolink::CONSTANTS::P_MAX_V, 0, 10.0f );
+    test_dev.set_par(
+        static_cast<int>( concentration_e_iolink::CONSTANTS::P_MAX_V ),
+        0, 10.0f );
     EXPECT_NEAR( test_dev.get_value(), 5.0f, .001f );
 
     G_PAC_INFO()->emulation_on();

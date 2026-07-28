@@ -3802,10 +3802,10 @@ int concentration_e_ok::save_device_ex( char* buff ) const
 //-----------------------------------------------------------------------------
 concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     analog_io_device( dev_name,
-    DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 )
+    DT_QT, DST_QT_IOLINK, static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
-    set_par_name( P_ERR, 0, "P_ERR" );
-    set_par_name( P_MAX_V, 0, "P_MAX_V" );
+    set_par_name( static_cast<int>( CONSTANTS::P_ERR ), 0, "P_ERR" );
+    set_par_name( static_cast<int>( CONSTANTS::P_MAX_V ), 0, "P_MAX_V" );
     };
 //-----------------------------------------------------------------------------
 concentration_e_iolink::~concentration_e_iolink()
@@ -3833,15 +3833,16 @@ float concentration_e_iolink::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_value();
 
-    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+    if ( get_AI_IOLINK_state( static_cast<int>( CONSTANTS::C_AI_INDEX ) ) !=
+        io_device::IOLINKSTATE::OK )
         {
-        return get_par( P_ERR, 0 );
+        return get_par( static_cast<int>( CONSTANTS::P_ERR ), 0 );
         }
     else
         {
         auto v = 0.001f * info->conductivity;
-        auto max_v = get_par( P_MAX_V, 0 );
-        if ( max_v > 0 && v > max_v )
+        if ( auto max_v = get_par( static_cast<int>( CONSTANTS::P_MAX_V ), 0 );
+            max_v > 0 && v > max_v )
             {
             return max_v;
             }
@@ -3853,10 +3854,11 @@ int concentration_e_iolink::get_state() const
 	{
     if ( G_PAC_INFO()->is_emulator() ) return analog_io_device::get_state();
 
-    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    IOLINKSTATE res = get_AI_IOLINK_state(
+        static_cast<int>( CONSTANTS::C_AI_INDEX ) );
     if ( res != io_device::IOLINKSTATE::OK )
         {
-        return -(int)res;
+        return -static_cast<int>( res );
         }
     else
         {
