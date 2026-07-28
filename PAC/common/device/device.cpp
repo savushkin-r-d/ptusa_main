@@ -3840,7 +3840,7 @@ float concentration_e_iolink::get_value() const
         }
     else
         {
-        auto v = 0.001f * info->conductivity;
+        auto v = 0.001f * static_cast<float>( info->conductivity );
         if ( auto max_v = get_par( static_cast<int>( CONSTANTS::P_MAX_V ), 0 );
             max_v > 0 && v > max_v )
             {
