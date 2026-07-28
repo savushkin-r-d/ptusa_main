@@ -2,6 +2,7 @@
 #include "console.h"
 #include "log.h"
 #include "PAC_err.h"
+#include "PAC_info.h"
 
 modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout )
     {
@@ -15,6 +16,8 @@ modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
     modbus_expected_length = 0;
     stationid = 1;
     prev_connected_state = tcp_client::ACS_DISCONNECTED;
+    disconnected_state_start_time = get_millisec();
+    is_disconnect_reported = false;
     }
 
 modbus_client::~modbus_client()
@@ -486,23 +489,41 @@ int modbus_client::get_connected_state()
 
 void modbus_client::check_connection_state_changed()
     {
-    int current_state = tcpclient->get_connected_state();
-    if ( current_state == prev_connected_state )
+    const int current_state = tcpclient->get_connected_state();
+    if ( current_state == tcp_client::ACS_CONNECTED )
         {
+        disconnected_state_start_time = 0;
+        if ( prev_connected_state != tcp_client::ACS_CONNECTED )
+            {
+            G_LOG->info( "Modbus client %d: connected to \"%s\".",
+                tcpclient->get_id(), tcpclient->ip );
+            auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
+            pac_err_mngr->reset_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+                tcpclient->get_id() );
+            }
+
+        is_disconnect_reported = false;
+        prev_connected_state = current_state;
         return;
         }
 
-    if ( current_state == tcp_client::ACS_CONNECTED )
+    if ( prev_connected_state == tcp_client::ACS_CONNECTED )
         {
-        G_LOG->info( "Modbus client %d: connected to \"%s\".",
-            tcpclient->get_id(), tcpclient->ip );
-        auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
-        pac_err_mngr->reset_global_error(
-            PAC_critical_errors_manager::AC_NO_CONNECTION,
-            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id() );
+        disconnected_state_start_time = get_millisec();
+        is_disconnect_reported = false;
         }
-    else if ( prev_connected_state == tcp_client::ACS_CONNECTED )
+    else if ( disconnected_state_start_time == 0 )
+        {
+        disconnected_state_start_time = get_millisec();
+        }
+
+    const auto wait_time =
+        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ];
+
+    if ( !is_disconnect_reported &&
+        get_delta_millisec( disconnected_state_start_time ) >= wait_time )
         {
         G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
@@ -511,6 +532,7 @@ void modbus_client::check_connection_state_changed()
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
             tcpclient->get_id() );
+        is_disconnect_reported = true;
         }
 
     prev_connected_state = current_state;
