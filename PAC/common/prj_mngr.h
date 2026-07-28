@@ -35,6 +35,13 @@ class project_manager
         /// @param argv - массив параметров.
         int proc_main_params( int argc, const char *argv[] );
 
+        /// @brief Применение сохраненного режима OPC UA.
+        ///
+        /// @param show_msg - выводить ли сообщение о примененном режиме.
+        ///
+        /// @return 0 - ОК.
+        int apply_opc_mode( bool show_msg = true ) const;
+
         /// @brief Загрузка системной конфигурации проекта на основе скрипта.
         ///
         /// Системная конфигурация была предварительно загружена из файла
@@ -63,6 +70,18 @@ class project_manager
         unsigned int sleep_time_ms = 0;
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
+
+        void log_opc_mode() const;
+
+        enum class OPC_MODE
+            {
+            UNDEFINED,
+            OFF,
+            READ_ONLY,
+            READ_WRITE
+            };
+
+        OPC_MODE opc_mode = OPC_MODE::UNDEFINED;
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < project_manager > instance;
