@@ -400,7 +400,7 @@ TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
 
 TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     {
-    auto* mngr = PAC_critical_errors_manager::get_instance();
+    const auto* mngr = PAC_critical_errors_manager::get_instance();
     G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 100;
 
     // Simulate connection established.
@@ -430,7 +430,7 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
 TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
     {
-    auto* mngr = PAC_critical_errors_manager::get_instance();
+    const auto* mngr = PAC_critical_errors_manager::get_instance();
 
     // State stays disconnected -- prev should remain ACS_DISCONNECTED.
     DeltaMilliSecSubHooker::set_millisec( 999 );
