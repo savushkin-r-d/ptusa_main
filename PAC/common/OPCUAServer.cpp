@@ -239,7 +239,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     if ( addMethodStatus != UA_STATUSCODE_GOOD )
         {
         G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
-            "failed for set_state: `%s` (0x%08x)",
+            "failed for set_value: `%s` (0x%08x)",
             UA_StatusCode_name( addMethodStatus ),
             static_cast<unsigned int>( addMethodStatus ) );
         }
@@ -263,7 +263,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     if ( addMethodStatus != UA_STATUSCODE_GOOD )
         {
         G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
-            "failed for set_state: `%s` (0x%08x)",
+            "failed for on: `%s` (0x%08x)",
             UA_StatusCode_name( addMethodStatus ),
             static_cast<unsigned int>( addMethodStatus ) );
         }
@@ -286,7 +286,7 @@ void OPCUA_server::add_device_methods( const UA_NodeId& deviceId, device* dev )
     if ( addMethodStatus != UA_STATUSCODE_GOOD )
         {
         G_LOG->debug( "OPCUA_server::UA_Server_addMethodNode "
-            "failed for set_state: `%s` (0x%08x)",
+            "failed for off: `%s` (0x%08x)",
             UA_StatusCode_name( addMethodStatus ),
             static_cast<unsigned int>( addMethodStatus ) );
         }
