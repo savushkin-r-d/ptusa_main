@@ -1,5 +1,5 @@
 #include <string.h>
-#include <fmt/core.h>
+#include "fmt/format.h"
 #include <inttypes.h>
 
 #include "PAC_info.h"
@@ -85,24 +85,26 @@ void PAC_info::eval()
 void PAC_info::reset_params()
     {
     par[ P_MIX_FLIP_PERIOD ] = 180;
-    par[ P_MIX_FLIP_UPPER_TIME ] = 2000;
-    par[ P_MIX_FLIP_LOWER_TIME ] = 1000;
-    par[ P_V_OFF_DELAY_TIME ] = 1000;
-    par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
+    par[ P_MIX_FLIP_UPPER_TIME ] = 2'000;
+    par[ P_MIX_FLIP_LOWER_TIME ] = 1'000;
+    par[ P_V_OFF_DELAY_TIME ] = 1'000;
+    par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1'200;
 
     par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] = 50;
     par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] = 300;
 
     par[ P_RESTRICTIONS_MODE ] = 0;
-    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1000; // 2 min
+    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1'000; // 2 minutes.
 
     par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
 
-    par[ P_AUTO_OPERATION_WAIT_TIME ] = 60000;
-    par[ P_AUTO_OPERATION_WARN_TIME ] = 20000;
+    par[ P_AUTO_OPERATION_WAIT_TIME ] = 60'000;
+    par[ P_AUTO_OPERATION_WARN_TIME ] = 20'000;
 
     par[ P_IS_OPC_UA_SERVER_ACTIVE ] = 1;
     par[ P_IS_OPC_UA_SERVER_CONTROL ] = 0;
+
+    par[ P_BK_ANSWER_MAX_WAIT_TIME ] = 6'000;   // 6 seconds.
 
     par.save_all();
     }
@@ -165,8 +167,9 @@ int PAC_info::save_device( char* buff ) const
     for ( unsigned int i = 0; i < nc; i++ )
         {
         auto wn = io_manager::get_instance()->get_node( i );
+        const char* active_str = wn->is_active ? "1, " : "0, ";
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-            wn->is_active ? "1, " : "0, " ).size;
+            "{}", active_str ).size;
         }
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 
@@ -186,12 +189,15 @@ int PAC_info::save_device( char* buff ) const
         "\tP_IS_OPC_UA_SERVER_CONTROL={},\n", par[ P_IS_OPC_UA_SERVER_CONTROL ] ).size;
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tP_BK_ANSWER_MAX_WAIT_TIME={},\n", par[ P_BK_ANSWER_MAX_WAIT_TIME ] ).size;
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tNODES_COMM_ERROR={},\n", nodes_comm_error ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tCOMMUN_ERROR={},\n", commun_error ).size;
-    
+
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
@@ -219,32 +225,31 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
         {
-        switch ((COMMANDS)(int)val)
+        switch ( static_cast<COMMANDS>( static_cast<int>( val ) ) )
             {
-            case CLEAR_RESULT_CMD:
+            case COMMANDS::CLEAR_RESULT_CMD:
                 cmd = 0;
                 break;
 
-            case RELOAD_RESTRICTIONS:
+            case COMMANDS::RELOAD_RESTRICTIONS:
                 {
-                if (G_DEBUG)
-                    {
-                    G_LOG->notice("Reload restrictions (remote monitor client command).");
-                    }
+                G_LOG->notice( "Reload restrictions (remote monitor "
+                    "client command)." );
                 const int SCRIPT_N = 7;
                 cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
                     cmd_answer, sizeof( cmd_answer ) );
                 return cmd;
                 }
 
-            case RESET_PARAMS:
-                if ( G_DEBUG )
-                    {
-                    G_LOG->notice( "Resetting params (remote monitor client command)." );
-                    }
+            case COMMANDS::RESET_PARAMS:
+                auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                G_LOG->notice( "Resetting parameters (remote monitor "
+                    "client command)." );
                 params_manager::get_instance()->reset_params_size();
                 params_manager::get_instance()->final_init();
-                break;
+
+                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                return proc_OPC( prev_val, new_val, false );
             }
 
         return 0;
@@ -290,7 +295,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         par.save( P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME, (u_int_4)val );
         return 0;
         }
-
 
     if ( strcmp( prop, "P_RESTRICTIONS_MODE" ) == 0 )
         {
@@ -341,54 +345,59 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     io_manager::get_instance()->disconnect( wn );
                     wn->is_active = 0;
                     }
+                // Если с узлом ранее не было связи и мы его хотим
+                // отключить для обслуживания, то активная ошибка отсутствия
+                // связи удаляется без записи в лог сообщения о том, что с
+                // узлом появилась связь.
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                    false );
+                wn->is_set_err = false;
+
+                // Если была активна данная ошибка, удаляем её аналогично.
+                if ( wn->is_err_mode_alarm_set )
+                    {
+                    PAC_critical_errors_manager::get_instance()->reset_global_error(
+                        PAC_critical_errors_manager::AC_PP_MODE,
+                        PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                        false );
+                    wn->is_err_mode_alarm_set = false;
+                    wn->prev_status_register = 0;
+                    }
+
+                // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
-                PAC_critical_errors_manager::get_instance()->reset_global_error(
-                    PAC_critical_errors_manager::AC_NO_CONNECTION,
-                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
-                wn->is_set_err = false;
                 }
             if ( 100 == val ) //Сброс ошибки.
                 {
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
+                wn->is_set_err = false;
+
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
-                PAC_critical_errors_manager::get_instance()->reset_global_error(
-                    PAC_critical_errors_manager::AC_NO_CONNECTION,
-                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
-                wn->is_set_err = false;
                 }
+
+            return 0;
             }
         }
 
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
-
-        auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
-        if ( val == 0 && prev_val == 1 )
+        if ( val == 0.0f || val == 1.f )
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-
-            G_OPCUA_SERVER.shutdown();
+            auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+            return proc_OPC( prev_val, static_cast<int>( val ), true );
             }
-        else if ( val == 1 && prev_val == 0 )
+        else
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            auto retval = G_OPCUA_SERVER.init_all_and_start();
-            if ( retval != UA_STATUSCODE_GOOD )
-                {
-                G_LOG->error( "OPC UA server start failed. Returned error code 0x%X!",
-                    retval );
-
-                auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
-                    "{}", G_LOG->msg );
-                *r.out = '\0';
-
-                G_OPCUA_SERVER.shutdown();
-                return 1;
-                }
+            return 10;
             }
         }
 
@@ -398,7 +407,49 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         return 0;
         }
 
+    if ( strcmp( prop, "P_BK_ANSWER_MAX_WAIT_TIME" ) == 0 )
+        {
+        par.save( P_BK_ANSWER_MAX_WAIT_TIME, static_cast<u_int_4>( val ) );
+        return 0;
+        }
+
     return 0;
+    }
+
+int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
+    {
+    if ( val == prev_val )
+        {
+        return 0;
+        }
+
+    if ( val == 0 && prev_val == 1 )
+        {
+        G_OPCUA_SERVER.shutdown();
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+        return 0;
+        }
+    else if ( val == 1 && prev_val == 0 )
+        {
+        if ( auto retval = G_OPCUA_SERVER.init_all_and_start();
+            retval != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->error( "OPC UA server start failed (0x%X). %s",
+                retval, UA_StatusCode_name( retval ) );
+            auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
+                "{}", G_LOG->msg );
+            *r.out = '\0';
+
+            G_OPCUA_SERVER.shutdown();
+            return 1;
+            }
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+        return 0;
+        }
+
+    return 10;
     }
 
 bool PAC_info::is_emulator() const

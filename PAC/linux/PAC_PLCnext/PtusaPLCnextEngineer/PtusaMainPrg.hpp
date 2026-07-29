@@ -15,14 +15,16 @@ namespace PtusaPLCnextEngineer
     class PtusaMainPrg: public ProgramBase, private Loggable<PtusaMainPrg>
         {
     public:
-        // typedefs        
+        // typedefs
 
     public:
         // construction/destruction
-        PtusaMainPrg(PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpntArg,
-                const String& name);
-        PtusaMainPrg(const PtusaMainPrg& arg) = delete;
+        PtusaMainPrg( PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpntArg, const String& name );
+#if ARP_ABI_VERSION_MAJOR < 2
+        PtusaMainPrg( const PtusaMainPrg& arg ) = delete;
         virtual ~PtusaMainPrg() = default;
+#endif
+
 
     public:
         // operators
@@ -41,7 +43,7 @@ namespace PtusaPLCnextEngineer
 
     private:
         // fields
-        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;       
+        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;
         };
 
     ///////////////////////////////////////////////////////////////////////////////

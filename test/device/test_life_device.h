@@ -44,7 +44,7 @@ class watchdog_bit : public ::testing::Test
     protected:
         std::unique_ptr<watchdog> life_bit = std::make_unique<watchdog>(
             "TestDevice", device::DEVICE_SUB_TYPE::DST_WATCHDOG );
-        std::unique_ptr<mock_DI_device> mock_DI_dev = 
+        std::unique_ptr<mock_DI_device> mock_DI_dev =
             std::make_unique<mock_DI_device>();
         std::unique_ptr<mock_AI_device> mock_AI_dev =
             std::make_unique<mock_AI_device>();
@@ -54,7 +54,7 @@ class watchdog_bit : public ::testing::Test
         std::unique_ptr<mock_AO_device> mock_AO_dev =
             std::make_unique<mock_AO_device>();
 
-        void SetUp() override 
+        void SetUp() override
             {
             // Устанавливаем mock устройства.
             life_bit->set_property( "DI_dev", mock_DI_dev.get() );
@@ -69,7 +69,7 @@ class watchdog_counter : public ::testing::Test
     protected:
         std::unique_ptr<watchdog> life_counter = std::make_unique<watchdog>(
             "TestDevice", device::DEVICE_SUB_TYPE::DST_WATCHDOG );
-        std::unique_ptr<mock_AI_device> mock_AI_dev = 
+        std::unique_ptr<mock_AI_device> mock_AI_dev =
             std::make_unique<mock_AI_device>();
 
         void SetUp() override
@@ -79,7 +79,7 @@ class watchdog_counter : public ::testing::Test
             }
     };
 
-TEST_F( watchdog_bit, EvaluateIO_NoDiDevice_NoAction ) 
+TEST_F( watchdog_bit, EvaluateIO_NoDiDevice_NoAction )
     {
     life_bit->set_property( "DI_dev", nullptr );// Убираем устройство.
     life_bit->evaluate_io();
@@ -110,7 +110,7 @@ TEST_F( watchdog_bit, EvaluateIO_StateChanged_DeviceActivated )
     EXPECT_FALSE( life_bit->DO_dev->is_active() );   // Дискретный выход должен стать равным 0.
     EXPECT_EQ( life_bit->AO_dev->get_value(), 2 );   // Аналоговый выход должен стать равным 2.
 
-    DeltaMilliSecSubHooker::set_default_time();    
+    DeltaMilliSecSubHooker::set_default_time();
     }
 
 TEST_F( watchdog_bit, EvaluateIO_TimerExceeded_DeviceDeactivated )
@@ -118,7 +118,7 @@ TEST_F( watchdog_bit, EvaluateIO_TimerExceeded_DeviceDeactivated )
     EXPECT_CALL( *mock_DI_dev, get_state() )
         .WillOnce( ::testing::Return( 1 ) ); // Состояние изменилось.
 
-    life_bit->evaluate_io();                
+    life_bit->evaluate_io();
     EXPECT_EQ( life_bit->get_state(), 1 );   // Устройство должно активироваться.
 
     // Устанавливаем P_T_ERR = 100 мс.

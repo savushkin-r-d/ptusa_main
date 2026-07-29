@@ -175,7 +175,7 @@ class io_device
         /// is available and not in error/PP mode state.
         ///
         /// @param index - index of the channel in DO channels table.
-        /// 
+        ///
         /// @return 1 - node is OK, -1 - node has PP mode,
         ///         0 - no output channels configured.
         int check_output_DO_node_PP_state( u_int index = 0 ) const;
@@ -196,7 +196,7 @@ class io_device
 #else
         private:
 #endif
-    
+
         /// @brief Группа каналов ввода/вывода устройства.
         struct IO_channels
             {
@@ -357,7 +357,6 @@ class io_manager
 
             enum W_CONST
                 {
-                C_MAX_WAIT_TIME = 6'000,    ///< Время до установки ошибки связи с модулем, мсек.
                 //Max 63 устройства PXC Axioline F.
                 C_ANALOG_BUF_SIZE = 63 * 32,///< Размер буфера аналоговых модулей.
 

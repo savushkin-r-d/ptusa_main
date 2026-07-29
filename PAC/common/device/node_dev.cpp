@@ -1,4 +1,4 @@
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #include "node_dev.h"
 #include "bus_coupler_io.h"
@@ -20,7 +20,7 @@ void node_dev::evaluate_io()
     if ( node )
         {
         // Обновление состояния на основе состояния узла.
-        device::direct_set_state( 
+        device::direct_set_state(
             static_cast<int>( node->get_display_state() ) );
         }
     else

@@ -14,7 +14,7 @@ class valve : public digital_io_device
     {
     public:
         /// @brief Конструктор для клапана c обратными связями.
-        /// 
+        ///
         /// @param is_on_fb - использовать обратную связь на включенное состояние.
         /// @param is_off_fb - использовать обратную связь на выключенное состояние.
         /// @param dev_name - имя клапана.
@@ -25,7 +25,7 @@ class valve : public digital_io_device
             device::DEVICE_SUB_TYPE sub_type );
 
         /// @brief Конструктор для клапана без обратных связей.
-        /// 
+        ///
         /// @param dev_name - имя клапана.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
@@ -649,10 +649,10 @@ class io_link_valve
     {
     public:
         /// @brief Returns a description of the error that is active.
-        /// 
+        ///
         /// @return A C-string containing the error description.
         const char* get_error_description( int err_id ) const;
-                
+
         inline static const int ERROR_ID_FIRST = -116;
         inline static const int ERROR_ID_LAST = -131;
 
@@ -664,7 +664,7 @@ class alfalaval_iol_valve
     {
     public:
         /// @brief Returns a description of the error that is active.
-        /// 
+        ///
         /// @return A C-string containing the error description or
         /// nullptr if no error.
         const char* get_error_description( int error_id ) const;
@@ -920,7 +920,7 @@ class valve_iolink_gea_tvis_a15 : public valve
             bool pv_y3_on : 1; // если pv_y1_on = 0: пилотный клапан соленоида y3 активирован
                                // если pv_y1_on = 1: пилотный клапан соленоида y4 активирован
                                // Управление верхним седлом.
-            bool error_on : 1; // ошибка активна 
+            bool error_on : 1; // ошибка активна
 
             uint16_t  pos : 10;     // позиция штока в 10^-4 метра
             uint16_t unused1 : 10;  // неиспользуемое битовое пространство
@@ -1023,7 +1023,7 @@ class valve_iol_terminal : public valve
         VALVE_STATE get_valve_state() const override;
 
         void direct_on() override;
-        void direct_off() override;        
+        void direct_off() override;
 
     protected:
         void set_st( VALVE_STATE new_state );
@@ -1229,7 +1229,7 @@ class analog_valve_iolink : public AO1
             float setpoint;         //Used setpoint in percent
             uint8_t namur_state = 0;
             bool closed : 1;        //True = Closed, False = Not closed
-            bool opened : 1;        //True = Opened, False = Not opened            
+            bool opened : 1;        //True = Opened, False = Not opened
             uint8_t status : 6;
             };
 

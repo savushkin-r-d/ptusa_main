@@ -115,7 +115,7 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #else
         = 32'768;
 #endif
-     
+
     const int NVRAM_SIZE = 32;
 
 #ifdef WIN_OS
@@ -192,7 +192,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         if ( G_DEBUG )
             {
             printf( "NV_memory_manager:get_memory_block(...) - incorrect memory "
-                "type!\n" );            
+                "type!\n" );
             }
 
         return new memory_range( 0, 0, 0 );
@@ -202,7 +202,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         {
         if ( G_DEBUG )
             {
-            printf( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );        
+            printf( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );
             }
         return new memory_range( 0, 0, 0 );
         }
@@ -220,7 +220,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
                 mem_name,
                 memory->get_size(),
                 memory->get_available_start_pos(),
-                memory->get_available_end_pos() );        
+                memory->get_available_end_pos() );
             }
         return new memory_range( 0, 0, 0 );
         }

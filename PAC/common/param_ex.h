@@ -53,7 +53,7 @@ class params_manager
     // Friendly класс предназначен только для тестирования
     // и не должен использоваться в других целях
 #ifdef PTUSA_TEST
-    friend class test_params_manager;	
+    friend class test_params_manager;
 #endif
     public:
         enum CONSTANTS
@@ -153,7 +153,7 @@ class params_manager
         ///
         /// Для вызова методов используется статический метод @ref get_instance.
         params_manager();
-	
+
 	private:
         void reset_to_default( void( *custom_init_params_function )( ),
             int auto_init_params, int auto_init_work_params );

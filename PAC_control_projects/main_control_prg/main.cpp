@@ -9,10 +9,10 @@
 
 #include <stdlib.h>
 #include <signal.h>
-#include "fcntl.h"
+#include <fcntl.h>
 #include <codecvt>
 
-#include <fmt/core.h> 
+#include "fmt/format.h"
 
 #include "dtime.h"
 
@@ -114,6 +114,8 @@ int main( int argc, const char *argv[] )
         debug_break;
         return EXIT_FAILURE;
         }
+
+    G_PROJECT_MANAGER->apply_opc_mode( false );
 
 #ifdef USE_PROFIBUS
     if ( G_PROFIBUS_SLAVE()->is_active() )

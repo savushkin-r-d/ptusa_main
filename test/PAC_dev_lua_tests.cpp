@@ -379,7 +379,7 @@ TEST( toLuapp, tolua_PAC_dev_operation_manager_get_idle_time_sec00 )
     EXPECT_EQ( 0, luaL_dostring( L,
         "o1=tech_object( \'O1\', 1, 1, \'O1\', 1, 1, 10, 1, 1, 1 )" ) );
     // Некорректный вызов - c параметром.
-    EXPECT_NE( 0, luaL_dostring( L, 
+    EXPECT_NE( 0, luaL_dostring( L,
         "res = o1:get_modes_manager():get_idle_time_sec( 1 )" ) );
     // Корректный вызов.
     EXPECT_EQ( 0, luaL_dostring( L,

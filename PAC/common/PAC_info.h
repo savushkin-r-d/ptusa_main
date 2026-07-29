@@ -58,6 +58,9 @@ class PAC_info: public i_Lua_save_device
             /// 0 - нет, 1 - да.
             P_IS_OPC_UA_SERVER_CONTROL,
 
+            ///< Время до установки ошибки связи с сетевым узлом, мсек.
+            P_BK_ANSWER_MAX_WAIT_TIME,
+
             ///< Количество параметров.
             P_PARAMS_COUNT
             };
@@ -79,6 +82,8 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, double val );
 
+        int proc_OPC( int prev_val, int val, bool is_save );
+
         const char* get_name_in_Lua() const
             {
             return "SYSTEM";
@@ -89,7 +94,7 @@ class PAC_info: public i_Lua_save_device
             return up_time_str;
             }
 
-        enum COMMANDS
+        enum class COMMANDS
             {
             CLEAR_RESULT_CMD = 0,
 

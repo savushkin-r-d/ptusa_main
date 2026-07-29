@@ -1201,7 +1201,7 @@ class operation
 
         public:
             const char* get_name() const;
-            
+
             /// @brief Установка номера параметра со временем переходного
             /// переключения шагов.
             void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
@@ -1739,6 +1739,24 @@ class PAC_info: public i_Lua_save_device
             ///< Переход на паузу операции при ошибке устройств,
             /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
+
+            ///< Время для включения операции по сигналам, мсек.
+            P_AUTO_OPERATION_WAIT_TIME,
+
+            ///< Время ожидания для повторной попытки включения операции по
+            ///< сигналам, мсек.
+            P_AUTO_OPERATION_WARN_TIME,
+
+            ///< Активность сервера OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_ACTIVE,
+
+            ///< Возможность управлять через сервер OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_CONTROL,
+
+            ///< Время до установки ошибки связи с сетевым узлом, мсек.
+            P_BK_ANSWER_MAX_WAIT_TIME,
             };
 
         saved_params_u_int_4 par;

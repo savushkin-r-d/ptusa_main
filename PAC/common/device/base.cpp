@@ -1,7 +1,7 @@
 #include "base.h"
 #include "PAC_info.h"
 
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #ifdef WIN_OS
 #pragma warning(push)

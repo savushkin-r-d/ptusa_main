@@ -80,7 +80,7 @@ end)";
     isMsa = 1;
     buf[ 0 ] = CoilGroups::C_MSA_RECIPES;   // Coil group.
     buf[ 1 ] = 0x03;                        // Read Holding Registers.
-    buf[ 2 ] = 5;                           // Starting address, 
+    buf[ 2 ] = 5;                           // Starting address,
     buf[ 3 ] = 24;                          // RC_PRG_START + 1 = 1303 + 1.
     buf[ 5 ] = 1;                           // Number of elements.
     res = ModbusServ::ModbusService( BUFSIZE, buf, buf );

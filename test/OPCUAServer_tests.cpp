@@ -31,7 +31,7 @@ TEST_F( OPCUA_server_test, evaluate_non_blocking )
     }
 
 TEST( OPCUA_server, evaluate )
-    {    
+    {
     G_OPCUA_SERVER.evaluate();  //Correct evaluate() with no initialization.
 
     G_OPCUA_SERVER.init();
@@ -39,7 +39,7 @@ TEST( OPCUA_server, evaluate )
 
     G_DEVICE_MANAGER()->add_io_device( device::DT_V, device::DST_V_DO1,
         "Valve1", "Test Valve", "" );
-    auto valve1 = G_DEVICE_MANAGER()->get_V( "Valve1" );  
+    auto valve1 = G_DEVICE_MANAGER()->get_V( "Valve1" );
     valve1->on();
 
     G_OPCUA_SERVER.create_dev_objects();
@@ -52,7 +52,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_BADINTERNALERROR, res );
 
     G_OPCUA_SERVER.evaluate();
-    
+
     res = G_OPCUA_SERVER.read_state( nullptr, nullptr, nullptr,
         nullptr, nullptr, false, nullptr, nullptr );
     EXPECT_EQ( UA_STATUSCODE_BAD, res );
@@ -83,7 +83,7 @@ TEST( OPCUA_server, evaluate )
     bd.includeSubtypes = true;
     bd.nodeId = UA_NODEID_NUMERIC( 0, UA_NS0ID_OBJECTSFOLDER );
     bd.referenceTypeId = UA_NODEID_NUMERIC( 0, UA_NS0ID_ORGANIZES );
-    
+
     bd.browseDirection = UA_BROWSEDIRECTION_FORWARD;
     bd.includeSubtypes = true;
 
@@ -92,13 +92,13 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
 
     bool is_exist_node = false;
-    auto total = br.referencesSize;   
+    auto total = br.referencesSize;
     for ( auto i = 0u; i < total; ++i )
-        {        
+        {
         auto name = br.references[ i ].browseName.name;
         if ( std::string( reinterpret_cast<char*>( name.data ),
             name.length ) == "devices" )
-            {            
+            {
             bd.nodeId = br.references[ i ].nodeId.nodeId;
             UA_BrowseResult br1 = UA_Server_browse( UA_server, 0, &bd );
             EXPECT_EQ( UA_STATUSCODE_GOOD, br.statusCode );
@@ -114,8 +114,8 @@ TEST( OPCUA_server, evaluate )
                     }
                 }
             UA_BrowseResult_clear( &br1 );
-            }            
-        }   
+            }
+        }
     EXPECT_TRUE( is_exist_node );
     UA_BrowseDescription_clear( &bd );
     UA_BrowseResult_clear( &br );
@@ -129,7 +129,7 @@ TEST( OPCUA_server, evaluate )
     auto state = static_cast<UA_Int32*>( out.data );
     EXPECT_EQ( 1, *state );
     UA_Variant_clear( &out );
-    
+
 
     UA_NodeId valve1_value_NodeId = UA_NODEID_STRING_ALLOC( 0, "Valve1.value" );
     res = UA_Server_readValue( UA_server, valve1_value_NodeId, &out );
@@ -190,7 +190,7 @@ TEST( OPCUA_server, evaluate )
     EXPECT_EQ( UA_STATUSCODE_GOOD, res );
     str = static_cast<UA_String*>( out.data );
     EXPECT_EQ( PRODUCT_VERSION_FULL_STR,
-        std::string( reinterpret_cast<char*>( str->data ), str->length ) ); 
+        std::string( reinterpret_cast<char*>( str->data ), str->length ) );
     UA_Variant_clear( &out );
     UA_NodeId_clear( &version_NodeId );
 

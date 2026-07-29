@@ -145,7 +145,7 @@ CMake tools for Windows`
 
 Detailed installation information can be obtained [here](
     https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160).
-The CMake version required for the build is 3.13 and above.
+The CMake version required for the build is 3.31 and above.
 
 You should open (in Visual Studio) root directory. This you get a CMake based
 project.

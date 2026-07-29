@@ -1301,7 +1301,7 @@ int ModbusServ::Utf8toUnicode(const char* Input, unsigned char* Buf)
     {
 	char outbuf[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER] = { 0 };
 	convert_utf8_to_windows1251(Input, outbuf,
-        MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER, 
+        MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER,
         MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER );
 	return CP1251toUnicode(outbuf, Buf);
     }

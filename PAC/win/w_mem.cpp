@@ -37,12 +37,12 @@ SRAM::SRAM( const char *file_name,
                 else
                     {
                     if ( G_DEBUG )
-                        {       
+                        {
                         printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                            file_name, strerror( errno ) );                      
+                            file_name, strerror( errno ) );
                         }
                     file = 0;
-                    }                
+                    }
                 }
             }
         }

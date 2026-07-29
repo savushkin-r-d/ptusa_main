@@ -2,7 +2,7 @@
 /// состояния устройств PAC на сервер. Также реализованы классы для работы с
 /// устройствами (клапаны, насосы, ...). Классы используются ТОЛЬКО в
 /// контроллере (PAC).
-/// 
+///
 
 #pragma once
 #include <array>
@@ -32,7 +32,7 @@ class par_device: public i_Lua_save_device
         explicit par_device( u_int par_cnt );
 
         ~par_device() override;
-        
+
         /// Unmovable classe.
         par_device& operator=( par_device&& ) = delete;
 
@@ -189,7 +189,7 @@ class device : public i_DO_AO_device, public par_device
             DT_HLA,      ///< Сигнальная колонна.
             DT_CAM,      ///< Камера.
             DT_PDS,      ///< Датчик разности давления.
-            DT_TS,       ///< Сигнальный датчик температуры. 
+            DT_TS,       ///< Сигнальный датчик температуры.
             DT_G,        ///< Блок питания.
             DT_WATCHDOG, ///< Устройство проверки связи.
             DT_EY,       ///< Конвертер IO-Link.
@@ -544,14 +544,14 @@ class device : public i_DO_AO_device, public par_device
         analog_emulator& get_emulator();
         const analog_emulator& get_emulator() const;
 
-        /// @brief Получение максимальной длины имени устройства (с учётом 
+        /// @brief Получение максимальной длины имени устройства (с учётом
         /// символа завершения строки).
         static int get_max_name_length()
             {
             return C_MAX_NAME;
             }
 
-        /// @brief Получение максимальной длины описания устройства (с учётом 
+        /// @brief Получение максимальной длины описания устройства (с учётом
         /// символа завершения строки).
         static int get_max_description_length()
             {
@@ -980,7 +980,7 @@ class signal_column : public device, public io_device
 //-----------------------------------------------------------------------------
 /// @brief Устройство с интерфейсом подключения IO-Link.
 class io_link_device
-    {        
+    {
     public:
         const char* get_error_description( int error_id ) const;
     };

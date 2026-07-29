@@ -87,7 +87,7 @@ void InitCipDevices()
     dm->add_io_device( device::DEVICE_TYPE::DT_FQT, device::DEVICE_SUB_TYPE::DST_FQT_VIRT, "LINE1FQT1", "", "" );
 
     dm->add_io_device( device::DEVICE_TYPE::DT_QT, device::DEVICE_SUB_TYPE::DST_QT_VIRT, "LINE1QT1", "", "" );
-    
+
     //Watchdog device.
     dm->add_io_device( device::DEVICE_TYPE::DT_WATCHDOG, device::DEVICE_SUB_TYPE::DST_WATCHDOG, "LINE1WATCHDOG1", "", "" );
     }
@@ -1408,23 +1408,23 @@ TEST( cipline_tech_object, _ResetLinesDevicesBeforeReset_watchdog )
     // Test proper watchdog device reset in _ResetLinesDevicesBeforeReset()
     InitCipDevices();
     cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
-    
+
     // Set up watchdog device manually
     auto dm = device_manager::get_instance();
     auto watchdog_dev = dm->get_device("LINE1WATCHDOG1");
     ASSERT_NE(nullptr, watchdog_dev);
     cip1.dev_watchdog = watchdog_dev;
-    
+
     // Set watchdog to active state
     watchdog_dev->set_state(1);
     EXPECT_EQ( 1, watchdog_dev->get_state() );
-    
+
     // Call reset function
     cip1._ResetLinesDevicesBeforeReset();
-    
+
     // Verify dev_watchdog pointer was nullified
     EXPECT_EQ( nullptr, cip1.dev_watchdog );
-    
+
     ClearCipDevices();
     }
 
@@ -1561,7 +1561,7 @@ TEST( cipline_tech_object, no_cool_after_desinfection_GoToStep91From67 )
     auto res = cip1.LoadProgram();
     EXPECT_EQ( res, 61 );
     // После шага 67 при отрицательном параметре переходим на 91.
-    EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );    
+    EXPECT_EQ( 91, cip1._GoToStep( 67, 0 ) );
 
     // После шага 91 переходим на 555.
     EXPECT_EQ( 555, cip1._GoToStep( 91, 0 ) );

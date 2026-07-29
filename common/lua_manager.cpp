@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 #ifdef WIN_OS
 #include <Windows.h>
@@ -130,7 +130,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     std::string dir_str( dir );
     std::string sys_dir_str( sys_dir );
     std::string extra_dirs_str( extra_dirs );
-    
+
 
     if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
         {
@@ -145,12 +145,12 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         {
         dir_str += std::filesystem::path::preferred_separator;
         }
-    if ( !sys_dir_str.empty() && 
+    if ( !sys_dir_str.empty() &&
         sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
         {
         sys_dir_str += std::filesystem::path::preferred_separator;
         }
-    if ( !extra_dirs_str.empty() && 
+    if ( !extra_dirs_str.empty() &&
         extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
         {
         extra_dirs_str += std::filesystem::path::preferred_separator;
@@ -197,7 +197,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     if ( !package_path.empty() )
         {
         package_path += "'";
-        luaL_dostring( L, ( cmd + package_path ).c_str() );
+        if ( luaL_dostring( L, ( cmd + package_path ).c_str() ) != 0 )
+            {
+            G_LOG->critical(
+                "Error during C++ call - \"lua_manager::init\" - %s",
+                lua_tostring( L, -1 ) );
+
+            lua_pop( L, 1 );
+            return 1;
+            }
         }
 
     //I
@@ -258,8 +266,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( luaL_dofile( L, path ) != 0 )
             {
-            sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-            G_LOG->write_log( i_log::P_CRIT );
+            G_LOG->critical( "%s", lua_tostring( L, -1 ) );
             lua_pop( L, 1 );
 
             return 1;
@@ -308,18 +315,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     if( luaL_loadfile( L, script_name ) != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
 
     if ( int i_line = lua_pcall(L, 0, LUA_MULTRET, 0); i_line != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
@@ -341,9 +344,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_rus", "lua_manager::init" );
     if ( 0 == PAC_name_rus )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (rus)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (rus)." );
         return 1;
         }
     const char *PAC_name_eng =
@@ -351,9 +352,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_eng", "lua_manager::init" );
     if ( 0 == PAC_name_eng )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (eng)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (eng)." );
         return 1;
         }
 
@@ -491,15 +490,15 @@ int lua_manager::exec_lua_method_var( const char* object_name,
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
         if ( lua_type( L, -1 ) == LUA_TNIL )
             {
-            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            lua_pop( L, 1 ); //Удаляем функцию error_trace.
             return 1;
             }
 
         lua_getfield( L, -1, function_name );
         if ( lua_type( L, -1 ) == LUA_TNIL )
             {
-            lua_pop( L, 1 ); //Удаляем object_name. 
-            lua_pop( L, 1 ); //Удаляем функцию error_trace. 
+            lua_pop( L, 1 ); //Удаляем object_name.
+            lua_pop( L, 1 ); //Удаляем функцию error_trace.
             return 1;
             }
 

@@ -18,7 +18,7 @@ class altivar_node: public i_iot_node
 		bool enabled;
 		unsigned long queryinterval;
 
-		
+
 		float frq_value;
 		int state;
 		int remote_state;

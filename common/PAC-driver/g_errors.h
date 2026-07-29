@@ -168,7 +168,7 @@ int load_from_stream( alarm &a, char *buff );
 
 #include "tech_def.h"
 
-#include <fmt/core.h>
+#include "fmt/format.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс с информацией об ошибке устройства.

@@ -72,7 +72,7 @@ TEST( tech_dev_error, save_as_Lua_str )
     {
     std::array<char, 300> buff{};
     u_int_2 err_id = 0;
-    
+
     G_ERRORS_MANAGER->clear();
     G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     EXPECT_STREQ( buff.data(), "" );    // Нет устройств - нет ошибок.
@@ -97,11 +97,11 @@ suppress=false
 },
 )s";
     EXPECT_STREQ( buff.data(), res_str );
-    
+
     v1->set_cmd( "ST", 0, .0 );
     G_ERRORS_MANAGER->set_cmd( base_error::COMMANDS::C_CMD_ACCEPT, 0, 0, 0 );
     G_ERRORS_MANAGER->evaluate();
-    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );   
+    G_ERRORS_MANAGER->save_as_Lua_str( buff.data(), err_id );
     EXPECT_STREQ( buff.data(), "" );    // Не должно быть ошибок.
 
     G_DEVICE_MANAGER()->add_io_device(

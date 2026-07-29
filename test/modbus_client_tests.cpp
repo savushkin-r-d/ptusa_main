@@ -29,7 +29,7 @@ static int_4 from_bytes( unsigned char b0, unsigned char b1,
 constexpr unsigned int kRWShift = 4;
 
 // Смещение для чтения write-области через `get_byte`.
-constexpr auto kBaseOff = kRWShift + kAddr * 2; 
+constexpr auto kBaseOff = kRWShift + kAddr * 2;
 
 // Записать 4 байта в "зону чтения" (read_buff_start + address*2)
 // через set_byte с отрицательным смещением относительно write_buff_start.
@@ -143,7 +143,7 @@ class ModbusClientLuaTest : public ::testing::Test
             lua_pushnumber( L, static_cast<lua_Number>( val ) );
             lua_setglobal( L, "VAL" );
 
-            ASSERT_EQ( 0, luaL_dostring( L, cmd ) );                
+            ASSERT_EQ( 0, luaL_dostring( L, cmd ) );
             auto lua_script =
                 "base = 4 + ADDR * 2\n"
                 "b0 = cli:get_byte(base + 0)\n"
@@ -176,7 +176,7 @@ TEST_F( ModbusClientTest, set_int4_ab_cd )
     {
     const int_4 val = from_bytes( kA, kB, kC, kD );
     cli.set_int4_ab_cd( kAddr, val );
-        
+
     EXPECT_EQ( cli.get_byte( kBaseOff + 0 ), kA ); // A
     EXPECT_EQ( cli.get_byte( kBaseOff + 1 ), kB ); // B
     EXPECT_EQ( cli.get_byte( kBaseOff + 2 ), kC ); // C

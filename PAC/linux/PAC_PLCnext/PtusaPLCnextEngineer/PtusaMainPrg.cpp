@@ -2,7 +2,12 @@
 
 #include "PtusaMainPrg.hpp"
 #include "Arp/System/Commons/Logging.h"
+#if ARP_ABI_VERSION_MAJOR < 2
 #include "Arp/System/Core/ByteConverter.hpp"
+#else
+#include "Arp/Base/Core/ByteConverter.hpp"
+#endif
+
 
 #include "dtime.h"
 #include "log.h"
@@ -23,7 +28,7 @@
 int G_DEBUG = 1;    //Вывод дополнительной отладочной информации.
 
 // В Linux по умолчанию обмен с модулями ввода/вывода включен.
-bool G_NO_IO_NODES = false;     
+bool G_NO_IO_NODES = false;
 bool G_READ_ONLY_IO_NODES = false;
 
 namespace PtusaPLCnextEngineer
