@@ -34,6 +34,22 @@ class test_uni_io_manager_PP_mode : public uni_io_manager
         int read_input_registers( io_node* node, unsigned int address,
             unsigned int quantity, unsigned char station /*= 0*/ ) override
             {
+            (void)node;
+            (void)quantity;
+            (void)station;
+            if ( address == PHOENIX_STATUS_REGISTER_ADDRESS &&
+                quantity == 2 )
+                {
+                buff[ 0 ] = static_cast<u_char>( status_register_value >> 8 );
+                buff[ 1 ] = static_cast<u_char>( status_register_value & 0xFF );
+                buff[ 2 ] = static_cast<u_char>(
+                    diagnostic_status_register_value >> 8 );
+                buff[ 3 ] = static_cast<u_char>(
+                    diagnostic_status_register_value & 0xFF );
+                resultbuff = buff;
+                return 1;
+                }
+
             auto register_value = status_register_value;
             if ( address == PHOENIX_DIAGNOSTIC_STATUS_REGISTER_ADDRESS )
                 {
@@ -223,7 +239,7 @@ TEST( pp_mode_alarm, e_communicate )
     test_uni_io_manager_PP_mode mngr;
 
     // Устанавливаем бит перехода в PP mode.
-    mngr.buff[ 1 ] = io_manager::io_node::STATUS_REG_PP_MODE_MASK;
+    mngr.activate_error();
     mngr.read_phoenix_status_register( node );
     EXPECT_TRUE( err_mngr->is_any_error() ); // Ошибка наличия `PP mode`.
 

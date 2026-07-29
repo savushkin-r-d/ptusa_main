@@ -985,28 +985,26 @@ int uni_io_manager::read_inputs()
 void uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
     if ( auto result = read_input_registers( nd,
-        PHOENIX_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
+        PHOENIX_STATUS_REGISTER_ADDRESS, 2 ); result > 0 )
         {
         nd->status_register = static_cast<u_int_2>(
             BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
-        }
-    else
-        {
-        return;
-        }
-
-    if ( auto result = read_input_registers( nd,
-        PHOENIX_DIAGNOSTIC_STATUS_REGISTER_ADDRESS, 1 ); result > 0 )
-        {
         nd->diagnostic_status_register = static_cast<u_int_2>(
-            BYTE_SHIFT_MULTIPLIER * resultbuff[ 0 ] + resultbuff[ 1 ] );
+            BYTE_SHIFT_MULTIPLIER * resultbuff[ 2 ] + resultbuff[ 3 ] );
         }
 #ifdef DEBUG_BK
     else
         {
-        G_LOG->debug( "Failed to read diagnostic status register (%d) "
+        G_LOG->debug( "Failed to read status registers (%d, %d) "
             "for node \"%s\".",
+            PHOENIX_STATUS_REGISTER_ADDRESS,
             PHOENIX_DIAGNOSTIC_STATUS_REGISTER_ADDRESS, nd->name );
+        return;
+        }
+#else
+    else
+        {
+        return;
         }
 #endif // DEBUG_BK
 
