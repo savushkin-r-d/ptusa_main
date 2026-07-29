@@ -467,9 +467,15 @@ class io_manager
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
 
+            /// Previous status register value for detecting changes.
+            u_int_2 prev_status_register{};
+
             /// Diagnostic status register (7997) for Phoenix BK ETH nodes.
             /// Bits 2 and 8 indicate configuration/bus errors.
             u_int_2 diagnostic_status_register{};
+
+            /// Previous diagnostic register value for detecting changes.
+            u_int_2 prev_diagnostic_status_register{};
 
             /// Flag indicating PP mode alarm is currently active.
             bool is_err_mode_alarm_set = false;

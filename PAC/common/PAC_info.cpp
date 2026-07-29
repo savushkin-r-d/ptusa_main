@@ -363,6 +363,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                         PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
                         false );
                     wn->is_err_mode_alarm_set = false;
+                    wn->prev_status_register = 0;
                     }
                 // Если была активна данная ошибка, удаляем её аналогично.
                 if ( wn->is_cfg_bus_error_alarm_set )
@@ -372,6 +373,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                         PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
                         false );
                     wn->is_cfg_bus_error_alarm_set = false;
+                    wn->prev_diagnostic_status_register = 0;
                     }
 
                 // Устанавливаем ошибку о переходе узла в сервисный режим.
