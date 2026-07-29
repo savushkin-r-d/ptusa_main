@@ -381,7 +381,7 @@ class io_manager
 				PHOENIX_BK_ETH		  = 200,///< Phoenix 2702177
 				};
 
-			enum STATES           ///< Cостояния работы с узлом.
+			enum STATES           ///< Состояния работы с узлом.
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
@@ -410,7 +410,7 @@ class io_manager
             static constexpr u_int_2 DIAG_STATUS_REG_CFG_BUS_ERROR_MASK =
                 0x0104;
 
-            ///< Cостояние работы с узлом.
+            ///< Состояние работы с узлом.
             io_node::STATES state{ io_node::STATES::ST_NO_CONNECT };
 
 			TYPES   type;               ///< Тип.
@@ -466,9 +466,6 @@ class io_manager
             /// including PP mode, startup failures, net failures,
             /// etc. Remains 0 for other node types.
             u_int_2 status_register{};
-
-            /// Previous status register value for detecting changes.
-            u_int_2 prev_status_register{};
 
             /// Diagnostic status register (7997) for Phoenix BK ETH nodes.
             /// Bits 2 and 8 indicate configuration/bus errors.
