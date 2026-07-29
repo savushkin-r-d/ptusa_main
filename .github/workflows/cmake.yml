@@ -64,7 +64,7 @@ jobs:
             cc: "cl",
             cxx: "cl",
             environment_script: "vcvars32.bat",
-            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
+            targets: "ptusa_main libptusa_main main_test main_performance_test",
             run_tests: "true"
           }
         - {
@@ -82,7 +82,7 @@ jobs:
             os: ubuntu-latest,
             cc: "gcc",
             cxx: "g++",
-            targets: "ptusa_main libptusa_main main_test main_perfomance_test",
+            targets: "ptusa_main libptusa_main main_test main_performance_test",
             run_tests: "true"
           }
 
@@ -145,7 +145,7 @@ jobs:
       with:
         egress-policy: audit
 
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
