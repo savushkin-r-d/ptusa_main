@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.31)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
 project(ptusa_main VERSION 2026.04.02.1)
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "CMake executable: ${CMAKE_COMMAND}")
+message(STATUS "CMake configured from: ${CMAKE_BINARY_DIR}")
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -144,7 +148,7 @@ endif()
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_cycle.cpp
-            PAC_control_projects/main_control_prg/main.cpp)
+            PAC_control_projects/main_control_prg/main.cpp )
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
@@ -154,8 +158,8 @@ if(LINUX)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
 
-    add_executable(main_perfomance_test ${common_src} ${linux_src}
-           test/perfomance/main_perfomance_test.cpp
+    add_executable(main_performance_test ${common_src} ${linux_src}
+           test/performance/main_performance_test.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
     if(ARP_DEVICE)
@@ -197,8 +201,8 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/version.rc)
 
     if(NOT MINGW)
-        add_executable(main_perfomance_test ${common_src} ${win_src}
-               test/perfomance/main_perfomance_test.cpp
+        add_executable(main_performance_test ${common_src} ${win_src}
+               test/performance/main_performance_test.cpp
                PAC_control_projects/main_control_prg/version.rc)
     endif()
 
@@ -229,14 +233,14 @@ endif()
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
 if(NOT MINGW)
-    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+    target_compile_definitions(main_performance_test PUBLIC DEBUG_NO_IO_MODULES)
 endif()
 
 if(ARP_DEVICE)
     target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
     target_compile_definitions(ptusa_main PUBLIC PAC_PC)
     target_compile_definitions(libptusa_main PUBLIC PAC_PC)
-    target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)
+    target_compile_definitions(main_performance_test PUBLIC PAC_PC)
 else()
     add_compile_definitions(PAC_PC)
 endif()
@@ -328,7 +332,7 @@ set(TEST_INCLUDES
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
-    target_include_directories(main_perfomance_test PUBLIC ${GENERAL_INCLUDES})
+    target_include_directories(main_performance_test PUBLIC ${GENERAL_INCLUDES})
 endif()
 
 ###############################################################################
@@ -341,6 +345,7 @@ endif()
 ###############################################################################
 if(LINUX)
     target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
+	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--as-needed)
 endif()
 ###############################################################################
 
@@ -351,29 +356,40 @@ endif()
 ################# add link targets ############################################
 if(ARP_DEVICE)
     find_package(ArpDevice REQUIRED)
-    find_package(ArpProgramming REQUIRED)
+
+    message(STATUS "ARP_DEVICE_VERSION=${ARP_DEVICE_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION=${ARP_DEVICE_SHORT_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION_BUILD=${ARP_DEVICE_SHORT_VERSION_BUILD}")
+
+	if(${ARP_VERSION_MAJOR} GREATER_EQUAL "25")
+		find_package(Arp REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE Arp::ALL)
+	else()
+		find_package(ArpProgramming REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming)
+	endif()
+
+    target_link_libraries(PtusaPLCnextEngineer PRIVATE
+		liblua_static toluapp_lib_static zlibstatic
+		fmt::fmt open62541::open62541)
 endif()
 
 ################# add link targets ############################################
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
-if(ARP_DEVICE)
-    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
-    target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
-endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
 target_link_libraries(libptusa_main open62541::open62541)
 target_link_libraries(main_test open62541::open62541)
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test open62541::open62541)
+    target_link_libraries(main_performance_test open62541::open62541)
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic GTest::gtest GTest::gmock subhook fmt::fmt)
 
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
+    target_link_libraries(main_performance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
 endif()
 
 if(WIN32)
@@ -381,7 +397,7 @@ if(WIN32)
     target_link_libraries(libptusa_main liblua wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
     if(NOT MINGW)
-        target_link_libraries(main_perfomance_test wsock32 ws2_32)
+        target_link_libraries(main_performance_test wsock32 ws2_32)
     endif()
 
 elseif (LINUX)
@@ -515,7 +531,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     endif()
 
 
-    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test
+    add_test(NAME save-speed-benchmark COMMAND main_performance_test
             --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true

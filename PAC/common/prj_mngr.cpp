@@ -89,7 +89,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "help" ) || argc < 2 )
         {
-        fmt::print( options.help() );
+        fmt::print( "{}", options.help() );
         return 1;
         }
 
