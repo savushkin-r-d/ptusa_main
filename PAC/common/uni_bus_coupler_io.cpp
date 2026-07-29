@@ -568,8 +568,19 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
 
             // Reset PP-mode tracking state so a new transition is detected
             // after reconnect.
-            node->prev_status_register = 0;
             node->is_err_mode_alarm_set = false;
+            }
+
+        // Reset CFG-bus error alarm on communication loss.
+        if ( node->is_cfg_bus_error_alarm_set )
+            {
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number,
+                false );
+            // Reset CFG-bus error tracking state so a new transition is detected
+            // after reconnect.
+            node->is_cfg_bus_error_alarm_set = false;
             }
         }
     else
@@ -1004,10 +1015,8 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
     // Check for PP mode state changes.
     // PP mode has become active.
     if ( auto is_err_mode_active =
-        ( nd->status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0,
-        was_err_mode_active =
-        ( nd->prev_status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0;
-        is_err_mode_active && !was_err_mode_active )
+        ( nd->status_register & io_node::STATUS_REG_PP_MODE_MASK ) != 0;
+        is_err_mode_active )
         {
         if ( !nd->is_err_mode_alarm_set )
             {
@@ -1018,8 +1027,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             }
         }
     // PP mode has become inactive.
-    else if ( !is_err_mode_active && was_err_mode_active &&
-        nd->is_err_mode_alarm_set )
+    else if ( !is_err_mode_active && nd->is_err_mode_alarm_set )
         {
         nd->is_err_mode_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
@@ -1044,8 +1052,6 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
             PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
-
-    nd->prev_status_register = nd->status_register;
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )
@@ -1074,12 +1080,12 @@ void uni_io_manager::disconnect( io_node* node )
     if ( node->is_err_mode_alarm_set )
         {
         node->is_err_mode_alarm_set = false;
-        node->prev_status_register = 0;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
             PAC_critical_errors_manager::AC_PP_MODE,
             PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
         }
 
+    // Reset CFG bus error alarm on disconnect.
     if ( node->is_cfg_bus_error_alarm_set )
         {
         node->is_cfg_bus_error_alarm_set = false;
