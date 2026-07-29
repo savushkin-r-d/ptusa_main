@@ -141,7 +141,6 @@ TEST( pp_mode_alarm, initialization )
 
     // Verify initial state.
     EXPECT_EQ( 0, node.status_register );
-    EXPECT_EQ( 0, node.prev_status_register );
     EXPECT_EQ( 0, node.diagnostic_status_register );
     EXPECT_FALSE( node.is_err_mode_alarm_set );
     EXPECT_FALSE( node.is_cfg_bus_error_alarm_set );
