@@ -1047,7 +1047,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
         was_cfg_bus_error_active =
         ( nd->prev_diagnostic_status_register &
             io_node::DIAG_STATUS_REG_CFG_BUS_ERROR_MASK ) != 0;
-            is_cfg_bus_error_active && was_cfg_bus_error_active &&
+            is_cfg_bus_error_active && !was_cfg_bus_error_active &&
         !nd->is_cfg_bus_error_alarm_set )
         {
         nd->is_cfg_bus_error_alarm_set = true;
@@ -1055,7 +1055,8 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
             PAC_critical_errors_manager::AS_IO_COUPLER, nd->number );
         }
-    else if ( !is_cfg_bus_error_active && nd->is_cfg_bus_error_alarm_set )
+    else if ( !is_cfg_bus_error_active && was_cfg_bus_error_active &&
+        nd->is_cfg_bus_error_alarm_set )
         {
         nd->is_cfg_bus_error_alarm_set = false;
         PAC_critical_errors_manager::get_instance()->reset_global_error(
