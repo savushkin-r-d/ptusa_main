@@ -565,6 +565,42 @@ TEST( tech_object, set_mode )
         G_LUA_MANAGER->free_Lua();
         }
 
+TEST( tech_object, set_cmd )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+    G_LUA_MANAGER->set_Lua( L );
+
+    tech_object tank( "TANK", 1, 1, "TANK1", 1, 1, 10, 10, 10, 10 );
+    tank.get_modes_manager()->add_operation( "Test operation" );
+
+    // Сброс канала команд должен вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 0 ) );
+
+    constexpr auto OPER_N1 = 1u;
+    constexpr auto STEP_N1 = 1u;
+    constexpr auto STEP_N2 = 2u;
+    constexpr auto STEP_N3 = 3u;
+    auto operation_1 = ( *tank.get_modes_manager() )[ OPER_N1 ];
+
+    operation_1->add_step( "Init", 2, -1 );
+    operation_1->add_step( "Process #1", 3, -1 );
+    operation_1->add_step( "Process #2", -1, -1 );
+
+    // Включение операции 1 должно вернуть 1.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1001 ) );
+    EXPECT_TRUE( operation_1->get_state() == operation::RUN );
+
+    // Выключение операции 1 должно вернуть 1.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 2001 ) );
+    EXPECT_TRUE( operation_1->get_state() == operation::IDLE );
+
+    // Попытка включить несуществующую операцию (2) должна вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1002 ) );
+
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( tech_object, set_cmd_to_step )
     {
     lua_State* L = lua_open();
