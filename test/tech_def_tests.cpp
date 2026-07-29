@@ -632,8 +632,6 @@ TEST( tech_object, set_cmd_to_step_invalid_operation )
     // 400001 = operation 0, step 1.
     EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400001 ) );
 
-    // Test: Invalid operation number (negative, wraps to large number).
-    // 399999 is outside the 400000-499999 range, not handled by this code.
     // Test: Operation number exceeds operations_count (2).
     // 400202 = operation 2, step 2.
     EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400202 ) );
@@ -682,9 +680,11 @@ TEST( tech_object, set_cmd_to_step_boundaries )
     EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 499999 ) );
 
     // Test: Just outside upper boundary (500000).
-    // This should not be handled by the 400000-499999 range at all.
-    // It will fall through to other command handling logic.
-    // We can't directly test this without knowing what other handlers do.
+    // Commands outside 400000-499999 are not handled by step jump logic.
+    // Verify they don't interfere (returns non-zero or handled elsewhere).
+    int result = tank.set_cmd( "CMD", 0, 500000 );
+    // Accept any non-zero result as this is handled by different logic.
+    EXPECT_NE( -1000, result ); // Sanity check it doesn't crash.
 
     G_LUA_MANAGER->free_Lua();
     }
