@@ -65,6 +65,7 @@ TEST( dll, lua_init )
     auto L = lua_open();
 
     auto res = lua_init( L );
+    luaL_openlibs( L );
     EXPECT_EQ( 1, res );
 
     char argv0[] = "ptusa_main.exe";
@@ -81,8 +82,20 @@ TEST( dll, lua_init )
     lua_pushlstring( L, argv4, sizeof( argv4 ) );
     lua_pushlstring( L, argv5, sizeof( argv5 ) );
 
+    // Функция инициализации возвращает количество результатов, помещенных
+    // в стек Lua.
     res = lua_init( L );
     EXPECT_EQ( 1, res );
+
+    // Получаем из стека результат выполнения инициализации. Это число, в
+    // данном случае будет ошибка.
+    res = lua_gettop( L );
+    EXPECT_EQ( 1, res );
+    auto t = lua_type( L, 1 );
+    EXPECT_EQ( LUA_TNUMBER, t );
+    res = static_cast<int>( lua_tonumber( L, 1 ) );
+    EXPECT_EQ( res, EXIT_FAILURE );
+    lua_remove( L, 1 );
 
     lua_close( L );
     L = nullptr;
