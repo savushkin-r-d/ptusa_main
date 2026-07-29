@@ -35,7 +35,6 @@ class test_uni_io_manager_PP_mode : public uni_io_manager
             unsigned int quantity, unsigned char station /*= 0*/ ) override
             {
             (void)node;
-            (void)quantity;
             (void)station;
             if ( address == PHOENIX_STATUS_REGISTER_ADDRESS &&
                 quantity == 2 )
