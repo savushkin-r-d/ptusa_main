@@ -977,37 +977,35 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
             return 0;
             }
 
-        u_int mode     = ( int ) val;
+        auto mode = static_cast<u_int>( val );
         char new_state = 0;
 
-        if ( mode >= 200000 && mode < 300000 )      // On extra step.
+        if ( mode >= 200'000 && mode < 300'000 )      // On extra step.
             {
-            int step = mode % 100;
-            int operation = mode / 100 - 2000;
+            auto step_n = mode % 100;
+            auto operation_n = mode / 100 - 2'000;
 
-            return set_extra_step( operation, step, 1 );
+            return set_extra_step( operation_n, step_n, 1 );
             }
         else
             {
-            if ( mode >= 300000 && mode < 400000 )      // Off extra step.
+            if ( mode >= 300'000 && mode < 400'000 )      // Off extra step.
                 {
-                int step = mode % 100;
-                int operation = mode / 100 - 3000;
+                auto step_n = mode % 100;
+                auto operation_n = mode / 100 - 3'000;
 
-                return set_extra_step( operation, step, 0 );
+                return set_extra_step( operation_n, step_n, 0 );
                 }
 
-            if ( mode >= 400000 && mode < 500000 )      // To step.
+            if ( mode >= 400'000 && mode < 500'000 )      // To step.
                 {
-                int step = mode % 100;
-                int operation = mode / 100 - 4000;
-
-                if ( operation > 0 && operation <= operations_count )
+                if ( auto step_n = mode % 100, operation_n = mode / 100 - 4'000;
+                    operation_n > 0 && operation_n <= operations_count )
                     {
-                    auto op = ( *operations_manager )[ operation ];
-                    if ( op->get_state() == operation::RUN )
+                    if ( auto op = ( *operations_manager )[ operation_n ];
+                        op->get_state() == operation::RUN )
                         {
-                        op->to_step( step );
+                        op->to_step( step_n );
                         return 0;
                         }
                     }
@@ -1016,24 +1014,24 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                 }
             }
 
-        if ( mode >= 1000 && mode < 2000 )      // On mode.
+        if ( mode >= 1'000 && mode < 2'000 )      // On mode.
             {
-            mode = mode - 1000;
+            mode = mode - 1'000;
             new_state = 1;
             }
         else
             {
-            if ( mode >= 2000 && mode < 3000 )  // Off mode.
+            if ( mode >= 2'000 && mode < 3'000 )  // Off mode.
                 {
-                mode = mode - 2000;
+                mode = mode - 2'000;
                 new_state = 0;
                 }
             else
                 {
-                if ( mode >= 100000 && mode < 200000 )      // On state mode.
+                if ( mode >= 100'000 && mode < 200'000 )      // On state mode.
                     {
                     new_state = mode % 100;
-                    mode = mode / 100 - 1000;
+                    mode = mode / 100 - 1'000;
                     cmd = ( int ) val;
                     return set_mode( mode, new_state );
                     }
