@@ -22,7 +22,7 @@ TEST( PAC_critical_errors_manager, set_global_error )
     u_int_2 id{};
     const auto REF_STR = R"(
 	{
-	description = "0-0-1",
+	description = "0-0-1 : ?",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 100,
