@@ -208,7 +208,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             switch ( err_sub_class )
                 {
                 case AS_IO_COUPLER:
-                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, is_set ?
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
                         "отключен для обслуживания" : "включен" );
                     break;
                 }
@@ -218,7 +218,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             switch ( err_sub_class )
                 {
                 case AS_IO_COUPLER:
-                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, is_set ?
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
                         "активен PP mode (каналы управления заблокированы)" :
                         "обычный режим" );
                     break;
@@ -229,7 +229,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             switch ( err_sub_class )
                 {
                 case AS_IO_COUPLER:
-                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, is_set ?
+                    fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
                         "ошибка конфигурации/шины" :
                         "конфигурация и шина в норме" );
                     break;
@@ -237,7 +237,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             break;
 
         case AC_NO_CONNECTION:
-            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, is_set ?
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
                 "нет связи" : "есть связь" ).size;
 
             switch ( err_sub_class )
@@ -262,22 +262,21 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             break;
 
         case AC_NET:
-            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, is_set ?
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
                 " : Ошибка сетевой работы: " : " : Сетевая работа в норме : " ).size;
 
-            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}",
                 par == 0 ? "Modbus-устройство 11 №{} : " :
                     par == 1 ? "Мастер {} : " : "? {} : ", par ).size;
 
-            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res,
+            res += fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}",
                 err_sub_class == AS_SOCKET_F ? "вызов функции socket(...)" :
                 err_sub_class == AS_BIND_F ? "вызов функции bind(...)" :
                 err_sub_class == AS_SETSOCKOPT_F ? "вызов функции setsockopt(...)" :
                 err_sub_class == AS_LISTEN_F ? "вызов функции listen(...)" :
                 "неизвестная ошибка" ).size;
 
-            fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                is_set ?
+            fmt::format_to_n( tmp + res, BUFF_SIZE - res, "{}", is_set ?
 #ifdef LINUX_OS
                 strerror( errno )
 #endif // LINUX_OS
