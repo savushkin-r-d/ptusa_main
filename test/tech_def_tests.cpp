@@ -578,25 +578,30 @@ TEST( tech_object, set_cmd )
     EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 0 ) );
 
     constexpr auto OPER_N1 = 1u;
-    constexpr auto STEP_N1 = 1u;
-    constexpr auto STEP_N2 = 2u;
-    constexpr auto STEP_N3 = 3u;
     auto operation_1 = ( *tank.get_modes_manager() )[ OPER_N1 ];
 
-    operation_1->add_step( "Init", 2, -1 );
-    operation_1->add_step( "Process #1", 3, -1 );
+    operation_1->add_step( "Init", -1, -1 );
+    auto st1 = operation_1->add_step( "Process #1", 3, -1 );
     operation_1->add_step( "Process #2", -1, -1 );
 
-    // Включение операции 1 должно вернуть 1.
-    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1001 ) );
+    // Включение операции 1 должно вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1'001 ) );
     EXPECT_TRUE( operation_1->get_state() == operation::RUN );
 
-    // Выключение операции 1 должно вернуть 1.
-    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 2001 ) );
+    // Включение дополнительно шага 2 должно вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 200'102 ) );
+    EXPECT_TRUE( st1->is_active() );
+
+    // Выключение дополнительно шага 2 должно вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 300'102 ) );
+    EXPECT_FALSE( st1->is_active() );
+
+    // Выключение операции 1 должно вернуть 0.
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 2'001 ) );
     EXPECT_TRUE( operation_1->get_state() == operation::IDLE );
 
     // Попытка включить несуществующую операцию (2) должна вернуть 0.
-    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1002 ) );
+    EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 1'002 ) );
 
     G_LUA_MANAGER->free_Lua();
     }
