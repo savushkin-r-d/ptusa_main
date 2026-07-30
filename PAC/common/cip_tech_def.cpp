@@ -6563,11 +6563,11 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
     switch (from)
         {
         case WATER:
-            if (!LL->is_active())
+            if (!LL->is_active() || !LM->is_active())
                 {
                 V00->on();
                 }
-            if (LM->is_active() || LH->is_active())
+            if (LH->is_active())
                 {
                 V00->instant_off();
                 }
