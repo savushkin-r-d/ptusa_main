@@ -121,9 +121,7 @@ class memory_range: public i_memory
             return size;
             }
 
-        virtual ~memory_range()
-            {
-            }
+        virtual ~memory_range() = default;
 
         /// @brief Метод интерфейса @ref i_memory.
         int read( void *buf, u_int count, u_int start_pos );

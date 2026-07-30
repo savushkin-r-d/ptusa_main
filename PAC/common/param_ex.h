@@ -128,6 +128,8 @@ class params_manager
 
         virtual ~params_manager();
 
+        int evaluate();
+
         enum PARAMS
             {
             P_COUNT = 1,
@@ -172,6 +174,10 @@ class params_manager
 
         memory_range *params_mem; ///< Память параметров.
         memory_range *CRC_mem;    ///< Память контрольной суммы.
+
+        uint32_t last_change_ms{ get_millisec() };
+        uint32_t last_save_ms{ get_millisec() };
+        bool is_changed{ false };
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.

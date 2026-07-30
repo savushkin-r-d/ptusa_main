@@ -106,6 +106,9 @@ void PAC_info::reset_params()
 
     par[ P_BK_ANSWER_MAX_WAIT_TIME ] = 6'000;   // 6 seconds.
 
+    par[ P_STABLE_SAVE_DELAY_MS ] = 60'000;     // 1 minute.
+    par[ P_MIN_SAVE_INTERVAL_MS ] = 3'600'000;  // 1 hour (60 * 60 * 1'000).
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------

@@ -161,7 +161,13 @@ void params_manager::save( int start_pos, int count )
         count = C_TOTAL_PARAMS_SIZE;
         }
 
-    params_mem->write( params + start_pos, count, start_pos );
+    static int counter = 0;
+    counter++;
+    G_LOG->debug( "params_manager::save( %d, %d ) - call %d",
+        start_pos, count, counter );
+
+    is_changed = true;
+    last_change_ms = get_millisec();
     }
 //-----------------------------------------------------------------------------
 char* params_manager::get_params_data( int size, int &start_pos )
@@ -212,6 +218,33 @@ params_manager::~params_manager()
 
     delete par;
     par = nullptr;
+    }
+//-----------------------------------------------------------------------------
+int params_manager::evaluate()
+    {
+    auto now = get_millisec();
+
+    if ( is_changed )
+        {
+        auto since_save = get_delta_millisec( last_save_ms );
+        auto since_change = get_delta_millisec( last_change_ms );
+
+        if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
+            since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
+            {
+            params_mem->write( params, C_TOTAL_PARAMS_SIZE, 0 );
+            is_changed = false;
+            last_save_ms = now;
+
+            static int counter = 0;
+            counter++;
+            G_LOG->debug( "params_mem::write() - call %d", counter );
+
+            return 0;
+            }
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 int params_manager::save_params_as_Lua_str( char* str )
