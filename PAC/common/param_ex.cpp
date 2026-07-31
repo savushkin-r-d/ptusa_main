@@ -76,6 +76,16 @@ void params_manager::reset_params_size()
     CRC_mem->write( ( char* )buff, 4, C_LAST_IDX_OFFSET );
     }
 //-----------------------------------------------------------------------------
+int params_manager::get_params_change_counter() const
+    {
+    return params_change_counter;
+    }
+//-----------------------------------------------------------------------------
+int params_manager::get_params_save_counter() const
+    {
+    return params_save_counter;
+    }
+//-----------------------------------------------------------------------------
 int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
@@ -154,17 +164,9 @@ void params_manager::reset_to_default( void( *custom_init_params_function )( ),
 #endif // KEY_CONFIRM
         }
 //-----------------------------------------------------------------------------
-void params_manager::save( int start_pos, int count )
+void params_manager::save()
     {
-    if ( 0 == count )
-        {
-        count = C_TOTAL_PARAMS_SIZE;
-        }
-
-    static int counter = 0;
-    counter++;
-    G_LOG->debug( "params_manager::save( %d, %d ) - call %d",
-        start_pos, count, counter );
+    params_change_counter++;
 
     is_changed = true;
     last_change_ms = get_millisec();
@@ -205,7 +207,7 @@ params_manager* params_manager::get_instance()
 //-----------------------------------------------------------------------------
 params_manager::~params_manager()
     {
-    if ( CRC_mem )
+    if ( params_mem )
         {
         delete params_mem;
         params_mem = nullptr;
@@ -222,8 +224,6 @@ params_manager::~params_manager()
 //-----------------------------------------------------------------------------
 int params_manager::evaluate()
     {
-    auto now = get_millisec();
-
     if ( is_changed )
         {
         auto since_save = get_delta_millisec( last_save_ms );
@@ -234,11 +234,10 @@ int params_manager::evaluate()
             {
             params_mem->write( params, C_TOTAL_PARAMS_SIZE, 0 );
             is_changed = false;
-            last_save_ms = now;
+            last_save_ms = get_millisec();
 
-            static int counter = 0;
-            counter++;
-            G_LOG->debug( "params_mem::write() - call %d", counter );
+            params_save_counter++;
+            G_LOG->debug( "params_mem::write() - call %d", params_save_counter );
 
             return 0;
             }

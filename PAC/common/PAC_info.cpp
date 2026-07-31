@@ -202,6 +202,14 @@ int PAC_info::save_device( char* buff ) const
         "\tCOMMUN_ERROR={},\n", commun_error ).size;
 
 
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_CHANGE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_change_counter() ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_SAVE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_save_counter() ).size;
+
+
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
     buff[ size ] = '\0';
