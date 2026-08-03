@@ -182,6 +182,8 @@ TEST( PAC_info, save_device )
         "\tNODES_COMM_ERROR=0,\n"
         "\tWATCHDOG_ERROR=0,\n"
         "\tCOMMUN_ERROR=0,\n"
+        "\tPARAMS_CHANGE_COUNTER=1,\n"
+        "\tPARAMS_SAVE_COUNTER=0,\n"
         "\t}\n";
     char buff[ MAX_SIZE ] = { 0 };
 
@@ -226,6 +228,8 @@ TEST( PAC_info, save_device )
             "\tNODES_COMM_ERROR=0,\n"
             "\tWATCHDOG_ERROR=0,\n"
             "\tCOMMUN_ERROR=0,\n"
+            "\tPARAMS_CHANGE_COUNTER=1,\n"
+            "\tPARAMS_SAVE_COUNTER=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1010 );
     G_PAC_INFO()->eval();

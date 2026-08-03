@@ -109,12 +109,10 @@ class params_manager
 
         /// @brief Запись параметров в EEPROM.
         ///
-        /// Запись параметров из массива параметров в EEPROM.
+        /// Устанавливается флаг изменения параметров и обновляется время
+        /// последней записи.
         ///
-        /// @param start_pos - номер индекса, с которого начать запись
-        /// параметров (для записи только одного параметра).
-        /// @param count - количество записываемых байт.
-        void save( int start_pos = 0, int count = 0 );
+        void save();
 
         /// @brief Получение указателя на блок данных параметров.
         ///
@@ -127,6 +125,8 @@ class params_manager
         virtual char* get_params_data( int size, int &start_pos );
 
         virtual ~params_manager();
+
+        int evaluate();
 
         enum PARAMS
             {
@@ -145,6 +145,12 @@ class params_manager
         u_int_2 solve_CRC();
 
         void reset_params_size();
+
+        int get_params_change_counter() const;
+
+        int get_params_save_counter() const;
+
+        void reset_change_counter();
 
 	protected:
         static char is_init;
@@ -172,6 +178,13 @@ class params_manager
 
         memory_range *params_mem; ///< Память параметров.
         memory_range *CRC_mem;    ///< Память контрольной суммы.
+
+        uint32_t last_change_ms{ get_millisec() };
+        uint32_t last_save_ms{ get_millisec() };
+        bool is_changed{ false };
+
+        int params_change_counter{ 0 };
+        int params_save_counter{ 0 };
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.
@@ -452,9 +465,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
             {
             }
 
-        virtual ~run_time_params_u_int_4()
-            {
-            }
+        virtual ~run_time_params_u_int_4() = default;
 
     protected:
         u_int_4 get_val( int idx ) const
@@ -482,9 +493,7 @@ public parameters < type, is_float >
             {
             }
 
-        virtual ~saved_params()
-            {
-            }
+        virtual ~saved_params() = default;
 
         /// @brief Сохранение значения параметра в энергонезависимой памяти.
         ///
@@ -498,8 +507,7 @@ public parameters < type, is_float >
                 idx--;
                 parameters< type, is_float >::get_values()[ idx ] = value;
 
-                params_manager::get_instance()->save(
-                    start_pos + idx * sizeof( type ), sizeof( type ) );
+                params_manager::get_instance()->save();
                 }
             else
                 {
@@ -516,8 +524,7 @@ public parameters < type, is_float >
         /// использовать данный метод.
         int save_all()
             {
-            params_manager::get_instance()->save( start_pos,
-                parameters< type, is_float >::get_count() * sizeof( type ) );
+            params_manager::get_instance()->save();
 
             return 0;
             }
@@ -532,8 +539,7 @@ public parameters < type, is_float >
                 parameters< type, is_float >::get_values()[ i ] = 0;
                 }
 
-            params_manager::get_instance()->save(
-                start_pos, sizeof( type ) * parameters< type, is_float >::get_count() );
+            params_manager::get_instance()->save();
             }
 
     private:
@@ -554,9 +560,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
               {
               }
 
-          virtual ~saved_params_u_int_4()
-              {
-              }
+          virtual ~saved_params_u_int_4() = default;
 
     protected:
         u_int_4 get_val( int idx ) const
@@ -577,9 +581,7 @@ class saved_params_float: public saved_params < float, true >
               {
               }
 
-          virtual ~saved_params_float()
-              {
-              }
+          virtual ~saved_params_float() = default;
 
     protected:
         float get_val( int idx ) const

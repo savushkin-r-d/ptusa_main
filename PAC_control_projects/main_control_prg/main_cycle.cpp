@@ -52,6 +52,8 @@ int main_cycle()
 
     G_CMMCTR->evaluate();
 
+    params_manager::get_instance()->evaluate();
+
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         G_OPCUA_SERVER.evaluate();

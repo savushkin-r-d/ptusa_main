@@ -76,6 +76,21 @@ void params_manager::reset_params_size()
     CRC_mem->write( ( char* )buff, 4, C_LAST_IDX_OFFSET );
     }
 //-----------------------------------------------------------------------------
+int params_manager::get_params_change_counter() const
+    {
+    return params_change_counter;
+    }
+//-----------------------------------------------------------------------------
+int params_manager::get_params_save_counter() const
+    {
+    return params_save_counter;
+    }
+//-----------------------------------------------------------------------------
+void params_manager::reset_change_counter()
+    {
+    params_change_counter = 0;
+    }
+//-----------------------------------------------------------------------------
 int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
@@ -154,14 +169,12 @@ void params_manager::reset_to_default( void( *custom_init_params_function )( ),
 #endif // KEY_CONFIRM
         }
 //-----------------------------------------------------------------------------
-void params_manager::save( int start_pos, int count )
+void params_manager::save()
     {
-    if ( 0 == count )
-        {
-        count = C_TOTAL_PARAMS_SIZE;
-        }
+    params_change_counter++;
 
-    params_mem->write( params + start_pos, count, start_pos );
+    is_changed = true;
+    last_change_ms = get_millisec();
     }
 //-----------------------------------------------------------------------------
 char* params_manager::get_params_data( int size, int &start_pos )
@@ -199,7 +212,7 @@ params_manager* params_manager::get_instance()
 //-----------------------------------------------------------------------------
 params_manager::~params_manager()
     {
-    if ( CRC_mem )
+    if ( params_mem )
         {
         delete params_mem;
         params_mem = nullptr;
@@ -212,6 +225,30 @@ params_manager::~params_manager()
 
     delete par;
     par = nullptr;
+    }
+//-----------------------------------------------------------------------------
+int params_manager::evaluate()
+    {
+    if ( is_changed )
+        {
+        auto since_save = get_delta_millisec( last_save_ms );
+        auto since_change = get_delta_millisec( last_change_ms );
+
+        if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
+            since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
+            {
+            params_mem->write( params, C_TOTAL_PARAMS_SIZE, 0 );
+            is_changed = false;
+            last_save_ms = get_millisec();
+
+            params_save_counter++;
+            G_LOG->debug( "params_mem::write() - call %d", params_save_counter );
+
+            return 0;
+            }
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 int params_manager::save_params_as_Lua_str( char* str )
