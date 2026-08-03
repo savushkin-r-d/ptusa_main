@@ -147,7 +147,10 @@ class params_manager
 
         int get_params_save_counter() const;
 
-	protected:
+#ifndef PTUSA_TEST
+    protected:
+#endif // !PTUSA_TEST
+
         static char is_init;
 
         /// @brief Закрытый конструктор.
