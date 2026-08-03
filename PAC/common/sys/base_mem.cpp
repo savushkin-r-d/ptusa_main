@@ -7,25 +7,18 @@
 #endif
 
 #include "base_mem.h"
+#include "log.h"
 
-#ifdef WIN_OS
-#include "w_mem.h"
-#endif // WIN_OS
+#ifdef LINUX_OS
+#include <unistd.h>
 
-#if defined LINUX_OS && defined PAC_PC
-#include "l_mem.h"
+#include <cstdio>
+#include <cerrno>
 #endif // LINUX_OS
 
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-#include "l_mem.h"
-#endif // LINUX_OS
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
 #include "mem_PFC200.h"
-#endif // LINUX_OS
-
-#if defined LINUX_OS && defined PAC_PLCNEXT
-#include "l_mem.h"
 #endif // LINUX_OS
 
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
@@ -53,12 +46,9 @@ int memory_range::read( void *buf, u_int count, u_int start_pos )
         {
         if ( check_params( count, start_pos ) != 0 )
             {
-            if ( G_DEBUG )
-                {
-                printf( "memory_range::write(...) - size[ %u ], incorrect params -> "
-                    "count[ %u ], start_pos[ %u ] \n",
-                    size, count, start_pos );
-                }
+            G_LOG->debug( "memory_range::read(...) - size[ %u ], incorrect "
+                "params -> count[ %u ], start_pos[ %u ] \n",
+                size, count, start_pos );
             return 0;
             }
 
@@ -68,24 +58,12 @@ int memory_range::read( void *buf, u_int count, u_int start_pos )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int memory_range::write( void *buf, u_int count, u_int start_pos )
+int memory_range::safe_save( void* buff )
     {
     if ( memory )
         {
-        if ( check_params( count, start_pos ) != 0 )
-            {
-            if ( G_DEBUG )
-                {
-                printf( "memory_range::write(...) - size[ %u ], incorrect params -> "
-                    "count[ %u ], start_pos[ %u ] \n",
-                    size, count, start_pos );
-                }
-            return 0;
-            }
-
-        return memory->write( buf, count, this->start_pos + start_pos );
+        return memory->safe_save( buff );
         }
-
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -114,14 +92,9 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 
     const int NVRAM_SIZE = 32;
 
-#ifdef WIN_OS
-    PAC_NVRAM  = new SRAM( "./nvram.bin", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "./nvram.bin", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif // WIN_OS
-
-#if defined LINUX_OS && defined PAC_PC
-    PAC_NVRAM  = new SRAM( "./nvram.bin", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "./nvram.bin", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
+#if defined WIN_OS || ( defined LINUX_OS && ( defined PAC_PC || defined PAC_PLCNEXT ) )
+    PAC_NVRAM  = new SRAM( "./nvram.bin", NVRAM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new SRAM( "./eeprom.bin", EEPROM_SIZE, 0, EEPROM_SIZE - 1 );
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
@@ -132,11 +105,6 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
     PAC_NVRAM  = new eeprom_PFC200( EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
     PAC_EEPROM = new eeprom_PFC200( EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif
-
-#if defined LINUX_OS && defined PAC_PLCNEXT
-    PAC_NVRAM  = new SRAM( "./nvram.bin", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "./nvram.bin", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 
     last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();
@@ -174,18 +142,19 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     default:
         if ( G_DEBUG )
             {
-            printf( "NV_memory_manager:get_memory_block(...) - incorrect memory "
-                "type!\n" );
+            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - "
+                "incorrect memory type!\n" );
             }
 
         return new memory_range( 0, 0, 0 );
         }
 
-    if ( 0 == memory )
+    if ( nullptr == memory )
         {
         if ( G_DEBUG )
             {
-            printf( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );
+            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - "
+                "memory == nullptr!\n" );
             }
         return new memory_range( 0, 0, 0 );
         }
@@ -195,9 +164,9 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         {
         if ( G_DEBUG )
             {
-            printf( "NV_memory_manager:get_memory_block(...) - count [ %u ] + last "
-                "memory position [ %u ] > available %s memory [ %u ], start "
-                "position = %u, end position = %u\n",
+            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - count "
+                "[ %u ] + last memory position [ %u ] > available %s memory "
+                "[ %u ], start position = %u, end position = %u\n",
                 count,
                 *last_mem_pos,
                 mem_name,
@@ -235,6 +204,217 @@ NV_memory_manager::~NV_memory_manager()
         {
         delete PAC_EEPROM;
         PAC_EEPROM = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+SRAM::SRAM( const char* file_name,
+    u_int total_size,
+    u_int available_start_pos,
+    u_int available_end_pos ) : NV_memory( total_size,
+        available_start_pos,
+        available_end_pos )
+    {
+    // Проверяем буфер (учитываем ".tmp").
+    if ( strlen( file_name ) > C_MAX_FILE_NAME - ( 1 + 4 ) )
+        {
+        G_LOG->error( "SRAM:: error - max file name length (%s).\n",
+            file_name );
+        }
+    else
+        {
+        strcpy( this->file_name, file_name );
+        strcpy( tmp_name, file_name );
+        strcat( tmp_name, ".tmp" );
+
+        if ( nullptr == file )
+            {
+            if ( ( file = fopen( file_name, "r+b" ) ) == nullptr )
+                {
+                //Пытаемся создать файл
+                file = fopen( file_name, "w+b" );
+                if ( file )
+                    {
+                    fseek( file, total_size, SEEK_SET );
+                    char tmp = 0;
+                    fwrite( &tmp, sizeof( tmp ), 1, file );
+                    fflush( file );
+                    }
+                else
+                    {
+                    if ( G_DEBUG )
+                        {
+                        G_LOG->error(
+                            "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                            file_name, strerror( errno ) );
+                        }
+                    file = 0;
+                    }
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+SRAM::~SRAM()
+    {
+    if ( file )
+        {
+        fclose( file );
+        file = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+int SRAM::read( void* buff, u_int count, u_int start_pos )
+    {
+    int res = 0;
+
+    if ( file )
+        {
+        fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
+        res = fread( buff, sizeof( char ), count, file );
+
+        if ( G_DEBUG )
+            {
+            if ( res <= 0 )
+                {
+                G_LOG->error( "Error reading device (%s) : %s.\n",
+                    file_name, strerror( errno ) );
+                }
+            }
+
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int SRAM::safe_save( void* buff )
+    {
+    // Схема атомарного сохранения:
+    //    1. записать данные во временный файл
+    //    2. fsync( temp )
+    //    3. rename( temp, target )
+    //    4. fsync( directory ) ( опционально )
+
+    if ( FILE* temp = fopen( tmp_name, "w+b" ); !temp )
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->error( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                file_name, strerror( errno ) );
+            }
+
+        return 1;
+        }
+    else
+        {
+        fclose( file );
+
+        fwrite( buff, sizeof( char ), get_size(), temp );
+        fflush( temp );
+        fclose( temp );
+        temp = 0;
+
+#ifdef WIN_OS
+        MoveFileExA( tmp_name, file_name, MOVEFILE_REPLACE_EXISTING );
+#else
+        std::rename( tmp_name, file_name );
+#endif
+        file = fopen( file_name, "r+b" );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+data_file::data_file() : f( 0 )
+    {
+    memset( buf, 0, C_MAX_BUFFER_SIZE );
+    }
+//-----------------------------------------------------------------------------
+int data_file::file_open( const char* file_name )
+    {
+    file_close();
+
+    f = fopen( file_name, "r+" );
+    if ( 0 == f )
+        {
+        printf( "Error open file \"%s\".\n", file_name );
+        return 0;
+        }
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+int data_file::file_read( void* buffer, int count )
+    {
+    int res = 0;
+    if ( f )
+        {
+        res = fread( buffer, sizeof( char ), count, f );
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+char* data_file::fget_line()
+    {
+    buf[ 0 ] = 0;
+
+    char* tmp_buff = buf;
+    int pos = 1;
+    int res = fread( tmp_buff, sizeof( char ), 1, f );
+    if ( res != 1 )
+        {
+        if ( G_DEBUG )
+            {
+            printf( "Error reading file - can\'t read!\n" );
+            }
+        return buf;
+        }
+
+    while ( tmp_buff[ 0 ] != '\n' )
+        {
+        tmp_buff++;
+        res = fread( tmp_buff, sizeof( char ), 1, f );
+
+        if ( res != 1 )
+            {
+            if ( G_DEBUG )
+                {
+                printf( "Error reading file - can\'t read more!\n" );
+                }
+            break;
+            }
+
+        pos++;
+        if ( pos >= C_MAX_BUFFER_SIZE )
+            {
+            if ( G_DEBUG )
+                {
+                printf( "Error reading file - line is too long!\n" );
+                }
+            break;
+            }
+        }
+
+    buf[ pos ] = 0;
+    return buf;
+    }
+//-----------------------------------------------------------------------------
+char* data_file::pfget_line()
+    {
+    fget_line();
+    int str_len = strlen( buf );
+    fseek( f, -str_len - 1, SEEK_CUR );
+    return buf;
+    }
+//-----------------------------------------------------------------------------
+void data_file::file_close()
+    {
+    if ( f )
+        {
+        fclose( f );
+        f = 0;
         }
     }
 //-----------------------------------------------------------------------------

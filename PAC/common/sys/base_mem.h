@@ -11,8 +11,7 @@
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-15 16:58:56#$.
 
-#ifndef MEM_H
-#define MEM_H
+#pragma once
 
 #include "console.h"
 #include "s_types.h"
@@ -37,15 +36,10 @@ class i_memory
         /// @return >= 0 - количество считанных байт.
         virtual int read( void *buf, u_int count, u_int start_pos ) = 0;
 
-        /// @brief Запись массива байт.
-        ///
-        /// @param buf       - адрес буфера, куда будут записываться данные.
-        /// @param count     - количество считываемых байт.
-        /// @param start_pos - стартовый адрес.
-        ///
-        /// @return <  0 - ошибка.
-        /// @return >= 0 - количество записанных байт.
-        virtual int write( void *buf, u_int count, u_int start_pos ) = 0;
+        /// @brief Безопасное сохранение данных.
+        /// @param buff - адрес буфера, куда будут записываться данные.
+        /// @return     - результат.
+        virtual int safe_save( void* buff ) = 0;
 
         /// @brief Получение размера памяти в байтах.
         ///
@@ -90,9 +84,7 @@ class NV_memory : public i_memory
             return available_end_pos;
             }
 
-        virtual ~NV_memory()
-            {
-            }
+        virtual ~NV_memory() = default;
 
         virtual void init( void * NV_ram_data ) {}
 
@@ -127,7 +119,7 @@ class memory_range: public i_memory
         int read( void *buf, u_int count, u_int start_pos );
 
         /// @brief Метод интерфейса @ref i_memory.
-        int write( void *buf, u_int count, u_int start_pos );
+        int safe_save( void* buff ) override;
 
     private:
         i_memory    *memory;    ///< Указатель на объект памяти.
@@ -251,4 +243,60 @@ class NV_memory_manager
         u_int last_EEPROM_pos; ///< Индекс крайнего свободного элемента EEPROM.
     };
 //-----------------------------------------------------------------------------
-#endif // MEM_H
+/// @brief Работа с энергонезависимой ОЗУ (Static Memory).
+///
+/// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
+class SRAM : public NV_memory
+    {
+    friend class NV_memory_manager;
+
+    private:
+        enum CONSTANTS
+            {
+            C_MAX_FILE_NAME = 200
+            };
+
+        char file_name[ 200 ];
+        char tmp_name[ 200 ];
+
+        FILE* file{};
+
+        SRAM( const char* file_name, u_int total_size, u_int available_start_pos,
+            u_int available_end_pos );
+        virtual ~SRAM();
+
+        /// @brief Метод интерфейса @ref i_memory.
+        int read( void* buff, u_int count, u_int start_pos );
+
+        int safe_save( void* buff ) override;
+    };
+//-----------------------------------------------------------------------------
+class data_file : public file
+    {
+    public:
+        data_file();
+
+        virtual ~data_file()
+            {
+            data_file::file_close();
+            }
+
+        int file_open( const char* file_name );
+
+        int file_read( void* buffer, int count );
+
+        char* fget_line();
+
+        char* pfget_line();
+
+        void file_close();
+
+    private:
+        enum CONSTANTS
+            {
+            C_MAX_BUFFER_SIZE = 200
+            };
+
+        FILE* f;
+        char buf[ C_MAX_BUFFER_SIZE ];
+    };

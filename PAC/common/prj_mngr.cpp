@@ -25,14 +25,6 @@
 
 #include "g_errors.h"
 
-#ifdef WIN_OS
-#include "w_mem.h"
-#endif
-
-#ifdef LINUX_OS
-#include "l_mem.h"
-#endif
-
 extern bool G_NO_IO_NODES;
 extern bool G_READ_ONLY_IO_NODES;
 

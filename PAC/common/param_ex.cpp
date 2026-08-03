@@ -72,8 +72,8 @@ u_int_2 params_manager::solve_CRC()
 //-----------------------------------------------------------------------------
 void params_manager::reset_params_size()
     {
-    unsigned char buff[ 4 ] = { 0 };
-    CRC_mem->write( ( char* )buff, 4, C_LAST_IDX_OFFSET );
+    unsigned char buff[ 4 ]{ 0 };
+    CRC_mem->safe_save( (char*)buff );
     }
 //-----------------------------------------------------------------------------
 int params_manager::get_params_change_counter() const
@@ -106,18 +106,18 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     G_LOG->write_log( i_log::P_DEBUG );
 
     //Проверка на изменение количества параметров.
-    unsigned char buff[ 4 ] = { 0 };
-    CRC_mem->read( ( char* ) buff, 4, C_LAST_IDX_OFFSET );
+    unsigned char buff[ 4 ]{ 0 };
+    CRC_mem->read( ( char* ) buff, 4, 0 );
     u_int* last_idx_ = ( u_int* ) buff;
     if ( *last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg,
-            "Total params size has changed (%d != %d), reinitialization.",
+            "Total parameters size has changed (%d != %d), re-initialization.",
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
         char *buff = ( char* ) &last_idx;   //Запись количества параметров.
-        CRC_mem->write( buff, 4, C_LAST_IDX_OFFSET );
+        CRC_mem->safe_save( buff );
 
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
@@ -232,12 +232,12 @@ int params_manager::evaluate()
         if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
-            params_mem->write( params, C_TOTAL_PARAMS_SIZE, 0 );
+            params_mem->safe_save( params );
             is_changed = false;
             last_save_ms = get_millisec();
 
             params_save_counter++;
-            G_LOG->debug( "params_mem::write() - call %d", params_save_counter );
+            G_LOG->debug( "params_mem::safe_save() - call %d", params_save_counter );
 
             return 0;
             }
