@@ -319,6 +319,9 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
+if(ARP_DEVICE)
+    target_include_directories(PtusaPLCnextEngineer PUBLIC ${GENERAL_INCLUDES})
+endif()
 
 set(TEST_INCLUDES
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/deps/googletest/googletest/include>
