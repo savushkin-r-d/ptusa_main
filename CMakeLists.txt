@@ -208,17 +208,17 @@ elseif(WIN32)
     endif()
 
     regenerate_tolua_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp"
         PAC_dev
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh)
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh")
     regenerate_tolua_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp"
         IOT_dev
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh)
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh")
     regenerate_tolua_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp"
         OPC_UA
-        ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh)
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh")
 endif()
 
 if(NOT ARP_DEVICE)
