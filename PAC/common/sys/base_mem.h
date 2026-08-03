@@ -223,8 +223,10 @@ class NV_memory_manager
 
         virtual ~NV_memory_manager();
 
-        NV_memory_manager(const NV_memory_manager&) = delete;
-        NV_memory_manager& operator=(const NV_memory_manager&) = delete;
+        NV_memory_manager( const NV_memory_manager& ) = delete;
+        NV_memory_manager( NV_memory_manager&& ) = delete;
+        NV_memory_manager& operator=( const NV_memory_manager& ) = delete;
+        NV_memory_manager& operator=( NV_memory_manager&& ) = delete;
 
     protected:
         /// Статический экземпляр класса для вызова методов.
