@@ -223,8 +223,6 @@ class NV_memory_manager
 
         virtual ~NV_memory_manager();
 
-        void init_ex( void * par );
-
     protected:
         /// Статический экземпляр класса для вызова методов.
         static auto_smart_ptr < NV_memory_manager > instance;
