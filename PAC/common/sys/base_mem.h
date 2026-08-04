@@ -17,6 +17,7 @@
 #include "s_types.h"
 
 #include "smart_ptr.h"
+#include <filesystem>
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс доступа к памяти.
 class i_memory
@@ -250,18 +251,19 @@ class SRAM : public NV_memory
     {
     friend class NV_memory_manager;
 
-    private:
-        enum CONSTANTS
-            {
-            C_MAX_FILE_NAME = 200
-            };
+    SRAM( const SRAM& ) = delete;
+    SRAM( SRAM&& ) = delete;
+    SRAM& operator=( const SRAM& ) = delete;
+    SRAM& operator=( SRAM&& ) = delete;
 
-        char file_name[ 200 ];
-        char tmp_name[ 200 ];
+    private:
+        std::filesystem::path file_path;
+        std::filesystem::path tmp_path;
 
         FILE* file{};
 
-        SRAM( const char* file_name, u_int total_size, u_int available_start_pos,
+        SRAM( const std::filesystem::path& file_name,
+            u_int total_size, u_int available_start_pos,
             u_int available_end_pos );
         virtual ~SRAM();
 
