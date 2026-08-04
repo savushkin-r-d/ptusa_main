@@ -1579,29 +1579,49 @@ void counter_iolink::evaluate_io()
     if ( auto data = reinterpret_cast<std::byte*>( get_AI_data( 0 ) );
         !G_PAC_INFO()->is_emulator() && data )
         {
-        auto buff = reinterpret_cast<std::byte*>( &in_info );
-        const int SIZE = 8;
-        std::copy( data, data + SIZE, buff );
+        if ( n_article == ARTICLE::IFM_SMFx20 )
+            {
+            auto buff = reinterpret_cast<std::byte*>( &smfx20_in_info );
+            const int SIZE = sizeof( smfx20_in_info );
+            std::copy( data, data + SIZE, buff );
 
-        //Reverse byte order to get correct float.
-        std::swap( buff[ 3 ], buff[ 0 ] );
-        std::swap( buff[ 1 ], buff[ 2 ] );
-        //Reverse byte order to get correct int16.
-        std::swap( buff[ 4 ], buff[ 5 ] );
-        //Reverse byte order to get correct int16.
-        std::swap( buff[ 6 ], buff[ 7 ] );
+            //Reverse byte order to get correct float.
+            std::swap( buff[ 3 ], buff[ 0 ] );
+            std::swap( buff[ 1 ], buff[ 2 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 4 ], buff[ 5 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 6 ], buff[ 7 ] );
+            //Reverse byte order to get correct uint16.
+            std::swap( buff[ 8 ], buff[ 9 ] );
+            }
+        else
+            {
+            auto buff = reinterpret_cast<std::byte*>( &in_info );
+            const int SIZE = 8;
+            std::copy( data, data + SIZE, buff );
+
+            //Reverse byte order to get correct float.
+            std::swap( buff[ 3 ], buff[ 0 ] );
+            std::swap( buff[ 1 ], buff[ 2 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 4 ], buff[ 5 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 6 ], buff[ 7 ] );
 
 #ifdef DEBUG_FQT_IOLINK
-        sprintf( G_LOG->msg,
-            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
-            in_info.totalizer, in_info.flow, in_info.temperature,
-            in_info.out2, in_info.out1 );
-        G_LOG->write_log( i_log::P_NOTICE );
-        sprintf( G_LOG->msg,
-            "get_quantity() %d, get_flow() %f, get_temperature() %f",
-            get_quantity(), get_flow(), get_temperature() );
-        G_LOG->write_log( i_log::P_NOTICE );
+            sprintf( G_LOG->msg,
+                "Totalizer %.2f, flow %d, temperature %d,"
+                " status2 %d, status1 %d",
+                in_info.totalizer, in_info.flow, in_info.temperature,
+                in_info.out2, in_info.out1 );
+            G_LOG->write_log( i_log::P_NOTICE );
+            sprintf( G_LOG->msg,
+                "get_quantity() %d, get_flow() %f, get_temperature() %f",
+                get_quantity(), get_flow(), get_temperature() );
+            G_LOG->write_log( i_log::P_NOTICE );
 #endif
+            }
         }
 
     base_counter::evaluate_io();
@@ -1609,7 +1629,16 @@ void counter_iolink::evaluate_io()
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
     {
+    if ( n_article == ARTICLE::IFM_SMFx20 )
+        {
+        return TE_GRADIENT * smfx20_in_info.temperature;
+        }
     return TE_GRADIENT * in_info.temperature;
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_conductivity() const
+    {
+    return CONDUCTIVITY_GRADIENT * smfx20_in_info.conductivity;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state() const
@@ -1640,6 +1669,10 @@ float counter_iolink::get_min_flow() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
     {
+    if ( n_article == ARTICLE::IFM_SMFx20 )
+        {
+        return smfx20_in_info.totalizer;
+        }
     return in_info.totalizer;
     };
 //-----------------------------------------------------------------------------
@@ -1650,6 +1683,11 @@ float counter_iolink::get_max_raw_value() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow() const
     {
+    if ( n_article == ARTICLE::IFM_SMFx20 )
+        {
+        return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
+            + smfx20_in_info.flow * get_flow_gradient();
+        }
     return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
         + in_info.flow * get_flow_gradient();
     }
@@ -1657,8 +1695,17 @@ float counter_iolink::get_flow() const
 int counter_iolink::save_device_ex( char* buff ) const
     {
     int res = base_counter::save_device_ex( buff );
-    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
-        get_flow(), get_temperature() ).size;
+    if ( n_article == ARTICLE::IFM_SMFx20 )
+        {
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE,
+            "F={:.2f}, T={:.1f}, C={:.0f}, ",
+            get_flow(), get_temperature(), get_conductivity() ).size;
+        }
+    else
+        {
+        res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "F={:.2f}, T={:.1f}, ",
+            get_flow(), get_temperature() ).size;
+        }
 
     return res;
     }
@@ -1672,14 +1719,35 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
             // Учитываем коэффициент, который переводит в мл.
             return base_counter::set_cmd( prop, idx, val / mL_in_L );
 
+        case 'C':
+            smfx20_in_info.conductivity = static_cast<uint16_t>(
+                round( val / CONDUCTIVITY_GRADIENT ) );
+            break;
+
         case 'F':
-            in_info.flow = static_cast<int16_t>(
-                round( val / get_flow_gradient() ) );
+            if ( n_article == ARTICLE::IFM_SMFx20 )
+                {
+                smfx20_in_info.flow = static_cast<int16_t>(
+                    round( val / get_flow_gradient() ) );
+                }
+            else
+                {
+                in_info.flow = static_cast<int16_t>(
+                    round( val / get_flow_gradient() ) );
+                }
             break;
 
         case 'T':
-            in_info.temperature = static_cast<int16_t>(
-                round( val / TE_GRADIENT ) );
+            if ( n_article == ARTICLE::IFM_SMFx20 )
+                {
+                smfx20_in_info.temperature = static_cast<int16_t>(
+                    round( val / TE_GRADIENT ) );
+                }
+            else
+                {
+                in_info.temperature = static_cast<int16_t>(
+                    round( val / TE_GRADIENT ) );
+                }
             break;
 
         default:
@@ -1731,6 +1799,12 @@ void counter_iolink::set_article( const char* new_article )
         n_article = ARTICLE::IFM_SM4000;
         return;
         }
+    if ( strcmp( new_article, "IFM.SMF420" ) == 0 ||
+         strcmp( new_article, "IFM.SMF320" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_SMFx20;
+        return;
+        }
 
     G_LOG->warning( "%s unknown article \"%s\"",
         get_name(), new_article );
@@ -1745,6 +1819,9 @@ float counter_iolink::get_flow_gradient() const
 
         case ARTICLE::IFM_SM4000:
             return 0.001f;
+
+        case ARTICLE::IFM_SMFx20:
+            return 0.1f;
 
         case ARTICLE::DEFAULT:
         default:
