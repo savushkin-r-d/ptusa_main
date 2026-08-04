@@ -4,6 +4,7 @@
 
 #include "tolua++.h"
 #include "PAC_dev_lua_tests.h" // содержит TOLUA_API int tolua_PAC_dev_open(lua_State*);
+#include "PAC_info.h"
 
 using namespace ::testing;
 
@@ -53,6 +54,11 @@ class test_modbus_client : public modbus_client
         auto get_tcp_client()
             {
             return tcpclient;
+            }
+
+        int get_prev_connected_state() const
+            {
+            return prev_connected_state;
             }
 
         void test_init_frame( unsigned int address, unsigned int value,
@@ -360,4 +366,77 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
 
     const int_4 expected = from_bytes( kD, kC, kB, kA );
     test_bytes( expected, "res = cli:get_int4_dc_ba(ADDR)\n" );
+    }
+
+// ------------------------------
+// TEST_F: connection state change tracking
+// ------------------------------
+
+// Test fixture reusing test_modbus_client.
+class ModbusClientConnectionStateTest : public ::testing::Test
+    {
+    protected:
+        test_modbus_client m_client{ 1, "127.0.0.1" };
+
+        void SetUp() override
+            {
+            PAC_critical_errors_manager::get_instance()->reset_all_error();
+            G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 1'000;
+            DeltaMilliSecSubHooker::set_default_time();
+            }
+
+        void TearDown() override
+            {
+            DeltaMilliSecSubHooker::set_default_time();
+            PAC_critical_errors_manager::get_instance()->reset_all_error();
+            }
+    };
+
+TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
+    {
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
+    }
+
+TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
+    {
+    const auto* mngr = PAC_critical_errors_manager::get_instance();
+    G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 100;
+
+    // Simulate connection established.
+    m_client.get_tcp_client()->set_connected_state(
+        tcp_client::ACS_CONNECTED );
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_CONNECTED );
+    EXPECT_FALSE( mngr->is_any_error() );
+
+    // Simulate short disconnect: no error before timeout.
+    m_client.get_tcp_client()->set_connected_state(
+        tcp_client::ACS_DISCONNECTED );
+    DeltaMilliSecSubHooker::set_millisec( 99 );
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
+    EXPECT_FALSE( mngr->is_any_error() );
+
+    // Simulate timeout expiration.
+    DeltaMilliSecSubHooker::set_millisec( 100 );
+    m_client.get_async_result();
+    EXPECT_TRUE( mngr->is_any_error() );
+    }
+
+TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
+    {
+    const auto* mngr = PAC_critical_errors_manager::get_instance();
+
+    // State stays disconnected -- prev should remain ACS_DISCONNECTED.
+    DeltaMilliSecSubHooker::set_millisec( 999 );
+    m_client.get_async_result();
+
+    EXPECT_EQ( m_client.get_prev_connected_state(),
+        tcp_client::ACS_DISCONNECTED );
+    EXPECT_FALSE( mngr->is_any_error() );
     }
