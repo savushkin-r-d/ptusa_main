@@ -448,8 +448,6 @@ class siren_lights_manager: public i_Lua_save_device
             return "G_SIREN_MNGR";
             }
 
-        int set_cmd( const char *prop, u_int idx, const char *val );
-
         virtual ~siren_lights_manager()
             {
             }
