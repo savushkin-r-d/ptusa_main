@@ -116,7 +116,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     {
     NV_memory *memory = 0;
     u_int     *last_mem_pos = 0;
-    char      mem_name[ 10 ];
+    const char* mem_name = "";
 
     // Выбор памяти, с которой будем работать.
     switch ( m_type )
@@ -126,7 +126,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         last_mem_pos = &last_NVRAM_pos;
         if ( G_DEBUG )
             {
-            strcpy( mem_name, "NVRAM" );
+            mem_name = "NVRAM";
             }
         break;
 
@@ -135,7 +135,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         last_mem_pos = &last_EEPROM_pos;
         if ( G_DEBUG )
             {
-            strcpy( mem_name, "EEPROM" );
+            mem_name = "EEPROM";
             }
         break;
 
