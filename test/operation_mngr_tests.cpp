@@ -697,7 +697,7 @@ TEST( operation, check_max_step_time_utf8_truncation )
 
 TEST( operation, operator_at )
 	{
-	char* res = 0;
+    std::byte* res = nullptr;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
 

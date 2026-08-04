@@ -119,7 +119,7 @@ class params_manager
         ///
         /// @return 0 - ОК.
         /// @return 1 - Ошибка контрольной суммы.
-        virtual char* get_params_data( int size, int &start_pos );
+        virtual std::byte* get_params_data( int size, int &start_pos );
 
         virtual ~params_manager();
 
@@ -166,7 +166,7 @@ class params_manager
         static auto_smart_ptr< params_manager > instance;
 
         /// Рабочий массив параметров.
-        char params[ C_TOTAL_PARAMS_SIZE ];
+        std::byte params[ C_TOTAL_PARAMS_SIZE ];
 
         /// Номер последнего выделенного параметра. Используется при создании
         /// экземпляра класса @ref parameters.

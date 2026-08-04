@@ -41,7 +41,7 @@ u_int_2 params_manager::solve_CRC()
 
     while ( datlen > 0 )
         {
-        CRC = CRC ^ params[ bufidx ];
+        CRC = CRC ^ static_cast<u_int_2>( params[ bufidx ] );
         for ( idx = 0; idx <= 7; idx++ )
             {
             Flag = CRC & 1;
@@ -72,8 +72,8 @@ u_int_2 params_manager::solve_CRC()
 //-----------------------------------------------------------------------------
 void params_manager::reset_params_size()
     {
-    unsigned char buff[ 4 ]{ 0 };
-    CRC_mem->safe_save( (char*)buff );
+    static const std::byte buff[ 4 ]{};
+    CRC_mem->safe_save( buff );
     }
 //-----------------------------------------------------------------------------
 int params_manager::get_params_change_counter() const
@@ -106,9 +106,9 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     G_LOG->write_log( i_log::P_DEBUG );
 
     //Проверка на изменение количества параметров.
-    unsigned char buff[ 4 ]{ 0 };
-    CRC_mem->read( ( char* ) buff, 4, 0 );
-    u_int* last_idx_ = ( u_int* ) buff;
+    std::byte buff[ 4 ]{};
+    CRC_mem->read( buff, 4, 0 );
+    auto last_idx_ = reinterpret_cast< u_int* >( buff );
     if ( *last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg,
@@ -116,7 +116,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
-        char *buff = ( char* ) &last_idx;   //Запись количества параметров.
+        auto buff = ( std::byte* ) &last_idx;   //Запись количества параметров.
         CRC_mem->safe_save( buff );
 
         reset_to_default( custom_init_params_function, auto_init_params,
@@ -172,9 +172,9 @@ void params_manager::save()
     last_change_ms = get_millisec();
     }
 //-----------------------------------------------------------------------------
-char* params_manager::get_params_data( int size, int &start_pos )
+std::byte* params_manager::get_params_data( int size, int &start_pos )
     {
-    char *res = nullptr;
+    std::byte *res = nullptr;
 
     if ( last_idx + size > params_mem->get_size() )
         {

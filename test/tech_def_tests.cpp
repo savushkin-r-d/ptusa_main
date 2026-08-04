@@ -5,7 +5,7 @@ using namespace ::testing;
 
 TEST( tech_object, lua_get_run_step_after_pause )
     {
-    char* res = 0;
+    std::byte* res = nullptr;
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 
@@ -64,7 +64,7 @@ TEST( tech_object, lua_get_run_step_after_pause )
 
 TEST( tech_object, evaluate )
     {
-    char* res = 0;
+    std::byte* res = nullptr;
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 

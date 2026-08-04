@@ -35,12 +35,12 @@ class i_memory
         ///
         /// @return <  0 - ошибка.
         /// @return >= 0 - количество считанных байт.
-        virtual int read( void *buf, u_int count, u_int start_pos ) = 0;
+        virtual int read( std::byte *buf, u_int count, u_int start_pos ) = 0;
 
         /// @brief Безопасное сохранение данных.
         /// @param buff - адрес буфера, куда будут записываться данные.
         /// @return     - результат.
-        virtual int safe_save( void* buff ) = 0;
+        virtual int safe_save( const std::byte* buff ) = 0;
 
         /// @brief Получение размера памяти в байтах.
         ///
@@ -64,7 +64,7 @@ class NV_memory : public i_memory
             u_int available_end_pos );
 
         /// @brief Метод интерфейса @ref i_memory.
-        u_int get_size() const
+        u_int get_size() const override
             {
             return total_size;
             }
@@ -109,7 +109,7 @@ class memory_range: public i_memory
 
     public:
         /// @brief Метод интерфейса @ref i_memory.
-        u_int get_size() const
+        u_int get_size() const override
             {
             return size;
             }
@@ -117,10 +117,10 @@ class memory_range: public i_memory
         virtual ~memory_range() = default;
 
         /// @brief Метод интерфейса @ref i_memory.
-        int read( void *buf, u_int count, u_int start_pos );
+        int read( std::byte *buf, u_int count, u_int start_pos ) override;
 
         /// @brief Метод интерфейса @ref i_memory.
-        int safe_save( void* buff ) override;
+        int safe_save( const std::byte* buff ) override;
 
     private:
         i_memory    *memory;    ///< Указатель на объект памяти.
@@ -139,51 +139,6 @@ class memory_range: public i_memory
         ///    0 - Ок.
         ///    1 - Ошибка.
         int check_params( u_int count, u_int start_pos );
-    };
-//-----------------------------------------------------------------------------
-/// @brief Работа с объектом файловой системы. Представляет абстракцию от
-/// физической реализации таковой.
-class file
-    {
-    public:
-        virtual ~file()
-            {
-            }
-
-        /// @brief Открытие файла.
-        ///
-        /// @param file_name - имя файла.
-        ///
-        /// @return - результат
-        ///    0   - Ок.
-        ///    0 < - Ошибка.
-        virtual int file_open( const char *file_name ) = 0;
-
-        /// @brief Чтение из файла блока данных.
-        ///
-        /// @param buffer - буфер, куда поместить результат.
-        /// @param count - количество считываемых байт.
-        ///
-        /// @return - количество считанных байт.
-        virtual int file_read( void *buffer, int count ) = 0;
-
-        /// @brief Чтение из файла строки.
-        ///
-        /// @return - указатель на начало строки.
-        virtual char* fget_line() = 0;
-
-        /// @brief Чтение из файла строки без изменения позиции указателя в
-        /// файле.
-        ///
-        /// @return - указатель на начало строки.
-        virtual char* pfget_line() = 0;
-
-        /// @brief Закрытие файла.
-        ///
-        /// @return - результат
-        ///    0   - Ок.
-        ///    0 < - Ошибка.
-        virtual void file_close() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ. Абстракция от физического
@@ -268,37 +223,7 @@ class SRAM : public NV_memory
         virtual ~SRAM();
 
         /// @brief Метод интерфейса @ref i_memory.
-        int read( void* buff, u_int count, u_int start_pos );
+        int read( std::byte* buff, u_int count, u_int start_pos );
 
-        int safe_save( void* buff ) override;
-    };
-//-----------------------------------------------------------------------------
-class data_file : public file
-    {
-    public:
-        data_file();
-
-        virtual ~data_file()
-            {
-            data_file::file_close();
-            }
-
-        int file_open( const char* file_name );
-
-        int file_read( void* buffer, int count );
-
-        char* fget_line();
-
-        char* pfget_line();
-
-        void file_close();
-
-    private:
-        enum CONSTANTS
-            {
-            C_MAX_BUFFER_SIZE = 200
-            };
-
-        FILE* f;
-        char buf[ C_MAX_BUFFER_SIZE ];
+        int safe_save( const std::byte* buff ) override;
     };

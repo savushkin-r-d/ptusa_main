@@ -240,26 +240,9 @@ project_manager* project_manager::get_instance()
     if ( instance.is_null() )
         {
         instance = new project_manager();
-
-#ifdef WIN_OS
-        instance->cfg_file = new data_file();
-#endif // WIN_OS
-
-#ifdef LINUX_OS
-        instance->cfg_file = new data_file();
-#endif // LINUX_OS
         }
 
     return instance;
-    }
-//-----------------------------------------------------------------------------
-project_manager::~project_manager()
-    {
-    if ( cfg_file )
-        {
-        delete cfg_file;
-        cfg_file = nullptr;
-        }
     }
 //-----------------------------------------------------------------------------
 int project_manager::init_path( const char* path )
