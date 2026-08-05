@@ -106,6 +106,9 @@ void PAC_info::reset_params()
 
     par[ P_BK_ANSWER_MAX_WAIT_TIME ] = 6'000;   // 6 seconds.
 
+    par[ P_STABLE_SAVE_DELAY_MS ] = 60'000;     // 1 minute.
+    par[ P_MIN_SAVE_INTERVAL_MS ] = 3'600'000;  // 1 hour (60 * 60 * 1'000).
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -197,6 +200,14 @@ int PAC_info::save_device( char* buff ) const
         "\tWATCHDOG_ERROR={},\n", watchdog_error ).size;
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
         "\tCOMMUN_ERROR={},\n", commun_error ).size;
+
+
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_CHANGE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_change_counter() ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_SAVE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_save_counter() ).size;
 
 
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
