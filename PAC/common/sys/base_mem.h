@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "console.h"
 #include "s_types.h"
 
@@ -23,19 +25,17 @@
 class i_memory
     {
     public:
-        virtual ~i_memory()
-            {
-            }
+        virtual ~i_memory() = default;
 
         /// @brief Чтение массива байт.
         ///
-        /// @param buf       - адрес буфера, куда будут считываться данные.
+        /// @param buff       - адрес буфера, куда будут считываться данные.
         /// @param count     - количество считываемых байт.
         /// @param start_pos - стартовый адрес.
         ///
         /// @return <  0 - ошибка.
         /// @return >= 0 - количество считанных байт.
-        virtual int read( std::byte *buf, u_int count, u_int start_pos ) = 0;
+        virtual int read( std::byte *buff, u_int count, u_int start_pos ) = 0;
 
         /// @brief Безопасное сохранение данных.
         /// @param buff - адрес буфера, куда будут записываться данные.
@@ -46,6 +46,8 @@ class i_memory
         ///
         /// @return - размер памяти в байтах.
         virtual u_int get_size() const = 0;
+
+        virtual int zero_fill() = 0;
     };
 //-----------------------------------------------------------------------------
 ///\russian
@@ -85,9 +87,12 @@ class NV_memory : public i_memory
             return available_end_pos;
             }
 
-        virtual ~NV_memory() = default;
+        ~NV_memory() override = default;
 
-        virtual void init( void * NV_ram_data ) {}
+        NV_memory( const NV_memory& ) = delete;
+        NV_memory( NV_memory&& ) = delete;
+        NV_memory& operator=( const NV_memory& ) = delete;
+        NV_memory& operator=( NV_memory&& ) = delete;
 
     private:
 
@@ -114,13 +119,20 @@ class memory_range: public i_memory
             return size;
             }
 
-        virtual ~memory_range() = default;
+        ~memory_range() override = default;
+
+        memory_range( const memory_range& ) = delete;
+        memory_range( memory_range&& ) = delete;
+        memory_range& operator=( const memory_range& ) = delete;
+        memory_range& operator=( memory_range&& ) = delete;
 
         /// @brief Метод интерфейса @ref i_memory.
-        int read( std::byte *buf, u_int count, u_int start_pos ) override;
+        int read( std::byte *buf, u_int count, u_int start_pos = 0 ) override;
 
         /// @brief Метод интерфейса @ref i_memory.
         int safe_save( const std::byte* buff ) override;
+
+        int zero_fill() override;
 
     private:
         i_memory    *memory;    ///< Указатель на объект памяти.
@@ -206,24 +218,28 @@ class SRAM : public NV_memory
     {
     friend class NV_memory_manager;
 
+    public:
+        SRAM( const std::filesystem::path& file_name,
+            u_int total_size, u_int available_start_pos,
+            u_int available_end_pos );
+        ~SRAM() override;
+
+        /// @brief Метод интерфейса @ref i_memory.
+        int read( std::byte* buff, u_int count, u_int start_pos ) override;
+
+        int safe_save( const std::byte* buff ) override;
+
+        int zero_fill() override;
+
+    private:
+
     SRAM( const SRAM& ) = delete;
     SRAM( SRAM&& ) = delete;
     SRAM& operator=( const SRAM& ) = delete;
     SRAM& operator=( SRAM&& ) = delete;
 
-    private:
-        std::filesystem::path file_path;
-        std::filesystem::path tmp_path;
+    std::filesystem::path file_path;
+    std::filesystem::path tmp_path;
 
-        FILE* file{};
-
-        SRAM( const std::filesystem::path& file_name,
-            u_int total_size, u_int available_start_pos,
-            u_int available_end_pos );
-        virtual ~SRAM();
-
-        /// @brief Метод интерфейса @ref i_memory.
-        int read( std::byte* buff, u_int count, u_int start_pos );
-
-        int safe_save( const std::byte* buff ) override;
+    FILE* file{};
     };

@@ -23,6 +23,8 @@
 #include <locale.h>
 #endif //WIN_OS
 
+#include <array>
+#include <cstddef>
 #include <math.h>
 #include <string.h>
 
@@ -56,7 +58,7 @@ class params_manager
     friend class test_params_manager;
 #endif
     public:
-        enum CONSTANTS
+        enum class CONSTANTS
             {
             C_TOTAL_PARAMS_SIZE =
 #ifdef PTUSA_TEST
@@ -166,7 +168,12 @@ class params_manager
         static auto_smart_ptr< params_manager > instance;
 
         /// Рабочий массив параметров.
-        std::byte params[ C_TOTAL_PARAMS_SIZE ];
+        std::array<std::byte,
+            static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE )> params{};
+
+        /// Системный массив параметров.
+        std::array<std::byte,
+            static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE )> sys_params{};
 
         /// Номер последнего выделенного параметра. Используется при создании
         /// экземпляра класса @ref parameters.

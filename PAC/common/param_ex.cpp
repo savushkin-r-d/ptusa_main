@@ -22,12 +22,12 @@ params_manager::params_manager(): par( 0 ), project_id( 0 )
     {
     last_idx = 0;
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
-        NV_memory_manager::MT_NVRAM, C_SYS_MEM_SIZE );
+        NV_memory_manager::MT_NVRAM,
+        static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE ) );
 
     params_mem = NV_memory_manager::get_instance()->get_memory_block(
-        NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
-
-    memset( params, 0, C_TOTAL_PARAMS_SIZE );
+        NV_memory_manager::MT_EEPROM,
+        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
     }
 //-----------------------------------------------------------------------------
 u_int_2 params_manager::solve_CRC()
@@ -36,7 +36,8 @@ u_int_2 params_manager::solve_CRC()
     char    Flag;
 
     u_int_2 CRC = 65535;
-    unsigned int datlen = C_TOTAL_PARAMS_SIZE;
+    unsigned int datlen =
+        static_cast<unsigned int>( CONSTANTS::C_TOTAL_PARAMS_SIZE );
     int bufidx = 0;
 
     while ( datlen > 0 )
@@ -72,8 +73,7 @@ u_int_2 params_manager::solve_CRC()
 //-----------------------------------------------------------------------------
 void params_manager::reset_params_size()
     {
-    static const std::byte buff[ 4 ]{};
-    CRC_mem->safe_save( buff );
+    CRC_mem->zero_fill();
     }
 //-----------------------------------------------------------------------------
 int params_manager::get_params_change_counter() const
@@ -90,8 +90,10 @@ int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
 
-    memset( params, 0, C_TOTAL_PARAMS_SIZE );
-    params_mem->read( params, C_TOTAL_PARAMS_SIZE, 0 );
+    memset( params.data(), 0,
+        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
+    params_mem->read( params.data(),
+        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
 
     return 0;
     }
@@ -101,14 +103,13 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
     sprintf( G_LOG->msg, "Total memory used: %u of %u bytes[ %.2f%c ].",
-            last_idx, C_TOTAL_PARAMS_SIZE,
-            100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
+            last_idx, static_cast<unsigned int>( CONSTANTS::C_TOTAL_PARAMS_SIZE ),
+            100. * last_idx / static_cast<float>( CONSTANTS::C_TOTAL_PARAMS_SIZE ), '%' );
     G_LOG->write_log( i_log::P_DEBUG );
 
     //Проверка на изменение количества параметров.
-    std::byte buff[ 4 ]{};
-    CRC_mem->read( buff, 4, 0 );
-    auto last_idx_ = reinterpret_cast< u_int* >( buff );
+    CRC_mem->read( sys_params.data(), 4 );
+    auto last_idx_ = reinterpret_cast< u_int* >( sys_params.data() );
     if ( *last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg,
@@ -116,8 +117,9 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
-        auto buff = ( std::byte* ) &last_idx;   //Запись количества параметров.
-        CRC_mem->safe_save( buff );
+        //Запись количества параметров.
+        memcpy( sys_params.data(), &last_idx, sizeof( last_idx ) );
+        CRC_mem->safe_save( sys_params.data() );
 
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
@@ -127,7 +129,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 void params_manager::reset_to_default( void( *custom_init_params_function )( ),
     int auto_init_params, int auto_init_work_params )
     {
-    memset( params, 0, C_TOTAL_PARAMS_SIZE );
+    memset( params.data(), 0,
+        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
 
     if ( custom_init_params_function != 0 )
         {
@@ -178,15 +181,14 @@ std::byte* params_manager::get_params_data( int size, int &start_pos )
 
     if ( last_idx + size > params_mem->get_size() )
         {
-        if ( G_DEBUG )
-            {
-            printf( "params_manager::get_params_data() - is not enough memory ( %d + %d < %d ) !\n",
-                last_idx, size, params_mem->get_size() );
-            }
+        G_LOG->debug( "params_manager::get_params_data() - is not enough "
+            "memory ( %d + %d < %d ) !",
+            last_idx, size, params_mem->get_size() );
+
         return 0;
         }
 
-    res = params + last_idx;
+    res = params.data() + last_idx;
     start_pos = last_idx;
     last_idx += size;
 
@@ -232,12 +234,13 @@ int params_manager::evaluate()
         if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
-            params_mem->safe_save( params );
+            params_mem->safe_save( params.data() );
             is_changed = false;
             last_save_ms = get_millisec();
 
             params_save_counter++;
-            G_LOG->debug( "params_mem::safe_save() - call %d", params_save_counter );
+            G_LOG->debug( "params_mem::safe_save() - call %d",
+                params_save_counter );
 
             return 0;
             }

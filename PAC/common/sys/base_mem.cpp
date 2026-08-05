@@ -9,6 +9,7 @@
 #include "base_mem.h"
 #include "log.h"
 
+#include <chrono>
 #ifdef LINUX_OS
 #include <unistd.h>
 
@@ -16,10 +17,11 @@
 #include <cerrno>
 #endif // LINUX_OS
 
-
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
 #include "mem_PFC200.h"
 #endif // LINUX_OS
+
+#include <vector>
 
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
@@ -40,7 +42,7 @@ memory_range::memory_range( i_memory *memory, u_int start_pos,
     {
     }
 //-----------------------------------------------------------------------------
-int memory_range::read( std::byte *buf, u_int count, u_int start_pos )
+int memory_range::read( std::byte *buf, u_int count, u_int start_pos/*= 0*/ )
     {
     if ( memory )
         {
@@ -65,6 +67,16 @@ int memory_range::safe_save( const std::byte* buff )
         return memory->safe_save( buff );
         }
     return 0;
+    }
+//-----------------------------------------------------------------------------
+int memory_range::zero_fill()
+    {
+    if ( memory )
+        {
+        return memory->zero_fill();
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 int memory_range::check_params( u_int count, u_int start_pos )
@@ -217,29 +229,26 @@ SRAM::SRAM( const std::filesystem::path& file_name,
     file_path( file_name ),
     tmp_path( file_name.string() + ".tmp" )
     {
-    if ( file == nullptr )
+    if ( ( file = fopen( file_path.string().c_str(), "r+b" ) ) == nullptr )
         {
-        if ( ( file = fopen( file_path.string().c_str(), "r+b" ) ) == nullptr )
+        //Пытаемся создать файл
+        file = fopen( file_path.string().c_str(), "w+b" );
+        if ( file )
             {
-            //Пытаемся создать файл
-            file = fopen( file_path.string().c_str(), "w+b" );
-            if ( file )
+            fseek( file, total_size, SEEK_SET );
+            char tmp = 0;
+            fwrite( &tmp, sizeof( tmp ), 1, file );
+            fflush( file );
+            }
+        else
+            {
+            if ( G_DEBUG )
                 {
-                fseek( file, total_size, SEEK_SET );
-                char tmp = 0;
-                fwrite( &tmp, sizeof( tmp ), 1, file );
-                fflush( file );
+                G_LOG->error(
+                    "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                    file_path.string().c_str(), strerror( errno ) );
                 }
-            else
-                {
-                if ( G_DEBUG )
-                    {
-                    G_LOG->error(
-                        "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                        file_path.string().c_str(), strerror( errno ) );
-                    }
-                file = 0;
-                }
+            file = nullptr;
             }
         }
     }
@@ -249,7 +258,7 @@ SRAM::~SRAM()
     if ( file )
         {
         fclose( file );
-        file = 0;
+        file = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
@@ -276,8 +285,25 @@ int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
     return res;
     }
 //-----------------------------------------------------------------------------
+int SRAM::zero_fill()
+    {
+    if ( !file ) return 1;
+
+    std::vector<std::byte> zeros( get_size(), std::byte{ 0 } );
+    fseek( file, 0, SEEK_SET );
+    fwrite( zeros.data(), sizeof( std::byte ), zeros.size(), file );
+    fflush( file );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int SRAM::safe_save( const std::byte* buff )
     {
+    std::chrono::high_resolution_clock::time_point start;
+    if ( G_DEBUG )
+        {
+        start = std::chrono::high_resolution_clock::now();
+        }
+
     // Схема атомарного сохранения:
     //    1. записать данные во временный файл
     //    2. fsync( temp )
@@ -286,11 +312,8 @@ int SRAM::safe_save( const std::byte* buff )
 
     if ( FILE* temp = fopen( tmp_path.string().c_str(), "w+b" ); !temp )
         {
-        if ( G_DEBUG )
-            {
-            G_LOG->error( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                file_path.string().c_str(), strerror( errno ) );
-            }
+        G_LOG->error( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+            file_path.string().c_str(), strerror( errno ) );
 
         return 1;
         }
@@ -304,11 +327,22 @@ int SRAM::safe_save( const std::byte* buff )
         temp = nullptr;
 
 #ifdef WIN_OS
-        MoveFileExA( tmp_path.string().c_str(), file_path.string().c_str(), MOVEFILE_REPLACE_EXISTING );
+        MoveFileExA( tmp_path.string().c_str(), file_path.string().c_str(),
+            MOVEFILE_REPLACE_EXISTING );
 #else
         std::filesystem::rename( tmp_path, file_path );
 #endif
         file = fopen( file_path.string().c_str(), "r+b" );
+
+        if ( G_DEBUG )
+            {
+            auto end = std::chrono::high_resolution_clock::now();
+            const auto duration = std::chrono::duration_cast<
+                std::chrono::microseconds>( end - start ).count();
+            G_LOG->debug( "SRAM::safe_save() - write time: %lld us (%s).",
+                static_cast<long long>( duration ),
+                file_path.string().c_str() );
+            }
         }
 
     return 0;
