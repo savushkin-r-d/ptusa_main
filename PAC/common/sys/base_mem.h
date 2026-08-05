@@ -35,7 +35,8 @@ class i_memory
         ///
         /// @return <  0 - ошибка.
         /// @return >= 0 - количество считанных байт.
-        virtual int read( std::byte *buff, u_int count, u_int start_pos ) = 0;
+        virtual int read( std::byte *buff, u_int count,
+            u_int start_pos = 0 ) = 0;
 
         /// @brief Безопасное сохранение данных.
         /// @param buff - адрес буфера, куда будут записываться данные.
@@ -135,9 +136,9 @@ class memory_range: public i_memory
         int zero_fill() override;
 
     private:
-        i_memory    *memory;    ///< Указатель на объект памяти.
-        u_int       start_pos;  ///< Начальный адрес.
-        u_int       size;       ///< Размер блока памяти в байтах.
+        i_memory *memory;        ///< Указатель на объект памяти.
+        u_int    start_position; ///< Начальный адрес.
+        u_int    size;           ///< Размер блока памяти в байтах.
 
         /// @brief Закрытый конструктор.
         ///
@@ -148,7 +149,7 @@ class memory_range: public i_memory
         /// @brief Проверка на корректность параметров.
         ///
         /// @return - результат проверки
-        ///    0 - Ок.
+        ///    0 - ОК.
         ///    1 - Ошибка.
         int check_params( u_int count, u_int start_pos );
     };

@@ -37,8 +37,7 @@ NV_memory::NV_memory( u_int total_size,
 //-----------------------------------------------------------------------------
 memory_range::memory_range( i_memory *memory, u_int start_pos,
     u_int size ) : memory( memory ),
-    start_pos( start_pos ),
-    size( size )
+    start_position( start_pos ), size( size )
     {
     }
 //-----------------------------------------------------------------------------
@@ -54,7 +53,7 @@ int memory_range::read( std::byte *buf, u_int count, u_int start_pos/*= 0*/ )
             return 0;
             }
 
-        return memory->read( buf, count, this->start_pos + start_pos );
+        return memory->read( buf, count, start_position + start_pos );
         }
 
     return 0;
@@ -264,25 +263,20 @@ SRAM::~SRAM()
 //-----------------------------------------------------------------------------
 int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
     {
-    int res = 0;
-
     if ( file )
         {
         fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
-        res = fread( buff, sizeof( char ), count, file );
+        auto res = fread( buff, sizeof( char ), count, file );
 
-        if ( G_DEBUG )
+        if ( res == 0 )
             {
-            if ( res <= 0 )
-                {
-                G_LOG->error( "Error reading device (%s) : %s.\n",
-                    file_path.string().c_str(), strerror( errno ) );
-                }
+            G_LOG->error( "Error reading device (%s) : %s.\n",
+                file_path.string().c_str(), strerror( errno ) );
             }
-
+        return 1;
         }
 
-    return res;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int SRAM::zero_fill()

@@ -32,18 +32,16 @@ params_manager::params_manager(): par( 0 ), project_id( 0 )
 //-----------------------------------------------------------------------------
 u_int_2 params_manager::solve_CRC()
     {
-    int     idx;
-    char    Flag;
+    char Flag;
 
     u_int_2 CRC = 65535;
-    unsigned int datlen =
-        static_cast<unsigned int>( CONSTANTS::C_TOTAL_PARAMS_SIZE );
+    auto datlen = static_cast<unsigned int>( CONSTANTS::C_TOTAL_PARAMS_SIZE );
     int bufidx = 0;
 
     while ( datlen > 0 )
         {
         CRC = CRC ^ static_cast<u_int_2>( params[ bufidx ] );
-        for ( idx = 0; idx <= 7; idx++ )
+        for ( int idx = 0; idx <= 7; idx++ )
             {
             Flag = CRC & 1;
             CRC = CRC >> 1;
@@ -54,14 +52,14 @@ u_int_2 params_manager::solve_CRC()
         }
     char* p = ( char* ) &project_id;
     CRC = CRC ^ p[ 0 ];
-    for ( idx = 0; idx <= 7; idx++ )
+    for ( int idx = 0; idx <= 7; idx++ )
         {
         Flag = CRC & 1;
         CRC = CRC >> 1;
         if ( Flag ) CRC = CRC ^ 0x0A001;
         }
     CRC = CRC ^ p[ 1 ];
-    for ( idx = 0; idx <= 7; idx++ )
+    for ( int idx = 0; idx <= 7; idx++ )
         {
         Flag = CRC & 1;
         CRC = CRC >> 1;
