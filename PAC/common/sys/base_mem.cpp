@@ -266,9 +266,8 @@ int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
     if ( file )
         {
         fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
-        auto res = fread( buff, sizeof( char ), count, file );
 
-        if ( res == 0 )
+        if ( auto res = fread( buff, sizeof( char ), count, file ); res == 0 )
             {
             G_LOG->error( "Error reading device (%s) : %s.\n",
                 file_path.string().c_str(), strerror( errno ) );

@@ -115,13 +115,13 @@ class params_manager
 
         /// @brief Получение указателя на блок данных параметров.
         ///
-        /// @param size      - размер блока данных в байтах.
+        /// @param size - размер блока данных в байтах.
         /// @param [out] start_pos - стартовый индекс в глобальном массиве
         /// параметров. Необходим для дальнейшей записи параметров в память.
         ///
         /// @return 0 - ОК.
         /// @return 1 - Ошибка контрольной суммы.
-        virtual std::byte* get_params_data( int size, int &start_pos );
+        virtual std::byte* reserve_params_region( int size, int &start_pos );
 
         virtual ~params_manager();
 
@@ -493,7 +493,7 @@ public parameters < type, is_float >
         /// @param name  - имя объекта.
         saved_params( int count, const char *name, i_params_owner* owner = 0 ) : parameters < type, is_float >(
             count, name,
-            ( type* ) params_manager::get_instance()->get_params_data(
+            ( type* ) params_manager::get_instance()->reserve_params_region(
             count * sizeof( type ), start_pos ), owner )
             {
             }

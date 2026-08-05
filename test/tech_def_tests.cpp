@@ -11,7 +11,7 @@ TEST( tech_object, lua_get_run_step_after_pause )
 
     EXPECT_CALL( *par_mock, init( _ ) );
     EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 
@@ -70,7 +70,7 @@ TEST( tech_object, evaluate )
 
     EXPECT_CALL( *par_mock, init( _ ) );
     EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 

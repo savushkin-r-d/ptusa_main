@@ -173,20 +173,18 @@ void params_manager::save()
     last_change_ms = get_millisec();
     }
 //-----------------------------------------------------------------------------
-std::byte* params_manager::get_params_data( int size, int &start_pos )
+std::byte* params_manager::reserve_params_region( int size, int &start_pos )
     {
-    std::byte *res = nullptr;
-
     if ( last_idx + size > params_mem->get_size() )
         {
-        G_LOG->debug( "params_manager::get_params_data() - is not enough "
+        G_LOG->debug( "params_manager::reserve_params_region() - is not enough "
             "memory ( %d + %d < %d ) !",
             last_idx, size, params_mem->get_size() );
 
-        return 0;
+        return nullptr;
         }
 
-    res = params.data() + last_idx;
+    auto res = params.data() + last_idx;
     start_pos = last_idx;
     last_idx += size;
 

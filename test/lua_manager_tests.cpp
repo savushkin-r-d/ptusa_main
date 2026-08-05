@@ -49,7 +49,7 @@ TEST_F(LuaManagerTest, init_success)
 	mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity(par_mock);
 
-    EXPECT_CALL(*par_mock, get_params_data(_, _))
+    EXPECT_CALL(*par_mock, reserve_params_region(_, _))
         .Times(AtLeast(2))
         .WillRepeatedly(Return(res));
 
@@ -234,7 +234,7 @@ mock_tech_object_manager* init_mocks( int cnt )
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 
