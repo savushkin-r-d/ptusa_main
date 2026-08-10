@@ -128,25 +128,20 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     {
     NV_memory *memory = 0;
     u_int     *last_mem_pos = 0;
-    const char* mem_name = "";
+    const char* mem_name;
 
-    // Выбор памяти, с которой будем работать.
-    switch ( m_type )
+    if ( m_type == MT_NVRAM )
         {
-    case MT_NVRAM:
         memory = PAC_NVRAM;
         last_mem_pos = &last_NVRAM_pos;
-
         mem_name = "NVRAM";
-        break;
-
-    case MT_EEPROM:
-    default:        // По умолчанию используем EEPROM.
+        }
+    else
+        {
+        // По умолчанию используем EEPROM.
         memory = PAC_EEPROM;
         last_mem_pos = &last_EEPROM_pos;
-
         mem_name = "EEPROM";
-        break;
         }
 
     if ( *last_mem_pos + count >
@@ -221,6 +216,11 @@ SRAM::SRAM( const std::filesystem::path& file_name,
             file = nullptr;
             }
         }
+    }
+//-----------------------------------------------------------------------------
+SRAM::SRAM( const std::filesystem::path& file_name, u_int total_size ) :
+    SRAM( file_name, total_size, 0, total_size - 1 )
+    {
     }
 //-----------------------------------------------------------------------------
 SRAM::~SRAM()

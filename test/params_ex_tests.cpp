@@ -32,10 +32,6 @@ TEST( memory_range, get_memory_block )
     {
     auto mm = NV_memory_manager::get_instance();
 
-    auto no_mem = mm->get_memory_block(
-        NV_memory_manager::MEMORY_TYPE::MT_NVRAM, 100 );
-
-
     // Запрос большего количества памяти, чем есть в NVRAM. Результат должен
     // быть объект с размером 0.
     auto bad_mem = mm->get_memory_block(
@@ -87,7 +83,7 @@ TEST( SRAM, constructor )
         reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fopen_hook );
 
-    SRAM bad_sram( "test_sram1.bin", 1024, 0, 1023 );
+    SRAM bad_sram( "test_sram1.bin", 1024 );
     EXPECT_EQ( 2, bad_sram.read( nullptr, 10, 5 ) );
 
     subhook_remove( fopen_hook );
@@ -99,8 +95,22 @@ TEST( SRAM, read )
         reinterpret_cast<void*>( &bad_fread ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fread_hook );
 
-    SRAM good_sram( "test_sram2.bin", 1024, 0, 1023 );
+    SRAM good_sram( "test_sram2.bin", 1024 );
     EXPECT_EQ( 1, good_sram.read( nullptr, 10, 5 ) );
 
     subhook_remove( fread_hook );
+    }
+
+TEST( SRAM, safe_save )
+    {
+    SRAM good_sram( "test_sram2.bin", 1024 );
+
+    auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
+        reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( fopen_hook );
+
+    std::array<std::byte, 10> buff{};
+    EXPECT_EQ( 1, good_sram.safe_save( buff.data() ) );
+
+    subhook_remove( fopen_hook );
     }

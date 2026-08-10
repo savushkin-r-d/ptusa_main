@@ -240,6 +240,9 @@ class SRAM : public NV_memory
         SRAM( const std::filesystem::path& file_name,
             u_int total_size, u_int available_start_pos,
             u_int available_end_pos );
+
+        SRAM( const std::filesystem::path& file_name,
+            u_int total_size );
         ~SRAM() override;
 
         /// @brief Метод интерфейса @ref i_memory.
