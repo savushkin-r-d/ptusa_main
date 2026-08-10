@@ -50,13 +50,13 @@ int memory_range::read( std::byte *buf, u_int count, u_int start_pos/*= 0*/ )
             G_LOG->debug( "memory_range::read(...) - size[ %u ], incorrect "
                 "params -> count[ %u ], start_pos[ %u ] \n",
                 size, count, start_pos );
-            return 0;
+            return 1;
             }
 
         return memory->read( buf, count, start_position + start_pos );
         }
 
-    return 0;
+    return 2;
     }
 //-----------------------------------------------------------------------------
 int memory_range::safe_save( const std::byte* buff )
@@ -65,7 +65,8 @@ int memory_range::safe_save( const std::byte* buff )
         {
         return memory->safe_save( buff );
         }
-    return 0;
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 int memory_range::zero_fill()
@@ -135,57 +136,30 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     case MT_NVRAM:
         memory = PAC_NVRAM;
         last_mem_pos = &last_NVRAM_pos;
-        if ( G_DEBUG )
-            {
-            mem_name = "NVRAM";
-            }
+
+        mem_name = "NVRAM";
         break;
 
     case MT_EEPROM:
+    default:        // По умолчанию используем EEPROM.
         memory = PAC_EEPROM;
         last_mem_pos = &last_EEPROM_pos;
-        if ( G_DEBUG )
-            {
-            mem_name = "EEPROM";
-            }
+
+        mem_name = "EEPROM";
         break;
-
-    default:
-        if ( G_DEBUG )
-            {
-            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - "
-                "incorrect memory type!\n" );
-            }
-
-        return new memory_range( 0, 0, 0 );
-        }
-
-    if ( nullptr == memory )
-        {
-        if ( G_DEBUG )
-            {
-            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - "
-                "memory == nullptr!\n" );
-            }
-        return new memory_range( 0, 0, 0 );
         }
 
     if ( *last_mem_pos + count >
         memory->get_available_end_pos() )
         {
-        if ( G_DEBUG )
-            {
-            G_LOG->debug( "NV_memory_manager:get_memory_block(...) - count "
-                "[ %u ] + last memory position [ %u ] > available %s memory "
-                "[ %u ], start position = %u, end position = %u\n",
-                count,
-                *last_mem_pos,
-                mem_name,
-                memory->get_size(),
-                memory->get_available_start_pos(),
-                memory->get_available_end_pos() );
-            }
-        return new memory_range( 0, 0, 0 );
+        G_LOG->debug( "NV_memory_manager:get_memory_block(...) - count "
+            "[ %u ] + last memory position [ %u ] > available %s memory "
+            "[ %u ], start position = %u, end position = %u\n",
+            count, *last_mem_pos, mem_name,
+            memory->get_size(),
+            memory->get_available_start_pos(),
+            memory->get_available_end_pos() );
+        return new memory_range( nullptr, 0, 0 );
         }
 
     memory_range *res = new memory_range( memory, *last_mem_pos, count );
