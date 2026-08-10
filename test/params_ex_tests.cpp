@@ -67,3 +67,40 @@ TEST( memory_range, get_memory_block )
     res = good_mem->read( buff.data(), 100 );
     EXPECT_EQ( 1, res );
     }
+
+namespace
+    {
+    FILE* bad_fopen( const char* filename, const char* mode )
+        {
+        return nullptr;
+        }
+
+    int bad_fread( void* ptr, size_t size, size_t count, FILE* stream )
+        {
+        return 0;
+        }
+    }
+
+TEST( SRAM, constructor )
+    {
+    auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
+        reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( fopen_hook );
+
+    SRAM bad_sram( "test_sram1.bin", 1024, 0, 1023 );
+    EXPECT_EQ( 2, bad_sram.read( nullptr, 10, 5 ) );
+
+    subhook_remove( fopen_hook );
+    }
+
+TEST( SRAM, read )
+    {
+    auto fread_hook = subhook_new( reinterpret_cast<void*>( &fread ),
+        reinterpret_cast<void*>( &bad_fread ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( fread_hook );
+
+    SRAM good_sram( "test_sram2.bin", 1024, 0, 1023 );
+    EXPECT_EQ( 1, good_sram.read( nullptr, 10, 5 ) );
+
+    subhook_remove( fread_hook );
+    }

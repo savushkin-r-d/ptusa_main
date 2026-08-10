@@ -215,12 +215,9 @@ SRAM::SRAM( const std::filesystem::path& file_name,
             }
         else
             {
-            if ( G_DEBUG )
-                {
-                G_LOG->error(
-                    "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                    file_path.string().c_str(), strerror( errno ) );
-                }
+            G_LOG->error(
+                "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                file_path.string().c_str(), strerror( errno ) );
             file = nullptr;
             }
         }
@@ -249,7 +246,7 @@ int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
         return 1;
         }
 
-    return 0;
+    return 2;
     }
 //-----------------------------------------------------------------------------
 int SRAM::zero_fill()
