@@ -66,12 +66,16 @@ TEST( memory_range, get_memory_block )
 
 namespace
     {
-    FILE* bad_fopen( const char* filename, const char* mode )
+    FILE* bad_fopen( [[maybe_unused]] const char* filename,
+        [[maybe_unused]] const char* mode )
         {
         return nullptr;
         }
 
-    int bad_fread( void* ptr, size_t size, size_t count, FILE* stream )
+    int bad_fread( [[maybe_unused]] void* ptr,
+        [[maybe_unused]] size_t size,
+        [[maybe_unused]] size_t count,
+        [[maybe_unused]] FILE* stream )
         {
         return 0;
         }
