@@ -1,0 +1,101 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class params_manager <<singleton>> {
+    - static auto_smart_ptr<params_manager> instance
+    - static char is_init
+    - std::array<std::byte, C_TOTAL_PARAMS_SIZE> params_data
+    - std::array<std::byte, C_SYS_MEM_SIZE> sys_params_data
+    - u_int last_idx
+    - u_int project_id
+    - memory_range* params_mem
+    - memory_range* CRC_mem
+    - uint32_t last_change_ms
+    - uint32_t last_save_ms
+    - bool is_changed
+    - int params_change_counter
+    - int params_save_counter
+    + static params_manager* get_instance()
+    + virtual int init(unsigned int project_id)
+    + virtual void final_init(int auto_init_params = 1, int auto_init_work_params = 1, void(*custom_init_params_function)() = 0)
+    + void save()
+    + virtual std::byte* reserve_params_region(int size, int &start_pos)
+    + virtual ~params_manager()
+    + int evaluate()
+    + int save_params_as_Lua_str(char* str)
+    + int restore_params_from_server_backup(char* backup_str)
+    + u_int_2 solve_CRC()
+    + void reset_params_size()
+    + int get_params_change_counter() const
+    + int get_params_save_counter() const
+}
+
+interface i_memory {
+    + virtual ~i_memory()
+    + virtual int read(std::byte *buff, u_int count, u_int start_pos = 0)
+    + virtual int safe_save(const std::byte* buff)
+    + virtual u_int get_size() const
+    + virtual int zero_fill()
+}
+
+class memory_range {
+    - i_memory* memory
+    - u_int start_position
+    - u_int size
+    + u_int get_size() const
+    + int read(std::byte *buf, u_int count, u_int start_pos = 0)
+    + int safe_save(const std::byte* buff)
+    + int zero_fill()
+    - memory_range(i_memory *memory, u_int start_pos, u_int size)
+    - int check_params(u_int count, u_int start_pos)
+}
+
+class NV_memory {
+    - u_int total_size
+    - u_int available_start_pos
+    - u_int available_end_pos
+    + u_int get_size() const
+}
+
+class NV_memory_manager <<singleton>> {
+    - static auto_smart_ptr<NV_memory_manager> instance
+    - NV_memory* PAC_NVRAM
+    + virtual memory_range* get_memory_block(NV_memory_manager::MEMORY_TYPE m_type, u_int count)
+    + static NV_memory_manager* get_instance()
+    + virtual ~NV_memory_manager()
+}
+
+class parameters<T, is_float> {
+    - char name[20]
+    - i_params_owner* owner
+    - type stub
+    - unsigned int count
+    - type* values
+    - char is_delete
+    + type& operator[](unsigned int index)
+    + const type& operator[](unsigned int index) const
+    + type get_val(int idx) const
+    + virtual void reset_to_0()
+    + virtual ~parameters()
+}
+
+class saved_params<type, is_float> {
+    - int start_pos
+    + saved_params(int count, const char *name, i_params_owner* owner = 0)
+    + type save(u_int idx, type value)
+    + int save_all()
+    + void reset_to_0()
+}
+
+class saved_params_u_int_4 {
+    + saved_params_u_int_4(int count, i_params_owner* owner = 0)
+}
+
+i_params_owner <|.. parameters
+i_memory <|.. memory_range
+i_memory <|.. NV_memory
+NV_memory_manager --> memory_range : creates
+params_manager --> memory_range : uses
+saved_params --|> parameters
+saved_params_u_int_4 --|> saved_params
+@enduml

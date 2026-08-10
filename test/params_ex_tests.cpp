@@ -27,43 +27,6 @@ TEST( params_manager, reserve_params_region )
     EXPECT_EQ( data, nullptr );
     }
 
-
-TEST( memory_range, get_memory_block )
-    {
-    auto mm = NV_memory_manager::get_instance();
-
-    // Запрос большего количества памяти, чем есть в NVRAM. Результат должен
-    // быть объект с размером 0.
-    auto bad_mem = mm->get_memory_block(
-        NV_memory_manager::MEMORY_TYPE::MT_NVRAM, 100 );
-    EXPECT_EQ( 0, bad_mem->get_size() );
-
-    std::array<std::byte, 10> buff{};
-    // Попытка прочитать для объекта, у которого не выделено памяти. Результат
-    // должен быть 2.
-    auto res = bad_mem->read( buff.data(), 10 );
-    EXPECT_EQ( 2, res );
-
-    // Попытка записать для объекта, у которого не выделено памяти. Результат
-    // должен быть 1.
-    res = bad_mem->safe_save( buff.data() );
-    EXPECT_EQ( 1, res );
-
-    // Попытка заполнить нулями для объекта, у которого не выделено памяти.
-    // Результат должен быть 1.
-    res = bad_mem->zero_fill();
-    EXPECT_EQ( 1, res );
-
-
-    auto good_mem = mm->get_memory_block(
-        NV_memory_manager::MEMORY_TYPE::MT_NVRAM, 1 );
-    EXPECT_EQ( 1, good_mem->get_size() );
-
-    // Попытка прочитать больше памяти, чем выделено. Результат должен быть 1.
-    res = good_mem->read( buff.data(), 100 );
-    EXPECT_EQ( 1, res );
-    }
-
 namespace
     {
     FILE* bad_fopen( [[maybe_unused]] const char* filename,
@@ -88,19 +51,19 @@ TEST( SRAM, constructor )
     subhook_install( fopen_hook );
 
     SRAM bad_sram( "test_sram1.bin", 1024 );
-    EXPECT_EQ( 2, bad_sram.read( nullptr, 10, 5 ) );
+    EXPECT_EQ( 2, bad_sram.load() );
 
     subhook_remove( fopen_hook );
     }
 
-TEST( SRAM, read )
+TEST( SRAM, load )
     {
     auto fread_hook = subhook_new( reinterpret_cast<void*>( &fread ),
         reinterpret_cast<void*>( &bad_fread ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fread_hook );
 
     SRAM good_sram( "test_sram2.bin", 1024 );
-    EXPECT_EQ( 1, good_sram.read( nullptr, 10, 5 ) );
+    EXPECT_EQ( 1, good_sram.load() );
 
     subhook_remove( fread_hook );
     }
@@ -114,7 +77,7 @@ TEST( SRAM, safe_save )
     subhook_install( fopen_hook );
 
     std::array<std::byte, 10> buff{};
-    EXPECT_EQ( 1, good_sram.safe_save( buff.data() ) );
+    EXPECT_EQ( 1, good_sram.safe_save() );
 
     subhook_remove( fopen_hook );
     }

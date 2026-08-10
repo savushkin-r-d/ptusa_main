@@ -21,13 +21,11 @@ char params_manager::is_init = 0;
 params_manager::params_manager(): par( 0 ), project_id( 0 )
     {
     last_idx = 0;
-    CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
-        NV_memory_manager::MT_NVRAM,
-        static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE ) );
 
-    params_mem = NV_memory_manager::get_instance()->get_memory_block(
-        NV_memory_manager::MT_EEPROM,
+    CRC_mem = new SRAM( "./nvram.bin",
         static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
+    params_mem = new SRAM( "./eeprom.bin",
+        static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE ) );
     }
 //-----------------------------------------------------------------------------
 u_int_2 params_manager::solve_CRC()
@@ -40,7 +38,7 @@ u_int_2 params_manager::solve_CRC()
 
     while ( datlen > 0 )
         {
-        CRC = CRC ^ static_cast<u_int_2>( params[ bufidx ] );
+        CRC = CRC ^ static_cast<u_int_2>( CRC_mem->get_data()[ bufidx ] );
         for ( int idx = 0; idx <= 7; idx++ )
             {
             Flag = CRC & 1;
@@ -88,10 +86,8 @@ int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
 
-    memset( params.data(), 0,
-        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
-    params_mem->read( params.data(),
-        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
+    params_mem->load();
+    CRC_mem->load();
 
     return 0;
     }
@@ -106,8 +102,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     G_LOG->write_log( i_log::P_DEBUG );
 
     //Проверка на изменение количества параметров.
-    CRC_mem->read( sys_params.data(), 4 );
-    auto last_idx_ = reinterpret_cast< u_int* >( sys_params.data() );
+    auto last_idx_ = reinterpret_cast< u_int* >( CRC_mem->get_data() );
     if ( *last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg,
@@ -116,8 +111,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         G_LOG->write_log( i_log::P_NOTICE );
 
         //Запись количества параметров.
-        memcpy( sys_params.data(), &last_idx, sizeof( last_idx ) );
-        CRC_mem->safe_save( sys_params.data() );
+        memcpy( CRC_mem->get_data(), &last_idx, sizeof( last_idx ) );
+        CRC_mem->safe_save();
 
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
@@ -127,8 +122,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 void params_manager::reset_to_default( void( *custom_init_params_function )( ),
     int auto_init_params, int auto_init_work_params )
     {
-    memset( params.data(), 0,
-        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
+    params_mem->zero_fill();
 
     if ( custom_init_params_function != 0 )
         {
@@ -184,7 +178,7 @@ std::byte* params_manager::reserve_params_region( int size, int &start_pos )
         return nullptr;
         }
 
-    auto res = params.data() + last_idx;
+    auto res = params_mem->get_data() + last_idx;
     start_pos = last_idx;
     last_idx += size;
 
@@ -230,7 +224,7 @@ int params_manager::evaluate()
         if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
-            params_mem->safe_save( params.data() );
+            params_mem->safe_save();
             is_changed = false;
             last_save_ms = get_millisec();
 

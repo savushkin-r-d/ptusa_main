@@ -167,22 +167,14 @@ class params_manager
         /// Статический экземпляр класса для вызова методов.
         static auto_smart_ptr< params_manager > instance;
 
-        /// Рабочий массив параметров.
-        std::array<std::byte,
-            static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE )> params{};
-
-        /// Системный массив параметров.
-        std::array<std::byte,
-            static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE )> sys_params{};
-
         /// Номер последнего выделенного параметра. Используется при создании
         /// экземпляра класса @ref parameters.
         u_int last_idx;
 
         u_int project_id;   ///< Номер проекта (для уникальности параметров).
 
-        memory_range *params_mem; ///< Память параметров.
-        memory_range *CRC_mem;    ///< Память контрольной суммы.
+        i_memory* params_mem; ///< Память параметров.
+        i_memory* CRC_mem;    ///< Память контрольной суммы.
 
         uint32_t last_change_ms{ get_millisec() };
         uint32_t last_save_ms{ get_millisec() };

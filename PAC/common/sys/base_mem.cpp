@@ -23,177 +23,9 @@
 
 #include <vector>
 
-auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-NV_memory::NV_memory( u_int total_size,
-    u_int available_start_pos,
-    u_int available_end_pos ) : total_size( total_size ),
-    available_start_pos( available_start_pos ),
-    available_end_pos( available_end_pos )
-    {
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-memory_range::memory_range( i_memory *memory, u_int start_pos,
-    u_int size ) : memory( memory ),
-    start_position( start_pos ), size( size )
-    {
-    }
-//-----------------------------------------------------------------------------
-int memory_range::read( std::byte *buf, u_int count, u_int start_pos/*= 0*/ )
-    {
-    if ( memory )
-        {
-        if ( check_params( count, start_pos ) != 0 )
-            {
-            G_LOG->debug( "memory_range::read(...) - size[ %u ], incorrect "
-                "params -> count[ %u ], start_pos[ %u ] \n",
-                size, count, start_pos );
-            return 1;
-            }
-
-        return memory->read( buf, count, start_position + start_pos );
-        }
-
-    return 2;
-    }
-//-----------------------------------------------------------------------------
-int memory_range::safe_save( const std::byte* buff )
-    {
-    if ( memory )
-        {
-        return memory->safe_save( buff );
-        }
-
-    return 1;
-    }
-//-----------------------------------------------------------------------------
-int memory_range::zero_fill()
-    {
-    if ( memory )
-        {
-        return memory->zero_fill();
-        }
-
-    return 1;
-    }
-//-----------------------------------------------------------------------------
-int memory_range::check_params( u_int count, u_int start_pos )
-    {
-    if ( size < start_pos + count )
-        {
-        return 1;
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
-    PAC_EEPROM( 0 ),
-    last_NVRAM_pos( 0 ),
-    last_EEPROM_pos( 0 )
-    {
-    const int EEPROM_SIZE
-#ifdef PTUSA_TEST
-        = 10 * 32'768;
-#else
-        = 32'768;
-#endif
-
-    const int NVRAM_SIZE = 32;
-
-#if defined WIN_OS || ( defined LINUX_OS && ( defined PAC_PC || defined PAC_PLCNEXT ) )
-    PAC_NVRAM  = new SRAM( "./nvram.bin", NVRAM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "./eeprom.bin", EEPROM_SIZE, 0, EEPROM_SIZE - 1 );
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-    PAC_NVRAM  = new SRAM( "/dev/nvram", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "/dev/nvram", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-    PAC_NVRAM  = new eeprom_PFC200( EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new eeprom_PFC200( EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif
-
-    last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();
-    last_EEPROM_pos = PAC_EEPROM->get_available_start_pos();
-    }
-//-----------------------------------------------------------------------------
-memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
-    u_int count )
-    {
-    NV_memory *memory = 0;
-    u_int     *last_mem_pos = 0;
-    const char* mem_name;
-
-    if ( m_type == MT_NVRAM )
-        {
-        memory = PAC_NVRAM;
-        last_mem_pos = &last_NVRAM_pos;
-        mem_name = "NVRAM";
-        }
-    else
-        {
-        // По умолчанию используем EEPROM.
-        memory = PAC_EEPROM;
-        last_mem_pos = &last_EEPROM_pos;
-        mem_name = "EEPROM";
-        }
-
-    if ( *last_mem_pos + count >
-        memory->get_available_end_pos() )
-        {
-        G_LOG->debug( "NV_memory_manager:get_memory_block(...) - count "
-            "[ %u ] + last memory position [ %u ] > available %s memory "
-            "[ %u ], start position = %u, end position = %u\n",
-            count, *last_mem_pos, mem_name,
-            memory->get_size(),
-            memory->get_available_start_pos(),
-            memory->get_available_end_pos() );
-        return new memory_range( nullptr, 0, 0 );
-        }
-
-    memory_range *res = new memory_range( memory, *last_mem_pos, count );
-    *last_mem_pos += count;
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-NV_memory_manager* NV_memory_manager::get_instance()
-    {
-    if ( instance.is_null() )
-        {
-        instance = new NV_memory_manager();
-        }
-
-    return instance;
-    }
-//-----------------------------------------------------------------------------
-NV_memory_manager::~NV_memory_manager()
-    {
-    if ( PAC_NVRAM )
-        {
-        delete PAC_NVRAM;
-        PAC_NVRAM = 0;
-        }
-    if ( PAC_EEPROM )
-        {
-        delete PAC_EEPROM;
-        PAC_EEPROM = 0;
-        }
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-SRAM::SRAM( const std::filesystem::path& file_name,
-    u_int total_size,
-    u_int available_start_pos,
-    u_int available_end_pos ) : NV_memory( total_size,
-        available_start_pos,
-        available_end_pos ),
+SRAM::SRAM( const std::filesystem::path& file_name, u_int total_size ) :
     file_path( file_name ),
     tmp_path( file_name.string() + ".tmp" )
     {
@@ -216,11 +48,8 @@ SRAM::SRAM( const std::filesystem::path& file_name,
             file = nullptr;
             }
         }
-    }
-//-----------------------------------------------------------------------------
-SRAM::SRAM( const std::filesystem::path& file_name, u_int total_size ) :
-    SRAM( file_name, total_size, 0, total_size - 1 )
-    {
+
+    params_data = new std::byte[ total_size ];
     }
 //-----------------------------------------------------------------------------
 SRAM::~SRAM()
@@ -230,15 +59,22 @@ SRAM::~SRAM()
         fclose( file );
         file = nullptr;
         }
+
+    if ( params_data )
+        {
+        delete[] params_data;
+        params_data = nullptr;
+        }
     }
 //-----------------------------------------------------------------------------
-int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
+int SRAM::load()
     {
     if ( file )
         {
-        fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
+        fseek( file, 0, SEEK_SET );
 
-        if ( auto res = fread( buff, sizeof( char ), count, file ); res == 0 )
+        if ( auto res = fread(
+            get_data(), sizeof( std::byte ), get_size(), file ); res == 0 )
             {
             G_LOG->error( "Error reading device (%s) : %s.\n",
                 file_path.string().c_str(), strerror( errno ) );
@@ -249,18 +85,7 @@ int SRAM::read( std::byte* buff, u_int count, u_int start_pos )
     return 2;
     }
 //-----------------------------------------------------------------------------
-int SRAM::zero_fill()
-    {
-    if ( !file ) return 1;
-
-    std::vector<std::byte> zeros( get_size(), std::byte{ 0 } );
-    fseek( file, 0, SEEK_SET );
-    fwrite( zeros.data(), sizeof( std::byte ), zeros.size(), file );
-    fflush( file );
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int SRAM::safe_save( const std::byte* buff )
+int SRAM::safe_save()
     {
     std::chrono::high_resolution_clock::time_point start;
     if ( G_DEBUG )
@@ -285,7 +110,7 @@ int SRAM::safe_save( const std::byte* buff )
         {
         fclose( file );
 
-        fwrite( buff, sizeof( char ), get_size(), temp );
+        fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
         fflush( temp );
         fclose( temp );
         temp = nullptr;
@@ -310,6 +135,24 @@ int SRAM::safe_save( const std::byte* buff )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+std::byte* SRAM::get_data()
+    {
+    return params_data;
+    }
+//-----------------------------------------------------------------------------
+void SRAM::zero_fill()
+    {
+    if ( params_data )
+        {
+        memset( params_data, 0, total_size );
+        }
+    }
+//-----------------------------------------------------------------------------
+u_int SRAM::get_size() const
+    {
+    return total_size;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
