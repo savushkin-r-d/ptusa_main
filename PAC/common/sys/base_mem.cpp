@@ -25,9 +25,10 @@
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-SRAM::SRAM( const std::filesystem::path& file_name, u_int total_size ) :
+SRAM::SRAM( const std::filesystem::path& file_name, u_int size ) :
     file_path( file_name ),
-    tmp_path( file_name.string() + ".tmp" )
+    tmp_path( file_name.string() + ".tmp" ),
+    total_size( size )
     {
     if ( ( file = fopen( file_path.string().c_str(), "r+b" ) ) == nullptr )
         {
@@ -50,6 +51,7 @@ SRAM::SRAM( const std::filesystem::path& file_name, u_int total_size ) :
         }
 
     params_data = new std::byte[ total_size ];
+    memset( params_data, 0, total_size );
     }
 //-----------------------------------------------------------------------------
 SRAM::~SRAM()
@@ -78,8 +80,10 @@ int SRAM::load()
             {
             G_LOG->error( "Error reading device (%s) : %s.\n",
                 file_path.string().c_str(), strerror( errno ) );
+            return 1;
             }
-        return 1;
+
+        return 0;
         }
 
     return 2;

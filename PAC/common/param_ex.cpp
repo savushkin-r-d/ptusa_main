@@ -23,9 +23,9 @@ params_manager::params_manager(): par( 0 ), project_id( 0 )
     last_idx = 0;
 
     CRC_mem = new SRAM( "./nvram.bin",
-        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
-    params_mem = new SRAM( "./eeprom.bin",
         static_cast<size_t>( CONSTANTS::C_SYS_MEM_SIZE ) );
+    params_mem = new SRAM( "./eeprom.bin",
+        static_cast<size_t>( CONSTANTS::C_TOTAL_PARAMS_SIZE ) );
     }
 //-----------------------------------------------------------------------------
 u_int_2 params_manager::solve_CRC()
@@ -38,7 +38,7 @@ u_int_2 params_manager::solve_CRC()
 
     while ( datlen > 0 )
         {
-        CRC = CRC ^ static_cast<u_int_2>( CRC_mem->get_data()[ bufidx ] );
+        CRC = CRC ^ static_cast<u_int_2>( params_mem->get_data()[ bufidx ] );
         for ( int idx = 0; idx <= 7; idx++ )
             {
             Flag = CRC & 1;

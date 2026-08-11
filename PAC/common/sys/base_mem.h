@@ -47,7 +47,7 @@ class SRAM : public i_memory
     friend class NV_memory_manager;
 
     public:
-        SRAM( const std::filesystem::path& file_name, u_int total_size );
+        SRAM( const std::filesystem::path& file_name, u_int size );
 
         ~SRAM() override;
 
