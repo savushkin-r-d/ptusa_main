@@ -108,10 +108,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     std::memcpy( &last_idx_, CRC_mem->get_data(), sizeof( last_idx ) );
     if ( last_idx_ != last_idx )
         {
-        sprintf( G_LOG->msg,
-            "Total parameters size has changed (%d != %d), re-initialization.",
-            last_idx, last_idx_ );
-        G_LOG->write_log( i_log::P_NOTICE );
+        G_LOG->notice( "Params count is changed (%d != %d), re-initialization.",
+            last_idx_, last_idx );
 
         //Запись количества параметров.
         std::memcpy( CRC_mem->get_data(), &last_idx, sizeof( last_idx ) );
@@ -123,15 +121,15 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
     // Проверка контрольной суммы.
     u_int_2 saved_CRC{};
-    std::memcpy( &saved_CRC, CRC_mem->get_data() + sizeof( last_idx ),
+    constexpr std::size_t OFFSET = sizeof( last_idx );
+    std::memcpy( &saved_CRC, CRC_mem->get_data() + OFFSET,
         sizeof( saved_CRC ) );
     auto solved_CRC = solve_CRC();
     if ( saved_CRC != solved_CRC )
         {
-        sprintf( G_LOG->msg,
-            "Params CRC is not valid (%d != %d), re-initialization.",
+        G_LOG->notice( "Params CRC is not valid (%d != %d), re-initialization.",
             saved_CRC, solved_CRC );
-        G_LOG->write_log( i_log::P_NOTICE );
+
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
         }
@@ -243,8 +241,8 @@ int params_manager::evaluate()
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
             const auto CRC = solve_CRC();
-            std::memcpy( CRC_mem->get_data() + sizeof( last_idx ),
-                &CRC, sizeof( CRC ) );
+            constexpr std::size_t OFFSET = sizeof( last_idx );
+            std::memcpy( CRC_mem->get_data() + OFFSET, &CRC, sizeof( CRC ) );
             CRC_mem->safe_save();
 
             if ( const auto SAVE_RES = params_mem->safe_save(); SAVE_RES != 0 )
