@@ -373,18 +373,6 @@ int project_manager::lua_load_configuration()
 
     if ( G_DEBUG )
         {
-        printf( "Получение конфигурации Profibus DP slave...\n" );
-        }
-
-    lua_manager::get_instance()->void_exec_lua_method( "system",
-        "init_profibus", "project_manager::lua_load_configuration()" );
-    if ( G_DEBUG )
-        {
-        printf( "Oк.\n" );
-        }
-
-    if ( G_DEBUG )
-        {
         printf( "Project manager - processing configuration completed.\n" );
         printf( "\n" );
         }

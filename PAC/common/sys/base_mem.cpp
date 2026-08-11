@@ -1,7 +1,5 @@
 #if !defined WIN_OS && \
     !( defined LINUX_OS && defined PAC_PC ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
 	!( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
@@ -13,15 +11,13 @@
 #ifdef LINUX_OS
 #include <unistd.h>
 
-#include <cstdio>
-#include <cerrno>
+#if defined LINUX_OS && defined PAC_PLCNEXT
+#ifdef PAC_PLCNEXT_ALONE
+#include "l_mem.h"
+#else
+#include "mem_PLCnext.h"
+#endif
 #endif // LINUX_OS
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "mem_PFC200.h"
-#endif // LINUX_OS
-
-#include <vector>
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

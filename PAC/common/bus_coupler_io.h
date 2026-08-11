@@ -375,13 +375,13 @@ class io_manager
 				EMPTY = -1,   ///< Не задан.
 
 				WAGO_750_86x		  = 0,  ///< Wago 750-863.
-				WAGO_750_820x		  = 2,  ///< Wago PFC200.
+				WAGO_750_820x		  = 2,  ///< Wago 750_820x.
 
 				WAGO_750_XXX_ETHERNET = 100,///< Wago Ethernet 750-341 и т.д.
 				PHOENIX_BK_ETH		  = 200,///< Phoenix 2702177
 				};
 
-			enum STATES           ///< Cостояния работы с узлом.
+			enum STATES           ///< Состояния работы с узлом.
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,

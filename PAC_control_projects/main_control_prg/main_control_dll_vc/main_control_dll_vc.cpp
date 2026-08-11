@@ -14,9 +14,6 @@
 #include "version_info.h"
 
 #include "log.h"
-#ifdef PAC_WAGO_750_860
-#include "l_log.h"
-#endif
 
 #ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.

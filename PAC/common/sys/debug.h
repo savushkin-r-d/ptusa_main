@@ -20,10 +20,10 @@
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_IDE
 
-#if defined LINUX_OS && !defined PAC_WAGO_750_860
+#if defined LINUX_OS && !defined PAC_PLCNEXT
 #undef debug_break
 #define debug_break asm ( "int" "3" )
-#endif // defined LINUX_OS && !defined PAC_WAGO_750_860
+#endif // defined LINUX_OS
 
 #if defined WIN_OS
 #undef debug_break
