@@ -20,7 +20,7 @@
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_IDE
 
-#if defined LINUX_OS
+#if defined LINUX_OS && !defined PAC_PLCNEXT
 #undef debug_break
 #define debug_break asm ( "int" "3" )
 #endif // defined LINUX_OS
