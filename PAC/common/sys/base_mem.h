@@ -44,8 +44,6 @@ class i_memory
 /// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
 class SRAM : public i_memory
     {
-    friend class NV_memory_manager;
-
     public:
         SRAM( const std::filesystem::path& file_name, u_int size );
 

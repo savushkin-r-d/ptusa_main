@@ -224,7 +224,11 @@ int params_manager::evaluate()
         if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
-            params_mem->safe_save();
+            if ( const auto SAVE_RES = params_mem->safe_save(); SAVE_RES != 0 )
+                {
+                return SAVE_RES;
+                }
+
             is_changed = false;
             last_save_ms = get_millisec();
 

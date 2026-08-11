@@ -8,16 +8,19 @@
 #include "log.h"
 
 #include <chrono>
+
 #ifdef LINUX_OS
 #include <unistd.h>
-
-#if defined LINUX_OS && defined PAC_PLCNEXT
-#ifdef PAC_PLCNEXT_ALONE
-#include "l_mem.h"
-#else
-#include "mem_PLCnext.h"
-#endif
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
 #endif // LINUX_OS
+
+#ifdef WIN_OS
+#include <windows.h>
+#include <fileapi.h>
+#include <io.h>
+#endif
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -91,11 +94,11 @@ int SRAM::safe_save()
     //    1. записать данные во временный файл
     //    2. fsync( temp )
     //    3. rename( temp, target )
-    //    4. fsync( directory ) ( опционально )
+    //    4. fsync( directory ) - для Linux
 
     if ( FILE* temp = fopen( tmp_path.string().c_str(), "w+b" ); !temp )
         {
-        G_LOG->error( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+        G_LOG->error( "SRAM() - ERROR: Can't open file (%s) : %s.\n",
             file_path.string().c_str(), strerror( errno ) );
 
         return 1;
@@ -104,6 +107,31 @@ int SRAM::safe_save()
         {
         fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
         fflush( temp );
+
+#ifdef WIN_OS
+        auto fd = _fileno( temp );
+        auto hFile = (HANDLE)_get_osfhandle( fd );
+
+        if ( hFile != INVALID_HANDLE_VALUE )
+            {
+            if ( !FlushFileBuffers( hFile ) )
+                {
+                G_LOG->error(
+                    "SRAM() - ERROR: FlushFileBuffers (%s) failed (%lu).",
+                    file_path.string().c_str(), GetLastError() );
+                return 2;
+                }
+            }
+#else
+        fsync( fileno( temp ) );
+        if ( auto fd = open( tmp_path.parent_path().string().c_str(), O_RDONLY );
+            fd != -1 )
+            {
+            fsync( fd );
+            close( fd );
+            }
+#endif
+
         fclose( temp );
         temp = nullptr;
 
@@ -111,7 +139,15 @@ int SRAM::safe_save()
         MoveFileExA( tmp_path.string().c_str(), file_path.string().c_str(),
             MOVEFILE_REPLACE_EXISTING );
 #else
-        std::filesystem::rename( tmp_path, file_path );
+        std::error_code ec;
+        std::filesystem::rename( tmp_path, file_path, ec );
+        if ( ec )
+            {
+            G_LOG->error( "SRAM() - ERROR: Can't rename (%s) to (%s) : %s.\n",
+                tmp_path.string().c_str(), file_path.string().c_str(),
+                ec.message().c_str() );
+            return 3;
+            }
 #endif
         if ( G_DEBUG )
             {

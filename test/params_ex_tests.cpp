@@ -74,6 +74,7 @@ TEST( SRAM, load )
     subhook_install( fopen_hook );
     EXPECT_EQ( 2, good_sram.load_data() );
     subhook_remove( fopen_hook );
+    subhook_free( fopen_hook );
 
     // Подменяем функцию `fread` на фиктивную, которая всегда возвращает 0.
     // Тест должен завершиться с ошибкой, так как файл не может быть прочитан.
@@ -82,6 +83,7 @@ TEST( SRAM, load )
     subhook_install( fread_hook );
     EXPECT_EQ( 3, good_sram.load_data() );
     subhook_remove( fread_hook );
+    subhook_free( fread_hook );
 
     // Записываем данные в файл, чтобы проверить успешную загрузку.
     std::array<std::byte, DATA_SIZE> data = {};
@@ -104,4 +106,5 @@ TEST( SRAM, safe_save )
     EXPECT_EQ( 1, good_sram.safe_save() );
 
     subhook_remove( fopen_hook );
+    subhook_free( fopen_hook );
     }
