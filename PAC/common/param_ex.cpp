@@ -86,8 +86,8 @@ int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
 
-    params_mem->load();
-    CRC_mem->load();
+    params_mem->load_data();
+    CRC_mem->load_data();
 
     return 0;
     }

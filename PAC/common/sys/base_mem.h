@@ -23,7 +23,7 @@ class i_memory
         ///
         /// @return > 0 - ошибка.
         /// @return = 0 - ОК.
-        virtual int load() = 0;
+        virtual int load_data() = 0;
 
         /// @brief Безопасное сохранение данных.
         /// @return - результат.
@@ -52,7 +52,7 @@ class SRAM : public i_memory
         ~SRAM() override;
 
         /// @brief Метод интерфейса @ref i_memory.
-        int load() override;
+        int load_data() override;
 
         int safe_save() override;
 
@@ -60,7 +60,7 @@ class SRAM : public i_memory
 
         void zero_fill() override;
 
-        u_int get_size() const;
+        u_int get_size() const override;
     private:
 
     SRAM( const SRAM& ) = delete;
@@ -70,8 +70,6 @@ class SRAM : public i_memory
 
     std::filesystem::path file_path;
     std::filesystem::path tmp_path;
-
-    FILE* file{};
 
     u_int total_size;
 

@@ -30,38 +30,12 @@ SRAM::SRAM( const std::filesystem::path& file_name, u_int size ) :
     tmp_path( file_name.string() + ".tmp" ),
     total_size( size )
     {
-    if ( ( file = fopen( file_path.string().c_str(), "r+b" ) ) == nullptr )
-        {
-        //Пытаемся создать файл
-        file = fopen( file_path.string().c_str(), "w+b" );
-        if ( file )
-            {
-            fseek( file, total_size, SEEK_SET );
-            char tmp = 0;
-            fwrite( &tmp, sizeof( tmp ), 1, file );
-            fflush( file );
-            }
-        else
-            {
-            G_LOG->error(
-                "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                file_path.string().c_str(), strerror( errno ) );
-            file = nullptr;
-            }
-        }
-
     params_data = new std::byte[ total_size ];
     memset( params_data, 0, total_size );
     }
 //-----------------------------------------------------------------------------
 SRAM::~SRAM()
     {
-    if ( file )
-        {
-        fclose( file );
-        file = nullptr;
-        }
-
     if ( params_data )
         {
         delete[] params_data;
@@ -69,24 +43,44 @@ SRAM::~SRAM()
         }
     }
 //-----------------------------------------------------------------------------
-int SRAM::load()
+int SRAM::load_data()
     {
-    if ( file )
+    if ( !std::filesystem::exists( file_path ) )
         {
-        fseek( file, 0, SEEK_SET );
+        G_LOG->debug( "SRAM() - File (%s) not found.",
+            file_path.string().c_str() );
+        return 1;
+        }
+    else
+        {
+        G_LOG->debug( "SRAM() - File (%s) found, loading.",
+            file_path.string().c_str() );
+        auto f = fopen( file_path.string().c_str(), "r+b" );
 
-        if ( auto res = fread(
-            get_data(), sizeof( std::byte ), get_size(), file ); res == 0 )
+        if ( f )
             {
-            G_LOG->error( "Error reading device (%s) : %s.\n",
-                file_path.string().c_str(), strerror( errno ) );
-            return 1;
-            }
+            fseek( f, 0, SEEK_SET );
+            auto res = fread( get_data(), sizeof( std::byte ), get_size(), f );
+            fclose( f );
+            f = nullptr;
 
-        return 0;
+            if ( res == 0 )
+                {
+                G_LOG->error( "Error reading device (%s) : %s.\n",
+                    file_path.string().c_str(), strerror( errno ) );
+                return 3;
+                }
+            }
+        else
+            {
+            G_LOG->error(
+                "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                file_path.string().c_str(), strerror( errno ) );
+            return 2;
+            }
         }
 
-    return 2;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int SRAM::safe_save()
@@ -112,8 +106,6 @@ int SRAM::safe_save()
         }
     else
         {
-        fclose( file );
-
         fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
         fflush( temp );
         fclose( temp );
@@ -125,8 +117,6 @@ int SRAM::safe_save()
 #else
         std::filesystem::rename( tmp_path, file_path );
 #endif
-        file = fopen( file_path.string().c_str(), "r+b" );
-
         if ( G_DEBUG )
             {
             auto end = std::chrono::high_resolution_clock::now();

@@ -46,37 +46,59 @@ namespace
 
 TEST( SRAM, constructor )
     {
-    auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
-        reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
-    subhook_install( fopen_hook );
+    SRAM sram( "test_sram1.bin", 1024 );
 
-    SRAM bad_sram( "test_sram1.bin", 1024 );
-    EXPECT_EQ( 2, bad_sram.load() );
-
-    subhook_remove( fopen_hook );
+    // Нет файла с параметрами, поэтому загрузка должна завершиться с ошибкой.
+    EXPECT_EQ( 1, sram.load_data() );
     }
 
 TEST( SRAM, load )
     {
+    auto test_file = "test_sram2.bin";
+
+    SRAM good_sram( test_file, 1024 );
+
+    // Нет файла с параметрами, поэтому загрузка должна завершиться с ошибкой.
+    EXPECT_EQ( 1, good_sram.load_data() );
+
+    // Создаём файл с параметрами, чтобы проверить успешную загрузку.
+    auto file = fopen( test_file, "wb" );
+
+    // Подменяем функцию `fopen` на фиктивную, которая всегда возвращает
+    // `nullptr`. Тест должен завершиться с ошибкой, так как файл не может
+    // быть открыт.
+    auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
+        reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
+    subhook_install( fopen_hook );
+    EXPECT_EQ( 2, good_sram.load_data() );
+    subhook_remove( fopen_hook );
+
+    // Подменяем функцию `fread` на фиктивную, которая всегда возвращает 0.
+    // Тест должен завершиться с ошибкой, так как файл не может быть прочитан.
     auto fread_hook = subhook_new( reinterpret_cast<void*>( &fread ),
         reinterpret_cast<void*>( &bad_fread ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fread_hook );
-
-    SRAM good_sram( "test_sram2.bin", 1024 );
-    EXPECT_EQ( 1, good_sram.load() );
-
+    EXPECT_EQ( 3, good_sram.load_data() );
     subhook_remove( fread_hook );
+
+    // Записываем данные в файл, чтобы проверить успешную загрузку.
+    std::byte data[ 1024 ] = {};
+    fwrite( data, sizeof( std::byte ), 1024, file );
+    fclose( file );
+
+    EXPECT_EQ( 0, good_sram.load_data() );
+
+    std::filesystem::remove( test_file );
     }
 
 TEST( SRAM, safe_save )
     {
-    SRAM good_sram( "test_sram2.bin", 1024 );
+    SRAM good_sram( "test_sram3.bin", 1024 );
 
     auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
         reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
     subhook_install( fopen_hook );
 
-    std::array<std::byte, 10> buff{};
     EXPECT_EQ( 1, good_sram.safe_save() );
 
     subhook_remove( fopen_hook );
