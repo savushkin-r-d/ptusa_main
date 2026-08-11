@@ -84,7 +84,6 @@ const char *FILES[ FILE_CNT ] =
     "main.io.lua",
     "main.objects.lua",
     "main.modbus_srv.lua",
-    "main.profibus.lua",
     "main.restrictions.lua",
     };
 //-----------------------------------------------------------------------------
