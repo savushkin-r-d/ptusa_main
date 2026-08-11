@@ -17,6 +17,8 @@ char params_manager::is_init = 0;
 #include "g_errors.h"
 
 #include "log.h"
+
+#include <cstring>
 //-----------------------------------------------------------------------------
 params_manager::params_manager(): par( 0 ), project_id( 0 )
     {
@@ -102,18 +104,34 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     G_LOG->write_log( i_log::P_DEBUG );
 
     //Проверка на изменение количества параметров.
-    auto last_idx_ = reinterpret_cast< u_int* >( CRC_mem->get_data() );
-    if ( *last_idx_ != last_idx )
+    u_int last_idx_{};
+    std::memcpy( &last_idx_, CRC_mem->get_data(), sizeof( last_idx ) );
+    if ( last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg,
             "Total parameters size has changed (%d != %d), re-initialization.",
-            last_idx, *last_idx_ );
+            last_idx, last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
         //Запись количества параметров.
-        memcpy( CRC_mem->get_data(), &last_idx, sizeof( last_idx ) );
+        std::memcpy( CRC_mem->get_data(), &last_idx, sizeof( last_idx ) );
         CRC_mem->safe_save();
 
+        reset_to_default( custom_init_params_function, auto_init_params,
+            auto_init_work_params );
+        }
+
+    // Проверка контрольной суммы.
+    u_int_2 saved_CRC{};
+    std::memcpy( &saved_CRC, CRC_mem->get_data() + sizeof( last_idx ),
+        sizeof( saved_CRC ) );
+    auto solved_CRC = solve_CRC();
+    if ( saved_CRC != solved_CRC )
+        {
+        sprintf( G_LOG->msg,
+            "Params CRC is not valid (%d != %d), re-initialization.",
+            saved_CRC, solved_CRC );
+        G_LOG->write_log( i_log::P_NOTICE );
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
         }
@@ -224,6 +242,11 @@ int params_manager::evaluate()
         if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
             since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
             {
+            const auto CRC = solve_CRC();
+            std::memcpy( CRC_mem->get_data() + sizeof( last_idx ),
+                &CRC, sizeof( CRC ) );
+            CRC_mem->safe_save();
+
             if ( const auto SAVE_RES = params_mem->safe_save(); SAVE_RES != 0 )
                 {
                 return SAVE_RES;
