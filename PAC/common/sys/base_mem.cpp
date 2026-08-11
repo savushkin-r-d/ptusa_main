@@ -1,7 +1,5 @@
 #if !defined WIN_OS && \
     !( defined LINUX_OS && defined PAC_PC ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
 	!( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
@@ -14,14 +12,6 @@
 
 #if defined LINUX_OS && defined PAC_PC
 #include "l_mem.h"
-#endif // LINUX_OS
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-#include "l_mem.h"
-#endif // LINUX_OS
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "mem_PFC200.h"
 #endif // LINUX_OS
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
@@ -126,16 +116,6 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #if defined LINUX_OS && defined PAC_PC
     PAC_NVRAM  = new SRAM( "./nvram.txt", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
     PAC_EEPROM = new SRAM( "./nvram.txt", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-    PAC_NVRAM  = new SRAM( "/dev/nvram", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new SRAM( "/dev/nvram", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-    PAC_NVRAM  = new eeprom_PFC200( EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
-    PAC_EEPROM = new eeprom_PFC200( EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
