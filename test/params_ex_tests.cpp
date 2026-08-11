@@ -42,11 +42,13 @@ namespace
         {
         return 0;
         }
+
+    const auto DATA_SIZE = 1024;
     }
 
 TEST( SRAM, constructor )
     {
-    SRAM sram( "test_sram1.bin", 1024 );
+    SRAM sram( "test_sram1.bin", DATA_SIZE );
 
     // Нет файла с параметрами, поэтому загрузка должна завершиться с ошибкой.
     EXPECT_EQ( 1, sram.load_data() );
@@ -56,7 +58,7 @@ TEST( SRAM, load )
     {
     auto test_file = "test_sram2.bin";
 
-    SRAM good_sram( test_file, 1024 );
+    SRAM good_sram( test_file, DATA_SIZE );
 
     // Нет файла с параметрами, поэтому загрузка должна завершиться с ошибкой.
     EXPECT_EQ( 1, good_sram.load_data() );
@@ -82,8 +84,8 @@ TEST( SRAM, load )
     subhook_remove( fread_hook );
 
     // Записываем данные в файл, чтобы проверить успешную загрузку.
-    std::byte data[ 1024 ] = {};
-    fwrite( data, sizeof( std::byte ), 1024, file );
+    std::array<std::byte, DATA_SIZE> data = {};
+    fwrite( data.data(), sizeof( std::byte ), data.size(), file );
     fclose( file );
 
     EXPECT_EQ( 0, good_sram.load_data() );
@@ -93,7 +95,7 @@ TEST( SRAM, load )
 
 TEST( SRAM, safe_save )
     {
-    SRAM good_sram( "test_sram3.bin", 1024 );
+    SRAM good_sram( "test_sram3.bin", DATA_SIZE );
 
     auto fopen_hook = subhook_new( reinterpret_cast<void*>( &fopen ),
         reinterpret_cast<void*>( &bad_fopen ), SUBHOOK_64BIT_OFFSET );
