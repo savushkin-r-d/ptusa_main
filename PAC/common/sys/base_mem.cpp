@@ -114,8 +114,6 @@ int SRAM::safe_save()
 #else
             fileno( temp );
 #endif
-        fclose( temp );
-        temp = nullptr;
 
 #ifdef WIN_OS
         auto hFile = (HANDLE)_get_osfhandle( fd );
@@ -127,12 +125,17 @@ int SRAM::safe_save()
                 G_LOG->error(
                     "SRAM() - ERROR: FlushFileBuffers (%s) failed (%lu).",
                     file_path.string().c_str(), GetLastError() );
+
+                fclose( temp );
                 return 2;
                 }
             }
 #else
         fsync( fd );
 #endif
+
+        fclose( temp );
+        temp = nullptr;
 
 #ifdef WIN_OS
         MoveFileExA( tmp_path.string().c_str(), file_path.string().c_str(),
