@@ -48,13 +48,13 @@ int SRAM::load_data()
 
     if ( !std::filesystem::exists( file_path ) )
         {
-        G_LOG->debug( "SRAM() - File (%s) not found.",
+        G_LOG->notice( "SRAM() - File (%s) not found.",
             file_path.string().c_str() );
         return 1;
         }
     else
         {
-        G_LOG->debug( "SRAM() - File (%s) found, loading.",
+        G_LOG->notice( "SRAM() - File (%s) found, loading.",
             file_path.string().c_str() );
         auto f = fopen( file_path.string().c_str(), "rb" );
 
