@@ -54,7 +54,7 @@ int SRAM::load_data()
         {
         G_LOG->debug( "SRAM() - File (%s) found, loading.",
             file_path.string().c_str() );
-        auto f = fopen( file_path.string().c_str(), "r+b" );
+        auto f = fopen( file_path.string().c_str(), "rb" );
 
         if ( f )
             {
@@ -105,7 +105,15 @@ int SRAM::safe_save()
         }
     else
         {
-        fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
+        auto res = fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
+        if ( res != get_size() )
+            {
+            G_LOG->error( "SRAM() - ERROR: fwrite (%s) wrote %zu of %u bytes.",
+                tmp_path.string().c_str(), res, get_size() );
+            fclose( temp );
+            return 2;
+            }
+
         fflush( temp );
 
         auto fd =
