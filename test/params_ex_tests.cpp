@@ -65,6 +65,7 @@ TEST( SRAM, load )
 
     // Создаём файл с параметрами, чтобы проверить успешную загрузку.
     auto file = fopen( test_file, "wb" );
+    fclose( file );
 
     // Подменяем функцию `fopen` на фиктивную, которая всегда возвращает
     // `nullptr`. Тест должен завершиться с ошибкой, так как файл не может
@@ -86,6 +87,7 @@ TEST( SRAM, load )
     subhook_free( fread_hook );
 
     // Записываем данные в файл, чтобы проверить успешную загрузку.
+    file = fopen( test_file, "wb" );
     std::array<std::byte, DATA_SIZE> data = {};
     fwrite( data.data(), sizeof( std::byte ), data.size(), file );
     fclose( file );
