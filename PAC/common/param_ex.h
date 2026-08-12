@@ -143,7 +143,7 @@ class params_manager
         // Высчитывание контрольной суммы.
         u_int_2 solve_CRC();
 
-        void reset_params_size();
+        void reset_CRC_mem();
 
         int get_params_change_counter() const;
 

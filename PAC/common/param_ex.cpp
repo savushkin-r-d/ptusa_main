@@ -69,7 +69,7 @@ u_int_2 params_manager::solve_CRC()
     return CRC;
     }
 //-----------------------------------------------------------------------------
-void params_manager::reset_params_size()
+void params_manager::reset_CRC_mem()
     {
     CRC_mem->zero_fill();
     }
@@ -113,7 +113,6 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
         //Запись количества параметров.
         std::memcpy( CRC_mem->get_data(), &last_idx, sizeof( last_idx ) );
-        CRC_mem->safe_save();
 
         reset_to_default( custom_init_params_function, auto_init_params,
             auto_init_work_params );
@@ -243,11 +242,15 @@ int params_manager::evaluate()
             const auto CRC = solve_CRC();
             constexpr std::size_t OFFSET = sizeof( last_idx );
             std::memcpy( CRC_mem->get_data() + OFFSET, &CRC, sizeof( CRC ) );
-            CRC_mem->safe_save();
-
-            if ( const auto SAVE_RES = params_mem->safe_save(); SAVE_RES != 0 )
+            auto res = CRC_mem->safe_save();
+            if ( res != 0 )
                 {
-                return SAVE_RES;
+                return res;
+                }
+            res = params_mem->safe_save();
+            if ( res != 0 )
+                {
+                return res;
                 }
 
             is_changed = false;

@@ -97,7 +97,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
             {
             fmt::print( "Resetting params (command line parameter \"rcrc\").\n" );
             }
-        params_manager::get_instance()->reset_params_size();
+        params_manager::get_instance()->reset_CRC_mem();
         }
 
     if ( result.count( "port" ) )

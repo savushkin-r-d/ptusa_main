@@ -256,7 +256,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
                 G_LOG->notice( "Resetting parameters (remote monitor "
                     "client command)." );
-                params_manager::get_instance()->reset_params_size();
+                params_manager::get_instance()->reset_CRC_mem();
                 params_manager::get_instance()->final_init();
 
                 auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];

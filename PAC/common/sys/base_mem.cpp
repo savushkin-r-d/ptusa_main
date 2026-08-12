@@ -7,14 +7,14 @@
 #include "base_mem.h"
 #include "log.h"
 
-#include <chrono>
-
 #ifdef LINUX_OS
 #include <unistd.h>
+#endif
+
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fcntl.h>
-#endif // LINUX_OS
 
 #ifdef WIN_OS
 #include <windows.h>
@@ -108,8 +108,16 @@ int SRAM::safe_save()
         fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
         fflush( temp );
 
+        auto fd =
 #ifdef WIN_OS
-        auto fd = _fileno( temp );
+            _fileno( temp );
+#else
+            fileno( temp );
+#endif
+        fclose( temp );
+        temp = nullptr;
+
+#ifdef WIN_OS
         auto hFile = (HANDLE)_get_osfhandle( fd );
 
         if ( hFile != INVALID_HANDLE_VALUE )
@@ -123,17 +131,8 @@ int SRAM::safe_save()
                 }
             }
 #else
-        fsync( fileno( temp ) );
-        if ( auto fd = open( tmp_path.parent_path().string().c_str(), O_RDONLY );
-            fd != -1 )
-            {
-            fsync( fd );
-            close( fd );
-            }
+        fsync( fd );
 #endif
-
-        fclose( temp );
-        temp = nullptr;
 
 #ifdef WIN_OS
         MoveFileExA( tmp_path.string().c_str(), file_path.string().c_str(),
@@ -148,7 +147,15 @@ int SRAM::safe_save()
                 ec.message().c_str() );
             return 3;
             }
+
+        if ( auto dir = open( tmp_path.parent_path().string().c_str(), O_RDONLY );
+            dir != -1 )
+            {
+            fsync( dir );
+            close( dir );
+            }
 #endif
+
         if ( G_DEBUG )
             {
             auto end = std::chrono::high_resolution_clock::now();
