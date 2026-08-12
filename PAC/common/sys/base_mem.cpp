@@ -44,6 +44,8 @@ SRAM::~SRAM()
 //-----------------------------------------------------------------------------
 int SRAM::load_data()
     {
+    zero_fill();
+
     if ( !std::filesystem::exists( file_path ) )
         {
         G_LOG->debug( "SRAM() - File (%s) not found.",
@@ -68,6 +70,16 @@ int SRAM::load_data()
                 G_LOG->error( "Error reading device (%s) : %s.\n",
                     file_path.string().c_str(), strerror( errno ) );
                 return 3;
+                }
+            // Если прочитано меньше, чем нужно, то выдаем предупреждение, но
+            // продолжаем работу. Далее, в функции
+            // `params_manager::get_instance()->final_init()` будет
+            // проверяться CRC и при несоответствии будет выдана ошибка.
+            if ( res < get_size() )
+                {
+                G_LOG->warning(
+                    "SRAM() - Warning: fread (%s) read %zu of %u bytes.",
+                    file_path.string().c_str(), res, get_size() );
                 }
             }
         else
