@@ -117,8 +117,9 @@ int SRAM::safe_save()
         }
     else
         {
-        auto res = fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
-        if ( res != get_size() )
+        if ( auto res =
+            fwrite( get_data(), sizeof( std::byte ), get_size(), temp );
+            res != get_size() )
             {
             G_LOG->error( "SRAM() - ERROR: fwrite (%s) wrote %zu of %u bytes.",
                 tmp_path.string().c_str(), res, get_size() );
