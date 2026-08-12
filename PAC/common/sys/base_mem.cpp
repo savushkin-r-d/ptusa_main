@@ -111,7 +111,7 @@ int SRAM::safe_save()
     if ( FILE* temp = fopen( tmp_path.string().c_str(), "w+b" ); !temp )
         {
         G_LOG->error( "SRAM() - ERROR: Can't open file (%s) : %s.\n",
-            file_path.string().c_str(), strerror( errno ) );
+            tmp_path.string().c_str(), strerror( errno ) );
 
         return 1;
         }

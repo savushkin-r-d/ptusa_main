@@ -176,6 +176,9 @@ class params_manager
         i_memory* params_mem; ///< Память параметров.
         i_memory* CRC_mem;    ///< Память контрольной суммы.
 
+        /// Инициализируем начальное время - запись параметров произойдет
+        /// через заданное время после запуска программы (при наличии
+        /// изменений).
         uint32_t last_change_ms{ get_millisec() };
         uint32_t last_save_ms{ get_millisec() };
         bool is_changed{ false };

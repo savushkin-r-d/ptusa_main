@@ -187,7 +187,7 @@ std::byte* params_manager::reserve_params_region( int size, int &start_pos )
     if ( last_idx + size > params_mem->get_size() )
         {
         G_LOG->debug( "params_manager::reserve_params_region() - is not enough "
-            "memory ( %d + %d < %d ) !",
+            "memory ( %d + %d > %d ) !",
             last_idx, size, params_mem->get_size() );
 
         return nullptr;
