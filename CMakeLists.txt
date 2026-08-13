@@ -112,6 +112,16 @@ add_subdirectory(deps/lunarmodules/luasystem EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
+find_package(ODBC QUIET)
+if(TARGET ODBC::ODBC OR ODBC_FOUND)
+    set(LUASQL_DRIVERS "odbc" CACHE STRING
+        "LuaSQL drivers to build" FORCE)
+else()
+    set(LUASQL_DRIVERS "" CACHE STRING
+        "LuaSQL drivers to build" FORCE)
+    message(STATUS
+        "ODBC development files not found; skipping LuaSQL ODBC driver")
+endif()
 add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ToluaCopyIfDifferent.cmake")
 
@@ -225,7 +235,11 @@ if(NOT ARP_DEVICE)
     add_dependencies(libptusa_main lua)
 endif()
 
-add_dependencies(lua lfs luasystem term_core luassert_copy luasql_odbc)
+set(lua_module_dependencies lfs luasystem term_core luassert_copy)
+if(TARGET luasql_odbc)
+    list(APPEND lua_module_dependencies luasql_odbc)
+endif()
+add_dependencies(lua ${lua_module_dependencies})
 
 if(MSVC)
     set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")
