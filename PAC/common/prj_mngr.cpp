@@ -47,22 +47,23 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
+    constexpr auto DEFAULT_NO_IO =
+#if defined WIN_OS
+        "true";
+#else
+        "false";
+#endif // defined WIN_OS
+
     options.add_options()
-        ( "s,script", "The script file to execute",
-            cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "v,version", "Print version info" )
         ( "d,debug", "Enable debugging",
             cxxopts::value<bool>()->default_value( "false" ) )
-#if defined WIN_OS
+
         ( "no_io", "No communicate with I\\O nodes",
-            cxxopts::value<bool>()->default_value( "true" ) )
+                cxxopts::value<bool>()->default_value( DEFAULT_NO_IO ) )
         ( "read_only_io", "Read only from I\\O nodes",
-            cxxopts::value<bool>()->default_value( "true" ) )
-#else
-        ( "no_io", "No communicate with I\\O nodes",
-            cxxopts::value<bool>()->default_value( "false" ) )
-        ( "read_only_io", "Read only from I\\O nodes",
-            cxxopts::value<bool>()->default_value( "false" ) )
-#endif // defined WIN_OS
+            cxxopts::value<bool>()->default_value( DEFAULT_NO_IO ) )
+
         ( "p,port", "Param port",
 
             cxxopts::value<int>()->default_value( "10000" ) )
@@ -79,19 +80,38 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "extra_paths", "Extra paths",
             cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
         ( "sleep_time", "Sleep time, ms",
-            cxxopts::value<unsigned int>()->default_value( "2" ) );
+            cxxopts::value<unsigned int>()->default_value( "2" ) )
 
-    options.positional_help( "<script>" );
+        ( "script", "The script file to execute",
+            cxxopts::value<std::string>()  );
+
     options.parse_positional( { "script" } );
-    options.show_positional_help();
-    options.allow_unrecognised_options(); //Unrecognized arguments are allowed.
+    options.positional_help( "<script>" );
+    options.allow_unrecognised_options();
     auto result = options.parse( argc, argv );
 
-    if ( result.count( "help" ) || argc < 2 )
+    if ( result.count( "version" ) )
+        {
+        fmt::print( "{}\n", PRODUCT_VERSION_FULL_STR );
+        return 1;
+        }
+
+    if ( result.count( "help" ) || result.count( "script" ) == 0 )
         {
         fmt::print( "{}", options.help() );
         return 1;
         }
+
+    // Проверка на наличие файла @main_script.
+    std::filesystem::path s{ result[ "script" ].as<std::string>() };
+    if ( !std::filesystem::exists( s ) )
+        {
+        fmt::print( "Error: Script file '{}' does not exist.\n", s.string() );
+        return 1;
+        }
+    main_script = s.generic_string();
+
+    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 
     if ( result[ "debug" ].as<bool>() )
         {
@@ -143,12 +163,15 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         log_opc_mode();
         }
 
-    main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
 
-    path = result[ "path" ].as<std::string>();
-    sys_path = result[ "sys_path" ].as<std::string>();
-    extra_paths = result[ "extra_paths" ].as<std::string>();
+    std::filesystem::path fs_path = result["path"].as<std::string>();
+    std::filesystem::path fs_sys_path = result["sys_path"].as<std::string>();
+    std::filesystem::path fs_extra_paths = result["extra_paths"].as<std::string>();
+
+    path = fs_path.lexically_normal().generic_string();
+    sys_path = fs_sys_path.lexically_normal().generic_string();
+    extra_paths = fs_extra_paths.lexically_normal().generic_string();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     if ( result[ "no_io" ].as<bool>() )
