@@ -118,10 +118,11 @@ if(TARGET ODBC::ODBC OR ODBC_FOUND)
     set(default_luasql_drivers "odbc")
 else()
     message(STATUS
-        "ODBC development files not found; skipping LuaSQL ODBC driver")
+        "ODBC development files not found; skipping LuaSQL ODBC driver.")
 endif()
 if(NOT DEFINED LUASQL_DRIVERS)
-    set(LUASQL_DRIVERS "${default_luasql_drivers}")
+    set(LUASQL_DRIVERS "${default_luasql_drivers}" CACHE STRING
+        "LuaSQL drivers to build.")
 endif()
 add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ToluaCopyIfDifferent.cmake")
