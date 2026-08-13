@@ -113,14 +113,15 @@ add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
 find_package(ODBC QUIET)
+set(default_luasql_drivers "")
 if(TARGET ODBC::ODBC OR ODBC_FOUND)
-    set(LUASQL_DRIVERS "odbc" CACHE STRING
-        "LuaSQL drivers to build" FORCE)
+    set(default_luasql_drivers "odbc")
 else()
-    set(LUASQL_DRIVERS "" CACHE STRING
-        "LuaSQL drivers to build" FORCE)
     message(STATUS
         "ODBC development files not found; skipping LuaSQL ODBC driver")
+endif()
+if(NOT DEFINED LUASQL_DRIVERS)
+    set(LUASQL_DRIVERS "${default_luasql_drivers}")
 endif()
 add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ToluaCopyIfDifferent.cmake")
