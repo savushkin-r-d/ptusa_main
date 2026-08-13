@@ -166,8 +166,11 @@ Usage:
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
-    // Create a temporary script file to satisfy the file existence check.
-    std::ofstream( "main.plua" ).close();
+    // Create a temporary script file and ensure it is cleaned up on scope exit.
+    struct ScriptFileGuard {
+        ScriptFileGuard() { std::ofstream( "main.plua" ).close(); }
+        ~ScriptFileGuard() { remove( "main.plua" ); }
+    } script_file_guard;
 
     // Отключаем работу с модулями ввода/вывода, сбрасываем параметры,
     // запускаем в отладочном режиме.
@@ -343,7 +346,6 @@ Resetting params (command line parameter "rcrc").
 
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
-    remove( "main.plua" );
     G_LUA_MANAGER->free_Lua();
     }
 
@@ -371,8 +373,11 @@ TEST( project_manager, apply_opc_mode )
 
     // Отключаем работу OPC UA.
     const auto NO_SHOW_LOG_MESSAGE = false;
-    // Create a temporary script file to satisfy the file existence check.
-    std::ofstream( "main.plua" ).close();
+    // Create a temporary script file and ensure it is cleaned up on scope exit.
+    struct ScriptFileGuard {
+        ScriptFileGuard() { std::ofstream( "main.plua" ).close(); }
+        ~ScriptFileGuard() { remove( "main.plua" ); }
+    } script_file_guard;
     std::array<const char*, 3> argv_ex = { "ptusa_main.exe", "--opc=off",
         "main.plua" };
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
@@ -406,5 +411,4 @@ TEST( project_manager, apply_opc_mode )
     // Возвращаем предыдущие значения.
     G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = ua_server_active;
     G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = ua_server_control;
-    remove( "main.plua" );
     }
