@@ -220,7 +220,7 @@ cd build
 ```bash
 # Install required packages
 sudo apt update
-sudo apt install -y lua5.1-dev cmake build-essential
+sudo apt install -y cmake build-essential
 ```
 
 ### Optional Development Tools
