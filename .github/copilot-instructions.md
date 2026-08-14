@@ -106,20 +106,20 @@ cmake --build . -j$(nproc)
 ### Unit Tests (~7 seconds)
 
 Run tests from the build directory so relative paths resolve inside the build
-tree. Do not run the build binary from the repository root like
-`build/Release/main_test` because that leaves the working directory outside the
-build tree.
+tree. Do not run the test binary from the repository root (for example,
+`build/main_test` or `build/Release/main_test`) because that leaves the working
+directory outside the build tree.
 
 ```bash
 cd build
-ctest
+ctest -C Release
 ```
 
 If you need to run a filtered subset of tests, use:
 
 ```bash
 cd build
-ctest -R project_manager
+ctest -R project_manager -C Release
 ```
 
 **Expected Results:**
@@ -130,11 +130,12 @@ ctest -R project_manager
 
 ### Performance Benchmarks (~2 seconds)
 
-Run the registered benchmark test from the build directory using CTest:
+Run the registered benchmark test (only available when demo tests are enabled;
+e.g., `SKIP_DEMO=OFF`) from the build directory using CTest:
 
 ```bash
 cd build
-ctest -R save-speed-benchmark
+ctest -R save-speed-benchmark -C Release
 ```
 
 ## Demo Project Execution
@@ -185,21 +186,21 @@ ls -la
 
 ```bash
 cd build
-ctest  # Should complete in ~7 seconds
+ctest -C Release  # Should complete in ~7 seconds
 ```
 
 If you need to run a filtered subset of tests, use:
 
 ```bash
 cd build
-ctest -R project_manager
+ctest -R project_manager -C Release
 ```
 
 ### 3. Performance Regression Check
 
 ```bash
 cd build
-ctest -R save-speed-benchmark  # Should complete in ~2 seconds
+ctest -R save-speed-benchmark -C Release # Should complete in ~2 seconds
 ```
 
 ### 4. Demo Application Test
@@ -258,7 +259,7 @@ git submodule update --init --recursive
 
 ### Performance Analysis
 
-1. Use built-in benchmarks: `ctest -R save-speed-benchmark`
+1. Use built-in benchmarks: `ctest -R save-speed-benchmark -C Release`
 2. Profile with standard tools (gprof, perf, etc.)
 3. Memory analysis with valgrind
 
@@ -305,7 +306,7 @@ The project uses GitHub Actions for continuous integration:
 ### C++ Standards
 
 - C++17 features encouraged
-- Prefer using 'auto' for type inference
+- Prefer using `auto` for type inference
 - Follow existing naming conventions
 - Use RAII and modern C++ practices
 - Prefer standard library over custom implementations
@@ -373,10 +374,10 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j$(nproc)
 
 # 3. Test (allow 5+ minutes timeout, actual ~7 seconds)
-ctest
+ctest -C Release
 
 # 4. Performance (allow 3+ minutes timeout, actual ~2 seconds)
-ctest -R save-speed-benchmark
+ctest -R save-speed-benchmark -C Release
 
 # 5. Demo
 ./ptusa_main --path ../demo_projects/T1-PLCnext-Demo/ \
