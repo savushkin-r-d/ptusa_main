@@ -31,14 +31,6 @@ if(ODBC_FOUND)
     return()
 endif()
 
-if(CMAKE_CROSSCOMPILING)
-    message(STATUS
-        "Cross-compiling without a target ODBC package in the sysroot; "
-        "skipping vendored unixODBC bootstrap. Use the target sysroot ODBC or disable ENABLE_ODBC."
-    )
-    return()
-endif()
-
 if(UNIX AND NOT APPLE)
     find_program(LIBTOOLIZE_EXECUTABLE libtoolize)
     find_path(LTDL_ACLOCAL_DIR ltdl.m4 PATHS /usr/share/aclocal /usr/local/share/aclocal)
