@@ -115,13 +115,43 @@ if(UNIX AND NOT APPLE)
     endif()
 endif()
 
+# --- Формирование флагов кросс-компиляции для Autotools ---
+set(UNIXODBC_CROSS_FLAGS "")
+
+if(CMAKE_CROSSCOMPILING)
+    # 1. Определяем целевую архитектуру (--host)
+    if(CMAKE_SYSTEM_PROCESSOR)
+        string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROC_ARCH)
+        if(PROC_ARCH STREQUAL "arm64" OR PROC_ARCH STREQUAL "aarch64")
+            set(AUTOTOOLS_HOST "aarch64-linux-gnu")
+        elseif(PROC_ARCH MATCHES "arm")
+            set(AUTOTOOLS_HOST "arm-linux-gnueabihf")
+        else()
+            set(AUTOTOOLS_HOST "${CMAKE_SYSTEM_PROCESSOR}-linux-gnu")
+        endif()
+    else()
+        # Если процессор не задан, вырезаем префикс из имени компилятора
+        get_filename_component(COMPILER_NAME "${CMAKE_C_COMPILER}" NAME)
+        string(REGEX REPLACE "-(gcc|cc|g\\+\\+)$" "" AUTOTOOLS_HOST "${COMPILER_NAME}")
+    endif()
+
+    # 2. Собираем строку аргументов (компилятор, линкер и хост)
+    set(UNIXODBC_CROSS_FLAGS "--host=${AUTOTOOLS_HOST} CC='${CMAKE_C_COMPILER}' LD='${CMAKE_LINKER}'")
+
+    # 3. Добавляем sysroot, если он используется в вашем CMake toolchain
+    if(CMAKE_SYSROOT)
+        string(APPEND UNIXODBC_CROSS_FLAGS " CFLAGS='--sysroot=${CMAKE_SYSROOT}' LDFLAGS='--sysroot=${CMAKE_SYSROOT}'")
+    endif()
+endif()
+# ---------------------------------------------------------
+
 ExternalProject_Add(unixodbc_project
     PREFIX "${CMAKE_BINARY_DIR}/deps/unixODBC"
     SOURCE_DIR "${UNIXODBC_SOURCE_DIR}"
     BINARY_DIR "${UNIXODBC_BUILD_DIR}"
     INSTALL_DIR "${UNIXODBC_INSTALL_DIR}"
     CONFIGURE_COMMAND
-        bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && if [ ! -f configure ]; then if [ -x ./autogen.sh ]; then bash ./autogen.sh || autoreconf -fiv; else autoreconf -fiv; fi; fi && bash ./configure --prefix='${UNIXODBC_INSTALL_DIR}' --disable-gui --enable-driver-conf=no --disable-dependency-tracking"
+        bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && if [ ! -f configure ]; then if [ -x ./autogen.sh ]; then bash ./autogen.sh || autoreconf -fiv; else autoreconf -fiv; fi; fi && bash ./configure --prefix='${UNIXODBC_INSTALL_DIR}' --disable-gui --enable-driver-conf=no --disable-dependency-tracking ${UNIXODBC_CROSS_FLAGS}"
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     UPDATE_COMMAND ""
