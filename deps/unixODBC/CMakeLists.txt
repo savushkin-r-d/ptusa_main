@@ -18,6 +18,16 @@ if(TARGET ODBC::ODBC)
     return()
 endif()
 
+if(UNIX AND NOT APPLE)
+    if(NOT EXISTS "/usr/share/aclocal/ltdl.m4" AND NOT EXISTS "/usr/share/aclocal/libtool.m4")
+        message(FATAL_ERROR
+            "Linux unixODBC build requires the libltdl development files. "
+            "Install 'libtool' and 'libltdl-dev' (for example: sudo apt-get install -y libtool libltdl-dev) "
+            "or install a system ODBC package before configuring this project."
+        )
+    endif()
+endif()
+
 set(UNIXODBC_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/unixODBC")
 set(UNIXODBC_BUILD_DIR "${CMAKE_BINARY_DIR}/deps/unixODBC/build")
 set(UNIXODBC_INSTALL_DIR "${CMAKE_BINARY_DIR}/deps/unixODBC/install")
