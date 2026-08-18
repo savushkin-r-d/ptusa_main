@@ -18,12 +18,26 @@ if(TARGET ODBC::ODBC)
     return()
 endif()
 
+find_package(ODBC QUIET)
+if(ODBC_FOUND)
+    if(NOT TARGET ODBC::ODBC)
+        add_library(ODBC::ODBC UNKNOWN IMPORTED GLOBAL)
+        set_target_properties(ODBC::ODBC PROPERTIES
+            IMPORTED_LOCATION "${ODBC_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${ODBC_INCLUDE_DIR}"
+        )
+    endif()
+    message(STATUS "Using system ODBC library: ${ODBC_LIBRARY}")
+    return()
+endif()
+
 if(UNIX AND NOT APPLE)
-    if(NOT EXISTS "/usr/share/aclocal/ltdl.m4" AND NOT EXISTS "/usr/share/aclocal/libtool.m4")
+    find_program(LIBTOOLIZE_EXECUTABLE libtoolize)
+    find_path(LTDL_ACLOCAL_DIR ltdl.m4 PATHS /usr/share/aclocal /usr/local/share/aclocal)
+    if(NOT LIBTOOLIZE_EXECUTABLE OR NOT LTDL_ACLOCAL_DIR)
         message(FATAL_ERROR
-            "Linux unixODBC build requires the libltdl development files. "
-            "Install 'libtool' and 'libltdl-dev' (for example: sudo apt-get install -y libtool libltdl-dev) "
-            "or install a system ODBC package before configuring this project."
+            "Linux unixODBC build requires libtool + libltdl-dev files. "
+            "Install: sudo apt-get install -y libtool libltdl-dev autoconf automake make"
         )
     endif()
 endif()
@@ -115,9 +129,18 @@ if(NOT EXISTS "${ODBC_LIBRARY}")
     set(ODBC_LIBRARY "${UNIXODBC_INSTALL_DIR}/lib/libodbc.so")
 endif()
 
+add_custom_command(
+    OUTPUT "${ODBC_LIBRARY}"
+    DEPENDS unixodbc_project
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${UNIXODBC_INSTALL_DIR}/lib"
+    COMMENT "Ensuring unixODBC library exists at ${ODBC_LIBRARY}"
+    VERBATIM
+)
+add_custom_target(unixodbc_library_target ALL DEPENDS "${ODBC_LIBRARY}")
+
 add_library(ODBC::ODBC UNKNOWN IMPORTED GLOBAL)
 set_target_properties(ODBC::ODBC PROPERTIES
     IMPORTED_LOCATION "${ODBC_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${ODBC_INCLUDE_DIR}"
 )
-add_dependencies(ODBC::ODBC unixodbc_project)
+add_dependencies(ODBC::ODBC unixodbc_library_target)
