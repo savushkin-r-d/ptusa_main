@@ -238,15 +238,20 @@ jobs:
         endif()
 
     - name: Install Linux build dependencies (autotools)
-      if: runner.os == 'Linux' && !matrix.config.preset
+      if: runner.os == 'Linux' && matrix.config.preset
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          autoconf \
-          automake \
-          libtool libltdl-dev \
-          make \
-          pkg-config
+        autoconf \
+        automake \
+        libtool \
+        libltdl-dev \
+        make \
+        pkg-config
+
+    - name: Install unixodbc-dev (Linux only)
+      if: runner.os == 'Linux' && !matrix.config.preset
+      run: sudo apt-get install -y unixodbc-dev
 
     - name: Install plcncli and PLCnext SDK (Linux only)
       if: runner.os == 'Linux' && matrix.config.preset
