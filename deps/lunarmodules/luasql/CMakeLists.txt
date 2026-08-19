@@ -33,6 +33,7 @@ function(add_luasql_driver driver)
         ${LUA_INCLUDE_DIR}
     )
     target_link_libraries(luasql_${driver} PRIVATE liblua)
+    add_dependencies(luasql_${driver} liblua)
 
     # Driver-specific dependencies.
     if(driver STREQUAL "odbc")

@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.13)
 
-include(ExternalProject)
+project(unixodbc LANGUAGES C)
 
-if(WIN32)
+# Native Windows builds use the system ODBC libraries.
+# AXCF cross-builds are still hosted on Windows, but CMAKE_CROSSCOMPILING is true,
+# so they must not take the native Windows branch.
+if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
     find_package(ODBC REQUIRED)
     if(NOT TARGET ODBC::ODBC)
         add_library(ODBC::ODBC UNKNOWN IMPORTED GLOBAL)
@@ -31,146 +34,135 @@ if(ODBC_FOUND)
     return()
 endif()
 
-if(UNIX AND NOT APPLE)
-    find_program(LIBTOOLIZE_EXECUTABLE libtoolize)
-    find_path(LTDL_ACLOCAL_DIR ltdl.m4 PATHS /usr/share/aclocal /usr/local/share/aclocal)
-    if(NOT LIBTOOLIZE_EXECUTABLE OR NOT LTDL_ACLOCAL_DIR)
-        message(FATAL_ERROR
-            "Linux unixODBC build requires libtool + libltdl-dev files. "
-            "Install: sudo apt-get install -y libtool libltdl-dev autoconf automake make"
-        )
-    endif()
-endif()
+include(ExternalProject)
 
 set(UNIXODBC_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/unixODBC")
-set(UNIXODBC_BUILD_DIR "${CMAKE_BINARY_DIR}/deps/unixODBC/build")
-set(UNIXODBC_INSTALL_DIR "${CMAKE_BINARY_DIR}/deps/unixODBC/install")
-file(MAKE_DIRECTORY "${UNIXODBC_INSTALL_DIR}/include")
-file(MAKE_DIRECTORY "${UNIXODBC_INSTALL_DIR}/lib")
+set(UNIXODBC_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/unixodbc-build")
+set(UNIXODBC_INSTALL_DIR "${CMAKE_BINARY_DIR}/unixodbc-install")
 
-if(UNIX AND NOT APPLE)
-    find_program(BASH_EXECUTABLE bash REQUIRED)
-    find_program(AUTORECONF_EXECUTABLE autoreconf)
+find_program(BASH_EXECUTABLE NAMES bash sh REQUIRED)
 
-    if(NOT AUTORECONF_EXECUTABLE)
-        message( INFO
-            "try: "
-            "sudo apt-get update"
-            "sudo apt-get install -y autoconf automake libtool make")
-        message(FATAL_ERROR
-            "Linux unixODBC build requires autotools tools: 'autoreconf' is not installed. "
-            "Install 'autoconf', 'automake', 'libtool' and 'make' before configuring this project."
+if(CMAKE_HOST_WIN32)
+    function(normalize_windows_bash_path out_var in_path)
+        set(_path "${in_path}")
+        string(REPLACE "\\" "/" _path "${_path}")
+
+        if(_path MATCHES "^([A-Za-z]):/(.*)$")
+            string(TOLOWER "${CMAKE_MATCH_1}" _unixodbc_drive_letter_lower)
+            set(_path "/mnt/${_unixodbc_drive_letter_lower}/${CMAKE_MATCH_2}")
+        elseif(_path MATCHES "^/([A-Za-z])/(.*)$")
+            string(TOLOWER "${CMAKE_MATCH_1}" _unixodbc_drive_letter_lower)
+            set(_path "/mnt/${_unixodbc_drive_letter_lower}/${CMAKE_MATCH_2}")
+        endif()
+
+        set(${out_var} "${_path}" PARENT_SCOPE)
+    endfunction()
+
+    normalize_windows_bash_path(UNIXODBC_SOURCE_DIR_BASH "${UNIXODBC_SOURCE_DIR}")
+    normalize_windows_bash_path(UNIXODBC_BUILD_DIR_BASH "${UNIXODBC_BUILD_DIR}")
+    normalize_windows_bash_path(UNIXODBC_INSTALL_DIR_BASH "${UNIXODBC_INSTALL_DIR}")
+
+    find_program(WSLPATH_EXECUTABLE NAMES wslpath)
+    find_program(CYGPATH_EXECUTABLE NAMES cygpath)
+
+    if(WSLPATH_EXECUTABLE)
+        execute_process(
+            COMMAND "${WSLPATH_EXECUTABLE}" -u "${UNIXODBC_SOURCE_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_SOURCE_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        execute_process(
+            COMMAND "${WSLPATH_EXECUTABLE}" -u "${UNIXODBC_BUILD_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_BUILD_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        execute_process(
+            COMMAND "${WSLPATH_EXECUTABLE}" -u "${UNIXODBC_INSTALL_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_INSTALL_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+    elseif(CYGPATH_EXECUTABLE)
+        execute_process(
+            COMMAND "${CYGPATH_EXECUTABLE}" -u "${UNIXODBC_SOURCE_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_SOURCE_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        execute_process(
+            COMMAND "${CYGPATH_EXECUTABLE}" -u "${UNIXODBC_BUILD_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_BUILD_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        execute_process(
+            COMMAND "${CYGPATH_EXECUTABLE}" -u "${UNIXODBC_INSTALL_DIR}"
+            OUTPUT_VARIABLE UNIXODBC_INSTALL_DIR_BASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
         )
     endif()
+else()
+    set(UNIXODBC_SOURCE_DIR_BASH "${UNIXODBC_SOURCE_DIR}")
+    set(UNIXODBC_BUILD_DIR_BASH "${UNIXODBC_BUILD_DIR}")
+    set(UNIXODBC_INSTALL_DIR_BASH "${UNIXODBC_INSTALL_DIR}")
+endif()
 
-    if(NOT EXISTS "${UNIXODBC_SOURCE_DIR}/configure")
-        if(EXISTS "${UNIXODBC_SOURCE_DIR}/autogen.sh")
-            execute_process(
-                COMMAND bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && if [ -x ./autogen.sh ]; then bash ./autogen.sh || '${AUTORECONF_EXECUTABLE}' -fiv; else '${AUTORECONF_EXECUTABLE}' -fiv; fi"
-                RESULT_VARIABLE UNIXODBC_BOOTSTRAP_RESULT
-                OUTPUT_VARIABLE UNIXODBC_BOOTSTRAP_OUTPUT
-                ERROR_VARIABLE UNIXODBC_BOOTSTRAP_ERROR
-            )
-        elseif(AUTORECONF_EXECUTABLE)
-            execute_process(
-                COMMAND bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && '${AUTORECONF_EXECUTABLE}' -fiv"
-                RESULT_VARIABLE UNIXODBC_BOOTSTRAP_RESULT
-                OUTPUT_VARIABLE UNIXODBC_BOOTSTRAP_OUTPUT
-                ERROR_VARIABLE UNIXODBC_BOOTSTRAP_ERROR
-            )
-        else()
-            message(FATAL_ERROR
-                "unixODBC bootstrap tooling is missing in '${UNIXODBC_SOURCE_DIR}'. "
-                "Install autotools or run 'git submodule update --init --recursive'."
-            )
-        endif()
+set(UNIXODBC_CONFIGURE_ARGS
+    --prefix=${UNIXODBC_INSTALL_DIR_BASH}
+    --enable-shared=yes
+    --enable-static=no
+    --disable-gui
+    --disable-debug
+    --enable-driver-config=no
+    --enable-drivers=no
+    --without-odbcini
+    --without-odbcinstini
+)
+string(REPLACE ";" " " UNIXODBC_CONFIGURE_ARG_STRING "${UNIXODBC_CONFIGURE_ARGS}")
 
-        if(NOT UNIXODBC_BOOTSTRAP_RESULT EQUAL 0)
-            message(FATAL_ERROR
-                "unixODBC bootstrap failed for Linux CI build.\n"
-                "Output:\n${UNIXODBC_BOOTSTRAP_OUTPUT}\n"
-                "Error:\n${UNIXODBC_BOOTSTRAP_ERROR}"
-            )
-        endif()
-    endif()
-
-    execute_process(
-        COMMAND bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && bash ./configure --help >/dev/null 2>&1"
-        RESULT_VARIABLE UNIXODBC_LINUX_CHECK
+if(CMAKE_HOST_WIN32)
+    set(UNIXODBC_SETUP_COMMAND
+        "mkdir -p \"${UNIXODBC_BUILD_DIR_BASH}\" && cp -af \"${UNIXODBC_SOURCE_DIR_BASH}/.\" \"${UNIXODBC_BUILD_DIR_BASH}/\""
     )
-
-    if(NOT UNIXODBC_LINUX_CHECK EQUAL 0)
-        message(FATAL_ERROR
-            "Linux unixODBC validation failed. The configure script in '${UNIXODBC_SOURCE_DIR}' is not runnable. "
-            "Ensure autotools bootstrap completed successfully and the toolchain is available."
-        )
-    endif()
+else()
+    set(UNIXODBC_SETUP_COMMAND
+        "rm -rf \"${UNIXODBC_BUILD_DIR_BASH}\" && mkdir -p \"${UNIXODBC_BUILD_DIR_BASH}\" && cp -af \"${UNIXODBC_SOURCE_DIR_BASH}/.\" \"${UNIXODBC_BUILD_DIR_BASH}/\""
+    )
 endif()
 
-# --- Формирование флагов кросс-компиляции для Autotools ---
-set(UNIXODBC_CROSS_FLAGS "")
-
-if(CMAKE_CROSSCOMPILING)
-    # 1. Определяем целевую архитектуру (--host)
-    if(CMAKE_SYSTEM_PROCESSOR)
-        string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROC_ARCH)
-        if(PROC_ARCH STREQUAL "arm64" OR PROC_ARCH STREQUAL "aarch64")
-            set(AUTOTOOLS_HOST "aarch64-linux-gnu")
-        elseif(PROC_ARCH MATCHES "arm")
-            set(AUTOTOOLS_HOST "arm-linux-gnueabihf")
-        else()
-            set(AUTOTOOLS_HOST "${CMAKE_SYSTEM_PROCESSOR}-linux-gnu")
-        endif()
-    else()
-        # Если процессор не задан, вырезаем префикс из имени компилятора
-        get_filename_component(COMPILER_NAME "${CMAKE_C_COMPILER}" NAME)
-        string(REGEX REPLACE "-(gcc|cc|g\\+\\+)$" "" AUTOTOOLS_HOST "${COMPILER_NAME}")
-    endif()
-
-    # 2. Собираем строку аргументов (компилятор, линкер и хост)
-    set(UNIXODBC_CROSS_FLAGS "--host=${AUTOTOOLS_HOST} CC='${CMAKE_C_COMPILER}' LD='${CMAKE_LINKER}'")
-
-    # 3. Добавляем sysroot, если он используется в вашем CMake toolchain
-    if(CMAKE_SYSROOT)
-        string(APPEND UNIXODBC_CROSS_FLAGS " CFLAGS='--sysroot=${CMAKE_SYSROOT}' LDFLAGS='--sysroot=${CMAKE_SYSROOT}'")
-    endif()
-endif()
-# ---------------------------------------------------------
+set(UNIXODBC_CONFIGURE_COMMAND
+    "cd \"${UNIXODBC_BUILD_DIR_BASH}\" && autoreconf -fi -I m4 && ./configure ${UNIXODBC_CONFIGURE_ARG_STRING}"
+)
 
 ExternalProject_Add(unixodbc_project
-    PREFIX "${CMAKE_BINARY_DIR}/deps/unixODBC"
     SOURCE_DIR "${UNIXODBC_SOURCE_DIR}"
     BINARY_DIR "${UNIXODBC_BUILD_DIR}"
     INSTALL_DIR "${UNIXODBC_INSTALL_DIR}"
-    CONFIGURE_COMMAND
-        bash -lc "cd '${UNIXODBC_SOURCE_DIR}' && if [ ! -f configure ]; then if [ -x ./autogen.sh ]; then bash ./autogen.sh || autoreconf -fiv; else autoreconf -fiv; fi; fi && bash ./configure --prefix='${UNIXODBC_INSTALL_DIR}' --disable-gui --enable-driver-conf=no --disable-dependency-tracking ${UNIXODBC_CROSS_FLAGS}"
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
-    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
-    UPDATE_COMMAND ""
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
+    PATCH_COMMAND
+        "${BASH_EXECUTABLE}" -lc "sed -i '/ACLOCAL_AMFLAGS/d' \"${UNIXODBC_SOURCE_DIR_BASH}/Makefile.am\" && sed -i '/ACLOCAL_AMFLAGS/d' \"${UNIXODBC_SOURCE_DIR_BASH}/Makefile.in\""
+    CONFIGURE_COMMAND "${BASH_EXECUTABLE}" -lc "${UNIXODBC_SETUP_COMMAND} && ${UNIXODBC_CONFIGURE_COMMAND}"
+    BUILD_COMMAND "${BASH_EXECUTABLE}" -lc "cd \"${UNIXODBC_BUILD_DIR_BASH}\" && make -j${CMAKE_BUILD_PARALLEL_LEVEL}"
+    INSTALL_COMMAND "${BASH_EXECUTABLE}" -lc "cd \"${UNIXODBC_BUILD_DIR_BASH}\" && make install"
+    BUILD_BYPRODUCTS "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    USES_TERMINAL_CONFIGURE TRUE
+    USES_TERMINAL_BUILD TRUE
+    USES_TERMINAL_INSTALL TRUE
 )
 
-set(ODBC_INCLUDE_DIR "${UNIXODBC_INSTALL_DIR}/include")
-set(ODBC_INCLUDE_DIRS "${ODBC_INCLUDE_DIR}")
-set(ODBC_LIBRARY "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}")
-if(NOT EXISTS "${ODBC_LIBRARY}")
-    set(ODBC_LIBRARY "${UNIXODBC_INSTALL_DIR}/lib/libodbc.so")
+set(_unixodbc_include_dir "${UNIXODBC_SOURCE_DIR}/include")
+set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}")
+if(WIN32)
+    set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 
-add_custom_command(
-    OUTPUT "${ODBC_LIBRARY}"
-    DEPENDS unixodbc_project
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${UNIXODBC_INSTALL_DIR}/lib"
-    COMMENT "Ensuring unixODBC library exists at ${ODBC_LIBRARY}"
-    VERBATIM
+add_library(unixodbc_library_target SHARED IMPORTED GLOBAL)
+set_target_properties(unixodbc_library_target PROPERTIES
+    IMPORTED_LOCATION "${_unixodbc_lib_path}"
+    INTERFACE_INCLUDE_DIRECTORIES "${_unixodbc_include_dir}"
 )
-add_custom_target(unixodbc_library_target ALL DEPENDS "${ODBC_LIBRARY}")
+add_dependencies(unixodbc_library_target unixodbc_project)
 
-add_library(ODBC::ODBC UNKNOWN IMPORTED GLOBAL)
-set_target_properties(ODBC::ODBC PROPERTIES
-    IMPORTED_LOCATION "${ODBC_LIBRARY}"
-    INTERFACE_INCLUDE_DIRECTORIES "${ODBC_INCLUDE_DIR}"
-)
-add_dependencies(ODBC::ODBC unixodbc_library_target)
+add_library(ODBC::ODBC ALIAS unixodbc_library_target)
