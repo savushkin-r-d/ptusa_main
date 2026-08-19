@@ -273,10 +273,13 @@ add_custom_target(unixodbc_project
     VERBATIM
 )
 
-set(_unixodbc_include_dir "${UNIXODBC_SOURCE_DIR}/include")
-set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}")
-if(WIN32)
+set(_unixodbc_include_dir "${UNIXODBC_BUILD_DIR};${UNIXODBC_SOURCE_DIR}/include")
+set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc.so.2.0.0")
+if(NOT EXISTS "${_unixodbc_lib_path}")
     set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+if(NOT EXISTS "${_unixodbc_lib_path}")
+    set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc.so")
 endif()
 
 add_library(unixodbc_library_target SHARED IMPORTED GLOBAL)
