@@ -231,7 +231,11 @@ if(NOT ARP_DEVICE)
     add_dependencies(libptusa_main lua)
 endif()
 
-add_dependencies(lua lfs luasystem term_core luassert_copy luasql_odbc)
+if(TARGET luasql_odbc)
+    add_dependencies(lua lfs luasystem term_core luassert_copy luasql_odbc)
+else()
+    add_dependencies(lua lfs luasystem term_core luassert_copy)
+endif()
 
 if(MSVC)
     set_property(TARGET libptusa_main PROPERTY VS_DEBUGGER_COMMAND "lua.exe")

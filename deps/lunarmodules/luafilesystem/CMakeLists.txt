@@ -6,7 +6,7 @@ add_library(lfs ${SOURCES})
 target_sources(lfs PRIVATE $<$<C_COMPILER_ID:MSVC>:luafilesystem/src/lfs.def>)
 
 target_include_directories(lfs PRIVATE luafilesystem/src src/lib ${LUA_INCLUDE_DIR})
-target_link_libraries(lfs PRIVATE liblua)
+target_link_libraries(lfs PRIVATE "$<TARGET_FILE:liblua>")
 
 target_compile_definitions(lfs PRIVATE $<$<C_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
 

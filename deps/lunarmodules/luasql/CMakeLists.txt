@@ -22,6 +22,11 @@ function(add_luasql_driver driver)
     )
 
     # Target name: luasql_<driver>, output file: <driver>.dll/.so without prefix.
+    if(driver STREQUAL "odbc" AND NOT TARGET ODBC::ODBC)
+        message(STATUS "ODBC runtime unavailable; skipping LuaSQL ODBC driver target")
+        return()
+    endif()
+
     add_library(luasql_${driver} ${SOURCES})
 
     if(MSVC)
@@ -32,7 +37,7 @@ function(add_luasql_driver driver)
         "${LUASQL_SRC_DIR}"
         ${LUA_INCLUDE_DIR}
     )
-    target_link_libraries(luasql_${driver} PRIVATE liblua)
+    target_link_libraries(luasql_${driver} PRIVATE "$<TARGET_FILE:liblua>")
     add_dependencies(luasql_${driver} liblua)
 
     # Driver-specific dependencies.
