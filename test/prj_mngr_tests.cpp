@@ -1,5 +1,7 @@
 #include <array>
 #include <iomanip>
+#include <sstream>
+#include <fstream>
 
 #include "prj_mngr_tests.h"
 #include "PAC_info.h"
@@ -121,7 +123,7 @@ TEST( project_manager, proc_main_params )
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg       The script file to execute (default: main.plua)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\O nodes (default: true)
       --read_only_io     Read only from I\O nodes (default: true)
@@ -139,7 +141,7 @@ Usage:
 Usage:
   ptusa_main.exe [OPTION...] <script>
 
-  -s, --script arg       The script file to execute (default: main.plua)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\O nodes
       --read_only_io     Read only from I\O nodes
@@ -163,6 +165,9 @@ Usage:
         SUBHOOK_64BIT_OFFSET );
     subhook_install( get_time_hook );
 
+    std::tm tm = get_time();
+    std::stringstream tmp;
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
 
     // Отключаем работу с модулями ввода/вывода, сбрасываем параметры,
     // запускаем в отладочном режиме.
@@ -171,12 +176,12 @@ Usage:
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
-    std::string debug = R"(DEBUG ON.
+    std::string debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+DEBUG ON.
 Resetting params (command line parameter "rcrc").
 )";
-    std::tm tm = get_time();
-    std::stringstream tmp;
-    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+
 #if defined WIN_OS
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
@@ -191,11 +196,15 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + OPC_OFF;
+    debug += tmp.str() + OPC_OFF;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug = tmp.str() + "\x1B[32m" + OPC_OFF + "\x1B[0m";
+    debug += tmp.str() + "\x1B[32m" + OPC_OFF + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
@@ -224,10 +233,14 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 1, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + OPC_ERR_ST;
+    debug += tmp.str() + OPC_ERR_ST;
 #else
-    debug = tmp.str() + "\x1B[31m" + OPC_ERR_ST + "\x1B[0m";
+    debug += tmp.str() + "\x1B[31m" + OPC_ERR_ST + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -238,11 +251,15 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + OPC_RO;
+    debug += tmp.str() + OPC_RO;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
 
@@ -255,11 +272,15 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + OPC_RW;
+    debug += tmp.str() + OPC_RW;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
 #else
-    debug = tmp.str() + "\x1B[33m" + OPC_RW + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + OPC_RW + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
@@ -271,11 +292,15 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + BUS_COUPLERS_ENABLED;
+    debug += tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -287,11 +312,15 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
+
 #if defined WIN_OS
-    debug = tmp.str() + BUS_COUPLERS_ENABLED;
+    debug += tmp.str() + BUS_COUPLERS_ENABLED;
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m"
         + "WARNING(4) -> Bus couplers are read only.\n" + "\x1B[0m";
 #endif
@@ -305,10 +334,13 @@ Resetting params (command line parameter "rcrc").
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
 
+    debug = tmp.str();
+    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
+)";
 #if defined WIN_OS
-    debug = tmp.str() + BUS_COUPLERS_ENABLED;
+    debug += tmp.str() + BUS_COUPLERS_ENABLED;
 #else
-    debug = tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
+    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
     output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
@@ -348,9 +380,16 @@ TEST( project_manager, apply_opc_mode )
         G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
 
 
+    // Для тестов создаем файл main.plua.
+    std::ofstream main_plua( "main.plua", std::ofstream::out );
+    main_plua << "system = {}" << std::endl;
+    main_plua.close();
+
+
     // Отключаем работу OPC UA.
     const auto NO_SHOW_LOG_MESSAGE = false;
-    std::array<const char*, 2> argv_ex = { "ptusa_main.exe", "--opc=off" };
+    std::array<const char*, 3> argv_ex = { "ptusa_main.exe", "--opc=off",
+        "main.plua" };
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
     ASSERT_EQ( 0, res );
     res = G_PROJECT_MANAGER->apply_opc_mode( NO_SHOW_LOG_MESSAGE );

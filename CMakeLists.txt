@@ -437,7 +437,7 @@ if (WIN32)
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes \(default: true\)
       --read_only_io     Read only from I\\O nodes \(default: true\)
@@ -455,7 +455,7 @@ else()
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes
       --read_only_io     Read only from I\\O nodes
@@ -496,8 +496,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
-        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
-
+        PASS_REGULAR_EXPRESSION "Error: Script file 'main\.plua1' does not exist.")
 
     add_test(NAME Busted-test COMMAND lua
                 -e "${LUA_BUSTED_PATH_INIT_CMD}"
