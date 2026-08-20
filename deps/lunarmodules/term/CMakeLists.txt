@@ -7,7 +7,7 @@ target_sources(term_core PRIVATE
     $<$<C_COMPILER_ID:MSVC>:term_core.def>)
 
 include_directories(PRIVATE ${LUA_INCLUDE_DIR})
-target_link_libraries(term_core PRIVATE "$<TARGET_FILE:liblua>")
+target_link_libraries(term_core PRIVATE "$<TARGET_LINKER_FILE:liblua>")
 
 set_target_properties(term_core PROPERTIES
     OUTPUT_NAME core 

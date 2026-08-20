@@ -37,7 +37,8 @@ function(add_luasql_driver driver)
         "${LUASQL_SRC_DIR}"
         ${LUA_INCLUDE_DIR}
     )
-    target_link_libraries(luasql_${driver} PRIVATE "$<TARGET_FILE:liblua>")
+    target_link_libraries(luasql_${driver}
+        PRIVATE "$<TARGET_LINKER_FILE:liblua>")
     add_dependencies(luasql_${driver} liblua)
 
     # Driver-specific dependencies.

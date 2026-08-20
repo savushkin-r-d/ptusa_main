@@ -10,7 +10,7 @@ set(SOURCES luasystem/src/bitflags.c
 # Create the library.
 add_library(luasystem ${SOURCES})
 target_include_directories(luasystem PRIVATE luasystem/src ${LUA_INCLUDE_DIR})
-target_link_libraries(luasystem PRIVATE "$<TARGET_FILE:liblua>")
+target_link_libraries(luasystem PRIVATE "$<TARGET_LINKER_FILE:liblua>")
 
 set_target_properties(luasystem PROPERTIES
     OUTPUT_NAME core
