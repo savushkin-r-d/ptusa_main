@@ -570,8 +570,8 @@ set(STDOUT_CAPTURE_LOCKED_FILTER
 	"tech_object.set_mode:"
 
     "project_manager.proc_main_params:"
-    "project_manager.lua_load_configuration:")
-
+    "project_manager.lua_load_configuration:"
+	"project_manager.apply_opc_mode:")
 
 set(TCP_SOCKET_LOCKED_FILTER
     "tcp_communicator.evaluate:"
@@ -591,10 +591,11 @@ string(REPLACE ";" "" STDOUT_CAPTURE_LOCKED_FILTER_STR
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
+
 set(UNLOCKED_FILTER_STR
-	"*-${TCP_SOCKET_LOCKED_FILTER_STR}"
-	"cipline_tech_object.save_device:"
-	"${STDOUT_CAPTURE_LOCKED_FILTER_STR}")
+    "*-${TCP_SOCKET_LOCKED_FILTER_STR}"
+    "*-${STDOUT_CAPTURE_LOCKED_FILTER_STR}"
+    "*-discipline_tech_object.save_device:")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test

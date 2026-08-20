@@ -159,6 +159,11 @@ object_manager =
 
 TEST( project_manager, proc_main_params )
     {
+    // Для тестов создаем файл main.plua.
+    std::ofstream main_plua( "main.plua", std::ofstream::out );
+    main_plua << "system = {}" << std::endl;
+    main_plua.close();
+
     auto L = lua_open();
     G_LUA_MANAGER->set_Lua( L );
 
@@ -246,7 +251,13 @@ Usage:
         "DEBUG ON.\n" +
         "Resetting params (command line parameter \"rcrc\").\n";
 
-    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+    debug += tmp.str() +
+#ifdef WIN_OS
+        BUS_COUPLERS_DISABLED;
+#else
+        BUS_COUPLERS_ENABLED;
+#endif // WIN_OS
+
     EXPECT_EQ( output, debug );
 
     // Выключаем OPC UA.
@@ -258,7 +269,12 @@ Usage:
 
     debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_OFF;
-    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+    debug += tmp.str() +
+#ifdef WIN_OS
+        BUS_COUPLERS_DISABLED;
+#else
+        BUS_COUPLERS_ENABLED;
+#endif // WIN_OS
 
     EXPECT_EQ( output, debug );
 
@@ -300,7 +316,12 @@ Usage:
 
     debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_RO;
-    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+    debug += tmp.str() +
+#ifdef WIN_OS
+        BUS_COUPLERS_DISABLED;
+#else
+        BUS_COUPLERS_ENABLED;
+#endif // WIN_OS
     EXPECT_EQ( output, debug );
 
     // Включаем OPC UA в режиме чтения и записи.
@@ -312,7 +333,12 @@ Usage:
 
     debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_RW;
-    debug += tmp.str() + BUS_COUPLERS_DISABLED;
+    debug += tmp.str() +
+#ifdef WIN_OS
+        BUS_COUPLERS_DISABLED;
+#else
+        BUS_COUPLERS_ENABLED;
+#endif // WIN_OS
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода.
@@ -370,6 +396,8 @@ Usage:
     subhook_remove( get_time_hook );
     subhook_free( get_time_hook );
     G_LUA_MANAGER->free_Lua();
+
+    std::remove( "main.plua" );
     }
 
 
@@ -435,4 +463,6 @@ TEST( project_manager, apply_opc_mode )
     // Возвращаем предыдущие значения.
     G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = ua_server_active;
     G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] = ua_server_control;
+
+    std::remove( "main.plua" );
     }
