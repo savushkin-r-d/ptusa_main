@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+﻿cmake_minimum_required(VERSION 3.13)
 
 project(unixodbc LANGUAGES C)
 
@@ -189,6 +189,17 @@ endif()
 file(MAKE_DIRECTORY "${UNIXODBC_BUILD_DIR}")
 file(COPY "${UNIXODBC_SOURCE_DIR}/" DESTINATION "${UNIXODBC_BUILD_DIR}" USE_SOURCE_PERMISSIONS)
 
+# Delete conflict flag ACLOCAL_AMFLAGS
+file(READ "${UNIXODBC_BUILD_DIR}/Makefile.am" FILE_CONTENTS)
+string(REPLACE "ACLOCAL_AMFLAGS=-I m4\n\n" "" FILE_CONTENTS "${FILE_CONTENTS}")
+file(WRITE "${UNIXODBC_BUILD_DIR}/Makefile.am" "${FILE_CONTENTS}")
+
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env
+        ${POSIX_SHELL_EXECUTABLE} -c "autoreconf -fi"
+    WORKING_DIRECTORY "${UNIXODBC_BUILD_DIR}"
+)
+
 # file(COPY) gives every file a fresh, effectively-simultaneous mtime, which
 # loses the dependency ordering a real "make dist" tarball would have. Automake's
 # maintainer-mode rules then see e.g. configure.ac as not-clearly-older-than
@@ -251,6 +262,7 @@ string(REPLACE
 file(GENERATE OUTPUT "${_unixodbc_configure_file}" CONTENT "${_unixodbc_configure_contents}" NEWLINE_STYLE UNIX)
 
 add_custom_target(unixodbc_project
+
     COMMAND ${CMAKE_COMMAND} -E env
         "CC=${UNIXODBC_C_COMPILER_BASH}"
         "CXX=${UNIXODBC_CXX_COMPILER_BASH}"
@@ -259,19 +271,24 @@ add_custom_target(unixodbc_project
         "${POSIX_SHELL_EXECUTABLE}"
         "${UNIXODBC_BUILD_DIR_BASH}/configure"
         ${UNIXODBC_CONFIGURE_ARGS}
+
     # config.status leaves unixodbc.h/unixodbc_conf.h's "#undef SYMBOL" lines
     # unsubstituted even though config.h gets the real values, which makes
     # sqltypes.h's "#error ... size of a long int" check fail. Copy the real
     # values over after configure has generated config.h.
     COMMAND ${CMAKE_COMMAND} "-DUNIXODBC_DIR=${UNIXODBC_BUILD_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/sync-header-defines.cmake"
+
     # "make" is a WSL/POSIX binary, not something Windows' cmake -E env can
     # exec directly; route it through the POSIX shell like configure above.
     COMMAND ${CMAKE_COMMAND} -E env "CC=${UNIXODBC_C_COMPILER_BASH}" "CXX=${UNIXODBC_CXX_COMPILER_BASH}" "${POSIX_SHELL_EXECUTABLE}" -c "make -j${CMAKE_BUILD_PARALLEL_LEVEL}"
+
     COMMAND ${CMAKE_COMMAND} -E env "CC=${UNIXODBC_C_COMPILER_BASH}" "CXX=${UNIXODBC_CXX_COMPILER_BASH}" "${POSIX_SHELL_EXECUTABLE}" -c "make install"
+
     WORKING_DIRECTORY "${UNIXODBC_BUILD_DIR}"
     BYPRODUCTS "${UNIXODBC_INSTALL_DIR}/lib/libodbc${CMAKE_SHARED_LIBRARY_SUFFIX}"
     VERBATIM
 )
+
 
 set(_unixodbc_include_dir "${UNIXODBC_BUILD_DIR};${UNIXODBC_SOURCE_DIR}/include")
 set(_unixodbc_lib_path "${UNIXODBC_INSTALL_DIR}/lib/libodbc.so.2.0.0")
