@@ -542,6 +542,37 @@ endif()
 
 include(GoogleTest)
 
+set(STDOUT_CAPTURE_LOCKED_FILTER
+	"io_device.get_AO:"
+	"io_device.get_AO_read_data:"
+
+	"dev_stub.print:"
+
+	"analog_io_device.set_cmd:"
+
+	"watchdog.set_property:"
+
+	"device_communicator.print:"
+
+	"action.print:"
+
+	"operation_state.print:"
+	"operation_state.to_step:"
+	"operation.on_extra_step_debug_output:"
+	"operation.evaluate_from_run_to_pause:"
+
+	"wash_action.print:"
+
+	"PAC_critical_errors_manager.set_global_error:"
+
+	"uni_io_manager.write_outputs:"
+
+	"tech_object.set_mode:"
+
+    "project_manager.proc_main_params:"
+    "project_manager.lua_load_configuration:")
+
+
 set(TCP_SOCKET_LOCKED_FILTER
     "tcp_communicator.evaluate:"
 	"tcp_communicator.recvtimeout:"
@@ -551,15 +582,19 @@ set(TCP_SOCKET_LOCKED_FILTER
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
 	"LuaManagerTest.init_success:"
-    "PAC_critical_errors_manager.set_global_error:"
-	"project_manager.proc_main_params:"
-	"project_manager.lua_load_configuration:")
+    "PAC_critical_errors_manager.set_global_error:")
+
+# Тесты, которые используют CaptureStdout() - выполняются последовательно
+string(REPLACE ";" "" STDOUT_CAPTURE_LOCKED_FILTER_STR
+    "${STDOUT_CAPTURE_LOCKED_FILTER}")
 
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
 set(UNLOCKED_FILTER_STR
-	"*-${TCP_SOCKET_LOCKED_FILTER_STR}cipline_tech_object.save_device:")
+	"*-${TCP_SOCKET_LOCKED_FILTER_STR}"
+	"cipline_tech_object.save_device:"
+	"${STDOUT_CAPTURE_LOCKED_FILTER_STR}")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test
@@ -570,6 +605,13 @@ gtest_discover_tests(main_test
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER "cipline_tech_object.save_device"
+    PROPERTIES RUN_SERIAL 1)
+
+# Тесты, которые захватывают stdout - выполняются последовательно
+# (без параллелизма, чтобы избежать гонки на stdout)
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${STDOUT_CAPTURE_LOCKED_FILTER_STR}
     PROPERTIES RUN_SERIAL 1)
 
 # Discover all remaining tests.
