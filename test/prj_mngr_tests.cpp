@@ -9,13 +9,77 @@
 #include "dtime.h"
 
 extern const char* FILES[ FILE_CNT ];
-const char* const BUS_COUPLERS_DISABLED = "WARNING(4) -> Bus couplers are disabled.\n";
-const char* const OPC_RO = "WARNING(4) -> OPC UA server is activated (only read).\n";
-const char* const OPC_RW = "WARNING(4) -> OPC UA server is activated (read-write).\n";
-const char* const OPC_OFF = "INFO   (6) -> OPC UA server is disabled.\n";
+
+const char * const PROGRAM_STARTED =
+#ifndef WIN_OS
+    "\x1B[32m"
+#endif // !WIN_OS
+    "INFO   (6) -> Program started (version 2026.04.02.1).\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif // !WIN_OS
+    ;
+
+const char* const BUS_COUPLERS_DISABLED =
+#ifndef WIN_OS
+    "\x1B[33m"
+#endif // !WIN_OS
+    "WARNING(4) -> Bus couplers are disabled.\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif // !WIN_OS
+    ;
+
+const char* const OPC_RO =
+#ifndef WIN_OS
+    "\x1B[33m"
+#endif
+    "WARNING(4) -> OPC UA server is activated (only read).\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif
+    ;
+
+const char* const OPC_RW =
+#ifndef WIN_OS
+    "\x1B[33m"
+#endif
+
+"WARNING(4) -> OPC UA server is activated (read-write).\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif
+    ;
+
+const char* const OPC_OFF =
+#ifndef WIN_OS
+    "\x1B[32m"
+#endif
+    "INFO   (6) -> OPC UA server is disabled.\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif
+    ;
+
 const char* const OPC_ERR_ST =
-    "ERROR  (3) -> Unknown OPC UA mode: 'st'. Valid values: off, r, rw.\n";
-const char* const BUS_COUPLERS_ENABLED = "WARNING(4) -> Bus couplers are enabled.\n";
+#ifndef WIN_OS
+    "\x1B[31m"
+#endif
+    "ERROR  (3) -> Unknown OPC UA mode: 'st'. Valid values: off, r, rw.\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif
+    ;
+
+const char* const BUS_COUPLERS_ENABLED =
+#ifndef WIN_OS
+    "\x1B[33m"
+#endif
+    "WARNING(4) -> Bus couplers are enabled.\n"
+#ifndef WIN_OS
+    "\x1B[0m"
+#endif
+    ;
 
 using namespace ::testing;
 
@@ -115,6 +179,7 @@ TEST( project_manager, proc_main_params )
 
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( 2, argv );
+    auto output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 1, res );
 
     auto help =
@@ -156,7 +221,6 @@ Usage:
 )";
 #endif // defined WIN_OS
 
-    auto output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, help );
 
 
@@ -175,39 +239,27 @@ Usage:
         "--rcrc", "main.plua" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
-    ASSERT_EQ( 0, res );
-    std::string debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-DEBUG ON.
-Resetting params (command line parameter "rcrc").
-)";
-
-#if defined WIN_OS
-    debug += tmp.str() + BUS_COUPLERS_DISABLED;
-#else
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-#endif
     output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ( 0, res );
+
+    std::string debug = tmp.str() + PROGRAM_STARTED +
+        "DEBUG ON.\n" +
+        "Resetting params (command line parameter \"rcrc\").\n";
+
+    debug += tmp.str() + BUS_COUPLERS_DISABLED;
     EXPECT_EQ( output, debug );
 
     // Выключаем OPC UA.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=off", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_OFF;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
-#else
-    debug += tmp.str() + "\x1B[32m" + OPC_OFF + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-#endif
-    output = testing::internal::GetCapturedStdout();
+
     EXPECT_EQ( output, debug );
 
     // Проверяем, что после инициализации стандартных параметров
@@ -221,8 +273,9 @@ Resetting params (command line parameter "rcrc").
 
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->apply_opc_mode( false );
-    ASSERT_EQ( 0, res );
     output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ( 0, res );
+
     EXPECT_TRUE( output.empty() );
     EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     EXPECT_EQ( 0, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_CONTROL ] );
@@ -231,78 +284,49 @@ Resetting params (command line parameter "rcrc").
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=st", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 1, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_ERR_ST;
-#else
-    debug += tmp.str() + "\x1B[31m" + OPC_ERR_ST + "\x1B[0m";
-#endif
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем OPC UA в режиме чтения.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=r", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_RO;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
-#else
-    debug += tmp.str() + "\x1B[33m" + OPC_RO + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-#endif
-
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем OPC UA в режиме чтения и записи.
     argv_ex = { "ptusa_main.exe", "main.plua", "--opc=rw", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + OPC_RW;
     debug += tmp.str() + BUS_COUPLERS_DISABLED;
-#else
-    debug += tmp.str() + "\x1B[33m" + OPC_RW + "\x1B[0m";
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-#endif
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода.
     argv_ex = { "ptusa_main.exe", "main.plua", "--no_io=false", "" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + BUS_COUPLERS_ENABLED;
+#if defined WIN_OS
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
-#else
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода, включаем только чтение.
@@ -310,21 +334,17 @@ Resetting params (command line parameter "rcrc").
         "--read_only_io" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + BUS_COUPLERS_ENABLED;
+#if defined WIN_OS
     debug += tmp.str() + "WARNING(4) -> Bus couplers are read only.\n";
 #else
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
     debug += tmp.str() + "\x1B[33m"
         + "WARNING(4) -> Bus couplers are read only.\n" + "\x1B[0m";
 #endif
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     // Включаем работу с модулями ввода/вывода, отключаем только чтение.
@@ -332,17 +352,11 @@ Resetting params (command line parameter "rcrc").
         "--read_only_io=false" };
     testing::internal::CaptureStdout();
     res = G_PROJECT_MANAGER->proc_main_params( argv_ex.size(), argv_ex.data() );
+    output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    debug = tmp.str();
-    debug += R"(INFO   (6) -> Program started (version 2026.04.02.1).
-)";
-#if defined WIN_OS
+    debug = tmp.str() + PROGRAM_STARTED;
     debug += tmp.str() + BUS_COUPLERS_ENABLED;
-#else
-    debug += tmp.str() + "\x1B[33m" + BUS_COUPLERS_ENABLED + "\x1B[0m";
-#endif
-    output = testing::internal::GetCapturedStdout();
     EXPECT_EQ( output, debug );
 
     std::array<const char*, 14> argv_path{ "ptusa_main.exe", "--port", "20000",
@@ -370,9 +384,9 @@ TEST( project_manager, apply_opc_mode )
     // сохранённые параметры не изменяются и нет никаких сообщений.
     testing::internal::CaptureStdout();
     auto res = G_PROJECT_MANAGER->apply_opc_mode();
+    auto output = testing::internal::GetCapturedStdout();
     ASSERT_EQ( 0, res );
 
-    auto output = testing::internal::GetCapturedStdout();
     EXPECT_TRUE( output.empty() );
     EXPECT_EQ( ua_server_active,
         G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
