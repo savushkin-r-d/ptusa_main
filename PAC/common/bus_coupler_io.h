@@ -375,13 +375,13 @@ class io_manager
 				EMPTY = -1,   ///< Не задан.
 
 				WAGO_750_86x		  = 0,  ///< Wago 750-863.
-				WAGO_750_820x		  = 2,  ///< Wago PFC200.
+				WAGO_750_820x		  = 2,  ///< Wago 750_820x.
 
 				WAGO_750_XXX_ETHERNET = 100,///< Wago Ethernet 750-341 и т.д.
 				PHOENIX_BK_ETH		  = 200,///< Phoenix 2702177
 				};
 
-			enum STATES           ///< Cостояния работы с узлом.
+			enum STATES           ///< Состояния работы с узлом.
 				{
 				ST_NO_CONNECT = 0,
 				ST_OK = 1,
@@ -529,13 +529,19 @@ class io_manager
 		/// @brief Завершает соединение с узлом
 		virtual void disconnect(io_node *node) = 0;
 
-        io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
+        inline static io_node io_node_stub{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
-        const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
+        inline static const io_node IO_NODE_STUB{ io_manager::io_node::PHOENIX_BK_ETH,
             1, "127.0.0.1", "Axxx", 0, 0, 0, 0, 0, 0 };
 #ifdef PTUSA_TEST
         void clear_nodes();
 #endif
+
+        // Explicitly delete the copy constructors.
+        io_manager( io_manager const& ) = delete;
+        io_manager( io_manager&& ) = delete;
+        io_manager& operator=( io_manager const& ) = delete;
+        io_manager& operator=( io_manager&& ) = delete;
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();
