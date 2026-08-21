@@ -514,11 +514,10 @@ void modbus_client::check_connection_state_changed()
         disconnected_state_start_time = get_millisec();
         }
 
-    const auto wait_time =
+    if ( const auto WAIT_TIME =
         G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ];
-
-    if ( !is_disconnect_reported &&
-        get_delta_millisec( disconnected_state_start_time ) >= wait_time )
+        !is_disconnect_reported &&
+        get_delta_millisec( disconnected_state_start_time ) >= WAIT_TIME )
         {
         G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
