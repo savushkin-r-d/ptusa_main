@@ -229,6 +229,14 @@ Usage:
     EXPECT_EQ( output, help );
 
 
+    const char* argv_v[] = { "ptusa_main.exe", "--version" };
+    testing::internal::CaptureStdout();
+    res = G_PROJECT_MANAGER->proc_main_params( 2, argv_v );
+    ASSERT_EQ( 1, res );
+    output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ( output, PRODUCT_VERSION_FULL_STR "\n" );
+
+
     auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
         reinterpret_cast<void*>( &get_fixed_time ),
         SUBHOOK_64BIT_OFFSET );
@@ -249,7 +257,16 @@ Usage:
 
     std::string debug = tmp.str() + PROGRAM_STARTED +
         "DEBUG ON.\n" +
-        "Resetting params (command line parameter \"rcrc\").\n";
+        tmp.str() +
+#if !defined WIN_OS
+        "\x1B[37m" +
+#endif
+        "DEBUG  (7) -> "
+        "Resetting parameters (command line parameter 'rcrc').\n"
+#if !defined WIN_OS
+        "\x1B[0m"
+#endif
+        ;
 
     debug += tmp.str() +
 #ifdef WIN_OS

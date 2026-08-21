@@ -121,10 +121,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "rcrc" ) )
         {
-        if ( G_DEBUG )
-            {
-            fmt::print( "Resetting params (command line parameter \"rcrc\").\n" );
-            }
+        G_LOG->debug( "Resetting parameters (command line parameter 'rcrc')." );
         params_manager::get_instance()->reset_params_size();
         }
 
@@ -174,23 +171,10 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     extra_paths = fs_extra_paths.lexically_normal().generic_string();
 
     // Отключить/включить обмен с модулями ввода/вывода.
-    if ( result[ "no_io" ].as<bool>() )
-        {
-        G_NO_IO_NODES = true;
-        }
-    else
-        {
-        G_NO_IO_NODES = false;
-        }
+    G_NO_IO_NODES = result[ "no_io" ].as<bool>() ? true : false;
+
     // Только чтение/запись+чтение данных с модулей ввода/вывода.
-    if ( result[ "read_only_io" ].as<bool>() )
-        {
-        G_READ_ONLY_IO_NODES = true;
-        }
-    else
-        {
-        G_READ_ONLY_IO_NODES = false;
-        }
+    G_READ_ONLY_IO_NODES = result[ "read_only_io" ].as<bool>() ? true : false;
 
     if ( G_NO_IO_NODES )
         G_LOG->warning( "Bus couplers are disabled." );
