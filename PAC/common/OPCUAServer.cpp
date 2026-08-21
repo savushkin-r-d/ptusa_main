@@ -512,7 +512,7 @@ UA_StatusCode OPCUA_server::method_set_state( UA_Server*,
         return UA_STATUSCODE_BADINTERNALERROR;
         }
 
-    if ( inputSize != 1 ||
+    if ( inputSize != 1 || !input ||
         !UA_Variant_hasScalarType( &input[ 0 ], &UA_TYPES[ UA_TYPES_INT32 ] ) )
         {
         return UA_STATUSCODE_BADINVALIDARGUMENT;
@@ -545,7 +545,7 @@ UA_StatusCode OPCUA_server::method_set_value( UA_Server*,
         return UA_STATUSCODE_BADINTERNALERROR;
         }
 
-    if ( inputSize != 1 ||
+    if ( inputSize != 1 || !input ||
         !UA_Variant_hasScalarType( &input[ 0 ], &UA_TYPES[ UA_TYPES_FLOAT ] ) )
         {
         return UA_STATUSCODE_BADINVALIDARGUMENT;
