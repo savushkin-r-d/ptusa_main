@@ -25,14 +25,6 @@
 
 #include "g_errors.h"
 
-#ifdef WIN_OS
-#include "w_mem.h"
-#endif
-
-#ifdef LINUX_OS
-#include "l_mem.h"
-#endif
-
 extern bool G_NO_IO_NODES;
 extern bool G_READ_ONLY_IO_NODES;
 
@@ -270,26 +262,9 @@ project_manager* project_manager::get_instance()
     if ( instance.is_null() )
         {
         instance = new project_manager();
-
-#ifdef WIN_OS
-        instance->cfg_file = new data_file();
-#endif // WIN_OS
-
-#ifdef LINUX_OS
-        instance->cfg_file = new data_file();
-#endif // LINUX_OS
         }
 
     return instance;
-    }
-//-----------------------------------------------------------------------------
-project_manager::~project_manager()
-    {
-    if ( cfg_file )
-        {
-        delete cfg_file;
-        cfg_file = nullptr;
-        }
     }
 //-----------------------------------------------------------------------------
 int project_manager::init_path( const char* path )

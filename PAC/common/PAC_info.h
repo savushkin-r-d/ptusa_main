@@ -61,6 +61,15 @@ class PAC_info: public i_Lua_save_device
             ///< Время до установки ошибки связи с сетевым узлом, мсек.
             P_BK_ANSWER_MAX_WAIT_TIME,
 
+            ///< Время, которое должно пройти после последнего изменения
+            ///< параметра, прежде чем писать. Это гарантирует, что запись идет
+            ///< не при каждой мелкой правке.
+            P_STABLE_SAVE_DELAY_MS,
+
+            ///< Минимальный интервал между последовательными сохранениями
+            ///< параметров.
+            P_MIN_SAVE_INTERVAL_MS,
+
             ///< Количество параметров.
             P_PARAMS_COUNT
             };
@@ -100,6 +109,7 @@ class PAC_info: public i_Lua_save_device
 
             RELOAD_RESTRICTIONS = 100,
             RESET_PARAMS = 101,
+            FORCE_SAVE_PARAMS = 102,
             };
 
 #ifdef PTUSA_TEST

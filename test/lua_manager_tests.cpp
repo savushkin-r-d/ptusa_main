@@ -44,12 +44,12 @@ TEST(lua_manager_test, get_instance)
 
 TEST_F(LuaManagerTest, init_success)
 {
-    char* res = 0;
+    std::byte* res = nullptr;
 	mock_project_manager* prj_mock = new mock_project_manager();
 	mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity(par_mock);
 
-    EXPECT_CALL(*par_mock, get_params_data(_, _))
+    EXPECT_CALL(*par_mock, reserve_params_region(_, _))
         .Times(AtLeast(2))
         .WillRepeatedly(Return(res));
 
@@ -228,13 +228,13 @@ TEST_F(LuaManagerTest, init_lua_pcall_failure)
 
 mock_tech_object_manager* init_mocks( int cnt )
     {
-    char* res = 0;
+    std::byte* res = nullptr;
 
     mock_project_manager* prj_mock = new mock_project_manager();
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 
