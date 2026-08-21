@@ -104,8 +104,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     // Проверка на наличие файла @main_script.
     std::filesystem::path s{ result[ "script" ].as<std::string>() };
-    if ( std::filesystem::file_status fs = std::filesystem::status( s );
-        !std::filesystem::exists( fs ) )
+    std::error_code ec;
+    if ( !std::filesystem::exists( s, ec ) )
         {
         fmt::print( "Error: Script file '{}' does not exist.\n", s.string() );
         return 1;
@@ -170,6 +170,20 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     path = fs_path.lexically_normal().generic_string();
     sys_path = fs_sys_path.lexically_normal().generic_string();
     extra_paths = fs_extra_paths.lexically_normal().generic_string();
+    if ( !path.empty() && path.back() != '\\' && path.back() != '/' )
+        {
+        path += '/';
+        }
+    if ( !sys_path.empty() && sys_path.back() != '\\'
+        && sys_path.back() != '/' )
+        {
+        sys_path += '/';
+        }
+    if ( !extra_paths.empty() && extra_paths.back() != '\\'
+        && extra_paths.back() != '/' )
+        {
+        extra_paths += '/';
+        }
 
     // Отключить/включить обмен с модулями ввода/вывода.
     G_NO_IO_NODES = result[ "no_io" ].as<bool>() ? true : false;
