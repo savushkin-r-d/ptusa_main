@@ -253,6 +253,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 }
 
             case COMMANDS::RESET_PARAMS:
+                {
                 auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
                 G_LOG->notice( "Resetting parameters (remote monitor "
                     "client command)." );
@@ -261,6 +262,12 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
                 auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
                 return proc_OPC( prev_val, new_val, false );
+                }
+
+            case COMMANDS::FORCE_SAVE_PARAMS:
+                G_LOG->notice( "Force saving parameters (remote monitor "
+                    "client command)." );
+                return params_manager::get_instance()->save_params();
             }
 
         return 0;

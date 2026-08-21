@@ -109,6 +109,7 @@ class PAC_info: public i_Lua_save_device
 
             RELOAD_RESTRICTIONS = 100,
             RESET_PARAMS = 101,
+            FORCE_SAVE_PARAMS = 102,
             };
 
 #ifdef PTUSA_TEST

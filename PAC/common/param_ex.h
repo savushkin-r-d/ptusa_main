@@ -125,6 +125,8 @@ class params_manager
 
         virtual ~params_manager();
 
+        int save_params();
+
         int evaluate();
 
         enum PARAMS

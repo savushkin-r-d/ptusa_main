@@ -229,43 +229,65 @@ params_manager::~params_manager()
     par = nullptr;
     }
 //-----------------------------------------------------------------------------
+int params_manager::save_params()
+    {
+    const auto CRC = solve_CRC();
+    constexpr std::size_t OFFSET = sizeof( last_idx );
+    std::memcpy( CRC_mem->get_data() + OFFSET, &CRC, sizeof( CRC ) );
+    auto res = CRC_mem->safe_save();
+    if ( res != 0 )
+        {
+        return res;
+        }
+    res = params_mem->safe_save();
+    if ( res != 0 )
+        {
+        return res;
+        }
+
+    is_changed = false;
+    last_save_ms = get_millisec();
+
+    params_save_counter++;
+    G_LOG->debug( "params_mem::safe_save() - call %d", params_save_counter );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int params_manager::evaluate()
     {
     // После запуска управляющей программы при первом вызове метода evaluate()
-    // будет произведена запись параметров в энергонезависимую память после
-    // истечения времени задержки сохранения параметров. Это уменьшает нагрузку
-    // на флеш-память.
+    // будет произведена запись параметров в энергонезависимую память при
+    // наличии изменений.
 
     if ( is_changed )
         {
         auto since_save = get_delta_millisec( last_save_ms );
         auto since_change = get_delta_millisec( last_change_ms );
+        const auto min_interval =
+             G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ];
+        const auto stable_delay =
+             G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ];
 
-        if ( since_save >= G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] &&
-            since_change >= G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] )
+        if ( ( params_save_counter == 0 || since_save >= min_interval ) &&
+            since_change >= stable_delay )
             {
-            const auto CRC = solve_CRC();
-            constexpr std::size_t OFFSET = sizeof( last_idx );
-            std::memcpy( CRC_mem->get_data() + OFFSET, &CRC, sizeof( CRC ) );
-            auto res = CRC_mem->safe_save();
-            if ( res != 0 )
+            // Проверка на наличие свободного места в файловой системе.
+            std::error_code ec;
+            const uintmax_t AVAILABLE_SPACE = std::filesystem::space(
+                std::filesystem::current_path(), ec ).available;
+            const auto SPACE_LIMIT = static_cast<uintmax_t>(
+                CONSTANTS::C_TOTAL_PARAMS_SIZE );
+
+            if ( AVAILABLE_SPACE < SPACE_LIMIT )
                 {
-                return res;
-                }
-            res = params_mem->safe_save();
-            if ( res != 0 )
-                {
-                return res;
+                G_LOG->error( "params_manager::evaluate() - not enough free "
+                    "space in the file system (%llu < %llu)!",
+                    AVAILABLE_SPACE, SPACE_LIMIT );
+                return 1;
                 }
 
-            is_changed = false;
-            last_save_ms = get_millisec();
-
-            params_save_counter++;
-            G_LOG->debug( "params_mem::safe_save() - call %d",
-                params_save_counter );
-
-            return 0;
+            return save_params();
             }
         }
 
