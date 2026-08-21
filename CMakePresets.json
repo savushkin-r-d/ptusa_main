@@ -229,13 +229,13 @@
   "buildPresets": [
     {
       "name": "build-windows-VS2022-release",
-      "displayName": "Windows VS2022 Release",
+      "displayName": " Windows VS2022 Release",
       "configurePreset": "windows-VS2022-default",
       "configuration": "Release"
     },
     {
       "name": "build-windows-VS2022-debug",
-      "displayName": "Windows VS2022 Debug",
+      "displayName": " Windows VS2022 Debug",
       "configurePreset": "windows-VS2022-debug",
       "configuration": "Debug"
     },
