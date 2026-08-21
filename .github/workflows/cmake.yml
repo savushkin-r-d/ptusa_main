@@ -141,7 +141,7 @@ jobs:
           }
     steps:
     - name: Harden the runner (Audit all outbound calls)
-      uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
       with:
         egress-policy: audit
 
@@ -236,6 +236,18 @@ jobs:
           execute_process(COMMAND sudo apt-get update)
           execute_process(COMMAND sudo apt-get install -y yasm)
         endif()
+
+    - name: Install Linux build dependencies (autotools)
+      if: runner.os == 'Linux' && matrix.config.preset
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+        autoconf \
+        automake \
+        libtool \
+        libltdl-dev \
+        make \
+        pkg-config
 
     - name: Install unixodbc-dev (Linux only)
       if: runner.os == 'Linux' && !matrix.config.preset
@@ -583,7 +595,7 @@ jobs:
 
     steps:
     - name: Harden the runner (Audit all outbound calls)
-      uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
       with:
         egress-policy: audit
 
@@ -633,7 +645,7 @@ jobs:
 
     steps:
     - name: Harden the runner (Audit all outbound calls)
-      uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
       with:
         egress-policy: audit
 
