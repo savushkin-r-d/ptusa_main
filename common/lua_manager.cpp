@@ -123,9 +123,8 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         G_LOG->debug( "Init Lua..." );
         }
 
-    sprintf( G_LOG->msg, "script_name = \"%s\"",
+    G_LOG->notice( "script_name = \"%s\"",
         std::filesystem::path( script_name ).make_preferred().u8string().c_str() );
-    G_LOG->write_log( i_log::P_NOTICE );
 
     std::string dir_str( dir );
     std::string sys_dir_str( sys_dir );

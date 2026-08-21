@@ -104,12 +104,13 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     // Проверка на наличие файла @main_script.
     std::filesystem::path s{ result[ "script" ].as<std::string>() };
-    if ( !std::filesystem::exists( s ) )
+    if ( std::filesystem::file_status fs = std::filesystem::status( s );
+        !std::filesystem::exists( fs ) )
         {
         fmt::print( "Error: Script file '{}' does not exist.\n", s.string() );
         return 1;
         }
-    main_script = s.generic_string();
+    main_script = s.lexically_normal().generic_string();
 
     G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 

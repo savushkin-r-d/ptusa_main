@@ -593,7 +593,7 @@ string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
 
 set(UNLOCKED_FILTER_STR
-	"-${TCP_SOCKET_LOCKED_FILTER_STR}:${STDOUT_CAPTURE_LOCKED_FILTER_STR}:cipline_tech_object.save_device")
+	"-${TCP_SOCKET_LOCKED_FILTER_STR}${STDOUT_CAPTURE_LOCKED_FILTER_STR}cipline_tech_object.save_device")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test

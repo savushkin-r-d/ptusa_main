@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <cstdio>
 
 #include "prj_mngr_tests.h"
 #include "PAC_info.h"
@@ -14,7 +15,7 @@ const char * const PROGRAM_STARTED =
 #ifndef WIN_OS
     "\x1B[32m"
 #endif // !WIN_OS
-    "INFO   (6) -> Program started (version 2026.04.02.1).\n"
+    "INFO   (6) -> Program started (version " PRODUCT_VERSION_FULL_STR ").\n"
 #ifndef WIN_OS
     "\x1B[0m"
 #endif // !WIN_OS
