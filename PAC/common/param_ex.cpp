@@ -274,15 +274,14 @@ int params_manager::evaluate()
             {
             // Проверка на наличие свободного места в файловой системе.
             std::error_code ec;
-            const uintmax_t AVAILABLE_SPACE = std::filesystem::space(
-                std::filesystem::current_path(), ec ).available;
-            const auto SPACE_LIMIT = static_cast<uintmax_t>(
-                CONSTANTS::C_TOTAL_PARAMS_SIZE );
-
-            if ( AVAILABLE_SPACE < SPACE_LIMIT )
+            if ( const auto AVAILABLE_SPACE = std::filesystem::space(
+                std::filesystem::current_path(), ec ).available,
+                SPACE_LIMIT = static_cast<uintmax_t>(
+                    CONSTANTS::C_TOTAL_PARAMS_SIZE );
+                AVAILABLE_SPACE < SPACE_LIMIT )
                 {
                 G_LOG->error( "params_manager::evaluate() - not enough free "
-                    "space in the file system (%llu < %llu)!",
+                    "space in the file system (%ju < %ju)!",
                     AVAILABLE_SPACE, SPACE_LIMIT );
                 return 1;
                 }
