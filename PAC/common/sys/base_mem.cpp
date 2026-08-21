@@ -46,7 +46,7 @@ int SRAM::load_data()
     {
     zero_fill();
 
-    if ( !std::filesystem::exists( file_path ) )
+    if ( std::error_code ec; !std::filesystem::exists( file_path, ec ) )
         {
         G_LOG->notice( "SRAM() - File (%s) not found.",
             file_path.string().c_str() );

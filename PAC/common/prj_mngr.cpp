@@ -96,8 +96,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     // Проверка на наличие файла @main_script.
     std::filesystem::path s{ result[ "script" ].as<std::string>() };
-    std::error_code ec;
-    if ( !std::filesystem::exists( s, ec ) )
+    if ( std::error_code ec; !std::filesystem::exists( s, ec ) )
         {
         fmt::print( "Error: Script file '{}' does not exist.\n", s.string() );
         return 1;
@@ -156,27 +155,17 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
 
-    std::filesystem::path fs_path = result["path"].as<std::string>();
-    std::filesystem::path fs_sys_path = result["sys_path"].as<std::string>();
-    std::filesystem::path fs_extra_paths = result["extra_paths"].as<std::string>();
+    // Нормализуем пути и гарантируем слеш на конце через /= "".
+    auto p_norm = std::filesystem::path(
+        result[ "path" ].as<std::string>() ).lexically_normal() / "";
+    auto s_norm = std::filesystem::path(
+        result[ "sys_path" ].as<std::string>() ).lexically_normal() / "";
+    auto e_norm = std::filesystem::path(
+        result[ "extra_paths" ].as<std::string>() ).lexically_normal() / "";
 
-    path = fs_path.lexically_normal().generic_string();
-    sys_path = fs_sys_path.lexically_normal().generic_string();
-    extra_paths = fs_extra_paths.lexically_normal().generic_string();
-    if ( !path.empty() && path.back() != '\\' && path.back() != '/' )
-        {
-        path += '/';
-        }
-    if ( !sys_path.empty() && sys_path.back() != '\\'
-        && sys_path.back() != '/' )
-        {
-        sys_path += '/';
-        }
-    if ( !extra_paths.empty() && extra_paths.back() != '\\'
-        && extra_paths.back() != '/' )
-        {
-        extra_paths += '/';
-        }
+    path = p_norm.generic_string();
+    sys_path = s_norm.generic_string();
+    extra_paths = e_norm.generic_string();
 
     // Отключить/включить обмен с модулями ввода/вывода.
     G_NO_IO_NODES = result[ "no_io" ].as<bool>() ? true : false;
