@@ -383,6 +383,16 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     wn->is_err_mode_alarm_set = false;
                     wn->prev_status_register = 0;
                     }
+                // Если была активна данная ошибка, удаляем её аналогично.
+                if ( wn->is_cfg_bus_error_alarm_set )
+                    {
+                    PAC_critical_errors_manager::get_instance()->reset_global_error(
+                        PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
+                        PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                        false );
+                    wn->is_cfg_bus_error_alarm_set = false;
+                    wn->prev_diagnostic_status_register = 0;
+                    }
 
                 // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(

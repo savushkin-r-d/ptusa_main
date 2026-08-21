@@ -577,6 +577,7 @@ set(TCP_SOCKET_LOCKED_FILTER
 	"tcp_communicator.recvtimeout:"
     "device_communicator.write_devices_states_service:"
     "pp_mode_alarm.pp_mode_activation_deactivation:"
+	"pp_mode_alarm.cfg_bus_error_activation_deactivation:"
     "pp_mode_alarm.e_communicate:"
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
