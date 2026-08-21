@@ -1003,7 +1003,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                     operation_n > 0 && operation_n <= operations_count )
                     {
                     if ( auto op = ( *operations_manager )[ operation_n ];
-                        op->get_state() == operation::RUN )
+                        op->get_state() != operation::IDLE )
                         {
                         op->to_step( step_n );
                         return 0;
