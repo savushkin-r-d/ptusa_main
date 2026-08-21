@@ -115,7 +115,7 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     if ( result.count( "rcrc" ) )
         {
         G_LOG->debug( "Resetting parameters (command line parameter 'rcrc')." );
-        params_manager::get_instance()->reset_params_size();
+        params_manager::get_instance()->reset_CRC_mem();
         }
 
     if ( result.count( "port" ) )
@@ -124,7 +124,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         if ( p > 0 )
             {
             tcp_communicator::set_port( p, p + 502 );
-            G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
+            G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].",
+                p, p + 502 );
             }
         }
 
