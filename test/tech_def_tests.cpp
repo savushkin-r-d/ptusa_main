@@ -801,6 +801,9 @@ TEST( tech_object, set_cmd_to_step_paused_operation )
     operation_1->add_step( "Process #1", 3, -1 );
     operation_1->add_step( "Process #2", -1, -1 );
 
+    operation_1->add_step( "Process pause #1", 2, -1, -1, operation::PAUSE );
+    operation_1->add_step( "Process pause #2", 1, -1, -1, operation::PAUSE );
+
     // Start operation.
     EXPECT_EQ( 0, tank.set_mode( OPER_N1, operation::RUN ) );
     EXPECT_EQ( STEP_N1, operation_1->active_step() );
@@ -809,18 +812,18 @@ TEST( tech_object, set_cmd_to_step_paused_operation )
     tank.set_mode( OPER_N1, operation::PAUSE );
     EXPECT_EQ( operation::PAUSE, operation_1->get_state() );
 
-    // Test: Jump should be rejected when paused (not RUN).
-    EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400102 ) );
-    // When paused, active_step becomes 0.
-    EXPECT_EQ( 0u, operation_1->active_step() );
-
-    // Resume operation.
-    tank.set_mode( OPER_N1, operation::RUN );
-    EXPECT_EQ( operation::RUN, operation_1->get_state() );
-
-    // Test: Jump should now succeed.
+    // Test: Jump should not be rejected when paused (not RUN).
     EXPECT_EQ( 0, tank.set_cmd( "CMD", 0, 400102 ) );
+    // When paused, active_step becomes 0.
     EXPECT_EQ( STEP_N2, operation_1->active_step() );
+
+    // Switch off operation.
+    tank.set_mode( OPER_N1, operation::IDLE );
+    EXPECT_EQ( operation::IDLE, operation_1->get_state() );
+
+    // Test: Jump should now not succeed.
+    EXPECT_EQ( 1, tank.set_cmd( "CMD", 0, 400102 ) );
+    EXPECT_EQ( 0u, operation_1->active_step() );
 
     G_LUA_MANAGER->free_Lua();
     }
