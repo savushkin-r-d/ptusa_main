@@ -757,3 +757,18 @@ TEST( lua_manager, check_file )
     auto res = check_file( FILE_NAME, err_str );
     EXPECT_EQ( res, FILE_VERSION );
     }
+
+TEST( lua_manager, init )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    // Так как не загружен соответствующий модуль package, то init должен
+    // вернуть 1 - "attempt to index global 'package' (a nil value)". При этом
+    // в консоль выводится информация о переданных параметрах.
+    auto res = G_LUA_MANAGER->init( L,
+        "test.lua", "dir", "sys_dir", "extra_dir" );
+    EXPECT_EQ( res, 1 );
+
+    G_LUA_MANAGER->free_Lua();
+    }
