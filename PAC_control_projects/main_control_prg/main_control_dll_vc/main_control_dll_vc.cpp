@@ -14,9 +14,6 @@
 #include "version_info.h"
 
 #include "log.h"
-#ifdef PAC_WAGO_750_860
-#include "l_log.h"
-#endif
 
 #ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
@@ -52,7 +49,6 @@ int lua_init( lua_State* L )
         lua_remove( L, 1 );
         }
 
-    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
     int res = G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     for ( int i = 0; i < argc; i++ )

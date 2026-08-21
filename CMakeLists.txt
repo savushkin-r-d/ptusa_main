@@ -113,6 +113,7 @@ add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ToluaCopyIfDifferent.cmake")
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -206,18 +207,18 @@ elseif(WIN32)
                PAC_control_projects/main_control_prg/version.rc)
     endif()
 
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
-        COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
-        COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
-        COMMAND toluapp -n OPC_UA -o PAC/common/OPCUA_tolua.cpp PAC/common/toloa++/pkg/OPC_UA.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    regenerate_tolua_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp"
+        PAC_dev
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh")
+    regenerate_tolua_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp"
+        IOT_dev
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh")
+    regenerate_tolua_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp"
+        OPC_UA
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh")
 endif()
 
 if(NOT ARP_DEVICE)
@@ -293,7 +294,6 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
@@ -436,7 +436,7 @@ if (WIN32)
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes \(default: true\)
       --read_only_io     Read only from I\\O nodes \(default: true\)
@@ -454,7 +454,7 @@ else()
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes
       --read_only_io     Read only from I\\O nodes
@@ -495,8 +495,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
-        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
-
+        PASS_REGULAR_EXPRESSION "Error: Script file 'main\.plua1' does not exist.")
 
     add_test(NAME Busted-test COMMAND lua
                 -e "${LUA_BUSTED_PATH_INIT_CMD}"
@@ -542,6 +541,37 @@ endif()
 
 include(GoogleTest)
 
+set(STDOUT_CAPTURE_LOCKED_FILTER
+	"io_device.get_AO:"
+	"io_device.get_AO_read_data:"
+
+	"dev_stub.print:"
+
+	"analog_io_device.set_cmd:"
+
+	"watchdog.set_property:"
+
+	"device_communicator.print:"
+
+	"action.print:"
+
+	"operation_state.print:"
+	"operation_state.to_step:"
+	"operation.on_extra_step_debug_output:"
+	"operation.evaluate_from_run_to_pause:"
+
+	"wash_action.print:"
+
+	"PAC_critical_errors_manager.set_global_error:"
+
+	"uni_io_manager.write_outputs:"
+
+	"tech_object.set_mode:"
+
+    "project_manager.proc_main_params:"
+    "project_manager.lua_load_configuration:"
+	"project_manager.apply_opc_mode:")
+
 set(TCP_SOCKET_LOCKED_FILTER
     "tcp_communicator.evaluate:"
 	"tcp_communicator.recvtimeout:"
@@ -551,15 +581,18 @@ set(TCP_SOCKET_LOCKED_FILTER
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
 	"LuaManagerTest.init_success:"
-    "PAC_critical_errors_manager.set_global_error:"
-	"project_manager.proc_main_params:"
-	"project_manager.lua_load_configuration:")
+    "PAC_critical_errors_manager.set_global_error:")
+
+# Тесты, которые используют CaptureStdout() - выполняются последовательно
+string(REPLACE ";" "" STDOUT_CAPTURE_LOCKED_FILTER_STR
+    "${STDOUT_CAPTURE_LOCKED_FILTER}")
 
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
+
 set(UNLOCKED_FILTER_STR
-	"*-${TCP_SOCKET_LOCKED_FILTER_STR}cipline_tech_object.save_device:")
+	"-${TCP_SOCKET_LOCKED_FILTER_STR}${STDOUT_CAPTURE_LOCKED_FILTER_STR}cipline_tech_object.save_device")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test
@@ -570,6 +603,13 @@ gtest_discover_tests(main_test
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER "cipline_tech_object.save_device"
+    PROPERTIES RUN_SERIAL 1)
+
+# Тесты, которые захватывают stdout - выполняются последовательно
+# (без параллелизма, чтобы избежать гонки на stdout)
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${STDOUT_CAPTURE_LOCKED_FILTER_STR}
     PROPERTIES RUN_SERIAL 1)
 
 # Discover all remaining tests.

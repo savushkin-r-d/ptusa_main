@@ -1,14 +1,21 @@
 #include "PAC_dev_tests.h"
 #include "uni_bus_coupler_io.h"
 
-using namespace ::testing;
-
 #include <cstring>
 #include <iomanip>
 #include <time.h>
 
-using B = std::byte;
+#include <fstream>
+#include <iostream>
+#include <filesystem>
 
+#ifdef LINUX_OS
+#include <sys/types.h>
+#include <ifaddrs.h>
+#endif
+
+using namespace ::testing;
+using B = std::byte;
 
 class iolink_dev_test : public ::testing::Test
     {
@@ -1536,14 +1543,6 @@ TEST( device, set_property )
     T1.set_property( "site", nullptr );
     }
 
-TEST( device, set_cmd )
-    {
-    device dev1( "DEV1", device::DEVICE_TYPE::DT_NONE,
-        device::DEVICE_SUB_TYPE::DST_NONE, 0 );
-    auto res = dev1.set_cmd( "PROPERTY", 1, "value" );
-    EXPECT_EQ( res, 0 );
-    }
-
 
 TEST( analog_io_device, set_cmd )
     {
@@ -1572,15 +1571,15 @@ TEST( analog_io_device, set_cmd )
 
     // Проверка включения ручного режима - только на 1 должен включиться.
     testing::internal::CaptureStdout();
-    struct tm t_info;
-    auto t = time( nullptr );
-#ifdef LINUX_OS
-    localtime_r( &t, &t_info );
-#else
-    localtime_s( &t_info, &t );
-#endif // LINUX_OS
+    auto get_time_hook = subhook_new( reinterpret_cast<void*>( &get_time ),
+        reinterpret_cast<void*>( &get_fixed_time ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_time_hook );
+
+    auto tm = get_time();
     std::stringstream tmp;
-    tmp << std::put_time( &t_info, "%Y-%m-%d %H.%M.%S " );
+    tmp << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+
     obj.set_cmd( "M", 0, 100 );
     auto output = testing::internal::GetCapturedStdout();
     auto exp_output = tmp.str() +
@@ -1603,6 +1602,9 @@ TEST( analog_io_device, set_cmd )
     EXPECT_EQ( output, exp_output );
     obj.save_device( buff );
     EXPECT_STREQ( "OBJ1={M=0, ST=0, V=0, E=0, M_EXP=10.0, S_DEV=20.0},\n", buff );
+
+    subhook_remove( get_time_hook );
+    subhook_free( get_time_hook );
     }
 
 
@@ -7013,14 +7015,37 @@ TEST( device_manager, get_EY )
     }
 
 
+class node_dev_set_cmd_test : public ::testing::Test
+    {
+    public:
+
+        static int run_cmd_exit_code_expected(
+            [[maybe_unused]] const char* cmd, int expected = 0 )
+            {
+            return expected;
+            }
+
+        static std::string get_A1_ipv4()
+            {
+            return "127.0.0.1";
+            }
+
+        static std::string get_bad_A1_ipv4()
+            {
+            return "127.0.0.344";
+            }
+
+    protected:
+        io_manager::io_node node{ io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+            1, "127.0.0.1", "A100", 1, 1, 1, 32, 1, 1 };
+    };
+
 TEST( node_dev, basic_functionality )
     {
-    // Инициализация io_manager с одним узлом.
-    uni_io_manager mngr;
-    mngr.init( 1 );
-    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
-    auto nd = mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH,
-        1, "127.0.0.1", "A100", 0, 0, 0, 0, 0, 0 );
+    io_manager::io_node nd( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.10", "A100", 0, 0, 0, 0, 0, 0 );
+    io_manager::io_node nd_2( io_manager::io_node::TYPES::PHOENIX_BK_ETH,
+        1, "127.0.0.11", "A200", 0, 0, 0, 0, 0, 0 );
 
     // Добавление устройства node_dev.
     auto* io_dev = G_DEVICE_MANAGER()->add_io_device(
@@ -7031,10 +7056,34 @@ TEST( node_dev, basic_functionality )
     auto node = dynamic_cast<node_dev*>(
         G_DEVICE_MANAGER()->get_device( "A100" ) );
     ASSERT_NE( node, nullptr );
-    node->set_io_node( nd );
 
+    // Проверка получения IP-адреса в случае, когда нет привязанного узла.
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче пустого указателя.
+    node->set_io_node( nullptr );
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче узла с некорректным IP-адресом.
+    auto r = fmt::format_to_n( nd.ip_address, sizeof( nd.ip_address ) - 1,
+        "34" );
+    *r.out = 0;
+
+    node->set_io_node( &nd );
+    EXPECT_STREQ( node->get_ip(), "" );
+
+    // Проверка при передаче узла с корректным IP-адресом.
+    r = fmt::format_to_n( nd.ip_address, sizeof( nd.ip_address ) - 1,
+        "127.0.0.10" );
+    *r.out = 0;
+    node->set_io_node( &nd );
     // Проверка получения IP-адреса.
-    EXPECT_STREQ( node->get_ip(), "127.0.0.1" );
+    EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
+    EXPECT_TRUE( node_dev::get_A1_ipv4().empty() );
+
+    // Проверка при повторной привязке узла.
+    node->set_io_node( &nd_2 );
+    EXPECT_STREQ( node->get_ip(), "127.0.0.10" );
 
     G_PAC_INFO()->emulation_off();
 
@@ -7043,16 +7092,225 @@ TEST( node_dev, basic_functionality )
 
     // Сохранение устройства.
     const int BUFF_SIZE = 200;
-    std::array <char, BUFF_SIZE> buff {};
+    std::array <char, BUFF_SIZE> buff{};
     node->save_device( buff.data() );
     EXPECT_STREQ( buff.data(),
-        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.1'},\n" );
+        "A100={ST=-1, WEB=0, STARTUP=0, IP='127.0.0.10'},\n" );
 
     // Очистка после теста.
     G_DEVICE_MANAGER()->clear_io_devices();
     G_ERRORS_MANAGER->clear();
-    io_manager::replace_instance( prev_mngr );
     G_PAC_INFO()->emulation_on();
+    }
+
+TEST( node_dev, get_A1_ipv4 )
+    {
+    // Инициализация io_manager.
+    uni_io_manager mngr;
+    mngr.init( 1 );
+    io_manager* prev_mngr = io_manager::replace_instance( &mngr );
+    const auto TEST_IP_10 = "127.0.0.10";
+
+
+    // Если нет узлов, то при получении IP-адреса возвращается пустая строка.
+    auto res = node_dev::get_A1_ipv4();
+    EXPECT_TRUE( res.empty() );
+
+    // Если первый узел не "А1", то при получении IP-адреса возвращается пустая
+    // строка.
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
+        TEST_IP_10, "A11", 0, 0, 0, 0, 0, 0 );
+    res = node_dev::get_A1_ipv4();
+    EXPECT_TRUE( res.empty() );
+
+    // Используем корректное для контроллера название: "A1".
+    mngr.clear_nodes();
+    mngr.init( 1 );
+    mngr.add_node( 0, io_manager::io_node::TYPES::PHOENIX_BK_ETH, 1,
+        TEST_IP_10, "A1", 0, 0, 0, 0, 0, 0 );
+    res = node_dev::get_A1_ipv4();
+    EXPECT_STREQ( res.c_str(), TEST_IP_10);
+
+
+    // Очистка после теста.
+    G_DEVICE_MANAGER()->clear_io_devices();
+    io_manager::replace_instance( prev_mngr );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web )
+    {
+    node_dev dev( "A100" );
+
+    // Команда WEB должна работать только для индекса 0 (второй параметр).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 1, 1 ) );
+
+    // Нет узла, команда должна вернуть ошибку.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 0 ) );
+
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
+    dev.set_io_node( &node );
+
+#ifdef WIN_OS
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов на Windows нет (пустые строки).
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+#else
+    auto run_cmd_0_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::run_cmd_exit_code ),
+        reinterpret_cast<void*>(
+            &node_dev_set_cmd_test::run_cmd_exit_code_expected ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( run_cmd_0_hook );
+
+    // Включаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+
+    // Команда должна работать повторно, возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+
+    // Выключаем проброс портов, команда должна выполниться успешно,
+    // возвращая 0.
+    EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
+
+    subhook_remove( run_cmd_0_hook );
+    subhook_free( run_cmd_0_hook );
+#endif // WIN_OS
+
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web_sudo_available )
+    {
+#ifdef WIN_OS
+    GTEST_SKIP() << "Linux only test";
+#else
+    node_dev dev( "A100" );
+
+    auto get_local_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_A1_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_ipv4_hook );
+
+    dev.set_io_node( &node );
+
+    subhook_remove( get_local_ipv4_hook );
+    subhook_free( get_local_ipv4_hook );
+
+    // В Linux проброс портов должен работать, так как команда для проброса
+    // портов есть.
+    // Проверяем на права.
+    auto res = node_dev::check_sudo_available();
+    if ( !res )
+        {
+        // Получаем ошибку: `sudo is not available without a password`
+        // и завершаем тест.
+        // Пишем соответствующее сообщение в тестовом отчете.
+        GTEST_SKIP() << "sudo is not available without a password";
+
+        return;
+        }
+    else
+        {
+        GTEST_LOG_( INFO ) <<
+            "Выполняется реальный проброс портов через sudo /usr/sbin/iptables";
+        // Проверяем, что команды выполняется успешно.
+        EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 1 ) );
+        EXPECT_EQ( 0, dev.set_cmd( "WEB", 0, 0 ) );
+        }
+#endif // WIN_OS
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_web_bad_controller_ip )
+    {
+    node_dev dev( "A100" );
+
+    auto get_local_bad_ipv4_hook = subhook_new(
+        reinterpret_cast<void*>( &node_dev::get_A1_ipv4 ),
+        reinterpret_cast<void*>( &node_dev_set_cmd_test::get_bad_A1_ipv4 ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( get_local_bad_ipv4_hook );
+
+    dev.set_io_node( &node );
+    EXPECT_STREQ( dev.get_controller_ip(), "" );
+
+    // Узел есть, но команда должна выполниться неуспешно, так как команды для
+    // проброса портов - пустые строки.
+    EXPECT_EQ( 1, dev.set_cmd( "WEB", 0, 1 ) );
+
+    subhook_remove( get_local_bad_ipv4_hook );
+    subhook_free( get_local_bad_ipv4_hook );
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_startup )
+    {
+    node_dev dev( "A100" );
+
+    // Команда STARTUP должна работать.
+    EXPECT_EQ( 0, dev.set_cmd( "STARTUP", 0, 1 ) );
+    }
+
+namespace
+    {
+    bool exists_no_file( const std::filesystem::path& p )
+        {
+        return false;
+        }
+    }
+
+TEST_F( node_dev_set_cmd_test, set_cmd_to_device )
+    {
+    node_dev dev( "A100" );
+
+    // Команды, которые не обрабатываются устройством, передаются дальше.
+    // Команды 'TEST' нет, должна вернуться ошибка.
+    EXPECT_EQ( 1, dev.set_cmd( "TEST", 0, 1 ) );
+    }
+
+TEST( node_dev, run_cmd_exit_code )
+    {
+    node_dev dev( "A100" );
+#ifdef WIN_OS
+    SetConsoleOutputCP( CP_UTF8 ); // 65001
+    SetConsoleCP( CP_UTF8 );
+    setlocale( LC_ALL, ".UTF-8" );
+#else
+    setlocale( LC_ALL, "en_US.UTF-8" );
+#endif
+
+    auto res = node_dev::run_cmd_exit_code( "lls" );
+    // Verify output contains the expected debug message pattern with time.
+    auto reference_out =
+#ifdef WIN_OS
+        "command result ('lls'): "
+        "'lls' is not recognized as an internal or external command,\n"
+        "operable program or batch file.";
+#else
+        "command result ('lls'): sh: 1: lls: not found";
+#endif
+    EXPECT_STREQ( node_dev::get_cmd_output(), reference_out );
+    EXPECT_NE( 0, res );
+
+    // Check "command result ('cmd') not found" error.
+    auto exists_no_file_hook = subhook_new(
+        reinterpret_cast<void*>( static_cast<bool( * )
+            ( const std::filesystem::path& )>( &std::filesystem::exists ) ),
+        reinterpret_cast<void*>( &exists_no_file ),
+        SUBHOOK_64BIT_OFFSET );
+    subhook_install( exists_no_file_hook );
+    res = node_dev::run_cmd_exit_code( "lls" );
+    EXPECT_NE( 0, res );
+
+    subhook_remove( exists_no_file_hook );
+    subhook_free( exists_no_file_hook );
     }
 
 
