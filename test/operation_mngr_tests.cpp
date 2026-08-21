@@ -697,13 +697,13 @@ TEST( operation, check_max_step_time_utf8_truncation )
 
 TEST( operation, operator_at )
 	{
-	char* res = 0;
+    std::byte* res = nullptr;
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
 
 	EXPECT_CALL( *par_mock, init( _ ) );
 	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+	EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
 		.Times( AtLeast( 2 ) )
 		.WillRepeatedly( Return( res ) );
 

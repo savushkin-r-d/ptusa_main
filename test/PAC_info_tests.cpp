@@ -79,6 +79,10 @@ TEST( PAC_info, set_cmd )
     EXPECT_TRUE( G_OPCUA_SERVER.get_server() );
     G_OPCUA_SERVER.shutdown();
 
+    auto ret = G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::FORCE_SAVE_PARAMS ) );
+    EXPECT_EQ( 0, ret );
+
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );
     EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 0 );
@@ -182,6 +186,8 @@ TEST( PAC_info, save_device )
         "\tNODES_COMM_ERROR=0,\n"
         "\tWATCHDOG_ERROR=0,\n"
         "\tCOMMUN_ERROR=0,\n"
+        "\tPARAMS_CHANGE_COUNTER=1,\n"
+        "\tPARAMS_SAVE_COUNTER=0,\n"
         "\t}\n";
     char buff[ MAX_SIZE ] = { 0 };
 
@@ -226,6 +232,8 @@ TEST( PAC_info, save_device )
             "\tNODES_COMM_ERROR=0,\n"
             "\tWATCHDOG_ERROR=0,\n"
             "\tCOMMUN_ERROR=0,\n"
+            "\tPARAMS_CHANGE_COUNTER=1,\n"
+            "\tPARAMS_SAVE_COUNTER=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1010 );
     G_PAC_INFO()->eval();
