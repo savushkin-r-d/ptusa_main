@@ -11,6 +11,10 @@ set(LMDB_SOURCES
     ${LMDB_ROOT}/midl.c
 )
 
+if(MINGW)
+    add_compile_options(-Wno-error=incompatible-pointer-types)
+endif()
+
 option(LMDB_ENABLE_CRYPTO "Build LMDB crypto support with libsodium" OFF)
 
 if (LMDB_ENABLE_CRYPTO)
