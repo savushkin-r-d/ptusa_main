@@ -51,6 +51,8 @@ class valve : public digital_io_device
         /// @brief Получение значения выключенного состояния.
         bool is_closed() const;
 
+        void set_fb_state( bool new_on_fb, bool new_off_fb );
+
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value() const;
 
@@ -205,9 +207,6 @@ class valve_DO1 : public valve
 
         /// @brief Получение состояния клапана без учета обратной связи.
         VALVE_STATE get_valve_state() const override;
-
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state() const override;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления.
@@ -218,9 +217,6 @@ class valve_DO2 : public valve
 
         /// @brief Получение состояния клапана без учета обратной связи.
         VALVE_STATE get_valve_state() const override;
-
-        /// @brief Получение состояния обратной связи.
-        bool get_fb_state() const override;
 
         int  get_state() const override;
         void direct_on() override;

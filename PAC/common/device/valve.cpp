@@ -26,12 +26,6 @@ valve::VALVE_STATE valve_DO2::get_valve_state() const
     return (VALVE_STATE)get_state();
     }
 //-----------------------------------------------------------------------------
-/// @brief Получение состояния обратной связи.
-bool valve_DO2::get_fb_state() const
-    {
-    return true;
-    }
-//-----------------------------------------------------------------------------
 int valve_DO2::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return valve::get_state();
@@ -44,6 +38,7 @@ int valve_DO2::get_state() const
 //-----------------------------------------------------------------------------
 void valve_DO2::direct_on()
     {
+    set_fb_state( true, false );
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
     set_DO( DO_INDEX_1, 0 );
@@ -52,6 +47,7 @@ void valve_DO2::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO2::direct_off()
     {
+    set_fb_state( false, true );
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
     set_DO( DO_INDEX_1, 1 );
@@ -334,6 +330,12 @@ bool valve::is_closed() const
     return get_off_fb_value() > 0;
     }
 //-----------------------------------------------------------------------------
+void valve::set_fb_state( bool new_on_fb, bool new_off_fb )
+    {
+    on_fb = new_on_fb;
+    off_fb = new_off_fb;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Получение значения обратной связи на включенное состояние.
 int valve::get_on_fb_value() const
     {
@@ -394,6 +396,7 @@ valve_DO1_DI1_off::valve_DO1_DI1_off( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_off::direct_on()
     {
+    set_fb_state( true, false );
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_on();
 
     if ( auto o = get_DO( DO_INDEX ); 0 == o )
@@ -405,6 +408,7 @@ void valve_DO1_DI1_off::direct_on()
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_off::direct_off()
     {
+    set_fb_state( false, true );
     if ( G_PAC_INFO()->is_emulator() ) return valve::direct_off();
 
     if ( auto o = get_DO( DO_INDEX ); o != 0 )
@@ -449,7 +453,9 @@ int valve_DO1_DI1_off::get_off_fb_value() const
 //-----------------------------------------------------------------------------
 int valve_DO1_DI1_off::get_on_fb_value() const
     {
-    return false;
+    if ( G_PAC_INFO()->is_emulator() ) return valve::get_on_fb_value();
+
+    return !get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
