@@ -133,15 +133,6 @@ class device : public i_DO_AO_device, public par_device
         /// @param val  - значение.
         int set_cmd( const char* prop, u_int idx, double val ) override;
 
-        /// @brief Выполнение команды.
-        ///
-        /// Запись в свойство объекта строки.
-        ///
-        /// @param prop - свойство объекта.
-        /// @param idx  - индекс свойства.
-        /// @param val  - значение.
-        int set_cmd( const char* prop, u_int idx, const char* val ) override;
-
         /// @brief Сохранение устройства в виде скрипта Lua.
         ///
         /// @param buff [out] - буфер записи строки.

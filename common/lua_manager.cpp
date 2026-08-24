@@ -84,7 +84,6 @@ const char *FILES[ FILE_CNT ] =
     "main.io.lua",
     "main.objects.lua",
     "main.modbus_srv.lua",
-    "main.profibus.lua",
     "main.restrictions.lua",
     };
 //-----------------------------------------------------------------------------
@@ -124,36 +123,22 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         G_LOG->debug( "Init Lua..." );
         }
 
-    sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
-    G_LOG->write_log( i_log::P_NOTICE );
+    G_LOG->notice( "script_name = \"%s\"",
+        std::filesystem::path( script_name ).make_preferred().u8string().c_str() );
 
     std::string dir_str( dir );
     std::string sys_dir_str( sys_dir );
     std::string extra_dirs_str( extra_dirs );
 
 
+    G_LOG->notice( "current working directory: \"%s\"",
+        std::filesystem::current_path().u8string().c_str() );
     if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
         {
-        G_LOG->notice( "current working directory: \"%s\"",
-            std::filesystem::current_path().u8string().c_str() );
-
         G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
-            dir_str.c_str(), sys_dir_str.c_str(), extra_dirs_str.c_str() );
-        }
-
-    if ( !dir_str.empty() && dir_str.back() != '\\' && dir_str.back() != '/' )
-        {
-        dir_str += std::filesystem::path::preferred_separator;
-        }
-    if ( !sys_dir_str.empty() &&
-        sys_dir_str.back() != '\\' && sys_dir_str.back() != '/' )
-        {
-        sys_dir_str += std::filesystem::path::preferred_separator;
-        }
-    if ( !extra_dirs_str.empty() &&
-        extra_dirs_str.back() != '\\' && extra_dirs_str.back() != '/' )
-        {
-        extra_dirs_str += std::filesystem::path::preferred_separator;
+            std::filesystem::path( dir ).make_preferred().u8string().c_str(),
+            std::filesystem::path( sys_dir ).make_preferred().u8string().c_str(),
+            std::filesystem::path( extra_dirs ).make_preferred().u8string().c_str() );
         }
 
     if ( 0 == lua_state )
@@ -694,8 +679,8 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         }
     else
         {
-        sprintf(path, "%s%s",
-            G_PROJECT_MANAGER->path.c_str(), FILES[script_n]);
+        sprintf( path, "%s%s",
+            G_PROJECT_MANAGER->path.c_str(), FILES[ script_n ] );
         }
 
     res = check_file( path, err_str );

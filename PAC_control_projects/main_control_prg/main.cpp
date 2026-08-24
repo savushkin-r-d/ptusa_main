@@ -2,8 +2,6 @@
 /// @c LINUX_OS         - компиляция для ОС Linux.
 /// @par Тип PAC:
 /// @c PAC_PC           - PAC на PC с ОС Linux.
-/// @c PAC_WAGO_750_860 - PAC Wago 750-860.
-///
 /// @c WIN_OS           - компиляция для ОС Windows.
 ///
 
@@ -31,11 +29,7 @@
 #endif
 
 #include "log.h"
-#ifdef PAC_WAGO_750_860r
-#include "l_log.h"
-#endif
 
-#include "profibus_slave.h"
 #include "iot_common.h"
 #include "OPCUAServer.h"
 
@@ -100,12 +94,6 @@ int main( int argc, const char *argv[] )
     signal(SIGILL, stopHandler);
     signal(SIGSEGV, stopHandler);
 
-#ifdef PAC_WAGO_750_860
-    log_mngr::lg = new l_log();
-#endif
-
-    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
-
     //-Работа с параметрами командной строки.
     int res = G_PROJECT_MANAGER->proc_main_params( argc, argv_utf8 );
     if ( res )
@@ -127,13 +115,6 @@ int main( int argc, const char *argv[] )
         }
 
     G_PROJECT_MANAGER->apply_opc_mode( false );
-
-#ifdef USE_PROFIBUS
-    if ( G_PROFIBUS_SLAVE()->is_active() )
-        {
-        G_PROFIBUS_SLAVE()->init();
-        }
-#endif // USE_PROFIBUS
 
 #if defined WIN_OS
     for ( int i = 0; i < argc; i++ )
