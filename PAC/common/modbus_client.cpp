@@ -10,10 +10,8 @@
 modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
     uint32_t exchangetimeout, const char* client_name )
     {
-    if ( client_name )
-        {
-        fmt::format_to_n( name, sizeof( client_name ) - 1, "{}", client_name );
-        }
+    fmt::format_to_n( name, sizeof( name ) - 1, "{}",
+        client_name ? client_name : fmt::to_string( id ) );
 
     if ( G_DEBUG )
         {

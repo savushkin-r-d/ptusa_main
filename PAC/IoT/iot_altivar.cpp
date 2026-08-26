@@ -104,6 +104,8 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
     const char* motor_name ) :
 	type(type)
 	{
+    fmt::format_to_n( name, sizeof( name ) - 1, "{}", motor_name );
+
 	mc = new modbus_client(id, (char*)ip, port, exchangetimeout, name );
 	strcpy(ip_address, ip);
 	configure = true;
@@ -124,11 +126,6 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
 	frq_max = FRQ_MAX_SETTING;
 	amperage = 0;
 	remote_state = 0;
-
-    if ( motor_name )
-        {
-        fmt::format_to_n( name, sizeof( motor_name ) - 1, "{}", motor_name );
-        }
     }
 
 altivar_node::~altivar_node()
