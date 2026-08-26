@@ -1068,7 +1068,10 @@ public:
         return atv;
         }
 
+#ifndef  PTUSA_TEST
 private:
+#endif // ! PTUSA_TEST
+
     altivar_node* atv = nullptr;
 
     float freq = .0f;

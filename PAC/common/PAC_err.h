@@ -45,11 +45,6 @@
 class PAC_critical_errors_manager
     {
     public:
-        enum CONSTANTS
-            {
-            ALARM_CLASS_PRIORITY = 100,
-            };
-
         enum ALARM_CLASS          ///< Класс тревоги.
             {
             AC_NO_CONNECTION = 1, ///< Ошибка связи.
@@ -87,7 +82,7 @@ class PAC_critical_errors_manager
 
         void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned int param );
+            unsigned int param, const char* description = "" );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned int param, bool is_print_msg = true );
 
@@ -114,7 +109,8 @@ class PAC_critical_errors_manager
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class,
-            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set );
+            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set,
+            const char* description = nullptr );
 
 
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
@@ -124,9 +120,13 @@ class PAC_critical_errors_manager
             int             err_class;     ///< Класс ошибки.
             unsigned int    err_sub_class; ///< Подкласс ошибки.
             unsigned int    param;         ///< Параметр ошибки.
+            int             priority;      ///< Приоритет ошибки.
+            const char*     description;   ///< Описание ошибки.
 
             critical_error( int err_class = 0, u_int err_sub_class = 0,
-                u_int param = 0 );
+                u_int param = 0,
+                int priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION,
+                const char* description = "" );
             };
 
         PAC_critical_errors_manager&

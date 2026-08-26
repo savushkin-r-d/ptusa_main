@@ -21,6 +21,7 @@ class i_iot_node
 		virtual unsigned long set_counter(unsigned long value, int index = 0);
 		virtual int get_counter(int index = 0);
 
-		i_iot_node();
-		virtual ~i_iot_node();
+        virtual const char* get_name() const = 0;
+
+		virtual ~i_iot_node() = default;
 	};

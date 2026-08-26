@@ -73,7 +73,7 @@ void PAC_critical_errors_manager::show_errors() const
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
-    ALARM_SUBCLASS p1, unsigned int p2 )
+    ALARM_SUBCLASS p1, unsigned int p2, const char* description )
     {
     int b = 0;
 
@@ -91,10 +91,16 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
 
     if ( b == 0 )
         {
-        sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, true ) );
+        sprintf( G_LOG->msg, "%s",
+            get_alarm_descr( eclass, p1, p2, true, description ) );
         G_LOG->write_log( i_log::P_ERR );
 
-        errors.emplace_back( eclass, p1, p2 );
+        auto priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION;
+        if ( p1 == AS_MODBUS_DEVICE )
+            {
+            priority = ALARM_CLASS_PRIORITY::P_ALARM;
+            }
+        errors.emplace_back( eclass, p1, p2, priority, description );
         errors_id++;
         }
     }
@@ -144,13 +150,14 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 
         res += sprintf( str + res, "\tdescription = \"%s\",\n",
             get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
-            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param, true ) );
+            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param, true,
+                errors[ i ].description ));
 
         res += sprintf( str + res, "\t%s\n", "type = AT_SPECIAL," );
         res += sprintf( str + res, "\t%s%s%s\n", "group = '",
             get_alarm_group(), "'," );
         res += sprintf( str + res, "\t%s%d%s\n", "priority = ",
-            ALARM_CLASS_PRIORITY, "," );
+            errors[ i ].priority, "," );
        res +=  sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
 
         //Для идентификации ошибок.
@@ -179,7 +186,8 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
-    ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set )
+    ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set,
+    const char* description )
     {
     const auto BUFF_SIZE = 200;
     static char tmp[ BUFF_SIZE ]{};
@@ -248,7 +256,8 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 
                 case AS_MODBUS_DEVICE:
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        " Modbus-device №{}", par );
+                        " c ModBus-устройством '{}'", description ? description :
+                        std::to_string( par ).c_str() );
                     break;
 
                 case AS_EASYSERVER:
@@ -298,9 +307,11 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::critical_error::critical_error( int err_class,
     u_int err_sub_class,
-    u_int param ) :err_class( err_class ),
-    err_sub_class( err_sub_class ),
-    param( param )
+    u_int param,
+    int priority,
+    const char* description ) :err_class( err_class ),
+    err_sub_class( err_sub_class ), param( param ),
+    priority( priority ), description( description )
     {
     }
 //-----------------------------------------------------------------------------

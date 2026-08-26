@@ -48,8 +48,11 @@ static void preset_read_area( modbus_client& cli, unsigned int address,
 class test_modbus_client : public modbus_client
     {
     public:
-        test_modbus_client( unsigned int id, const char* ip ) : modbus_client( id, ip )
-            {}
+        test_modbus_client( unsigned int id, const char* ip,
+            i_iot_node* m = nullptr ) :
+            modbus_client( id, ip, 502, 50, m )
+            {
+            }
 
         auto get_tcp_client()
             {
@@ -376,10 +379,14 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
 class ModbusClientConnectionStateTest : public ::testing::Test
     {
     protected:
-        test_modbus_client m_client{ 1, "127.0.0.1" };
+        motor_altivar m{ "M1", device::DEVICE_SUB_TYPE::M_ATV };
+        test_modbus_client *m_client;
 
         void SetUp() override
             {
+            m.set_string_property( "IP", "127.0.0.1" );
+            m_client = new test_modbus_client{ 1, "127.0.0.1", m.get_atv() };
+
             PAC_critical_errors_manager::get_instance()->reset_all_error();
             G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 1'000;
             DeltaMilliSecSubHooker::set_default_time();
@@ -387,6 +394,9 @@ class ModbusClientConnectionStateTest : public ::testing::Test
 
         void TearDown() override
             {
+            delete m_client;
+            m_client = nullptr;
+
             DeltaMilliSecSubHooker::set_default_time();
             PAC_critical_errors_manager::get_instance()->reset_all_error();
             }
@@ -394,7 +404,7 @@ class ModbusClientConnectionStateTest : public ::testing::Test
 
 TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
     {
-    EXPECT_EQ( m_client.get_prev_connected_state(),
+    EXPECT_EQ( m_client->get_prev_connected_state(),
         tcp_client::ACS_DISCONNECTED );
     }
 
@@ -404,28 +414,46 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 100;
 
     // Simulate connection established.
-    m_client.get_tcp_client()->set_connected_state(
+    m_client->get_tcp_client()->set_connected_state(
         tcp_client::ACS_CONNECTED );
-    m_client.get_async_result();
+    m_client->get_async_result();
 
-    EXPECT_EQ( m_client.get_prev_connected_state(),
+    EXPECT_EQ( m_client->get_prev_connected_state(),
         tcp_client::ACS_CONNECTED );
     EXPECT_FALSE( mngr->is_any_error() );
 
     // Simulate short disconnect: no error before timeout.
-    m_client.get_tcp_client()->set_connected_state(
+    m_client->get_tcp_client()->set_connected_state(
         tcp_client::ACS_DISCONNECTED );
     DeltaMilliSecSubHooker::set_millisec( 99 );
-    m_client.get_async_result();
+    m_client->get_async_result();
 
-    EXPECT_EQ( m_client.get_prev_connected_state(),
+    EXPECT_EQ( m_client->get_prev_connected_state(),
         tcp_client::ACS_DISCONNECTED );
     EXPECT_FALSE( mngr->is_any_error() );
 
     // Simulate timeout expiration.
     DeltaMilliSecSubHooker::set_millisec( 100 );
-    m_client.get_async_result();
+    m_client->get_async_result();
     EXPECT_TRUE( mngr->is_any_error() );
+
+    std::array<char, 500> buffer{};
+    u_int_2 id = 0;
+    PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
+        buffer.data(), id );
+
+    const auto REFERENCE_MSG =
+R"(	{
+	description = "1-2-1 : нет связи c ModBus-устройством 'M1'",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 250,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+)";
+
+    EXPECT_EQ( std::string( buffer.data() ), REFERENCE_MSG );
     }
 
 TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
@@ -434,9 +462,9 @@ TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
 
     // State stays disconnected -- prev should remain ACS_DISCONNECTED.
     DeltaMilliSecSubHooker::set_millisec( 999 );
-    m_client.get_async_result();
+    m_client->get_async_result();
 
-    EXPECT_EQ( m_client.get_prev_connected_state(),
+    EXPECT_EQ( m_client->get_prev_connected_state(),
         tcp_client::ACS_DISCONNECTED );
     EXPECT_FALSE( mngr->is_any_error() );
     }

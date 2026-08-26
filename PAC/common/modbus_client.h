@@ -1,10 +1,13 @@
 #ifndef modbus_client_h__
 #define modbus_client_h__
 #include "tcp_client.h"
+#include "iot_base.h"
 
 class modbus_client
     {
     protected:
+        i_iot_node* iot_node{};
+
         tcp_client* tcpclient;
         int modbus_expected_length;
         int modbus_async_result;
@@ -21,7 +24,8 @@ class modbus_client
         void check_connection_state_changed();
 
     public:
-        modbus_client(unsigned int id, const char* ip, unsigned int port = 502, uint32_t exchangetimeout = 50);
+        modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
+            uint32_t exchangetimeout = 50, i_iot_node* owner = nullptr );
         int get_id();
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);

@@ -4,7 +4,8 @@
 #include "PAC_err.h"
 #include "PAC_info.h"
 
-modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout )
+modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
+    uint32_t exchangetimeout, i_iot_node* owner ): iot_node( owner )
     {
     if ( G_DEBUG )
         {
@@ -521,11 +522,13 @@ void modbus_client::check_connection_state_changed()
         {
         G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
             tcpclient->get_id(), tcpclient->ip );
+
         auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
         pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id() );
+            tcpclient->get_id(),
+            iot_node ? iot_node->get_name() : "?" );
         is_disconnect_reported = true;
         }
 

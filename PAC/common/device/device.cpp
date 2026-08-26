@@ -2210,7 +2210,7 @@ void wages_eth::set_string_property( const char* field, const char* value )
         {
         int port = 1001;
         int id = 0;
-        weth = new iot_wages_eth( id, value, port );
+        weth = new iot_wages_eth( id, value, port, get_name() );
         }
     }
 
@@ -4327,7 +4327,8 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
             if (!atv)
                 {
-                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, get_article() );
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout,
+                    get_article(), get_name() );
                 atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
                 }
             }

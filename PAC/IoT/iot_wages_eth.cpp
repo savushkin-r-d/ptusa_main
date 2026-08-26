@@ -2,11 +2,16 @@
 #include <cstring>
 #include <cstdlib>
 
-iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port ) :
+iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip,
+    unsigned int port, const char* wages_name ) :
     tc( std::unique_ptr<tcp_client>( tcp_client::Create( ip, port, id, 0,
     static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ),
     static_cast<unsigned long> ( CONSTANTS::SEND_RECEIVE_TIMEOUT ) ) ) )
     {
+    if ( wages_name )
+        {
+        strncpy( name, wages_name, sizeof( name ) - 1 );
+        }
     }
 
 void iot_wages_eth::evaluate()
@@ -58,4 +63,9 @@ void iot_wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
     memcpy( tc->buff, new_value, size );
     status = new_status;
     convert_value();
+    }
+
+const char* iot_wages_eth::get_name() const
+    {
+    return name;
     }

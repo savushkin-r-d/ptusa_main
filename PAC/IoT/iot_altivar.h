@@ -10,8 +10,9 @@ class modbus_client;
 class altivar_node: public i_iot_node
 	{
 	public:
-		altivar_node(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout, int type);
-		~altivar_node();
+		altivar_node(unsigned int id, const char* ip, unsigned int port,
+            uint32_t exchangetimeout, int type, const char* name );
+		~altivar_node() override;
 		void Evaluate();
 		void Enable();
 		void Disable();
@@ -31,6 +32,8 @@ class altivar_node: public i_iot_node
 		char    ip_address[16];
 		void set_output_in_percent( float value );
 		float get_output_in_percent( );
+
+        const char* get_name() const override;
 
 		enum CFG_STEP
 			{
@@ -74,8 +77,10 @@ class altivar_node: public i_iot_node
             FRQ_MIN_SETTING = 10,
             FRQ_MAX_SETTING = 120
             };
+
     private:
 	    float frq_setpoint;
+        char name[ 50 ]{ '\0' };
 
 	protected:
 		modbus_client* mc;
@@ -101,7 +106,8 @@ class altivar_manager
 		virtual ~altivar_manager();
 
 		static altivar_manager* get_instance();
-		void add_node(const char* IP_address, unsigned int port, unsigned int timeout, const char* article);
+		void add_node(const char* IP_address, unsigned int port, unsigned int timeout,
+            const char* article, const char* motor_name );
 		altivar_node* get_node(const char* IP_address);
 		altivar_node* get_node(unsigned int id);
 		void evaluate();
