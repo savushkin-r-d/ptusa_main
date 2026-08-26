@@ -128,14 +128,14 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 
     if ( idx >= 0 )
         {
-        errors.erase( errors.begin() + idx );
-
         if ( is_print_msg )
             {
-            sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false ) );
+            sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false,
+                errors[ idx ].description ) );
             G_LOG->write_log( i_log::P_INFO );
             }
 
+        errors.erase( errors.begin() + idx );
         errors_id++;
         }
     }
@@ -256,7 +256,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 
                 case AS_MODBUS_DEVICE:
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        " c ModBus-устройством '{}'", description );
+                        " c ModBus-устройством '{}'", description  );
                     break;
 
                 case AS_EASYSERVER:
