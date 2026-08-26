@@ -533,7 +533,7 @@ void modbus_client::check_connection_state_changed()
         pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id(), name ? name : "?" );
+            tcpclient->get_id(), name );
         is_disconnect_reported = true;
         }
 

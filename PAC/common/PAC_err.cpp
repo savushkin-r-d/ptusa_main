@@ -256,8 +256,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 
                 case AS_MODBUS_DEVICE:
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        " c ModBus-устройством '{}'", description ? description :
-                        std::to_string( par ).c_str() );
+                        " c ModBus-устройством '{}'", description );
                     break;
 
                 case AS_EASYSERVER:

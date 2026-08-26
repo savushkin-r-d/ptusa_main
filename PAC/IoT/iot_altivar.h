@@ -80,6 +80,12 @@ class altivar_node: public i_iot_node
 	    float frq_setpoint;
         char name[ 50 ]{ '\0' };
 
+        // Explicitly delete the copy constructors.
+        altivar_node( const altivar_node& ) = delete;
+        altivar_node( altivar_node&& ) = delete;
+        altivar_node& operator=( const altivar_node& ) = delete;
+        altivar_node& operator=( altivar_node&& ) = delete;
+
 	protected:
 		modbus_client* mc;
 		bool configure;

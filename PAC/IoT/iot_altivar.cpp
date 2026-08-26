@@ -106,7 +106,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
 	{
     fmt::format_to_n( name, sizeof( name ) - 1, "{}", motor_name );
 
-	mc = new modbus_client(id, (char*)ip, port, exchangetimeout, name );
+    mc = new modbus_client( id, ip, port, exchangetimeout, name );
 	strcpy(ip_address, ip);
 	configure = true;
 	querystep = RUN_STEP_CHECK_CONFIG;
