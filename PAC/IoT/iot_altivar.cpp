@@ -130,7 +130,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
         }
     else
         {
-        snprintf( name, sizeof( name ), "ALTIVAR_%d", id );
+        snprintf( name, sizeof( name ) - 1, "ALTIVAR_%d", id );
         }
     }
 
