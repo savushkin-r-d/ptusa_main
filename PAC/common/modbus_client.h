@@ -6,7 +6,7 @@
 class modbus_client
     {
     protected:
-        i_iot_node* iot_node{};
+        char name[ 50 ]{};
 
         tcp_client* tcpclient;
         int modbus_expected_length;
@@ -25,7 +25,7 @@ class modbus_client
 
     public:
         modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
-            uint32_t exchangetimeout = 50, i_iot_node* owner = nullptr );
+            uint32_t exchangetimeout = 50, const char * name = nullptr );
         int get_id();
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);

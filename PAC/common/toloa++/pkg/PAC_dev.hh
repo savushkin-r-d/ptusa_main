@@ -1975,7 +1975,7 @@ class modbus_client
 
     public:
         modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
-            unsigned long exchangetimeout = 50 );
+            unsigned long exchangetimeout = 50, const char* name = nullptr );
 
         // Реализация функций протокола modbus.
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);

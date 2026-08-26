@@ -25,8 +25,6 @@ class iot_wages_eth : public i_iot_node
         void direct_set_tcp_buff( const char* new_value, size_t size,
             int new_status );
 
-        const char* get_name() const override;
-
     private:
         enum class CONSTANTS
             {
@@ -39,5 +37,5 @@ class iot_wages_eth : public i_iot_node
         float value = .0f;
         std::unique_ptr < tcp_client > tc;
 
-        char name[ 50 ]{ '\0' };
+        char name[ 50 ]{};
     };

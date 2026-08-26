@@ -1,6 +1,7 @@
 #include "iot_altivar.h"
 #include "modbus_client.h"
 
+#include "fmt/format.h"
 
 altivar_manager::~altivar_manager()
 	{
@@ -103,7 +104,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
     const char* motor_name ) :
 	type(type)
 	{
-	mc = new modbus_client(id, (char*)ip, port, exchangetimeout, this );
+	mc = new modbus_client(id, (char*)ip, port, exchangetimeout, name );
 	strcpy(ip_address, ip);
 	configure = true;
 	querystep = RUN_STEP_CHECK_CONFIG;
@@ -126,11 +127,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
 
     if ( motor_name )
         {
-        strncpy( name, motor_name, sizeof( name ) - 1 );
-        }
-    else
-        {
-        snprintf( name, sizeof( name ) - 1, "ALTIVAR_%d", id );
+        fmt::format_to_n( name, sizeof( motor_name ) - 1, "{}", motor_name );
         }
     }
 
@@ -397,8 +394,3 @@ float altivar_node::get_output_in_percent( )
 	{
 	return frq_setpoint / frq_max * 100.0f;
 	}
-
-const char* altivar_node::get_name() const
-    {
-    return name;
-    }

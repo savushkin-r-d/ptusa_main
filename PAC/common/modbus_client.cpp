@@ -4,12 +4,20 @@
 #include "PAC_err.h"
 #include "PAC_info.h"
 
+#include "fmt/format.h"
+
+
 modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
-    uint32_t exchangetimeout, i_iot_node* owner ): iot_node( owner )
+    uint32_t exchangetimeout, const char* client_name )
     {
+    if ( client_name )
+        {
+        fmt::format_to_n( name, sizeof( client_name ) - 1, "{}", client_name );
+        }
+
     if ( G_DEBUG )
         {
-        printf("Create modbus client with ip = %s\n\r", ip);
+        printf("Create modbus client '%s' with ip = %s\n\r", ip, name );
         }
     tcpclient = tcp_client::Create( ip, port, id, PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout  );
     zero_output_buff();
@@ -527,8 +535,7 @@ void modbus_client::check_connection_state_changed()
         pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id(),
-            iot_node ? iot_node->get_name() : "?" );
+            tcpclient->get_id(), name ? name : "?" );
         is_disconnect_reported = true;
         }
 

@@ -49,8 +49,8 @@ class test_modbus_client : public modbus_client
     {
     public:
         test_modbus_client( unsigned int id, const char* ip,
-            i_iot_node* m = nullptr ) :
-            modbus_client( id, ip, 502, 50, m )
+            const char* const name = nullptr ) :
+            modbus_client( id, ip, 502, 50, name )
             {
             }
 
@@ -385,7 +385,7 @@ class ModbusClientConnectionStateTest : public ::testing::Test
         void SetUp() override
             {
             m.set_string_property( "IP", "127.0.0.1" );
-            m_client = new test_modbus_client{ 1, "127.0.0.1", m.get_atv() };
+            m_client = new test_modbus_client{ 1, "127.0.0.1", m.get_name() };
 
             PAC_critical_errors_manager::get_instance()->reset_all_error();
             G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 1'000;

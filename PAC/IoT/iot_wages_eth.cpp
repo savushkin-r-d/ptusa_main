@@ -2,6 +2,8 @@
 #include <cstring>
 #include <cstdlib>
 
+#include "fmt/format.h"
+
 iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip,
     unsigned int port, const char* wages_name ) :
     tc( std::unique_ptr<tcp_client>( tcp_client::Create( ip, port, id, 0,
@@ -10,7 +12,7 @@ iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip,
     {
     if ( wages_name )
         {
-        strncpy( name, wages_name, sizeof( name ) - 1 );
+        fmt::format_to_n( name, sizeof( wages_name ) - 1, "{}", wages_name );
         }
     }
 
@@ -63,9 +65,4 @@ void iot_wages_eth::direct_set_tcp_buff( const char* new_value, size_t size,
     memcpy( tc->buff, new_value, size );
     status = new_status;
     convert_value();
-    }
-
-const char* iot_wages_eth::get_name() const
-    {
-    return name;
     }

@@ -33,8 +33,6 @@ class altivar_node: public i_iot_node
 		void set_output_in_percent( float value );
 		float get_output_in_percent( );
 
-        const char* get_name() const override;
-
 		enum CFG_STEP
 			{
 			CFG_STEP_INIT_OUTPUTS = 0,
