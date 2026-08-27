@@ -104,7 +104,8 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
     const char* motor_name ) :
 	type(type)
 	{
-    fmt::format_to_n( name.data(), name.size() - 1, "{}", motor_name );
+    fmt::format_to_n( name.data(), name.size() - 1, "{}",
+        motor_name ? motor_name : fmt::to_string( id ) );
 
     mc = std::make_unique < modbus_client>(
         id, ip, port, exchangetimeout, name.data() );

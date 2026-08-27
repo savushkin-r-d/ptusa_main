@@ -10,10 +10,8 @@ iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip,
     static_cast<unsigned int> ( CONSTANTS::BUFF_SIZE ),
     static_cast<unsigned long> ( CONSTANTS::SEND_RECEIVE_TIMEOUT ) ) ) )
     {
-    if ( wages_name )
-        {
-        fmt::format_to_n( name, sizeof( wages_name ) - 1, "{}", wages_name );
-        }
+    fmt::format_to_n( name.data(), name.size() - 1, "{}",
+        wages_name ? wages_name : fmt::to_string( id ) );
     }
 
 void iot_wages_eth::evaluate()

@@ -5609,6 +5609,9 @@ TEST( wages_eth, evaluate_io )
     w1.evaluate_io();
     EXPECT_EQ( 0, w1.get_value() );
 
+    // Корректное создание с именем в виде пустой строки.
+    iot_wages_eth w( 10, "127.0.0.2", 10000, nullptr );
+
     iot_wages_eth w2( 1, "127.0.0.1", 10000, "W2" );
 
     w2.evaluate();
