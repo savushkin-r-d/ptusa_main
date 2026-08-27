@@ -12,10 +12,11 @@ class modbus_client
         int modbus_expected_length;
         int modbus_async_result;
         unsigned char stationid;
-        unsigned int ormask;
-        unsigned int andmask;
+        unsigned int ormask{};
+        unsigned int andmask{ 0xFFFF };
+
         static const int write_buff_start = 13; //Начало буфера данных для операций записи
-        static const int read_buff_start = 9;  //Начало буфера данных для операций чтения
+        static const int read_buff_start = 9;   //Начало буфера данных для операций чтения
         int prev_connected_state; ///< Previous connection state for change detection.
         uint32_t disconnected_state_start_time; ///< Disconnect start time.
         bool is_disconnect_reported; ///< Disconnect event has been reported.
