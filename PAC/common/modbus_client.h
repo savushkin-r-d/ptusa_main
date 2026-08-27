@@ -1,25 +1,32 @@
 #ifndef modbus_client_h__
 #define modbus_client_h__
+#include <array>
 #include "tcp_client.h"
 #include "iot_base.h"
 
 class modbus_client
     {
     protected:
-        char name[ 50 ]{};
+        std::array<char, 50 > name{};
 
         tcp_client* tcpclient;
-        int modbus_expected_length;
-        int modbus_async_result;
-        unsigned char stationid;
-        unsigned int ormask{};
+        int modbus_expected_length{ 0 };
+        int modbus_async_result{ 0 };
+        unsigned char stationid{ 1 };
+        unsigned int ormask{ 0 };
         unsigned int andmask{ 0xFFFF };
 
-        static const int write_buff_start = 13; //Начало буфера данных для операций записи
-        static const int read_buff_start = 9;   //Начало буфера данных для операций чтения
-        int prev_connected_state; ///< Previous connection state for change detection.
-        uint32_t disconnected_state_start_time; ///< Disconnect start time.
-        bool is_disconnect_reported; ///< Disconnect event has been reported.
+        ///< Начало буфера данных для операций записи
+        static const int write_buff_start = 13;
+        ///< Начало буфера данных для операций чтения
+        static const int read_buff_start = 9;
+        ///< Previous connection state for change detection.
+        int prev_connected_state{ tcp_client::ACS_DISCONNECTED };
+
+        ///< Disconnect start time.
+        uint32_t disconnected_state_start_time{ get_millisec() };
+        ///< Disconnect event has been reported.
+        bool is_disconnect_reported{ false };
 
         void init_frame(unsigned int address, unsigned int value, unsigned int seventh_byte);
         void check_connection_state_changed();

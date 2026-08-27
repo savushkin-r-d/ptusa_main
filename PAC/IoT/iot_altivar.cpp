@@ -39,7 +39,7 @@ void altivar_manager::add_node(const char* IP_address, unsigned int port,
 	nodeip.append(std::to_string(port));
 	nodeip.append(" ");
 	nodeip.append(std::to_string(timeout));
-	altivar_node* new_node = new altivar_node(
+	auto new_node = new altivar_node(
         SOCKID_ALTIVAR + index, IP_address, port, timeout, type, name );
 	nodes.emplace(nodeip, new_node);
 	num_nodes.emplace(index, new_node);
@@ -104,9 +104,10 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
     const char* motor_name ) :
 	type(type)
 	{
-    fmt::format_to_n( name, sizeof( name ) - 1, "{}", motor_name );
+    fmt::format_to_n( name.data(), name.size() - 1, "{}", motor_name );
 
-    mc = new modbus_client( id, ip, port, exchangetimeout, name );
+    mc = std::make_unique < modbus_client>(
+        id, ip, port, exchangetimeout, name.data() );
 	strcpy(ip_address, ip);
 	configure = true;
 	querystep = RUN_STEP_CHECK_CONFIG;
@@ -127,11 +128,6 @@ altivar_node::altivar_node(unsigned int id, const char* ip,
 	amperage = 0;
 	remote_state = 0;
     }
-
-altivar_node::~altivar_node()
-	{
-	delete mc;
-	}
 
 void altivar_node::Evaluate()
 	{

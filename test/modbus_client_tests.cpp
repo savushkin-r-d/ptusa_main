@@ -1,6 +1,7 @@
 #include "modbus_client_tests.h"
 #include <array>
 #include <cstring>
+#include <memory>
 
 #include "tolua++.h"
 #include "PAC_dev_lua_tests.h" // содержит TOLUA_API int tolua_PAC_dev_open(lua_State*);
@@ -380,12 +381,13 @@ class ModbusClientConnectionStateTest : public ::testing::Test
     {
     protected:
         motor_altivar m{ "M1", device::DEVICE_SUB_TYPE::M_ATV };
-        test_modbus_client *m_client;
+        std::unique_ptr<test_modbus_client> m_client;
 
         void SetUp() override
             {
             m.set_string_property( "IP", "127.0.0.1" );
-            m_client = new test_modbus_client{ 1, "127.0.0.1", m.get_name() };
+            m_client = std::make_unique<test_modbus_client>(
+                1, "127.0.0.1", m.get_name() );
 
             PAC_critical_errors_manager::get_instance()->reset_all_error();
             G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 1'000;
@@ -394,9 +396,6 @@ class ModbusClientConnectionStateTest : public ::testing::Test
 
         void TearDown() override
             {
-            delete m_client;
-            m_client = nullptr;
-
             DeltaMilliSecSubHooker::set_default_time();
             PAC_critical_errors_manager::get_instance()->reset_all_error();
             }

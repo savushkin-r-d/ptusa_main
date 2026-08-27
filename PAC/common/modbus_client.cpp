@@ -7,24 +7,18 @@
 #include "fmt/format.h"
 
 
-modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
+modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port,
     uint32_t exchangetimeout, const char* client_name )
     {
-    fmt::format_to_n( name, sizeof( name ) - 1, "{}",
+    fmt::format_to_n( name.data(), name.size() - 1, "{}",
         client_name ? client_name : fmt::to_string( id ) );
 
-    if ( G_DEBUG )
-        {
-        printf("Create modbus client '%s' with ip = %s\n\r", ip, name );
-        }
-    tcpclient = tcp_client::Create( ip, port, id, PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout  );
+    G_LOG->debug( "Create Modbus client '%s' with IP = %s\n",
+        ip, name.data() );
+
+    tcpclient = tcp_client::Create( ip, port, id,
+        PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout );
     zero_output_buff();
-    modbus_async_result = 0;
-    modbus_expected_length = 0;
-    stationid = 1;
-    prev_connected_state = tcp_client::ACS_DISCONNECTED;
-    disconnected_state_start_time = get_millisec();
-    is_disconnect_reported = false;
     }
 
 modbus_client::~modbus_client()
@@ -533,7 +527,7 @@ void modbus_client::check_connection_state_changed()
         pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
             PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id(), name );
+            tcpclient->get_id(), name.data() );
         is_disconnect_reported = true;
         }
 

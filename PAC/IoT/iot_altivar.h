@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <array>
+#include <memory>
+
 class modbus_client;
 
 class altivar_node: public i_iot_node
@@ -12,7 +15,7 @@ class altivar_node: public i_iot_node
 	public:
 		altivar_node(unsigned int id, const char* ip, unsigned int port,
             uint32_t exchangetimeout, int type, const char* name );
-		~altivar_node() override;
+		~altivar_node() override = default;
 		void Evaluate();
 		void Enable();
 		void Disable();
@@ -78,7 +81,7 @@ class altivar_node: public i_iot_node
 
     private:
 	    float frq_setpoint;
-        char name[ 50 ]{ '\0' };
+        std::array<char, 50 > name{};
 
         // Explicitly delete the copy constructors.
         altivar_node( const altivar_node& ) = delete;
@@ -87,7 +90,7 @@ class altivar_node: public i_iot_node
         altivar_node& operator=( altivar_node&& ) = delete;
 
 	protected:
-		modbus_client* mc;
+        std::unique_ptr<modbus_client> mc;
 		bool configure;
 		int type;
 		int querystep;
