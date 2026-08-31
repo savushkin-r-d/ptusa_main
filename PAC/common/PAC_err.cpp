@@ -100,6 +100,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
             {
             priority = ALARM_CLASS_PRIORITY::P_ALARM;
             }
+
         errors.emplace_back( eclass, p1, p2, priority, description );
         errors_id++;
         }
@@ -142,8 +143,9 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     int res = 0;
-    str[ 0 ] = 0;
-    for ( u_int i = 0; i < errors.size(); i++ )
+    str[ 0 ] = '\0';
+
+    for ( size_t i = 0; i < errors.size(); i++ )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
 
@@ -172,6 +174,21 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 #endif // DEBUG_PAC_ERR
 
     return res;
+    }
+//-----------------------------------------------------------------------------
+bool PAC_critical_errors_manager::is_critical_error()
+    {
+    is_any_is_critical_error = false;
+    for each( auto err in errors )
+        {
+        if ( err.priority == ALARM_CLASS_PRIORITY::P_ALARM )
+            {
+            is_any_is_critical_error = true;
+            break;
+            }
+        }
+
+    return is_any_is_critical_error;
     }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()

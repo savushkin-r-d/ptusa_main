@@ -193,22 +193,25 @@ long device_communicator::write_devices_states_service(
             static u_int_2  prev_PAC_err_id = 0;
             static u_int_2  prev_dev_err_id = 0;
 
-            int err_size =
-                PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
-                str + answer_size, err_id );
+            auto CRITICAL_ERR_MANAGER = PAC_critical_errors_manager::get_instance();
+            auto err_size = CRITICAL_ERR_MANAGER->save_as_Lua_str( str +
+                answer_size, err_id );
             if ( err_id != prev_PAC_err_id )
                 {
                 prev_PAC_err_id = err_id;
                 errors_id++;
                 }
 
-            static uint32_t start_time = get_millisec();
+            static auto start_time = get_millisec();
             answer_size += err_size;
-            if ( err_size == 0 &&                   //Нет критических ошибок.
-                get_delta_millisec( start_time ) > 5000 )
+            // Нет критических ошибок и прошло более 5 секунд с момента
+            // запуска управляющей программы.
+            if ( !CRITICAL_ERR_MANAGER->is_critical_error() &&
+                get_delta_millisec( start_time ) > 5'000 )
                 {
                 answer_size +=
-                    G_ERRORS_MANAGER->save_as_Lua_str( str + answer_size, err_id );
+                    G_ERRORS_MANAGER->save_as_Lua_str( str + answer_size,
+                        err_id );
                 if ( err_id != prev_dev_err_id )
                     {
                     prev_dev_err_id = err_id;
@@ -216,7 +219,8 @@ long device_communicator::write_devices_states_service(
                     }
                 }
 
-            answer_size += sprintf( str + answer_size, "  %s %d,\n", "id =", errors_id );
+            answer_size += sprintf( str + answer_size, "  %s %d,\n", "id =",
+                errors_id );
             answer_size += sprintf( str + answer_size, "  %s\n", "}" );
 
 #ifdef DEBUG_DEV_CMCTR
