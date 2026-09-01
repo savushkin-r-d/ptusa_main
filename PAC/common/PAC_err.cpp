@@ -162,7 +162,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         res += sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
 
         //Для идентификации ошибок.
-        res += sprintf( str + res, "\tid_n = %d,\n", err.param );
+        res += sprintf( str + res, "\tid_n = %u,\n", err.param );
 
         res += sprintf( str + res, "\t%s\n", "}," );
         } );
