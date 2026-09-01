@@ -109,6 +109,8 @@ void PAC_info::reset_params()
     par[ P_STABLE_SAVE_DELAY_MS ] = 60'000;     // 1 minute.
     par[ P_MIN_SAVE_INTERVAL_MS ] = 3'600'000;  // 1 hour (60 * 60 * 1'000).
 
+    par[ P_POST_START_ERROR_PROCESSING_DELAY_MS ] = 5'000; // 5 seconds.
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------

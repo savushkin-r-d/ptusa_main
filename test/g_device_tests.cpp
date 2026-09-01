@@ -4,6 +4,8 @@
 #include "device/manager.h"
 #include "g_errors.h"
 
+#include <string>
+
 using namespace ::testing;
 
 
@@ -16,41 +18,60 @@ TEST( device_communicator, write_devices_states_service )
     const int OUT_BUFF_SIZE = 1000;
     unsigned char data[ IN_BUFF_SIZE ] = { '\0' };
     auto cmd_size = 1;
-    unsigned char out_data[ OUT_BUFF_SIZE ] = { '\0' };
+    std::string out_data{ '\0' };
+    out_data.reserve( OUT_BUFF_SIZE );
+    auto out_data_ptr = reinterpret_cast<unsigned char*>( out_data.data() );
 
     tcp_communicator::init_instance( "Тест", "Test" );
 
     G_DEVICE_CMMCTR->clear_devices();
     device_communicator::switch_on_compression();
 
-    data[0] = device_communicator::CMD_GET_INFO_ON_CONNECT;
-    device_communicator::write_devices_states_service(0, data, out_data);
-    EXPECT_EQ('\0', out_data[0]);
-
     data[ 0 ] = device_communicator::CMD_GET_INFO_ON_CONNECT;
-    device_communicator::write_devices_states_service( cmd_size, data, out_data );
-    EXPECT_EQ( 'x', out_data[ 0 ] );
+    device_communicator::write_devices_states_service( 0, data, out_data_ptr );
+    EXPECT_EQ( '\0', out_data[ 0 ] );
+
+    device_communicator::switch_off_compression();
+    data[ 0 ] = device_communicator::CMD_GET_INFO_ON_CONNECT;
+    device_communicator::write_devices_states_service( cmd_size, data, out_data_ptr );
+    EXPECT_EQ( 'p', out_data_ptr[ 0 ] );
+    device_communicator::switch_on_compression();
 
     data[ 0 ] = device_communicator::CMD_GET_DEVICES;
-    device_communicator::write_devices_states_service( cmd_size, data, out_data );
+    device_communicator::write_devices_states_service( cmd_size, data, out_data_ptr );
     EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_GET_DEVICES_STATES;
-    device_communicator::write_devices_states_service( cmd_size, data, out_data );
+    device_communicator::write_devices_states_service( cmd_size, data, out_data_ptr );
     EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
-    device_communicator::write_devices_states_service( cmd_size, data, out_data );
+    device_communicator::write_devices_states_service( cmd_size, data, out_data_ptr );
     EXPECT_EQ( 'x', out_data[ 0 ] );
 
     data[ 0 ] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
-    device_communicator::write_devices_states_service( cmd_size, data, out_data );
+    device_communicator::write_devices_states_service( cmd_size, data, out_data_ptr );
     EXPECT_EQ( 'x', out_data[ 0 ] );
 
-    unsigned char recman_data[IN_BUFF_SIZE] = " __RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
-    recman_data[0] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
-    device_communicator::write_devices_states_service(cmd_size, recman_data, out_data);
-    EXPECT_EQ('x', out_data[0]);
+    unsigned char recman_data[ IN_BUFF_SIZE ] =
+        " __RECMAN[1]:set_cmd( \"hello\", 1, 2.5 )";
+    recman_data[ 0 ] = device_communicator::CMD_EXEC_DEVICE_COMMAND;
+    device_communicator::write_devices_states_service( cmd_size, recman_data,
+        out_data_ptr );
+    EXPECT_EQ( 'x', out_data[ 0 ] );
+
+
+    device_communicator::switch_off_compression();
+    data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
+    device_communicator::write_devices_states_service( cmd_size, data,
+        out_data_ptr );
+    EXPECT_STREQ( R"(
+alarms[ 0 ] =
+  {  id = 0,
+  }
+)" + 1,
+        reinterpret_cast<const char*>( out_data_ptr ) );
+    device_communicator::switch_on_compression();
 
     G_LUA_MANAGER->free_Lua();
     tcp_communicator::clear_instance();

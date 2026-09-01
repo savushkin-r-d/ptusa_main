@@ -181,7 +181,7 @@ bool PAC_critical_errors_manager::is_critical_error()
     is_any_is_critical_error = false;
     for( auto& err : errors )
         {
-        if ( err.priority == ALARM_CLASS_PRIORITY::P_ALARM )
+        if ( err.priority == ALARM_CLASS_PRIORITY::P_ERR_CONNECTION )
             {
             is_any_is_critical_error = true;
             break;

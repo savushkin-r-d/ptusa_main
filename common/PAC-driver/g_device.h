@@ -77,7 +77,7 @@ class device_communicator
         static auto_smart_ptr < device_communicator > instance;
         static char buff[ tcp_communicator::BUFSIZE ];
 
-        static bool use_compression;
+        inline static bool use_compression{ true };
 
     public:
         static void switch_on_compression()

@@ -20,7 +20,6 @@ const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
-bool device_communicator::use_compression = true;
 //-----------------------------------------------------------------------------
 void print_str( const char *err_str, char is_need_CR )
     {
@@ -154,7 +153,7 @@ long device_communicator::write_devices_states_service(
                 }
             else
                 {
-                res = lua_manager::get_instance()->exec_Lua_str( 
+                res = lua_manager::get_instance()->exec_Lua_str(
                     str, "CMD_EXEC_DEVICE_COMMAND " );
                 }
 
@@ -178,15 +177,13 @@ long device_communicator::write_devices_states_service(
 #ifdef DEBUG_DEV_CMCTR
             printf( "CMD_GET_PAC_ERRORS\n" );
 #endif
-            static u_int_2 errors_id = get_millisec() % 100;
+            static u_int_2 errors_id{};
 
             unsigned char project_descr_id = data[ 1 ];
             char *str = ( char* ) outdata;
             str[ 0 ] = 0;
 
-            answer_size = sprintf( str, "alarms[ %d ] = \n  {}",
-                project_descr_id );
-            answer_size += sprintf( str + answer_size, "alarms[ %d ] = \n  {",
+            answer_size = sprintf( str + answer_size, "alarms[ %d ] =\n  {\n",
                 project_descr_id );
 
             u_int_2         err_id = 0;
@@ -204,10 +201,12 @@ long device_communicator::write_devices_states_service(
 
             static auto start_time = get_millisec();
             answer_size += err_size;
-            // Нет критических ошибок и прошло более 5 секунд с момента
-            // запуска управляющей программы.
-            if ( !CRITICAL_ERR_MANAGER->is_critical_error() &&
-                get_delta_millisec( start_time ) > 5'000 )
+            // Нет критических ошибок и прошло более xx секунд (параметр) с
+            // момента запуска управляющей программы.
+            if ( const auto DELAY_MS = G_PAC_INFO()->par[
+                PAC_info::P_POST_START_ERROR_PROCESSING_DELAY_MS ];
+                !CRITICAL_ERR_MANAGER->is_critical_error() &&
+                get_delta_millisec( start_time ) > DELAY_MS )
                 {
                 answer_size +=
                     G_ERRORS_MANAGER->save_as_Lua_str( str + answer_size,
@@ -219,9 +218,8 @@ long device_communicator::write_devices_states_service(
                     }
                 }
 
-            answer_size += sprintf( str + answer_size, "  %s %d,\n", "id =",
-                errors_id );
-            answer_size += sprintf( str + answer_size, "  %s\n", "}" );
+            answer_size += fmt::format_to_n( str + answer_size, MAX_COPY_SIZE,
+                "  id = {},\n  }}\n", errors_id ).size;
 
 #ifdef DEBUG_DEV_CMCTR
             printf( "Critical errors = \n%s", outdata );

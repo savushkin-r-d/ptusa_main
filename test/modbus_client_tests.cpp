@@ -6,6 +6,8 @@
 #include "tolua++.h"
 #include "PAC_dev_lua_tests.h" // содержит TOLUA_API int tolua_PAC_dev_open(lua_State*);
 #include "PAC_info.h"
+#include "lua_manager.h"
+
 
 using namespace ::testing;
 
@@ -409,7 +411,7 @@ TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
 
 TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     {
-    const auto* mngr = PAC_critical_errors_manager::get_instance();
+    auto* mngr = PAC_critical_errors_manager::get_instance();
     G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 100;
 
     // Simulate connection established.
@@ -438,11 +440,10 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
     std::array<char, 500> buffer{};
     u_int_2 id = 0;
-    PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
-        buffer.data(), id );
+    mngr->save_as_Lua_str( buffer.data(), id );
 
-    const auto REFERENCE_MSG =
-R"(	{
+    const auto REFERENCE_MSG = R"(
+	{
 	description = "1-2-1 : нет связи c ModBus-устройством 'M1'",
 	type = AT_SPECIAL,
 	group = 'Авария',
@@ -450,9 +451,45 @@ R"(	{
 	state = AS_ALARM,
 	id_n = 1,
 	},
-)";
+)" + 1;
 
     EXPECT_EQ( std::string( buffer.data() ), REFERENCE_MSG );
+    EXPECT_FALSE( mngr->is_critical_error() );
+
+
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    const int IN_BUFF_SIZE = 100;
+    const int OUT_BUFF_SIZE = 1000;
+    unsigned char data[ IN_BUFF_SIZE ] = { '\0' };
+    const auto CMD_SIZE = 1;
+    std::string out_data{ '\0' };
+    out_data.reserve( OUT_BUFF_SIZE );
+    auto out_data_ptr = reinterpret_cast<unsigned char*>( out_data.data() );
+
+    G_DEVICE_CMMCTR->clear_devices();
+    device_communicator::switch_off_compression();
+    data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
+    device_communicator::write_devices_states_service( CMD_SIZE, data, out_data_ptr );
+    EXPECT_STREQ( R"(
+alarms[ 0 ] =
+  {
+	{
+	description = "1-2-1 : нет связи c ModBus-устройством 'M1'",
+	type = AT_SPECIAL,
+	group = 'Авария',
+	priority = 250,
+	state = AS_ALARM,
+	id_n = 1,
+	},
+  id = 1,
+  }
+)" + 1,
+        reinterpret_cast<const char*>( out_data_ptr ) );
+    device_communicator::switch_on_compression();
+
+    G_LUA_MANAGER->free_Lua();
     }
 
 TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
