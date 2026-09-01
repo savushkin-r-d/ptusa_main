@@ -462,16 +462,17 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 
     const int IN_BUFF_SIZE = 100;
     const int OUT_BUFF_SIZE = 1000;
-    unsigned char data[ IN_BUFF_SIZE ] = { '\0' };
+    std::array<char, IN_BUFF_SIZE > data{ '\0' };
     const auto CMD_SIZE = 1;
-    std::string out_data{ '\0' };
-    out_data.reserve( OUT_BUFF_SIZE );
+    std::array<char, OUT_BUFF_SIZE> out_data{ '\0' };
     auto out_data_ptr = reinterpret_cast<unsigned char*>( out_data.data() );
+    auto in_data_ptr = reinterpret_cast<unsigned char*>( data.data() );
 
     G_DEVICE_CMMCTR->clear_devices();
     device_communicator::switch_off_compression();
-    data[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
-    device_communicator::write_devices_states_service( CMD_SIZE, data, out_data_ptr );
+    in_data_ptr[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
+    device_communicator::write_devices_states_service( CMD_SIZE,
+        in_data_ptr, out_data_ptr );
     EXPECT_STREQ( R"(
 alarms[ 0 ] =
   {
