@@ -7,16 +7,19 @@ TEST( PAC_critical_errors_manager, set_global_error )
     {
     auto mngr = PAC_critical_errors_manager::get_instance();
     EXPECT_FALSE( mngr->is_any_error() );
+    EXPECT_FALSE( mngr->is_any_critical_error() );
 
     // Ошибки неизвестного класса.
     mngr->set_global_error( PAC_critical_errors_manager::ALARM_CLASS( 0 ),
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     EXPECT_TRUE( mngr->is_any_error() );
+    EXPECT_TRUE( mngr->is_any_critical_error() );
 
     // Пробуем повторно установить ошибку.
     mngr->set_global_error( PAC_critical_errors_manager::ALARM_CLASS( 0 ),
         PAC_critical_errors_manager::ALARM_SUBCLASS( 0 ), 1 );
     EXPECT_TRUE( mngr->is_any_error() );
+    EXPECT_TRUE( mngr->is_any_critical_error() );
 
     std::array<char, 256> buff{};
     u_int_2 id{};

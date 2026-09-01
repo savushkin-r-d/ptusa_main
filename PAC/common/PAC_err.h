@@ -90,7 +90,7 @@ class PAC_critical_errors_manager
 
         int save_as_Lua_str( char* str, u_int_2& id );
 
-        bool is_critical_error();
+        bool is_any_critical_error() const;
 
         static PAC_critical_errors_manager* get_instance();
 
@@ -137,8 +137,6 @@ class PAC_critical_errors_manager
         std::vector< critical_error >  errors;
 
         u_int_2 errors_id{};
-
-        bool is_any_is_critical_error{ false };
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

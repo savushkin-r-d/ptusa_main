@@ -454,7 +454,7 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
 )" + 1;
 
     EXPECT_EQ( std::string( buffer.data() ), REFERENCE_MSG );
-    EXPECT_FALSE( mngr->is_critical_error() );
+    EXPECT_FALSE( mngr->is_any_critical_error() );
 
 
     auto L = lua_open();

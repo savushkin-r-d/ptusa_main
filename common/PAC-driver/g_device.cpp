@@ -179,12 +179,12 @@ long device_communicator::write_devices_states_service(
 #endif
             static u_int_2 errors_id{};
 
-            unsigned char project_descr_id = data[ 1 ];
-            char *str = ( char* ) outdata;
+            auto project_descr_id = data[ 1 ];
+            auto* str = reinterpret_cast<char*>( outdata );
             str[ 0 ] = 0;
 
-            answer_size = sprintf( str + answer_size, "alarms[ %d ] =\n  {\n",
-                project_descr_id );
+            answer_size = fmt::format_to_n( str + answer_size, MAX_COPY_SIZE,
+                "alarms[ {} ] =\n  {{\n", project_descr_id ).size;
 
             u_int_2         err_id = 0;
             static u_int_2  prev_PAC_err_id = 0;
@@ -199,14 +199,14 @@ long device_communicator::write_devices_states_service(
                 errors_id++;
                 }
 
-            static auto start_time = get_millisec();
+            const auto START_TIME = get_millisec();
             answer_size += err_size;
             // Нет критических ошибок и прошло более xx секунд (параметр) с
             // момента запуска управляющей программы.
             if ( const auto DELAY_MS = G_PAC_INFO()->par[
                 PAC_info::P_POST_START_ERROR_PROCESSING_DELAY_MS ];
-                !CRITICAL_ERR_MANAGER->is_critical_error() &&
-                get_delta_millisec( start_time ) > DELAY_MS )
+                !CRITICAL_ERR_MANAGER->is_any_critical_error() &&
+                get_delta_millisec( START_TIME ) > DELAY_MS )
                 {
                 answer_size +=
                     G_ERRORS_MANAGER->save_as_Lua_str( str + answer_size,
