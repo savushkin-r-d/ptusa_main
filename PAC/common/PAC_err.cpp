@@ -152,9 +152,9 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "\tdescription = \"{}\",\n",
-            get_alarm_descr( (ALARM_CLASS)err.err_class,
-                (ALARM_SUBCLASS)err.err_sub_class, err.param, true,
-                err.description ) ).size;
+            get_alarm_descr( static_cast<ALARM_CLASS>( err.err_class ),
+                static_cast<ALARM_SUBCLASS>( err.err_sub_class ),
+                err.param, true, err.description ) ).size;
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "\ttype = AT_SPECIAL,\n" ).size;
