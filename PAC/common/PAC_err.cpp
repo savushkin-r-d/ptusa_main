@@ -145,27 +145,27 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     int res = 0;
     str[ 0 ] = '\0';
 
-    for ( size_t i = 0; i < errors.size(); i++ )
+    std::for_each( errors.begin(), errors.end(), [ str, &res, this ]( const critical_error& err )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
 
         res += sprintf( str + res, "\tdescription = \"%s\",\n",
-            get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
-            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param, true,
-                errors[ i ].description ));
+            get_alarm_descr( (ALARM_CLASS)err.err_class,
+                (ALARM_SUBCLASS)err.err_sub_class, err.param, true,
+                err.description ) );
 
         res += sprintf( str + res, "\t%s\n", "type = AT_SPECIAL," );
         res += sprintf( str + res, "\t%s%s%s\n", "group = '",
             get_alarm_group(), "'," );
         res += sprintf( str + res, "\t%s%d%s\n", "priority = ",
-            errors[ i ].priority, "," );
-       res +=  sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
+            err.priority, "," );
+        res += sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
 
         //Для идентификации ошибок.
-        res += sprintf( str + res, "\tid_n = %d,\n", errors[ i ].param );
+        res += sprintf( str + res, "\tid_n = %d,\n", err.param );
 
         res += sprintf( str + res, "\t%s\n", "}," );
-        }
+        } );
 
    id = errors_id;
 
@@ -178,15 +178,9 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 //-----------------------------------------------------------------------------
 bool PAC_critical_errors_manager::is_any_critical_error() const
     {
-    for( auto& err : errors )
-        {
-        if ( err.priority == ALARM_CLASS_PRIORITY::P_ERR_CONNECTION )
-            {
-            return true;
-            }
-        }
-
-    return false;
+    return std::any_of( std::begin( errors ), std::end( errors ),
+        []( const critical_error& err ) {
+        return err.priority == ALARM_CLASS_PRIORITY::P_ERR_CONNECTION; } );
     }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
