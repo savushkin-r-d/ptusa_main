@@ -93,9 +93,8 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
 
     if ( b == 0 )
         {
-        sprintf( G_LOG->msg, "%s",
+        G_LOG->error( "%s",
             get_alarm_descr( eclass, p1, p2, true, description ) );
-        G_LOG->write_log( i_log::P_ERR );
 
         auto priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION;
         if ( p1 == AS_MODBUS_DEVICE )
@@ -145,34 +144,39 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     int res = 0;
-    str[ 0 ] = '\0';
 
-    std::for_each( errors.begin(), errors.end(), [ str, &res, this ]( const critical_error& err )
+    std::for_each( errors.begin(), errors.end(),
+        [ str, &res, this ]( const critical_error& err )
         {
-        res += sprintf( str + res, "\t%s\n", "{" );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE, "\t{{\n" ).size;
 
-        res += sprintf( str + res, "\tdescription = \"%s\",\n",
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\tdescription = \"{}\",\n",
             get_alarm_descr( (ALARM_CLASS)err.err_class,
                 (ALARM_SUBCLASS)err.err_sub_class, err.param, true,
-                err.description ) );
+                err.description ) ).size;
 
-        res += sprintf( str + res, "\t%s\n", "type = AT_SPECIAL," );
-        res += sprintf( str + res, "\t%s%s%s\n", "group = '",
-            get_alarm_group(), "'," );
-        res += sprintf( str + res, "\t%s%d%s\n", "priority = ",
-            err.priority, "," );
-        res += sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\ttype = AT_SPECIAL,\n" ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\tgroup = '{}',\n", get_alarm_group() ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\tpriority = {},\n", err.priority ).size;
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\tstate = AS_ALARM,\n" ).size;
 
         //Для идентификации ошибок.
-        res += sprintf( str + res, "\tid_n = %u,\n", err.param );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
+            "\tid_n = {},\n", err.param ).size;
 
-        res += sprintf( str + res, "\t%s\n", "}," );
+        res += fmt::format_to_n( str + res, MAX_COPY_SIZE, "\t}},\n" ).size;
         } );
 
-   id = errors_id;
+    id = errors_id;
+    str[ res ] = '\0';
 
 #ifdef DEBUG_PAC_ERR
-    printf( "%s\n", str );
+    fmt::print( "{}\n", str );
 #endif // DEBUG_PAC_ERR
 
     return res;
