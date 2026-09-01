@@ -1,9 +1,11 @@
 #include "PAC_err.h"
 
+#include "fmt/format.h"
+
 #include <stdio.h>
 #include <vector>
-#include "fmt/format.h"
 #include <cstring>
+#include <algorithm>
 
 #include "log.h"
 
