@@ -62,7 +62,7 @@ class PAC_critical_errors_manager
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
             {
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
-            AS_MODBUS_DEVICE = 2,   ///< Ошибки Modbus-устройства.
+            AS_MODBUS_CMMCTR = 2,   ///< Ошибки Modbus-коммуникации.
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
 
             //AC_NET,               ///< Ошибки сетевой работы.
@@ -119,11 +119,11 @@ class PAC_critical_errors_manager
 
         struct critical_error
             {
-            int             err_class;     ///< Класс ошибки.
-            unsigned int    err_sub_class; ///< Подкласс ошибки.
-            unsigned int    param;         ///< Параметр ошибки.
-            int             priority;      ///< Приоритет ошибки.
-            const char*     description;   ///< Описание ошибки.
+            int             err_class;           ///< Класс ошибки.
+            unsigned int    err_sub_class;       ///< Подкласс ошибки.
+            unsigned int    param;               ///< Параметр ошибки.
+            int             priority;            ///< Приоритет ошибки.
+            std::array<char, 50 > description{}; ///< Описание ошибки.
 
             critical_error( int err_class = 0, u_int err_sub_class = 0,
                 u_int param = 0,

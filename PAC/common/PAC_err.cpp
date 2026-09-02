@@ -97,7 +97,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
             get_alarm_descr( eclass, p1, p2, true, description ) );
 
         auto priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION;
-        if ( p1 == AS_MODBUS_DEVICE )
+        if ( p1 == AS_MODBUS_CMMCTR )
             {
             priority = ALARM_CLASS_PRIORITY::P_ALARM;
             }
@@ -133,7 +133,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         if ( is_print_msg )
             {
             G_LOG->info( "%s", get_alarm_descr( eclass, p1, p2, false,
-                errors[ idx ].description ) );
+                errors[ idx ].description.data() ) );
             }
 
         errors.erase( errors.begin() + idx );
@@ -154,7 +154,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
             "\tdescription = \"{}\",\n",
             get_alarm_descr( static_cast<ALARM_CLASS>( err.err_class ),
                 static_cast<ALARM_SUBCLASS>( err.err_sub_class ),
-                err.param, true, err.description ) ).size;
+                err.param, true, err.description.data() ) ).size;
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "\ttype = AT_SPECIAL,\n" ).size;
@@ -268,9 +268,9 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                     // Обработано в начале функции.
                     break;
 
-                case AS_MODBUS_DEVICE:
+                case AS_MODBUS_CMMCTR:
                     fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        " c ModBus-устройством '{}'", description  );
+                        " c '{}' (ModBus)", description  );
                     break;
 
                 case AS_EASYSERVER:
@@ -322,10 +322,16 @@ PAC_critical_errors_manager::critical_error::critical_error( int err_class,
     u_int err_sub_class,
     u_int param,
     int priority,
-    const char* description ) :err_class( err_class ),
+    const char* err_description ) :err_class( err_class ),
     err_sub_class( err_sub_class ), param( param ),
-    priority( priority ), description( description )
+    priority( priority )
     {
+    if ( err_description )
+        {
+        const auto result = fmt::format_to_n(
+            description.data(), description.size() - 1, "{}", err_description );
+        *result.out = '\0';
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

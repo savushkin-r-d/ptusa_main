@@ -442,16 +442,16 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     u_int_2 id = 0;
     mngr->save_as_Lua_str( buffer.data(), id );
 
-    const auto REFERENCE_MSG = R"(
+    const auto REFERENCE_MSG = R"_(
 	{
-	description = "1-2-1 : нет связи c ModBus-устройством 'M1'",
+	description = "1-2-1 : нет связи c 'M1' (ModBus)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 250,
 	state = AS_ALARM,
 	id_n = 1,
 	},
-)" + 1;
+)_" + 1;
 
     EXPECT_EQ( std::string( buffer.data() ), REFERENCE_MSG );
     EXPECT_FALSE( mngr->is_any_critical_error() );
@@ -473,11 +473,11 @@ TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
     in_data_ptr[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
     device_communicator::write_devices_states_service( CMD_SIZE,
         in_data_ptr, out_data_ptr );
-    EXPECT_STREQ( R"(
+    EXPECT_STREQ( R"_(
 alarms[ 0 ] =
   {
 	{
-	description = "1-2-1 : нет связи c ModBus-устройством 'M1'",
+	description = "1-2-1 : нет связи c 'M1' (ModBus)",
 	type = AT_SPECIAL,
 	group = 'Авария',
 	priority = 250,
@@ -486,7 +486,7 @@ alarms[ 0 ] =
 	},
   id = 1,
   }
-)" + 1,
+)_" + 1,
         reinterpret_cast<const char*>( out_data_ptr ) );
     device_communicator::switch_on_compression();
 

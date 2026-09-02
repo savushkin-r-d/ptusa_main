@@ -200,7 +200,7 @@ long device_communicator::write_devices_states_service(
                 errors_id++;
                 }
 
-            const auto START_TIME = get_millisec();
+            static const auto START_TIME = get_millisec();
             answer_size += err_size;
             // Нет критических ошибок и прошло более xx секунд (параметр) с
             // момента запуска управляющей программы.

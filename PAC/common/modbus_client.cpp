@@ -14,10 +14,10 @@ modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port
         client_name ? client_name : fmt::to_string( id ) );
 
     G_LOG->debug( "Create Modbus client '%s' with IP = %s\n",
-        ip, name.data() );
+        name.data(), ip );
 
     tcpclient = tcp_client::Create( ip, port, id,
-        PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout );
+        PAC_critical_errors_manager::AS_MODBUS_CMMCTR, 256, exchangetimeout );
     zero_output_buff();
     }
 
@@ -496,7 +496,7 @@ void modbus_client::check_connection_state_changed()
             auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
             pac_err_mngr->reset_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+                PAC_critical_errors_manager::AS_MODBUS_CMMCTR,
                 tcpclient->get_id() );
             }
 
@@ -526,7 +526,7 @@ void modbus_client::check_connection_state_changed()
         auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
         pac_err_mngr->set_global_error(
             PAC_critical_errors_manager::AC_NO_CONNECTION,
-            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+            PAC_critical_errors_manager::AS_MODBUS_CMMCTR,
             tcpclient->get_id(), name.data() );
         is_disconnect_reported = true;
         }
