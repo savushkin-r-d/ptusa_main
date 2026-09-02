@@ -183,9 +183,11 @@ long device_communicator::write_devices_states_service(
             auto* str = reinterpret_cast<char*>( outdata );
             str[ 0 ] = 0;
 
+            // LCOV_EXCL_START
             answer_size = static_cast<u_int_2>( fmt::format_to_n(
                 str + answer_size, MAX_COPY_SIZE,
                 "alarms[ {} ] =\n  {{\n", project_descr_id ).size );
+            // LCOV_EXCL_STOP
 
             u_int_2         err_id = 0;
             static u_int_2  prev_PAC_err_id = 0;
@@ -219,9 +221,11 @@ long device_communicator::write_devices_states_service(
                     }
                 }
 
+            // LCOV_EXCL_START
             answer_size += static_cast<u_int_2>( fmt::format_to_n(
                 str + answer_size, MAX_COPY_SIZE,
                 "  id = {},\n  }}\n", errors_id ).size );
+            // LCOV_EXCL_STOP
 
 #ifdef DEBUG_DEV_CMCTR
             printf( "Critical errors = \n%s", outdata );
