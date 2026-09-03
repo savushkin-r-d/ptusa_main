@@ -1286,6 +1286,29 @@ TEST( device_manager, clear_io_devices )
         G_DEVICE_MANAGER()->get_TE( "T1" ) );   // Search shouldn't find device.
     }
 
+TEST( device_manager, get_FQT_IOLINK )
+    {
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto* missing = G_DEVICE_MANAGER()->get_FQT_IOLINK( "NO_FQT" );
+    ASSERT_NE( nullptr, missing );
+    EXPECT_STREQ( "stub", missing->get_name() );
+
+    G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT, "FQT_BASE", "Base counter", "" );
+    auto* wrong_type = G_DEVICE_MANAGER()->get_FQT_IOLINK( "FQT_BASE" );
+    ASSERT_NE( nullptr, wrong_type );
+    EXPECT_STREQ( "stub", wrong_type->get_name() );
+
+    G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_IOLINK, "FQT_IOL", "IOL counter", "IFM.SMF420" );
+    auto* iol = G_DEVICE_MANAGER()->get_FQT_IOLINK( "FQT_IOL" );
+    ASSERT_NE( nullptr, iol );
+    EXPECT_STREQ( "FQT_IOL", iol->get_name() );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    }
+
 TEST( device_manager, get_device )
     {
     auto res = G_DEVICE_MANAGER()->add_io_device(

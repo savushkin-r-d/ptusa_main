@@ -816,6 +816,58 @@ TEST( toLuapp, tolua_PAC_dev_FQT00 )
     lua_close( L );
     }
 
+TEST( toLuapp, tolua_PAC_dev_FQT_IOLINK00 )
+    {
+    lua_State* L = lua_open();
+    ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+
+    // Некорректный вызов без параметра.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = FQT_IOLINK()" ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "G_DEVICE_MANAGER():add_io_device( "
+        "device.DT_FQT, device.DST_FQT_IOLINK, \'FQT1\', "
+        "\'Test FQT IOLINK\', \'IFM.SMF420\' )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT_IOLINK( \'FQT1\' )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
+    auto FQT1 = static_cast<counter_iolink*>(
+        tolua_touserdata( L, -1, nullptr ) );
+    ASSERT_NE( nullptr, FQT1 );
+    lua_remove( L, -1 );
+
+    // Некорректный вызов без self.
+    ASSERT_NE( 0, luaL_dostring( L, "res = FQT1.get_temperature()" ) );
+    // Корректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res_t = FQT1:get_temperature()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res_t" );
+    EXPECT_EQ( 0.f, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
+    // Некорректный вызов без self.
+    ASSERT_NE( 0, luaL_dostring( L, "res = FQT1.get_conductivity()" ) );
+    // Корректный вызов.
+    ASSERT_EQ( 0, luaL_dostring( L, "res_c = FQT1:get_conductivity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res_c" );
+    EXPECT_EQ( 0.f, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:set_cmd( 'T', 0, 12.3 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:set_cmd( 'C', 0, 456 )" ) );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res_t = FQT1:get_temperature()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res_t" );
+    EXPECT_FLOAT_EQ( 12.3f, static_cast<float>( tolua_tonumber( L, -1, 0 ) ) );
+    lua_remove( L, -1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "res_c = FQT1:get_conductivity()" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res_c" );
+    EXPECT_FLOAT_EQ( 456.f, static_cast<float>( tolua_tonumber( L, -1, 0 ) ) );
+    lua_remove( L, -1 );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    lua_close( L );
+    }
+
 TEST( toLuapp, tolua_PAC_dev_QT00 )
     {
     lua_State* L = lua_open();
