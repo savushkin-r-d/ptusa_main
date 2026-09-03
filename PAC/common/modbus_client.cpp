@@ -1,6 +1,8 @@
 #include "modbus_client.h"
 #include "console.h"
+#include "log.h"
 #include "PAC_err.h"
+#include "PAC_info.h"
 
 modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout )
     {
@@ -13,6 +15,9 @@ modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port,
     modbus_async_result = 0;
     modbus_expected_length = 0;
     stationid = 1;
+    prev_connected_state = tcp_client::ACS_DISCONNECTED;
+    disconnected_state_start_time = get_millisec();
+    is_disconnect_reported = false;
     }
 
 modbus_client::~modbus_client()
@@ -414,15 +419,10 @@ void modbus_client::mask_set_bit(int pos, int value)
 
 unsigned char modbus_client::reverse(unsigned char b)
     {
-#ifdef PAC_WAGO_PFC200
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-#else
     b = (b & 0b11110000) >> 4 | (b & 0b00001111) << 4;
     b = (b & 0b11001100) >> 2 | (b & 0b00110011) << 2;
     b = (b & 0b10101010) >> 1 | (b & 0b01010101) << 1;
-#endif
+
     return b;
     }
 
@@ -473,12 +473,63 @@ int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsig
 
 int modbus_client::get_async_result()
     {
+    check_connection_state_changed();
     return tcpclient->get_async_result();
     }
 
 int modbus_client::get_connected_state()
     {
     return tcpclient->get_connected_state();
+    }
+
+void modbus_client::check_connection_state_changed()
+    {
+    const int current_state = tcpclient->get_connected_state();
+    if ( current_state == tcp_client::ACS_CONNECTED )
+        {
+        disconnected_state_start_time = 0;
+        if ( prev_connected_state != tcp_client::ACS_CONNECTED )
+            {
+            G_LOG->info( "Modbus client %d: connected to \"%s\".",
+                tcpclient->get_id(), tcpclient->ip );
+            auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
+            pac_err_mngr->reset_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+                tcpclient->get_id() );
+            }
+
+        is_disconnect_reported = false;
+        prev_connected_state = current_state;
+        return;
+        }
+
+    if ( prev_connected_state == tcp_client::ACS_CONNECTED )
+        {
+        disconnected_state_start_time = get_millisec();
+        is_disconnect_reported = false;
+        }
+    else if ( disconnected_state_start_time == 0 )
+        {
+        disconnected_state_start_time = get_millisec();
+        }
+
+    if ( const auto WAIT_TIME =
+        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ];
+        !is_disconnect_reported &&
+        get_delta_millisec( disconnected_state_start_time ) >= WAIT_TIME )
+        {
+        G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
+            tcpclient->get_id(), tcpclient->ip );
+        auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
+        pac_err_mngr->set_global_error(
+            PAC_critical_errors_manager::AC_NO_CONNECTION,
+            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+            tcpclient->get_id() );
+        is_disconnect_reported = true;
+        }
+
+    prev_connected_state = current_state;
     }
 
 int modbus_client::async_read_coils( unsigned int start_address, unsigned int quantity )

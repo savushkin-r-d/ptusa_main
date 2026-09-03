@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Jun  4 17:07:01 2026.
+** Generated automatically by tolua++-1.0.92 on Tue Aug 11 09:59:08 2026.
 */
 
 #ifndef __cplusplus
@@ -25,7 +25,6 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "g_errors.h"
 #include "modbus_client.h"
 #include "modbus_serv.h"
-#include "profibus_slave.h"
 #include "params_recipe_manager.h"
 #ifdef WIN_OS
 #pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
@@ -93,16 +92,15 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
  tolua_usertype(tolua_S,"io_manager");
- tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"virtual_counter");
  tolua_usertype(tolua_S,"counter_iolink");
  tolua_usertype(tolua_S,"errors_manager");
  tolua_usertype(tolua_S,"tech_object_manager");
- tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
+ tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"PAC_info");
- tolua_usertype(tolua_S,"profibus_slave");
  tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"modbus_client");
@@ -14855,373 +14853,6 @@ static int tolua_PAC_dev_ModbusServ_UnpackWord00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: activate of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_activate00
-static int tolua_PAC_dev_profibus_slave_activate00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'activate'", NULL);
-#endif
-  {
-   self->activate();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'activate'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_station_address of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_station_address00
-static int tolua_PAC_dev_profibus_slave_set_station_address00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int address = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_station_address'", NULL);
-#endif
-  {
-   self->set_station_address(address);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_station_address'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_output_byte_size of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_output_byte_size00
-static int tolua_PAC_dev_profibus_slave_set_output_byte_size00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int size = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_output_byte_size'", NULL);
-#endif
-  {
-   self->set_output_byte_size(size);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_output_byte_size'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_input_byte_size of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_input_byte_size00
-static int tolua_PAC_dev_profibus_slave_set_input_byte_size00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int size = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_input_byte_size'", NULL);
-#endif
-  {
-   self->set_input_byte_size(size);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_input_byte_size'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_double of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_double00
-static int tolua_PAC_dev_profibus_slave_get_double00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int offset = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_double'", NULL);
-#endif
-  {
-   double tolua_ret = (double)  self->get_double(offset);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_double'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_bool of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_bool00
-static int tolua_PAC_dev_profibus_slave_get_bool00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
-  int bit_offset = ((int)  tolua_tonumber(tolua_S,3,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_bool'", NULL);
-#endif
-  {
-   bool tolua_ret = (bool)  self->get_bool(byte_offset,bit_offset);
-   tolua_pushboolean(tolua_S,(bool)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_bool'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_bool of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_bool00
-static int tolua_PAC_dev_profibus_slave_set_bool00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isboolean(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
-  int bit_offset = ((int)  tolua_tonumber(tolua_S,3,0));
-  bool val = ((bool)  tolua_toboolean(tolua_S,4,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bool'", NULL);
-#endif
-  {
-   self->set_bool(byte_offset,bit_offset,val);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_bool'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_int of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_int00
-static int tolua_PAC_dev_profibus_slave_get_int00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_int'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->get_int(byte_offset);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_int'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_int of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_int00
-static int tolua_PAC_dev_profibus_slave_set_int00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
-  int val = ((int)  tolua_tonumber(tolua_S,3,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_int'", NULL);
-#endif
-  {
-   self->set_int(byte_offset,val);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_int'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_int4 of class  profibus_slave */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_int400
-static int tolua_PAC_dev_profibus_slave_get_int400(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
-  int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_int4'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->get_int4(byte_offset);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_int4'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* function: G_PROFIBUS_SLAVE_LUA */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00
-static int tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isnoobj(tolua_S,1,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  {
-   profibus_slave* tolua_ret = (profibus_slave*)  G_PROFIBUS_SLAVE_LUA();
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"profibus_slave");
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'G_PROFIBUS_SLAVE_LUA'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
 /* method: write_log of class  i_log */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_i_log_write_log00
 static int tolua_PAC_dev_i_log_write_log00(lua_State* tolua_S)
@@ -16528,20 +16159,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"UnpackFloat",tolua_PAC_dev_ModbusServ_UnpackFloat00);
    tolua_function(tolua_S,"UnpackWord",tolua_PAC_dev_ModbusServ_UnpackWord00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
-  tolua_beginmodule(tolua_S,"profibus_slave");
-   tolua_function(tolua_S,"activate",tolua_PAC_dev_profibus_slave_activate00);
-   tolua_function(tolua_S,"set_station_address",tolua_PAC_dev_profibus_slave_set_station_address00);
-   tolua_function(tolua_S,"set_output_byte_size",tolua_PAC_dev_profibus_slave_set_output_byte_size00);
-   tolua_function(tolua_S,"set_input_byte_size",tolua_PAC_dev_profibus_slave_set_input_byte_size00);
-   tolua_function(tolua_S,"get_double",tolua_PAC_dev_profibus_slave_get_double00);
-   tolua_function(tolua_S,"get_bool",tolua_PAC_dev_profibus_slave_get_bool00);
-   tolua_function(tolua_S,"set_bool",tolua_PAC_dev_profibus_slave_set_bool00);
-   tolua_function(tolua_S,"get_int",tolua_PAC_dev_profibus_slave_get_int00);
-   tolua_function(tolua_S,"set_int",tolua_PAC_dev_profibus_slave_set_int00);
-   tolua_function(tolua_S,"get_int4",tolua_PAC_dev_profibus_slave_get_int400);
-  tolua_endmodule(tolua_S);
-  tolua_function(tolua_S,"G_PROFIBUS_SLAVE_LUA",tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00);
   tolua_cclass(tolua_S,"i_log","i_log","",NULL);
   tolua_beginmodule(tolua_S,"i_log");
    tolua_constant(tolua_S,"P_EMERG",i_log::P_EMERG);

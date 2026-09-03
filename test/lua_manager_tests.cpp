@@ -44,12 +44,12 @@ TEST(lua_manager_test, get_instance)
 
 TEST_F(LuaManagerTest, init_success)
 {
-    char* res = 0;
+    std::byte* res = nullptr;
 	mock_project_manager* prj_mock = new mock_project_manager();
 	mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity(par_mock);
 
-    EXPECT_CALL(*par_mock, get_params_data(_, _))
+    EXPECT_CALL(*par_mock, reserve_params_region(_, _))
         .Times(AtLeast(2))
         .WillRepeatedly(Return(res));
 
@@ -228,13 +228,13 @@ TEST_F(LuaManagerTest, init_lua_pcall_failure)
 
 mock_tech_object_manager* init_mocks( int cnt )
     {
-    char* res = 0;
+    std::byte* res = nullptr;
 
     mock_project_manager* prj_mock = new mock_project_manager();
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 
@@ -756,4 +756,19 @@ TEST( lua_manager, check_file )
 
     auto res = check_file( FILE_NAME, err_str );
     EXPECT_EQ( res, FILE_VERSION );
+    }
+
+TEST( lua_manager, init )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+
+    // Так как не загружен соответствующий модуль package, то init должен
+    // вернуть 1 - "attempt to index global 'package' (a nil value)". При этом
+    // в консоль выводится информация о переданных параметрах.
+    auto res = G_LUA_MANAGER->init( L,
+        "test.lua", "dir", "sys_dir", "extra_dir" );
+    EXPECT_EQ( res, 1 );
+
+    G_LUA_MANAGER->free_Lua();
     }

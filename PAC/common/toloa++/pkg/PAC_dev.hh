@@ -22,8 +22,6 @@ $#include "modbus_client.h"
 
 $#include "modbus_serv.h"
 
-$#include "profibus_slave.h"
-
 $#include "params_recipe_manager.h"
 
 $#ifdef WIN_OS
@@ -2049,75 +2047,6 @@ class ModbusServ
         static float UnpackFloat( unsigned char* Buf, int offset  );
         static unsigned int UnpackWord( unsigned char* Buf, int offset );
     };
-//----------------------------------------------------------------------------
-/// @brief Работа с Profibus Slave.
-class profibus_slave
-    {
-    //Конфигурирование клиента.
-    public:
-        /// <summary>
-        /// Включение модуля обмена.
-        /// </summary>
-        void activate();
-
-        /// <summary>
-        /// Установка адреса станции.
-        /// </summary>
-        void set_station_address( int address );
-
-        /// <summary>
-        /// Установка размера массива области записи.
-        /// </summary>
-        void set_output_byte_size( int size );
-
-        /// <summary>
-        /// Установка размера массива области чтения.
-        /// </summary>
-        void set_input_byte_size( int size );
-
-    public:
-        /// <summary>
-        /// Получение значения типа double.
-        /// </summary>
-        /// <param name="offset">Смещение, диапазон 0..239.</param>
-        virtual double get_double( int offset ) = 0;
-
-        /// <summary>
-        /// Получение значения типа bool.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-        virtual bool get_bool( int byte_offset, int bit_offset ) = 0;
-
-        /// <summary>
-        /// Установка значения типа bool.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-        /// <param name="val">Значение.</param>
-        virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
-
-        /// <summary>
-        /// Получение значения типа int.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-        virtual int get_int( int byte_offset ) = 0;
-
-        /// <summary>
-        /// Установка значения типа int.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-        /// <param name="val">Значение.</param>
-        virtual void set_int( int byte_offset, int val ) = 0;
-
-        /// <summary>
-        /// Получение значения типа int (4 байта).
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..240.</param>
-        virtual int get_int4( int byte_offset ) = 0;
-    };
-
-profibus_slave* G_PROFIBUS_SLAVE_LUA();
 //-----------------------------------------------------------------------------
 class i_log
     {

@@ -6,28 +6,21 @@
 /// всю необходимую информацию. Для хранения всех ошибок служит класс
 /// @ref errors_manager.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
-///
 /// @par Описание директив препроцессора:
-/// @c PAC    - компиляция для контроллера.@n
+/// @c PAC - компиляция для контроллера.@n
 /// @c DRIVER - компиляция для драйвера (ОС Windows).
 ///
-/// @par Текущая версия:
-/// @$Rev$.\n
-/// @$Author$.\n
-/// @$Date::                     $.
+
 
 #ifndef ERRORS_H
 #define ERRORS_H
 
-#if !( defined PAC_PC || defined PAC_WAGO_750_860 || \
-	defined PAC_WAGO_PFC200 || defined PAC_PLCNEXT ) && \
+#if !( defined PAC_PC || defined PAC_PLCNEXT ) && \
     !defined DRIVER
 #error You must define type!
 #endif
 
-#if ( defined PAC_PC || defined PAC_WAGO_750_860 || \
-	defined PAC_WAGO_PFC200 || defined PAC_PLCNEXT ) && \
+#if ( defined PAC_PC || defined PAC_PLCNEXT ) && \
     !defined PAC
 #define PAC
 #endif
@@ -447,8 +440,6 @@ class siren_lights_manager: public i_Lua_save_device
             {
             return "G_SIREN_MNGR";
             }
-
-        int set_cmd( const char *prop, u_int idx, const char *val );
 
         virtual ~siren_lights_manager()
             {
