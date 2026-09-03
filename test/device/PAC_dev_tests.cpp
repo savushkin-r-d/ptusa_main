@@ -5484,11 +5484,11 @@ TEST_F( iolink_dev_test, counter_iolink_smfx20_evaluate_io_and_getters )
     EXPECT_NEAR( 9.9f, fqt1.get_flow(), 0.01f );
     EXPECT_FLOAT_EQ( 4.2f, fqt1.get_temperature() );
 
-    char buff[ 300 ] = { 0 };
-    fqt1.save_device( buff );
-    EXPECT_THAT( std::string( buff ), HasSubstr( "C=321" ) );
-    EXPECT_THAT( std::string( buff ), HasSubstr( "F=9.90" ) );
-    EXPECT_THAT( std::string( buff ), HasSubstr( "T=4.2" ) );
+    std::array<char, 300> buff{};
+    fqt1.save_device( buff.data() );
+    EXPECT_THAT( std::string( buff.data() ), HasSubstr( "C=321" ) );
+    EXPECT_THAT( std::string( buff.data() ), HasSubstr( "F=9.90" ) );
+    EXPECT_THAT( std::string( buff.data() ), HasSubstr( "T=4.2" ) );
 
     delete[] fqt1.AI_channels.int_read_values[ 0 ];
     fqt1.AI_channels.int_read_values[ 0 ] = nullptr;

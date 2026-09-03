@@ -432,7 +432,7 @@ class circuit_breaker : public analog_io_device
 
         int save_device_ex(char* buff) const override;
 
-        int set_cmd(const char* prop, u_int idx, double val) override;
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
         void direct_set_value(float v) override;
 
