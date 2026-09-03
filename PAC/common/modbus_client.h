@@ -3,13 +3,15 @@
 #include <array>
 #include "tcp_client.h"
 #include "iot_base.h"
+#include "device/i_tech_dev_error_device.h"
 
-class modbus_client
+class modbus_client: public i_simple_error
     {
     protected:
         std::array<char, 50 > name{};
 
         tcp_client* tcpclient;
+        saved_params_u_int_4* error_params = nullptr;
         int modbus_expected_length{ 0 };
         int modbus_async_result{ 0 };
         unsigned char stationid{ 1 };
@@ -20,20 +22,20 @@ class modbus_client
         static const int write_buff_start = 13;
         ///< Начало буфера данных для операций чтения
         static const int read_buff_start = 9;
-        ///< Previous connection state for change detection.
-        int prev_connected_state{ tcp_client::ACS_DISCONNECTED };
-
-        ///< Disconnect start time.
-        uint32_t disconnected_state_start_time{ get_millisec() };
-        ///< Disconnect event has been reported.
-        bool is_disconnect_reported{ false };
-
         void init_frame(unsigned int address, unsigned int value, unsigned int seventh_byte);
-        void check_connection_state_changed();
 
     public:
         modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
             uint32_t exchangetimeout = 50, const char * name = nullptr );
+
+        void set_error_params( saved_params_u_int_4* err_par ) override;
+        const char* get_name() const override;
+        const char* get_error_description() override;
+        int get_error_id() override;
+        int get_state() const override;
+        u_int_4 get_serial_n() const override;
+        int get_error_type() const override;
+
         int get_id();
         //реализация функций протокола modbus
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
@@ -83,5 +85,8 @@ class modbus_client
         unsigned char reverse(unsigned char b);
         int swapBits(int x, int p1, int p2, int n);
         ~modbus_client();
+
+    private:
+        static constexpr int ERROR_TYPE = 200;
     };
 #endif // modbus_client_h__

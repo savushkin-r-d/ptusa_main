@@ -62,9 +62,9 @@ class test_modbus_client : public modbus_client
             return tcpclient;
             }
 
-        int get_prev_connected_state() const
+        saved_params_u_int_4* get_error_params() const
             {
-            return prev_connected_state;
+            return error_params;
             }
 
         void test_init_frame( unsigned int address, unsigned int value,
@@ -374,134 +374,48 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
     test_bytes( expected, "res = cli:get_int4_dc_ba(ADDR)\n" );
     }
 
-// ------------------------------
-// TEST_F: connection state change tracking
-// ------------------------------
-
-// Test fixture reusing test_modbus_client.
-class ModbusClientConnectionStateTest : public ::testing::Test
+TEST( i_simple_error, modbus_client )
     {
-    protected:
-        motor_altivar m{ "M1", device::DEVICE_SUB_TYPE::M_ATV };
-        std::unique_ptr<test_modbus_client> m_client;
+    G_ERRORS_MANAGER->clear();
+    test_modbus_client client{ 1, "127.0.0.1", "M1" };
+    i_simple_error& error = client;
 
-        void SetUp() override
-            {
-            m.set_string_property( "IP", "127.0.0.1" );
-            m_client = std::make_unique<test_modbus_client>(
-                1, "127.0.0.1", m.get_name() );
+    EXPECT_NE( nullptr, client.get_error_params() );
+    EXPECT_STREQ( "M1", error.get_name() );
+    EXPECT_STREQ( "нет связи (Modbus)", error.get_error_description() );
+    EXPECT_EQ( -1, error.get_error_id() );
+    EXPECT_EQ( -1, error.get_state() );
+    EXPECT_EQ( 1U, error.get_serial_n() );
+    EXPECT_EQ( 200, error.get_error_type() );
 
-            PAC_critical_errors_manager::get_instance()->reset_all_error();
-            G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 1'000;
-            DeltaMilliSecSubHooker::set_default_time();
-            }
-
-        void TearDown() override
-            {
-            DeltaMilliSecSubHooker::set_default_time();
-            PAC_critical_errors_manager::get_instance()->reset_all_error();
-            }
-    };
-
-TEST_F( ModbusClientConnectionStateTest, initial_state_is_disconnected )
-    {
-    EXPECT_EQ( m_client->get_prev_connected_state(),
-        tcp_client::ACS_DISCONNECTED );
+    client.get_tcp_client()->set_connected_state( tcp_client::ACS_CONNECTED );
+    EXPECT_EQ( 0, error.get_state() );
+    G_ERRORS_MANAGER->clear();
     }
 
-TEST_F( ModbusClientConnectionStateTest, detects_connect_and_disconnect )
+TEST( errors_manager, saves_modbus_simple_error )
     {
-    auto* mngr = PAC_critical_errors_manager::get_instance();
-    G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ] = 100;
+    std::array<char, 300> buffer{};
+    u_int_2 error_id = 0;
 
-    // Simulate connection established.
-    m_client->get_tcp_client()->set_connected_state(
-        tcp_client::ACS_CONNECTED );
-    m_client->get_async_result();
+    G_ERRORS_MANAGER->clear();
+    test_modbus_client client{ 1, "127.0.0.1", "M1" };
+    G_ERRORS_MANAGER->evaluate();
+    G_ERRORS_MANAGER->save_as_Lua_str( buffer.data(), error_id );
 
-    EXPECT_EQ( m_client->get_prev_connected_state(),
-        tcp_client::ACS_CONNECTED );
-    EXPECT_FALSE( mngr->is_any_error() );
-
-    // Simulate short disconnect: no error before timeout.
-    m_client->get_tcp_client()->set_connected_state(
-        tcp_client::ACS_DISCONNECTED );
-    DeltaMilliSecSubHooker::set_millisec( 99 );
-    m_client->get_async_result();
-
-    EXPECT_EQ( m_client->get_prev_connected_state(),
-        tcp_client::ACS_DISCONNECTED );
-    EXPECT_FALSE( mngr->is_any_error() );
-
-    // Simulate timeout expiration.
-    DeltaMilliSecSubHooker::set_millisec( 100 );
-    m_client->get_async_result();
-    EXPECT_TRUE( mngr->is_any_error() );
-
-    std::array<char, 500> buffer{};
-    u_int_2 id = 0;
-    mngr->save_as_Lua_str( buffer.data(), id );
-
-    const auto REFERENCE_MSG = R"_(
-	{
-	description = "1-2-1 : нет связи c 'M1' (ModBus)",
-	type = AT_SPECIAL,
-	group = 'Авария',
-	priority = 250,
-	state = AS_ALARM,
-	id_n = 1,
-	},
-)_" + 1;
-
-    EXPECT_EQ( std::string( buffer.data() ), REFERENCE_MSG );
-    EXPECT_FALSE( mngr->is_any_critical_error() );
-
-
-    auto L = lua_open();
-    G_LUA_MANAGER->set_Lua( L );
-
-    const int IN_BUFF_SIZE = 100;
-    const int OUT_BUFF_SIZE = 1000;
-    std::array<char, IN_BUFF_SIZE > data{ '\0' };
-    const auto CMD_SIZE = 1;
-    std::array<char, OUT_BUFF_SIZE> out_data{ '\0' };
-    auto out_data_ptr = reinterpret_cast<unsigned char*>( out_data.data() );
-    auto in_data_ptr = reinterpret_cast<unsigned char*>( data.data() );
-
-    G_DEVICE_CMMCTR->clear_devices();
-    device_communicator::switch_off_compression();
-    in_data_ptr[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
-    device_communicator::write_devices_states_service( CMD_SIZE,
-        in_data_ptr, out_data_ptr );
-    EXPECT_STREQ( R"_(
-alarms[ 0 ] =
-  {
-	{
-	description = "1-2-1 : нет связи c 'M1' (ModBus)",
-	type = AT_SPECIAL,
-	group = 'Авария',
-	priority = 250,
-	state = AS_ALARM,
-	id_n = 1,
-	},
-  id = 1,
-  }
-)_" + 1,
-        reinterpret_cast<const char*>( out_data_ptr ) );
-    device_communicator::switch_on_compression();
-
-    G_LUA_MANAGER->free_Lua();
-    }
-
-TEST_F( ModbusClientConnectionStateTest, no_change_when_state_unchanged )
-    {
-    const auto* mngr = PAC_critical_errors_manager::get_instance();
-
-    // State stays disconnected -- prev should remain ACS_DISCONNECTED.
-    DeltaMilliSecSubHooker::set_millisec( 999 );
-    m_client->get_async_result();
-
-    EXPECT_EQ( m_client->get_prev_connected_state(),
-        tcp_client::ACS_DISCONNECTED );
-    EXPECT_FALSE( mngr->is_any_error() );
+    const auto expected = R"s({
+description="M1 - нет связи (Modbus)",
+priority=250,
+state=1,
+type=4,
+group="тревога",
+id_n=1,
+id_object_alarm_number=1,
+id_type=200,
+suppress=false
+},
+)s";
+    EXPECT_STREQ( expected, buffer.data() );
+    EXPECT_EQ( 1, error_id );
+    G_ERRORS_MANAGER->clear();
     }

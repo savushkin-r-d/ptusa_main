@@ -59,14 +59,6 @@ TEST( PAC_critical_errors_manager, set_global_error )
     EXPECT_STREQ( "", buff.data() );
 
 
-    // Ошибки класса `AC_NO_CONNECTION`.
-    mngr->set_global_error( PAC_critical_errors_manager::AC_NO_CONNECTION,
-        PAC_critical_errors_manager::AS_MODBUS_CMMCTR, 1 );
-    EXPECT_TRUE( mngr->is_any_error() );
-    mngr->reset_global_error( PAC_critical_errors_manager::AC_NO_CONNECTION,
-        PAC_critical_errors_manager::AS_MODBUS_CMMCTR, 1 );
-    EXPECT_FALSE( mngr->is_any_error() );
-
     mngr->set_global_error( PAC_critical_errors_manager::AC_NO_CONNECTION,
         PAC_critical_errors_manager::AS_EASYSERVER, 1 );
     EXPECT_TRUE( mngr->is_any_error() );

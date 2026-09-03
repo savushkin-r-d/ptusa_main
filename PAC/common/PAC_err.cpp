@@ -96,13 +96,8 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
         G_LOG->error( "%s",
             get_alarm_descr( eclass, p1, p2, true, description ) );
 
-        auto priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION;
-        if ( p1 == AS_MODBUS_CMMCTR )
-            {
-            priority = ALARM_CLASS_PRIORITY::P_ALARM;
-            }
-
-        errors.emplace_back( eclass, p1, p2, priority, description );
+        errors.emplace_back( eclass, p1, p2,
+            ALARM_CLASS_PRIORITY::P_ERR_CONNECTION, description );
         errors_id++;
         }
     }
@@ -266,11 +261,6 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
                 {
                 case AS_IO_COUPLER:
                     // Обработано в начале функции.
-                    break;
-
-                case AS_MODBUS_CMMCTR:
-                    fmt::format_to_n( tmp + res, BUFF_SIZE - res,
-                        " c '{}' (ModBus)", description  );
                     break;
 
                 case AS_EASYSERVER:

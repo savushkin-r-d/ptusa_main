@@ -97,7 +97,7 @@ TEST( device_communicator, print )
     EXPECT_TRUE( true );
     }
 
-TEST( tech_dev_error, save_as_Lua_str )
+TEST( simple_error, save_as_Lua_str )
     {
     std::array<char, 300> buff{};
     u_int_2 err_id = 0;

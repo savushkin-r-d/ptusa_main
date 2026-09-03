@@ -62,7 +62,6 @@ class PAC_critical_errors_manager
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
             {
             AS_IO_COUPLER = 1,      ///< Ошибки модулей I/O.
-            AS_MODBUS_CMMCTR = 2,   ///< Ошибки Modbus-коммуникации.
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
 
             //AC_NET,               ///< Ошибки сетевой работы.
