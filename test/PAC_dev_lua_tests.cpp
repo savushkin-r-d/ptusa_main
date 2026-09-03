@@ -828,11 +828,16 @@ TEST( toLuapp, tolua_PAC_dev_FQT_IOLINK00 )
         "G_DEVICE_MANAGER():add_io_device( "
         "device.DT_FQT, device.DST_FQT_IOLINK, \'FQT1\', "
         "\'Test FQT IOLINK\', \'IFM.SMF420\' )" ) );
+    auto* fqt_cpp = G_DEVICE_MANAGER()->get_FQT_IOLINK( "FQT1" );
+    ASSERT_NE( nullptr, fqt_cpp );
+    ASSERT_STREQ( "FQT1", fqt_cpp->get_name() );
+
     ASSERT_EQ( 0, luaL_dostring( L, "FQT1 = FQT_IOLINK( \'FQT1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "FQT1" );
     auto FQT1 = static_cast<counter_iolink*>(
         tolua_touserdata( L, -1, nullptr ) );
     ASSERT_NE( nullptr, FQT1 );
+    EXPECT_EQ( fqt_cpp, FQT1 );
     lua_remove( L, -1 );
 
     // Некорректный вызов без self.
@@ -851,8 +856,8 @@ TEST( toLuapp, tolua_PAC_dev_FQT_IOLINK00 )
     EXPECT_EQ( 0.f, tolua_tonumber( L, -1, 0 ) );
     lua_remove( L, -1 );
 
-    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:set_cmd( 'T', 0, 12.3 )" ) );
-    ASSERT_EQ( 0, luaL_dostring( L, "FQT1:set_cmd( 'C', 0, 456 )" ) );
+    fqt_cpp->set_cmd( "T", 0, 12.3 );
+    fqt_cpp->set_cmd( "C", 0, 456 );
 
     ASSERT_EQ( 0, luaL_dostring( L, "res_t = FQT1:get_temperature()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res_t" );
