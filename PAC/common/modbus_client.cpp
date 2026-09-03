@@ -1,28 +1,63 @@
 #include "modbus_client.h"
-#include "console.h"
 #include "log.h"
-#include "PAC_err.h"
-#include "PAC_info.h"
+#include "g_errors.h"
 
-modbus_client::modbus_client(unsigned int id, const char* ip, unsigned int port, uint32_t exchangetimeout )
+#include "fmt/format.h"
+
+
+modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port,
+    uint32_t exchangetimeout, const char* client_name )
     {
-    if ( G_DEBUG )
-        {
-        printf("Create modbus client with ip = %s\n\r", ip);
-        }
-    tcpclient = tcp_client::Create( ip, port, id, PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout  );
+    fmt::format_to_n( name.data(), name.size() - 1, "{}",
+        client_name ? client_name : fmt::to_string( id ) );
+
+    G_LOG->debug( "Create Modbus client '%s' with IP = %s\n",
+        name.data(), ip );
+
+    tcpclient = tcp_client::Create( ip, port, id, 0, 256, exchangetimeout );
     zero_output_buff();
-    modbus_async_result = 0;
-    modbus_expected_length = 0;
-    stationid = 1;
-    prev_connected_state = tcp_client::ACS_DISCONNECTED;
-    disconnected_state_start_time = get_millisec();
-    is_disconnect_reported = false;
+
+    G_ERRORS_MANAGER->add_error( new simple_error( this ) );
     }
 
 modbus_client::~modbus_client()
     {
     delete tcpclient;
+    }
+
+void modbus_client::set_error_params( saved_params_u_int_4* err_par )
+    {
+    error_params = err_par;
+    }
+
+const char* modbus_client::get_name() const
+    {
+    return name.data();
+    }
+
+const char* modbus_client::get_error_description()
+    {
+    return "нет связи (Modbus)";
+    }
+
+int modbus_client::get_error_id()
+    {
+    return -tcpclient->get_id();
+    }
+
+int modbus_client::get_state() const
+    {
+    return tcpclient->get_connected_state() == tcp_client::ACS_CONNECTED ? 0 : -1;
+    }
+
+u_int_4 modbus_client::get_serial_n() const
+    {
+    return static_cast<u_int_4>( tcpclient->get_id() );
+    }
+
+int modbus_client::get_error_type() const
+    {
+    return ERROR_TYPE;
     }
 
 void modbus_client::init_frame( unsigned int address, unsigned int value,
@@ -473,63 +508,12 @@ int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsig
 
 int modbus_client::get_async_result()
     {
-    check_connection_state_changed();
     return tcpclient->get_async_result();
     }
 
 int modbus_client::get_connected_state()
     {
     return tcpclient->get_connected_state();
-    }
-
-void modbus_client::check_connection_state_changed()
-    {
-    const int current_state = tcpclient->get_connected_state();
-    if ( current_state == tcp_client::ACS_CONNECTED )
-        {
-        disconnected_state_start_time = 0;
-        if ( prev_connected_state != tcp_client::ACS_CONNECTED )
-            {
-            G_LOG->info( "Modbus client %d: connected to \"%s\".",
-                tcpclient->get_id(), tcpclient->ip );
-            auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
-            pac_err_mngr->reset_global_error(
-                PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-                tcpclient->get_id() );
-            }
-
-        is_disconnect_reported = false;
-        prev_connected_state = current_state;
-        return;
-        }
-
-    if ( prev_connected_state == tcp_client::ACS_CONNECTED )
-        {
-        disconnected_state_start_time = get_millisec();
-        is_disconnect_reported = false;
-        }
-    else if ( disconnected_state_start_time == 0 )
-        {
-        disconnected_state_start_time = get_millisec();
-        }
-
-    if ( const auto WAIT_TIME =
-        G_PAC_INFO()->par[ PAC_info::P_BK_ANSWER_MAX_WAIT_TIME ];
-        !is_disconnect_reported &&
-        get_delta_millisec( disconnected_state_start_time ) >= WAIT_TIME )
-        {
-        G_LOG->warning( "Modbus client %d: disconnected from \"%s\".",
-            tcpclient->get_id(), tcpclient->ip );
-        auto* pac_err_mngr = PAC_critical_errors_manager::get_instance();
-        pac_err_mngr->set_global_error(
-            PAC_critical_errors_manager::AC_NO_CONNECTION,
-            PAC_critical_errors_manager::AS_MODBUS_DEVICE,
-            tcpclient->get_id() );
-        is_disconnect_reported = true;
-        }
-
-    prev_connected_state = current_state;
     }
 
 int modbus_client::async_read_coils( unsigned int start_address, unsigned int quantity )

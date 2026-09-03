@@ -15,8 +15,6 @@ extern "C" {
 #include    "tolua++.h"
 //-----------------------------------------------------------------------------
 TOLUA_API int tolua_PAC_dev_open ( lua_State* tolua_S );
-
-TOLUA_API int tolua_IOT_dev_open(lua_State* tolua_S);
 //-----------------------------------------------------------------------------
 const int SYS_FILE_CNT = 3;
 const int FILE_CNT     = 7;

@@ -1467,7 +1467,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         new_device = static_cast<device*>( static_cast<valve*>( new dev_stub() ) );
         }
 
-    G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
+    G_ERRORS_MANAGER->add_error( new simple_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );

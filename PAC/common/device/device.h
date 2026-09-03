@@ -1010,23 +1010,23 @@ class motor : public i_motor, public io_device
             C_MIN_VALUE = 0,
             C_MAX_VALUE = 100,
 
-            P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
+            P_ON_TIME = 1,       ///< Индекс параметра времени включения (мс).
 
-            DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
-            DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
+            DO_INDEX = 0,        ///< Индекс канала дискретного выхода.
+            DO_INDEX_REVERSE = 1,///< Индекс канала дискретного выхода реверса.
 
-            DI_INDEX       = 0,   ///< Индекс канала дискретного входа.
-                                  //   Или
-            DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
+            DI_INDEX       = 0,  ///< Индекс канала дискретного входа.
+                                 //   Или
+            DI_INDEX_ERROR = 0,  ///< Индекс канала дискретного входа ошибки.
 
-            AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
+            AO_INDEX = 0,        ///< Индекс канала аналогового выхода.
             };
 
         mutable uint32_t start_switch_time = get_millisec();
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-/// @brief Электродвигатель, управляемый частотным преобразователем altivar с
+/// @brief Электродвигатель, управляемый частотным преобразователем Altivar с
 /// интерфейсной платой Ethernet.
 class motor_altivar : public i_motor, public io_device
 {
@@ -1060,7 +1060,7 @@ public:
 
     float get_rpm() const
         {
-        return (float)rpm;
+        return static_cast<float>( rpm );
         }
 
     altivar_node* get_atv() const
@@ -1068,36 +1068,27 @@ public:
         return atv;
         }
 
+#ifndef  PTUSA_TEST
 private:
-    altivar_node* atv = nullptr;
+#endif // ! PTUSA_TEST
 
-    float freq = .0f;
-    int reverse = 0;
-    int rpm = 0;
-    int est = 0;
-    float amperage = .0f;
+    altivar_node* atv{ nullptr };
 
-    enum CONSTANTS
-    {
-        ADDITIONAL_PARAM_COUNT = 1,
+    float freq{ .0f };
+    int reverse{ 0 };
+    int rpm{ 0 };
+    int est{ 0 };
+    float amperage{ .0f };
 
-        C_MIN_VALUE = 0,
-        C_MAX_VALUE = 100,
-
+    enum class CONSTANTS
+        {
         P_ON_TIME = 1,          ///< Индекс параметра времени включения (мсек).
 
-        DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
-        DO_INDEX_REVERSE = 1,   ///< Индекс канала дискретного выхода реверса.
+        ADDITIONAL_PARAM_COUNT,
+        };
 
-        DI_INDEX = 0,           ///< Индекс канала дискретного входа.
-        //   Или
-        DI_INDEX_ERROR = 0,     ///< Индекс канала дискретного входа ошибки.
-
-        AO_INDEX = 0,           ///< Индекс канала аналогового выхода.
+    uint32_t start_switch_time{ get_millisec() };
     };
-
-    uint32_t start_switch_time = get_millisec();
-};
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
 /// интерфейсной платой Ethernet c расчетом линейной скорости.
@@ -1112,12 +1103,12 @@ class motor_altivar_linear : public motor_altivar
     private:
         int start_param_idx;
 
-        enum CONSTANTS
+        enum class CONSTANTS
             {
-            ADDITIONAL_PARAM_COUNT = 2,
-
             P_SHAFT_DIAMETER = 1,   ///< Диаметр вала (м).
             P_TRANSFER_RATIO,       ///< Передаточный коэффициент.
+
+            ADDITIONAL_PARAM_COUNT,
             };
     };
 //-----------------------------------------------------------------------------
