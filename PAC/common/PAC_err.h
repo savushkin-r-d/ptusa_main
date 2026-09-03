@@ -81,7 +81,7 @@ class PAC_critical_errors_manager
 
         void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
-            unsigned int param, const char* description = "" );
+            unsigned int param );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned int param, bool is_print_msg = true );
 
@@ -110,8 +110,7 @@ class PAC_critical_errors_manager
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class,
-            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set,
-            const char* description = nullptr );
+            ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set );
 
 
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
@@ -122,12 +121,10 @@ class PAC_critical_errors_manager
             unsigned int    err_sub_class;       ///< Подкласс ошибки.
             unsigned int    param;               ///< Параметр ошибки.
             int             priority;            ///< Приоритет ошибки.
-            std::array<char, 50 > description{}; ///< Описание ошибки.
 
             critical_error( int err_class = 0, u_int err_sub_class = 0,
                 u_int param = 0,
-                int priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION,
-                const char* description = "" );
+                int priority = ALARM_CLASS_PRIORITY::P_ERR_CONNECTION );
             };
 
         PAC_critical_errors_manager&

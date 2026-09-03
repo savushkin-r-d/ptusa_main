@@ -242,7 +242,7 @@ class simple_error: public base_error
 
     public:
         simple_error( i_simple_error* simple_error_owner = nullptr );
-        virtual ~simple_error();
+        virtual ~simple_error() = default;
 
 
         int save_as_Lua_str( char *str );

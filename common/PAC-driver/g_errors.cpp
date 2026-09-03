@@ -32,10 +32,6 @@ simple_error::simple_error( i_simple_error* simple_error_owner
     simple_error_owner->set_error_params( &err_par );
     }
 //-----------------------------------------------------------------------------
-simple_error::~simple_error()
-    {
-    }
-//-----------------------------------------------------------------------------
 int simple_error::save_as_Lua_str( char *str )
     {
     int res = 0;

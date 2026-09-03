@@ -86,6 +86,12 @@ class modbus_client: public i_simple_error
         int swapBits(int x, int p1, int p2, int n);
         ~modbus_client();
 
+        // Explicitly delete the copy constructors.
+        modbus_client( modbus_client const& ) = delete;
+        modbus_client( modbus_client&& ) = delete;
+        modbus_client& operator=( modbus_client const& ) = delete;
+        modbus_client& operator=( modbus_client&& ) = delete;
+
     private:
         static constexpr int ERROR_TYPE = 200;
     };

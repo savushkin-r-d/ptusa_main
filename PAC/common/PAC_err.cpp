@@ -75,7 +75,7 @@ void PAC_critical_errors_manager::show_errors() const
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
-    ALARM_SUBCLASS p1, unsigned int p2, const char* description )
+    ALARM_SUBCLASS p1, unsigned int p2 )
     {
     int b = 0;
 
@@ -94,10 +94,10 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
     if ( b == 0 )
         {
         G_LOG->error( "%s",
-            get_alarm_descr( eclass, p1, p2, true, description ) );
+            get_alarm_descr( eclass, p1, p2, true ) );
 
         errors.emplace_back( eclass, p1, p2,
-            ALARM_CLASS_PRIORITY::P_ERR_CONNECTION, description );
+            ALARM_CLASS_PRIORITY::P_ERR_CONNECTION );
         errors_id++;
         }
     }
@@ -127,8 +127,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         {
         if ( is_print_msg )
             {
-            G_LOG->info( "%s", get_alarm_descr( eclass, p1, p2, false,
-                errors[ idx ].description.data() ) );
+            G_LOG->info( "%s", get_alarm_descr( eclass, p1, p2, false ) );
             }
 
         errors.erase( errors.begin() + idx );
@@ -149,7 +148,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
             "\tdescription = \"{}\",\n",
             get_alarm_descr( static_cast<ALARM_CLASS>( err.err_class ),
                 static_cast<ALARM_SUBCLASS>( err.err_sub_class ),
-                err.param, true, err.description.data() ) ).size;
+                err.param, true ) ).size;
 
         res += fmt::format_to_n( str + res, MAX_COPY_SIZE,
             "\ttype = AT_SPECIAL,\n" ).size;
@@ -195,8 +194,7 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
-    ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set,
-    const char* description )
+    ALARM_SUBCLASS err_sub_class, unsigned int par, bool is_set )
     {
     const auto BUFF_SIZE = 200;
     static char tmp[ BUFF_SIZE ]{};
@@ -311,17 +309,10 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 PAC_critical_errors_manager::critical_error::critical_error( int err_class,
     u_int err_sub_class,
     u_int param,
-    int priority,
-    const char* err_description ) :err_class( err_class ),
+    int priority ) :err_class( err_class ),
     err_sub_class( err_sub_class ), param( param ),
     priority( priority )
     {
-    if ( err_description )
-        {
-        const auto result = fmt::format_to_n(
-            description.data(), description.size() - 1, "{}", err_description );
-        *result.out = '\0';
-        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
