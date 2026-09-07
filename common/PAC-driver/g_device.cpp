@@ -177,8 +177,6 @@ long device_communicator::write_devices_states_service(
 #ifdef DEBUG_DEV_CMCTR
             printf( "CMD_GET_PAC_ERRORS\n" );
 #endif
-            static u_int_2 errors_id{};
-
             auto project_descr_id = data[ 1 ];
             auto* str = reinterpret_cast<char*>( outdata );
             str[ 0 ] = 0;

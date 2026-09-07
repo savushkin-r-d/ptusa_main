@@ -401,7 +401,7 @@ void errors_manager::print()
     {
     if ( G_DEBUG )
         {
-        printf( "dev_errors_manager\n" );
+        printf( "errors_manager\n" );
 
         for ( u_int i = 0; i < s_errors_vector.size(); i++ )
             {
@@ -442,17 +442,21 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
         int result = res->set_cmd( cmd, object_alarm_number );
         if ( 0 == result )
             {
-            errors_id++; // Cостояние ошибок изменилось.
+            errors_id++; // Состояние ошибок изменилось.
             }
         }
     else
         {
         if ( G_DEBUG )
             {
-            printf( "Error dev_errors_manager::set_cmd(...) - cmd = %u, object_type = %u,\
-               object_number = %u, object_alarm_number = %u\n",
+            printf(
+                "[errors] set_cmd failed: object not found; "
+                "cmd=%s(%u), type=%u, obj=%u, alarm=%u\n",
+                cmd == base_error::C_CMD_ACCEPT ? "C_CMD_ACCEPT" :
+                ( cmd == base_error::C_CMD_SUPPRESS ? "C_CMD_SUPPRESS" :
+                    ( cmd == base_error::C_CMD_UNSET_SUPPRESS ?
+                        "C_CMD_UNSET_SUPPRESS" : "UNKNOWN" ) ),
                 cmd, object_type, object_number, object_alarm_number );
-            printf( "Error object not found!\n" );
             }
         }
 

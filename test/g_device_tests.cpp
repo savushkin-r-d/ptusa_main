@@ -69,6 +69,7 @@ TEST( device_communicator, write_devices_states_service )
 
     device_communicator::switch_off_compression();
     in_data_ptr[ 0 ] = device_communicator::CMD_GET_PAC_ERRORS;
+    device_communicator::clear_errors_id();
     device_communicator::write_devices_states_service( CMD_SIZE,
         in_data_ptr, out_data_ptr );
     EXPECT_STREQ( R"(
