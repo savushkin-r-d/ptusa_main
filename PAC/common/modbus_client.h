@@ -92,7 +92,18 @@ class modbus_client: public i_simple_error
         modbus_client& operator=( modbus_client const& ) = delete;
         modbus_client& operator=( modbus_client&& ) = delete;
 
+#ifndef PTUSA_TEST
     private:
+#endif
+        inline static std::vector<unsigned int> ids{};
+
+#ifdef PTUSA_TEST
+        void static clear_ids()
+            {
+            ids.clear();
+            }
+#endif
+
         static constexpr int ERROR_TYPE = 200;
     };
 #endif // modbus_client_h__

@@ -197,8 +197,12 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
                 {
                 if ( G_DEBUG )
                     {
-                    printf( "simple_error::set_cmd(...) - error state = %d, \
-                       trying to set to ACCEPT!\n", error_state );
+                    printf( "[errors] set_cmd failed: "
+                        "incorrect current error state; "
+                        "error_state=%s(%d), trying to set to ACCEPT.\n",
+                        error_state == AS_NORMAL ? "AS_NORMAL" :
+                            error_state == AS_ACCEPT ? "AS_ACCEPT" : "UNKNOWN",
+                        error_state );
                     }
                 res = 1;
                 }
@@ -211,8 +215,12 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
 
     if ( G_DEBUG )
         {
-        printf( "simple_error::set_cmd(...) - cmd = %d\n", cmd );
-        print();
+        printf( "[errors] set_cmd: "
+            "error_state = %d, trying to set to %s(%d).\n",
+            error_state,
+            cmd == C_CMD_SUPPRESS ? "SUPPRESS" :
+                cmd == C_CMD_UNSET_SUPPRESS ? "UNSET_SUPPRESS" :
+                    cmd == C_CMD_ACCEPT ? "ACCEPT" : "UNKNOWN", cmd );
         }
 
     return res;
@@ -459,11 +467,6 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
                 cmd, object_type, object_number, object_alarm_number );
             }
         }
-
-#ifdef DEBUG
-    //print();
-#endif // DEBUG
-
     }
 //-----------------------------------------------------------------------------
 errors_manager::~errors_manager()

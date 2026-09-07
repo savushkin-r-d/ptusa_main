@@ -8,27 +8,26 @@
 modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port,
     uint32_t exchangetimeout, const char* client_name )
     {
-    // Вектор уже имеющихся идентификаторов клиентов. Если идентификатор уже
-    // есть в векторе, то выдаём соответствующее сообщение и создаем новый
-    // номер, который добавляется в вектор. Если идентификатора нет, то он
-    // добавляется в вектор.
-    static std::vector<unsigned int> ids{};
+    // Если идентификатор уже есть в векторе, то выдаём соответствующее
+    // сообщение и создаем новый номер, который добавляется в вектор.
+    // Если идентификатора нет, то он добавляется в вектор.
     if ( std::find( ids.begin(), ids.end(), id ) != ids.end() )
         {
-        G_LOG->warning( "Modbus client with id = %d already exists.", id );
+        auto old_id = id;
         while ( std::find( ids.begin(), ids.end(), id ) != ids.end() )
             {
             ++id;
             }
-        G_LOG->warning( "Creating a new client with a new id = %d.", id );
+        G_LOG->warning( "Modbus client (id=%d) already exists, "
+            "setting a new client id (id=%d)", old_id, id );
         }
     ids.push_back( id );
 
     fmt::format_to_n( name.data(), name.size() - 1, "{}",
         client_name ? client_name : fmt::to_string( id ) );
 
-    G_LOG->debug( "Create Modbus client '%s' with IP = %s\n",
-        name.data(), ip );
+    G_LOG->debug( "Create Modbus client '%s' (id=%d, IP=`%s`)",
+        name.data(), id, ip );
 
     tcpclient = tcp_client::Create( ip, port, id, 0, 256, exchangetimeout );
     zero_output_buff();

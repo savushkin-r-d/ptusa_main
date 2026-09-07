@@ -374,9 +374,12 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
     test_bytes( expected, "res = cli:get_int4_dc_ba(ADDR)\n" );
     }
 
+
 TEST( i_simple_error, modbus_client )
     {
     G_ERRORS_MANAGER->clear();
+    modbus_client::clear_ids();
+
     test_modbus_client client_1{ 1u, "127.0.0.1", "M1" };
     test_modbus_client client_2{ 1u, "127.0.0.1", "M2" };
 
