@@ -4,6 +4,7 @@
 
 #include "fmt/format.h"
 #include <vector>
+#include <algorithm>
 
 modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port,
     uint32_t exchangetimeout, const char* client_name )
@@ -24,7 +25,7 @@ modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port
     ids.push_back( id );
 
     fmt::format_to_n( name.data(), name.size() - 1, "{}",
-        client_name ? client_name : fmt::to_string( id ) );
+        client_name ? client_name : fmt::format( "modbus_client_{}", id ) );
 
     G_LOG->debug( "Create Modbus client '%s' (id=%d, IP=`%s`)",
         name.data(), id, ip );
