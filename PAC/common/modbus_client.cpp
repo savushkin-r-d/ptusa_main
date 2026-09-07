@@ -63,6 +63,11 @@ int modbus_client::get_error_id()
 
 int modbus_client::get_state() const
     {
+    if ( G_PAC_INFO()->is_emulator() )
+        {
+        return tcp_client::ACS_CONNECTED;
+        }
+
     return tcpclient->get_connected_state() == tcp_client::ACS_CONNECTED ? 0 : -1;
     }
 

@@ -389,6 +389,11 @@ TEST( i_simple_error, modbus_client )
 
     i_simple_error& error = client_1;
 
+    // В режиме эмулятора нет ошибки.
+    EXPECT_EQ( 1, error.get_state() );
+
+    G_PAC_INFO()->emulation_off();
+
     EXPECT_NE( nullptr, client_1.get_error_params() );
     EXPECT_STREQ( "M1", error.get_name() );
     EXPECT_STREQ( "нет связи (Modbus)", error.get_error_description() );
@@ -400,6 +405,8 @@ TEST( i_simple_error, modbus_client )
     client_1.get_tcp_client()->set_connected_state( tcp_client::ACS_CONNECTED );
     EXPECT_EQ( 0, error.get_state() );
     G_ERRORS_MANAGER->clear();
+
+    G_PAC_INFO()->emulation_on();
     }
 
 TEST( errors_manager, saves_modbus_simple_error )
@@ -407,6 +414,7 @@ TEST( errors_manager, saves_modbus_simple_error )
     std::array<char, 300> buffer{};
     u_int_2 error_id = 0;
 
+    G_PAC_INFO()->emulation_off();
     G_ERRORS_MANAGER->clear();
     test_modbus_client client{ 1, "127.0.0.1", "M1" };
     G_ERRORS_MANAGER->evaluate();
@@ -427,4 +435,6 @@ suppress=false
     EXPECT_STREQ( expected, buffer.data() );
     EXPECT_EQ( 1, error_id );
     G_ERRORS_MANAGER->clear();
+
+    G_PAC_INFO()->emulation_on();
     }
