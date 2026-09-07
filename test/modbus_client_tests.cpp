@@ -377,10 +377,16 @@ TEST_F( ModbusClientLuaTest, get_int4_dc_ba )
 TEST( i_simple_error, modbus_client )
     {
     G_ERRORS_MANAGER->clear();
-    test_modbus_client client{ 1, "127.0.0.1", "M1" };
-    i_simple_error& error = client;
+    test_modbus_client client_1{ 1u, "127.0.0.1", "M1" };
+    test_modbus_client client_2{ 1u, "127.0.0.1", "M2" };
 
-    EXPECT_NE( nullptr, client.get_error_params() );
+    // Проверка, что второй клиент получил уникальный идентификатор.
+    EXPECT_EQ( client_1.get_serial_n(), 1u );
+    EXPECT_EQ( client_2.get_serial_n(), 2u );
+
+    i_simple_error& error = client_1;
+
+    EXPECT_NE( nullptr, client_1.get_error_params() );
     EXPECT_STREQ( "M1", error.get_name() );
     EXPECT_STREQ( "нет связи (Modbus)", error.get_error_description() );
     EXPECT_EQ( -1, error.get_error_id() );
@@ -388,7 +394,7 @@ TEST( i_simple_error, modbus_client )
     EXPECT_EQ( 1U, error.get_serial_n() );
     EXPECT_EQ( 200, error.get_error_type() );
 
-    client.get_tcp_client()->set_connected_state( tcp_client::ACS_CONNECTED );
+    client_1.get_tcp_client()->set_connected_state( tcp_client::ACS_CONNECTED );
     EXPECT_EQ( 0, error.get_state() );
     G_ERRORS_MANAGER->clear();
     }

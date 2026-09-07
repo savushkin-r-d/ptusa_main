@@ -3,11 +3,27 @@
 #include "g_errors.h"
 
 #include "fmt/format.h"
-
+#include <vector>
 
 modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port,
     uint32_t exchangetimeout, const char* client_name )
     {
+    // Вектор уже имеющихся идентификаторов клиентов. Если идентификатор уже
+    // есть в векторе, то выдаём соответствующее сообщение и создаем новый
+    // номер, который добавляется в вектор. Если идентификатора нет, то он
+    // добавляется в вектор.
+    static std::vector<unsigned int> ids{};
+    if ( std::find( ids.begin(), ids.end(), id ) != ids.end() )
+        {
+        G_LOG->warning( "Modbus client with id = %d already exists.", id );
+        while ( std::find( ids.begin(), ids.end(), id ) != ids.end() )
+            {
+            ++id;
+            }
+        G_LOG->warning( "Creating a new client with a new id = %d.", id );
+        }
+    ids.push_back( id );
+
     fmt::format_to_n( name.data(), name.size() - 1, "{}",
         client_name ? client_name : fmt::to_string( id ) );
 
@@ -42,7 +58,7 @@ const char* modbus_client::get_error_description()
 
 int modbus_client::get_error_id()
     {
-    return -tcpclient->get_id();
+    return -1;
     }
 
 int modbus_client::get_state() const
