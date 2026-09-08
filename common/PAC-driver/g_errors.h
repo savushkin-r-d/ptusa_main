@@ -241,7 +241,7 @@ class simple_error: public base_error
     friend class errors_manager;
 
     public:
-        simple_error( i_simple_error* simple_error_owner = nullptr );
+        simple_error( i_simple_error* simple_error_owner );
         virtual ~simple_error() = default;
 
 

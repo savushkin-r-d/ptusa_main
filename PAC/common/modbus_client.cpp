@@ -1,8 +1,10 @@
 #include "modbus_client.h"
 #include "log.h"
 #include "g_errors.h"
+#include "PAC_info.h"
 
 #include "fmt/format.h"
+
 #include <vector>
 #include <algorithm>
 
@@ -38,7 +40,15 @@ modbus_client::modbus_client( unsigned int id, const char* ip, unsigned int port
 
 modbus_client::~modbus_client()
     {
+    // Removing the client ID.
+    if ( auto it = std::find( ids.begin(), ids.end(), tcpclient->get_id() );
+        it != ids.end() )
+        {
+        ids.erase( it );
+        }
+
     delete tcpclient;
+    tcpclient = nullptr;
     }
 
 void modbus_client::set_error_params( saved_params_u_int_4* err_par )
