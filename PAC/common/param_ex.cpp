@@ -84,14 +84,20 @@ int params_manager::get_params_save_counter() const
     return params_save_counter;
     }
 //-----------------------------------------------------------------------------
+const bool params_manager::was_successful_init() const
+    {
+    return successful_init;
+    }
+//-----------------------------------------------------------------------------
 int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
 
-    params_mem->load_data();
-    CRC_mem->load_data();
+    auto res = params_mem->load_data();
+    res += CRC_mem->load_data();
 
-    return 0;
+    successful_init = ( res == 0 );
+    return res;
     }
 //-----------------------------------------------------------------------------
 void params_manager::final_init( int auto_init_params /*= 1*/,
