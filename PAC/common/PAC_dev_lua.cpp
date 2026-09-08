@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Aug 11 09:59:08 2026.
+** Generated automatically by tolua++-1.0.92 on Wed Aug 26 12:58:59 2026.
 */
 
 #ifndef __cplusplus
@@ -13064,7 +13064,8 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
      !tolua_isstring(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,1,&tolua_err) ||
      !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isstring(tolua_S,6,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -13074,8 +13075,9 @@ static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
   const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,502));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,50));
+  const char* name = ((const char*)  tolua_tostring(tolua_S,6,nullptr));
   {
-   modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout));
+   modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout,name));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"modbus_client");
   }
  }
@@ -13100,7 +13102,8 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
      !tolua_isstring(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,1,&tolua_err) ||
      !tolua_isnumber(tolua_S,5,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isstring(tolua_S,6,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -13110,8 +13113,9 @@ static int tolua_PAC_dev_modbus_client_new00_local(lua_State* tolua_S)
   const char* ip = ((const char*)  tolua_tostring(tolua_S,3,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,4,502));
   unsigned long exchangetimeout = ((unsigned long)  tolua_tonumber(tolua_S,5,50));
+  const char* name = ((const char*)  tolua_tostring(tolua_S,6,nullptr));
   {
-   modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout));
+   modbus_client* tolua_ret = (modbus_client*)  Mtolua_new((modbus_client)(id,ip,port,exchangetimeout,name));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"modbus_client");
     tolua_register_gc(tolua_S,lua_gettop(tolua_S));
   }

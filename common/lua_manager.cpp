@@ -265,7 +265,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         printf( "Экспорт в Lua необходимых объектов.\n" );
         }
     tolua_PAC_dev_open( L );
-    tolua_IOT_dev_open( L );
 
     //-Загрузка параметров.
     if ( G_DEBUG )
