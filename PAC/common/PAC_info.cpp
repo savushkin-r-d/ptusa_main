@@ -248,9 +248,8 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 {
                 G_LOG->notice( "Reload restrictions (remote monitor "
                     "client command)." );
-                const int SCRIPT_N = 7;
-                cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
-                    cmd_answer, sizeof( cmd_answer ) );
+                cmd = G_LUA_MANAGER->reload_script( RESTRICTIONS_SCRIPT_N,
+                    "restrictions", cmd_answer, sizeof( cmd_answer ) );
                 return cmd;
                 }
 

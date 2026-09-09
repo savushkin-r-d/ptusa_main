@@ -670,6 +670,22 @@ TEST_F(LuaManagerTest, reload_script_exceeded_script_number_failure)
     EXPECT_EQ(1, G_LUA_MANAGER->reload_script(INT_MAX, "test_lua_func_str", ans, sizeof(ans)));
 }
 
+TEST( lua_manager, reload_script_negative_script_number_failure )
+    {
+    auto L = lua_open();
+    G_LUA_MANAGER->set_Lua( L );
+    char ans[ 100 ] = {};
+    EXPECT_EQ( 1, G_LUA_MANAGER->reload_script( -1, "test_lua_func_str",
+        ans, sizeof( ans ) ) );
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( lua_manager, restrictions_script_is_last_file )
+    {
+    EXPECT_EQ( RESTRICTIONS_SCRIPT_N, FILE_CNT - 1 );
+    EXPECT_STREQ( FILES[ RESTRICTIONS_SCRIPT_N ], "main.restrictions.lua" );
+    }
+
 TEST_F(LuaManagerTest, reload_script_check_file_failure)
 {
     subhook_t hook_check_file =
