@@ -4262,7 +4262,7 @@ TEST( analog_valve_iolink, analog_valve_iolink )
     V1.save_device( buff );
     EXPECT_STREQ(
         "V1={M=0, ST=0, V=0, NAMUR_ST=0, OPENED=0, CLOSED=1, "
-        "BLINK=0, P_FB=1},\n", buff );
+        "BLINK=0, P_FB=0},\n", buff );
     }
 
 
@@ -5713,7 +5713,10 @@ TEST( wages_eth, evaluate_io )
     w1.evaluate_io();
     EXPECT_EQ( 0, w1.get_value() );
 
-    iot_wages_eth w2( 1, "127.0.0.1", 10000 );
+    // Корректное создание с именем в виде пустой строки.
+    iot_wages_eth w( 10, "127.0.0.2", 10000, nullptr );
+
+    iot_wages_eth w2( 1, "127.0.0.1", 10000, "W2" );
 
     w2.evaluate();
     EXPECT_EQ( 0, w2.get_wages_value() );
@@ -7089,6 +7092,10 @@ TEST_F( iolink_dev_test, converter_iolink_ao_get_state )
 TEST_F( iolink_dev_test, analog_valve_iolink_get_error_description_and_state )
     {
     analog_valve_iolink VC1( "VC1" );
+    // Включаем параметр P_FB, чтобы проверка ошибок IO-Link была активна.
+    VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+        0, 1.0f );
+
     // Повторно используем универсальную проверку ошибок IO-Link.
     // Ожидаемое состояние при OK — in_info.status, по умолчанию 0.
     test_dev_err( VC1, VC1, 0 );
@@ -7102,8 +7109,10 @@ TEST_F( iolink_dev_test, analog_valve_iolink_get_state_respects_P_FB )
     // Настраиваем только AI-канал для проверки IOLINK state.
     init_channels( VC1 );
 
-    // Без подключения IO-Link и P_FB=1 (по умолчанию) —
-    // ожидаем ошибку NOTCONNECTED.
+    // Включаем обратную связь (P_FB=1).
+    VC1.set_par( static_cast<int>( analog_valve_iolink::PAR_CONSTANTS::P_FB ),
+        0, 1.0f );
+    // Без подключения IO-Link и P_FB=1 — ожидаем ошибку NOTCONNECTED.
     VC1.evaluate_io();
     EXPECT_EQ( VC1.get_state(), -io_device::IOLINKSTATE::NOTCONNECTED );
 

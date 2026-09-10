@@ -2287,7 +2287,7 @@ void wages_eth::set_string_property( const char* field, const char* value )
         {
         int port = 1001;
         int id = 0;
-        weth = new iot_wages_eth( id, value, port );
+        weth = new iot_wages_eth( id, value, port, get_name() );
         }
     }
 
@@ -4278,12 +4278,13 @@ float analog_output::get_max_value() const
 //-----------------------------------------------------------------------------
 motor_altivar::motor_altivar( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
-    i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
-    io_device( dev_name )
+    i_motor( dev_name, sub_type,
+        par_cnt + static_cast<int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) - 1 ),
+        io_device( dev_name )
     {
-    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( static_cast<int>( CONSTANTS::P_ON_TIME ), 0, "P_ON_TIME" );
     }
-
+//-----------------------------------------------------------------------------
 int motor_altivar::save_device_ex(char * buff) const
     {
     int res = 0;
@@ -4303,14 +4304,14 @@ int motor_altivar::save_device_ex(char * buff) const
 
     return res;
     }
-
+//-----------------------------------------------------------------------------
 float motor_altivar::get_value() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return freq;
 
     return atv->get_output_in_percent();
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::direct_set_value(float value)
     {
     if ( G_PAC_INFO()->is_emulator() )
@@ -4321,7 +4322,7 @@ void motor_altivar::direct_set_value(float value)
 
     atv->set_output_in_percent( value );
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::direct_set_state(int new_state)
     {
     if ( G_PAC_INFO()->is_emulator() )
@@ -4355,14 +4356,14 @@ void motor_altivar::direct_set_state(int new_state)
         direct_off();
         }
     }
-
+//-----------------------------------------------------------------------------
 int motor_altivar::get_state() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::get_state();
 
     return atv->state;
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::direct_on()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::direct_on();
@@ -4370,7 +4371,7 @@ void motor_altivar::direct_on()
     atv->cmd = 1;
     atv->reverse = 0;
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::direct_off()
     {
     if ( G_PAC_INFO()->is_emulator() ) return device::direct_off();
@@ -4385,7 +4386,7 @@ void motor_altivar::direct_off()
         }
     atv->reverse = 0;
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::set_string_property(const char * field, const char * value)
     {
     device::set_string_property( field, value );
@@ -4404,30 +4405,31 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
             if (!atv)
                 {
-                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, get_article() );
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout,
+                    get_article(), get_name() );
                 atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
                 }
             }
         }
     }
-
+//-----------------------------------------------------------------------------
 void motor_altivar::print() const
     {
     device::print();
     }
-
+//-----------------------------------------------------------------------------
 int motor_altivar::get_params_count() const
     {
-    return ADDITIONAL_PARAM_COUNT;
+    return static_cast<int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) - 1;
     }
-
+//-----------------------------------------------------------------------------
 float motor_altivar::get_amperage() const
     {
     if ( G_PAC_INFO()->is_emulator() ) return amperage;
 
     return atv->amperage;
     }
-
+//-----------------------------------------------------------------------------
 int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_PAC_INFO()->is_emulator() )
@@ -4468,8 +4470,10 @@ int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 float motor_altivar_linear::get_linear_speed() const
     {
-    float d = get_par( P_SHAFT_DIAMETER, start_param_idx );
-    float n = get_par( P_TRANSFER_RATIO, start_param_idx );
+    float d = get_par( static_cast<int>( CONSTANTS::P_SHAFT_DIAMETER ),
+        start_param_idx );
+    float n = get_par( static_cast<int>( CONSTANTS::P_TRANSFER_RATIO ),
+        start_param_idx );
     float v = .0f;
 
     if ( 0 != d && 0 != n )
@@ -4486,15 +4490,17 @@ float motor_altivar_linear::get_linear_speed() const
 
     return v;
     }
-
+//-----------------------------------------------------------------------------
 motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
-    motor_altivar( dev_name, device::M_ATV_LINEAR, ADDITIONAL_PARAM_COUNT )
+    motor_altivar( dev_name, device::M_ATV_LINEAR,
+        static_cast<int>( CONSTANTS::ADDITIONAL_PARAM_COUNT ) - 1 )
     {
     start_param_idx = motor_altivar::get_params_count();
-    set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
-    set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
+    set_par_name( static_cast<int>( CONSTANTS::P_SHAFT_DIAMETER ),
+        start_param_idx, "P_SHAFT_DIAMETER" );
+    set_par_name( static_cast<int>( CONSTANTS::P_TRANSFER_RATIO ),
+        start_param_idx, "P_TRANSFER_RATIO" );
     }
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 converter_iolink_ao::converter_iolink_ao( const char* dev_name ) :
