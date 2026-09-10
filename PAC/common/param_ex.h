@@ -155,7 +155,7 @@ class params_manager
         ///
         /// @return true - инициализация прошла успешно.
         /// @return false - инициализация завершилась с ошибкой.
-        const bool was_successful_init() const;
+        bool was_successful_init() const;
 
 #ifndef PTUSA_TEST
     protected:

@@ -84,7 +84,7 @@ int params_manager::get_params_save_counter() const
     return params_save_counter;
     }
 //-----------------------------------------------------------------------------
-const bool params_manager::was_successful_init() const
+bool params_manager::was_successful_init() const
     {
     return successful_init;
     }
