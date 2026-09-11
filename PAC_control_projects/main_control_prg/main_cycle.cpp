@@ -2,6 +2,7 @@
 
 #include "dtime.h"
 #include "lua_manager.h"
+#include "lua_debugger.h"
 #include "prj_mngr.h"
 #include "tech_def.h"
 #include "device/manager.h"
@@ -44,6 +45,7 @@ int main_cycle()
     valve::evaluate();
 
     G_TECH_OBJECT_MNGR()->evaluate();
+    G_LUA_DEBUGGER->evaluate();
     sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     if ( !G_NO_IO_NODES &&

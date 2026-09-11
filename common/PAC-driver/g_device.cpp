@@ -16,7 +16,7 @@ char device_communicator::buff[ tcp_communicator::BUFSIZE ];
 
 auto_smart_ptr < device_communicator > device_communicator::instance;
 
-const u_int_2 G_CURRENT_PROTOCOL_VERSION = 104;
+const u_int_2 G_CURRENT_PROTOCOL_VERSION = 106;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
