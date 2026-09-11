@@ -102,6 +102,11 @@ virtual_counter* virtual_FQT( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_virtual_FQT( dev_name );
     }
+
+counter_iolink* FQT_IOLINK( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_FQT_IOLINK( dev_name );
+    }
 //-----------------------------------------------------------------------------
 i_AI_device* TE( u_int dev_n )
     {
@@ -486,6 +491,22 @@ virtual_counter* device_manager::get_virtual_FQT( const char* dev_name )
 
     static virtual_counter stub_fqt( "stub" );
     return &stub_fqt;
+    }
+//-----------------------------------------------------------------------------
+counter_iolink* device_manager::get_FQT_IOLINK( const char* dev_name )
+    {
+    if ( auto res = get_device_n( device::DT_FQT, dev_name ); res > -1 )
+        {
+        device* res_ctr = project_devices.at( res );
+        if ( res_ctr->get_sub_type() == device::DST_FQT_IOLINK )
+            {
+            return (counter_iolink*)res_ctr;
+            }
+        }
+    G_LOG->error( "FQT_IOLINK \"%s\" not found!", dev_name );
+
+    static counter_iolink stub_fqt_iolink( "stub" );
+    return &stub_fqt_iolink;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( const char* dev_name )
