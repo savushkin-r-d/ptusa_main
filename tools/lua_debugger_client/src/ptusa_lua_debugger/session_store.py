@@ -4,7 +4,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .history import DEFAULT_HISTORY_LIMIT, MAX_HISTORY_LIMIT
+from .history import (
+    DEFAULT_DISPLAY_SECONDS,
+    DEFAULT_HISTORY_LIMIT,
+    MAX_DISPLAY_SECONDS,
+    MAX_HISTORY_LIMIT,
+)
 
 
 def save_session(
@@ -16,12 +21,18 @@ def save_session(
     history_limit: int,
     expressions: list[str],
     chart_data: dict[str, Any] | None,
+    display_seconds: int = DEFAULT_DISPLAY_SECONDS,
+    auto_follow: bool = True,
+    statistics: dict[str, dict[str, float]] | None = None,
 ) -> None:
     document = {
         "version": 1,
         "connection": {"host": host, "port": port},
         "poll_interval_ms": poll_interval_ms,
         "history_limit": history_limit,
+        "display_seconds": display_seconds,
+        "auto_follow": auto_follow,
+        "statistics": statistics or {},
         "expressions": expressions,
         "chart_data": chart_data,
     }
@@ -38,6 +49,9 @@ def load_session(path: str | Path) -> dict[str, Any]:
     expressions = document.get("expressions")
     interval = document.get("poll_interval_ms")
     history_limit = document.get("history_limit", DEFAULT_HISTORY_LIMIT)
+    display_seconds = document.get("display_seconds", DEFAULT_DISPLAY_SECONDS)
+    auto_follow = document.get("auto_follow", True)
+    statistics = document.get("statistics", {})
     if not isinstance(connection, dict) or not isinstance(expressions, list):
         raise TypeError("Некорректный файл сессии")
     if not all(isinstance(item, str) for item in expressions):
@@ -51,4 +65,27 @@ def load_session(path: str | Path) -> dict[str, Any]:
     ):
         raise TypeError("Некорректный лимит истории")
     document["history_limit"] = history_limit
+    if (
+        not isinstance(display_seconds, int)
+        or isinstance(display_seconds, bool)
+        or not 1 <= display_seconds <= MAX_DISPLAY_SECONDS
+    ):
+        raise TypeError("Некорректный интервал отображения")
+    if not isinstance(auto_follow, bool):
+        raise TypeError("Некорректный режим отображения")
+    if not isinstance(statistics, dict) or any(
+        not isinstance(expression, str)
+        or not isinstance(extrema, dict)
+        or set(extrema) != {"min", "max"}
+        or any(
+            not isinstance(extrema[key], (int, float))
+            or isinstance(extrema[key], bool)
+            for key in ("min", "max")
+        )
+        for expression, extrema in statistics.items()
+    ):
+        raise TypeError("Некорректная статистика выражений")
+    document["display_seconds"] = display_seconds
+    document["auto_follow"] = auto_follow
+    document["statistics"] = statistics
     return document

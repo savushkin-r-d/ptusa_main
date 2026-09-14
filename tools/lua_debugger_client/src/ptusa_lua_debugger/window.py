@@ -7,6 +7,7 @@ from PySide6.QtCore import QMetaObject, Qt, QThread, Signal, Slot
 from PySide6.QtGui import QAction, QCloseEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QCheckBox,
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
@@ -25,9 +26,12 @@ from PySide6.QtWidgets import (
 )
 
 from .history import (
+    DEFAULT_DISPLAY_SECONDS,
     DEFAULT_HISTORY_LIMIT,
+    MAX_DISPLAY_SECONDS,
     MAX_HISTORY_LIMIT,
     merge_chart_data,
+    merge_statistics,
     trim_chart_data,
 )
 from .session_store import load_session, save_session
@@ -48,6 +52,7 @@ class MainWindow(QMainWindow):
         self.resize(1180, 760)
         self._connected = False
         self._last_chart_data: dict[str, Any] | None = None
+        self._statistics: dict[str, dict[str, float]] = {}
 
         self._thread = QThread(self)
         self._worker = DebuggerWorker()
@@ -92,6 +97,20 @@ class MainWindow(QMainWindow):
         self.history_limit_spin.setValue(DEFAULT_HISTORY_LIMIT)
         self.history_limit_spin.setToolTip("Максимум точек на каждое выражение")
         self.history_limit_spin.valueChanged.connect(self._history_limit_changed)
+        self.display_seconds_spin = QSpinBox()
+        self.display_seconds_spin.setRange(1, MAX_DISPLAY_SECONDS)
+        self.display_seconds_spin.setSuffix(" с")
+        self.display_seconds_spin.setValue(DEFAULT_DISPLAY_SECONDS)
+        self.display_seconds_spin.setToolTip(
+            "Интервал, отображаемый на графике"
+        )
+        self.display_seconds_spin.valueChanged.connect(self._display_settings_changed)
+        self.auto_follow_check = QCheckBox("Авто")
+        self.auto_follow_check.setChecked(True)
+        self.auto_follow_check.setToolTip(
+            "Автоматически показывать последние N секунд"
+        )
+        self.auto_follow_check.toggled.connect(self._display_settings_changed)
         self.connect_button = QPushButton("Подключиться")
         self.connect_button.clicked.connect(self._toggle_connection)
 
@@ -104,6 +123,9 @@ class MainWindow(QMainWindow):
         connection.addWidget(self.interval_spin)
         connection.addWidget(QLabel("История:"))
         connection.addWidget(self.history_limit_spin)
+        connection.addWidget(QLabel("Окно:"))
+        connection.addWidget(self.display_seconds_spin)
+        connection.addWidget(self.auto_follow_check)
         connection.addWidget(self.connect_button)
 
         self.expression_edit = QLineEdit()
@@ -125,21 +147,25 @@ class MainWindow(QMainWindow):
         expression_buttons.addWidget(apply_button)
         expression_buttons.addWidget(clear_button)
 
-        self.variables = QTableWidget(0, 3)
-        self.variables.setHorizontalHeaderLabels(["Lua-выражение", "Значение", "Состояние"])
+        self.variables = QTableWidget(0, 5)
+        self.variables.setHorizontalHeaderLabels(
+            ["Lua-выражение", "Значение", "Min", "Max", "Состояние"]
+        )
         self.variables.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.variables.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.variables.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.variables.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.variables.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        for column in range(1, 5):
+            self.variables.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeToContents
+            )
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
         left_layout.addLayout(expression_buttons)
         left_layout.addWidget(self.variables)
 
-        pg.setConfigOptions(antialias=True)
-        self.plot = pg.PlotWidget(background="#111827")
+        pg.setConfigOptions(antialias=True, foreground="#CFD8DC")
+        self.plot = pg.PlotWidget(background="#1C252A")
         self.plot.addLegend()
         self.plot.showGrid(x=True, y=True, alpha=0.2)
         self.plot.setLabel("bottom", "Время", units="s")
@@ -205,8 +231,7 @@ class MainWindow(QMainWindow):
         row = self.variables.rowCount()
         self.variables.insertRow(row)
         self.variables.setItem(row, 0, QTableWidgetItem(expression))
-        self.variables.setItem(row, 1, QTableWidgetItem("—"))
-        self.variables.setItem(row, 2, QTableWidgetItem("ожидание"))
+        self._initialize_expression_values(row)
         self.expression_edit.clear()
         self._apply_expressions()
 
@@ -223,6 +248,11 @@ class MainWindow(QMainWindow):
             for row in range(self.variables.rowCount())
             if self.variables.item(row, 0)
         ]
+
+    def _initialize_expression_values(self, row: int) -> None:
+        for column in range(1, 4):
+            self.variables.setItem(row, column, QTableWidgetItem("—"))
+        self.variables.setItem(row, 4, QTableWidgetItem("ожидание"))
 
     @Slot()
     def _apply_expressions(self) -> None:
@@ -244,6 +274,7 @@ class MainWindow(QMainWindow):
 
     @Slot(dict)
     def _on_chart_data(self, data: dict[str, Any]) -> None:
+        self._statistics = merge_statistics(self._statistics, data)
         self._last_chart_data = merge_chart_data(
             self._last_chart_data, data, self.history_limit_spin.value()
         )
@@ -255,23 +286,50 @@ class MainWindow(QMainWindow):
             series = by_expression.get(expression, {})
             samples = series.get("samples", [])
             if not samples:
+                self.variables.setItem(row, 2, QTableWidgetItem("—"))
+                self.variables.setItem(row, 3, QTableWidgetItem("—"))
                 continue
             last = samples[-1]
             self.variables.setItem(row, 1, QTableWidgetItem(str(last.get("value"))))
             status = "OK" if last.get("ok") else str(last.get("value", "ошибка"))
-            self.variables.setItem(row, 2, QTableWidgetItem(status))
+            self.variables.setItem(row, 4, QTableWidgetItem(status))
+        self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
+
+    def _refresh_table_statistics(self) -> None:
+        for row, expression in enumerate(self._expressions()):
+            extrema = self._statistics.get(expression, {})
+            minimum = extrema.get("min")
+            maximum = extrema.get("max")
+            self.variables.setItem(
+                row, 2, QTableWidgetItem(self._format_stat(minimum))
+            )
+            self.variables.setItem(
+                row, 3, QTableWidgetItem(self._format_stat(maximum))
+            )
+
+    @staticmethod
+    def _format_stat(value: float | None) -> str:
+        return "—" if value is None else f"{value:.12g}"
 
     @Slot(int)
     def _history_limit_changed(self, limit: int) -> None:
         self._last_chart_data = trim_chart_data(self._last_chart_data, limit)
         if self._last_chart_data is not None:
+            self._refresh_table_statistics()
+            self._draw_chart(self._last_chart_data)
+
+    def _display_settings_changed(self, _value: int | bool) -> None:
+        if self._last_chart_data is not None:
+            self._refresh_table_statistics()
             self._draw_chart(self._last_chart_data)
 
     @Slot()
     def _clear_charts(self) -> None:
         self._last_chart_data = None
+        self._statistics = {}
         self.plot.clear()
+        self._refresh_table_statistics()
         if self._connected:
             self.clear_requested.emit()
 
@@ -290,6 +348,7 @@ class MainWindow(QMainWindow):
             return
 
         base = int(prepared[0][1][0]["time_ms"])
+        max_x = 0.0
         for index, (series, numeric) in enumerate(prepared):
             x_values = [((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000 for sample in numeric]
             y_values = [float(sample["value"]) for sample in numeric]
@@ -297,6 +356,7 @@ class MainWindow(QMainWindow):
             if current_x > x_values[-1]:
                 x_values.append(current_x)
                 y_values.append(y_values[-1])
+            max_x = max(max_x, x_values[-1])
             self.plot.plot(
                 x_values,
                 y_values,
@@ -304,6 +364,9 @@ class MainWindow(QMainWindow):
                 pen=pg.mkPen(pg.intColor(index), width=2),
                 stepMode="left",
             )
+        if self.auto_follow_check.isChecked():
+            left = max(0.0, max_x - self.display_seconds_spin.value())
+            self.plot.setXRange(left, max_x, padding=0)
 
     @Slot(str)
     def _show_error(self, message: str) -> None:
@@ -326,6 +389,9 @@ class MainWindow(QMainWindow):
                 history_limit=self.history_limit_spin.value(),
                 expressions=self._expressions(),
                 chart_data=self._last_chart_data,
+                display_seconds=self.display_seconds_spin.value(),
+                auto_follow=self.auto_follow_check.isChecked(),
+                statistics=self._statistics,
             )
         except OSError as exc:
             self._show_error(str(exc))
@@ -344,13 +410,18 @@ class MainWindow(QMainWindow):
             self.port_spin.setValue(int(connection.get("port", 10_000)))
             self.interval_spin.setValue(int(document["poll_interval_ms"]))
             self.history_limit_spin.setValue(int(document["history_limit"]))
+            self.display_seconds_spin.setValue(int(document["display_seconds"]))
+            self.auto_follow_check.setChecked(bool(document["auto_follow"]))
+            self._statistics = {
+                expression: dict(extrema)
+                for expression, extrema in document["statistics"].items()
+            }
             self.variables.setRowCount(0)
             for expression in document["expressions"]:
                 row = self.variables.rowCount()
                 self.variables.insertRow(row)
                 self.variables.setItem(row, 0, QTableWidgetItem(expression))
-                self.variables.setItem(row, 1, QTableWidgetItem("—"))
-                self.variables.setItem(row, 2, QTableWidgetItem("ожидание"))
+                self._initialize_expression_values(row)
             chart_data = document.get("chart_data")
             self._last_chart_data = None
             if isinstance(chart_data, dict):

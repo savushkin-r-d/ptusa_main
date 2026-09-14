@@ -11,12 +11,20 @@ def test_session_roundtrip(tmp_path) -> None:
         history_limit=7_500,
         expressions=["TE1:get_value()"],
         chart_data={"ok": True, "series": []},
+        display_seconds=120,
+        auto_follow=False,
+        statistics={"TE1:get_value()": {"min": 1.5, "max": 8.0}},
     )
 
     document = load_session(path)
     assert document["connection"] == {"host": "192.168.1.10", "port": 10_000}
     assert document["poll_interval_ms"] == 250
     assert document["history_limit"] == 7_500
+    assert document["display_seconds"] == 120
+    assert document["auto_follow"] is False
+    assert document["statistics"] == {
+        "TE1:get_value()": {"min": 1.5, "max": 8.0}
+    }
     assert document["expressions"] == ["TE1:get_value()"]
 
 
@@ -27,4 +35,8 @@ def test_old_session_uses_default_history_limit(tmp_path) -> None:
         encoding="utf-8",
     )
 
-    assert load_session(path)["history_limit"] == 5_000
+    document = load_session(path)
+    assert document["history_limit"] == 5_000
+    assert document["display_seconds"] == 60
+    assert document["auto_follow"] is True
+    assert document["statistics"] == {}

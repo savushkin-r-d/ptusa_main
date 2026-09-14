@@ -1,10 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_data_files
+
+qt_material_data = collect_data_files("qt_material")
+
 analysis = Analysis(
     ["src/ptusa_lua_debugger/main.py"],
     pathex=["src"],
     binaries=[],
-    datas=[],
+    datas=qt_material_data,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

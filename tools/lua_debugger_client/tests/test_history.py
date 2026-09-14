@@ -1,4 +1,8 @@
-from ptusa_lua_debugger.history import merge_chart_data, trim_chart_data
+from ptusa_lua_debugger.history import (
+    merge_chart_data,
+    merge_statistics,
+    trim_chart_data,
+)
 
 
 def chart(*values: int) -> dict:
@@ -34,3 +38,12 @@ def test_history_is_limited_per_expression() -> None:
 
     trimmed = trim_chart_data(result, 2)
     assert [sample["value"] for sample in trimmed["series"][0]["samples"]] == [4, 5]
+
+
+def test_statistics_are_kept_after_chart_history_is_trimmed() -> None:
+    statistics = merge_statistics({}, chart(1, 9))
+    history = merge_chart_data(None, chart(1, 9), 1)
+    statistics = merge_statistics(statistics, chart(4, 5))
+
+    assert [sample["value"] for sample in history["series"][0]["samples"]] == [9]
+    assert statistics == {"x": {"min": 1.0, "max": 9.0}}

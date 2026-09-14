@@ -4,6 +4,8 @@ from typing import Any
 
 DEFAULT_HISTORY_LIMIT = 5_000
 MAX_HISTORY_LIMIT = 1_000_000
+DEFAULT_DISPLAY_SECONDS = 60
+MAX_DISPLAY_SECONDS = 86_400
 
 
 def _overlap_size(
@@ -62,3 +64,31 @@ def trim_chart_data(data: dict[str, Any] | None, limit: int) -> dict[str, Any] |
             if isinstance(item, dict)
         ],
     }
+
+
+def merge_statistics(
+    previous: dict[str, dict[str, float]], data: dict[str, Any]
+) -> dict[str, dict[str, float]]:
+    """Accumulate numeric extrema independently from the trimmed chart history."""
+    result = {expression: dict(extrema) for expression, extrema in previous.items()}
+    for series in data.get("series", []):
+        if not isinstance(series, dict):
+            continue
+        expression = series.get("expression")
+        if not isinstance(expression, str):
+            continue
+        values = [
+            float(sample["value"])
+            for sample in series.get("samples", [])
+            if sample.get("ok") and sample.get("type") in {"number", "boolean"}
+        ]
+        if not values:
+            continue
+        extrema = result.get(expression)
+        minimum = min(values)
+        maximum = max(values)
+        if extrema is not None:
+            minimum = min(minimum, extrema["min"])
+            maximum = max(maximum, extrema["max"])
+        result[expression] = {"min": minimum, "max": maximum}
+    return result
