@@ -273,7 +273,13 @@ int params_manager::evaluate()
         const auto stable_delay =
              G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ];
 
-        if ( since_save >= min_interval && since_change >= stable_delay )
+        // The first save must not be delayed by the regular minimum interval.
+        // In particular, final_init() can successfully read the files and then
+        // reject their parameter count or CRC. In that case reset_to_default()
+        // marks the new defaults as changed, and they have to reach disk after
+        // stable_delay instead of remaining invalid until min_interval expires.
+        if ( ( params_save_counter == 0 || since_save >= min_interval ) &&
+            since_change >= stable_delay )
             {
             // Проверка на наличие свободного места в файловой системе.
             std::error_code ec;
