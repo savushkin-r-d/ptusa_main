@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.31)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -6,7 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 
-project(ptusa_main VERSION 2026.04.02.1)
+project(ptusa_main VERSION 2026.08.21.0)
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "CMake executable: ${CMAKE_COMMAND}")
+message(STATUS "CMake configured from: ${CMAKE_BINARY_DIR}")
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -107,6 +111,7 @@ add_subdirectory(deps/lunarmodules/term EXCLUDE_FROM_ALL)
 add_subdirectory(deps/lunarmodules/luassert EXCLUDE_FROM_ALL)
 
 add_subdirectory(deps/lunarmodules/luasql EXCLUDE_FROM_ALL)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ToluaCopyIfDifferent.cmake")
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -142,7 +147,7 @@ endif()
 if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_cycle.cpp
-            PAC_control_projects/main_control_prg/main.cpp)
+            PAC_control_projects/main_control_prg/main.cpp )
 
     add_library(libptusa_main SHARED ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
@@ -152,8 +157,8 @@ if(LINUX)
            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
            test/main_test.cpp)
 
-    add_executable(main_perfomance_test ${common_src} ${linux_src}
-           test/perfomance/main_perfomance_test.cpp
+    add_executable(main_performance_test ${common_src} ${linux_src}
+           test/performance/main_performance_test.cpp
            PAC_control_projects/main_control_prg/version.rc)
 
     if(ARP_DEVICE)
@@ -195,23 +200,15 @@ elseif(WIN32)
            PAC_control_projects/main_control_prg/version.rc)
 
     if(NOT MINGW)
-        add_executable(main_perfomance_test ${common_src} ${win_src}
-               test/perfomance/main_perfomance_test.cpp
+        add_executable(main_performance_test ${common_src} ${win_src}
+               test/performance/main_performance_test.cpp
                PAC_control_projects/main_control_prg/version.rc)
     endif()
 
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
-        COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
-        COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
-    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/OPCUA_tolua.cpp
-        COMMAND toluapp -n OPC_UA -o PAC/common/OPCUA_tolua.cpp PAC/common/toloa++/pkg/OPC_UA.hh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/OPC_UA.hh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+    regenerate_tolua_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp"
+        PAC_dev
+        "${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh")
 endif()
 
 if(NOT ARP_DEVICE)
@@ -227,14 +224,14 @@ endif()
 target_compile_definitions(main_test PUBLIC DEBUG_NO_IO_MODULES)
 target_compile_definitions(libptusa_main PUBLIC DEBUG_NO_IO_MODULES)
 if(NOT MINGW)
-    target_compile_definitions(main_perfomance_test PUBLIC DEBUG_NO_IO_MODULES)
+    target_compile_definitions(main_performance_test PUBLIC DEBUG_NO_IO_MODULES)
 endif()
 
 if(ARP_DEVICE)
     target_compile_definitions(PtusaPLCnextEngineer PUBLIC PAC_PLCNEXT)
     target_compile_definitions(ptusa_main PUBLIC PAC_PC)
     target_compile_definitions(libptusa_main PUBLIC PAC_PC)
-    target_compile_definitions(main_perfomance_test PUBLIC PAC_PC)
+    target_compile_definitions(main_performance_test PUBLIC PAC_PC)
 else()
     add_compile_definitions(PAC_PC)
 endif()
@@ -287,7 +284,6 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
@@ -326,7 +322,7 @@ set(TEST_INCLUDES
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 if(NOT MINGW)
-    target_include_directories(main_perfomance_test PUBLIC ${GENERAL_INCLUDES})
+    target_include_directories(main_performance_test PUBLIC ${GENERAL_INCLUDES})
 endif()
 
 ###############################################################################
@@ -339,6 +335,7 @@ endif()
 ###############################################################################
 if(LINUX)
     target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
+	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--as-needed)
 endif()
 ###############################################################################
 
@@ -349,29 +346,40 @@ endif()
 ################# add link targets ############################################
 if(ARP_DEVICE)
     find_package(ArpDevice REQUIRED)
-    find_package(ArpProgramming REQUIRED)
+
+    message(STATUS "ARP_DEVICE_VERSION=${ARP_DEVICE_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION=${ARP_DEVICE_SHORT_VERSION}")
+	message(STATUS "ARP_DEVICE_SHORT_VERSION_BUILD=${ARP_DEVICE_SHORT_VERSION_BUILD}")
+
+	if(${ARP_VERSION_MAJOR} GREATER_EQUAL "25")
+		find_package(Arp REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE Arp::ALL)
+	else()
+		find_package(ArpProgramming REQUIRED)
+		target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming)
+	endif()
+
+    target_link_libraries(PtusaPLCnextEngineer PRIVATE
+		liblua_static toluapp_lib_static zlibstatic
+		fmt::fmt open62541::open62541)
 endif()
 
 ################# add link targets ############################################
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic fmt::fmt)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic fmt::fmt)
-if(ARP_DEVICE)
-    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic fmt::fmt)
-    target_link_libraries(PtusaPLCnextEngineer open62541::open62541)
-endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
 target_link_libraries(libptusa_main open62541::open62541)
 target_link_libraries(main_test open62541::open62541)
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test open62541::open62541)
+    target_link_libraries(main_performance_test open62541::open62541)
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic GTest::gtest GTest::gmock subhook fmt::fmt)
 
 if(NOT MINGW)
-    target_link_libraries(main_perfomance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
+    target_link_libraries(main_performance_test liblua_static toluapp_lib_static zlibstatic fmt::fmt benchmark::benchmark)
 endif()
 
 if(WIN32)
@@ -379,7 +387,7 @@ if(WIN32)
     target_link_libraries(libptusa_main liblua wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
     if(NOT MINGW)
-        target_link_libraries(main_perfomance_test wsock32 ws2_32)
+        target_link_libraries(main_performance_test wsock32 ws2_32)
     endif()
 
 elseif (LINUX)
@@ -418,7 +426,7 @@ if (WIN32)
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes \(default: true\)
       --read_only_io     Read only from I\\O nodes \(default: true\)
@@ -436,7 +444,7 @@ else()
         PROPERTIES PASS_REGULAR_EXPRESSION
 [[
 (.*)
-  -s, --script arg       The script file to execute \(default: main\.plua\)
+  -v, --version          Print version info
   -d, --debug            Enable debugging
       --no_io            No communicate with I\\O nodes
       --read_only_io     Read only from I\\O nodes
@@ -477,8 +485,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(NAME T1-PLCnext-Demo_main COMMAND ${PROJECT_NAME} main.plua1
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo )
     set_tests_properties(T1-PLCnext-Demo_main PROPERTIES
-        PASS_REGULAR_EXPRESSION "main\.plua1: No such file or directory")
-
+        PASS_REGULAR_EXPRESSION "Error: Script file 'main\.plua1' does not exist.")
 
     add_test(NAME Busted-test COMMAND lua
                 -e "${LUA_BUSTED_PATH_INIT_CMD}"
@@ -513,7 +520,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     endif()
 
 
-    add_test(NAME save-speed-benchmark COMMAND main_perfomance_test
+    add_test(NAME save-speed-benchmark COMMAND main_performance_test
             --benchmark_out=${CMAKE_BINARY_DIR}/benchmark_result.json --benchmark_out_format=json
             --benchmark_context=pwd=`${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo`
             --benchmark_counters_tabular=true
@@ -524,24 +531,59 @@ endif()
 
 include(GoogleTest)
 
+set(STDOUT_CAPTURE_LOCKED_FILTER
+	"io_device.get_AO:"
+	"io_device.get_AO_read_data:"
+
+	"dev_stub.print:"
+
+	"analog_io_device.set_cmd:"
+
+	"watchdog.set_property:"
+
+	"device_communicator.print:"
+
+	"action.print:"
+
+	"operation_state.print:"
+	"operation_state.to_step:"
+	"operation.on_extra_step_debug_output:"
+	"operation.evaluate_from_run_to_pause:"
+
+	"wash_action.print:"
+
+	"PAC_critical_errors_manager.set_global_error:"
+
+	"uni_io_manager.write_outputs:"
+
+	"tech_object.set_mode:"
+
+    "project_manager.proc_main_params:"
+    "project_manager.lua_load_configuration:"
+	"project_manager.apply_opc_mode:")
+
 set(TCP_SOCKET_LOCKED_FILTER
     "tcp_communicator.evaluate:"
 	"tcp_communicator.recvtimeout:"
     "device_communicator.write_devices_states_service:"
     "pp_mode_alarm.pp_mode_activation_deactivation:"
+	"pp_mode_alarm.cfg_bus_error_activation_deactivation:"
     "pp_mode_alarm.e_communicate:"
     "main_cycle.main_cycle:"
 	"PAC_info.set_cmd:"
 	"LuaManagerTest.init_success:"
-    "PAC_critical_errors_manager.set_global_error:"
-	"project_manager.proc_main_params:"
-	"project_manager.lua_load_configuration:")
+    "PAC_critical_errors_manager.set_global_error:")
+
+# Тесты, которые используют CaptureStdout() - выполняются последовательно
+string(REPLACE ";" "" STDOUT_CAPTURE_LOCKED_FILTER_STR
+    "${STDOUT_CAPTURE_LOCKED_FILTER}")
 
 # Join list into a single GTest filter string (elements already end with ':').
 string(REPLACE ";" "" TCP_SOCKET_LOCKED_FILTER_STR
 	"${TCP_SOCKET_LOCKED_FILTER}")
+
 set(UNLOCKED_FILTER_STR
-	"*-${TCP_SOCKET_LOCKED_FILTER_STR}cipline_tech_object.save_device:")
+	"-${TCP_SOCKET_LOCKED_FILTER_STR}${STDOUT_CAPTURE_LOCKED_FILTER_STR}cipline_tech_object.save_device")
 
 # Discover tests that use shared tcp_communicator socket and serialize them.
 gtest_discover_tests(main_test
@@ -552,6 +594,13 @@ gtest_discover_tests(main_test
 gtest_discover_tests(main_test
     DISCOVERY_TIMEOUT 30
     TEST_FILTER "cipline_tech_object.save_device"
+    PROPERTIES RUN_SERIAL 1)
+
+# Тесты, которые захватывают stdout - выполняются последовательно
+# (без параллелизма, чтобы избежать гонки на stdout)
+gtest_discover_tests(main_test
+    DISCOVERY_TIMEOUT 30
+    TEST_FILTER ${STDOUT_CAPTURE_LOCKED_FILTER_STR}
     PROPERTIES RUN_SERIAL 1)
 
 # Discover all remaining tests.

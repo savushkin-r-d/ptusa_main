@@ -106,6 +106,11 @@ void PAC_info::reset_params()
 
     par[ P_BK_ANSWER_MAX_WAIT_TIME ] = 6'000;   // 6 seconds.
 
+    par[ P_STABLE_SAVE_DELAY_MS ] = 60'000;     // 1 minute.
+    par[ P_MIN_SAVE_INTERVAL_MS ] = 3'600'000;  // 1 hour (60 * 60 * 1'000).
+
+    par[ P_POST_START_ERROR_PROCESSING_DELAY_MS ] = 5'000; // 5 seconds.
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -167,8 +172,9 @@ int PAC_info::save_device( char* buff ) const
     for ( unsigned int i = 0; i < nc; i++ )
         {
         auto wn = io_manager::get_instance()->get_node( i );
+        const char* active_str = wn->is_active ? "1, " : "0, ";
         size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
-            wn->is_active ? "1, " : "0, " ).size;
+            "{}", active_str ).size;
         }
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\n\t}},\n" ).size;
 
@@ -198,6 +204,14 @@ int PAC_info::save_device( char* buff ) const
         "\tCOMMUN_ERROR={},\n", commun_error ).size;
 
 
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_CHANGE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_change_counter() ).size;
+    size += fmt::format_to_n( buff + size, MAX_COPY_SIZE,
+        "\tPARAMS_SAVE_COUNTER={},\n",
+        params_manager::get_instance()->get_params_save_counter() ).size;
+
+
     size += fmt::format_to_n( buff + size, MAX_COPY_SIZE, "\t}}\n" ).size;
 
     buff[ size ] = '\0';
@@ -224,32 +238,37 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
         {
-        switch ((COMMANDS)(int)val)
+        switch ( static_cast<COMMANDS>( static_cast<int>( val ) ) )
             {
-            case CLEAR_RESULT_CMD:
+            case COMMANDS::CLEAR_RESULT_CMD:
                 cmd = 0;
                 break;
 
-            case RELOAD_RESTRICTIONS:
+            case COMMANDS::RELOAD_RESTRICTIONS:
                 {
-                if (G_DEBUG)
-                    {
-                    G_LOG->notice("Reload restrictions (remote monitor client command).");
-                    }
-                const int SCRIPT_N = 7;
-                cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
-                    cmd_answer, sizeof( cmd_answer ) );
+                G_LOG->notice( "Reload restrictions (remote monitor "
+                    "client command)." );
+                cmd = G_LUA_MANAGER->reload_script( RESTRICTIONS_SCRIPT_N,
+                    "restrictions", cmd_answer, sizeof( cmd_answer ) );
                 return cmd;
                 }
 
-            case RESET_PARAMS:
-                if ( G_DEBUG )
-                    {
-                    G_LOG->notice( "Resetting params (remote monitor client command)." );
-                    }
-                params_manager::get_instance()->reset_params_size();
+            case COMMANDS::RESET_PARAMS:
+                {
+                auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                G_LOG->notice( "Resetting parameters (remote monitor "
+                    "client command)." );
+                params_manager::get_instance()->reset_CRC_mem();
                 params_manager::get_instance()->final_init();
-                break;
+
+                auto new_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+                return proc_OPC( prev_val, new_val, false );
+                }
+
+            case COMMANDS::FORCE_SAVE_PARAMS:
+                G_LOG->notice( "Force saving parameters (remote monitor "
+                    "client command)." );
+                return params_manager::get_instance()->save_params();
             }
 
         return 0;
@@ -365,6 +384,16 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     wn->is_err_mode_alarm_set = false;
                     wn->prev_status_register = 0;
                     }
+                // Если была активна данная ошибка, удаляем её аналогично.
+                if ( wn->is_cfg_bus_error_alarm_set )
+                    {
+                    PAC_critical_errors_manager::get_instance()->reset_global_error(
+                        PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
+                        PAC_critical_errors_manager::AS_IO_COUPLER, wn->number,
+                        false );
+                    wn->is_cfg_bus_error_alarm_set = false;
+                    wn->prev_diagnostic_status_register = 0;
+                    }
 
                 // Устанавливаем ошибку о переходе узла в сервисный режим.
                 PAC_critical_errors_manager::get_instance()->set_global_error(
@@ -390,30 +419,14 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     if ( strcmp( prop, "P_IS_OPC_UA_SERVER_ACTIVE" ) == 0 )
         {
         cmd_answer[ 0 ] = 0;
-
-        auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
-        if ( val == 0 && prev_val == 1 )
+        if ( val == 0.0f || val == 1.f )
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-
-            G_OPCUA_SERVER.shutdown();
+            auto prev_val = par[ P_IS_OPC_UA_SERVER_ACTIVE ];
+            return proc_OPC( prev_val, static_cast<int>( val ), true );
             }
-        else if ( val == 1 && prev_val == 0 )
+        else
             {
-            par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            auto retval = G_OPCUA_SERVER.init_all_and_start();
-            if ( retval != UA_STATUSCODE_GOOD )
-                {
-                G_LOG->error( "OPC UA server start failed. Returned error code 0x%X!",
-                    retval );
-
-                auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
-                    "{}", G_LOG->msg );
-                *r.out = '\0';
-
-                G_OPCUA_SERVER.shutdown();
-                return 1;
-                }
+            return 10;
             }
         }
 
@@ -430,6 +443,42 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         }
 
     return 0;
+    }
+
+int PAC_info::proc_OPC( int prev_val, int val, bool is_save )
+    {
+    if ( val == prev_val )
+        {
+        return 0;
+        }
+
+    if ( val == 0 && prev_val == 1 )
+        {
+        G_OPCUA_SERVER.shutdown();
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+        return 0;
+        }
+    else if ( val == 1 && prev_val == 0 )
+        {
+        if ( auto retval = G_OPCUA_SERVER.init_all_and_start();
+            retval != UA_STATUSCODE_GOOD )
+            {
+            G_LOG->error( "OPC UA server start failed (0x%X). %s",
+                retval, UA_StatusCode_name( retval ) );
+            auto r = fmt::format_to_n( cmd_answer, sizeof( cmd_answer ) - 1,
+                "{}", G_LOG->msg );
+            *r.out = '\0';
+
+            G_OPCUA_SERVER.shutdown();
+            return 1;
+            }
+
+        if ( is_save ) par.save( P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+        return 0;
+        }
+
+    return 10;
     }
 
 bool PAC_info::is_emulator() const

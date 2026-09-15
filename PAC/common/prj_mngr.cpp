@@ -25,14 +25,6 @@
 
 #include "g_errors.h"
 
-#ifdef WIN_OS
-#include "w_mem.h"
-#endif
-
-#ifdef LINUX_OS
-#include "l_mem.h"
-#endif
-
 extern bool G_NO_IO_NODES;
 extern bool G_READ_ONLY_IO_NODES;
 
@@ -42,25 +34,28 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     {
     if ( !argc || !argv || !argv[ 0 ] ) return 2;
 
+    opc_mode = OPC_MODE::UNDEFINED;
+
     //-Работа с параметрами командной строки.
     cxxopts::Options options( argv[ 0 ], "Main control program" );
 
+    constexpr auto DEFAULT_NO_IO =
+#if defined WIN_OS
+        "true";
+#else
+        "false";
+#endif // defined WIN_OS
+
     options.add_options()
-        ( "s,script", "The script file to execute",
-            cxxopts::value<std::string>()->default_value( "main.plua" ) )
+        ( "v,version", "Print version info" )
         ( "d,debug", "Enable debugging",
             cxxopts::value<bool>()->default_value( "false" ) )
-#if defined WIN_OS
+
         ( "no_io", "No communicate with I\\O nodes",
-            cxxopts::value<bool>()->default_value( "true" ) )
+                cxxopts::value<bool>()->default_value( DEFAULT_NO_IO ) )
         ( "read_only_io", "Read only from I\\O nodes",
-            cxxopts::value<bool>()->default_value( "true" ) )
-#else
-        ( "no_io", "No communicate with I\\O nodes",
-            cxxopts::value<bool>()->default_value( "false" ) )
-        ( "read_only_io", "Read only from I\\O nodes",
-            cxxopts::value<bool>()->default_value( "false" ) )
-#endif // defined WIN_OS
+            cxxopts::value<bool>()->default_value( DEFAULT_NO_IO ) )
+
         ( "p,port", "Param port",
 
             cxxopts::value<int>()->default_value( "10000" ) )
@@ -77,19 +72,38 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         ( "extra_paths", "Extra paths",
             cxxopts::value<std::string>()->default_value( "./dairy-sys" ) )
         ( "sleep_time", "Sleep time, ms",
-            cxxopts::value<unsigned int>()->default_value( "2" ) );
+            cxxopts::value<unsigned int>()->default_value( "2" ) )
 
-    options.positional_help( "<script>" );
+        ( "script", "The script file to execute",
+            cxxopts::value<std::string>()  );
+
     options.parse_positional( { "script" } );
-    options.show_positional_help();
-    options.allow_unrecognised_options(); //Unrecognised arguments are allowed.
+    options.positional_help( "<script>" );
+    options.allow_unrecognised_options();
     auto result = options.parse( argc, argv );
 
-    if ( result.count( "help" ) || argc < 2 )
+    if ( result.count( "version" ) )
         {
-        fmt::print( options.help() );
+        fmt::print( "{}\n", PRODUCT_VERSION_FULL_STR );
         return 1;
         }
+
+    if ( result.count( "help" ) || result.count( "script" ) == 0 )
+        {
+        fmt::print( "{}", options.help() );
+        return 1;
+        }
+
+    // Проверка на наличие файла @main_script.
+    std::filesystem::path s{ result[ "script" ].as<std::string>() };
+    if ( std::error_code ec; !std::filesystem::exists( s, ec ) )
+        {
+        fmt::print( "Error: Script file '{}' does not exist.\n", s.string() );
+        return 1;
+        }
+    main_script = s.lexically_normal().generic_string();
+
+    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 
     if ( result[ "debug" ].as<bool>() )
         {
@@ -99,11 +113,8 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
 
     if ( result.count( "rcrc" ) )
         {
-        if ( G_DEBUG )
-            {
-            fmt::print( "Resetting params (command line parameter \"rcrc\").\n" );
-            }
-        params_manager::get_instance()->reset_params_size();
+        G_LOG->debug( "Resetting parameters (command line parameter 'rcrc')." );
+        params_manager::get_instance()->reset_CRC_mem();
         }
 
     if ( result.count( "port" ) )
@@ -112,65 +123,55 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
         if ( p > 0 )
             {
             tcp_communicator::set_port( p, p + 502 );
-            G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
+            G_LOG->notice( "New tcp_communicator ports: %d [modbus %d].",
+                p, p + 502 );
             }
         }
 
     if ( result.count( "opc" ) )
         {
-        auto opc_mode = result[ "opc" ].as<std::string>();
-
-        if ( opc_mode == "rw" )
+        if ( auto opc_mode_arg = result[ "opc" ].as<std::string>();
+            opc_mode_arg == "rw" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
-            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            opc_mode = OPC_MODE::READ_WRITE;
             }
-        else if ( opc_mode == "r" )
+        else if ( opc_mode_arg == "r" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            G_LOG->warning( "OPC UA server is activated (only read)." );
+            opc_mode = OPC_MODE::READ_ONLY;
             }
-        else if ( opc_mode == "off" )
+        else if ( opc_mode_arg == "off" )
             {
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
-            G_PAC_INFO()->par.save( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
-            G_LOG->info( "OPC UA server is disabled." );
+            opc_mode = OPC_MODE::OFF;
             }
         else
             {
             G_LOG->error( "Unknown OPC UA mode: '%s'. "
-                "Valid values: off, r, rw.", opc_mode.c_str() );
+                "Valid values: off, r, rw.", opc_mode_arg.c_str() );
             return 1;
             }
+
+        log_opc_mode();
         }
 
-    main_script = result[ "script" ].as<std::string>();
     sleep_time_ms = result[ "sleep_time" ].as<unsigned int>();
 
-    path = result[ "path" ].as<std::string>();
-    sys_path = result[ "sys_path" ].as<std::string>();
-    extra_paths = result[ "extra_paths" ].as<std::string>();
+    // Нормализуем пути и гарантируем слеш на конце через /= "".
+    auto p_norm = std::filesystem::path(
+        result[ "path" ].as<std::string>() ).lexically_normal() / "";
+    auto s_norm = std::filesystem::path(
+        result[ "sys_path" ].as<std::string>() ).lexically_normal() / "";
+    auto e_norm = std::filesystem::path(
+        result[ "extra_paths" ].as<std::string>() ).lexically_normal() / "";
+
+    path = p_norm.generic_string();
+    sys_path = s_norm.generic_string();
+    extra_paths = e_norm.generic_string();
 
     // Отключить/включить обмен с модулями ввода/вывода.
-    if ( result[ "no_io" ].as<bool>() )
-        {
-        G_NO_IO_NODES = true;
-        }
-    else
-        {
-        G_NO_IO_NODES = false;
-        }
+    G_NO_IO_NODES = result[ "no_io" ].as<bool>() ? true : false;
+
     // Только чтение/запись+чтение данных с модулей ввода/вывода.
-    if ( result[ "read_only_io" ].as<bool>() )
-        {
-        G_READ_ONLY_IO_NODES = true;
-        }
-    else
-        {
-        G_READ_ONLY_IO_NODES = false;
-        }
+    G_READ_ONLY_IO_NODES = result[ "read_only_io" ].as<bool>() ? true : false;
 
     if ( G_NO_IO_NODES )
         G_LOG->warning( "Bus couplers are disabled." );
@@ -184,31 +185,76 @@ int project_manager::proc_main_params( int argc, const char* argv[] )
     return 0;
     }
 //-----------------------------------------------------------------------------
+void project_manager::log_opc_mode() const
+    {
+    switch ( opc_mode )
+        {
+        case OPC_MODE::OFF:
+            G_LOG->info( "OPC UA server is disabled." );
+            break;
+
+        case OPC_MODE::READ_ONLY:
+            G_LOG->warning( "OPC UA server is activated (only read)." );
+            break;
+
+        case OPC_MODE::READ_WRITE:
+            G_LOG->warning( "OPC UA server is activated (read-write)." );
+            break;
+
+        case OPC_MODE::UNDEFINED:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int project_manager::apply_opc_mode( bool show_msg /* = true */ ) const
+    {
+    auto pac_info = G_PAC_INFO();
+    auto save_param_if_changed = [ pac_info ]( unsigned int param_idx,
+        u_int_4 value )
+        {
+        if ( pac_info->par[ param_idx ] != value )
+            {
+            pac_info->par.save( param_idx, value );
+            }
+        };
+
+    switch ( opc_mode )
+        {
+        case OPC_MODE::OFF:
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 0 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            break;
+
+        case OPC_MODE::READ_ONLY:
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 0 );
+            break;
+
+        case OPC_MODE::READ_WRITE:
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_ACTIVE, 1 );
+            save_param_if_changed( PAC_info::P_IS_OPC_UA_SERVER_CONTROL, 1 );
+            break;
+
+        case OPC_MODE::UNDEFINED:
+            break;
+        }
+
+    if ( show_msg )
+        {
+        log_opc_mode();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 project_manager* project_manager::get_instance()
     {
     if ( instance.is_null() )
         {
         instance = new project_manager();
-
-#ifdef WIN_OS
-        instance->cfg_file = new data_file();
-#endif // WIN_OS
-
-#ifdef LINUX_OS
-        instance->cfg_file = new data_file();
-#endif // LINUX_OS
         }
 
     return instance;
-    }
-//-----------------------------------------------------------------------------
-project_manager::~project_manager()
-    {
-    if ( cfg_file )
-        {
-        delete cfg_file;
-        cfg_file = nullptr;
-        }
     }
 //-----------------------------------------------------------------------------
 int project_manager::init_path( const char* path )
@@ -336,18 +382,6 @@ int project_manager::lua_load_configuration()
     G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
     G_DEVICE_CMMCTR->add_device( ParamsRecipeManager::getInstance());
-
-    if ( G_DEBUG )
-        {
-        printf( "Получение конфигурации Profibus DP slave...\n" );
-        }
-
-    lua_manager::get_instance()->void_exec_lua_method( "system",
-        "init_profibus", "project_manager::lua_load_configuration()" );
-    if ( G_DEBUG )
-        {
-        printf( "Oк.\n" );
-        }
 
     if ( G_DEBUG )
         {

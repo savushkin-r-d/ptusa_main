@@ -1,7 +1,5 @@
 #if !defined WIN_OS && \
     !( defined LINUX_OS && defined PAC_PC ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
 	!( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
@@ -15,14 +13,6 @@
 
 #if defined LINUX_OS && defined PAC_PC
 #include "led_PC.h"
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-#include "led_w750.h"
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "led_PFC200.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
@@ -43,14 +33,6 @@ led* get_led()
 #if defined LINUX_OS && defined PAC_PC
         led_instance = new led_PC();
 #endif
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-        led_instance = new led_W750();
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-        led_instance = new led_PFC200();
-#endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
         led_instance = new led_PC();

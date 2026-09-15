@@ -52,6 +52,8 @@ int main_cycle()
 
     G_CMMCTR->evaluate();
 
+    params_manager::get_instance()->evaluate();
+
     if ( G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] == 1 )
         {
         G_OPCUA_SERVER.evaluate();
@@ -70,13 +72,6 @@ int main_cycle()
     G_ERRORS_MANAGER->evaluate();
     G_SIREN_LIGHTS_MANAGER()->eval();
     sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
-
-#ifdef USE_PROFIBUS
-    if ( G_PROFIBUS_SLAVE()->is_active() )
-        {
-        G_PROFIBUS_SLAVE()->eval();
-        }
-#endif // USE_PROFIBUS
 
 #ifdef TEST_SPEED
     u_int TRESH_AVG =

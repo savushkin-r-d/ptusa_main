@@ -61,6 +61,22 @@ class PAC_info: public i_Lua_save_device
             ///< Время до установки ошибки связи с сетевым узлом, мсек.
             P_BK_ANSWER_MAX_WAIT_TIME,
 
+            ///< Время, которое должно пройти после последнего изменения
+            ///< параметра, прежде чем писать. Это гарантирует, что запись идет
+            ///< не при каждой мелкой правке.
+            P_STABLE_SAVE_DELAY_MS,
+
+            ///< Минимальный интервал между последовательными сохранениями
+            ///< параметров.
+            P_MIN_SAVE_INTERVAL_MS,
+
+            ///< Время, которое должно пройти после запуска управляющей
+            /// программы, прежде чем будут передаваться некритические ошибки.
+            /// Это нужно, чтобы не загромождать сразу же ошибками, которые
+            /// могут быть после запуска (например, ещё идет подключение к
+            /// сетевым узлам или устройствам).
+            P_POST_START_ERROR_PROCESSING_DELAY_MS,
+
             ///< Количество параметров.
             P_PARAMS_COUNT
             };
@@ -82,6 +98,8 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, double val );
 
+        int proc_OPC( int prev_val, int val, bool is_save );
+
         const char* get_name_in_Lua() const
             {
             return "SYSTEM";
@@ -92,12 +110,13 @@ class PAC_info: public i_Lua_save_device
             return up_time_str;
             }
 
-        enum COMMANDS
+        enum class COMMANDS
             {
             CLEAR_RESULT_CMD = 0,
 
             RELOAD_RESTRICTIONS = 100,
             RESET_PARAMS = 101,
+            FORCE_SAVE_PARAMS = 102,
             };
 
 #ifdef PTUSA_TEST

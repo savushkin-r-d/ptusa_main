@@ -36,7 +36,6 @@ TEST(lua_manager_test, get_instance)
 	LUA_API int lua_pcallk (lua_State *L, int nargs, int nresults, int errfunc, lua_KContext ctx, lua_KFunction k)
 	LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename, const char *mode)
 	TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
-	TOLUA_API int tolua_IOT_dev_open (lua_State* tolua_S)
     LUA_API void lua_close (lua_State *L)
     LUA_API const char *lua_tolstring (lua_State *L, int idx, size_t *len)
     LUA_API void lua_settop (lua_State *L, int idx)
@@ -44,12 +43,12 @@ TEST(lua_manager_test, get_instance)
 
 TEST_F(LuaManagerTest, init_success)
 {
-    char* res = 0;
+    std::byte* res = nullptr;
 	mock_project_manager* prj_mock = new mock_project_manager();
 	mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity(par_mock);
 
-    EXPECT_CALL(*par_mock, get_params_data(_, _))
+    EXPECT_CALL(*par_mock, reserve_params_region(_, _))
         .Times(AtLeast(2))
         .WillRepeatedly(Return(res));
 
@@ -228,13 +227,13 @@ TEST_F(LuaManagerTest, init_lua_pcall_failure)
 
 mock_tech_object_manager* init_mocks( int cnt )
     {
-    char* res = 0;
+    std::byte* res = nullptr;
 
     mock_project_manager* prj_mock = new mock_project_manager();
     mock_params_manager* par_mock = new mock_params_manager();
     test_params_manager::replaceEntity( par_mock );
 
-    EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+    EXPECT_CALL( *par_mock, reserve_params_region( _, _ ) )
         .Times( AtLeast( 2 ) )
         .WillRepeatedly( Return( res ) );
 
@@ -679,6 +678,22 @@ TEST_F(LuaManagerTest, reload_script_exceeded_script_number_failure)
     EXPECT_EQ(1, G_LUA_MANAGER->reload_script(INT_MAX, "test_lua_func_str", ans, sizeof(ans)));
 }
 
+TEST( lua_manager, reload_script_negative_script_number_failure )
+    {
+    auto L = luaL_newstate();
+    G_LUA_MANAGER->set_Lua( L );
+    char ans[ 100 ] = {};
+    EXPECT_EQ( 1, G_LUA_MANAGER->reload_script( -1, "test_lua_func_str",
+        ans, sizeof( ans ) ) );
+    G_LUA_MANAGER->free_Lua();
+    }
+
+TEST( lua_manager, restrictions_script_is_last_file )
+    {
+    EXPECT_EQ( RESTRICTIONS_SCRIPT_N, FILE_CNT - 1 );
+    EXPECT_STREQ( FILES[ RESTRICTIONS_SCRIPT_N ], "main.restrictions.lua" );
+    }
+
 TEST_F(LuaManagerTest, reload_script_check_file_failure)
 {
     subhook_t hook_check_file =
@@ -764,4 +779,19 @@ TEST( lua_manager, check_file )
 
     auto res = check_file( FILE_NAME, err_str );
     EXPECT_EQ( res, FILE_VERSION );
+    }
+
+TEST( lua_manager, init )
+    {
+    auto L = luaL_newstate();
+    G_LUA_MANAGER->set_Lua( L );
+
+    // Так как не загружен соответствующий модуль package, то init должен
+    // вернуть 1 - "attempt to index global 'package' (a nil value)". При этом
+    // в консоль выводится информация о переданных параметрах.
+    auto res = G_LUA_MANAGER->init( L,
+        "test.lua", "dir", "sys_dir", "extra_dir" );
+    EXPECT_EQ( res, 1 );
+
+    G_LUA_MANAGER->free_Lua();
     }

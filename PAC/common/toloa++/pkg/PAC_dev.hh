@@ -22,8 +22,6 @@ $#include "modbus_client.h"
 
 $#include "modbus_serv.h"
 
-$#include "profibus_slave.h"
-
 $#include "params_recipe_manager.h"
 
 $#ifdef WIN_OS
@@ -690,6 +688,8 @@ i_AO_device* AO( const char *dev_name );
 i_counter* FQT( const char *dev_name );
 
 virtual_counter* virtual_FQT( const char *dev_name );
+
+counter_iolink* FQT_IOLINK( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение температуры по имени.
 ///
@@ -992,6 +992,17 @@ class virtual_counter : public device
             float read_flow );
     };
 //-----------------------------------------------------------------------------
+/// @brief Счетчик IO-Link (IFM.SMFx20 и другие).
+class counter_iolink : public device
+    {
+    public:
+        /// @brief Получение значения температуры.
+        float get_temperature();
+
+        /// @brief Получение значения проводимости (мкСм/см).
+        float get_conductivity();
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Работа с технологическим объектом.
 ///
@@ -1201,7 +1212,7 @@ class operation
 
         public:
             const char* get_name() const;
-            
+
             /// @brief Установка номера параметра со временем переходного
             /// переключения шагов.
             void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
@@ -1739,6 +1750,24 @@ class PAC_info: public i_Lua_save_device
             ///< Переход на паузу операции при ошибке устройств,
             /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
+
+            ///< Время для включения операции по сигналам, мсек.
+            P_AUTO_OPERATION_WAIT_TIME,
+
+            ///< Время ожидания для повторной попытки включения операции по
+            ///< сигналам, мсек.
+            P_AUTO_OPERATION_WARN_TIME,
+
+            ///< Активность сервера OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_ACTIVE,
+
+            ///< Возможность управлять через сервер OPC UA,
+            /// 0 - нет, 1 - да.
+            P_IS_OPC_UA_SERVER_CONTROL,
+
+            ///< Время до установки ошибки связи с сетевым узлом, мсек.
+            P_BK_ANSWER_MAX_WAIT_TIME,
             };
 
         saved_params_u_int_4 par;
@@ -1959,7 +1988,7 @@ class modbus_client
 
     public:
         modbus_client(unsigned int id, const char* ip, unsigned int port = 502,
-            unsigned long exchangetimeout = 50 );
+            unsigned long exchangetimeout = 50, const char* name = nullptr );
 
         // Реализация функций протокола modbus.
         int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
@@ -2018,75 +2047,6 @@ class ModbusServ
         static float UnpackFloat( unsigned char* Buf, int offset  );
         static unsigned int UnpackWord( unsigned char* Buf, int offset );
     };
-//----------------------------------------------------------------------------
-/// @brief Работа с Profibus Slave.
-class profibus_slave
-    {
-    //Конфигурирование клиента.
-    public:
-        /// <summary>
-        /// Включение модуля обмена.
-        /// </summary>
-        void activate();
-
-        /// <summary>
-        /// Установка адреса станции.
-        /// </summary>
-        void set_station_address( int address );
-
-        /// <summary>
-        /// Установка размера массива области записи.
-        /// </summary>
-        void set_output_byte_size( int size );
-
-        /// <summary>
-        /// Установка размера массива области чтения.
-        /// </summary>
-        void set_input_byte_size( int size );
-
-    public:
-        /// <summary>
-        /// Получение значения типа double.
-        /// </summary>
-        /// <param name="offset">Смещение, диапазон 0..239.</param>
-        virtual double get_double( int offset ) = 0;
-
-        /// <summary>
-        /// Получение значения типа bool.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-        virtual bool get_bool( int byte_offset, int bit_offset ) = 0;
-
-        /// <summary>
-        /// Установка значения типа bool.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-        /// <param name="val">Значение.</param>
-        virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
-
-        /// <summary>
-        /// Получение значения типа int.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-        virtual int get_int( int byte_offset ) = 0;
-
-        /// <summary>
-        /// Установка значения типа int.
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-        /// <param name="val">Значение.</param>
-        virtual void set_int( int byte_offset, int val ) = 0;
-
-        /// <summary>
-        /// Получение значения типа int (4 байта).
-        /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..240.</param>
-        virtual int get_int4( int byte_offset ) = 0;
-    };
-
-profibus_slave* G_PROFIBUS_SLAVE_LUA();
 //-----------------------------------------------------------------------------
 class i_log
     {

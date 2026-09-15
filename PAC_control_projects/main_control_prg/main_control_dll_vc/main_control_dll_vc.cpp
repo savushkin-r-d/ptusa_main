@@ -14,9 +14,6 @@
 #include "version_info.h"
 
 #include "log.h"
-#ifdef PAC_WAGO_750_860
-#include "l_log.h"
-#endif
 
 #ifndef PTUSA_TEST
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
@@ -52,10 +49,9 @@ int lua_init( lua_State* L )
         lua_remove( L, 1 );
         }
 
-    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
     int res = G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
-    for ( int i = 0; i < p_size; i++ )
+    for ( int i = 0; i < argc; i++ )
         {
         delete[] argv[ i ];
         argv[ i ] = nullptr;
@@ -86,7 +82,9 @@ int lua_init( lua_State* L )
         return 1;
         }
 
-    lua_pushnumber( L, 0 );
+    G_PROJECT_MANAGER->apply_opc_mode( false );
+
+    lua_pushnumber( L, EXIT_SUCCESS );
     return 1;
     }
 
@@ -164,5 +162,7 @@ __declspec( dllexport )
     luaopen_ptusa_main( lua_State* L )
     {
     luaL_newlib( L, ls_lib );
+    lua_pushvalue( L, -1 );
+    lua_setglobal( L, "ptusa_main" );
     return 1;
     }

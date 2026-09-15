@@ -6,28 +6,21 @@
 /// всю необходимую информацию. Для хранения всех ошибок служит класс
 /// @ref errors_manager.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
-///
 /// @par Описание директив препроцессора:
-/// @c PAC    - компиляция для контроллера.@n
+/// @c PAC - компиляция для контроллера.@n
 /// @c DRIVER - компиляция для драйвера (ОС Windows).
 ///
-/// @par Текущая версия:
-/// @$Rev$.\n
-/// @$Author$.\n
-/// @$Date::                     $.
+
 
 #ifndef ERRORS_H
 #define ERRORS_H
 
-#if !( defined PAC_PC || defined PAC_WAGO_750_860 || \
-	defined PAC_WAGO_PFC200 || defined PAC_PLCNEXT ) && \
+#if !( defined PAC_PC || defined PAC_PLCNEXT ) && \
     !defined DRIVER
 #error You must define type!
 #endif
 
-#if ( defined PAC_PC || defined PAC_WAGO_750_860 || \
-	defined PAC_WAGO_PFC200 || defined PAC_PLCNEXT ) && \
+#if ( defined PAC_PC || defined PAC_PLCNEXT ) && \
     !defined PAC
 #define PAC
 #endif
@@ -164,11 +157,13 @@ int load_from_stream( alarm &a, char *buff );
 #ifdef PAC
 #include "param_ex.h"
 #include "smart_ptr.h"
-#include "device/device.h"
+#include "device/i_tech_dev_error_device.h"
 
 #include "tech_def.h"
 
 #include "fmt/format.h"
+
+class device;
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс с информацией об ошибке устройства.
@@ -178,9 +173,7 @@ class base_error
     public:
         base_error();
 
-        virtual ~base_error()
-            {
-            }
+        virtual ~base_error() = default;
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
         ///
@@ -237,19 +230,19 @@ class base_error
         unsigned char error_state;    ///< Состояние ошибки.
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию об ошибке простого устройства (клапан,
-/// насос...).
+/// @brief Содержит информацию о простой ошибке ( Modbus-клиент,
+/// простое устройство - клапан, насос и т.п.).
 ///
 /// У простого устройства может быть только одна ошибка (ошибка обратной
 /// связи).
-class tech_dev_error: public base_error
+class simple_error: public base_error
     {
     friend class siren_lights_manager;
     friend class errors_manager;
 
     public:
-        tech_dev_error( device* simple_device = 0 );
-        virtual ~tech_dev_error();
+        simple_error( i_simple_error* simple_error_owner );
+        virtual ~simple_error() = default;
 
 
         int save_as_Lua_str( char *str );
@@ -274,8 +267,8 @@ class tech_dev_error: public base_error
         bool static is_new_error;        ///< Наличие новой тревоги.
 
     private:
-        device* simple_device;  ///< Простое устройство.
-        int prev_error_id = 0;  ///< Предыдущая ошибка.
+        i_simple_error* simple_error_owner;     ///< Владелец ошибки.
+        int prev_error_id = 0;                  ///< Предыдущая ошибка.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке сложного устройства (танк,
@@ -351,7 +344,7 @@ class errors_manager
         /// @param stream - поток байт.
         ///
         /// @return < 0 - ошибка.
-        /// @return   0 - ок.
+        /// @return   0 - ОК.
         int save_as_Lua_str( char *str, u_int_2 &id );
 
         /// @brief Обновление состояния ошибок.
@@ -362,7 +355,7 @@ class errors_manager
         /// @param s_error - добавляемая ошибка.
         ///
         /// @return < 0 - ошибка.
-        /// @return   0 - ок.
+        /// @return   0 - ОК.
         int add_error( base_error *s_error );
 
         /// @brief Сброс параметров всех ошибок в значение по умолчанию (0).
@@ -387,7 +380,7 @@ class errors_manager
             }
 
     private:
-        u_int_2 errors_id; // Cостояние ошибок.
+        u_int_2 errors_id; // Состояние ошибок.
 
         /// Единственный экземпляр класса.
         static auto_smart_ptr < errors_manager > instance;
@@ -447,8 +440,6 @@ class siren_lights_manager: public i_Lua_save_device
             {
             return "G_SIREN_MNGR";
             }
-
-        int set_cmd( const char *prop, u_int idx, const char *val );
 
         virtual ~siren_lights_manager()
             {

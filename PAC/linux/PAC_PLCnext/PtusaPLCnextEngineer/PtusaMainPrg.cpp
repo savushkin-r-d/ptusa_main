@@ -2,7 +2,12 @@
 
 #include "PtusaMainPrg.hpp"
 #include "Arp/System/Commons/Logging.h"
+#if ARP_ABI_VERSION_MAJOR < 2
 #include "Arp/System/Core/ByteConverter.hpp"
+#else
+#include "Arp/Base/Core/ByteConverter.hpp"
+#endif
+
 
 #include "dtime.h"
 #include "log.h"
@@ -38,8 +43,6 @@ namespace PtusaPLCnextEngineer
             G_LOG->info( "Program started (version %s).",
                 PRODUCT_VERSION_FULL_STR );
 
-            NV_memory_manager::get_instance()->init_ex( NVRAM );
-
             G_PROJECT_MANAGER->init_path( "/opt/main/" );
             G_PROJECT_MANAGER->init_sys_path( "/opt/main/sys/" );
 
@@ -74,6 +77,11 @@ namespace PtusaPLCnextEngineer
 
             ptusaMainCmpnt.init_flag = false;
             ptusaMainCmpnt.running = 1;
+
+            if ( !params_manager::get_instance()->was_successful_init() )
+                {
+                params_manager::get_instance()->save_params();
+                }
             }
 
         while ( ptusaMainCmpnt.running )

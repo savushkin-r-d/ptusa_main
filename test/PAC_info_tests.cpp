@@ -1,6 +1,8 @@
 #include "PAC_info_tests.h"
 #include "bus_coupler_io.h"
 #include "OPCUAServer.h"
+#include "lua_manager.h"
+#include <cstdio>
 
 // Мок для G_OPCUA_SERVER.
 class MockOPCUAServer : public OPCUA_server
@@ -56,11 +58,58 @@ TEST( PAC_info, OPCUA_server_start_fail )
     subhook_free( get_OPC_hook );
     }
 
+TEST( PAC_info, reload_restrictions )
+    {
+    auto L = luaL_newstate();
+    G_LUA_MANAGER->set_Lua( L );
+
+    const char* file_name = "main.restrictions.lua";
+    FILE* f = std::fopen( file_name, "w+" );
+    ASSERT_NE( f, nullptr );
+    std::fprintf( f,
+        "--version = 1\n"
+        "restrictions = { reload_marker = 1415 }\n" );
+    std::fclose( f );
+
+    auto ret = G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::RELOAD_RESTRICTIONS ) );
+    EXPECT_EQ( 0, ret );
+
+    lua_getglobal( L, "restrictions" );
+    ASSERT_TRUE( lua_istable( L, -1 ) );
+    lua_getfield( L, -1, "reload_marker" );
+    EXPECT_EQ( 1415, lua_tointeger( L, -1 ) );
+    lua_pop( L, 2 );
+
+    std::remove( file_name );
+    G_LUA_MANAGER->free_Lua();
+    }
+
 TEST( PAC_info, set_cmd )
     {
+    auto L = luaL_newstate();
+    G_LUA_MANAGER->set_Lua( L );
+
     PAC_critical_errors_manager::get_instance()->reset_all_error();
 
-    G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::RELOAD_RESTRICTIONS );
+    G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::RELOAD_RESTRICTIONS ) );
+
+
+    // OPC UA сервер должен запуститься, так как по умолчанию он активен,
+    // а данная команда как раз устанавливает параметры в значения по
+    // умолчанию.
+    G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] = 0;
+    G_OPCUA_SERVER.shutdown();
+    G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::RESET_PARAMS ) );
+    EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
+    EXPECT_TRUE( G_OPCUA_SERVER.get_server() );
+    G_OPCUA_SERVER.shutdown();
+
+    auto ret = G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::FORCE_SAVE_PARAMS ) );
+    EXPECT_EQ( 0, ret );
 
     G_PAC_INFO()->set_cmd( "P_IS_OPC_UA_SERVER_ACTIVE", 0, 1 );
     EXPECT_EQ( 1, G_PAC_INFO()->par[ PAC_info::P_IS_OPC_UA_SERVER_ACTIVE ] );
@@ -93,7 +142,15 @@ TEST( PAC_info, set_cmd )
     EXPECT_EQ( 0, G_PAC_INFO()->set_cmd( "NODEENABLED", 1, 100 ) );
     EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_error() );
 
+    G_LUA_MANAGER->free_Lua();
     tcp_communicator::clear_instance();
+    }
+
+TEST( PAC_info, proc_OPC )
+    {
+    // Некорректные значения параметров для обработки команды работы сервера
+    // OPC UA, поэтому должно вернуться значение 10.
+    EXPECT_EQ( 10, G_PAC_INFO()->proc_OPC( 0, 10, false ) );
     }
 
 TEST( PAC_info, reset_params )
@@ -112,7 +169,8 @@ TEST( PAC_info, save_device )
         0, 0, 0, 0, 0, 0 );
 
     G_PAC_INFO()->reset_params();
-    G_PAC_INFO()->set_cmd( "CMD", 0, PAC_info::CLEAR_RESULT_CMD );
+    G_PAC_INFO()->set_cmd( "CMD", 0,
+        static_cast<double>( PAC_info::COMMANDS::CLEAR_RESULT_CMD ) );
     G_PAC_INFO()->set_cycle_time( 100 );
     G_PAC_INFO()->reset_uptime();
     DeltaMilliSecSubHooker::set_millisec( 0 );
@@ -156,6 +214,8 @@ TEST( PAC_info, save_device )
         "\tNODES_COMM_ERROR=0,\n"
         "\tWATCHDOG_ERROR=0,\n"
         "\tCOMMUN_ERROR=0,\n"
+        "\tPARAMS_CHANGE_COUNTER=1,\n"
+        "\tPARAMS_SAVE_COUNTER=0,\n"
         "\t}\n";
     char buff[ MAX_SIZE ] = { 0 };
 
@@ -200,6 +260,8 @@ TEST( PAC_info, save_device )
             "\tNODES_COMM_ERROR=0,\n"
             "\tWATCHDOG_ERROR=0,\n"
             "\tCOMMUN_ERROR=0,\n"
+            "\tPARAMS_CHANGE_COUNTER=1,\n"
+            "\tPARAMS_SAVE_COUNTER=0,\n"
             "\t}\n";
     DeltaMilliSecSubHooker::set_millisec( 1010 );
     G_PAC_INFO()->eval();

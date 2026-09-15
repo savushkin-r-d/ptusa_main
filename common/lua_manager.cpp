@@ -84,8 +84,7 @@ const char *FILES[ FILE_CNT ] =
     "main.io.lua",
     "main.objects.lua",
     "main.modbus_srv.lua",
-    "main.profibus.lua",
-    "main.restrictions.lua",
+    "main.restrictions.lua", // Keep last for RESTRICTIONS_SCRIPT_N.
     };
 //-----------------------------------------------------------------------------
 //I
@@ -124,21 +123,22 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         G_LOG->debug( "Init Lua..." );
         }
 
-    sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
-    G_LOG->write_log( i_log::P_NOTICE );
+    G_LOG->notice( "script_name = \"%s\"",
+        std::filesystem::path( script_name ).make_preferred().u8string().c_str() );
 
     std::string dir_str( dir );
     std::string sys_dir_str( sys_dir );
     std::string extra_dirs_str( extra_dirs );
 
 
+    G_LOG->notice( "current working directory: \"%s\"",
+        std::filesystem::current_path().u8string().c_str() );
     if ( !dir_str.empty() || !sys_dir_str.empty() || !extra_dirs_str.empty() )
         {
-        G_LOG->notice( "current working directory: \"%s\"",
-            std::filesystem::current_path().u8string().c_str() );
-
         G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
-            dir_str.c_str(), sys_dir_str.c_str(), extra_dirs_str.c_str() );
+            std::filesystem::path( dir_str ).make_preferred().u8string().c_str(),
+            std::filesystem::path( sys_dir_str ).make_preferred().u8string().c_str(),
+            std::filesystem::path( extra_dirs_str ).make_preferred().u8string().c_str() );
         }
 
     if ( !dir_str.empty() && dir_str.back() != '\\' && dir_str.back() != '/' )
@@ -197,7 +197,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     if ( !package_path.empty() )
         {
         package_path += "'";
-        luaL_dostring( L, ( cmd + package_path ).c_str() );
+        if ( luaL_dostring( L, ( cmd + package_path ).c_str() ) != 0 )
+            {
+            G_LOG->critical(
+                "Error during C++ call - \"lua_manager::init\" - %s",
+                lua_tostring( L, -1 ) );
+
+            lua_pop( L, 1 );
+            return 1;
+            }
         }
 
     //I
@@ -258,8 +266,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( luaL_dofile( L, path ) != 0 )
             {
-            sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-            G_LOG->write_log( i_log::P_CRIT );
+            G_LOG->critical( "%s", lua_tostring( L, -1 ) );
             lua_pop( L, 1 );
 
             return 1;
@@ -273,7 +280,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         printf( "Экспорт в Lua необходимых объектов.\n" );
         }
     tolua_PAC_dev_open( L );
-    tolua_IOT_dev_open( L );
 
     //-Загрузка параметров.
     if ( G_DEBUG )
@@ -308,18 +314,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     if( luaL_loadfile( L, script_name ) != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
 
     if ( int i_line = lua_pcall(L, 0, LUA_MULTRET, 0); i_line != 0 )
         {
-        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "%s", lua_tostring( L, -1 ) );
         lua_pop( L, 1 );
         return 1;
         }
@@ -341,9 +343,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_rus", "lua_manager::init" );
     if ( 0 == PAC_name_rus )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (rus)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (rus)." );
         return 1;
         }
     const char *PAC_name_eng =
@@ -351,9 +351,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         "get_PAC_name_eng", "lua_manager::init" );
     if ( 0 == PAC_name_eng )
         {
-        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (eng)." );
-        G_LOG->write_log( i_log::P_CRIT );
-
+        G_LOG->critical( "Lua init error - error reading PAC name (eng)." );
         return 1;
         }
 
@@ -675,10 +673,10 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         return 1;
         }
 
-    if ( script_n >= FILE_CNT )
+    if ( script_n < 0 || script_n >= FILE_CNT )
         {
-        G_LOG->error( "Reload Lua script error - script_n >= FILE_CNT (%d>=%d).",
-            script_n, FILE_CNT );
+        G_LOG->error( "Reload Lua script error - script_n out of range "
+            "(%d, FILE_CNT=%d).", script_n, FILE_CNT );
         return 1;
         }
 
@@ -695,8 +693,8 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         }
     else
         {
-        sprintf(path, "%s%s",
-            G_PROJECT_MANAGER->path.c_str(), FILES[script_n]);
+        sprintf( path, "%s%s",
+            G_PROJECT_MANAGER->path.c_str(), FILES[ script_n ] );
         }
 
     res = check_file( path, err_str );

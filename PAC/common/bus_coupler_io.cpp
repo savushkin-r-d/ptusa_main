@@ -1,7 +1,5 @@
 #if !defined WIN_OS && \
     !( defined LINUX_OS && defined PAC_PC ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
     !( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
@@ -16,14 +14,6 @@
 
 #if defined LINUX_OS && defined PAC_PC
 #include "uni_bus_coupler_io.h"
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-#include "bus_coupler_io_w750.h"
-#endif
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "l_bus_coupler_io.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
@@ -1075,14 +1065,6 @@ io_manager* io_manager::get_instance()
         instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
 
-#if defined LINUX_OS && defined PAC_WAGO_750_860
-        instance = new io_manager_w750();
-#endif // defined LINUX_OS && defined PAC_WAGO_750_860
-
-#if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = new io_manager_linux();
-#endif // defined LINUX_OS && defined PAC_WAGO_750_860
-
 #if defined LINUX_OS && defined PAC_PLCNEXT
         instance = new uni_io_manager();
 #endif // defined LINUX_OS && defined PAC_PC
@@ -1430,8 +1412,11 @@ io_manager::io_node::DISPLAY_STATES io_manager::io_node::get_display_state() con
         return io_node::DISPLAY_STATES::DST_ERROR;
         }
 
-    // Check error/PP mode bits (0-5) in status register for Phoenix BK ETH nodes.
-    if ( type == PHOENIX_BK_ETH && ( status_register & STATUS_REG_ERROR_MASK ) )
+    // Check error/warning bits in Phoenix status registers.
+    if ( type == PHOENIX_BK_ETH &&
+        ( ( status_register & STATUS_REG_ERROR_MASK ) ||
+        ( diagnostic_status_register &
+            DIAG_STATUS_REG_CFG_BUS_ERROR_MASK ) ) )
         {
         return io_node::DISPLAY_STATES::DST_WARNING;
         }
