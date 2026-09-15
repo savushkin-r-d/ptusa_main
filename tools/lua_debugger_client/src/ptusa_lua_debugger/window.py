@@ -21,19 +21,25 @@ from PySide6.QtWidgets import (
     QStatusBar,
     QTableWidget,
     QTableWidgetItem,
+    QTableView,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
+from xlsxwriter.exceptions import XlsxWriterException
 
+from .excel_export import export_history_xlsx
 from .history import (
     DEFAULT_DISPLAY_SECONDS,
     DEFAULT_HISTORY_LIMIT,
     MAX_DISPLAY_SECONDS,
     MAX_HISTORY_LIMIT,
+    controller_timestamp_ms,
     merge_chart_data,
     merge_statistics,
     trim_chart_data,
 )
+from .history_table import HistoryTableModel
 from .session_store import load_session, save_session
 from .worker import DebuggerWorker
 
@@ -137,7 +143,7 @@ class MainWindow(QMainWindow):
         remove_button.clicked.connect(self._remove_expressions)
         apply_button = QPushButton("Применить")
         apply_button.clicked.connect(self._apply_expressions)
-        clear_button = QPushButton("Очистить графики")
+        clear_button = QPushButton("Очистить историю")
         clear_button.clicked.connect(self._clear_charts)
 
         expression_buttons = QHBoxLayout()
@@ -147,17 +153,26 @@ class MainWindow(QMainWindow):
         expression_buttons.addWidget(apply_button)
         expression_buttons.addWidget(clear_button)
 
-        self.variables = QTableWidget(0, 5)
+        self.variables = QTableWidget(0, 7)
         self.variables.setHorizontalHeaderLabels(
-            ["Lua-выражение", "Значение", "Min", "Max", "Состояние"]
+            [
+                "Lua-выражение",
+                "История",
+                "Текущее",
+                "Предыдущее",
+                "Min",
+                "Max",
+                "Состояние",
+            ]
         )
         self.variables.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.variables.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.variables.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        for column in range(1, 5):
+        for column in range(1, 7):
             self.variables.horizontalHeader().setSectionResizeMode(
                 column, QHeaderView.ResizeToContents
             )
+        self.variables.itemChanged.connect(self._history_changed)
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
@@ -165,14 +180,36 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.variables)
 
         pg.setConfigOptions(antialias=True, foreground="#CFD8DC")
-        self.plot = pg.PlotWidget(background="#1C252A")
+        self.plot = pg.PlotWidget(
+            background="#1C252A",
+            axisItems={"bottom": pg.DateAxisItem(orientation="bottom")},
+        )
+        self._absolute_time_axis = True
         self.plot.addLegend()
         self.plot.showGrid(x=True, y=True, alpha=0.2)
-        self.plot.setLabel("bottom", "Время", units="s")
+        self.plot.setLabel("bottom", "Время контроллера")
+
+        self.history_model = HistoryTableModel()
+        self.history_table = QTableView()
+        self.history_table.setModel(self.history_model)
+        self.history_table.setAlternatingRowColors(True)
+        self.history_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.history_table.setColumnWidth(0, 190)
+        self.history_table.horizontalHeader().setStretchLastSection(True)
+        export_button = QPushButton("Экспорт в Excel…")
+        export_button.clicked.connect(self._export_history)
+        history_page = QWidget()
+        history_layout = QVBoxLayout(history_page)
+        history_layout.addWidget(export_button, 0, Qt.AlignRight)
+        history_layout.addWidget(self.history_table, 1)
+
+        self.output_tabs = QTabWidget()
+        self.output_tabs.addTab(self.plot, "График")
+        self.output_tabs.addTab(history_page, "История")
 
         splitter = QSplitter()
         splitter.addWidget(left)
-        splitter.addWidget(self.plot)
+        splitter.addWidget(self.output_tabs)
         splitter.setSizes([470, 710])
 
         self.evaluate_edit = QLineEdit()
@@ -231,7 +268,7 @@ class MainWindow(QMainWindow):
         row = self.variables.rowCount()
         self.variables.insertRow(row)
         self.variables.setItem(row, 0, QTableWidgetItem(expression))
-        self._initialize_expression_values(row)
+        self._initialize_expression_values(row, history_enabled=False)
         self.expression_edit.clear()
         self._apply_expressions()
 
@@ -240,6 +277,7 @@ class MainWindow(QMainWindow):
         rows = sorted({item.row() for item in self.variables.selectedItems()}, reverse=True)
         for row in rows:
             self.variables.removeRow(row)
+        self._history_changed(None)
         self._apply_expressions()
 
     def _expressions(self) -> list[str]:
@@ -249,10 +287,41 @@ class MainWindow(QMainWindow):
             if self.variables.item(row, 0)
         ]
 
-    def _initialize_expression_values(self, row: int) -> None:
-        for column in range(1, 4):
+    def _initialize_expression_values(
+        self, row: int, *, history_enabled: bool = False
+    ) -> None:
+        history_item = QTableWidgetItem()
+        history_item.setFlags(
+            (history_item.flags() | Qt.ItemIsUserCheckable) & ~Qt.ItemIsEditable
+        )
+        history_item.setCheckState(Qt.Checked if history_enabled else Qt.Unchecked)
+        self.variables.setItem(row, 1, history_item)
+        for column in range(2, 6):
             self.variables.setItem(row, column, QTableWidgetItem("—"))
-        self.variables.setItem(row, 4, QTableWidgetItem("ожидание"))
+        self.variables.setItem(row, 6, QTableWidgetItem("ожидание"))
+
+    def _history_expressions(self) -> list[str]:
+        return [
+            self.variables.item(row, 0).text()
+            for row in range(self.variables.rowCount())
+            if self.variables.item(row, 0)
+            and self.variables.item(row, 1)
+            and self.variables.item(row, 1).checkState() == Qt.Checked
+        ]
+
+    def _history_changed(self, item: QTableWidgetItem | None) -> None:
+        if item is not None and item.column() != 1:
+            return
+        self._last_chart_data = trim_chart_data(
+            self._last_chart_data,
+            self.history_limit_spin.value(),
+            set(self._history_expressions()),
+        )
+        if self._last_chart_data is not None:
+            self._draw_chart(self._last_chart_data)
+        else:
+            self.plot.clear()
+        self._refresh_history_table()
 
     @Slot()
     def _apply_expressions(self) -> None:
@@ -276,7 +345,10 @@ class MainWindow(QMainWindow):
     def _on_chart_data(self, data: dict[str, Any]) -> None:
         self._statistics = merge_statistics(self._statistics, data)
         self._last_chart_data = merge_chart_data(
-            self._last_chart_data, data, self.history_limit_spin.value()
+            self._last_chart_data,
+            data,
+            self.history_limit_spin.value(),
+            set(self._history_expressions()),
         )
         by_expression = {
             item.get("expression"): item
@@ -286,15 +358,24 @@ class MainWindow(QMainWindow):
             series = by_expression.get(expression, {})
             samples = series.get("samples", [])
             if not samples:
-                self.variables.setItem(row, 2, QTableWidgetItem("—"))
-                self.variables.setItem(row, 3, QTableWidgetItem("—"))
+                for column in (2, 3, 6):
+                    self.variables.setItem(row, column, QTableWidgetItem("—"))
                 continue
             last = samples[-1]
-            self.variables.setItem(row, 1, QTableWidgetItem(str(last.get("value"))))
+            previous = samples[-2] if len(samples) > 1 else None
+            self.variables.setItem(row, 2, QTableWidgetItem(str(last.get("value"))))
+            self.variables.setItem(
+                row,
+                3,
+                QTableWidgetItem(
+                    "—" if previous is None else str(previous.get("value"))
+                ),
+            )
             status = "OK" if last.get("ok") else str(last.get("value", "ошибка"))
-            self.variables.setItem(row, 4, QTableWidgetItem(status))
+            self.variables.setItem(row, 6, QTableWidgetItem(status))
         self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
+        self._refresh_history_table()
 
     def _refresh_table_statistics(self) -> None:
         for row, expression in enumerate(self._expressions()):
@@ -302,10 +383,10 @@ class MainWindow(QMainWindow):
             minimum = extrema.get("min")
             maximum = extrema.get("max")
             self.variables.setItem(
-                row, 2, QTableWidgetItem(self._format_stat(minimum))
+                row, 4, QTableWidgetItem(self._format_stat(minimum))
             )
             self.variables.setItem(
-                row, 3, QTableWidgetItem(self._format_stat(maximum))
+                row, 5, QTableWidgetItem(self._format_stat(maximum))
             )
 
     @staticmethod
@@ -314,10 +395,13 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def _history_limit_changed(self, limit: int) -> None:
-        self._last_chart_data = trim_chart_data(self._last_chart_data, limit)
+        self._last_chart_data = trim_chart_data(
+            self._last_chart_data, limit, set(self._history_expressions())
+        )
         if self._last_chart_data is not None:
             self._refresh_table_statistics()
             self._draw_chart(self._last_chart_data)
+            self._refresh_history_table()
 
     def _display_settings_changed(self, _value: int | bool) -> None:
         if self._last_chart_data is not None:
@@ -329,6 +413,7 @@ class MainWindow(QMainWindow):
         self._last_chart_data = None
         self._statistics = {}
         self.plot.clear()
+        self._refresh_history_table()
         self._refresh_table_statistics()
         if self._connected:
             self.clear_requested.emit()
@@ -337,7 +422,10 @@ class MainWindow(QMainWindow):
         self.plot.clear()
         server_time = int(data.get("server_time_ms", 0))
         prepared: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
+        history_expressions = set(self._history_expressions())
         for series in data.get("series", []):
+            if series.get("expression") not in history_expressions:
+                continue
             numeric = [
                 sample for sample in series.get("samples", [])
                 if sample.get("ok") and sample.get("type") in {"number", "boolean"}
@@ -348,15 +436,36 @@ class MainWindow(QMainWindow):
             return
 
         base = int(prepared[0][1][0]["time_ms"])
-        max_x = 0.0
+        absolute_time = controller_timestamp_ms(data, base) is not None
+        self._set_time_axis(absolute_time)
+        max_x: float | None = None
         for index, (series, numeric) in enumerate(prepared):
-            x_values = [((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000 for sample in numeric]
+            if absolute_time:
+                timestamps = [
+                    controller_timestamp_ms(data, int(sample["time_ms"]))
+                    for sample in numeric
+                ]
+                x_values = [
+                    int(timestamp) / 1000
+                    for timestamp in timestamps
+                    if timestamp is not None
+                ]
+            else:
+                x_values = [
+                    ((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000
+                    for sample in numeric
+                ]
             y_values = [float(sample["value"]) for sample in numeric]
-            current_x = ((server_time - base) & 0xFFFFFFFF) / 1000
+            current_time = controller_timestamp_ms(data, server_time)
+            current_x = (
+                current_time / 1000
+                if current_time is not None
+                else ((server_time - base) & 0xFFFFFFFF) / 1000
+            )
             if current_x > x_values[-1]:
                 x_values.append(current_x)
                 y_values.append(y_values[-1])
-            max_x = max(max_x, x_values[-1])
+            max_x = x_values[-1] if max_x is None else max(max_x, x_values[-1])
             self.plot.plot(
                 x_values,
                 y_values,
@@ -364,9 +473,57 @@ class MainWindow(QMainWindow):
                 pen=pg.mkPen(pg.intColor(index), width=2),
                 stepMode="left",
             )
-        if self.auto_follow_check.isChecked():
-            left = max(0.0, max_x - self.display_seconds_spin.value())
+        if self.auto_follow_check.isChecked() and max_x is not None:
+            left = max_x - self.display_seconds_spin.value()
+            if not absolute_time:
+                left = max(0.0, left)
             self.plot.setXRange(left, max_x, padding=0)
+
+    def _set_time_axis(self, absolute_time: bool) -> None:
+        if absolute_time == self._absolute_time_axis:
+            return
+        axis = (
+            pg.DateAxisItem(orientation="bottom")
+            if absolute_time
+            else pg.AxisItem(orientation="bottom")
+        )
+        self.plot.setAxisItems({"bottom": axis})
+        self.plot.setLabel(
+            "bottom",
+            "Время контроллера" if absolute_time else "Время",
+            units=None if absolute_time else "s",
+        )
+        self._absolute_time_axis = absolute_time
+
+    def _refresh_history_table(self) -> None:
+        self.history_model.set_chart_data(
+            self._last_chart_data, self._history_expressions()
+        )
+
+    @Slot()
+    def _export_history(self) -> None:
+        if not self.history_model.rows:
+            QMessageBox.information(
+                self, "Lua debugger", "Нет накопленной истории для экспорта"
+            )
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Экспорт истории", "debugger_history.xlsx", "Excel (*.xlsx)"
+        )
+        if not path:
+            return
+        if not path.lower().endswith(".xlsx"):
+            path += ".xlsx"
+        try:
+            export_history_xlsx(
+                path,
+                self.history_model.rows,
+                self.history_model.expressions,
+                self.history_model.absolute_time,
+            )
+            self.statusBar().showMessage(f"История экспортирована: {path}")
+        except (OSError, ValueError, XlsxWriterException) as exc:
+            self._show_error(str(exc))
 
     @Slot(str)
     def _show_error(self, message: str) -> None:
@@ -388,6 +545,7 @@ class MainWindow(QMainWindow):
                 poll_interval_ms=self.interval_spin.value(),
                 history_limit=self.history_limit_spin.value(),
                 expressions=self._expressions(),
+                history_expressions=self._history_expressions(),
                 chart_data=self._last_chart_data,
                 display_seconds=self.display_seconds_spin.value(),
                 auto_follow=self.auto_follow_check.isChecked(),
@@ -416,12 +574,19 @@ class MainWindow(QMainWindow):
                 expression: dict(extrema)
                 for expression, extrema in document["statistics"].items()
             }
-            self.variables.setRowCount(0)
-            for expression in document["expressions"]:
-                row = self.variables.rowCount()
-                self.variables.insertRow(row)
-                self.variables.setItem(row, 0, QTableWidgetItem(expression))
-                self._initialize_expression_values(row)
+            history_expressions = set(document["history_expressions"])
+            self.variables.blockSignals(True)
+            try:
+                self.variables.setRowCount(0)
+                for expression in document["expressions"]:
+                    row = self.variables.rowCount()
+                    self.variables.insertRow(row)
+                    self.variables.setItem(row, 0, QTableWidgetItem(expression))
+                    self._initialize_expression_values(
+                        row, history_enabled=expression in history_expressions
+                    )
+            finally:
+                self.variables.blockSignals(False)
             chart_data = document.get("chart_data")
             self._last_chart_data = None
             if isinstance(chart_data, dict):

@@ -32,6 +32,8 @@ class DebuggerProtocol:
         self.timeout = timeout
         self.session_id: str | None = None
         self.session_timeout_ms = 10_000
+        self.controller_time_unix_ms: int | None = None
+        self.controller_time_millisec: int | None = None
         self._socket: socket.socket | None = None
         self._packet_id = 0
 
@@ -50,8 +52,19 @@ class DebuggerProtocol:
             self._socket = connection
             response = self._request(Command.CREATE_SESSION)
             self._ensure_ok(response)
-            self.session_id = str(response["session_id"])
-            self.session_timeout_ms = int(response.get("timeout_ms", 10_000))
+            try:
+                self.session_id = str(response["session_id"])
+                self.session_timeout_ms = int(response.get("timeout_ms", 10_000))
+                self.controller_time_unix_ms = int(
+                    response["controller_time_unix_ms"]
+                )
+                self.controller_time_millisec = int(
+                    response["controller_time_millisec"]
+                )
+            except (KeyError, TypeError, ValueError) as error:
+                raise ProtocolError(
+                    "Контроллер не прислал временной якорь сессии"
+                ) from error
             return self.session_id
         except Exception:
             connection.close()
@@ -62,6 +75,8 @@ class DebuggerProtocol:
         connection = self._socket
         if connection is None:
             self.session_id = None
+            self.controller_time_unix_ms = None
+            self.controller_time_millisec = None
             return
         if send_close and self.session_id:
             try:
@@ -75,6 +90,8 @@ class DebuggerProtocol:
         connection.close()
         self._socket = None
         self.session_id = None
+        self.controller_time_unix_ms = None
+        self.controller_time_millisec = None
 
     def evaluate(self, expression: str) -> dict[str, Any]:
         return self._request(Command.EVALUATE, expression)
@@ -89,6 +106,8 @@ class DebuggerProtocol:
     def get_chart_data(self) -> dict[str, Any]:
         response = self._request(Command.GET_CHART_DATA)
         self._ensure_ok(response)
+        response["controller_time_unix_ms"] = self.controller_time_unix_ms
+        response["controller_time_millisec"] = self.controller_time_millisec
         return response
 
     def clear_chart_data(self) -> None:

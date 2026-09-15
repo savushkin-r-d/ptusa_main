@@ -20,6 +20,7 @@ def save_session(
     poll_interval_ms: int,
     history_limit: int,
     expressions: list[str],
+    history_expressions: list[str],
     chart_data: dict[str, Any] | None,
     display_seconds: int = DEFAULT_DISPLAY_SECONDS,
     auto_follow: bool = True,
@@ -34,6 +35,7 @@ def save_session(
         "auto_follow": auto_follow,
         "statistics": statistics or {},
         "expressions": expressions,
+        "history_expressions": history_expressions,
         "chart_data": chart_data,
     }
     Path(path).write_text(
@@ -47,6 +49,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise ValueError("Неподдерживаемая версия файла сессии")
     connection = document.get("connection")
     expressions = document.get("expressions")
+    history_expressions = document.get("history_expressions", expressions)
     interval = document.get("poll_interval_ms")
     history_limit = document.get("history_limit", DEFAULT_HISTORY_LIMIT)
     display_seconds = document.get("display_seconds", DEFAULT_DISPLAY_SECONDS)
@@ -56,6 +59,12 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise TypeError("Некорректный файл сессии")
     if not all(isinstance(item, str) for item in expressions):
         raise ValueError("Некорректный список выражений")
+    if (
+        not isinstance(history_expressions, list)
+        or not all(isinstance(item, str) for item in history_expressions)
+        or not set(history_expressions).issubset(expressions)
+    ):
+        raise ValueError("Некорректный список выражений с историей")
     if not isinstance(interval, int):
         raise TypeError("Некорректный интервал опроса")
     if (
@@ -88,4 +97,5 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["display_seconds"] = display_seconds
     document["auto_follow"] = auto_follow
     document["statistics"] = statistics
+    document["history_expressions"] = history_expressions
     return document

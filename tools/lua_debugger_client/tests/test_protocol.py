@@ -38,7 +38,13 @@ def test_connect_creates_session(monkeypatch) -> None:
         b"PAC accept"
         + response(
             1,
-            {"ok": True, "session_id": "0123456789abcdef", "timeout_ms": 10_000},
+            {
+                "ok": True,
+                "session_id": "0123456789abcdef",
+                "timeout_ms": 10_000,
+                "controller_time_unix_ms": 1_789_123_456_789,
+                "controller_time_millisec": 123_456,
+            },
         )
     )
     monkeypatch.setattr("socket.create_connection", lambda *args, **kwargs: fake)
@@ -46,6 +52,8 @@ def test_connect_creates_session(monkeypatch) -> None:
     client = DebuggerProtocol()
     assert client.connect("127.0.0.1") == "0123456789abcdef"
     assert client.connected
+    assert client.controller_time_unix_ms == 1_789_123_456_789
+    assert client.controller_time_millisec == 123_456
 
     net_id, service, frame_type, packet_id, length = struct.unpack(
         ">cBBBH", fake.sent[:6]
@@ -68,3 +76,17 @@ def test_request_contains_session_id() -> None:
         bytes((Command.SET_CHART_EXPRESSIONS,))
         + b"session1\nTE1:get_value()\nM1:get_state()"
     )
+
+
+def test_chart_data_contains_session_time_anchor() -> None:
+    fake = FakeSocket(response(1, {"ok": True, "server_time_ms": 12, "series": []}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    client.controller_time_unix_ms = 1_789_123_456_789
+    client.controller_time_millisec = 123_456
+
+    data = client.get_chart_data()
+
+    assert data["controller_time_unix_ms"] == 1_789_123_456_789
+    assert data["controller_time_millisec"] == 123_456

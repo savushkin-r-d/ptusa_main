@@ -88,6 +88,15 @@ TEST_F( lua_debugger_test, creates_and_closes_session )
         request( lua_debugger::CMD_KEEP_ALIVE ).find( "expired session" ) );
     }
 
+TEST_F( lua_debugger_test, session_contains_controller_time_anchor )
+    {
+    const auto response = raw_request( lua_debugger::CMD_CREATE_SESSION );
+    EXPECT_NE( std::string::npos,
+        response.find( R"("controller_time_unix_ms":)" ) );
+    EXPECT_NE( std::string::npos,
+        response.find( R"("controller_time_millisec":)" ) );
+    }
+
 TEST_F( lua_debugger_test, expires_inactive_session )
     {
     G_LUA_DEBUGGER->expire_sessions_for_test(

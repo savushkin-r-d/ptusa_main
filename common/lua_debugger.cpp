@@ -1,6 +1,7 @@
 #include "lua_debugger.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
@@ -198,9 +199,17 @@ std::string lua_debugger::create_session()
         }
     while ( sessions_.find( session_id ) != sessions_.end() );
 
-    sessions_[ session_id ].last_access_ms = get_millisec();
+    const auto controller_time_millisec = get_millisec();
+    const auto controller_time_unix_ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch() ).count();
+    sessions_[ session_id ].last_access_ms = controller_time_millisec;
     return R"({"ok":true,"session_id":)" + json_quote( session_id ) +
-        R"(,"timeout_ms":)" + std::to_string( SESSION_TIMEOUT_MS ) + "}";
+        R"(,"timeout_ms":)" + std::to_string( SESSION_TIMEOUT_MS ) +
+        R"(,"controller_time_unix_ms":)" +
+        std::to_string( controller_time_unix_ms ) +
+        R"(,"controller_time_millisec":)" +
+        std::to_string( controller_time_millisec ) + "}";
     }
 
 std::string lua_debugger::set_expressions( session& target,

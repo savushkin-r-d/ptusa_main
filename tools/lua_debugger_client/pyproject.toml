@@ -8,6 +8,7 @@ dependencies = [
     "pyqtgraph>=0.13.7,<0.15",
     "pyside6>=6.8,<7",
     "qt-material>=2.14,<3",
+    "xlsxwriter>=3.2,<4",
 ]
 
 [project.scripts]
