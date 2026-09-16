@@ -4,7 +4,7 @@ from typing import Any
 
 import pyqtgraph as pg
 from PySide6.QtCore import QMetaObject, Qt, QThread, Signal, Slot
-from PySide6.QtGui import QAction, QCloseEvent
+from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
@@ -18,11 +18,11 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSpinBox,
     QSplitter,
-    QStatusBar,
     QTableWidget,
     QTableWidgetItem,
     QTableView,
     QTabWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -44,21 +44,21 @@ from .session_store import load_session, save_session
 from .worker import DebuggerWorker
 
 
-class MainWindow(QMainWindow):
+class DebuggerSessionWidget(QWidget):
     connect_requested = Signal(str, int)
     disconnect_requested = Signal()
     expressions_requested = Signal(list)
     interval_requested = Signal(int)
     evaluate_requested = Signal(str)
     clear_requested = Signal()
+    title_changed = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("ptusa Lua debugger")
-        self.resize(1180, 760)
         self._connected = False
+        self._shutting_down = False
         self._last_chart_data: dict[str, Any] | None = None
-        self._statistics: dict[str, dict[str, float]] = {}
+        self._statistics: dict[str, dict[str, Any]] = {}
 
         self._thread = QThread(self)
         self._worker = DebuggerWorker()
@@ -79,18 +79,12 @@ class MainWindow(QMainWindow):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        file_menu = self.menuBar().addMenu("Сессия")
-        load_action = QAction("Загрузить…", self)
-        save_action = QAction("Сохранить…", self)
-        load_action.triggered.connect(self._load_session)
-        save_action.triggered.connect(self._save_session)
-        file_menu.addAction(load_action)
-        file_menu.addAction(save_action)
-
         self.host_edit = QLineEdit("127.0.0.1")
+        self.host_edit.textChanged.connect(self._update_title)
         self.port_spin = QSpinBox()
         self.port_spin.setRange(1, 65_535)
         self.port_spin.setValue(10_000)
+        self.port_spin.valueChanged.connect(self._update_title)
         self.interval_spin = QSpinBox()
         self.interval_spin.setRange(100, 9_000)
         self.interval_spin.setSingleStep(100)
@@ -153,7 +147,7 @@ class MainWindow(QMainWindow):
         expression_buttons.addWidget(apply_button)
         expression_buttons.addWidget(clear_button)
 
-        self.variables = QTableWidget(0, 7)
+        self.variables = QTableWidget(0, 9)
         self.variables.setHorizontalHeaderLabels(
             [
                 "Lua-выражение",
@@ -162,13 +156,15 @@ class MainWindow(QMainWindow):
                 "Предыдущее",
                 "Min",
                 "Max",
+                "Среднее",
+                "Медиана",
                 "Состояние",
             ]
         )
         self.variables.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.variables.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.variables.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        for column in range(1, 7):
+        for column in range(1, 9):
             self.variables.horizontalHeader().setSectionResizeMode(
                 column, QHeaderView.ResizeToContents
             )
@@ -223,14 +219,12 @@ class MainWindow(QMainWindow):
         evaluation.addWidget(evaluate_button)
         evaluation.addWidget(self.evaluate_result, 1)
 
-        root = QWidget()
-        root_layout = QVBoxLayout(root)
+        root_layout = QVBoxLayout(self)
         root_layout.addLayout(connection)
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
-        self.setCentralWidget(root)
-        self.setStatusBar(QStatusBar())
-        self.statusBar().showMessage("Не подключено")
+        self.status_label = QLabel("Не подключено")
+        root_layout.addWidget(self.status_label)
 
     @Slot()
     def _toggle_connection(self) -> None:
@@ -238,7 +232,7 @@ class MainWindow(QMainWindow):
             self.disconnect_requested.emit()
             return
         self.connect_button.setEnabled(False)
-        self.statusBar().showMessage("Подключение…")
+        self.status_label.setText("Подключение…")
         self.interval_requested.emit(self.interval_spin.value())
         self.connect_requested.emit(self.host_edit.text().strip(), self.port_spin.value())
 
@@ -247,7 +241,8 @@ class MainWindow(QMainWindow):
         self._connected = True
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Отключиться")
-        self.statusBar().showMessage(f"Подключено · сессия {session_id}")
+        self.status_label.setText(f"Подключено · сессия {session_id}")
+        self._update_title()
         self._apply_expressions()
 
     @Slot(str)
@@ -255,7 +250,8 @@ class MainWindow(QMainWindow):
         self._connected = False
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Подключиться")
-        self.statusBar().showMessage(reason or "Не подключено")
+        self.status_label.setText(reason or "Не подключено")
+        self._update_title()
 
     @Slot()
     def _add_expression(self) -> None:
@@ -296,9 +292,9 @@ class MainWindow(QMainWindow):
         )
         history_item.setCheckState(Qt.Checked if history_enabled else Qt.Unchecked)
         self.variables.setItem(row, 1, history_item)
-        for column in range(2, 6):
+        for column in range(2, 8):
             self.variables.setItem(row, column, QTableWidgetItem("—"))
-        self.variables.setItem(row, 6, QTableWidgetItem("ожидание"))
+        self.variables.setItem(row, 8, QTableWidgetItem("ожидание"))
 
     def _history_expressions(self) -> list[str]:
         return [
@@ -358,7 +354,7 @@ class MainWindow(QMainWindow):
             series = by_expression.get(expression, {})
             samples = series.get("samples", [])
             if not samples:
-                for column in (2, 3, 6):
+                for column in (2, 3, 8):
                     self.variables.setItem(row, column, QTableWidgetItem("—"))
                 continue
             last = samples[-1]
@@ -372,7 +368,7 @@ class MainWindow(QMainWindow):
                 ),
             )
             status = "OK" if last.get("ok") else str(last.get("value", "ошибка"))
-            self.variables.setItem(row, 6, QTableWidgetItem(status))
+            self.variables.setItem(row, 8, QTableWidgetItem(status))
         self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
         self._refresh_history_table()
@@ -382,11 +378,19 @@ class MainWindow(QMainWindow):
             extrema = self._statistics.get(expression, {})
             minimum = extrema.get("min")
             maximum = extrema.get("max")
+            average = extrema.get("average")
+            median = extrema.get("median")
             self.variables.setItem(
                 row, 4, QTableWidgetItem(self._format_stat(minimum))
             )
             self.variables.setItem(
                 row, 5, QTableWidgetItem(self._format_stat(maximum))
+            )
+            self.variables.setItem(
+                row, 6, QTableWidgetItem(self._format_stat(average))
+            )
+            self.variables.setItem(
+                row, 7, QTableWidgetItem(self._format_stat(median))
             )
 
     @staticmethod
@@ -521,13 +525,13 @@ class MainWindow(QMainWindow):
                 self.history_model.expressions,
                 self.history_model.absolute_time,
             )
-            self.statusBar().showMessage(f"История экспортирована: {path}")
+            self.status_label.setText(f"История экспортирована: {path}")
         except (OSError, ValueError, XlsxWriterException) as exc:
             self._show_error(str(exc))
 
     @Slot(str)
     def _show_error(self, message: str) -> None:
-        self.statusBar().showMessage(message)
+        self.status_label.setText(message)
         QMessageBox.warning(self, "Lua debugger", message)
 
     @Slot()
@@ -562,43 +566,166 @@ class MainWindow(QMainWindow):
         if not path:
             return
         try:
-            document = load_session(path)
-            connection = document["connection"]
-            self.host_edit.setText(str(connection.get("host", "127.0.0.1")))
-            self.port_spin.setValue(int(connection.get("port", 10_000)))
-            self.interval_spin.setValue(int(document["poll_interval_ms"]))
-            self.history_limit_spin.setValue(int(document["history_limit"]))
-            self.display_seconds_spin.setValue(int(document["display_seconds"]))
-            self.auto_follow_check.setChecked(bool(document["auto_follow"]))
-            self._statistics = {
-                expression: dict(extrema)
-                for expression, extrema in document["statistics"].items()
-            }
-            history_expressions = set(document["history_expressions"])
-            self.variables.blockSignals(True)
-            try:
-                self.variables.setRowCount(0)
-                for expression in document["expressions"]:
-                    row = self.variables.rowCount()
-                    self.variables.insertRow(row)
-                    self.variables.setItem(row, 0, QTableWidgetItem(expression))
-                    self._initialize_expression_values(
-                        row, history_enabled=expression in history_expressions
-                    )
-            finally:
-                self.variables.blockSignals(False)
-            chart_data = document.get("chart_data")
-            self._last_chart_data = None
-            if isinstance(chart_data, dict):
-                self._on_chart_data(chart_data)
-            self._apply_expressions()
+            self.load_document(load_session(path))
         except (OSError, ValueError, TypeError) as exc:
             self._show_error(str(exc))
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def load_document(self, document: dict[str, Any]) -> None:
+        connection = document["connection"]
+        self.host_edit.setText(str(connection.get("host", "127.0.0.1")))
+        self.port_spin.setValue(int(connection.get("port", 10_000)))
+        self.interval_spin.setValue(int(document["poll_interval_ms"]))
+        self.history_limit_spin.setValue(int(document["history_limit"]))
+        self.display_seconds_spin.setValue(int(document["display_seconds"]))
+        self.auto_follow_check.setChecked(bool(document["auto_follow"]))
+        self._statistics = {
+            expression: dict(extrema)
+            for expression, extrema in document["statistics"].items()
+        }
+        history_expressions = set(document["history_expressions"])
+        self.variables.blockSignals(True)
+        try:
+            self.variables.setRowCount(0)
+            for expression in document["expressions"]:
+                row = self.variables.rowCount()
+                self.variables.insertRow(row)
+                self.variables.setItem(row, 0, QTableWidgetItem(expression))
+                self._initialize_expression_values(
+                    row, history_enabled=expression in history_expressions
+                )
+        finally:
+            self.variables.blockSignals(False)
+        chart_data = document.get("chart_data")
+        self._last_chart_data = None
+        if isinstance(chart_data, dict):
+            self._on_chart_data(chart_data)
+        else:
+            self.plot.clear()
+            self._refresh_history_table()
+            self._refresh_table_statistics()
+        self._apply_expressions()
+        self._update_title()
+
+    def _update_title(self, _value: object = None) -> None:
+        marker = "● " if self._connected else ""
+        host = self.host_edit.text().strip() or "новая сессия"
+        self.title_changed.emit(f"{marker}{host}:{self.port_spin.value()}")
+
+    def shutdown(self) -> None:
+        if self._shutting_down:
+            return
+        self._shutting_down = True
         QMetaObject.invokeMethod(
             self._worker, "shutdown", Qt.BlockingQueuedConnection
         )
         self._thread.quit()
         self._thread.wait(3_000)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self.shutdown()
+        event.accept()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowTitle("ptusa Lua debugger")
+        self.resize(1180, 760)
+
+        self.sessions = QTabWidget()
+        self.sessions.setDocumentMode(True)
+        self.sessions.setMovable(True)
+        self.sessions.setTabsClosable(True)
+        self.sessions.tabCloseRequested.connect(self._close_session)
+        self.setCentralWidget(self.sessions)
+
+        add_button = QToolButton()
+        add_button.setText("+")
+        add_button.setToolTip("Новая сессия (Ctrl+T)")
+        add_button.clicked.connect(self._add_session)
+        self.sessions.setCornerWidget(add_button, Qt.TopRightCorner)
+
+        session_menu = self.menuBar().addMenu("Сессия")
+        new_action = QAction("Новая вкладка", self)
+        new_action.setShortcut(QKeySequence.StandardKey.AddTab)
+        new_action.triggered.connect(self._add_session)
+        open_action = QAction("Открыть в новой вкладке…", self)
+        open_action.setShortcut(QKeySequence.StandardKey.Open)
+        open_action.triggered.connect(self._open_session)
+        save_action = QAction("Сохранить текущую…", self)
+        save_action.setShortcut(QKeySequence.StandardKey.Save)
+        save_action.triggered.connect(self._save_current_session)
+        close_action = QAction("Закрыть вкладку", self)
+        close_action.setShortcut(QKeySequence.StandardKey.Close)
+        close_action.triggered.connect(self._close_current_session)
+        session_menu.addActions(
+            [new_action, open_action, save_action, close_action]
+        )
+
+        self._add_session()
+
+    @Slot()
+    def _add_session(self) -> DebuggerSessionWidget:
+        session = DebuggerSessionWidget()
+        index = self.sessions.addTab(session, self._session_title(session))
+        session.title_changed.connect(
+            lambda title, current=session: self._set_session_title(current, title)
+        )
+        self.sessions.setCurrentIndex(index)
+        return session
+
+    @staticmethod
+    def _session_title(session: DebuggerSessionWidget) -> str:
+        host = session.host_edit.text().strip() or "новая сессия"
+        return f"{host}:{session.port_spin.value()}"
+
+    def _set_session_title(
+        self, session: DebuggerSessionWidget, title: str
+    ) -> None:
+        index = self.sessions.indexOf(session)
+        if index >= 0:
+            self.sessions.setTabText(index, title)
+
+    @Slot()
+    def _open_session(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Открыть сессию", "", "Lua debugger session (*.ptlua.json)"
+        )
+        if not path:
+            return
+        try:
+            document = load_session(path)
+        except (OSError, ValueError, TypeError) as exc:
+            QMessageBox.warning(self, "Lua debugger", str(exc))
+            return
+        self._add_session().load_document(document)
+
+    @Slot()
+    def _save_current_session(self) -> None:
+        session = self.sessions.currentWidget()
+        if isinstance(session, DebuggerSessionWidget):
+            session._save_session()
+
+    @Slot()
+    def _close_current_session(self) -> None:
+        index = self.sessions.currentIndex()
+        if index >= 0:
+            self._close_session(index)
+
+    @Slot(int)
+    def _close_session(self, index: int) -> None:
+        session = self.sessions.widget(index)
+        if not isinstance(session, DebuggerSessionWidget):
+            return
+        self.sessions.removeTab(index)
+        session.shutdown()
+        session.deleteLater()
+        if self.sessions.count() == 0:
+            self._add_session()
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        for index in range(self.sessions.count()):
+            session = self.sessions.widget(index)
+            if isinstance(session, DebuggerSessionWidget):
+                session.shutdown()
         event.accept()

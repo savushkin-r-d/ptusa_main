@@ -50,7 +50,20 @@ def test_statistics_are_kept_after_chart_history_is_trimmed() -> None:
     statistics = merge_statistics(statistics, chart(4, 5))
 
     assert [sample["value"] for sample in history["series"][0]["samples"]] == [9]
-    assert statistics == {"x": {"min": 1.0, "max": 9.0}}
+    assert statistics["x"]["min"] == 1.0
+    assert statistics["x"]["max"] == 9.0
+    assert statistics["x"]["average"] == 4.75
+    assert statistics["x"]["median"] == 4.5
+
+
+def test_statistics_do_not_recount_overlapping_server_cache() -> None:
+    statistics = merge_statistics({}, chart(1, 3, 5))
+    statistics = merge_statistics(statistics, chart(3, 5, 9))
+    statistics = merge_statistics(statistics, chart(3, 5, 9))
+
+    assert statistics["x"]["_count"] == 4
+    assert statistics["x"]["average"] == 4.5
+    assert statistics["x"]["median"] == 4.0
 
 
 def test_controller_timestamp_uses_session_anchor_across_counter_wrap() -> None:

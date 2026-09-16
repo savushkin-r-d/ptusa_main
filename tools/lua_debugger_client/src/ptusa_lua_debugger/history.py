@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from bisect import insort
 from dataclasses import dataclass
 from typing import Any
 
@@ -163,9 +164,9 @@ def build_history_rows(
 
 
 def merge_statistics(
-    previous: dict[str, dict[str, float]], data: dict[str, Any]
-) -> dict[str, dict[str, float]]:
-    """Accumulate numeric extrema independently from the trimmed chart history."""
+    previous: dict[str, dict[str, Any]], data: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    """Accumulate exact numeric statistics without recounting server cache data."""
     result = {expression: dict(extrema) for expression, extrema in previous.items()}
     for series in data.get("series", []):
         if not isinstance(series, dict):
@@ -173,18 +174,61 @@ def merge_statistics(
         expression = series.get("expression")
         if not isinstance(expression, str):
             continue
+        samples = [
+            sample
+            for sample in series.get("samples", [])
+            if isinstance(sample, dict)
+        ]
+        if not samples:
+            continue
+
+        accumulated = result.get(expression, {})
+        last_sample = accumulated.get("_last_sample")
+        start = 0
+        if isinstance(last_sample, dict):
+            for index in range(len(samples) - 1, -1, -1):
+                if samples[index] == last_sample:
+                    start = index + 1
+                    break
+        new_samples = samples[start:]
         values = [
             float(sample["value"])
-            for sample in series.get("samples", [])
+            for sample in new_samples
             if sample.get("ok") and sample.get("type") in {"number", "boolean"}
         ]
-        if not values:
+        if not values and not accumulated:
             continue
-        extrema = result.get(expression)
-        minimum = min(values)
-        maximum = max(values)
-        if extrema is not None:
-            minimum = min(minimum, extrema["min"])
-            maximum = max(maximum, extrema["max"])
-        result[expression] = {"min": minimum, "max": maximum}
+
+        sorted_values = list(accumulated.get("_values", []))
+        total = float(accumulated.get("_sum", sum(sorted_values)))
+        count = int(accumulated.get("_count", len(sorted_values)))
+        for value in values:
+            insort(sorted_values, value)
+            total += value
+            count += 1
+
+        if not count:
+            continue
+        middle = count // 2
+        median = (
+            sorted_values[middle]
+            if count % 2
+            else (sorted_values[middle - 1] + sorted_values[middle]) / 2
+        )
+        minimum = min(sorted_values)
+        maximum = max(sorted_values)
+        if "min" in accumulated:
+            minimum = min(minimum, float(accumulated["min"]))
+        if "max" in accumulated:
+            maximum = max(maximum, float(accumulated["max"]))
+        result[expression] = {
+            "min": minimum,
+            "max": maximum,
+            "average": total / count,
+            "median": median,
+            "_sum": total,
+            "_count": count,
+            "_values": sorted_values,
+            "_last_sample": samples[-1],
+        }
     return result

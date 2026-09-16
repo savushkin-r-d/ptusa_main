@@ -24,7 +24,7 @@ def save_session(
     chart_data: dict[str, Any] | None,
     display_seconds: int = DEFAULT_DISPLAY_SECONDS,
     auto_follow: bool = True,
-    statistics: dict[str, dict[str, float]] | None = None,
+    statistics: dict[str, dict[str, Any]] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -83,15 +83,8 @@ def load_session(path: str | Path) -> dict[str, Any]:
     if not isinstance(auto_follow, bool):
         raise TypeError("Некорректный режим отображения")
     if not isinstance(statistics, dict) or any(
-        not isinstance(expression, str)
-        or not isinstance(extrema, dict)
-        or set(extrema) != {"min", "max"}
-        or any(
-            not isinstance(extrema[key], (int, float))
-            or isinstance(extrema[key], bool)
-            for key in ("min", "max")
-        )
-        for expression, extrema in statistics.items()
+        not isinstance(expression, str) or not _valid_statistics_entry(entry)
+        for expression, entry in statistics.items()
     ):
         raise TypeError("Некорректная статистика выражений")
     document["display_seconds"] = display_seconds
@@ -99,3 +92,38 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["statistics"] = statistics
     document["history_expressions"] = history_expressions
     return document
+
+
+def _valid_statistics_entry(entry: Any) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    numeric = lambda value: isinstance(value, (int, float)) and not isinstance(
+        value, bool
+    )
+    if set(entry) == {"min", "max"}:
+        return numeric(entry["min"]) and numeric(entry["max"])
+
+    expected = {
+        "min",
+        "max",
+        "average",
+        "median",
+        "_sum",
+        "_count",
+        "_values",
+        "_last_sample",
+    }
+    if set(entry) != expected:
+        return False
+    values = entry["_values"]
+    count = entry["_count"]
+    return (
+        all(numeric(entry[key]) for key in ("min", "max", "average", "median", "_sum"))
+        and isinstance(count, int)
+        and not isinstance(count, bool)
+        and count > 0
+        and isinstance(values, list)
+        and len(values) == count
+        and all(numeric(value) for value in values)
+        and isinstance(entry["_last_sample"], dict)
+    )
