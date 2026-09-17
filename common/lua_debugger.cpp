@@ -18,6 +18,7 @@ namespace
     {
     constexpr std::size_t MAX_EXPRESSION_LENGTH = 1024;
     constexpr std::size_t MAX_CHART_STRING_LENGTH = 128;
+    constexpr std::size_t MAX_MESSAGE_LENGTH = 1024;
     constexpr std::size_t MAX_RESPONSE_LENGTH =
         tcp_communicator::BUFSIZE - 6;
 
@@ -203,7 +204,13 @@ std::string lua_debugger::create_session()
     const auto controller_time_unix_ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch() ).count();
-    sessions_[ session_id ].last_access_ms = controller_time_millisec;
+    auto& new_session = sessions_[ session_id ];
+    new_session.last_access_ms = controller_time_millisec;
+    active_sessions_.store( sessions_.size(), std::memory_order_relaxed );
+    {
+        std::lock_guard<std::mutex> lock( messages_mutex_ );
+        new_session.next_message_id = next_message_id_;
+    }
     return R"({"ok":true,"session_id":)" + json_quote( session_id ) +
         R"(,"timeout_ms":)" + std::to_string( SESSION_TIMEOUT_MS ) +
         R"(,"controller_time_unix_ms":)" +
@@ -312,6 +319,56 @@ std::string lua_debugger::chart_data( const session& target ) const
     return response;
     }
 
+void lua_debugger::publish_message( const char* source, int priority,
+    const char* text )
+    {
+    if ( !source || !text ||
+        active_sessions_.load( std::memory_order_relaxed ) == 0 ) return;
+
+    message item;
+    item.time_ms = get_millisec();
+    item.source.assign( source );
+    item.priority = priority;
+    const auto text_length = std::strlen( text );
+    item.text.assign( text,
+        ( std::min )( text_length, MAX_MESSAGE_LENGTH ) );
+    if ( text_length > MAX_MESSAGE_LENGTH ) item.text += "...";
+
+    std::lock_guard<std::mutex> lock( messages_mutex_ );
+    item.id = next_message_id_++;
+    messages_.push_back( std::move( item ) );
+    if ( messages_.size() > MAX_MESSAGES ) messages_.pop_front();
+    }
+
+std::string lua_debugger::message_data( session& target )
+    {
+    std::lock_guard<std::mutex> lock( messages_mutex_ );
+    const auto first_available = messages_.empty() ? next_message_id_ :
+        messages_.front().id;
+    const auto dropped = target.next_message_id < first_available ?
+        first_available - target.next_message_id : 0;
+    if ( dropped ) target.next_message_id = first_available;
+
+    std::string response = R"({"ok":true,"dropped":)" +
+        std::to_string( dropped ) + R"(,"messages":[)";
+    std::size_t count = 0;
+    for ( const auto& item : messages_ )
+        {
+        if ( item.id < target.next_message_id ) continue;
+        if ( count >= MAX_MESSAGES_PER_RESPONSE ) break;
+        if ( count ) response += ',';
+        response += R"({"id":)" + std::to_string( item.id ) +
+            R"(,"time_ms":)" + std::to_string( item.time_ms ) +
+            R"(,"source":)" + json_quote( item.source ) +
+            R"(,"priority":)" + std::to_string( item.priority ) +
+            R"(,"text":)" + json_quote( item.text ) + "}";
+        target.next_message_id = item.id + 1;
+        count++;
+        }
+    response += "]}";
+    return response;
+    }
+
 void lua_debugger::clear_samples( session& target )
     {
     for ( auto& item : target.expressions ) item.samples.clear();
@@ -344,6 +401,7 @@ void lua_debugger::expire_sessions()
             }
         }
     if ( sessions_.empty() ) state_ = nullptr;
+    active_sessions_.store( sessions_.size(), std::memory_order_relaxed );
     }
 
 void lua_debugger::reset( lua_State* state )
@@ -352,6 +410,10 @@ void lua_debugger::reset( lua_State* state )
     for ( auto& item : sessions_ ) release_expressions( item.second );
     sessions_.clear();
     state_ = nullptr;
+    active_sessions_.store( 0, std::memory_order_relaxed );
+    std::lock_guard<std::mutex> lock( messages_mutex_ );
+    messages_.clear();
+    next_message_id_ = 1;
     }
 
 long lua_debugger::write_response( const std::string& response,
@@ -427,9 +489,13 @@ long lua_debugger::process_service( long len, unsigned char* data,
             debugger->release_expressions( target );
             debugger->sessions_.erase( found );
             if ( debugger->sessions_.empty() ) debugger->state_ = nullptr;
+            debugger->active_sessions_.store( debugger->sessions_.size(),
+                std::memory_order_relaxed );
             return write_response( R"({"ok":true})", outdata );
         case CMD_KEEP_ALIVE:
             return write_response( R"({"ok":true})", outdata );
+        case CMD_GET_MESSAGES:
+            return write_response( debugger->message_data( target ), outdata );
         default:
             return write_response(
                 R"({"ok":false,"error":"Unknown command"})", outdata );

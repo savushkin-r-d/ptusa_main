@@ -6,6 +6,7 @@
 #include "g_errors.h"
 #include "device/device.h"
 #include "PAC_err.h"
+#include "lua_debugger.h"
 #endif
 
 #ifdef PAC
@@ -75,6 +76,7 @@ int simple_error::save_as_Lua_str( char *str )
 //-----------------------------------------------------------------------------
 void simple_error::evaluate( bool &is_new_state )
     {
+    bool publish_error = false;
     // Проверка текущего состояния устройства.
     if ( simple_error_owner->get_state() < 0 )    // Есть ошибка.
         {
@@ -84,6 +86,7 @@ void simple_error::evaluate( bool &is_new_state )
             {
             is_new_state = true;
             prev_error_id = error_id;
+            publish_error = true;
             }
 
         switch ( error_state )
@@ -103,6 +106,7 @@ void simple_error::evaluate( bool &is_new_state )
                 is_new_error = true; //Появилась новая ошибка.
 
                 is_any_no_ack_error = true;
+                publish_error = true;
                 break;
             }
         is_any_error = true;
@@ -112,6 +116,17 @@ void simple_error::evaluate( bool &is_new_state )
             is_any_error = false;
             is_new_error = false;
             is_any_no_ack_error = false;
+            }
+
+        if ( publish_error )
+            {
+            const char* description =
+                simple_error_owner->get_error_description();
+            const std::string message = std::string(
+                simple_error_owner->get_name() ) + " - " +
+                ( description ? description : "Unknown error" );
+            G_LUA_DEBUGGER->publish_message(
+                "error_manager", 3, message.c_str() );
             }
         }
     else // Нет ошибки - все остальные состояния.

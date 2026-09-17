@@ -9,6 +9,7 @@ class DebuggerWorker(QObject):
     connected = Signal(str)
     disconnected = Signal(str)
     chart_data = Signal(dict)
+    messages = Signal(dict)
     evaluated = Signal(str, dict)
     error = Signal(str)
 
@@ -78,6 +79,7 @@ class DebuggerWorker(QObject):
             return
         try:
             self.chart_data.emit(self._client.get_chart_data())
+            self.messages.emit(self._client.get_messages())
         except (OSError, ProtocolError) as exc:
             self._timer.stop()
             self._client.disconnect(send_close=False)

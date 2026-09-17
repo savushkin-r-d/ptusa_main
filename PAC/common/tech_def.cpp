@@ -6,6 +6,7 @@
 #include "tech_def.h"
 
 #include "lua_manager.h"
+#include "lua_debugger.h"
 
 #include "g_errors.h"
 //-----------------------------------------------------------------------------
@@ -1299,6 +1300,11 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     if ( errors.size() < E_MAX_ERRORS_SIZE )
         {
         errors.push_back( new_err );
+        const int priority = type == ERR_ALARM || type == ERR_TO_FAIL_STATE ?
+            3 : type == ERR_OFF || type == ERR_OFF_AND_ON ||
+            type == ERR_DURING_WORK ? 5 : 4;
+        G_LUA_DEBUGGER->publish_message(
+            "set_err_msg", priority, new_err->msg );
         }
     else
         {

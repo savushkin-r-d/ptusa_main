@@ -90,3 +90,36 @@ def test_chart_data_contains_session_time_anchor() -> None:
 
     assert data["controller_time_unix_ms"] == 1_789_123_456_789
     assert data["controller_time_millisec"] == 123_456
+
+
+def test_messages_contain_session_time_anchor() -> None:
+    fake = FakeSocket(
+        response(
+            1,
+            {
+                "ok": True,
+                "dropped": 0,
+                "messages": [
+                    {
+                        "id": 1,
+                        "time_ms": 123_500,
+                        "source": "log",
+                        "priority": 6,
+                        "text": "ready",
+                    }
+                ],
+            },
+        )
+    )
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    client.controller_time_unix_ms = 1_789_123_456_789
+    client.controller_time_millisec = 123_456
+
+    data = client.get_messages()
+
+    assert data["controller_time_unix_ms"] == 1_789_123_456_789
+    assert data["controller_time_millisec"] == 123_456
+    assert data["messages"][0]["text"] == "ready"
+    assert fake.sent[6] == Command.GET_MESSAGES

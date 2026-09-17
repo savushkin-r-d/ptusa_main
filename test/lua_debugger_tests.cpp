@@ -6,6 +6,9 @@
 
 #include "lua_debugger.h"
 #include "lua_manager.h"
+#include "log.h"
+#include "g_errors.h"
+#include "tech_def.h"
 
 namespace
     {
@@ -32,6 +35,19 @@ namespace
         const auto end = response.find( '"', value_start );
         return response.substr( value_start, end - value_start );
         }
+
+    class debugger_error_owner final : public i_simple_error
+        {
+        public:
+            void set_error_params( saved_params_u_int_4* ) override {}
+            const char* get_name() const override { return "TEST_DEVICE"; }
+            const char* get_error_description() override
+                { return "test device error"; }
+            int get_error_id() override { return -1; }
+            int get_state() const override { return -1; }
+            u_int_4 get_serial_n() const override { return 1; }
+            int get_error_type() const override { return 1; }
+        };
 
     class lua_debugger_test : public ::testing::Test
         {
@@ -156,6 +172,71 @@ TEST_F( lua_debugger_test, sessions_have_independent_expression_lists )
     EXPECT_EQ( 2u, G_LUA_DEBUGGER->sessions_count() );
     EXPECT_EQ( 1u, G_LUA_DEBUGGER->expressions_count( session_id ) );
     EXPECT_EQ( 0u, G_LUA_DEBUGGER->expressions_count( second_id ) );
+    }
+
+TEST_F( lua_debugger_test, delivers_messages_to_each_current_session )
+    {
+    G_LUA_DEBUGGER->publish_message( "test", 4, "first message" );
+
+    const auto second_id = extract_session_id(
+        raw_request( lua_debugger::CMD_CREATE_SESSION ) );
+    ASSERT_FALSE( second_id.empty() );
+
+    const auto first_messages = request( lua_debugger::CMD_GET_MESSAGES );
+    EXPECT_NE( std::string::npos, first_messages.find( "first message" ) );
+    EXPECT_NE( std::string::npos,
+        first_messages.find( R"("source":"test")" ) );
+
+    const auto second_old_messages = raw_request(
+        lua_debugger::CMD_GET_MESSAGES, second_id + "\n" );
+    EXPECT_EQ( std::string::npos,
+        second_old_messages.find( "first message" ) );
+
+    G_LUA_DEBUGGER->publish_message( "test", 3, "shared message" );
+    EXPECT_NE( std::string::npos,
+        request( lua_debugger::CMD_GET_MESSAGES ).find( "shared message" ) );
+    EXPECT_NE( std::string::npos, raw_request(
+        lua_debugger::CMD_GET_MESSAGES, second_id + "\n" ).find(
+            "shared message" ) );
+    }
+
+TEST_F( lua_debugger_test, mirrors_log_messages )
+    {
+    G_LOG->write_log( i_log::P_INFO, "lua debugger log test" );
+    const auto messages = request( lua_debugger::CMD_GET_MESSAGES );
+    EXPECT_NE( std::string::npos,
+        messages.find( "lua debugger log test" ) );
+    EXPECT_NE( std::string::npos, messages.find( R"("source":"log")" ) );
+    EXPECT_NE( std::string::npos, messages.find( R"("priority":6)" ) );
+    }
+
+TEST_F( lua_debugger_test, receives_error_manager_errors )
+    {
+    debugger_error_owner owner;
+    G_ERRORS_MANAGER->clear();
+    G_ERRORS_MANAGER->add_error( new simple_error( &owner ) );
+
+    G_ERRORS_MANAGER->evaluate();
+
+    const auto messages = request( lua_debugger::CMD_GET_MESSAGES );
+    EXPECT_NE( std::string::npos, messages.find( "test device error" ) );
+    EXPECT_NE( std::string::npos,
+        messages.find( R"("source":"error_manager")" ) );
+    G_ERRORS_MANAGER->clear();
+    }
+
+TEST_F( lua_debugger_test, receives_set_err_msg_messages )
+    {
+    tech_object object( "TEST_OBJECT", 1, 1, "TEST_OBJECT1",
+        0, 0, 1, 1, 1, 1 );
+
+    object.set_err_msg( "test object alarm", 0, 0,
+        tech_object::ERR_ALARM );
+
+    const auto messages = request( lua_debugger::CMD_GET_MESSAGES );
+    EXPECT_NE( std::string::npos, messages.find( "test object alarm" ) );
+    EXPECT_NE( std::string::npos,
+        messages.find( R"("source":"set_err_msg")" ) );
     }
 
 TEST_F( lua_debugger_test, rejects_invalid_chart_expression_atomically )

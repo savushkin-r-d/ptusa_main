@@ -1,9 +1,11 @@
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -29,6 +31,8 @@ class lua_debugger
             MAX_SESSIONS = 16,
             MAX_EXPRESSIONS = 16,
             MAX_SAMPLES_PER_EXPRESSION = 128,
+            MAX_MESSAGES = 128,
+            MAX_MESSAGES_PER_RESPONSE = 32,
             SESSION_TIMEOUT_MS = 10'000,
             };
 
@@ -43,6 +47,8 @@ class lua_debugger
             CMD_CLEAR_CHART_DATA,
             CMD_CLOSE_SESSION,
             CMD_KEEP_ALIVE,
+            /// Returns messages accumulated since the previous request.
+            CMD_GET_MESSAGES,
             };
 
         static lua_debugger* get_instance();
@@ -56,6 +62,10 @@ class lua_debugger
 
         /// Releases all sessions while the supplied Lua state is valid.
         void reset( lua_State* state = nullptr );
+
+        /// Publishes a message to debugger sessions that are currently open.
+        void publish_message( const char* source, int priority,
+            const char* text );
 
 #ifdef PTUSA_TEST
         std::size_t sessions_count() const;
@@ -89,7 +99,17 @@ class lua_debugger
         struct session
             {
             std::uint32_t last_access_ms = 0;
+            std::uint64_t next_message_id = 0;
             std::vector<expression> expressions;
+            };
+
+        struct message
+            {
+            std::uint64_t id = 0;
+            std::uint32_t time_ms = 0;
+            std::string source;
+            int priority = 0;
+            std::string text;
             };
 
         lua_debugger() = default;
@@ -102,6 +122,7 @@ class lua_debugger
         std::string set_expressions( session& target,
             const std::string& request );
         std::string chart_data( const session& target ) const;
+        std::string message_data( session& target );
         void clear_samples( session& target );
         void release_expressions( session& target );
         void expire_sessions();
@@ -113,6 +134,10 @@ class lua_debugger
         lua_State* state_ = nullptr;
         std::map<std::string, session> sessions_;
         std::uint64_t next_session_id_ = 1;
+        std::deque<message> messages_;
+        std::uint64_t next_message_id_ = 1;
+        std::mutex messages_mutex_;
+        std::atomic<std::size_t> active_sessions_{ 0 };
     };
 
 #define G_LUA_DEBUGGER lua_debugger::get_instance()

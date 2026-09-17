@@ -15,6 +15,7 @@ class Command(IntEnum):
     CLEAR_CHART_DATA = 5
     CLOSE_SESSION = 6
     KEEP_ALIVE = 7
+    GET_MESSAGES = 8
 
 
 class ProtocolError(RuntimeError):
@@ -112,6 +113,13 @@ class DebuggerProtocol:
 
     def clear_chart_data(self) -> None:
         self._ensure_ok(self._request(Command.CLEAR_CHART_DATA))
+
+    def get_messages(self) -> dict[str, Any]:
+        response = self._request(Command.GET_MESSAGES)
+        self._ensure_ok(response)
+        response["controller_time_unix_ms"] = self.controller_time_unix_ms
+        response["controller_time_millisec"] = self.controller_time_millisec
+        return response
 
     def keep_alive(self) -> None:
         self._ensure_ok(self._request(Command.KEEP_ALIVE))

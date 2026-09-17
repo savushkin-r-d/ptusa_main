@@ -29,3 +29,34 @@ def test_tabs_own_independent_workers_and_threads() -> None:
     finally:
         window.close()
         application.processEvents()
+
+
+def test_session_displays_debugger_messages() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._on_messages(
+            {
+                "controller_time_unix_ms": 1_789_123_456_789,
+                "controller_time_millisec": 123_456,
+                "dropped": 0,
+                "messages": [
+                    {
+                        "id": 1,
+                        "time_ms": 123_500,
+                        "source": "set_err_msg",
+                        "priority": 3,
+                        "text": "Тестовая авария",
+                    }
+                ],
+            }
+        )
+
+        assert session.messages_table.rowCount() == 1
+        assert session.messages_table.item(0, 1).text() == "set_err_msg"
+        assert session.messages_table.item(0, 2).text() == "ERROR"
+        assert session.messages_table.item(0, 3).text() == "Тестовая авария"
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()

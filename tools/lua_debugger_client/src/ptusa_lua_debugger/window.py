@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 import pyqtgraph as pg
@@ -72,6 +73,7 @@ class DebuggerSessionWidget(QWidget):
         self._worker.connected.connect(self._on_connected)
         self._worker.disconnected.connect(self._on_disconnected)
         self._worker.chart_data.connect(self._on_chart_data)
+        self._worker.messages.connect(self._on_messages)
         self._worker.evaluated.connect(self._on_evaluated)
         self._worker.error.connect(self._show_error)
         self._thread.start()
@@ -199,9 +201,37 @@ class DebuggerSessionWidget(QWidget):
         history_layout.addWidget(export_button, 0, Qt.AlignRight)
         history_layout.addWidget(self.history_table, 1)
 
+        self.messages_table = QTableWidget(0, 4)
+        self.messages_table.setHorizontalHeaderLabels(
+            ["Время", "Источник", "Уровень", "Сообщение"]
+        )
+        self.messages_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.messages_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.messages_table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeToContents
+        )
+        self.messages_table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeToContents
+        )
+        self.messages_table.horizontalHeader().setSectionResizeMode(
+            2, QHeaderView.ResizeToContents
+        )
+        self.messages_table.horizontalHeader().setSectionResizeMode(
+            3, QHeaderView.Stretch
+        )
+        clear_messages_button = QPushButton("Очистить")
+        clear_messages_button.clicked.connect(
+            lambda: self.messages_table.setRowCount(0)
+        )
+        messages_page = QWidget()
+        messages_layout = QVBoxLayout(messages_page)
+        messages_layout.addWidget(clear_messages_button, 0, Qt.AlignRight)
+        messages_layout.addWidget(self.messages_table, 1)
+
         self.output_tabs = QTabWidget()
         self.output_tabs.addTab(self.plot, "График")
         self.output_tabs.addTab(history_page, "История")
+        self.output_tabs.addTab(messages_page, "Сообщения")
 
         splitter = QSplitter()
         splitter.addWidget(left)
@@ -372,6 +402,54 @@ class DebuggerSessionWidget(QWidget):
         self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
         self._refresh_history_table()
+
+    @Slot(dict)
+    def _on_messages(self, data: dict[str, Any]) -> None:
+        priority_names = {
+            0: "EMERG",
+            1: "ALERT",
+            2: "CRIT",
+            3: "ERROR",
+            4: "WARNING",
+            5: "NOTICE",
+            6: "INFO",
+            7: "DEBUG",
+        }
+        dropped = int(data.get("dropped", 0) or 0)
+        if dropped:
+            self.status_label.setText(
+                f"Пропущено сообщений отладчика: {dropped}"
+            )
+        for message in data.get("messages", []):
+            if not isinstance(message, dict):
+                continue
+            row = self.messages_table.rowCount()
+            self.messages_table.insertRow(row)
+            timestamp = controller_timestamp_ms(
+                data, int(message.get("time_ms", 0))
+            )
+            time_text = (
+                datetime.fromtimestamp(timestamp / 1000).strftime(
+                    "%Y-%m-%d %H:%M:%S.%f"
+                )[:-3]
+                if timestamp is not None
+                else str(message.get("time_ms", ""))
+            )
+            priority = int(message.get("priority", 6))
+            values = (
+                time_text,
+                str(message.get("source", "")),
+                priority_names.get(priority, str(priority)),
+                str(message.get("text", "")),
+            )
+            for column, value in enumerate(values):
+                self.messages_table.setItem(
+                    row, column, QTableWidgetItem(value)
+                )
+        while self.messages_table.rowCount() > 5_000:
+            self.messages_table.removeRow(0)
+        if data.get("messages"):
+            self.messages_table.scrollToBottom()
 
     def _refresh_table_statistics(self) -> None:
         for row, expression in enumerate(self._expressions()):
