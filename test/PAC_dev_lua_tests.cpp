@@ -508,6 +508,18 @@ TEST( toLuapp, tolua_PAC_dev_DI00 )
     EXPECT_NE( nullptr, DI1 );
     lua_remove( L, -1 );
 
+    ASSERT_EQ( 0, luaL_dostring( L, "DI1:set_cmd( 'M', 0, 1 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "manual_mode = DI1:get_cmd( 'M', 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "manual_mode" );
+    EXPECT_EQ( 1, tolua_tonumber( L, -1, 0 ) );
+    lua_pop( L, 1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "DI1:set_cmd( 'P_DT', 0, 1250 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L, "filter_time = DI1:get_cmd( 'P_DT', 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "filter_time" );
+    EXPECT_EQ( 1250, tolua_tonumber( L, -1, 0 ) );
+    lua_pop( L, 1 );
+
     G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
     }
@@ -544,12 +556,20 @@ TEST( toLuapp, tolua_PAC_dev_V00 )
 
     ASSERT_EQ( 0, luaL_dostring( L,
         "G_DEVICE_MANAGER():add_io_device( "
-        "device.DT_V, device.DST_V_DO1, \'V1\', \'Test valve\', \'\' )" ) );
+        "device.DT_V, device.DST_V_DO1_DI1_FB_OFF, "
+        "\'V1\', \'Test valve\', \'\' )" ) );
     ASSERT_EQ( 0, luaL_dostring( L, "V1 = V( \'V1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "V1" );
     auto V1 = static_cast<valve*>( tolua_touserdata( L, -1, nullptr ) );
     EXPECT_NE( nullptr, V1 );
     lua_remove( L, -1 );
+
+    ASSERT_EQ( 0, luaL_dostring( L, "V1:set_cmd( 'P_ON_TIME', 0, 3000 )" ) );
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "on_time = V1:get_cmd( 'P_ON_TIME', 0 )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "on_time" );
+    EXPECT_EQ( 3000, tolua_tonumber( L, -1, 0 ) );
+    lua_pop( L, 1 );
 
     G_DEVICE_MANAGER()->clear_io_devices();
     lua_close( L );
