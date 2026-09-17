@@ -100,12 +100,14 @@ class uni_io_manager : public io_manager
         uni_io_manager& operator=( const uni_io_manager& ) = delete;
         uni_io_manager( uni_io_manager&& ) = delete;
 
-        /// @brief Инициализация соединения с узлом I/O.
+        static constexpr int NET_CONNECTING = 8;
+
+        /// @brief Инициализация соединения с узлом I/O без ожидания.
         ///
         /// @param node - узел I/O, с которым осуществляется соединение.
         ///
         /// @return -   0 - ок.
-        /// @return - < 0 - ошибка.
+        /// @return NET_CONNECTING - подключение продолжается; 1..7 - ошибка.
         int net_init( io_node* node ) const;
 
         /// @brief Отключение от узла.

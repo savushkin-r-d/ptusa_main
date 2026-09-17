@@ -25,138 +25,144 @@ int uni_io_manager::net_init( io_node* node ) const
         return 1;
         }
 
-#ifdef WIN_OS
-    WSAData tmp_WSA_data;
-    if ( WSAStartup( 0x202, &tmp_WSA_data ) )
+    if ( node->state == io_node::ST_OK ) return 0;
+
+    int sock = node->sock;
+    if ( node->state != io_node::ST_CONNECTING )
         {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Ошибка инициализации сетевой библиотеки: {}",
-            WSA_Last_Err_Decode() );
-        *res.out = '\0';
-        G_LOG->write_log( i_log::P_CRIT );
-
-        return 2;
-        }
-#endif // WIN_OS
-
-    int type = SOCK_STREAM;
-    int protocol = 0; /* всегда 0 */
-    int err;
-    int sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
-
-    if ( sock < 0 )
-        {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't create I/O node socket : {}",
 #ifdef WIN_OS
-            WSA_Last_Err_Decode()
-#else
-            strerror( errno )
-#endif // WIN_OS
-        );
-        *res.out = '\0';
-        G_LOG->write_log( i_log::P_CRIT );
-
-        return 3;
-        }
-
-    // Адресация мастер-сокета.
-    struct sockaddr_in socket_remote_server;
-    const int PORT = 502;
-    memset( &socket_remote_server, 0, sizeof( socket_remote_server ) );
-    socket_remote_server.sin_family = AF_INET;
-    socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
-    socket_remote_server.sin_port = htons( PORT );
-
-#ifdef WIN_OS
-    unsigned long timeout = io_node::C_CNT_TIMEOUT_US;
-    int vlen = sizeof( timeout );
-#else
-    const int C_ON = 1;
-#endif // WIN_OS
-
-    if (
-#ifdef WIN_OS
-        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR,
-            reinterpret_cast<char*>( &timeout ), vlen)
-#else
-        setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
-#endif // WIN_OS
-        )
-        {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't setsockopt I/O node socket : {}",
-#ifdef WIN_OS
-            WSA_Last_Err_Decode()
-#else
-            strerror( errno )
-#endif // WIN_OS
-        );
-        *res.out = '\0';
-        G_LOG->write_log( i_log::P_CRIT );
-
-#ifdef WIN_OS
-        closesocket( sock );
-#else
-        close( sock );
-#endif // WIN_OS
-
-        return 4;
-        }
-
-    // Переводим в неблокирующий режим.
-#ifdef WIN_OS
-    u_long mode = 1;
-    err = ioctlsocket( sock, FIONBIO, &mode );
-#else
-    err = fcntl( sock, F_SETFL, O_NONBLOCK );
-#endif // WIN_OS
-
-    if ( err != 0 )
-        {
-        auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-            "Network communication : can't fcntl I/O node socket : {}",
-#ifdef WIN_OS
-            WSA_Last_Err_Decode()
-#else
-            strerror( errno )
-#endif // WIN_OS
-        );
-        *res.out = '\0';
-        G_LOG->write_log( i_log::P_CRIT );
-
-#ifdef WIN_OS
-        closesocket( sock );
-#else
-        close( sock );
-#endif // WIN_OS
-        return 5;
-        }
-
-    // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    sockaddr s_address;
-    static_assert( sizeof( sockaddr ) == sizeof( sockaddr_in ) );
-    std::memcpy( &s_address, &socket_remote_server, sizeof( socket_remote_server ) );
-    connect( sock, &s_address, sizeof( socket_remote_server ) );
-
-    fd_set rdevents;
-    struct timeval tv;
-    FD_ZERO( &rdevents );
-    FD_SET( sock, &rdevents );
-
-    tv.tv_sec = 0;
-    tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
-
-    static uint32_t st_time;
-    st_time = get_millisec();
-
-    err = select( sock + 1, nullptr, &rdevents, nullptr, &tv );
-
-    if ( err <= 0 )
-        {
-        if ( node->is_set_err == false )
+        WSAData tmp_WSA_data;
+        if ( WSAStartup( 0x202, &tmp_WSA_data ) )
             {
-            if ( err < 0 )
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Ошибка инициализации сетевой библиотеки: {}",
+                WSA_Last_Err_Decode() );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_CRIT );
+
+            return 2;
+            }
+#endif // WIN_OS
+
+        int type = SOCK_STREAM;
+        int protocol = 0; /* всегда 0 */
+        int err;
+        sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
+
+        if ( sock < 0 )
+            {
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network communication : can't create I/O node socket : {}",
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_CRIT );
+
+            return 3;
+            }
+
+#ifndef WIN_OS
+        // FD_SET cannot represent descriptors outside this range.
+        if ( sock >= FD_SETSIZE )
+            {
+            close( sock );
+            return 3;
+            }
+#endif
+
+        // Адресация мастер-сокета.
+        struct sockaddr_in socket_remote_server;
+        const int PORT = 502;
+        memset( &socket_remote_server, 0, sizeof( socket_remote_server ) );
+        socket_remote_server.sin_family = AF_INET;
+        socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
+        socket_remote_server.sin_port = htons( PORT );
+
+#ifdef WIN_OS
+        unsigned long timeout = io_node::C_CNT_TIMEOUT_US;
+        int vlen = sizeof( timeout );
+#else
+        const int C_ON = 1;
+#endif // WIN_OS
+
+        if (
+#ifdef WIN_OS
+            setsockopt( sock, SOL_SOCKET, SO_REUSEADDR,
+                reinterpret_cast<char*>( &timeout ), vlen)
+#else
+            setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) )
+#endif // WIN_OS
+            )
+            {
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network communication : can't setsockopt I/O node socket : {}",
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_CRIT );
+
+#ifdef WIN_OS
+            closesocket( sock );
+#else
+            close( sock );
+#endif // WIN_OS
+
+            return 4;
+            }
+
+        // Переводим в неблокирующий режим.
+#ifdef WIN_OS
+        u_long mode = 1;
+        err = ioctlsocket( sock, FIONBIO, &mode );
+#else
+        err = fcntl( sock, F_SETFL, O_NONBLOCK );
+#endif // WIN_OS
+
+        if ( err != 0 )
+            {
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                "Network communication : can't fcntl I/O node socket : {}",
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( errno )
+#endif // WIN_OS
+            );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_CRIT );
+
+#ifdef WIN_OS
+            closesocket( sock );
+#else
+            close( sock );
+#endif // WIN_OS
+            return 5;
+            }
+
+        // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
+        sockaddr s_address;
+        static_assert( sizeof( sockaddr ) == sizeof( sockaddr_in ) );
+        std::memcpy( &s_address, &socket_remote_server, sizeof( socket_remote_server ) );
+        node->connect_start_time = get_millisec();
+        err = connect( sock, &s_address, sizeof( socket_remote_server ) );
+#ifdef WIN_OS
+        const int connect_error = err == 0 ? 0 : WSAGetLastError();
+        const bool pending = connect_error == WSAEWOULDBLOCK;
+#else
+        const int connect_error = err == 0 ? 0 : errno;
+        const bool pending = connect_error == EINPROGRESS;
+#endif
+        if ( err != 0 && !pending )
+            {
+            if ( !node->is_set_err )
                 {
                 auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
                     R"(Network device : s{}->"{}":"{}" can't connect : {})",
@@ -164,79 +170,106 @@ int uni_io_manager::net_init( io_node* node ) const
 #ifdef WIN_OS
                     WSA_Last_Err_Decode()
 #else
-                    strerror( errno )
-#endif // WIN_OS
+                    strerror( connect_error )
+#endif
                 );
                 *res.out = '\0';
                 G_LOG->write_log( i_log::P_CRIT );
                 }
-            else // = 0
-                {
-                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    R"(Network device : s{}->"{}":"{}" can't connect : timeout ({} ms).)",
-                    sock, node->name, node->ip_address,
-                    io_node::C_CNT_TIMEOUT_US / 1000 );
-                *res.out = '\0';
-                G_LOG->write_log( i_log::P_CRIT );
-                }
-            }
-
-#ifdef WIN_OS
-        closesocket( sock );
-#else
-        close( sock );
-#endif // WIN_OS
-        return 6;
-        }
-
-    if ( FD_ISSET( sock, &rdevents ) )
-        {
-        int error = 0;
-#ifdef WIN_OS
-        int err_len;
-#else
-        socklen_t err_len;
-#endif // WIN_OS
-        err_len = sizeof( error );
-
-        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
-#ifdef WIN_OS
-            reinterpret_cast<char*>( &error ),
-#else
-            &error,
-#endif // WIN_OS
-            &err_len ) < 0 || error != 0 )
-            {
-            if ( node->is_set_err == false )
-                {
-                auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
-                    R"(Network device : s{}->"{}":"{}" error during connect : {})",
-                    sock, node->name, node->ip_address,
-#ifdef WIN_OS
-                    WSA_Last_Err_Decode()
-#else
-                    strerror( errno )
-#endif // WIN_OS
-                );
-                *res.out = '\0';
-                G_LOG->write_log( i_log::P_CRIT );
-                }
-
 #ifdef WIN_OS
             closesocket( sock );
 #else
             close( sock );
-#endif // WIN_OS
-            return 7;
+#endif
+            return 6;
             }
+        node->sock = sock;
+        node->state = io_node::ST_CONNECTING;
         }
 
-    static u_long connect_time = 0;
-    connect_time = get_delta_millisec( st_time );
+    // Poll only: connection establishment must not delay the control cycle.
+    fd_set write_events, error_events;
+    FD_ZERO( &write_events );
+    FD_ZERO( &error_events );
+    FD_SET( sock, &write_events );
+    FD_SET( sock, &error_events );
+    timeval tv{};
+    const int ready = select( sock + 1, nullptr, &write_events,
+        &error_events, &tv );
+    int error = 0;
+#ifdef WIN_OS
+    int err_len = sizeof( error );
+#else
+    socklen_t err_len = sizeof( error );
+#endif
+    if ( ready < 0 )
+        {
+#ifdef WIN_OS
+        error = WSAGetLastError();
+        if ( error == WSAEINTR ) return NET_CONNECTING;
+#else
+        error = errno;
+        if ( error == EINTR ) return NET_CONNECTING;
+#endif
+        }
+    else if ( ready == 0 )
+        {
+        if ( get_delta_millisec( node->connect_start_time ) <
+            io_node::C_CNT_TIMEOUT_US / 1000 ) return NET_CONNECTING;
+#ifdef WIN_OS
+        error = WSAETIMEDOUT;
+#else
+        error = ETIMEDOUT;
+#endif
+        }
+    else if ( getsockopt( sock, SOL_SOCKET, SO_ERROR,
+#ifdef WIN_OS
+        reinterpret_cast<char*>( &error ),
+#else
+        &error,
+#endif
+        &err_len ) != 0 )
+        {
+#ifdef WIN_OS
+        error = WSAGetLastError();
+#else
+        error = errno;
+#endif
+        }
 
+    if ( error != 0 )
+        {
+        if ( !node->is_set_err )
+            {
+#ifdef WIN_OS
+            WSASetLastError( error );
+#endif
+            auto res = fmt::format_to_n( G_LOG->msg, i_log::C_BUFF_SIZE,
+                R"(Network device : s{}->"{}":"{}" error during connect : {})",
+                sock, node->name, node->ip_address,
+#ifdef WIN_OS
+                WSA_Last_Err_Decode()
+#else
+                strerror( error )
+#endif
+            );
+            *res.out = '\0';
+            G_LOG->write_log( i_log::P_CRIT );
+            }
+#ifdef WIN_OS
+        closesocket( sock );
+#else
+        close( sock );
+#endif
+        node->sock = 0;
+        node->state = io_node::ST_NO_CONNECT;
+        return ready <= 0 ? 6 : 7;
+        }
+
+    const u_long connect_time = get_delta_millisec( node->connect_start_time );
     G_LOG->debug( "uni_io_manager:net_init() : socket %d is successfully "
         R"(connected to "%s":"%s":%d (%lu ms).)",
-        sock, node->name, node->ip_address, PORT, connect_time );
+        sock, node->name, node->ip_address, 502, connect_time );
 
     node->sock = sock;
     node->state = io_node::ST_OK;
@@ -600,12 +633,13 @@ int uni_io_manager::e_communicate( io_node* node, int bytes_to_send,
     // Инициализация сетевого соединения, при необходимости.
     if ( node->state != io_node::ST_OK )
         {
-        if ( get_delta_millisec( node->last_init_time ) < node->delay_time )
+        if ( node->state != io_node::ST_CONNECTING &&
+            get_delta_millisec( node->last_init_time ) < node->delay_time )
             {
             return 1;
             }
 
-        net_init( node );
+        if ( net_init( node ) == NET_CONNECTING ) return 1;
         if ( node->state != io_node::ST_OK )
             {
             node->last_init_time = get_millisec();
@@ -1070,7 +1104,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )
     {
-    if ( node->sock )
+    if ( node->sock || node->state != io_node::ST_NO_CONNECT )
         {
         shutdown( node->sock,
 #ifdef WIN_OS
@@ -1089,6 +1123,7 @@ void uni_io_manager::disconnect( io_node* node )
         node->sock = 0;
         }
     node->state = io_node::ST_NO_CONNECT;
+    node->last_init_time = get_millisec();
 
     // Reset PP mode alarm on disconnect.
     if ( node->is_err_mode_alarm_set )
