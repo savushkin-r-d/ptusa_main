@@ -38,7 +38,6 @@ int main_cycle()
     sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     if ( !G_NO_IO_NODES ) G_IO_MANAGER()->read_inputs();
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     G_DEVICE_MANAGER()->evaluate_io();
 
@@ -46,11 +45,9 @@ int main_cycle()
 
     G_TECH_OBJECT_MNGR()->evaluate();
     G_LUA_DEBUGGER->evaluate();
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     if ( !G_NO_IO_NODES &&
         !G_READ_ONLY_IO_NODES ) G_IO_MANAGER()->write_outputs();
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
     G_CMMCTR->evaluate();
 
@@ -67,13 +64,10 @@ int main_cycle()
         IOT_EVALUATE();
         }
 
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
-
     PAC_info::get_instance()->eval();
     PAC_critical_errors_manager::get_instance()->show_errors();
     G_ERRORS_MANAGER->evaluate();
     G_SIREN_LIGHTS_MANAGER()->eval();
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
 
 #ifdef TEST_SPEED
     u_int TRESH_AVG =
