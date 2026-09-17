@@ -1,7 +1,42 @@
 #include "tcp_cmctr_tests.h"
 #include "PAC_info.h"
+#include <memory>
 
 using namespace ::testing;
+
+namespace
+    {
+    class frame_scheduler_test : public tcp_communicator
+        {
+        public:
+            int evaluate() override { return 0; }
+            bool ready( bool debug, int service, int available )
+                {
+                debugger_cycle = debug;
+                buf[ 0 ] = 's';
+                buf[ 1 ] = static_cast<u_char>( service );
+                buf[ 2 ] = 1;
+                buf[ 3 ] = 1;
+                buf[ 4 ] = 0;
+                buf[ 5 ] = 4;
+                return buffered_frame_ready( available );
+                }
+            int frame_size() const { return incoming_frame_size; }
+        };
+    }
+
+TEST( tcp_communicator, separates_debugger_cycles_and_waits_for_complete_frames )
+    {
+    auto scheduler = std::make_unique<frame_scheduler_test>();
+    EXPECT_FALSE( scheduler->ready( false, 2, 10 ) );
+    EXPECT_TRUE( scheduler->ready( true, 2, 10 ) );
+    EXPECT_FALSE( scheduler->ready( true, 1, 10 ) );
+    EXPECT_TRUE( scheduler->ready( false, 1, 10 ) );
+    EXPECT_FALSE( scheduler->ready( true, 2, 5 ) );
+    EXPECT_FALSE( scheduler->ready( true, 2, 9 ) );
+    EXPECT_TRUE( scheduler->ready( true, 2, 20 ) );
+    EXPECT_EQ( 10, scheduler->frame_size() );
+    }
 
 #ifndef WIN_OS // For linux to deal with __stdcall.
 #define __stdcall

@@ -16,6 +16,7 @@ class Command(IntEnum):
     CLOSE_SESSION = 6
     KEEP_ALIVE = 7
     GET_MESSAGES = 8
+    POLL = 9
 
 
 class ProtocolError(RuntimeError):
@@ -47,6 +48,7 @@ class DebuggerProtocol:
         connection = socket.create_connection((host, port), timeout=self.timeout)
         connection.settimeout(self.timeout)
         try:
+            connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             greeting = self._recv_exact(connection, len(self.ACCEPT_MESSAGE))
             if greeting != self.ACCEPT_MESSAGE:
                 raise ProtocolError("Контроллер не прислал приветствие PAC accept")
@@ -119,6 +121,14 @@ class DebuggerProtocol:
         self._ensure_ok(response)
         response["controller_time_unix_ms"] = self.controller_time_unix_ms
         response["controller_time_millisec"] = self.controller_time_millisec
+        return response
+
+    def poll(self) -> dict[str, Any]:
+        response = self._request(Command.POLL)
+        self._ensure_ok(response)
+        for document in (response, response["events"]):
+            document["controller_time_unix_ms"] = self.controller_time_unix_ms
+            document["controller_time_millisec"] = self.controller_time_millisec
         return response
 
     def keep_alive(self) -> None:

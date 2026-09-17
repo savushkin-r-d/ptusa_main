@@ -18,6 +18,9 @@ class FakeSocket:
     def settimeout(self, timeout: float) -> None:
         pass
 
+    def setsockopt(self, level: int, option: int, value: int) -> None:
+        pass
+
     def recv(self, size: int) -> bytes:
         result = bytes(self.incoming[:size])
         del self.incoming[:size]
@@ -123,3 +126,20 @@ def test_messages_contain_session_time_anchor() -> None:
     assert data["controller_time_millisec"] == 123_456
     assert data["messages"][0]["text"] == "ready"
     assert fake.sent[6] == Command.GET_MESSAGES
+
+
+def test_poll_uses_one_request_for_chart_and_messages() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": True, "series": [],
+        "events": {"ok": True, "messages": [], "dropped": 0},
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    client.controller_time_unix_ms = 1000
+    client.controller_time_millisec = 50
+    data = client.poll()
+    assert fake.sent[6] == Command.POLL
+    assert len(fake.sent) == 6 + 1 + len("session1\n")
+    assert data["events"]["controller_time_unix_ms"] == 1000
+    assert data["controller_time_millisec"] == 50

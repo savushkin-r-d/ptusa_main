@@ -78,8 +78,9 @@ class DebuggerWorker(QObject):
         if not self._client.connected:
             return
         try:
-            self.chart_data.emit(self._client.get_chart_data())
-            self.messages.emit(self._client.get_messages())
+            data = self._client.poll()
+            self.chart_data.emit(data)
+            self.messages.emit(data["events"])
         except (OSError, ProtocolError) as exc:
             self._timer.stop()
             self._client.disconnect(send_close=False)

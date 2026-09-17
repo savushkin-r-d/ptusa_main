@@ -210,6 +210,27 @@ TEST_F( lua_debugger_test, mirrors_log_messages )
     EXPECT_NE( std::string::npos, messages.find( R"("priority":6)" ) );
     }
 
+TEST_F( lua_debugger_test, poll_combines_chart_and_messages_with_bounded_cache )
+    {
+    ASSERT_EQ( R"({"ok":true,"count":1})",
+        request( lua_debugger::CMD_SET_CHART_EXPRESSIONS, "debug_x" ) );
+    for ( int i = 0; i < 70; ++i )
+        {
+        lua_pushinteger( state, i );
+        lua_setglobal( state, "debug_x" );
+        G_LUA_DEBUGGER->evaluate();
+        G_LUA_DEBUGGER->publish_message( "test", 6, "event" );
+        }
+    const auto response = request( lua_debugger::CMD_POLL );
+    EXPECT_NE( std::string::npos, response.find( R"("events":)" ) );
+    EXPECT_NE( std::string::npos, response.find( R"("dropped":6)" ) );
+    EXPECT_EQ( 64u, occurrences( response, R"("value":)" ) );
+    EXPECT_EQ( 32u, occurrences( response, R"("text":"event")" ) );
+    const auto next = request( lua_debugger::CMD_POLL );
+    EXPECT_EQ( 1u, occurrences( next, R"("value":)" ) );
+    EXPECT_EQ( 32u, occurrences( next, R"("text":"event")" ) );
+    }
+
 TEST_F( lua_debugger_test, receives_error_manager_errors )
     {
     debugger_error_owner owner;

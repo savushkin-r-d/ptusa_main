@@ -340,7 +340,7 @@ void lua_debugger::publish_message( const char* source, int priority,
     if ( messages_.size() > MAX_MESSAGES ) messages_.pop_front();
     }
 
-std::string lua_debugger::message_data( session& target )
+std::string lua_debugger::message_data( session& target, std::size_t budget )
     {
     std::lock_guard<std::mutex> lock( messages_mutex_ );
     const auto first_available = messages_.empty() ? next_message_id_ :
@@ -356,12 +356,14 @@ std::string lua_debugger::message_data( session& target )
         {
         if ( item.id < target.next_message_id ) continue;
         if ( count >= MAX_MESSAGES_PER_RESPONSE ) break;
-        if ( count ) response += ',';
-        response += R"({"id":)" + std::to_string( item.id ) +
+        const auto entry = R"({"id":)" + std::to_string( item.id ) +
             R"(,"time_ms":)" + std::to_string( item.time_ms ) +
             R"(,"source":)" + json_quote( item.source ) +
             R"(,"priority":)" + std::to_string( item.priority ) +
             R"(,"text":)" + json_quote( item.text ) + "}";
+        if ( response.size() + entry.size() + 3 > budget ) break;
+        if ( count ) response += ',';
+        response += entry;
         target.next_message_id = item.id + 1;
         count++;
         }
@@ -496,6 +498,21 @@ long lua_debugger::process_service( long len, unsigned char* data,
             return write_response( R"({"ok":true})", outdata );
         case CMD_GET_MESSAGES:
             return write_response( debugger->message_data( target ), outdata );
+        case CMD_POLL:
+            {
+            auto response = debugger->chart_data( target );
+            if ( response.size() > 60000 )
+                return write_response(
+                    R"({"ok":false,"error":"Chart response is too large"})", outdata );
+            response.pop_back();
+            const auto budget = 65500 - response.size();
+            response += R"(,"events":)" + debugger->message_data( target, budget ) + "}";
+            // Keep the last point as the overlap anchor for client history.
+            // Subsequent polls transfer only this anchor and new changes.
+            for ( auto& item : target.expressions )
+                while ( item.samples.size() > 1 ) item.samples.pop_front();
+            return write_response( response, outdata );
+            }
         default:
             return write_response(
                 R"({"ok":false,"error":"Unknown command"})", outdata );

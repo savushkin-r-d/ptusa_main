@@ -30,8 +30,8 @@ class lua_debugger
             C_SERVICE_N = 2,
             MAX_SESSIONS = 16,
             MAX_EXPRESSIONS = 16,
-            MAX_SAMPLES_PER_EXPRESSION = 128,
-            MAX_MESSAGES = 128,
+            MAX_SAMPLES_PER_EXPRESSION = 64,
+            MAX_MESSAGES = 64,
             MAX_MESSAGES_PER_RESPONSE = 32,
             SESSION_TIMEOUT_MS = 10'000,
             };
@@ -49,6 +49,7 @@ class lua_debugger
             CMD_KEEP_ALIVE,
             /// Returns messages accumulated since the previous request.
             CMD_GET_MESSAGES,
+            CMD_POLL,
             };
 
         static lua_debugger* get_instance();
@@ -122,7 +123,7 @@ class lua_debugger
         std::string set_expressions( session& target,
             const std::string& request );
         std::string chart_data( const session& target ) const;
-        std::string message_data( session& target );
+        std::string message_data( session& target, std::size_t budget = 60000 );
         void clear_samples( session& target );
         void release_expressions( session& target );
         void expire_sessions();
