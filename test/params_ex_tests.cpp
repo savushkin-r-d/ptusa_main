@@ -18,8 +18,23 @@ TEST( params_manager, evaluate )
     pm->par->save( 1, 0xDEADBEEF );
     EXPECT_EQ( 0xDEADBEEF, pm->par[ 0 ][ params_manager::P_IS_RESET_PARAMS ] );
 
+    // Первая запись после запуска не должна ждать минимальный интервал между
+    // обычными записями. Это необходимо после сброса параметров из-за
+    // несовпадения их количества или CRC.
+    const auto stable_delay =
+        G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ];
+    const auto min_interval =
+        G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ];
+    G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] = 0;
+    G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] = 3'600'000;
+    const auto save_counter = pm->get_params_save_counter();
+
     pm->save();
-    pm->evaluate();
+    EXPECT_EQ( 0, pm->evaluate() );
+    EXPECT_EQ( save_counter + 1, pm->get_params_save_counter() );
+
+    G_PAC_INFO()->par[ PAC_info::P_STABLE_SAVE_DELAY_MS ] = stable_delay;
+    G_PAC_INFO()->par[ PAC_info::P_MIN_SAVE_INTERVAL_MS ] = min_interval;
     }
 
 TEST( params_manager, reserve_params_region )
