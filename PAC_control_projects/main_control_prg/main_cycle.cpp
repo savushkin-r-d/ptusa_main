@@ -29,6 +29,8 @@ int main_cycle()
     cycles_cnt++;
 #endif // TEST_SPEED
 
+    static u_int32_t min_cycle_time = G_PROJECT_MANAGER->min_cycle_time;
+
     if ( G_DEBUG )
         {
         fflush( stdout );
@@ -87,6 +89,12 @@ int main_cycle()
     static uint32_t cycle_time = 0;
     cycle_time = get_delta_millisec( st_time );
     G_PAC_INFO()->set_cycle_time( cycle_time );
+    
+    //Fast cycle time is not a problem, but if the cycle time is less than min_cycle_time ms, we will sleep for the remaining time to avoid overloading the CPU.
+    if ( cycle_time < min_cycle_time && cycle_time >= 0 )
+        {
+        sleep_ms( min_cycle_time - cycle_time);
+        }
 
     if ( max_iteration_cycle_time < cycle_time )
         {
