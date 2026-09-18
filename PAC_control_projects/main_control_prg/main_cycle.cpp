@@ -29,7 +29,7 @@ int main_cycle()
     cycles_cnt++;
 #endif // TEST_SPEED
 
-    static u_int32_t min_cycle_time = G_PROJECT_MANAGER->min_cycle_time;
+    static uint32_t min_cycle_time = G_PROJECT_MANAGER->min_cycle_time;
 
     if ( G_DEBUG )
         {
