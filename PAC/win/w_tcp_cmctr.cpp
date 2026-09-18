@@ -312,9 +312,18 @@ int tcp_communicator_win::evaluate()
             }
 
         //Добавляем асинхронные сокеты в список прослушки
-        for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
+        for ( auto it = clients->begin(); it != clients->end(); )
             {
+            // A client can disconnect while its asynchronous request is queued.
+            // Remove stale requests before passing their sockets to select().
+            if ( it->second->get_connected_state() != tcp_client::ACS_CONNECTED ||
+                it->first != it->second->get_socket() )
+                {
+                it = clients->erase( it );
+                continue;
+                }
             FD_SET( it->second->get_socket(), &rfds);
+            ++it;
             }
 
         //-Ждём события в одном из сокетов.

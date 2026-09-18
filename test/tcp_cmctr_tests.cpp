@@ -75,6 +75,7 @@ TEST( tcp_communicator, evaluate )
     cnt = 0;
     while ( size <= 0 && cnt < 1000 )
         {
+        EXPECT_EQ( 0, G_CMMCTR->evaluate() );
         sleep_ms( 1 );
         size = cl.AsyncReceive();
         cnt++;
@@ -83,9 +84,11 @@ TEST( tcp_communicator, evaluate )
     cl.buff[ size ] = '\0';
     EXPECT_STREQ( cl.buff, "PAC accept" );
 
-    cl.AsyncSend( 10 );
-    G_CMMCTR->evaluate();
-
+    // Queue a complete frame, then disconnect before evaluate can handle the
+    // request. A stale asynchronous client must not tear down the server.
+    const char request[] = { 's', 1, 1, 1, 0, 0 };
+    memcpy( cl.buff, request, sizeof( request ) );
+    cl.AsyncSend( sizeof( request ) );
     cl.Disconnect();
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
 
