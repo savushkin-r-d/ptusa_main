@@ -60,3 +60,61 @@ def test_session_displays_debugger_messages() -> None:
         session.shutdown()
         session.deleteLater()
         application.processEvents()
+
+
+def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
+    from copy import deepcopy
+    from ptusa_lua_debugger.session_store import save_session, load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        style = {"name": "Ступень", "color": "#32aaff", "offset": 2.5, "points": True}
+        session._create_expression("x", history_enabled=True, style=style)
+        data = {"server_time_ms": 3000, "series": [{"expression": "x", "samples": [
+            {"time_ms": 1000, "value": 0, "type": "number", "ok": True},
+            {"time_ms": 2000, "value": 1, "type": "number", "ok": True},
+        ]}]}
+        original = deepcopy(data)
+        session._on_chart_data(data)
+        root = session.variables.topLevelItem(0)
+        assert root.childCount() == 9
+        assert not root.isExpanded()
+        assert root.text(2) == "1"
+        assert root.child(0).text(2) == "0"
+        assert root.child(1).text(2) == "0"
+        assert root.child(2).text(2) == "1"
+        line, points = session.plot.listDataItems()
+        assert line.opts["stepMode"] == "right"
+        assert line.name() == "Ступень"
+        assert line.opts["pen"].color().name() == "#32aaff"
+        assert list(line.yData) == [2.5, 3.5, 3.5]
+        assert list(points.yData) == [2.5, 3.5]
+        assert list(points.xData) == [0, 1]
+        assert data == original
+        assert session._statistics["x"]["max"] == 1
+        path = tmp_path / "session.json"
+        save_session(path, host="localhost", port=10000, poll_interval_ms=500,
+                     history_limit=5000, expressions=["x"], history_expressions=["x"],
+                     chart_data=session._last_chart_data, statistics=session._statistics,
+                     series_styles=session._series_styles())
+        restored.load_document(load_session(path))
+        assert restored._series_styles() == {"x": style}
+        assert list(restored.plot.listDataItems()[0].yData) == [2.5, 3.5, 3.5]
+        # Editing presentation settings redraws immediately without altering samples.
+        session.variables.itemWidget(root.child(7), 2).setValue(-1)
+        assert list(session.plot.listDataItems()[0].yData) == [-1, 0, 0]
+        session.variables.itemWidget(root.child(8), 2).setChecked(False)
+        assert len(session.plot.listDataItems()) == 1
+        # Removing a selected property removes its owning expression.
+        root.child(1).setSelected(True)
+        session._remove_expressions()
+        assert session._expressions() == []
+        assert session.plot.listDataItems() == []
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()

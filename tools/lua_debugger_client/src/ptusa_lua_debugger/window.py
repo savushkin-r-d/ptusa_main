@@ -9,6 +9,10 @@ from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
+    QColorDialog,
+    QDoubleSpinBox,
+    QTreeWidget,
+    QTreeWidgetItem,
     QFileDialog,
     QHBoxLayout,
     QHeaderView,
@@ -143,37 +147,27 @@ class DebuggerSessionWidget(QWidget):
         clear_button.clicked.connect(self._clear_charts)
 
         expression_buttons = QHBoxLayout()
-        expression_buttons.addWidget(self.expression_edit, 1)
         expression_buttons.addWidget(add_button)
         expression_buttons.addWidget(remove_button)
         expression_buttons.addWidget(apply_button)
         expression_buttons.addWidget(clear_button)
 
-        self.variables = QTableWidget(0, 9)
-        self.variables.setHorizontalHeaderLabels(
-            [
-                "Lua-выражение",
-                "История",
-                "Текущее",
-                "Предыдущее",
-                "Min",
-                "Max",
-                "Среднее",
-                "Медиана",
-                "Состояние",
-            ]
+        self.variables = QTreeWidget()
+        self.variables.setColumnCount(4)
+        self.variables.setHeaderLabels(
+            ["Lua-выражение / свойство", "История", "Значение", "Состояние"]
         )
-        self.variables.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.variables.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.variables.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        for column in range(1, 9):
-            self.variables.horizontalHeader().setSectionResizeMode(
-                column, QHeaderView.ResizeToContents
-            )
+        self.variables.header().setSectionResizeMode(0, QHeaderView.Interactive)
+        self.variables.setColumnWidth(0, 300)
+        for column in range(1, 4):
+            self.variables.header().setSectionResizeMode(column, QHeaderView.ResizeToContents)
+        self.variables.setMinimumWidth(420)
         self.variables.itemChanged.connect(self._history_changed)
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
+        left_layout.addWidget(self.expression_edit)
         left_layout.addLayout(expression_buttons)
         left_layout.addWidget(self.variables)
 
@@ -291,52 +285,104 @@ class DebuggerSessionWidget(QWidget):
         if expression in self._expressions():
             self.expression_edit.clear()
             return
-        row = self.variables.rowCount()
-        self.variables.insertRow(row)
-        self.variables.setItem(row, 0, QTableWidgetItem(expression))
-        self._initialize_expression_values(row, history_enabled=False)
+        self._create_expression(expression)
         self.expression_edit.clear()
         self._apply_expressions()
 
     @Slot()
     def _remove_expressions(self) -> None:
-        rows = sorted({item.row() for item in self.variables.selectedItems()}, reverse=True)
-        for row in rows:
-            self.variables.removeRow(row)
+        items = set()
+        for item in self.variables.selectedItems():
+            while item.parent() is not None:
+                item = item.parent()
+            items.add(item)
+        for item in items:
+            self.variables.takeTopLevelItem(self.variables.indexOfTopLevelItem(item))
         self._history_changed(None)
         self._apply_expressions()
 
-    def _expressions(self) -> list[str]:
-        return [
-            self.variables.item(row, 0).text()
-            for row in range(self.variables.rowCount())
-            if self.variables.item(row, 0)
-        ]
+    def _expression_items(self) -> list[QTreeWidgetItem]:
+        return [self.variables.topLevelItem(i)
+                for i in range(self.variables.topLevelItemCount())]
 
-    def _initialize_expression_values(
-        self, row: int, *, history_enabled: bool = False
-    ) -> None:
-        history_item = QTableWidgetItem()
-        history_item.setFlags(
-            (history_item.flags() | Qt.ItemIsUserCheckable) & ~Qt.ItemIsEditable
-        )
-        history_item.setCheckState(Qt.Checked if history_enabled else Qt.Unchecked)
-        self.variables.setItem(row, 1, history_item)
-        for column in range(2, 8):
-            self.variables.setItem(row, column, QTableWidgetItem("—"))
-        self.variables.setItem(row, 8, QTableWidgetItem("ожидание"))
+    def _expressions(self) -> list[str]:
+        return [item.text(0) for item in self._expression_items()]
+
+    def _create_expression(self, expression: str, *, history_enabled: bool = False,
+                           style: dict[str, Any] | None = None) -> None:
+        style = style or {}
+        self.variables.blockSignals(True)
+        try:
+            item = QTreeWidgetItem(self.variables, [expression, "", "—", "ожидание"])
+            item.setToolTip(0, expression)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(1, Qt.Checked if history_enabled else Qt.Unchecked)
+            for label in ("Предыдущее", "Min", "Max", "Среднее", "Медиана"):
+                QTreeWidgetItem(item, [label, "", "—"])
+            name_row = QTreeWidgetItem(item, ["Имя на графике"])
+            name = QLineEdit(str(style.get("name", "")))
+            name.setPlaceholderText(expression)
+            self.variables.setItemWidget(name_row, 2, name)
+            color_row = QTreeWidgetItem(item, ["Цвет линии"])
+            color = QPushButton()
+            initial_color = style.get("color") or pg.intColor(
+                self.variables.topLevelItemCount() - 1).name()
+            self._set_color_button(color, initial_color)
+            self.variables.setItemWidget(color_row, 2, color)
+            offset_row = QTreeWidgetItem(item, ["Сдвиг по Y"])
+            offset = QDoubleSpinBox()
+            offset.setRange(-1e12, 1e12)
+            offset.setDecimals(6)
+            offset.setValue(style.get("offset", 0.0))
+            offset.setToolTip("На графике: исходное значение + сдвиг. История и статистика не меняются.")
+            self.variables.setItemWidget(offset_row, 2, offset)
+            points_row = QTreeWidgetItem(item, ["Точки на графике"])
+            points = QCheckBox()
+            points.setChecked(style.get("points", False))
+            points.setToolTip("Показывать точки полученных изменений значения")
+            self.variables.setItemWidget(points_row, 2, points)
+            name.textChanged.connect(self._redraw_chart)
+            color.clicked.connect(lambda: self._choose_color(color))
+            offset.valueChanged.connect(self._redraw_chart)
+            points.toggled.connect(self._redraw_chart)
+        finally:
+            self.variables.blockSignals(False)
+
+    @staticmethod
+    def _set_color_button(button: QPushButton, color: str) -> None:
+        button.setProperty("lineColor", color)
+        button.setText(color)
+        button.setStyleSheet(f"QPushButton {{ border: 3px solid {color}; }}")
+
+    def _choose_color(self, button: QPushButton) -> None:
+        color = QColorDialog.getColor(pg.mkColor(button.property("lineColor")), self,
+                                     "Цвет линии")
+        if color.isValid():
+            self._set_color_button(button, color.name())
+            self._redraw_chart()
+
+    def _series_styles(self) -> dict[str, dict[str, Any]]:
+        styles = {}
+        for item in self._expression_items():
+            widget = lambda index: self.variables.itemWidget(item.child(index), 2)
+            styles[item.text(0)] = {
+                "name": widget(5).text(),
+                "color": widget(6).property("lineColor"),
+                "offset": widget(7).value(),
+                "points": widget(8).isChecked(),
+            }
+        return styles
+
+    def _redraw_chart(self, _value: object = None) -> None:
+        if self._last_chart_data is not None:
+            self._draw_chart(self._last_chart_data)
 
     def _history_expressions(self) -> list[str]:
-        return [
-            self.variables.item(row, 0).text()
-            for row in range(self.variables.rowCount())
-            if self.variables.item(row, 0)
-            and self.variables.item(row, 1)
-            and self.variables.item(row, 1).checkState() == Qt.Checked
-        ]
+        return [item.text(0) for item in self._expression_items()
+                if item.checkState(1) == Qt.Checked]
 
-    def _history_changed(self, item: QTableWidgetItem | None) -> None:
-        if item is not None and item.column() != 1:
+    def _history_changed(self, item: QTreeWidgetItem | None, column: int = 1) -> None:
+        if item is not None and (item.parent() is not None or column != 1):
             return
         self._last_chart_data = trim_chart_data(
             self._last_chart_data,
@@ -380,25 +426,15 @@ class DebuggerSessionWidget(QWidget):
             item.get("expression"): item
             for item in self._last_chart_data.get("series", [])
         }
-        for row, expression in enumerate(self._expressions()):
-            series = by_expression.get(expression, {})
-            samples = series.get("samples", [])
-            if not samples:
-                for column in (2, 3, 8):
-                    self.variables.setItem(row, column, QTableWidgetItem("—"))
-                continue
-            last = samples[-1]
+        for item in self._expression_items():
+            samples = by_expression.get(item.text(0), {}).get("samples", [])
+            last = samples[-1] if samples else None
             previous = samples[-2] if len(samples) > 1 else None
-            self.variables.setItem(row, 2, QTableWidgetItem(str(last.get("value"))))
-            self.variables.setItem(
-                row,
-                3,
-                QTableWidgetItem(
-                    "—" if previous is None else str(previous.get("value"))
-                ),
-            )
-            status = "OK" if last.get("ok") else str(last.get("value", "ошибка"))
-            self.variables.setItem(row, 8, QTableWidgetItem(status))
+            item.setText(2, "—" if last is None else str(last.get("value")))
+            item.child(0).setText(2, "—" if previous is None else str(previous.get("value")))
+            status = "—" if last is None else (
+                "OK" if last.get("ok") else str(last.get("value", "ошибка")))
+            item.setText(3, status)
         self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
         self._refresh_history_table()
@@ -452,24 +488,10 @@ class DebuggerSessionWidget(QWidget):
             self.messages_table.scrollToBottom()
 
     def _refresh_table_statistics(self) -> None:
-        for row, expression in enumerate(self._expressions()):
-            extrema = self._statistics.get(expression, {})
-            minimum = extrema.get("min")
-            maximum = extrema.get("max")
-            average = extrema.get("average")
-            median = extrema.get("median")
-            self.variables.setItem(
-                row, 4, QTableWidgetItem(self._format_stat(minimum))
-            )
-            self.variables.setItem(
-                row, 5, QTableWidgetItem(self._format_stat(maximum))
-            )
-            self.variables.setItem(
-                row, 6, QTableWidgetItem(self._format_stat(average))
-            )
-            self.variables.setItem(
-                row, 7, QTableWidgetItem(self._format_stat(median))
-            )
+        for item in self._expression_items():
+            statistics = self._statistics.get(item.text(0), {})
+            for index, key in enumerate(("min", "max", "average", "median"), start=1):
+                item.child(index).setText(2, self._format_stat(statistics.get(key)))
 
     @staticmethod
     def _format_stat(value: float | None) -> str:
@@ -521,7 +543,10 @@ class DebuggerSessionWidget(QWidget):
         absolute_time = controller_timestamp_ms(data, base) is not None
         self._set_time_axis(absolute_time)
         max_x: float | None = None
-        for index, (series, numeric) in enumerate(prepared):
+        styles = self._series_styles()
+        for series, numeric in prepared:
+            expression = str(series.get("expression", ""))
+            style = styles[expression]
             if absolute_time:
                 timestamps = [
                     controller_timestamp_ms(data, int(sample["time_ms"]))
@@ -537,7 +562,8 @@ class DebuggerSessionWidget(QWidget):
                     ((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000
                     for sample in numeric
                 ]
-            y_values = [float(sample["value"]) for sample in numeric]
+            y_values = [float(sample["value"]) + style["offset"] for sample in numeric]
+            point_x, point_y = x_values.copy(), y_values.copy()
             current_time = controller_timestamp_ms(data, server_time)
             current_x = (
                 current_time / 1000
@@ -551,10 +577,13 @@ class DebuggerSessionWidget(QWidget):
             self.plot.plot(
                 x_values,
                 y_values,
-                name=str(series.get("expression", "")),
-                pen=pg.mkPen(pg.intColor(index), width=2),
-                stepMode="left",
+                name=style["name"].strip() or expression,
+                pen=pg.mkPen(style["color"], width=2),
+                stepMode="right",
             )
+            if style["points"]:
+                self.plot.plot(point_x, point_y, pen=None, symbol="o", symbolSize=6,
+                               symbolBrush=style["color"], symbolPen=style["color"])
         if self.auto_follow_check.isChecked() and max_x is not None:
             left = max_x - self.display_seconds_spin.value()
             if not absolute_time:
@@ -632,6 +661,7 @@ class DebuggerSessionWidget(QWidget):
                 display_seconds=self.display_seconds_spin.value(),
                 auto_follow=self.auto_follow_check.isChecked(),
                 statistics=self._statistics,
+                series_styles=self._series_styles(),
             )
         except OSError as exc:
             self._show_error(str(exc))
@@ -661,18 +691,12 @@ class DebuggerSessionWidget(QWidget):
             for expression, extrema in document["statistics"].items()
         }
         history_expressions = set(document["history_expressions"])
-        self.variables.blockSignals(True)
-        try:
-            self.variables.setRowCount(0)
-            for expression in document["expressions"]:
-                row = self.variables.rowCount()
-                self.variables.insertRow(row)
-                self.variables.setItem(row, 0, QTableWidgetItem(expression))
-                self._initialize_expression_values(
-                    row, history_enabled=expression in history_expressions
-                )
-        finally:
-            self.variables.blockSignals(False)
+        self.variables.clear()
+        for expression in document["expressions"]:
+            self._create_expression(
+                expression, history_enabled=expression in history_expressions,
+                style=document.get("series_styles", {}).get(expression),
+            )
         chart_data = document.get("chart_data")
         self._last_chart_data = None
         if isinstance(chart_data, dict):

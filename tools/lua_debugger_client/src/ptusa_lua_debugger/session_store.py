@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +27,7 @@ def save_session(
     display_seconds: int = DEFAULT_DISPLAY_SECONDS,
     auto_follow: bool = True,
     statistics: dict[str, dict[str, Any]] | None = None,
+    series_styles: dict[str, dict[str, Any]] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -34,6 +37,7 @@ def save_session(
         "display_seconds": display_seconds,
         "auto_follow": auto_follow,
         "statistics": statistics or {},
+        "series_styles": series_styles or {},
         "expressions": expressions,
         "history_expressions": history_expressions,
         "chart_data": chart_data,
@@ -87,6 +91,13 @@ def load_session(path: str | Path) -> dict[str, Any]:
         for expression, entry in statistics.items()
     ):
         raise TypeError("Некорректная статистика выражений")
+    styles = document.get("series_styles", {})
+    if not isinstance(styles, dict) or any(
+        not isinstance(expression, str) or not _valid_series_style(style)
+        for expression, style in styles.items()
+    ):
+        raise ValueError("Некорректные настройки линий графика")
+    document["series_styles"] = styles
     document["display_seconds"] = display_seconds
     document["auto_follow"] = auto_follow
     document["statistics"] = statistics
@@ -126,4 +137,18 @@ def _valid_statistics_entry(entry: Any) -> bool:
         and len(values) == count
         and all(numeric(value) for value in values)
         and isinstance(entry["_last_sample"], dict)
+    )
+
+
+def _valid_series_style(style: Any) -> bool:
+    if not isinstance(style, dict):
+        return False
+    offset = style.get("offset", 0)
+    return (
+        isinstance(style.get("name", ""), str)
+        and isinstance(style.get("color", "#ffffff"), str)
+        and re.fullmatch(r"#[0-9a-fA-F]{6}", style.get("color", "#ffffff")) is not None
+        and isinstance(offset, (int, float)) and not isinstance(offset, bool)
+        and math.isfinite(offset) and abs(offset) <= 1e12
+        and isinstance(style.get("points", False), bool)
     )
