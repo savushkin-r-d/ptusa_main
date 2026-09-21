@@ -26,6 +26,9 @@
 #include "bus_coupler_io.h"
 #include "dtime.h"
 #include "PAC_err.h"
+#include <array>
+#include <chrono>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода для OC Linux.
@@ -53,13 +56,44 @@ class uni_io_manager : public io_manager
         u_char* resultbuff = nullptr;
         u_char* writebuff = nullptr;
 
+        struct exchange
+            {
+            io_node* node = nullptr;
+            std::array<u_char, BUFF_SIZE> request{}, response{};
+            int send_size = 0, expected_size = 0;
+            int sent = 0, received = 0, frame_size = 6;
+            int result = 1;
+            size_t previous = static_cast<size_t>( -1 );
+            bool started = false, done = false, consumed = false;
+            std::chrono::steady_clock::time_point deadline{}, started_at{}, sent_at{};
+            };
+        std::vector<exchange> phase_exchanges;
+        bool phase_active = false, phase_executed = false;
+        uint16_t transaction_id = 0;
+
+        // The phase remains synchronous; only socket waits overlap.
+        void prepare_phase( bool writing );
+        void run_exchanges( std::vector<exchange>& exchanges );
+        int prepare_node( io_node* node );
+        void queue_exchange( io_node* node, int send_size, int expected_size );
+        void make_read_request( unsigned int address, unsigned int quantity,
+            unsigned char function, unsigned char station = 0 );
+        void make_write_request( unsigned int address, unsigned int quantity,
+            unsigned char station = 0 );
+        void make_wago_do_request( io_node* node );
+        void make_wago_ao_request( io_node* node );
+        void make_phoenix_output( io_node* node, unsigned int start_register,
+            unsigned int registers_count, unsigned int& module_type,
+            unsigned int& module_offset );
+
         /// @brief Обмен с узлом I/O.
         ///
         /// @param node             - узел I/O, с которым осуществляется обмен.
         /// @param bytes_to_send    - размер данных для отсылки.
         /// @param bytes_to_receive - размер данных для получения.
         ///
-        /// @return -   0 - ок.
+        /// @return -   0 - полный ответ (включая Modbus exception).
+        /// @return -   1 - обмен пропущен: подключение или ошибка предыдущего запроса.
         /// @return - < 0 - ошибка.
         virtual int e_communicate( io_node* node, int bytes_to_send,
             int bytes_to_receive );
@@ -88,6 +122,13 @@ class uni_io_manager : public io_manager
         void read_phoenix_status_register( io_node* nd );
 
     public:
+        struct phase_timing
+            {
+            uint64_t last_us = 0, max_us = 0, total_us = 0, cycles = 0;
+            };
+        const phase_timing& get_read_timing() const { return read_timing; }
+        const phase_timing& get_write_timing() const { return write_timing; }
+
         int read_inputs() override;
         int write_outputs() override;
 
@@ -114,6 +155,9 @@ class uni_io_manager : public io_manager
         ///
         /// @param node - узел, от которого отключаемся.
         void disconnect( io_node* node ) override;
+
+    private:
+        phase_timing read_timing, write_timing;
     };
 //-----------------------------------------------------------------------------
 #endif // UNI_BUS_COUPLER_IO_H

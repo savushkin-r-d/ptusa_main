@@ -117,8 +117,24 @@ TEST( tcp_communicator, evaluate )
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );
     sleep_ms( 1 );
     //Для модбас клиента ответа на подключение не будет.
-    size = modbus_cl.AsyncReceive();
-    ASSERT_EQ( size, 0 );
+    EXPECT_FALSE( tcp_communicator::checkBuff( modbus_cl.get_socket() ) );
+
+    // Queue a receive without sending data: no socket event should be needed
+    // to expire the request. Keep the peer open and silent.
+    modbus_cl.tcp_client::AsyncReceive();
+    ASSERT_EQ( tcp_client::ACS_CONNECTED, modbus_cl.get_connected_state() );
+    EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+    ASSERT_EQ( tcp_client::ACS_CONNECTED, modbus_cl.get_connected_state() );
+    EXPECT_EQ( tcp_client::AR_BUSY, modbus_cl.get_async_result() );
+    modbus_cl.async_queued = get_millisec() - modbus_cl.async_timeout - 1;
+    EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+    EXPECT_EQ( tcp_client::AR_TIMEOUT, modbus_cl.get_async_result() );
+    EXPECT_EQ( tcp_client::ACS_DISCONNECTED, modbus_cl.get_connected_state() );
+
+    // The completed request must no longer be processed by the communicator.
+    modbus_cl.set_async_result( tcp_client::AR_FREE );
+    EXPECT_EQ( 0, G_CMMCTR->evaluate() );
+    EXPECT_EQ( tcp_client::AR_FREE, modbus_cl.get_async_result() );
 
     modbus_cl.Disconnect();
     EXPECT_EQ( 0, G_CMMCTR->evaluate() );

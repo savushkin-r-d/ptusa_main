@@ -341,8 +341,6 @@ int tcp_communicator_linux::evaluate()
         timeval ready_timeout{};
         rc = select( max_sock_number + 1, &rfds, NULL, NULL, &ready_timeout );
 
-        if ( 0 == rc ) break; // Ничего не произошло.
-
         if ( rc < 0 )
             {
             sprintf( G_LOG->msg,
@@ -494,6 +492,8 @@ int tcp_communicator_linux::evaluate()
                  }
              }
 
+        // Even without socket events, pending requests must expire.
+        if ( 0 == rc ) break;
         }  /* service loop */
 
 
@@ -611,7 +611,6 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
             break;
             }
 
-        usleep( 1 );
         i -= n;
         p += n;
 

@@ -330,7 +330,6 @@ int tcp_communicator_win::evaluate()
         if ( rfds.fd_count == 0 ) break;
         timeval ready_timeout{};
         rc = select( 0/*Не учитывается*/, &rfds, NULL, NULL, &ready_timeout );
-        if ( 0 == rc ) break; // Ничего не произошло.
 
         if ( rc < 0 )
             {
@@ -481,6 +480,8 @@ int tcp_communicator_win::evaluate()
                 }
             }
 
+        // Even without socket events, pending requests must expire.
+        if ( 0 == rc ) break;
         }  /* service loop */
 
     for ( u_int i = 0; i < sst.size(); i++ )
