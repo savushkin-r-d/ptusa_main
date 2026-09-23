@@ -9,6 +9,7 @@ from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
+    QComboBox,
     QColorDialog,
     QDoubleSpinBox,
     QTreeWidget,
@@ -34,6 +35,7 @@ from PySide6.QtWidgets import (
 from xlsxwriter.exceptions import XlsxWriterException
 
 from .excel_export import export_history_xlsx
+from .chart_styles import CHART_TYPES, DEFAULT_CHART_TYPE
 from .history import (
     DEFAULT_DISPLAY_SECONDS,
     DEFAULT_HISTORY_LIMIT,
@@ -341,6 +343,19 @@ class DebuggerSessionWidget(QWidget):
             points.setChecked(style.get("points", False))
             points.setToolTip("Показывать точки полученных изменений значения")
             self.variables.setItemWidget(points_row, 2, points)
+            type_row = QTreeWidgetItem(item, ["Тип графика"])
+            chart_type = QComboBox()
+            for key, label in CHART_TYPES.items():
+                chart_type.addItem(label, key)
+            chart_type.setCurrentIndex(max(0, chart_type.findData(
+                style.get("chart_type", DEFAULT_CHART_TYPE))))
+            chart_type.setToolTip(
+                "После точки: значение действует до следующего измерения.\n"
+                "До точки: значение действует от предыдущего измерения.\n"
+                "По середине: переход между значениями в середине интервала."
+            )
+            self.variables.setItemWidget(type_row, 2, chart_type)
+            chart_type.currentIndexChanged.connect(self._redraw_chart)
             name.textChanged.connect(self._redraw_chart)
             color.clicked.connect(lambda: self._choose_color(color))
             offset.valueChanged.connect(self._redraw_chart)
@@ -370,6 +385,7 @@ class DebuggerSessionWidget(QWidget):
                 "color": widget(6).property("lineColor"),
                 "offset": widget(7).value(),
                 "points": widget(8).isChecked(),
+                "chart_type": widget(9).currentData(),
             }
         return styles
 
@@ -574,14 +590,31 @@ class DebuggerSessionWidget(QWidget):
                 x_values.append(current_x)
                 y_values.append(y_values[-1])
             max_x = x_values[-1] if max_x is None else max(max_x, x_values[-1])
+            chart_type = style["chart_type"]
+            step_mode = {"step_post": "right", "step_pre": "left"}.get(chart_type)
+            if chart_type == "step_mid":
+                # Center mode needs N+1 bin edges for N values. Keep actual
+                # sample positions for markers, including the single-sample case.
+                x_values = [x_values[0]] + [
+                    left + (right - left) / 2
+                    for left, right in zip(point_x, point_x[1:])
+                ] + [x_values[-1]]
+                y_values = point_y
+                step_mode = "center"
+            elif chart_type == "scatter":
+                x_values, y_values = point_x, point_y
             self.plot.plot(
                 x_values,
                 y_values,
                 name=style["name"].strip() or expression,
-                pen=pg.mkPen(style["color"], width=2),
-                stepMode="right",
+                pen=None if chart_type == "scatter" else pg.mkPen(style["color"], width=2),
+                stepMode=step_mode,
+                symbol="o" if chart_type == "scatter" else None,
+                symbolSize=6,
+                symbolBrush=style["color"],
+                symbolPen=style["color"],
             )
-            if style["points"]:
+            if style["points"] and chart_type != "scatter":
                 self.plot.plot(point_x, point_y, pen=None, symbol="o", symbolSize=6,
                                symbolBrush=style["color"], symbolPen=style["color"])
         if self.auto_follow_check.isChecked() and max_x is not None:

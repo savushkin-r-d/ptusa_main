@@ -1,12 +1,73 @@
 from __future__ import annotations
 
 import os
+import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
 from ptusa_lua_debugger.window import DebuggerSessionWidget, MainWindow
+
+
+@pytest.mark.parametrize("chart_type, expected_x, expected_y", [
+    ("step_post", [0, 2, 2, 5, 5, 7, 7, 7], [0, 0, 1, 1, 0, 0, 0, 0]),
+    ("step_pre", [0, 0, 0, 2, 2, 5, 5, 7], [0, 0, 1, 1, 0, 0, 0, 0]),
+    ("step_mid", [0, 1, 1, 3.5, 3.5, 7], [0, 0, 1, 1, 0, 0]),
+    ("line", [0, 2, 5, 7], [0, 1, 0, 0]),
+    ("scatter", [0, 2, 5], [0, 1, 0]),
+])
+@pytest.mark.parametrize("single_sample", [False, True])
+def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
+                                          expected_y, single_sample) -> None:
+    from copy import deepcopy
+    from ptusa_lua_debugger.session_store import load_session, save_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        session._create_expression("x", history_enabled=True)
+        session._create_expression("other", history_enabled=True)
+        samples = [
+            {"time_ms": t, "value": v, "type": "number", "ok": True}
+            for t, v in [(1000, 0), (3000, 1), (6000, 0)]
+        ]
+        data = {"server_time_ms": 8000, "series": [
+            {"expression": "x", "samples": samples[:1] if single_sample else samples}
+        ]}
+        session._on_chart_data(data)
+        original = deepcopy(session._last_chart_data)
+        root = session.variables.topLevelItem(0)
+        selector = session.variables.itemWidget(root.child(9), 2)
+        selector.setCurrentIndex(selector.findData(chart_type))
+        curve = session.plot.listDataItems()[0]
+        # Inspect the rendered geometry, not just the selected option.
+        path = curve.curve.getPath()
+        if chart_type != "scatter" and not single_sample:
+            assert [path.elementAt(i).x for i in range(path.elementCount())] == expected_x
+            assert [path.elementAt(i).y for i in range(path.elementCount())] == expected_y
+        if chart_type == "scatter":
+            assert list(curve.xData) == ([0] if single_sample else expected_x)
+            assert curve.opts["pen"] is None
+            assert curve.opts["symbol"] == "o"
+        assert session._series_styles()["other"]["chart_type"] == "step_post"
+        assert session._last_chart_data == original
+        path = tmp_path / "styles.json"
+        save_session(path, host="localhost", port=10000, poll_interval_ms=500,
+                     history_limit=5000, expressions=session._expressions(),
+                     history_expressions=session._history_expressions(),
+                     chart_data=session._last_chart_data,
+                     series_styles=session._series_styles())
+        restored.load_document(load_session(path))
+        assert restored._series_styles() == session._series_styles()
+        assert restored.plot.listDataItems()[0].opts["stepMode"] == curve.opts["stepMode"]
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
 
 
 def test_tabs_own_independent_workers_and_threads() -> None:
@@ -79,7 +140,7 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         original = deepcopy(data)
         session._on_chart_data(data)
         root = session.variables.topLevelItem(0)
-        assert root.childCount() == 9
+        assert root.childCount() == 10
         assert not root.isExpanded()
         assert root.text(2) == "1"
         assert root.child(0).text(2) == "0"
@@ -100,7 +161,7 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
                      chart_data=session._last_chart_data, statistics=session._statistics,
                      series_styles=session._series_styles())
         restored.load_document(load_session(path))
-        assert restored._series_styles() == {"x": style}
+        assert restored._series_styles() == {"x": {**style, "chart_type": "step_post"}}
         assert list(restored.plot.listDataItems()[0].yData) == [2.5, 3.5, 3.5]
         # Editing presentation settings redraws immediately without altering samples.
         session.variables.itemWidget(root.child(7), 2).setValue(-1)

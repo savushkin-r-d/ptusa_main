@@ -5,6 +5,7 @@ import math
 import re
 from pathlib import Path
 from typing import Any
+from .chart_styles import CHART_TYPES, DEFAULT_CHART_TYPE
 
 from .history import (
     DEFAULT_DISPLAY_SECONDS,
@@ -151,4 +152,6 @@ def _valid_series_style(style: Any) -> bool:
         and isinstance(offset, (int, float)) and not isinstance(offset, bool)
         and math.isfinite(offset) and abs(offset) <= 1e12
         and isinstance(style.get("points", False), bool)
+        and isinstance(style.get("chart_type", DEFAULT_CHART_TYPE), str)
+        and style.get("chart_type", DEFAULT_CHART_TYPE) in CHART_TYPES
     )

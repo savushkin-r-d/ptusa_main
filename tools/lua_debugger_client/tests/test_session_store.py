@@ -1,4 +1,15 @@
 from ptusa_lua_debugger.session_store import load_session, save_session
+import pytest
+
+
+@pytest.mark.parametrize("invalid_type", ["spline", None, [], 42])
+def test_invalid_chart_type_is_rejected(tmp_path, invalid_type) -> None:
+    path = tmp_path / "invalid.json"
+    save_session(path, host="localhost", port=10000, poll_interval_ms=500,
+                 history_limit=5000, expressions=["x"], history_expressions=["x"],
+                 chart_data=None, series_styles={"x": {"chart_type": invalid_type}})
+    with pytest.raises(ValueError, match="настройки линий"):
+        load_session(path)
 
 
 def test_session_roundtrip(tmp_path) -> None:
