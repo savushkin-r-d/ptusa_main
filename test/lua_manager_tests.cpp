@@ -765,19 +765,37 @@ TEST( lua_manager, get_lua_error_count )
 
     EXPECT_EQ( 0, luaL_dostring( L,
         "t = {} function t.ok() end function t.fail() error( 'same' ) end" ) );
+    EXPECT_EQ( 0, lua_gettop( L ) );
 
     lua_manager::reset_lua_error_count();
     EXPECT_EQ( 0, lua_manager::get_lua_error_count() );
 
-    EXPECT_EQ( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "ok", "get_lua_error_count" ) );
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method(
+        "missing", "ok", "get_lua_error_count" ) );
     EXPECT_EQ( 0, lua_manager::get_lua_error_count() );
+    EXPECT_EQ( 0, lua_gettop( L ) );
 
-    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "fail", "get_lua_error_count" ) );
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method(
+        "t", "missing", "get_lua_error_count" ) );
+    EXPECT_EQ( 0, lua_manager::get_lua_error_count() );
+    EXPECT_EQ( 0, lua_gettop( L ) );
+
+    EXPECT_EQ( 0, G_LUA_MANAGER->void_exec_lua_method(
+        "t", "ok", "get_lua_error_count" ) );
+    EXPECT_EQ( 0, lua_manager::get_lua_error_count() );
+    EXPECT_EQ( 0, lua_gettop( L ) );
+
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method(
+        "t", "fail", "get_lua_error_count" ) );
     EXPECT_EQ( 1, lua_manager::get_lua_error_count() );
+    EXPECT_EQ( 0, lua_gettop( L ) );
 
-    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method( "t", "fail", "get_lua_error_count" ) );
+    EXPECT_NE( 0, G_LUA_MANAGER->void_exec_lua_method(
+        "t", "fail", "get_lua_error_count" ) );
     EXPECT_EQ( 2, lua_manager::get_lua_error_count() );
+    EXPECT_EQ( 0, lua_gettop( L ) );
 
+    lua_manager::reset_lua_error_count();
     G_LUA_MANAGER->free_Lua();
     }
 

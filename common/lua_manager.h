@@ -110,7 +110,7 @@ class lua_manager
 #endif
 
     private:
-        lua_manager() : L( 0 ), err_func( 0 ), is_free_lua( 0 )
+        lua_manager() : L( 0 ), is_free_lua( 0 )
             {
             }
 
@@ -128,7 +128,6 @@ class lua_manager
         static bool is_print_stack_traceback;
         static int lua_error_count;
 
-        int err_func;
         lua_State * L;
 
         int is_free_lua;
