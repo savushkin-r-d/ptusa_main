@@ -50,6 +50,8 @@ class lua_debugger
             /// Returns messages accumulated since the previous request.
             CMD_GET_MESSAGES,
             CMD_POLL,
+            /// Decimal PAC_info::COMMANDS id in the request body.
+            CMD_EXEC_CONTROLLER_COMMAND,
             };
 
         static lua_debugger* get_instance();

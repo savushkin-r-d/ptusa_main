@@ -134,6 +134,20 @@ TEST_F( lua_debugger_test, evaluates_lua_expression )
     EXPECT_NE( std::string::npos, error.find( R"("type":"error")" ) );
     }
 
+TEST_F( lua_debugger_test, executes_known_controller_commands )
+    {
+    EXPECT_EQ( R"({"ok":true,"command":102,"result":0,"queued":true})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "102" ) );
+    EXPECT_EQ( R"({"ok":true,"command":0,"result":0,"queued":false})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "0" ) );
+    EXPECT_EQ( R"({"ok":false,"error":"Unknown controller command"})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "999" ) );
+    EXPECT_EQ( R"({"ok":false,"error":"Invalid controller command id"})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "102abc" ) );
+    EXPECT_EQ( R"({"ok":false,"error":"Invalid controller command id"})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND ) );
+    }
+
 TEST_F( lua_debugger_test, caches_only_chart_value_changes )
     {
     ASSERT_EQ( 0, luaL_dostring( state, "debug_x = 10" ) );

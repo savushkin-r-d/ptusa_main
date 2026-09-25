@@ -182,6 +182,33 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         application.processEvents()
 
 
+def test_controller_commands_are_available_in_each_session() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.controller_command_requested.disconnect(
+            session._worker.execute_controller_command
+        )
+        sent: list[int] = []
+        session.controller_command_requested.connect(sent.append)
+        assert [session.command_combo.itemData(i)
+                for i in range(session.command_combo.count())] == [102, 100, 101, 0]
+        assert not session.command_button.isEnabled()
+
+        session._connected = True
+        session.command_button.setEnabled(True)
+        session.command_button.click()
+        assert sent == [102]
+        assert not session.command_button.isEnabled()
+        session._on_command_executed(102, {"ok": True, "queued": True})
+        assert session.command_button.isEnabled()
+        assert session.command_result.text() == "Сохранение запланировано"
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
 def test_pulse_counter_is_plotted_and_restored(tmp_path) -> None:
     from ptusa_lua_debugger.session_store import load_session, save_session
 

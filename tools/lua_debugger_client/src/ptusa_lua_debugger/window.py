@@ -54,6 +54,13 @@ from .pulse_counter import PulseCounters, PulseDefinition
 from .session_store import load_session, save_session
 from .worker import DebuggerWorker
 
+CONTROLLER_COMMANDS = (
+    (102, "Принудительно сохранить параметры"),
+    (100, "Перезагрузить ограничения"),
+    (101, "Сбросить параметры"),
+    (0, "Очистить код результата"),
+)
+
 
 class DebuggerSessionWidget(QWidget):
     connect_requested = Signal(str, int)
@@ -61,6 +68,7 @@ class DebuggerSessionWidget(QWidget):
     expressions_requested = Signal(list)
     interval_requested = Signal(int)
     evaluate_requested = Signal(str)
+    controller_command_requested = Signal(int)
     clear_requested = Signal()
     title_changed = Signal(str)
 
@@ -80,12 +88,16 @@ class DebuggerSessionWidget(QWidget):
         self.expressions_requested.connect(self._worker.set_expressions)
         self.interval_requested.connect(self._worker.set_interval)
         self.evaluate_requested.connect(self._worker.evaluate)
+        self.controller_command_requested.connect(
+            self._worker.execute_controller_command
+        )
         self.clear_requested.connect(self._worker.clear_chart_data)
         self._worker.connected.connect(self._on_connected)
         self._worker.disconnected.connect(self._on_disconnected)
         self._worker.chart_data.connect(self._on_chart_data)
         self._worker.messages.connect(self._on_messages)
         self._worker.evaluated.connect(self._on_evaluated)
+        self._worker.command_executed.connect(self._on_command_executed)
         self._worker.error.connect(self._show_error)
         self._thread.start()
 
@@ -253,10 +265,24 @@ class DebuggerSessionWidget(QWidget):
         evaluation.addWidget(evaluate_button)
         evaluation.addWidget(self.evaluate_result, 1)
 
+        self.command_combo = QComboBox()
+        for command_id, label in CONTROLLER_COMMANDS:
+            self.command_combo.addItem(label, command_id)
+        self.command_button = QPushButton("Выполнить")
+        self.command_button.setEnabled(False)
+        self.command_button.clicked.connect(self._execute_controller_command)
+        self.command_result = QLabel("—")
+        commands = QHBoxLayout()
+        commands.addWidget(QLabel("Команда контроллера:"))
+        commands.addWidget(self.command_combo)
+        commands.addWidget(self.command_button)
+        commands.addWidget(self.command_result, 1)
+
         root_layout = QVBoxLayout(self)
         root_layout.addLayout(connection)
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
+        root_layout.addLayout(commands)
         self.status_label = QLabel("Не подключено")
         root_layout.addWidget(self.status_label)
 
@@ -275,6 +301,7 @@ class DebuggerSessionWidget(QWidget):
         self._connected = True
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Отключиться")
+        self.command_button.setEnabled(True)
         self.status_label.setText(f"Подключено · сессия {session_id}")
         self._update_title()
         self._apply_expressions()
@@ -284,6 +311,9 @@ class DebuggerSessionWidget(QWidget):
         self._connected = False
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Подключиться")
+        self.command_button.setEnabled(False)
+        if self.command_result.text() == "Выполнение…":
+            self.command_result.setText(reason or "Нет подключения")
         self.status_label.setText(reason or "Не подключено")
         self._update_title()
 
@@ -500,6 +530,27 @@ class DebuggerSessionWidget(QWidget):
             self.evaluate_result.setText(f"{result.get('type')}: {result.get('value')}")
         else:
             self.evaluate_result.setText(str(result.get("error", "Ошибка")))
+
+    @Slot()
+    def _execute_controller_command(self) -> None:
+        if not self._connected:
+            return
+        command_id = int(self.command_combo.currentData())
+        self.command_button.setEnabled(False)
+        self.command_result.setText("Выполнение…")
+        self.controller_command_requested.emit(command_id)
+
+    @Slot(int, dict)
+    def _on_command_executed(
+        self, command_id: int, result: dict[str, Any]
+    ) -> None:
+        self.command_button.setEnabled(self._connected)
+        if result.get("queued"):
+            self.command_result.setText("Сохранение запланировано")
+        else:
+            self.command_result.setText(
+                f"Команда {command_id} выполнена (код {result.get('result', 0)})"
+            )
 
     @Slot(dict)
     def _on_chart_data(self, data: dict[str, Any]) -> None:
@@ -752,6 +803,9 @@ class DebuggerSessionWidget(QWidget):
 
     @Slot(str)
     def _show_error(self, message: str) -> None:
+        self.command_button.setEnabled(self._connected)
+        if self.command_result.text() == "Выполнение…":
+            self.command_result.setText(f"Ошибка: {message}")
         self.status_label.setText(message)
         QMessageBox.warning(self, "Lua debugger", message)
 

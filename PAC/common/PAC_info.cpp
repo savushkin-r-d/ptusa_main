@@ -268,6 +268,8 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
             case COMMANDS::FORCE_SAVE_PARAMS:
                 G_LOG->notice( "Force saving parameters (remote monitor "
                     "client command)." );
+                // Keep the existing success response; the write finishes in
+                // params_manager's background worker.
                 return params_manager::get_instance()->save_params();
             }
 

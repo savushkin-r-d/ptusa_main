@@ -1,6 +1,7 @@
 #include "lua_debugger.h"
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -12,6 +13,7 @@
 
 #include "dtime.h"
 #include "lua_manager.h"
+#include "PAC_info.h"
 #include "tcp_cmctr.h"
 
 namespace
@@ -511,6 +513,49 @@ long lua_debugger::process_service( long len, unsigned char* data,
             // Subsequent polls transfer only this anchor and new changes.
             for ( auto& item : target.expressions )
                 while ( item.samples.size() > 1 ) item.samples.pop_front();
+            return write_response( response, outdata );
+            }
+        case CMD_EXEC_CONTROLLER_COMMAND:
+            {
+            if ( body.empty() )
+                return write_response(
+                    R"({"ok":false,"error":"Invalid controller command id"})",
+                    outdata );
+            int command_id = -1;
+            const auto parsed = std::from_chars(
+                body.data(), body.data() + body.size(), command_id );
+            if ( parsed.ec != std::errc{} ||
+                parsed.ptr != body.data() + body.size() )
+                return write_response(
+                    R"({"ok":false,"error":"Invalid controller command id"})",
+                    outdata );
+
+            const auto controller_command =
+                static_cast<PAC_info::COMMANDS>( command_id );
+            switch ( controller_command )
+                {
+                case PAC_info::COMMANDS::CLEAR_RESULT_CMD:
+                case PAC_info::COMMANDS::RELOAD_RESTRICTIONS:
+                case PAC_info::COMMANDS::RESET_PARAMS:
+                case PAC_info::COMMANDS::FORCE_SAVE_PARAMS:
+                    break;
+                default:
+                    return write_response(
+                        R"({"ok":false,"error":"Unknown controller command"})",
+                        outdata );
+                }
+
+            const int result = G_PAC_INFO()->set_cmd(
+                "CMD", 0, static_cast<double>( command_id ) );
+            const std::string response = std::string( R"({"ok":)" ) +
+                ( result == 0 ? "true" : "false" ) +
+                R"(,"command":)" + std::to_string( command_id ) +
+                R"(,"result":)" + std::to_string( result ) +
+                R"(,"queued":)" +
+                ( controller_command == PAC_info::COMMANDS::FORCE_SAVE_PARAMS &&
+                    result == 0 ? "true" : "false" ) +
+                ( result == 0 ? "}" :
+                    R"(,"error":"Controller command failed"})" );
             return write_response( response, outdata );
             }
         default:

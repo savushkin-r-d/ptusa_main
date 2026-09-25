@@ -1,7 +1,9 @@
 import json
 import struct
 
-from ptusa_lua_debugger.protocol import Command, DebuggerProtocol
+from ptusa_lua_debugger.protocol import Command, DebuggerProtocol, ProtocolError
+
+import pytest
 
 
 def response(packet_id: int, document: dict) -> bytes:
@@ -143,3 +145,32 @@ def test_poll_uses_one_request_for_chart_and_messages() -> None:
     assert len(fake.sent) == 6 + 1 + len("session1\n")
     assert data["events"]["controller_time_unix_ms"] == 1000
     assert data["controller_time_millisec"] == 50
+
+
+def test_controller_command_uses_debugger_session() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": True, "command": 102, "result": 0, "queued": True,
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    assert client.execute_controller_command(102)["queued"] is True
+    _, service, frame_type, packet_id, length = struct.unpack(">cBBBH", fake.sent[:6])
+    assert (service, frame_type, packet_id) == (2, 1, 1)
+    assert fake.sent[6 : 6 + length] == (
+        bytes((Command.EXEC_CONTROLLER_COMMAND,)) + b"session1\n102"
+    )
+
+
+def test_controller_command_reports_controller_failure() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": False, "command": 100, "result": 1,
+        "error": "Controller command failed",
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    with pytest.raises(ProtocolError, match="Controller command failed"):
+        client.execute_controller_command(100)

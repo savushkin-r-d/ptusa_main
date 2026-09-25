@@ -11,6 +11,7 @@ class DebuggerWorker(QObject):
     chart_data = Signal(dict)
     messages = Signal(dict)
     evaluated = Signal(str, dict)
+    command_executed = Signal(int, dict)
     error = Signal(str)
 
     def __init__(self) -> None:
@@ -60,6 +61,17 @@ class DebuggerWorker(QObject):
             return
         try:
             self.evaluated.emit(expression, self._client.evaluate(expression))
+        except (OSError, ProtocolError) as exc:
+            self.error.emit(str(exc))
+
+    @Slot(int)
+    def execute_controller_command(self, command_id: int) -> None:
+        if not self._client.connected:
+            self.error.emit("Нет подключения к контроллеру")
+            return
+        try:
+            response = self._client.execute_controller_command(command_id)
+            self.command_executed.emit(command_id, response)
         except (OSError, ProtocolError) as exc:
             self.error.emit(str(exc))
 

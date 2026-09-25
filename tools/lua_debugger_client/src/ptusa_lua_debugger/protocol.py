@@ -17,6 +17,7 @@ class Command(IntEnum):
     KEEP_ALIVE = 7
     GET_MESSAGES = 8
     POLL = 9
+    EXEC_CONTROLLER_COMMAND = 10
 
 
 class ProtocolError(RuntimeError):
@@ -98,6 +99,11 @@ class DebuggerProtocol:
 
     def evaluate(self, expression: str) -> dict[str, Any]:
         return self._request(Command.EVALUATE, expression)
+
+    def execute_controller_command(self, command_id: int) -> dict[str, Any]:
+        response = self._request(Command.EXEC_CONTROLLER_COMMAND, str(command_id))
+        self._ensure_ok(response)
+        return response
 
     def set_expressions(self, expressions: list[str]) -> dict[str, Any]:
         response = self._request(
