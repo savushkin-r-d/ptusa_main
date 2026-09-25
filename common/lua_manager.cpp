@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
 bool lua_manager::is_print_stack_traceback = true;
+int lua_manager::lua_error_count = 0;
 //-----------------------------------------------------------------------------
 #ifdef PTUSA_TEST
 void lua_manager::set_Lua( lua_State* l )
@@ -535,6 +536,8 @@ int lua_manager::error_trace( lua_State * L )
 
     std::string err_str = lua_tostring( L, -1 );
     lua_pop( L, 1 );
+
+    lua_error_count++;
 
     if ( std::binary_search( errors.begin(), errors.end(), err_str ) != true )
         {
