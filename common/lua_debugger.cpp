@@ -538,6 +538,8 @@ long lua_debugger::process_service( long len, unsigned char* data,
                 case PAC_info::COMMANDS::RELOAD_RESTRICTIONS:
                 case PAC_info::COMMANDS::RESET_PARAMS:
                 case PAC_info::COMMANDS::FORCE_SAVE_PARAMS:
+                case PAC_info::COMMANDS::PHOENIX_MODBUS_UDP_ON:
+                case PAC_info::COMMANDS::PHOENIX_MODBUS_UDP_OFF:
                     break;
                 default:
                     return write_response(

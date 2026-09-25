@@ -160,11 +160,9 @@ TEST( uni_io_exchange, fragmented_response_is_complete_before_publication )
     io_peer peer( manager, *node, [&]( int socket, const bytes& request, int )
         {
         const auto response = reply_to( request );
-        for ( size_t i = 0; i < response.size(); ++i )
-            {
-            send_bytes( socket, response, i, 1 );
-            std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-            }
+        send_bytes( socket, response, 0, 6 );
+        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+        send_bytes( socket, response, 6 );
         }, 2 );
     ASSERT_EQ( 0, manager.read_inputs() );
     EXPECT_EQ( 0x0101, node->AI[0] );
@@ -203,6 +201,7 @@ TEST( uni_io_exchange, independent_nodes_overlap_but_each_phase_waits_for_acknow
     std::array<std::atomic<int>, 4> arrivals{};
     auto respond = [&]( int socket, const bytes& request, int index )
         {
+        EXPECT_EQ( index + 1, request[0] * 256 + request[1] );
         ++arrivals[index];
         const auto deadline = steady::now() + std::chrono::milliseconds( 180 );
         while ( arrivals[index] != 2 && steady::now() < deadline )
@@ -333,4 +332,200 @@ TEST( uni_io_exchange, phoenix_blocks_remain_ordered_and_status_is_read_last )
     EXPECT_EQ( 0x0101, node->AI[123] );
     ASSERT_EQ( 0, manager.write_outputs() );
     EXPECT_EQ( 5, peer.requests );
+    }
+
+TEST( uni_io_exchange, phoenix_udp_recovers_after_loss_and_discards_invalid_datagrams )
+    {
+#ifdef WIN_OS
+    WSADATA winsock;
+    ASSERT_EQ( 0, WSAStartup( MAKEWORD( 2, 2 ), &winsock ) );
+#endif
+    uni_io_manager manager;
+    manager.init( 1 );
+    auto* node = add_io_node( manager, 0, io_manager::io_node::PHOENIX_BK_ETH );
+    const int server = static_cast<int>( socket( AF_INET, SOCK_DGRAM, 0 ) );
+    ASSERT_GE( server, 0 );
+    sockaddr_in address{};
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl( INADDR_LOOPBACK );
+    ASSERT_EQ( 0, bind( server, reinterpret_cast<sockaddr*>( &address ), sizeof( address ) ) );
+#ifdef WIN_OS
+    int address_length = sizeof( address );
+#else
+    socklen_t address_length = sizeof( address );
+#endif
+    ASSERT_EQ( 0, getsockname( server, reinterpret_cast<sockaddr*>( &address ),
+        &address_length ) );
+    node->sock = static_cast<int>( socket( AF_INET, SOCK_DGRAM, 0 ) );
+    ASSERT_GE( node->sock, 0 );
+    ASSERT_EQ( 0, connect( node->sock, reinterpret_cast<sockaddr*>( &address ),
+        sizeof( address ) ) );
+#ifdef WIN_OS
+    u_long nonblocking = 1;
+    ASSERT_EQ( 0, ioctlsocket( node->sock, FIONBIO, &nonblocking ) );
+#else
+    ASSERT_EQ( 0, fcntl( node->sock, F_SETFL, O_NONBLOCK ) );
+#endif
+    node->state = io_manager::io_node::ST_OK;
+    node->last_poll_time = get_millisec();
+    G_PAC_INFO()->par[PAC_info::P_BK_ANSWER_MAX_WAIT_TIME] = 10000;
+    G_PAC_INFO()->set_phoenix_modbus_udp( true );
+    manager.phoenix_udp_active = true;
+    node->modbus_transaction_id = 65534;
+    const int original_socket = node->sock;
+    // Leave the first request unanswered. The next cycle must poll immediately
+    // on the same socket, without the TCP reconnect delay.
+    EXPECT_NE( 0, manager.read_inputs() );
+    EXPECT_EQ( io_manager::io_node::ST_OK, node->state );
+    EXPECT_EQ( original_socket, node->sock );
+    EXPECT_TRUE( node->read_io_error_flag );
+    std::atomic<int> requests{ 0 };
+    std::thread peer( [&]()
+        {
+        uint16_t previous_transaction = 0;
+        for ( int index = 0; index < 9; ++index )
+            {
+            fd_set reads;
+            FD_ZERO( &reads );
+            FD_SET( server, &reads );
+            timeval timeout{ 1, 0 };
+            if ( select( server + 1, &reads, nullptr, nullptr, &timeout ) <= 0 ) break;
+            bytes request( 262 );
+            sockaddr_in client{};
+#ifdef WIN_OS
+            int client_length = sizeof( client );
+#else
+            socklen_t client_length = sizeof( client );
+#endif
+            const int n = recvfrom( server,
+                reinterpret_cast<char*>( request.data() ),
+                static_cast<int>( request.size() ), 0,
+                reinterpret_cast<sockaddr*>( &client ), &client_length );
+            if ( n < 12 ) break;
+            request.resize( n );
+            const auto transaction = static_cast<uint16_t>(
+                request[0] * 256 + request[1] );
+            if ( index == 0 ) EXPECT_EQ( 65535, transaction );
+            if ( index > 0 ) EXPECT_EQ(
+                static_cast<uint16_t>( previous_transaction + 1 ), transaction );
+            previous_transaction = transaction;
+            ++requests;
+            if ( index == 6 ) continue; // Lose only the status reply.
+            auto response = reply_to( request );
+            if ( index > 0 && index % 2 == 0 )
+                std::fill( response.begin() + 9, response.end(), 0 );
+            if ( index == 1 )
+                {
+                auto send_datagram = [&]( const bytes& data )
+                    {
+                    sendto( server, reinterpret_cast<const char*>( data.data() ),
+                        static_cast<int>( data.size() ), 0,
+                        reinterpret_cast<sockaddr*>( &client ), client_length );
+                    };
+                auto stale = response;
+                stale[1] ^= 1;
+                send_datagram( stale );
+                sendto( server, "", 0, 0,
+                    reinterpret_cast<sockaddr*>( &client ), client_length );
+                auto invalid = response;
+                invalid[2] = 1; // Incorrect protocol with a matching transaction.
+                send_datagram( invalid );
+                invalid = response;
+                invalid[6] ^= 1; // Wrong Unit ID.
+                send_datagram( invalid );
+                invalid = response;
+                invalid[8] = 0; // Wrong byte count.
+                send_datagram( invalid );
+                invalid = response;
+                invalid.resize( 2048 ); // Oversized datagram (WSAEMSGSIZE on Windows).
+                send_datagram( invalid );
+                }
+            sendto( server, reinterpret_cast<const char*>( response.data() ),
+                static_cast<int>( response.size() ), 0,
+                reinterpret_cast<sockaddr*>( &client ), client_length );
+            }
+        } );
+    EXPECT_EQ( 0, manager.read_inputs() );
+    EXPECT_EQ( 0x0101, node->AI[0] );
+    EXPECT_EQ( std::chrono::milliseconds( 25 ),
+        manager.phase_exchanges[0].deadline -
+        manager.phase_exchanges[0].sent_at );
+    EXPECT_EQ( 0, G_PAC_INFO()->set_phoenix_modbus_udp_timeout_ms( 40 ) );
+    EXPECT_EQ( 0, manager.read_inputs() );
+    EXPECT_EQ( std::chrono::milliseconds( 40 ),
+        manager.phase_exchanges[0].deadline -
+        manager.phase_exchanges[0].sent_at );
+    EXPECT_FALSE( node->read_io_error_flag );
+    EXPECT_EQ( 5, requests );
+    EXPECT_NE( 0, manager.read_inputs() );
+    EXPECT_TRUE( node->read_io_error_flag );
+    EXPECT_EQ( 1, manager.write_outputs() ); // No output after incomplete read.
+    EXPECT_EQ( 7, requests );
+    EXPECT_EQ( original_socket, node->sock );
+    EXPECT_EQ( 0, manager.read_inputs() );
+    EXPECT_FALSE( node->read_io_error_flag );
+    EXPECT_EQ( 9, requests );
+    manager.disconnect( node );
+    peer.join();
+    close_peer( server );
+    G_PAC_INFO()->set_phoenix_modbus_udp( false );
+    G_PAC_INFO()->set_phoenix_modbus_udp_timeout_ms( 25 );
+#ifdef WIN_OS
+    WSACleanup();
+#endif
+    }
+
+TEST( uni_io_exchange, phoenix_udp_net_init_creates_datagram_socket )
+    {
+    uni_io_manager manager;
+    manager.init( 1 );
+    auto* node = add_io_node( manager, 0, io_manager::io_node::PHOENIX_BK_ETH );
+    G_PAC_INFO()->set_phoenix_modbus_udp( true );
+    manager.sync_phoenix_transport();
+    EXPECT_EQ( 0, manager.net_init( node ) );
+    EXPECT_EQ( io_manager::io_node::ST_OK, node->state );
+    int type = 0;
+#ifdef WIN_OS
+    int length = sizeof( type );
+#else
+    socklen_t length = sizeof( type );
+#endif
+    EXPECT_EQ( 0, getsockopt( node->sock, SOL_SOCKET, SO_TYPE,
+        reinterpret_cast<char*>( &type ), &length ) );
+    EXPECT_EQ( SOCK_DGRAM, type );
+    manager.disconnect( node );
+    G_PAC_INFO()->set_phoenix_modbus_udp( false );
+#ifdef WIN_OS
+    WSACleanup();
+#endif
+    }
+
+TEST( uni_io_exchange, switching_phoenix_transport_reopens_only_phoenix_sockets )
+    {
+#ifdef WIN_OS
+    WSADATA winsock;
+    ASSERT_EQ( 0, WSAStartup( MAKEWORD( 2, 2 ), &winsock ) );
+#endif
+    uni_io_manager manager;
+    manager.init( 2 );
+    auto* phoenix = add_io_node( manager, 0, io_manager::io_node::PHOENIX_BK_ETH );
+    auto* wago = add_io_node( manager, 1 );
+    phoenix->sock = static_cast<int>( socket( AF_INET, SOCK_STREAM, 0 ) );
+    wago->sock = static_cast<int>( socket( AF_INET, SOCK_STREAM, 0 ) );
+    ASSERT_GE( phoenix->sock, 0 );
+    ASSERT_GE( wago->sock, 0 );
+    phoenix->state = io_manager::io_node::ST_OK;
+    wago->state = io_manager::io_node::ST_OK;
+    const int wago_socket = wago->sock;
+    G_PAC_INFO()->set_phoenix_modbus_udp( true );
+    manager.sync_phoenix_transport();
+    EXPECT_TRUE( manager.phoenix_udp_active );
+    EXPECT_EQ( io_manager::io_node::ST_NO_CONNECT, phoenix->state );
+    EXPECT_EQ( io_manager::io_node::ST_OK, wago->state );
+    EXPECT_EQ( wago_socket, wago->sock );
+    manager.disconnect( wago );
+    G_PAC_INFO()->set_phoenix_modbus_udp( false );
+#ifdef WIN_OS
+    WSACleanup();
+#endif
     }

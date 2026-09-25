@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Sep 16 15:16:21 2026.
+** Generated automatically by tolua++-1.0.92 on Fri Sep 25 17:27:40 2026.
 */
 
 #ifndef __cplusplus
@@ -9076,6 +9076,137 @@ static int tolua_PAC_dev_PAC_info_is_emulator00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: is_phoenix_modbus_udp of class  PAC_info */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PAC_info_is_phoenix_modbus_udp00
+static int tolua_PAC_dev_PAC_info_is_phoenix_modbus_udp00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const PAC_info",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const PAC_info* self = (const PAC_info*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_phoenix_modbus_udp'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_phoenix_modbus_udp();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_phoenix_modbus_udp'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_phoenix_modbus_udp of class  PAC_info */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp00
+static int tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"PAC_info",0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  PAC_info* self = (PAC_info*)  tolua_tousertype(tolua_S,1,0);
+  bool enabled = ((bool)  tolua_toboolean(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_phoenix_modbus_udp'", NULL);
+#endif
+  {
+   self->set_phoenix_modbus_udp(enabled);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_phoenix_modbus_udp'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_phoenix_modbus_udp_timeout_ms of class  PAC_info */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PAC_info_get_phoenix_modbus_udp_timeout_ms00
+static int tolua_PAC_dev_PAC_info_get_phoenix_modbus_udp_timeout_ms00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const PAC_info",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const PAC_info* self = (const PAC_info*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_phoenix_modbus_udp_timeout_ms'", NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->get_phoenix_modbus_udp_timeout_ms();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_phoenix_modbus_udp_timeout_ms'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_phoenix_modbus_udp_timeout_ms of class  PAC_info */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp_timeout_ms00
+static int tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp_timeout_ms00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"PAC_info",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  PAC_info* self = (PAC_info*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int timeout_ms = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_phoenix_modbus_udp_timeout_ms'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_phoenix_modbus_udp_timeout_ms(timeout_ms);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_phoenix_modbus_udp_timeout_ms'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: init of class  siren_lights_manager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_siren_lights_manager_init00
 static int tolua_PAC_dev_siren_lights_manager_init00(lua_State* tolua_S)
@@ -16210,6 +16341,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"par",tolua_get_PAC_info_par,tolua_set_PAC_info_par);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PAC_info_set_cmd00);
    tolua_function(tolua_S,"is_emulator",tolua_PAC_dev_PAC_info_is_emulator00);
+   tolua_function(tolua_S,"is_phoenix_modbus_udp",tolua_PAC_dev_PAC_info_is_phoenix_modbus_udp00);
+   tolua_function(tolua_S,"set_phoenix_modbus_udp",tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp00);
+   tolua_function(tolua_S,"get_phoenix_modbus_udp_timeout_ms",tolua_PAC_dev_PAC_info_get_phoenix_modbus_udp_timeout_ms00);
+   tolua_function(tolua_S,"set_phoenix_modbus_udp_timeout_ms",tolua_PAC_dev_PAC_info_set_phoenix_modbus_udp_timeout_ms00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"siren_lights_manager","siren_lights_manager","",NULL);
   tolua_beginmodule(tolua_S,"siren_lights_manager");

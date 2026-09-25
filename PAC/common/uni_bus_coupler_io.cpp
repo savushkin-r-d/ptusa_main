@@ -157,7 +157,10 @@ namespace
 void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
     {
     using clock = std::chrono::steady_clock;
-    auto finish = [&]( exchange& item, int result )
+    sync_phoenix_transport();
+    auto is_udp = [&]( const exchange& item )
+        { return phoenix_udp_active && item.node->type == io_node::PHOENIX_BK_ETH; };
+    auto finish = [&]( exchange& item, int result, bool close_socket = true )
         {
         item.result = result;
         item.done = true;
@@ -175,7 +178,7 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
                 result == -103 ? "invalid Modbus frame" :
                 result == -101 ? "send error or deadline exceeded" :
                 "receive error or deadline exceeded" );
-            disconnect( item.node );
+            if ( close_socket ) disconnect( item.node );
             }
         if ( result == 0 ) item.node->last_poll_time = get_millisec();
         };
@@ -219,8 +222,9 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
 #endif
                 // select's Windows fd_set has a fixed capacity. Remaining nodes
                 // are admitted after an active slot is released.
-                item.request[0] = static_cast<u_char>( ++transaction_id >> 8 );
-                item.request[1] = static_cast<u_char>( transaction_id );
+                const auto transaction = ++item.node->modbus_transaction_id;
+                item.request[0] = static_cast<u_char>( transaction >> 8 );
+                item.request[1] = static_cast<u_char>( transaction );
                 item.started = true;
                 ++admitted;
                 item.started_at = clock::now();
@@ -228,7 +232,12 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
                     io_node::C_RCV_TIMEOUT_SEC * 1000000 + io_node::C_RCV_TIMEOUT_US );
                 }
             if ( clock::now() >= item.deadline )
-                { finish( item, item.sent == item.send_size ? -102 : -101 ); continue; }
+                {
+                // Packet loss does not invalidate a UDP socket. Report this
+                // exchange as failed, then send fresh data on the next cycle.
+                finish( item, item.sent == item.send_size ? -102 : -101, !is_udp( item ) );
+                continue;
+                }
             if ( item.sent < item.send_size ) FD_SET( item.node->sock, &writes );
             else FD_SET( item.node->sock, &reads );
             max_socket = (std::max)( max_socket, item.node->sock );
@@ -258,7 +267,10 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
             {
             if ( !item.started || item.done ) continue;
             if ( clock::now() >= item.deadline )
-                { finish( item, item.sent == item.send_size ? -102 : -101 ); continue; }
+                {
+                finish( item, item.sent == item.send_size ? -102 : -101, !is_udp( item ) );
+                continue;
+                }
             if ( item.sent < item.send_size && FD_ISSET( item.node->sock, &writes ) )
                 {
                 const int n = send( item.node->sock,
@@ -271,31 +283,65 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
 #endif
                 );
                 if ( n < 0 && io_would_retry() ) continue;
-                if ( n <= 0 ) { finish( item, -101 ); continue; }
+                if ( n <= 0 || ( phoenix_udp_active &&
+                    item.node->type == io_node::PHOENIX_BK_ETH &&
+                    n != item.send_size ) )
+                    { finish( item, -101 ); continue; }
                 item.sent += n;
                 if ( item.sent == item.send_size )
                     {
                     item.sent_at = clock::now();
+                    if ( phoenix_udp_active &&
+                        item.node->type == io_node::PHOENIX_BK_ETH )
+                        item.deadline = item.sent_at + std::chrono::milliseconds(
+                            G_PAC_INFO()->get_phoenix_modbus_udp_timeout_ms() );
                     record_io_time( item.node->send_stat, item.sent_at - item.started_at, *item.node, "send" );
                     }
                 }
             if ( item.sent == item.send_size && FD_ISSET( item.node->sock, &reads ) )
                 {
+                const bool udp = is_udp( item );
                 const int n = recv( item.node->sock,
                     reinterpret_cast<char*>( item.response.data() ) + item.received,
-                    item.frame_size - item.received, 0 );
+                    udp ? BUFF_SIZE : item.frame_size - item.received,
+#ifdef WIN_OS
+                    0
+#else
+                    udp ? MSG_TRUNC : 0
+#endif
+                    );
                 if ( n < 0 && io_would_retry() ) continue;
+#ifdef WIN_OS
+                // Winsock consumes an oversized datagram and reports this error.
+                if ( udp && n < 0 && WSAGetLastError() == WSAEMSGSIZE ) continue;
+#endif
+                if ( udp && ( n == 0 || n > BUFF_SIZE ) ) continue;
                 if ( n <= 0 ) { finish( item, -102 ); continue; }
-                item.received += n;
-                if ( item.received < item.frame_size ) continue;
-                if ( item.frame_size == 6 )
+                if ( udp )
                     {
-                    item.frame_size = 6 + item.response[4] * 256 + item.response[5];
-                    if ( item.frame_size < 9 || item.frame_size > BUFF_SIZE ||
-                        item.response[0] != item.request[0] || item.response[1] != item.request[1] ||
-                        item.response[2] != 0 || item.response[3] != 0 )
-                        finish( item, -103 );
-                    continue;
+                    // A connected UDP socket filters foreign peers. Old replies can
+                    // still arrive after a timeout, so discard them by transaction ID.
+                    if ( n < 2 || item.response[0] != item.request[0] ||
+                        item.response[1] != item.request[1] ) continue;
+                    if ( n < 9 || item.response[2] != 0 || item.response[3] != 0 ||
+                        6 + item.response[4] * 256 + item.response[5] != n )
+                        continue;
+                    item.received = n;
+                    item.frame_size = n;
+                    }
+                else
+                    {
+                    item.received += n;
+                    if ( item.received < item.frame_size ) continue;
+                    if ( item.frame_size == 6 )
+                        {
+                        item.frame_size = 6 + item.response[4] * 256 + item.response[5];
+                        if ( item.frame_size < 9 || item.frame_size > BUFF_SIZE ||
+                            item.response[0] != item.request[0] || item.response[1] != item.request[1] ||
+                            item.response[2] != 0 || item.response[3] != 0 )
+                            finish( item, -103 );
+                        continue;
+                        }
                     }
                 const auto function = item.request[7];
                 const bool exception = item.response[7] == ( function | 0x80 );
@@ -310,10 +356,32 @@ void uni_io_manager::run_exchanges( std::vector<exchange>& exchanges )
                         valid = std::equal( item.request.begin() + 8,
                             item.request.begin() + 12, item.response.begin() + 8 );
                     }
+                if ( udp && !valid )
+                    {
+                    // Discard an invalid datagram without extending the deadline.
+                    item.received = 0;
+                    item.frame_size = 6;
+                    continue;
+                    }
                 finish( item, valid ? 0 : -103 );
                 }
             }
         }
+    }
+
+void uni_io_manager::sync_phoenix_transport()
+    {
+    const bool desired = G_PAC_INFO()->is_phoenix_modbus_udp();
+    if ( desired == phoenix_udp_active ) return;
+    // Recreate only PHOENIX sockets at the next exchange boundary. Other
+    // couplers keep their TCP sessions and their current polling state.
+    for ( unsigned int i = 0; i < nodes_count; ++i )
+        if ( nodes[i]->type == io_node::PHOENIX_BK_ETH )
+            {
+            disconnect( nodes[i] );
+            nodes[i]->last_init_time = get_millisec() - nodes[i]->delay_time;
+            }
+    phoenix_udp_active = desired;
     }
 
 int uni_io_manager::e_communicate( io_node* node, int bytes_to_send, int bytes_to_receive )
@@ -380,7 +448,9 @@ int uni_io_manager::net_init( io_node* node ) const
             }
 #endif // WIN_OS
 
-        int type = SOCK_STREAM;
+        const bool udp = phoenix_udp_active &&
+            node->type == io_node::PHOENIX_BK_ETH;
+        int type = udp ? SOCK_DGRAM : SOCK_STREAM;
         int protocol = 0; /* всегда 0 */
         int err;
         sock = socket( AF_INET, type, protocol ); // Cоздание сокета.
@@ -520,6 +590,13 @@ int uni_io_manager::net_init( io_node* node ) const
             return 6;
             }
         node->sock = sock;
+        if ( udp && err == 0 )
+            {
+            node->state = io_node::ST_OK;
+            G_LOG->debug( "uni_io_manager:net_init(): UDP socket %d for '%s' (%s).",
+                sock, node->name, node->ip_address );
+            return 0;
+            }
         node->state = io_node::ST_CONNECTING;
         }
 
@@ -1170,14 +1247,19 @@ int uni_io_manager::read_inputs()
                 } // if (nd->AI_cnt > 0)
 
             // Read Status Register (7996) for PP mode detection.
-            read_phoenix_status_register( nd );
+            if ( !read_phoenix_status_register( nd ) )
+                {
+                nd->read_io_error_flag = true;
+                res = 1;
+                }
+            else if ( nd->AI_cnt == 0 ) nd->read_io_error_flag = false;
             }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return res;
     }
 //-----------------------------------------------------------------------------
-void uni_io_manager::read_phoenix_status_register( io_node* nd )
+bool uni_io_manager::read_phoenix_status_register( io_node* nd )
     {
     if ( auto result = read_input_registers( nd, PHOENIX_STATUS_REGISTER_ADDRESS,
         2 ); result <= 0 )
@@ -1188,7 +1270,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
             PHOENIX_STATUS_REGISTER_ADDRESS,
             PHOENIX_DIAGNOSTIC_STATUS_REGISTER_ADDRESS, nd->name );
 #endif // DEBUG_BK
-        return;
+        return false;
         }
 
     nd->status_register = static_cast<u_int_2>(
@@ -1248,6 +1330,7 @@ void uni_io_manager::read_phoenix_status_register( io_node* nd )
 
     nd->prev_status_register = nd->status_register;
     nd->prev_diagnostic_status_register = nd->diagnostic_status_register;
+    return true;
     }
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )

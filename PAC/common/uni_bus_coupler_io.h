@@ -69,7 +69,9 @@ class uni_io_manager : public io_manager
             };
         std::vector<exchange> phase_exchanges;
         bool phase_active = false, phase_executed = false;
-        uint16_t transaction_id = 0;
+        bool phoenix_udp_active = false;
+
+        void sync_phoenix_transport();
 
         // The phase remains synchronous; only socket waits overlap.
         void prepare_phase( bool writing );
@@ -119,7 +121,7 @@ class uni_io_manager : public io_manager
         /// @brief Read status register for Phoenix BK ETH nodes.
         ///
         /// @param nd - node to read status register from.
-        void read_phoenix_status_register( io_node* nd );
+        bool read_phoenix_status_register( io_node* nd );
 
     public:
         struct phase_timing

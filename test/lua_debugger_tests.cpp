@@ -8,6 +8,7 @@
 #include "lua_manager.h"
 #include "log.h"
 #include "g_errors.h"
+#include "PAC_info.h"
 #include "tech_def.h"
 
 namespace
@@ -136,6 +137,12 @@ TEST_F( lua_debugger_test, evaluates_lua_expression )
 
 TEST_F( lua_debugger_test, executes_known_controller_commands )
     {
+    EXPECT_EQ( R"({"ok":true,"command":103,"result":0,"queued":false})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "103" ) );
+    EXPECT_TRUE( G_PAC_INFO()->is_phoenix_modbus_udp() );
+    EXPECT_EQ( R"({"ok":true,"command":104,"result":0,"queued":false})",
+        request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "104" ) );
+    EXPECT_FALSE( G_PAC_INFO()->is_phoenix_modbus_udp() );
     EXPECT_EQ( R"({"ok":true,"command":102,"result":0,"queued":true})",
         request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, "102" ) );
     EXPECT_EQ( R"({"ok":true,"command":0,"result":0,"queued":false})",

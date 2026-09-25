@@ -1795,6 +1795,10 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, unsigned int idx, double val );
         bool is_emulator();
+        bool is_phoenix_modbus_udp() const;
+        void set_phoenix_modbus_udp( bool enabled );
+        unsigned int get_phoenix_modbus_udp_timeout_ms() const;
+        int set_phoenix_modbus_udp_timeout_ms( unsigned int timeout_ms );
     };
 //----------------------------------------------------------------------------
 class siren_lights_manager
