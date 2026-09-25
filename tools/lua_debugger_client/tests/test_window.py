@@ -8,6 +8,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtWidgets import QApplication
 
 from ptusa_lua_debugger.window import DebuggerSessionWidget, MainWindow
+from ptusa_lua_debugger.pulse_counter import PulseDefinition
 
 
 @pytest.mark.parametrize("chart_type, expected_x, expected_y", [
@@ -173,6 +174,64 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         session._remove_expressions()
         assert session._expressions() == []
         assert session.plot.listDataItems() == []
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
+
+
+def test_pulse_counter_is_plotted_and_restored(tmp_path) -> None:
+    from ptusa_lua_debugger.session_store import load_session, save_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        definition = PulseDefinition("Партия", "left", "right", 1, 1)
+        session._pulse_counters.add(definition)
+        session._create_expression("left", history_enabled=True, style={"offset": -0.5})
+        session._create_expression("right", history_enabled=True, style={"offset": 1.5})
+        session._create_expression(definition.expression, history_enabled=True)
+        data = {
+            "server_time_ms": 1040,
+            "controller_time_unix_ms": 10_000,
+            "controller_time_millisec": 1000,
+            "series": [
+                {"expression": "left", "samples": [
+                    {"time_ms": time, "ok": True, "type": "number", "value": value}
+                    for time, value in [(1000, 0), (1010, 1), (1020, 0), (1030, 1)]
+                ]},
+                {"expression": "right", "samples": [
+                    {"time_ms": 1000, "ok": True, "type": "number", "value": 0},
+                    {"time_ms": 1040, "ok": True, "type": "number", "value": 1},
+                ]},
+            ],
+        }
+        session._on_chart_data(data)
+        assert session._expressions() == ["left", "right"]
+        assert [s["value"] for s in session._last_chart_data["series"][-1]["samples"]] == [2]
+        assert session.variables.topLevelItem(2).text(2) == "2"
+        assert definition.expression in session.history_model.expressions
+        assert any(curve.name() == definition.expression for curve in session.plot.listDataItems())
+        path = tmp_path / "pulse.ptlua.json"
+        save_session(path, host="localhost", port=10000, poll_interval_ms=500,
+                     history_limit=5000, expressions=session._expressions(),
+                     history_expressions=session._history_expressions(),
+                     chart_data=session._last_chart_data, statistics=session._statistics,
+                     series_styles=session._series_styles(),
+                     pulse_definitions=[vars(definition)],
+                     pulse_state=session._pulse_counters.snapshot())
+        restored.load_document(load_session(path))
+        assert restored._pulse_counters.states[definition.expression].count == 0
+        assert restored._expressions() == ["left", "right"]
+        assert any(curve.name() == definition.expression for curve in restored.plot.listDataItems())
+        # Removing a source also removes the computed value that uses it.
+        restored.variables.topLevelItem(0).setSelected(True)
+        restored._remove_expressions()
+        assert definition.expression not in restored._pulse_counters.definitions
+        assert restored._expressions() == ["right"]
     finally:
         session.shutdown()
         restored.shutdown()

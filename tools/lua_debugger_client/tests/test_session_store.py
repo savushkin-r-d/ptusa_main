@@ -2,6 +2,20 @@ from ptusa_lua_debugger.session_store import load_session, save_session
 import pytest
 
 
+def test_pending_burst_roundtrip(tmp_path):
+    path = tmp_path / "pending.json"
+    expression = "[Импульсы] Левый"
+    state = {"count": 12, "values": {}, "last_samples": {}}
+    save_session(path, host="localhost", port=10000, poll_interval_ms=500,
+                 history_limit=5000, expressions=["left", "right"],
+                 history_expressions=[expression], chart_data=None,
+                 pulse_definitions=[{"name": "Левый", "source": "left",
+                                     "dependent": "right", "source_value": 1,
+                                     "dependent_value": 1}],
+                 pulse_state={expression: state})
+    assert load_session(path)["pulse_state"][expression]["count"] == 12
+
+
 @pytest.mark.parametrize("invalid_type", ["spline", None, [], 42])
 def test_invalid_chart_type_is_rejected(tmp_path, invalid_type) -> None:
     path = tmp_path / "invalid.json"

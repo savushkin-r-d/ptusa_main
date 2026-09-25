@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Any
 
@@ -12,6 +13,8 @@ from PySide6.QtWidgets import (
     QComboBox,
     QColorDialog,
     QDoubleSpinBox,
+    QDialog,
+    QFormLayout,
     QTreeWidget,
     QTreeWidgetItem,
     QFileDialog,
@@ -47,6 +50,7 @@ from .history import (
     trim_chart_data,
 )
 from .history_table import HistoryTableModel
+from .pulse_counter import PulseCounters, PulseDefinition
 from .session_store import load_session, save_session
 from .worker import DebuggerWorker
 
@@ -66,6 +70,7 @@ class DebuggerSessionWidget(QWidget):
         self._shutting_down = False
         self._last_chart_data: dict[str, Any] | None = None
         self._statistics: dict[str, dict[str, Any]] = {}
+        self._pulse_counters = PulseCounters()
 
         self._thread = QThread(self)
         self._worker = DebuggerWorker()
@@ -141,6 +146,8 @@ class DebuggerSessionWidget(QWidget):
         self.expression_edit.returnPressed.connect(self._add_expression)
         add_button = QPushButton("Добавить")
         add_button.clicked.connect(self._add_expression)
+        pulse_button = QPushButton("Счётчик импульсов…")
+        pulse_button.clicked.connect(self._add_pulse_counter)
         remove_button = QPushButton("Удалить")
         remove_button.clicked.connect(self._remove_expressions)
         apply_button = QPushButton("Применить")
@@ -150,6 +157,7 @@ class DebuggerSessionWidget(QWidget):
 
         expression_buttons = QHBoxLayout()
         expression_buttons.addWidget(add_button)
+        expression_buttons.addWidget(pulse_button)
         expression_buttons.addWidget(remove_button)
         expression_buttons.addWidget(apply_button)
         expression_buttons.addWidget(clear_button)
@@ -284,12 +292,67 @@ class DebuggerSessionWidget(QWidget):
         expression = self.expression_edit.text().strip()
         if not expression:
             return
-        if expression in self._expressions():
+        if expression in [item.text(0) for item in self._expression_items()]:
             self.expression_edit.clear()
             return
         self._create_expression(expression)
         self.expression_edit.clear()
         self._apply_expressions()
+
+    @Slot()
+    def _add_pulse_counter(self) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Счётчик импульсов")
+        form = QFormLayout(dialog)
+        name = QLineEdit()
+        name.setPlaceholderText("Например: левый датчик")
+        source = QComboBox()
+        dependent = QComboBox()
+        for combo in (source, dependent):
+            combo.setEditable(True)
+            combo.addItems(self._expressions())
+            combo.setCurrentText("")
+        source_value = QLineEdit("1")
+        dependent_value = QLineEdit("1")
+        for edit in (source_value, dependent_value):
+            edit.setToolTip('Число, true/false или строка в кавычках, например "RUN"')
+        form.addRow("Имя", name)
+        form.addRow("Считаемый датчик", source)
+        form.addRow("Её значение", source_value)
+        form.addRow("Ведомый датчик", dependent)
+        form.addRow("Её значение", dependent_value)
+        form.addRow(QLabel("Первый импульс ведомого датчика фиксирует число импульсов\n"
+                           "считаемого датчика. График показывает итог последней серии.\n"
+                           "Указывайте значения датчиков без сдвига линии по Y."))
+        create = QPushButton("Создать")
+        form.addRow(create)
+
+        def accept() -> None:
+            try:
+                definition = PulseDefinition(
+                    name.text().strip(), source.currentText().strip(),
+                    dependent.currentText().strip(), json.loads(source_value.text()),
+                    json.loads(dependent_value.text()),
+                )
+                if definition.expression in [item.text(0) for item in self._expression_items()]:
+                    raise ValueError("Такое имя уже есть в списке величин")
+                self._pulse_counters.add(definition)
+            except (ValueError, json.JSONDecodeError) as exc:
+                QMessageBox.warning(dialog, "Счётчик импульсов", str(exc))
+                return
+            for expression in (definition.source, definition.dependent):
+                if expression not in self._expressions():
+                    self._create_expression(expression, history_enabled=True)
+            self._create_expression(definition.expression, history_enabled=True,
+                                    style={"points": True})
+            if self._last_chart_data is not None:
+                self._pulse_counters.seed(
+                    definition.expression, self._last_chart_data)
+            self._apply_expressions()
+            dialog.accept()
+
+        create.clicked.connect(accept)
+        dialog.exec()
 
     @Slot()
     def _remove_expressions(self) -> None:
@@ -298,7 +361,15 @@ class DebuggerSessionWidget(QWidget):
             while item.parent() is not None:
                 item = item.parent()
             items.add(item)
+        removed = {item.text(0) for item in items}
+        for expression, definition in self._pulse_counters.definitions.items():
+            if definition.source in removed or definition.dependent in removed:
+                for item in self._expression_items():
+                    if item.text(0) == expression:
+                        items.add(item)
+                        break
         for item in items:
+            self._pulse_counters.remove(item.text(0))
             self.variables.takeTopLevelItem(self.variables.indexOfTopLevelItem(item))
         self._history_changed(None)
         self._apply_expressions()
@@ -308,7 +379,8 @@ class DebuggerSessionWidget(QWidget):
                 for i in range(self.variables.topLevelItemCount())]
 
     def _expressions(self) -> list[str]:
-        return [item.text(0) for item in self._expression_items()]
+        return [item.text(0) for item in self._expression_items()
+                if item.text(0) not in self._pulse_counters.definitions]
 
     def _create_expression(self, expression: str, *, history_enabled: bool = False,
                            style: dict[str, Any] | None = None) -> None:
@@ -431,6 +503,9 @@ class DebuggerSessionWidget(QWidget):
 
     @Slot(dict)
     def _on_chart_data(self, data: dict[str, Any]) -> None:
+        if self._pulse_counters.definitions:
+            data = {**data, "series": [*data.get("series", []),
+                                     *self._pulse_counters.process(data)]}
         self._statistics = merge_statistics(self._statistics, data)
         self._last_chart_data = merge_chart_data(
             self._last_chart_data,
@@ -438,6 +513,11 @@ class DebuggerSessionWidget(QWidget):
             self.history_limit_spin.value(),
             set(self._history_expressions()),
         )
+        self._refresh_values()
+
+    def _refresh_values(self) -> None:
+        if self._last_chart_data is None:
+            return
         by_expression = {
             item.get("expression"): item
             for item in self._last_chart_data.get("series", [])
@@ -532,6 +612,7 @@ class DebuggerSessionWidget(QWidget):
     def _clear_charts(self) -> None:
         self._last_chart_data = None
         self._statistics = {}
+        self._pulse_counters.reset()
         self.plot.clear()
         self._refresh_history_table()
         self._refresh_table_statistics()
@@ -695,6 +776,9 @@ class DebuggerSessionWidget(QWidget):
                 auto_follow=self.auto_follow_check.isChecked(),
                 statistics=self._statistics,
                 series_styles=self._series_styles(),
+                pulse_definitions=[vars(definition) for definition in
+                                   self._pulse_counters.definitions.values()],
+                pulse_state=self._pulse_counters.snapshot(),
             )
         except OSError as exc:
             self._show_error(str(exc))
@@ -724,8 +808,11 @@ class DebuggerSessionWidget(QWidget):
             for expression, extrema in document["statistics"].items()
         }
         history_expressions = set(document["history_expressions"])
+        self._pulse_counters = PulseCounters()
+        for values in document.get("pulse_definitions", []):
+            self._pulse_counters.add(PulseDefinition(**values))
         self.variables.clear()
-        for expression in document["expressions"]:
+        for expression in [*document["expressions"], *self._pulse_counters.definitions]:
             self._create_expression(
                 expression, history_enabled=expression in history_expressions,
                 style=document.get("series_styles", {}).get(expression),
@@ -733,7 +820,13 @@ class DebuggerSessionWidget(QWidget):
         chart_data = document.get("chart_data")
         self._last_chart_data = None
         if isinstance(chart_data, dict):
-            self._on_chart_data(chart_data)
+            self._last_chart_data = chart_data
+            self._pulse_counters.restore(
+                document.get("pulse_state", {}),
+                (chart_data.get("controller_time_unix_ms"),
+                 chart_data.get("controller_time_millisec")),
+            )
+            self._refresh_values()
         else:
             self.plot.clear()
             self._refresh_history_table()

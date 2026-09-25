@@ -29,6 +29,8 @@ def save_session(
     auto_follow: bool = True,
     statistics: dict[str, dict[str, Any]] | None = None,
     series_styles: dict[str, dict[str, Any]] | None = None,
+    pulse_definitions: list[dict[str, Any]] | None = None,
+    pulse_state: dict[str, Any] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -39,6 +41,8 @@ def save_session(
         "auto_follow": auto_follow,
         "statistics": statistics or {},
         "series_styles": series_styles or {},
+        "pulse_definitions": pulse_definitions or [],
+        "pulse_state": pulse_state or {},
         "expressions": expressions,
         "history_expressions": history_expressions,
         "chart_data": chart_data,
@@ -54,6 +58,8 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise ValueError("Неподдерживаемая версия файла сессии")
     connection = document.get("connection")
     expressions = document.get("expressions")
+    pulse_definitions = document.get("pulse_definitions", [])
+    pulse_state = document.get("pulse_state", {})
     history_expressions = document.get("history_expressions", expressions)
     interval = document.get("poll_interval_ms")
     history_limit = document.get("history_limit", DEFAULT_HISTORY_LIMIT)
@@ -64,10 +70,25 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise TypeError("Некорректный файл сессии")
     if not all(isinstance(item, str) for item in expressions):
         raise ValueError("Некорректный список выражений")
+    if not isinstance(pulse_definitions, list) or not isinstance(pulse_state, dict):
+        raise ValueError("Некорректные счётчики импульсов")
+    computed = set()
+    for definition in pulse_definitions:
+        if not _valid_pulse_definition(definition, expressions):
+            raise ValueError("Некорректные параметры счётчика импульсов")
+        expression = f"[Импульсы] {definition['name']}"
+        if expression in computed or expression in expressions:
+            raise ValueError("Повторяющееся имя счётчика импульсов")
+        computed.add(expression)
+    if not set(pulse_state).issubset(computed) or any(
+        not _valid_pulse_state(state)
+        for state in pulse_state.values()
+    ):
+        raise ValueError("Некорректное состояние счётчика импульсов")
     if (
         not isinstance(history_expressions, list)
         or not all(isinstance(item, str) for item in history_expressions)
-        or not set(history_expressions).issubset(expressions)
+        or not set(history_expressions).issubset(set(expressions) | computed)
     ):
         raise ValueError("Некорректный список выражений с историей")
     if not isinstance(interval, int):
@@ -103,7 +124,40 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["auto_follow"] = auto_follow
     document["statistics"] = statistics
     document["history_expressions"] = history_expressions
+    document["pulse_definitions"] = pulse_definitions
+    document["pulse_state"] = pulse_state
     return document
+
+
+def _valid_pulse_definition(definition: Any, expressions: list[str]) -> bool:
+    if not isinstance(definition, dict) or set(definition) != {
+        "name", "source", "dependent", "source_value", "dependent_value"
+    }:
+        return False
+    return (
+        isinstance(definition["name"], str) and bool(definition["name"].strip())
+        and definition["source"] in expressions
+        and definition["dependent"] in expressions
+        and definition["source"] != definition["dependent"]
+        and all(isinstance(definition[key], (str, int, float, bool))
+                and (not isinstance(definition[key], float)
+                     or math.isfinite(definition[key]))
+                for key in ("source_value", "dependent_value"))
+    )
+
+
+def _valid_pulse_state(state: Any) -> bool:
+    if not isinstance(state, dict) or set(state) != {
+        "count", "values", "last_samples"
+    }:
+        return False
+    return (
+        isinstance(state["count"], int) and not isinstance(state["count"], bool)
+        and state["count"] >= 0
+        and isinstance(state["values"], dict)
+        and isinstance(state["last_samples"], dict)
+        and all(isinstance(sample, dict) for sample in state["last_samples"].values())
+    )
 
 
 def _valid_statistics_entry(entry: Any) -> bool:
