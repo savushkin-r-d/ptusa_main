@@ -38,14 +38,17 @@ class HistoryTableModel(QAbstractTableModel):
             return int(Qt.AlignRight | Qt.AlignVCenter)
 
         row = self.rows[index.row()]
-        if index.column() == 0:
-            if row.real_time_ms is None:
+        if index.column() < 2:
+            timestamp = (
+                row.real_time_ms
+                if index.column() == 0
+                else row.controller_time_ms
+            )
+            if timestamp is None:
                 return "—"
-            return datetime.fromtimestamp(row.real_time_ms / 1000).strftime(
+            return datetime.fromtimestamp(timestamp / 1000).strftime(
                 "%Y-%m-%d %H:%M:%S.%f"
             )[:-3]
-        if index.column() == 1:
-            return f"{row.controller_time_ms / 1000:.3f}"
 
         sample = row.samples.get(self.expressions[index.column() - 2])
         if sample is None:
@@ -61,6 +64,6 @@ class HistoryTableModel(QAbstractTableModel):
             if section == 0:
                 return "Реальное время"
             if section == 1:
-                return "Время контроллера, с"
+                return "Время контроллера"
             return self.expressions[section - 2]
         return section + 1

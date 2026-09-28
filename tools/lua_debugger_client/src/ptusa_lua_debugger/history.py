@@ -8,20 +8,40 @@ DEFAULT_HISTORY_LIMIT = 5_000
 MAX_HISTORY_LIMIT = 1_000_000
 DEFAULT_DISPLAY_SECONDS = 60
 MAX_DISPLAY_SECONDS = 86_400
-TIME_ANCHOR_FIELDS = ("controller_time_unix_ms", "controller_time_millisec")
+TIME_ANCHOR_FIELDS = (
+    "controller_time_unix_ms",
+    "controller_time_millisec",
+    "client_time_unix_ms",
+    "client_time_millisec",
+)
 
 
 @dataclass
 class HistoryRow:
-    controller_time_ms: int
+    controller_time_ms: int | None
     real_time_ms: int | None
     samples: dict[str, dict[str, Any]]
 
 
 def controller_timestamp_ms(data: dict[str, Any], millisec: int) -> int | None:
     """Convert a wrapping PAC millisecond counter to controller Unix time."""
-    unix_ms = data.get("controller_time_unix_ms")
-    anchor_millisec = data.get("controller_time_millisec")
+    return _anchored_timestamp_ms(
+        data, millisec, "controller_time_unix_ms", "controller_time_millisec"
+    )
+
+
+def client_timestamp_ms(data: dict[str, Any], millisec: int) -> int | None:
+    """Convert a wrapping PAC millisecond counter to debugger-computer Unix time."""
+    return _anchored_timestamp_ms(
+        data, millisec, "client_time_unix_ms", "client_time_millisec"
+    )
+
+
+def _anchored_timestamp_ms(
+    data: dict[str, Any], millisec: int, unix_field: str, anchor_field: str
+) -> int | None:
+    unix_ms = data.get(unix_field)
+    anchor_millisec = data.get(anchor_field)
     if (
         not isinstance(unix_ms, int)
         or isinstance(unix_ms, bool)
@@ -156,7 +176,9 @@ def build_history_rows(
             row = rows_by_time.setdefault(
                 elapsed,
                 HistoryRow(
-                    millisec, controller_timestamp_ms(data, millisec), {}
+                    controller_timestamp_ms(data, millisec),
+                    client_timestamp_ms(data, millisec),
+                    {},
                 ),
             )
             row.samples[expression] = sample

@@ -271,7 +271,83 @@ def test_pulse_counter_is_plotted_and_restored(tmp_path) -> None:
 
 def test_timeline_selector_switches_chart_time_axis() -> None:
     import pyqtgraph as pg
+    from datetime import datetime
     from PySide6.QtCore import Qt
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._create_expression("x", history_enabled=True)
+        session._on_chart_data(
+            {
+                "server_time_ms": 8000,
+                "controller_time_unix_ms": 1_789_123_456_000,
+                "controller_time_millisec": 1000,
+                "client_time_unix_ms": 1_700_000_000_000,
+                "client_time_millisec": 1000,
+                "series": [
+                    {
+                        "expression": "x",
+                        "samples": [
+                            {"time_ms": 1000, "value": 0, "type": "number",
+                             "ok": True},
+                            {"time_ms": 3000, "value": 1, "type": "number",
+                             "ok": True},
+                            {"time_ms": 6000, "value": 0, "type": "number",
+                             "ok": True},
+                        ],
+                    }
+                ],
+            }
+        )
+
+        model = session.history_model
+        assert model.headerData(0, Qt.Horizontal) == "Реальное время"
+        assert model.headerData(1, Qt.Horizontal) == "Время контроллера"
+        assert model.headerData(2, Qt.Horizontal) == "x"
+        assert model.data(model.index(0, 0)) == datetime.fromtimestamp(
+            1_700_000_000_000 / 1000
+        ).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        assert model.data(model.index(0, 1)) == datetime.fromtimestamp(
+            1_789_123_456_000 / 1000
+        ).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+        # Controller Unix-seconds axis is the default; the last point is the
+        # held current-time value at server_time_ms.
+        assert session.timeline_combo.currentData() == "controller"
+        axis = session.plot.getAxis("bottom")
+        assert isinstance(axis, pg.DateAxisItem)
+        assert axis.labelText == "Время контроллера"
+        curve = session.plot.listDataItems()[0]
+        assert list(curve.xData) == [
+            1_789_123_456.0,
+            1_789_123_458.0,
+            1_789_123_461.0,
+            1_789_123_463.0,
+        ]
+
+        session.timeline_combo.setCurrentIndex(
+            session.timeline_combo.findData("real")
+        )
+        axis = session.plot.getAxis("bottom")
+        assert isinstance(axis, pg.DateAxisItem)
+        assert axis.labelText == "Реальное время"
+        curve = session.plot.listDataItems()[0]
+        assert list(curve.xData) == [
+            1_700_000_000.0,
+            1_700_000_002.0,
+            1_700_000_005.0,
+            1_700_000_007.0,
+        ]
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_periodic_logging_saves_and_starts_new_history(tmp_path) -> None:
+    from copy import deepcopy
+    from ptusa_lua_debugger.session_store import load_session
 
     application = QApplication.instance() or QApplication([])
     session = DebuggerSessionWidget()
@@ -297,36 +373,79 @@ def test_timeline_selector_switches_chart_time_axis() -> None:
                 ],
             }
         )
+        saved_chart_data = deepcopy(session._last_chart_data)
+        saved_statistics = deepcopy(session._statistics)
+        session.logging_directory_edit.setText(str(tmp_path))
+        session.logging_check.setChecked(True)
+        assert session._logging_timer.isActive()
+        assert session._logging_timer.interval() == 60 * 60_000
 
-        model = session.history_model
-        assert model.headerData(0, Qt.Horizontal) == "Реальное время"
-        assert model.headerData(1, Qt.Horizontal) == "Время контроллера, с"
-        assert model.headerData(2, Qt.Horizontal) == "x"
-        assert model.data(model.index(0, 1)) == "1.000"
-        assert model.data(model.index(2, 1)) == "6.000"
+        session._rotate_log()
 
-        # Real Unix-seconds axis is the default; the last point is the held
-        # current-time value at server_time_ms.
-        axis = session.plot.getAxis("bottom")
-        assert isinstance(axis, pg.DateAxisItem)
-        assert axis.labelText == "Реальное время"
-        curve = session.plot.listDataItems()[0]
-        assert list(curve.xData) == [
-            1_789_123_456.0,
-            1_789_123_458.0,
-            1_789_123_461.0,
-            1_789_123_463.0,
-        ]
-
-        session.timeline_combo.setCurrentIndex(
-            session.timeline_combo.findData("controller")
-        )
-        axis = session.plot.getAxis("bottom")
-        assert not isinstance(axis, pg.DateAxisItem)
-        assert axis.labelText == "Время контроллера"
-        curve = session.plot.listDataItems()[0]
-        assert list(curve.xData) == [1.0, 3.0, 6.0, 8.0]
+        files = list(tmp_path.glob("*.ptlua.json"))
+        assert len(files) == 1
+        document = load_session(files[0])
+        assert document["chart_data"] == saved_chart_data
+        assert document["statistics"] == saved_statistics
+        assert session._last_chart_data is None
+        assert session._statistics == {}
+        assert session.history_model.rows == []
+        assert session._logging_timer.isActive()
     finally:
+        session.logging_check.setChecked(False)
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_failed_periodic_log_preserves_history_and_stops_logging(
+    tmp_path, monkeypatch
+) -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    errors: list[str] = []
+    try:
+        session._create_expression("x", history_enabled=True)
+        session._on_chart_data(
+            {
+                "server_time_ms": 8000,
+                "series": [
+                    {
+                        "expression": "x",
+                        "samples": [
+                            {"time_ms": 1000, "value": 0, "type": "number",
+                             "ok": True},
+                            {"time_ms": 3000, "value": 1, "type": "number",
+                             "ok": True},
+                        ],
+                    }
+                ],
+            }
+        )
+        saved_chart_data = session._last_chart_data
+        saved_statistics = session._statistics
+        session.logging_directory_edit.setText(str(tmp_path))
+        session.logging_check.setChecked(True)
+        assert session._logging_timer.isActive()
+
+        def fail_save(*args, **kwargs):
+            raise OSError("disk full")
+
+        monkeypatch.setattr(
+            "ptusa_lua_debugger.window.save_session", fail_save
+        )
+        session._show_error = errors.append
+
+        session._rotate_log()
+
+        assert session._last_chart_data is saved_chart_data
+        assert session._statistics is saved_statistics
+        assert not session._logging_timer.isActive()
+        assert not session.logging_check.isChecked()
+        assert len(errors) == 1
+        assert "disk full" in errors[0]
+    finally:
+        session.logging_check.setChecked(False)
         session.shutdown()
         session.deleteLater()
         application.processEvents()

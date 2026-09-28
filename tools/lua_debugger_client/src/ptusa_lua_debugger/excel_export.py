@@ -34,29 +34,28 @@ def export_history_xlsx(
             }
         )
         date_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm:ss.000"})
-        relative_format = workbook.add_format({"num_format": "0.000"})
 
         for column, label in enumerate(
-            ["Реальное время", "Время контроллера, с", *expressions]
+            ["Реальное время", "Время контроллера", *expressions]
         ):
             worksheet.write_string(0, column, label, header)
         worksheet.freeze_panes(1, 2)
         worksheet.set_column(0, 0, 24)
-        worksheet.set_column(1, 1, 22)
+        worksheet.set_column(1, 1, 24)
         for column, expression in enumerate(expressions, 2):
             worksheet.set_column(column, column, min(max(len(expression) + 2, 12), 48))
 
         for row_index, row in enumerate(rows, 1):
-            if row.real_time_ms is not None:
-                worksheet.write_datetime(
-                    row_index,
-                    0,
-                    datetime.fromtimestamp(row.real_time_ms / 1000),
-                    date_format,
-                )
-            worksheet.write_number(
-                row_index, 1, row.controller_time_ms / 1000, relative_format
-            )
+            for column, timestamp in enumerate(
+                (row.real_time_ms, row.controller_time_ms)
+            ):
+                if timestamp is not None:
+                    worksheet.write_datetime(
+                        row_index,
+                        column,
+                        datetime.fromtimestamp(timestamp / 1000),
+                        date_format,
+                    )
             for column, expression in enumerate(expressions, 2):
                 sample = row.samples.get(expression)
                 if sample is None:

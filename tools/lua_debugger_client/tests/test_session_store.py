@@ -84,10 +84,11 @@ def test_old_session_uses_default_history_limit(tmp_path) -> None:
     assert document["auto_follow"] is True
     assert document["statistics"] == {}
     assert document["history_expressions"] == []
-    assert document["timeline"] == "real"
+    assert document["timeline"] == "controller"
 
 
-def test_timeline_roundtrip(tmp_path) -> None:
+@pytest.mark.parametrize("timeline", ["real", "controller"])
+def test_timeline_roundtrip(tmp_path, timeline) -> None:
     path = tmp_path / "timeline.ptlua.json"
     save_session(
         path,
@@ -98,10 +99,10 @@ def test_timeline_roundtrip(tmp_path) -> None:
         expressions=[],
         history_expressions=[],
         chart_data=None,
-        timeline="controller",
+        timeline=timeline,
     )
 
-    assert load_session(path)["timeline"] == "controller"
+    assert load_session(path)["timeline"] == timeline
 
 
 def test_invalid_timeline_is_rejected(tmp_path) -> None:

@@ -27,7 +27,7 @@ def save_session(
     chart_data: dict[str, Any] | None,
     display_seconds: int = DEFAULT_DISPLAY_SECONDS,
     auto_follow: bool = True,
-    timeline: str = "real",
+    timeline: str = "controller",
     statistics: dict[str, dict[str, Any]] | None = None,
     series_styles: dict[str, dict[str, Any]] | None = None,
     pulse_definitions: list[dict[str, Any]] | None = None,
@@ -67,7 +67,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
     history_limit = document.get("history_limit", DEFAULT_HISTORY_LIMIT)
     display_seconds = document.get("display_seconds", DEFAULT_DISPLAY_SECONDS)
     auto_follow = document.get("auto_follow", True)
-    timeline = document.get("timeline", "real")
+    timeline = document.get("timeline", "controller")
     statistics = document.get("statistics", {})
     if not isinstance(connection, dict) or not isinstance(expressions, list):
         raise TypeError("Некорректный файл сессии")
