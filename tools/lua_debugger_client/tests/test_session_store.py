@@ -84,6 +84,36 @@ def test_old_session_uses_default_history_limit(tmp_path) -> None:
     assert document["auto_follow"] is True
     assert document["statistics"] == {}
     assert document["history_expressions"] == []
+    assert document["timeline"] == "real"
+
+
+def test_timeline_roundtrip(tmp_path) -> None:
+    path = tmp_path / "timeline.ptlua.json"
+    save_session(
+        path,
+        host="localhost",
+        port=10_000,
+        poll_interval_ms=500,
+        history_limit=5_000,
+        expressions=[],
+        history_expressions=[],
+        chart_data=None,
+        timeline="controller",
+    )
+
+    assert load_session(path)["timeline"] == "controller"
+
+
+def test_invalid_timeline_is_rejected(tmp_path) -> None:
+    path = tmp_path / "bad-timeline.ptlua.json"
+    path.write_text(
+        '{"version":1,"connection":{},"poll_interval_ms":500,'
+        '"expressions":[],"timeline":"client"}',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="шкал"):
+        load_session(path)
 
 
 def test_old_session_enables_history_for_existing_expressions(tmp_path) -> None:

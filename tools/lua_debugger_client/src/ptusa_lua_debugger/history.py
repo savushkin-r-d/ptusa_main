@@ -13,7 +13,8 @@ TIME_ANCHOR_FIELDS = ("controller_time_unix_ms", "controller_time_millisec")
 
 @dataclass
 class HistoryRow:
-    time_ms: int
+    controller_time_ms: int
+    real_time_ms: int | None
     samples: dict[str, dict[str, Any]]
 
 
@@ -151,13 +152,13 @@ def build_history_rows(
             if not isinstance(sample, dict) or "time_ms" not in sample:
                 continue
             millisec = int(sample["time_ms"])
-            timestamp = controller_timestamp_ms(data, millisec)
-            row_time = (
-                timestamp
-                if timestamp is not None
-                else (millisec - base_millisec) & 0xFFFFFFFF
+            elapsed = (millisec - base_millisec) & 0xFFFFFFFF
+            row = rows_by_time.setdefault(
+                elapsed,
+                HistoryRow(
+                    millisec, controller_timestamp_ms(data, millisec), {}
+                ),
             )
-            row = rows_by_time.setdefault(row_time, HistoryRow(row_time, {}))
             row.samples[expression] = sample
 
     return [rows_by_time[key] for key in sorted(rows_by_time)], absolute_time

@@ -14,7 +14,6 @@ def export_history_xlsx(
     path: str | Path,
     rows: list[HistoryRow],
     expressions: list[str],
-    absolute_time: bool,
 ) -> None:
     if len(rows) > MAX_EXCEL_DATA_ROWS:
         raise ValueError(
@@ -37,24 +36,28 @@ def export_history_xlsx(
         date_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm:ss.000"})
         relative_format = workbook.add_format({"num_format": "0.000"})
 
-        for column, label in enumerate(["Время контроллера", *expressions]):
+        for column, label in enumerate(
+            ["Реальное время", "Время контроллера, с", *expressions]
+        ):
             worksheet.write_string(0, column, label, header)
-        worksheet.freeze_panes(1, 1)
+        worksheet.freeze_panes(1, 2)
         worksheet.set_column(0, 0, 24)
-        for column, expression in enumerate(expressions, 1):
+        worksheet.set_column(1, 1, 22)
+        for column, expression in enumerate(expressions, 2):
             worksheet.set_column(column, column, min(max(len(expression) + 2, 12), 48))
 
         for row_index, row in enumerate(rows, 1):
-            if absolute_time:
+            if row.real_time_ms is not None:
                 worksheet.write_datetime(
                     row_index,
                     0,
-                    datetime.fromtimestamp(row.time_ms / 1000),
+                    datetime.fromtimestamp(row.real_time_ms / 1000),
                     date_format,
                 )
-            else:
-                worksheet.write_number(row_index, 0, row.time_ms / 1000, relative_format)
-            for column, expression in enumerate(expressions, 1):
+            worksheet.write_number(
+                row_index, 1, row.controller_time_ms / 1000, relative_format
+            )
+            for column, expression in enumerate(expressions, 2):
                 sample = row.samples.get(expression)
                 if sample is None:
                     continue
@@ -67,6 +70,6 @@ def export_history_xlsx(
                     worksheet.write_string(row_index, column, str(value))
 
         if expressions:
-            worksheet.autofilter(0, 0, max(len(rows), 1), len(expressions))
+            worksheet.autofilter(0, 0, max(len(rows), 1), len(expressions) + 1)
     finally:
         workbook.close()

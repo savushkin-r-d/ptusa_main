@@ -200,10 +200,15 @@ class DebuggerSessionWidget(QWidget):
             background="#1C252A",
             axisItems={"bottom": pg.DateAxisItem(orientation="bottom")},
         )
-        self._absolute_time_axis = True
+        self._time_axis = "real"
         self.plot.addLegend()
         self.plot.showGrid(x=True, y=True, alpha=0.2)
-        self.plot.setLabel("bottom", "Время контроллера")
+        self.plot.setLabel("bottom", "Реальное время")
+
+        self.timeline_combo = QComboBox()
+        self.timeline_combo.addItem("Реальное время", "real")
+        self.timeline_combo.addItem("Время контроллера", "controller")
+        self.timeline_combo.currentIndexChanged.connect(self._redraw_chart)
 
         self.history_model = HistoryTableModel()
         self.history_table = QTableView()
@@ -211,6 +216,7 @@ class DebuggerSessionWidget(QWidget):
         self.history_table.setAlternatingRowColors(True)
         self.history_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.history_table.setColumnWidth(0, 190)
+        self.history_table.setColumnWidth(1, 150)
         self.history_table.horizontalHeader().setStretchLastSection(True)
         export_button = QPushButton("Экспорт в Excel…")
         export_button.clicked.connect(self._export_history)
@@ -246,8 +252,17 @@ class DebuggerSessionWidget(QWidget):
         messages_layout.addWidget(clear_messages_button, 0, Qt.AlignRight)
         messages_layout.addWidget(self.messages_table, 1)
 
+        chart_page = QWidget()
+        chart_layout = QVBoxLayout(chart_page)
+        timeline_row = QHBoxLayout()
+        timeline_row.addWidget(QLabel("Шкала времени:"))
+        timeline_row.addWidget(self.timeline_combo)
+        timeline_row.addStretch(1)
+        chart_layout.addLayout(timeline_row)
+        chart_layout.addWidget(self.plot, 1)
+
         self.output_tabs = QTabWidget()
-        self.output_tabs.addTab(self.plot, "График")
+        self.output_tabs.addTab(chart_page, "График")
         self.output_tabs.addTab(history_page, "История")
         self.output_tabs.addTab(messages_page, "Сообщения")
 
@@ -690,14 +705,20 @@ class DebuggerSessionWidget(QWidget):
             return
 
         base = int(prepared[0][1][0]["time_ms"])
-        absolute_time = controller_timestamp_ms(data, base) is not None
-        self._set_time_axis(absolute_time)
+        mode = (
+            "real"
+            if self.timeline_combo.currentData() == "real"
+            and controller_timestamp_ms(data, base) is not None
+            else "controller"
+        )
+        self._set_time_axis(mode)
+        base_seconds = base / 1000
         max_x: float | None = None
         styles = self._series_styles()
         for series, numeric in prepared:
             expression = str(series.get("expression", ""))
             style = styles[expression]
-            if absolute_time:
+            if mode == "real":
                 timestamps = [
                     controller_timestamp_ms(data, int(sample["time_ms"]))
                     for sample in numeric
@@ -709,7 +730,8 @@ class DebuggerSessionWidget(QWidget):
                 ]
             else:
                 x_values = [
-                    ((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000
+                    base_seconds
+                    + ((int(sample["time_ms"]) - base) & 0xFFFFFFFF) / 1000
                     for sample in numeric
                 ]
             y_values = [float(sample["value"]) + style["offset"] for sample in numeric]
@@ -717,8 +739,8 @@ class DebuggerSessionWidget(QWidget):
             current_time = controller_timestamp_ms(data, server_time)
             current_x = (
                 current_time / 1000
-                if current_time is not None
-                else ((server_time - base) & 0xFFFFFFFF) / 1000
+                if mode == "real" and current_time is not None
+                else base_seconds + ((server_time - base) & 0xFFFFFFFF) / 1000
             )
             if current_x > x_values[-1]:
                 x_values.append(current_x)
@@ -753,25 +775,23 @@ class DebuggerSessionWidget(QWidget):
                                symbolBrush=style["color"], symbolPen=style["color"])
         if self.auto_follow_check.isChecked() and max_x is not None:
             left = max_x - self.display_seconds_spin.value()
-            if not absolute_time:
-                left = max(0.0, left)
             self.plot.setXRange(left, max_x, padding=0)
 
-    def _set_time_axis(self, absolute_time: bool) -> None:
-        if absolute_time == self._absolute_time_axis:
+    def _set_time_axis(self, mode: str) -> None:
+        if mode == self._time_axis:
             return
         axis = (
             pg.DateAxisItem(orientation="bottom")
-            if absolute_time
+            if mode == "real"
             else pg.AxisItem(orientation="bottom")
         )
         self.plot.setAxisItems({"bottom": axis})
         self.plot.setLabel(
             "bottom",
-            "Время контроллера" if absolute_time else "Время",
-            units=None if absolute_time else "s",
+            "Реальное время" if mode == "real" else "Время контроллера",
+            units=None if mode == "real" else "s",
         )
-        self._absolute_time_axis = absolute_time
+        self._time_axis = mode
 
     def _refresh_history_table(self) -> None:
         self.history_model.set_chart_data(
@@ -797,7 +817,6 @@ class DebuggerSessionWidget(QWidget):
                 path,
                 self.history_model.rows,
                 self.history_model.expressions,
-                self.history_model.absolute_time,
             )
             self.status_label.setText(f"История экспортирована: {path}")
         except (OSError, ValueError, XlsxWriterException) as exc:
@@ -830,6 +849,7 @@ class DebuggerSessionWidget(QWidget):
                 chart_data=self._last_chart_data,
                 display_seconds=self.display_seconds_spin.value(),
                 auto_follow=self.auto_follow_check.isChecked(),
+                timeline=self.timeline_combo.currentData(),
                 statistics=self._statistics,
                 series_styles=self._series_styles(),
                 pulse_definitions=[vars(definition) for definition in
@@ -875,6 +895,9 @@ class DebuggerSessionWidget(QWidget):
             )
         chart_data = document.get("chart_data")
         self._last_chart_data = None
+        timeline_index = self.timeline_combo.findData(document["timeline"])
+        if timeline_index >= 0:
+            self.timeline_combo.setCurrentIndex(timeline_index)
         if isinstance(chart_data, dict):
             self._last_chart_data = chart_data
             self._pulse_counters.restore(

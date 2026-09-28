@@ -109,4 +109,40 @@ def test_builds_sparse_summary_history_table() -> None:
     rows, absolute_time = build_history_rows(data, ["x", "y"])
 
     assert absolute_time is True
+    assert [row.controller_time_ms for row in rows] == [1, 2, 3]
+    assert [row.real_time_ms for row in rows] == [
+        controller_timestamp_ms(data, millisec) for millisec in (1, 2, 3)
+    ]
     assert [set(row.samples) for row in rows] == [{"x"}, {"y"}, {"x", "y"}]
+
+
+def test_history_rows_stay_ordered_across_counter_wrap() -> None:
+    data = {
+        "controller_time_unix_ms": 1_789_123_456_000,
+        "controller_time_millisec": 0xFFFFFFF0,
+        "series": [
+            {
+                "expression": "x",
+                "samples": [
+                    {
+                        "time_ms": 0xFFFFFFFE,
+                        "ok": True,
+                        "type": "number",
+                        "value": 1,
+                    },
+                    {
+                        "time_ms": 0x00000002,
+                        "ok": True,
+                        "type": "number",
+                        "value": 2,
+                    },
+                ],
+            }
+        ],
+    }
+
+    rows, absolute_time = build_history_rows(data, ["x"])
+
+    assert absolute_time is True
+    assert [row.controller_time_ms for row in rows] == [0xFFFFFFFE, 0x00000002]
+    assert rows[1].real_time_ms - rows[0].real_time_ms == 4
