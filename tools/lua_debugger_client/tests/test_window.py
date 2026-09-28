@@ -12,11 +12,11 @@ from ptusa_lua_debugger.pulse_counter import PulseDefinition
 
 
 @pytest.mark.parametrize("chart_type, expected_x, expected_y", [
-    ("step_post", [0, 2, 2, 5, 5, 7, 7, 7], [0, 0, 1, 1, 0, 0, 0, 0]),
-    ("step_pre", [0, 0, 0, 2, 2, 5, 5, 7], [0, 0, 1, 1, 0, 0, 0, 0]),
-    ("step_mid", [0, 1, 1, 3.5, 3.5, 7], [0, 0, 1, 1, 0, 0]),
-    ("line", [0, 2, 5, 7], [0, 1, 0, 0]),
-    ("scatter", [0, 2, 5], [0, 1, 0]),
+    ("step_post", [1, 3, 3, 6, 6, 8, 8, 8], [0, 0, 1, 1, 0, 0, 0, 0]),
+    ("step_pre", [1, 1, 1, 3, 3, 6, 6, 8], [0, 0, 1, 1, 0, 0, 0, 0]),
+    ("step_mid", [1, 2, 2, 4.5, 4.5, 8], [0, 0, 1, 1, 0, 0]),
+    ("line", [1, 3, 6, 8], [0, 1, 0, 0]),
+    ("scatter", [1, 3, 6], [0, 1, 0]),
 ])
 @pytest.mark.parametrize("single_sample", [False, True])
 def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
@@ -49,7 +49,7 @@ def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
             assert [path.elementAt(i).x for i in range(path.elementCount())] == expected_x
             assert [path.elementAt(i).y for i in range(path.elementCount())] == expected_y
         if chart_type == "scatter":
-            assert list(curve.xData) == ([0] if single_sample else expected_x)
+            assert list(curve.xData) == ([1] if single_sample else expected_x)
             assert curve.opts["pen"] is None
             assert curve.opts["symbol"] == "o"
         assert session._series_styles()["other"]["chart_type"] == "step_post"
@@ -153,7 +153,7 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         assert line.opts["pen"].color().name() == "#32aaff"
         assert list(line.yData) == [2.5, 3.5, 3.5]
         assert list(points.yData) == [2.5, 3.5]
-        assert list(points.xData) == [0, 1]
+        assert list(points.xData) == [1, 2]
         assert data == original
         assert session._statistics["x"]["max"] == 1
         path = tmp_path / "session.json"
@@ -192,11 +192,13 @@ def test_controller_commands_are_available_in_each_session() -> None:
         sent: list[int] = []
         session.controller_command_requested.connect(sent.append)
         assert [session.command_combo.itemData(i)
-                for i in range(session.command_combo.count())] == [102, 100, 101, 0]
+                for i in range(session.command_combo.count())
+                ] == [103, 104, 102, 100, 101, 0]
         assert not session.command_button.isEnabled()
 
         session._connected = True
         session.command_button.setEnabled(True)
+        session.command_combo.setCurrentIndex(session.command_combo.findData(102))
         session.command_button.click()
         assert sent == [102]
         assert not session.command_button.isEnabled()
@@ -264,4 +266,67 @@ def test_pulse_counter_is_plotted_and_restored(tmp_path) -> None:
         restored.shutdown()
         session.deleteLater()
         restored.deleteLater()
+        application.processEvents()
+
+
+def test_timeline_selector_switches_chart_time_axis() -> None:
+    import pyqtgraph as pg
+    from PySide6.QtCore import Qt
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._create_expression("x", history_enabled=True)
+        session._on_chart_data(
+            {
+                "server_time_ms": 8000,
+                "controller_time_unix_ms": 1_789_123_456_000,
+                "controller_time_millisec": 1000,
+                "series": [
+                    {
+                        "expression": "x",
+                        "samples": [
+                            {"time_ms": 1000, "value": 0, "type": "number",
+                             "ok": True},
+                            {"time_ms": 3000, "value": 1, "type": "number",
+                             "ok": True},
+                            {"time_ms": 6000, "value": 0, "type": "number",
+                             "ok": True},
+                        ],
+                    }
+                ],
+            }
+        )
+
+        model = session.history_model
+        assert model.headerData(0, Qt.Horizontal) == "Реальное время"
+        assert model.headerData(1, Qt.Horizontal) == "Время контроллера, с"
+        assert model.headerData(2, Qt.Horizontal) == "x"
+        assert model.data(model.index(0, 1)) == "1.000"
+        assert model.data(model.index(2, 1)) == "6.000"
+
+        # Real Unix-seconds axis is the default; the last point is the held
+        # current-time value at server_time_ms.
+        axis = session.plot.getAxis("bottom")
+        assert isinstance(axis, pg.DateAxisItem)
+        assert axis.labelText == "Реальное время"
+        curve = session.plot.listDataItems()[0]
+        assert list(curve.xData) == [
+            1_789_123_456.0,
+            1_789_123_458.0,
+            1_789_123_461.0,
+            1_789_123_463.0,
+        ]
+
+        session.timeline_combo.setCurrentIndex(
+            session.timeline_combo.findData("controller")
+        )
+        axis = session.plot.getAxis("bottom")
+        assert not isinstance(axis, pg.DateAxisItem)
+        assert axis.labelText == "Время контроллера"
+        curve = session.plot.listDataItems()[0]
+        assert list(curve.xData) == [1.0, 3.0, 6.0, 8.0]
+    finally:
+        session.shutdown()
+        session.deleteLater()
         application.processEvents()
