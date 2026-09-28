@@ -1,5 +1,6 @@
 from ptusa_lua_debugger.history import (
     build_history_rows,
+    client_timestamp_ms,
     controller_timestamp_ms,
     merge_chart_data,
     merge_statistics,
@@ -13,6 +14,8 @@ def chart(*values: int) -> dict:
         "server_time_ms": values[-1] if values else 0,
         "controller_time_unix_ms": 1_789_123_456_000,
         "controller_time_millisec": 1_000,
+        "client_time_unix_ms": 1_700_000_000_000,
+        "client_time_millisec": 1_000,
         "series": [
             {
                 "expression": "x",
@@ -109,9 +112,11 @@ def test_builds_sparse_summary_history_table() -> None:
     rows, absolute_time = build_history_rows(data, ["x", "y"])
 
     assert absolute_time is True
-    assert [row.controller_time_ms for row in rows] == [1, 2, 3]
-    assert [row.real_time_ms for row in rows] == [
+    assert [row.controller_time_ms for row in rows] == [
         controller_timestamp_ms(data, millisec) for millisec in (1, 2, 3)
+    ]
+    assert [row.real_time_ms for row in rows] == [
+        client_timestamp_ms(data, millisec) for millisec in (1, 2, 3)
     ]
     assert [set(row.samples) for row in rows] == [{"x"}, {"y"}, {"x", "y"}]
 
@@ -120,6 +125,8 @@ def test_history_rows_stay_ordered_across_counter_wrap() -> None:
     data = {
         "controller_time_unix_ms": 1_789_123_456_000,
         "controller_time_millisec": 0xFFFFFFF0,
+        "client_time_unix_ms": 1_700_000_000_000,
+        "client_time_millisec": 0xFFFFFFF0,
         "series": [
             {
                 "expression": "x",
@@ -144,5 +151,7 @@ def test_history_rows_stay_ordered_across_counter_wrap() -> None:
     rows, absolute_time = build_history_rows(data, ["x"])
 
     assert absolute_time is True
-    assert [row.controller_time_ms for row in rows] == [0xFFFFFFFE, 0x00000002]
+    assert rows[0].controller_time_ms == controller_timestamp_ms(data, 0xFFFFFFFE)
+    assert rows[0].real_time_ms == client_timestamp_ms(data, 0xFFFFFFFE)
+    assert rows[1].controller_time_ms - rows[0].controller_time_ms == 4
     assert rows[1].real_time_ms - rows[0].real_time_ms == 4

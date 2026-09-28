@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import socket
 import struct
+import time
 from enum import IntEnum
 from typing import Any
 
@@ -37,6 +38,8 @@ class DebuggerProtocol:
         self.session_timeout_ms = 10_000
         self.controller_time_unix_ms: int | None = None
         self.controller_time_millisec: int | None = None
+        self.client_time_unix_ms: int | None = None
+        self.client_time_millisec: int | None = None
         self._socket: socket.socket | None = None
         self._packet_id = 0
 
@@ -54,7 +57,9 @@ class DebuggerProtocol:
             if greeting != self.ACCEPT_MESSAGE:
                 raise ProtocolError("Контроллер не прислал приветствие PAC accept")
             self._socket = connection
+            request_started_ms = time.time_ns() // 1_000_000
             response = self._request(Command.CREATE_SESSION)
+            request_finished_ms = time.time_ns() // 1_000_000
             self._ensure_ok(response)
             try:
                 self.session_id = str(response["session_id"])
@@ -65,6 +70,10 @@ class DebuggerProtocol:
                 self.controller_time_millisec = int(
                     response["controller_time_millisec"]
                 )
+                self.client_time_unix_ms = (
+                    request_started_ms + request_finished_ms
+                ) // 2
+                self.client_time_millisec = self.controller_time_millisec
             except (KeyError, TypeError, ValueError) as error:
                 raise ProtocolError(
                     "Контроллер не прислал временной якорь сессии"
@@ -81,6 +90,8 @@ class DebuggerProtocol:
             self.session_id = None
             self.controller_time_unix_ms = None
             self.controller_time_millisec = None
+            self.client_time_unix_ms = None
+            self.client_time_millisec = None
             return
         if send_close and self.session_id:
             try:
@@ -96,6 +107,8 @@ class DebuggerProtocol:
         self.session_id = None
         self.controller_time_unix_ms = None
         self.controller_time_millisec = None
+        self.client_time_unix_ms = None
+        self.client_time_millisec = None
 
     def evaluate(self, expression: str) -> dict[str, Any]:
         return self._request(Command.EVALUATE, expression)
@@ -115,8 +128,7 @@ class DebuggerProtocol:
     def get_chart_data(self) -> dict[str, Any]:
         response = self._request(Command.GET_CHART_DATA)
         self._ensure_ok(response)
-        response["controller_time_unix_ms"] = self.controller_time_unix_ms
-        response["controller_time_millisec"] = self.controller_time_millisec
+        self._attach_time_anchor(response)
         return response
 
     def clear_chart_data(self) -> None:
@@ -125,17 +137,21 @@ class DebuggerProtocol:
     def get_messages(self) -> dict[str, Any]:
         response = self._request(Command.GET_MESSAGES)
         self._ensure_ok(response)
-        response["controller_time_unix_ms"] = self.controller_time_unix_ms
-        response["controller_time_millisec"] = self.controller_time_millisec
+        self._attach_time_anchor(response)
         return response
 
     def poll(self) -> dict[str, Any]:
         response = self._request(Command.POLL)
         self._ensure_ok(response)
         for document in (response, response["events"]):
-            document["controller_time_unix_ms"] = self.controller_time_unix_ms
-            document["controller_time_millisec"] = self.controller_time_millisec
+            self._attach_time_anchor(document)
         return response
+
+    def _attach_time_anchor(self, document: dict[str, Any]) -> None:
+        document["controller_time_unix_ms"] = self.controller_time_unix_ms
+        document["controller_time_millisec"] = self.controller_time_millisec
+        document["client_time_unix_ms"] = self.client_time_unix_ms
+        document["client_time_millisec"] = self.client_time_millisec
 
     def keep_alive(self) -> None:
         self._ensure_ok(self._request(Command.KEEP_ALIVE))

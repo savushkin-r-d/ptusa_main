@@ -53,12 +53,22 @@ def test_connect_creates_session(monkeypatch) -> None:
         )
     )
     monkeypatch.setattr("socket.create_connection", lambda *args, **kwargs: fake)
+    readings = iter(
+        [1_700_000_000_000_000_000, 1_700_000_000_010_000_000]
+    )
+    monkeypatch.setattr(
+        "ptusa_lua_debugger.protocol.time.time_ns", lambda: next(readings)
+    )
 
     client = DebuggerProtocol()
     assert client.connect("127.0.0.1") == "0123456789abcdef"
     assert client.connected
     assert client.controller_time_unix_ms == 1_789_123_456_789
     assert client.controller_time_millisec == 123_456
+    assert client.client_time_unix_ms == (
+        1_700_000_000_000 + 1_700_000_000_010
+    ) // 2
+    assert client.client_time_millisec == 123_456
 
     net_id, service, frame_type, packet_id, length = struct.unpack(
         ">cBBBH", fake.sent[:6]
@@ -90,11 +100,15 @@ def test_chart_data_contains_session_time_anchor() -> None:
     client.session_id = "session1"
     client.controller_time_unix_ms = 1_789_123_456_789
     client.controller_time_millisec = 123_456
+    client.client_time_unix_ms = 1_700_000_000_000
+    client.client_time_millisec = 123_450
 
     data = client.get_chart_data()
 
     assert data["controller_time_unix_ms"] == 1_789_123_456_789
     assert data["controller_time_millisec"] == 123_456
+    assert data["client_time_unix_ms"] == 1_700_000_000_000
+    assert data["client_time_millisec"] == 123_450
 
 
 def test_messages_contain_session_time_anchor() -> None:
@@ -121,11 +135,15 @@ def test_messages_contain_session_time_anchor() -> None:
     client.session_id = "session1"
     client.controller_time_unix_ms = 1_789_123_456_789
     client.controller_time_millisec = 123_456
+    client.client_time_unix_ms = 1_700_000_000_000
+    client.client_time_millisec = 123_450
 
     data = client.get_messages()
 
     assert data["controller_time_unix_ms"] == 1_789_123_456_789
     assert data["controller_time_millisec"] == 123_456
+    assert data["client_time_unix_ms"] == 1_700_000_000_000
+    assert data["client_time_millisec"] == 123_450
     assert data["messages"][0]["text"] == "ready"
     assert fake.sent[6] == Command.GET_MESSAGES
 
@@ -140,11 +158,17 @@ def test_poll_uses_one_request_for_chart_and_messages() -> None:
     client.session_id = "session1"
     client.controller_time_unix_ms = 1000
     client.controller_time_millisec = 50
+    client.client_time_unix_ms = 2000
+    client.client_time_millisec = 40
     data = client.poll()
     assert fake.sent[6] == Command.POLL
     assert len(fake.sent) == 6 + 1 + len("session1\n")
     assert data["events"]["controller_time_unix_ms"] == 1000
     assert data["controller_time_millisec"] == 50
+    assert data["client_time_unix_ms"] == 2000
+    assert data["client_time_millisec"] == 40
+    assert data["events"]["client_time_unix_ms"] == 2000
+    assert data["events"]["client_time_millisec"] == 40
 
 
 def test_controller_command_uses_debugger_session() -> None:

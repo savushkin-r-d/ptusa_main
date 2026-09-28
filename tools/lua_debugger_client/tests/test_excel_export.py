@@ -8,13 +8,13 @@ def test_exports_sparse_history_to_xlsx(tmp_path) -> None:
     path = tmp_path / "history.xlsx"
     rows = [
         HistoryRow(
-            1_000,
             1_789_123_456_000,
+            1_700_000_000_000,
             {"x": {"ok": True, "type": "number", "value": 1.5}},
         ),
         HistoryRow(
-            2_000,
             None,
+            1_700_000_001_000,
             {"y": {"ok": True, "type": "boolean", "value": True}},
         ),
     ]
@@ -32,13 +32,13 @@ def test_exports_sparse_history_to_xlsx(tmp_path) -> None:
         )
         text = sheet + strings
         # Both time columns and the two expression headers exist.
-        for label in ("Реальное время", "Время контроллера, с", "x", "y"):
+        for label in ("Реальное время", "Время контроллера", "x", "y"):
             assert label.encode("utf-8") in text
-        # Real time written only when available, controller time always.
+        # Datetimes written only when the anchor is available.
         assert b'<c r="A2"' in sheet
         assert b'<c r="B2"' in sheet
-        assert b'<c r="B3"' in sheet
-        assert b'<c r="A3"' not in sheet
+        assert b'<c r="A3"' in sheet
+        assert b'<c r="B3"' not in sheet
         # Expression cells moved one column right; sparse cells stay absent.
         assert b'<c r="C2"' in sheet
         assert b'<c r="D3"' in sheet

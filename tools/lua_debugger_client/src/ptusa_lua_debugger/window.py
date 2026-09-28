@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pyqtgraph as pg
-from PySide6.QtCore import QMetaObject, Qt, QThread, Signal, Slot
+from PySide6.QtCore import QMetaObject, Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -44,6 +46,7 @@ from .history import (
     DEFAULT_HISTORY_LIMIT,
     MAX_DISPLAY_SECONDS,
     MAX_HISTORY_LIMIT,
+    client_timestamp_ms,
     controller_timestamp_ms,
     merge_chart_data,
     merge_statistics,
@@ -62,6 +65,9 @@ CONTROLLER_COMMANDS = (
     (101, "Сбросить параметры"),
     (0, "Очистить код результата"),
 )
+
+DEFAULT_LOG_INTERVAL_MINUTES = 60
+MAX_LOG_INTERVAL_MINUTES = 7 * 24 * 60
 
 
 class DebuggerSessionWidget(QWidget):
@@ -102,6 +108,9 @@ class DebuggerSessionWidget(QWidget):
         self._worker.command_executed.connect(self._on_command_executed)
         self._worker.error.connect(self._show_error)
         self._thread.start()
+
+        self._logging_timer = QTimer(self)
+        self._logging_timer.timeout.connect(self._rotate_log)
 
         self._build_ui()
 
@@ -155,6 +164,33 @@ class DebuggerSessionWidget(QWidget):
         connection.addWidget(self.auto_follow_check)
         connection.addWidget(self.connect_button)
 
+        self.logging_check = QCheckBox("Логирование")
+        self.logging_check.setToolTip(
+            "Периодически сохранять сессию и начинать новую историю"
+        )
+        self.logging_interval_spin = QSpinBox()
+        self.logging_interval_spin.setRange(1, MAX_LOG_INTERVAL_MINUTES)
+        self.logging_interval_spin.setValue(DEFAULT_LOG_INTERVAL_MINUTES)
+        self.logging_interval_spin.setSuffix(" мин")
+        self.logging_interval_spin.valueChanged.connect(
+            self._logging_interval_changed
+        )
+        self.logging_directory_edit = QLineEdit()
+        self.logging_directory_edit.setPlaceholderText(
+            "Каталог файлов журнала"
+        )
+        logging_browse_button = QPushButton("Обзор...")
+        logging_browse_button.clicked.connect(self._choose_logging_directory)
+        self.logging_check.toggled.connect(self._logging_toggled)
+
+        logging = QHBoxLayout()
+        logging.addWidget(self.logging_check)
+        logging.addWidget(QLabel("Период:"))
+        logging.addWidget(self.logging_interval_spin)
+        logging.addWidget(QLabel("Каталог:"))
+        logging.addWidget(self.logging_directory_edit, 1)
+        logging.addWidget(logging_browse_button)
+
         self.expression_edit = QLineEdit()
         self.expression_edit.setPlaceholderText("Например: TE1:get_value()")
         self.expression_edit.returnPressed.connect(self._add_expression)
@@ -200,14 +236,17 @@ class DebuggerSessionWidget(QWidget):
             background="#1C252A",
             axisItems={"bottom": pg.DateAxisItem(orientation="bottom")},
         )
-        self._time_axis = "real"
+        self._time_axis = "controller"
         self.plot.addLegend()
         self.plot.showGrid(x=True, y=True, alpha=0.2)
-        self.plot.setLabel("bottom", "Реальное время")
+        self.plot.setLabel("bottom", "Время контроллера")
 
         self.timeline_combo = QComboBox()
         self.timeline_combo.addItem("Реальное время", "real")
         self.timeline_combo.addItem("Время контроллера", "controller")
+        self.timeline_combo.setCurrentIndex(
+            self.timeline_combo.findData("controller")
+        )
         self.timeline_combo.currentIndexChanged.connect(self._redraw_chart)
 
         self.history_model = HistoryTableModel()
@@ -297,6 +336,7 @@ class DebuggerSessionWidget(QWidget):
 
         root_layout = QVBoxLayout(self)
         root_layout.addLayout(connection)
+        root_layout.addLayout(logging)
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
         root_layout.addLayout(commands)
@@ -705,12 +745,17 @@ class DebuggerSessionWidget(QWidget):
             return
 
         base = int(prepared[0][1][0]["time_ms"])
-        mode = (
-            "real"
-            if self.timeline_combo.currentData() == "real"
-            and controller_timestamp_ms(data, base) is not None
-            else "controller"
+        requested = self.timeline_combo.currentData()
+        converter = (
+            client_timestamp_ms if requested == "real" else controller_timestamp_ms
         )
+        mode = requested if requested == "real" else "controller"
+        if converter(data, base) is None:
+            converter = controller_timestamp_ms
+            mode = "controller"
+            if converter(data, base) is None:
+                converter = None
+                mode = "counter"
         self._set_time_axis(mode)
         base_seconds = base / 1000
         max_x: float | None = None
@@ -718,9 +763,9 @@ class DebuggerSessionWidget(QWidget):
         for series, numeric in prepared:
             expression = str(series.get("expression", ""))
             style = styles[expression]
-            if mode == "real":
+            if converter is not None:
                 timestamps = [
-                    controller_timestamp_ms(data, int(sample["time_ms"]))
+                    converter(data, int(sample["time_ms"]))
                     for sample in numeric
                 ]
                 x_values = [
@@ -736,10 +781,10 @@ class DebuggerSessionWidget(QWidget):
                 ]
             y_values = [float(sample["value"]) + style["offset"] for sample in numeric]
             point_x, point_y = x_values.copy(), y_values.copy()
-            current_time = controller_timestamp_ms(data, server_time)
+            current_time = converter(data, server_time) if converter else None
             current_x = (
                 current_time / 1000
-                if mode == "real" and current_time is not None
+                if current_time is not None
                 else base_seconds + ((server_time - base) & 0xFFFFFFFF) / 1000
             )
             if current_x > x_values[-1]:
@@ -781,15 +826,15 @@ class DebuggerSessionWidget(QWidget):
         if mode == self._time_axis:
             return
         axis = (
-            pg.DateAxisItem(orientation="bottom")
-            if mode == "real"
-            else pg.AxisItem(orientation="bottom")
+            pg.AxisItem(orientation="bottom")
+            if mode == "counter"
+            else pg.DateAxisItem(orientation="bottom")
         )
         self.plot.setAxisItems({"bottom": axis})
         self.plot.setLabel(
             "bottom",
             "Реальное время" if mode == "real" else "Время контроллера",
-            units=None if mode == "real" else "s",
+            units="s" if mode == "counter" else None,
         )
         self._time_axis = mode
 
@@ -831,6 +876,98 @@ class DebuggerSessionWidget(QWidget):
         QMessageBox.warning(self, "Lua debugger", message)
 
     @Slot()
+    def _choose_logging_directory(self) -> None:
+        path = QFileDialog.getExistingDirectory(
+            self, "Каталог журнала", self.logging_directory_edit.text()
+        )
+        if path:
+            self.logging_directory_edit.setText(path)
+
+    @Slot(bool)
+    def _logging_toggled(self, enabled: bool) -> None:
+        if not enabled:
+            self._logging_timer.stop()
+            return
+        if not self.logging_directory_edit.text().strip():
+            self._choose_logging_directory()
+        directory_text = self.logging_directory_edit.text().strip()
+        if not directory_text:
+            self.logging_check.blockSignals(True)
+            self.logging_check.setChecked(False)
+            self.logging_check.blockSignals(False)
+            return
+        try:
+            directory = Path(directory_text).expanduser().resolve()
+            directory.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            self.logging_check.blockSignals(True)
+            self.logging_check.setChecked(False)
+            self.logging_check.blockSignals(False)
+            self._show_error(f"Не удалось включить логирование: {exc}")
+            return
+        self.logging_directory_edit.setText(str(directory))
+        self._logging_timer.start(self.logging_interval_spin.value() * 60_000)
+        self.status_label.setText(
+            f"Логирование включено: {directory}"
+        )
+
+    @Slot(int)
+    def _logging_interval_changed(self, minutes: int) -> None:
+        if self._logging_timer.isActive():
+            self._logging_timer.start(minutes * 60_000)
+
+    def _save_session_to(self, path: str | Path) -> None:
+        save_session(
+            path,
+            host=self.host_edit.text().strip(),
+            port=self.port_spin.value(),
+            poll_interval_ms=self.interval_spin.value(),
+            history_limit=self.history_limit_spin.value(),
+            expressions=self._expressions(),
+            history_expressions=self._history_expressions(),
+            chart_data=self._last_chart_data,
+            display_seconds=self.display_seconds_spin.value(),
+            auto_follow=self.auto_follow_check.isChecked(),
+            timeline=self.timeline_combo.currentData(),
+            statistics=self._statistics,
+            series_styles=self._series_styles(),
+            pulse_definitions=[
+                vars(definition)
+                for definition in self._pulse_counters.definitions.values()
+            ],
+            pulse_state=self._pulse_counters.snapshot(),
+        )
+
+    def _next_log_path(self) -> Path:
+        directory = Path(self.logging_directory_edit.text().strip())
+        directory.mkdir(parents=True, exist_ok=True)
+        host = re.sub(r"[^\w.-]+", "_", self.host_edit.text().strip()).strip("._")
+        host = host or "session"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        stem = f"session_{host}_{self.port_spin.value()}_{timestamp}"
+        path = directory / f"{stem}.ptlua.json"
+        suffix = 1
+        while path.exists():
+            path = directory / f"{stem}_{suffix:03d}.ptlua.json"
+            suffix += 1
+        return path
+
+    @Slot()
+    def _rotate_log(self) -> None:
+        try:
+            path = self._next_log_path()
+            self._save_session_to(path)
+        except OSError as exc:
+            self._logging_timer.stop()
+            self.logging_check.blockSignals(True)
+            self.logging_check.setChecked(False)
+            self.logging_check.blockSignals(False)
+            self._show_error(f"Логирование остановлено: {exc}")
+            return
+        self._clear_charts()
+        self.status_label.setText(f"Сессия журнала сохранена: {path}")
+
+    @Slot()
     def _save_session(self) -> None:
         path, _ = QFileDialog.getSaveFileName(
             self, "Сохранить сессию", "", "Lua debugger session (*.ptlua.json)"
@@ -838,26 +975,11 @@ class DebuggerSessionWidget(QWidget):
         if not path:
             return
         try:
-            save_session(
-                path,
-                host=self.host_edit.text().strip(),
-                port=self.port_spin.value(),
-                poll_interval_ms=self.interval_spin.value(),
-                history_limit=self.history_limit_spin.value(),
-                expressions=self._expressions(),
-                history_expressions=self._history_expressions(),
-                chart_data=self._last_chart_data,
-                display_seconds=self.display_seconds_spin.value(),
-                auto_follow=self.auto_follow_check.isChecked(),
-                timeline=self.timeline_combo.currentData(),
-                statistics=self._statistics,
-                series_styles=self._series_styles(),
-                pulse_definitions=[vars(definition) for definition in
-                                   self._pulse_counters.definitions.values()],
-                pulse_state=self._pulse_counters.snapshot(),
-            )
+            self._save_session_to(path)
         except OSError as exc:
             self._show_error(str(exc))
+            return
+        self.status_label.setText(f"Сессия сохранена: {path}")
 
     @Slot()
     def _load_session(self) -> None:
@@ -922,6 +1044,7 @@ class DebuggerSessionWidget(QWidget):
         if self._shutting_down:
             return
         self._shutting_down = True
+        self._logging_timer.stop()
         QMetaObject.invokeMethod(
             self._worker, "shutdown", Qt.BlockingQueuedConnection
         )
