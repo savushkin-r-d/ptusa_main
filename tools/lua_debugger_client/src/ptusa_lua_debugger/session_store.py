@@ -32,6 +32,7 @@ def save_session(
     series_styles: dict[str, dict[str, Any]] | None = None,
     pulse_definitions: list[dict[str, Any]] | None = None,
     pulse_state: dict[str, Any] | None = None,
+    auto_reconnect: bool = False,
 ) -> None:
     document = {
         "version": 1,
@@ -40,6 +41,7 @@ def save_session(
         "history_limit": history_limit,
         "display_seconds": display_seconds,
         "auto_follow": auto_follow,
+        "auto_reconnect": auto_reconnect,
         "timeline": timeline,
         "statistics": statistics or {},
         "series_styles": series_styles or {},
@@ -67,6 +69,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
     history_limit = document.get("history_limit", DEFAULT_HISTORY_LIMIT)
     display_seconds = document.get("display_seconds", DEFAULT_DISPLAY_SECONDS)
     auto_follow = document.get("auto_follow", True)
+    auto_reconnect = document.get("auto_reconnect", False)
     timeline = document.get("timeline", "controller")
     statistics = document.get("statistics", {})
     if not isinstance(connection, dict) or not isinstance(expressions, list):
@@ -111,6 +114,8 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise TypeError("Некорректный интервал отображения")
     if not isinstance(auto_follow, bool):
         raise TypeError("Некорректный режим отображения")
+    if not isinstance(auto_reconnect, bool):
+        raise TypeError("Некорректная настройка автоматического переподключения")
     if timeline not in ("real", "controller"):
         raise ValueError("Некорректная шкала времени")
     if not isinstance(statistics, dict) or any(
@@ -127,6 +132,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["series_styles"] = styles
     document["display_seconds"] = display_seconds
     document["auto_follow"] = auto_follow
+    document["auto_reconnect"] = auto_reconnect
     document["timeline"] = timeline
     document["statistics"] = statistics
     document["history_expressions"] = history_expressions

@@ -449,3 +449,139 @@ def test_failed_periodic_log_preserves_history_and_stops_logging(
         session.shutdown()
         session.deleteLater()
         application.processEvents()
+
+
+def test_auto_reconnect_backoff_progression() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.connect_requested.disconnect(session._worker.connect_to)
+        attempts: list[tuple[str, int]] = []
+        session.connect_requested.connect(
+            lambda host, port: attempts.append((host, port))
+        )
+        session.host_edit.setText("10.0.0.5")
+        session.port_spin.setValue(12_345)
+        session.auto_reconnect_check.setChecked(True)
+
+        expected = [1_000 + 5_000 * step for step in range(12)]
+        expected += [60_000, 60_000]
+        intervals = []
+        session._on_disconnected("Обрыв связи")
+        intervals.append(session._reconnect_timer.interval())
+        assert session._reconnect_timer.isActive()
+        assert session.connect_button.isEnabled()
+        assert "Обрыв связи · повторное подключение через 1 с" \
+            == session.status_label.text()
+        while len(intervals) < len(expected):
+            session._retry_connection()
+            assert not session._reconnect_timer.isActive()
+            session._on_disconnected("Обрыв связи")
+            intervals.append(session._reconnect_timer.interval())
+
+        assert intervals == expected
+        assert attempts == [("10.0.0.5", 12_345)] * (len(expected) - 1)
+        assert session._reconnect_timer.isActive()
+        assert "повторное подключение через 60 с" in session.status_label.text()
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_auto_reconnect_reset_and_manual_cancellation() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.connect_requested.disconnect(session._worker.connect_to)
+        session.disconnect_requested.disconnect(session._worker.disconnect)
+        attempts: list[tuple[str, int]] = []
+        disconnects: list[bool] = []
+        session.connect_requested.connect(
+            lambda host, port: attempts.append((host, port))
+        )
+        session.disconnect_requested.connect(lambda: disconnects.append(True))
+        session.auto_reconnect_check.setChecked(True)
+
+        # A scheduled retry is cancelled by a manual connect, which starts a
+        # fresh backoff cycle.
+        session._on_disconnected("Обрыв связи")
+        assert session._reconnect_timer.isActive()
+        session._toggle_connection()
+        assert not session._reconnect_timer.isActive()
+        assert session._connection_pending
+        assert session._reconnect_delay_seconds == 1
+        assert attempts == [("127.0.0.1", 10_000)]
+        session._on_disconnected("Отказано")
+        assert session._reconnect_timer.interval() == 1_000
+
+        # A successful connection cancels the retry and resets the backoff.
+        session._retry_connection()
+        session._on_connected("session-1")
+        assert not session._reconnect_timer.isActive()
+        assert not session._connection_pending
+        assert session._reconnect_delay_seconds == 1
+        assert session._scheduled_reconnect_delay_seconds is None
+        assert session._last_disconnect_reason == ""
+        assert session.connect_button.text() == "Отключиться"
+
+        # Manual disconnect emits an empty reason and never schedules a retry.
+        session._toggle_connection()
+        assert disconnects == [True]
+        session._on_disconnected("")
+        assert not session._reconnect_timer.isActive()
+        assert session._last_disconnect_reason == ""
+        assert session.status_label.text() == "Не подключено"
+        assert session.connect_button.text() == "Подключиться"
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_auto_reconnect_toggle_preserves_pending_delay() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.connect_requested.disconnect(session._worker.connect_to)
+
+        # A failure with the option off does not schedule anything; enabling
+        # the option schedules the first applicable delay.
+        session._on_disconnected("Обрыв связи")
+        assert not session._reconnect_timer.isActive()
+        session.auto_reconnect_check.setChecked(True)
+        assert session._reconnect_timer.isActive()
+        assert session._reconnect_timer.interval() == 1_000
+        assert "повторное подключение через 1 с" in session.status_label.text()
+
+        # Toggling the option off/on reuses the already chosen delay and does
+        # not advance the backoff.
+        for _ in range(2):
+            session.auto_reconnect_check.setChecked(False)
+            assert not session._reconnect_timer.isActive()
+            assert session.status_label.text() == "Обрыв связи"
+            session.auto_reconnect_check.setChecked(True)
+            assert session._reconnect_timer.isActive()
+            assert session._reconnect_timer.interval() == 1_000
+
+        # The next failed attempt advances to the following delay exactly once.
+        session._retry_connection()
+        session._on_disconnected("Обрыв связи")
+        assert session._reconnect_timer.interval() == 6_000
+        assert "повторное подключение через 6 с" in session.status_label.text()
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_shutdown_stops_reconnect_timer() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    session.auto_reconnect_check.setChecked(True)
+    session._on_disconnected("Обрыв связи")
+    assert session._reconnect_timer.isActive()
+    session.shutdown()
+    assert not session._reconnect_timer.isActive()
+    session.deleteLater()
+    application.processEvents()

@@ -1,3 +1,5 @@
+import json
+
 from ptusa_lua_debugger.session_store import load_session, save_session
 import pytest
 
@@ -39,6 +41,7 @@ def test_session_roundtrip(tmp_path) -> None:
         chart_data={"ok": True, "series": []},
         display_seconds=120,
         auto_follow=False,
+        auto_reconnect=True,
         statistics={
             "TE1:get_value()": {
                 "min": 1.5,
@@ -64,6 +67,7 @@ def test_session_roundtrip(tmp_path) -> None:
     assert document["history_limit"] == 7_500
     assert document["display_seconds"] == 120
     assert document["auto_follow"] is False
+    assert document["auto_reconnect"] is True
     assert document["statistics"]["TE1:get_value()"]["average"] == 4.75
     assert document["statistics"]["TE1:get_value()"]["median"] == 4.75
     assert document["statistics"]["TE1:get_value()"]["_count"] == 2
@@ -82,9 +86,46 @@ def test_old_session_uses_default_history_limit(tmp_path) -> None:
     assert document["history_limit"] == 5_000
     assert document["display_seconds"] == 60
     assert document["auto_follow"] is True
+    assert document["auto_reconnect"] is False
     assert document["statistics"] == {}
     assert document["history_expressions"] == []
     assert document["timeline"] == "controller"
+
+
+@pytest.mark.parametrize("value", ["yes", 1, None, [], {}])
+def test_invalid_auto_reconnect_is_rejected(tmp_path, value) -> None:
+    path = tmp_path / "bad-auto-reconnect.ptlua.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "connection": {},
+                "poll_interval_ms": 500,
+                "expressions": [],
+                "auto_reconnect": value,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(TypeError, match="переподключения"):
+        load_session(path)
+
+
+def test_auto_reconnect_defaults_to_false_when_not_saved(tmp_path) -> None:
+    path = tmp_path / "default-auto-reconnect.ptlua.json"
+    save_session(
+        path,
+        host="localhost",
+        port=10_000,
+        poll_interval_ms=500,
+        history_limit=5_000,
+        expressions=[],
+        history_expressions=[],
+        chart_data=None,
+    )
+
+    assert load_session(path)["auto_reconnect"] is False
 
 
 @pytest.mark.parametrize("timeline", ["real", "controller"])
