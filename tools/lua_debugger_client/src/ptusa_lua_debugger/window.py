@@ -128,6 +128,8 @@ class DebuggerSessionWidget(QWidget):
 
     def _build_ui(self) -> None:
         self.host_edit = QLineEdit("127.0.0.1")
+        self.host_edit.setMinimumWidth(150)
+        self.host_edit.setMaximumWidth(280)
         self.host_edit.textChanged.connect(self._update_title)
         self.port_spin = QSpinBox()
         self.port_spin.setRange(1, 65_535)
@@ -165,6 +167,7 @@ class DebuggerSessionWidget(QWidget):
         )
         self.auto_reconnect_check.toggled.connect(self._auto_reconnect_toggled)
         self.connect_button = QPushButton("Подключиться")
+        self.connect_button.setProperty("primary", True)
         self.connect_button.clicked.connect(self._toggle_connection)
 
         connection = QHBoxLayout()
@@ -174,12 +177,8 @@ class DebuggerSessionWidget(QWidget):
         connection.addWidget(self.port_spin)
         connection.addWidget(QLabel("Опрос:"))
         connection.addWidget(self.interval_spin)
-        connection.addWidget(QLabel("История:"))
-        connection.addWidget(self.history_limit_spin)
-        connection.addWidget(QLabel("Окно:"))
-        connection.addWidget(self.display_seconds_spin)
-        connection.addWidget(self.auto_follow_check)
         connection.addWidget(self.auto_reconnect_check)
+        connection.addStretch(1)
         connection.addWidget(self.connect_button)
 
         self.logging_check = QCheckBox("Логирование")
@@ -213,6 +212,8 @@ class DebuggerSessionWidget(QWidget):
         self.expression_edit.setPlaceholderText("Например: TE1:get_value()")
         self.expression_edit.returnPressed.connect(self._add_expression)
         add_button = QPushButton("Добавить")
+        add_button.setProperty("primary", True)
+        add_button.setToolTip("Добавить выражение (Enter)")
         add_button.clicked.connect(self._add_expression)
         pulse_button = QPushButton("Счётчик импульсов…")
         pulse_button.clicked.connect(self._add_pulse_counter)
@@ -224,10 +225,10 @@ class DebuggerSessionWidget(QWidget):
         clear_button.clicked.connect(self._clear_charts)
 
         expression_buttons = QHBoxLayout()
-        expression_buttons.addWidget(add_button)
         expression_buttons.addWidget(pulse_button)
         expression_buttons.addWidget(remove_button)
         expression_buttons.addWidget(apply_button)
+        expression_buttons.addStretch(1)
         expression_buttons.addWidget(clear_button)
 
         self.variables = QTreeWidget()
@@ -237,7 +238,8 @@ class DebuggerSessionWidget(QWidget):
         )
         self.variables.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.variables.header().setSectionResizeMode(0, QHeaderView.Interactive)
-        self.variables.setColumnWidth(0, 300)
+        self.variables.setColumnWidth(0, 230)
+        self.variables.setAlternatingRowColors(True)
         for column in range(1, 4):
             self.variables.header().setSectionResizeMode(column, QHeaderView.ResizeToContents)
         self.variables.setMinimumWidth(420)
@@ -245,7 +247,11 @@ class DebuggerSessionWidget(QWidget):
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
-        left_layout.addWidget(self.expression_edit)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        expression_entry = QHBoxLayout()
+        expression_entry.addWidget(self.expression_edit, 1)
+        expression_entry.addWidget(add_button)
+        left_layout.addLayout(expression_entry)
         left_layout.addLayout(expression_buttons)
         left_layout.addWidget(self.variables)
 
@@ -311,11 +317,20 @@ class DebuggerSessionWidget(QWidget):
 
         chart_page = QWidget()
         chart_layout = QVBoxLayout(chart_page)
+        chart_layout.setContentsMargins(8, 8, 0, 0)
         timeline_row = QHBoxLayout()
         timeline_row.addWidget(QLabel("Шкала времени:"))
         timeline_row.addWidget(self.timeline_combo)
         timeline_row.addStretch(1)
         chart_layout.addLayout(timeline_row)
+        chart_settings = QHBoxLayout()
+        chart_settings.addWidget(QLabel("Окно:"))
+        chart_settings.addWidget(self.display_seconds_spin)
+        chart_settings.addWidget(self.auto_follow_check)
+        chart_settings.addStretch(1)
+        chart_settings.addWidget(QLabel("Точек:"))
+        chart_settings.addWidget(self.history_limit_spin)
+        chart_layout.addLayout(chart_settings)
         chart_layout.addWidget(self.plot, 1)
 
         self.output_tabs = QTabWidget()
@@ -324,6 +339,8 @@ class DebuggerSessionWidget(QWidget):
         self.output_tabs.addTab(messages_page, "Сообщения")
 
         splitter = QSplitter()
+        splitter.setChildrenCollapsible(False)
+        splitter.setHandleWidth(8)
         splitter.addWidget(left)
         splitter.addWidget(self.output_tabs)
         splitter.setSizes([470, 710])
@@ -353,12 +370,15 @@ class DebuggerSessionWidget(QWidget):
         commands.addWidget(self.command_result, 1)
 
         root_layout = QVBoxLayout(self)
+        root_layout.setContentsMargins(12, 8, 12, 8)
+        root_layout.setSpacing(8)
         root_layout.addLayout(connection)
         root_layout.addLayout(logging)
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
         root_layout.addLayout(commands)
         self.status_label = QLabel("Не подключено")
+        self.status_label.setObjectName("sessionStatus")
         root_layout.addWidget(self.status_label)
 
     @Slot()
