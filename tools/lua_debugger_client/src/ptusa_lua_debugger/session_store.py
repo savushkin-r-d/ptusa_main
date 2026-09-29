@@ -33,6 +33,7 @@ def save_session(
     pulse_definitions: list[dict[str, Any]] | None = None,
     pulse_state: dict[str, Any] | None = None,
     auto_reconnect: bool = False,
+    message_log: list[dict[str, str]] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -42,6 +43,7 @@ def save_session(
         "display_seconds": display_seconds,
         "auto_follow": auto_follow,
         "auto_reconnect": auto_reconnect,
+        "message_log": message_log or [],
         "timeline": timeline,
         "statistics": statistics or {},
         "series_styles": series_styles or {},
@@ -70,6 +72,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
     display_seconds = document.get("display_seconds", DEFAULT_DISPLAY_SECONDS)
     auto_follow = document.get("auto_follow", True)
     auto_reconnect = document.get("auto_reconnect", False)
+    message_log = document.get("message_log", [])
     timeline = document.get("timeline", "controller")
     statistics = document.get("statistics", {})
     if not isinstance(connection, dict) or not isinstance(expressions, list):
@@ -116,6 +119,11 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise TypeError("Некорректный режим отображения")
     if not isinstance(auto_reconnect, bool):
         raise TypeError("Некорректная настройка автоматического переподключения")
+    if (
+        not isinstance(message_log, list)
+        or any(not _valid_message_log_entry(entry) for entry in message_log)
+    ):
+        raise ValueError("Некорректный журнал сообщений")
     if timeline not in ("real", "controller"):
         raise ValueError("Некорректная шкала времени")
     if not isinstance(statistics, dict) or any(
@@ -133,6 +141,7 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["display_seconds"] = display_seconds
     document["auto_follow"] = auto_follow
     document["auto_reconnect"] = auto_reconnect
+    document["message_log"] = message_log
     document["timeline"] = timeline
     document["statistics"] = statistics
     document["history_expressions"] = history_expressions
@@ -220,4 +229,13 @@ def _valid_series_style(style: Any) -> bool:
         and isinstance(style.get("points", False), bool)
         and isinstance(style.get("chart_type", DEFAULT_CHART_TYPE), str)
         and style.get("chart_type", DEFAULT_CHART_TYPE) in CHART_TYPES
+    )
+
+
+def _valid_message_log_entry(entry: Any) -> bool:
+    keys = {"time", "source", "level", "text"}
+    return (
+        isinstance(entry, dict)
+        and set(entry) == keys
+        and all(isinstance(entry[key], str) for key in keys)
     )

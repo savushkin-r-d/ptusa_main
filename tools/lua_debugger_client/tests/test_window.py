@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -585,3 +586,71 @@ def test_shutdown_stops_reconnect_timer() -> None:
     assert not session._reconnect_timer.isActive()
     session.deleteLater()
     application.processEvents()
+
+
+def test_session_saves_and_restores_message_log(tmp_path) -> None:
+    from ptusa_lua_debugger.session_store import load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        session._on_messages(
+            {
+                "controller_time_unix_ms": 1_789_123_456_789,
+                "controller_time_millisec": 123_456,
+                "dropped": 0,
+                "messages": [
+                    {
+                        "id": 1,
+                        "time_ms": 123_500,
+                        "source": "set_err_msg",
+                        "priority": 3,
+                        "text": "Тестовая авария",
+                    },
+                    {
+                        "id": 2,
+                        "time_ms": 123_600,
+                        "source": "debugger",
+                        "priority": 7,
+                        "text": "Отладочное сообщение",
+                    },
+                ],
+            }
+        )
+        assert session.messages_table.rowCount() == 2
+        expected = [
+            [session.messages_table.item(row, column).text()
+             for column in range(4)]
+            for row in range(2)
+        ]
+        # The converted timestamp and the severity label are stored as shown.
+        assert re.fullmatch(
+            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}", expected[0][0]
+        )
+        assert expected[0][1:] == ["set_err_msg", "ERROR", "Тестовая авария"]
+        assert expected[1][2] == "DEBUG"
+
+        path = tmp_path / "messages.ptlua.json"
+        session._save_session_to(path)
+        document = load_session(path)
+        assert document["message_log"] == [
+            dict(zip(("time", "source", "level", "text"), row))
+            for row in expected
+        ]
+
+        restored.load_document(document)
+        assert restored.messages_table.rowCount() == 2
+        for row, values in enumerate(expected):
+            for column, value in enumerate(values):
+                assert restored.messages_table.item(row, column).text() == value
+
+        # Loading a session without a saved log clears the displayed rows.
+        restored.load_document({**document, "message_log": []})
+        assert restored.messages_table.rowCount() == 0
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()

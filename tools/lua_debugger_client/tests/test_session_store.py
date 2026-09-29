@@ -42,6 +42,14 @@ def test_session_roundtrip(tmp_path) -> None:
         display_seconds=120,
         auto_follow=False,
         auto_reconnect=True,
+        message_log=[
+            {
+                "time": "2026-06-25 12:00:00.500",
+                "source": "set_err_msg",
+                "level": "ERROR",
+                "text": "Тестовая авария",
+            }
+        ],
         statistics={
             "TE1:get_value()": {
                 "min": 1.5,
@@ -68,6 +76,14 @@ def test_session_roundtrip(tmp_path) -> None:
     assert document["display_seconds"] == 120
     assert document["auto_follow"] is False
     assert document["auto_reconnect"] is True
+    assert document["message_log"] == [
+        {
+            "time": "2026-06-25 12:00:00.500",
+            "source": "set_err_msg",
+            "level": "ERROR",
+            "text": "Тестовая авария",
+        }
+    ]
     assert document["statistics"]["TE1:get_value()"]["average"] == 4.75
     assert document["statistics"]["TE1:get_value()"]["median"] == 4.75
     assert document["statistics"]["TE1:get_value()"]["_count"] == 2
@@ -87,6 +103,7 @@ def test_old_session_uses_default_history_limit(tmp_path) -> None:
     assert document["display_seconds"] == 60
     assert document["auto_follow"] is True
     assert document["auto_reconnect"] is False
+    assert document["message_log"] == []
     assert document["statistics"] == {}
     assert document["history_expressions"] == []
     assert document["timeline"] == "controller"
@@ -126,6 +143,32 @@ def test_auto_reconnect_defaults_to_false_when_not_saved(tmp_path) -> None:
     )
 
     assert load_session(path)["auto_reconnect"] is False
+
+
+@pytest.mark.parametrize("message_log", [
+    "not-a-list",
+    ["not-a-dict"],
+    [{"time": "t", "source": "s", "level": "l"}],
+    [{"time": "t", "source": "s", "level": "l", "text": "x", "id": "1"}],
+    [{"time": "t", "source": "s", "level": "l", "text": 42}],
+])
+def test_invalid_message_log_is_rejected(tmp_path, message_log) -> None:
+    path = tmp_path / "bad-message-log.ptlua.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "connection": {},
+                "poll_interval_ms": 500,
+                "expressions": [],
+                "message_log": message_log,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="журнал сообщений"):
+        load_session(path)
 
 
 @pytest.mark.parametrize("timeline", ["real", "controller"])

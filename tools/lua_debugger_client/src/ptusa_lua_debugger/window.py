@@ -768,6 +768,31 @@ class DebuggerSessionWidget(QWidget):
         if data.get("messages"):
             self.messages_table.scrollToBottom()
 
+    def _message_log(self) -> list[dict[str, str]]:
+        keys = ("time", "source", "level", "text")
+
+        def cell(row: int, column: int) -> str:
+            item = self.messages_table.item(row, column)
+            return item.text() if item is not None else ""
+
+        return [
+            {key: cell(row, column) for column, key in enumerate(keys)}
+            for row in range(self.messages_table.rowCount())
+        ]
+
+    def _restore_message_log(self, message_log: list[dict[str, str]]) -> None:
+        keys = ("time", "source", "level", "text")
+        self.messages_table.setRowCount(0)
+        for entry in message_log:
+            row = self.messages_table.rowCount()
+            self.messages_table.insertRow(row)
+            for column, key in enumerate(keys):
+                self.messages_table.setItem(
+                    row, column, QTableWidgetItem(entry[key])
+                )
+        if message_log:
+            self.messages_table.scrollToBottom()
+
     def _refresh_table_statistics(self) -> None:
         for item in self._expression_items():
             statistics = self._statistics.get(item.text(0), {})
@@ -1014,6 +1039,7 @@ class DebuggerSessionWidget(QWidget):
                 for definition in self._pulse_counters.definitions.values()
             ],
             pulse_state=self._pulse_counters.snapshot(),
+            message_log=self._message_log(),
         )
 
     def _next_log_path(self) -> Path:
@@ -1082,6 +1108,7 @@ class DebuggerSessionWidget(QWidget):
         self.auto_reconnect_check.setChecked(
             bool(document.get("auto_reconnect", False))
         )
+        self._restore_message_log(document.get("message_log", []))
         self._statistics = {
             expression: dict(extrema)
             for expression, extrema in document["statistics"].items()
