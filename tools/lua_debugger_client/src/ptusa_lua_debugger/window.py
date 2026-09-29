@@ -669,6 +669,19 @@ class DebuggerSessionWidget(QWidget):
     def _execute_controller_command(self) -> None:
         if not self._connected:
             return
+        answer = QMessageBox.question(
+            self,
+            "Подтверждение команды",
+            (
+                f"Отправить команду на контроллер "
+                f"{self.host_edit.text().strip()}:{self.port_spin.value()}?\n\n"
+                f"{self.command_combo.currentText()}"
+            ),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
         command_id = int(self.command_combo.currentData())
         self.command_button.setEnabled(False)
         self.command_result.setText("Выполнение…")

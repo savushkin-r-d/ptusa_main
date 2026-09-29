@@ -6,7 +6,7 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 
 from ptusa_lua_debugger.window import DebuggerSessionWidget, MainWindow
 from ptusa_lua_debugger.pulse_counter import PulseDefinition
@@ -183,7 +183,9 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         application.processEvents()
 
 
-def test_controller_commands_are_available_in_each_session() -> None:
+def test_controller_commands_are_available_in_each_session(
+    monkeypatch,
+) -> None:
     application = QApplication.instance() or QApplication([])
     session = DebuggerSessionWidget()
     try:
@@ -197,12 +199,88 @@ def test_controller_commands_are_available_in_each_session() -> None:
                 ] == [103, 104, 102, 100, 101, 0]
         assert not session.command_button.isEnabled()
 
+        # Without a connection nothing is sent and no dialog is shown.
+        def fail_question(*args, **kwargs):
+            raise AssertionError("confirmation shown while disconnected")
+
+        monkeypatch.setattr(QMessageBox, "question", fail_question)
+        session._execute_controller_command()
+        assert sent == []
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_controller_command_declined_confirmation_sends_nothing(
+    monkeypatch,
+) -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.controller_command_requested.disconnect(
+            session._worker.execute_controller_command
+        )
+        sent: list[int] = []
+        session.controller_command_requested.connect(sent.append)
+        session._connected = True
+        session.command_button.setEnabled(True)
+        session.host_edit.setText("192.168.0.10")
+        session.port_spin.setValue(10_001)
+        session.command_combo.setCurrentIndex(session.command_combo.findData(102))
+
+        calls: list[tuple] = []
+
+        def decline(*args):
+            calls.append(args)
+            return QMessageBox.StandardButton.No
+
+        monkeypatch.setattr(QMessageBox, "question", decline)
+
+        session.command_button.click()
+
+        assert sent == []
+        assert session.command_button.isEnabled()
+        assert session.command_result.text() == "—"
+
+        assert len(calls) == 1
+        parent, title, text, buttons, default = calls[0]
+        assert parent is session
+        assert title == "Подтверждение команды"
+        assert "192.168.0.10:10001" in text
+        assert session.command_combo.currentText() in text
+        assert buttons == (
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        assert default == QMessageBox.StandardButton.No
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_controller_command_confirmed_is_sent(monkeypatch) -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.controller_command_requested.disconnect(
+            session._worker.execute_controller_command
+        )
+        sent: list[int] = []
+        session.controller_command_requested.connect(sent.append)
         session._connected = True
         session.command_button.setEnabled(True)
         session.command_combo.setCurrentIndex(session.command_combo.findData(102))
+        monkeypatch.setattr(
+            QMessageBox,
+            "question",
+            lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
+        )
+
         session.command_button.click()
         assert sent == [102]
         assert not session.command_button.isEnabled()
+        assert session.command_result.text() == "Выполнение…"
         session._on_command_executed(102, {"ok": True, "queued": True})
         assert session.command_button.isEnabled()
         assert session.command_result.text() == "Сохранение запланировано"
