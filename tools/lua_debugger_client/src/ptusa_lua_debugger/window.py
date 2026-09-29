@@ -69,6 +69,10 @@ CONTROLLER_COMMANDS = (
 DEFAULT_LOG_INTERVAL_MINUTES = 60
 MAX_LOG_INTERVAL_MINUTES = 7 * 24 * 60
 
+RECONNECT_INITIAL_DELAY_SECONDS = 1
+RECONNECT_DELAY_STEP_SECONDS = 5
+RECONNECT_MAX_DELAY_SECONDS = 60
+
 
 class DebuggerSessionWidget(QWidget):
     connect_requested = Signal(str, int)
@@ -84,6 +88,10 @@ class DebuggerSessionWidget(QWidget):
         super().__init__()
         self._connected = False
         self._shutting_down = False
+        self._connection_pending = False
+        self._reconnect_delay_seconds = RECONNECT_INITIAL_DELAY_SECONDS
+        self._scheduled_reconnect_delay_seconds: int | None = None
+        self._last_disconnect_reason = ""
         self._last_chart_data: dict[str, Any] | None = None
         self._statistics: dict[str, dict[str, Any]] = {}
         self._pulse_counters = PulseCounters()
@@ -111,6 +119,10 @@ class DebuggerSessionWidget(QWidget):
 
         self._logging_timer = QTimer(self)
         self._logging_timer.timeout.connect(self._rotate_log)
+
+        self._reconnect_timer = QTimer(self)
+        self._reconnect_timer.setSingleShot(True)
+        self._reconnect_timer.timeout.connect(self._retry_connection)
 
         self._build_ui()
 
@@ -147,6 +159,11 @@ class DebuggerSessionWidget(QWidget):
             "Автоматически показывать последние N секунд"
         )
         self.auto_follow_check.toggled.connect(self._display_settings_changed)
+        self.auto_reconnect_check = QCheckBox("Переподключаться")
+        self.auto_reconnect_check.setToolTip(
+            "Автоматически повторять подключение через 1–60 секунд"
+        )
+        self.auto_reconnect_check.toggled.connect(self._auto_reconnect_toggled)
         self.connect_button = QPushButton("Подключиться")
         self.connect_button.clicked.connect(self._toggle_connection)
 
@@ -162,6 +179,7 @@ class DebuggerSessionWidget(QWidget):
         connection.addWidget(QLabel("Окно:"))
         connection.addWidget(self.display_seconds_spin)
         connection.addWidget(self.auto_follow_check)
+        connection.addWidget(self.auto_reconnect_check)
         connection.addWidget(self.connect_button)
 
         self.logging_check = QCheckBox("Логирование")
@@ -346,16 +364,65 @@ class DebuggerSessionWidget(QWidget):
     @Slot()
     def _toggle_connection(self) -> None:
         if self._connected:
+            self._reset_reconnect()
             self.disconnect_requested.emit()
             return
+        self._reset_reconnect()
+        self._start_connection()
+
+    def _reset_reconnect(self) -> None:
+        self._reconnect_timer.stop()
+        self._reconnect_delay_seconds = RECONNECT_INITIAL_DELAY_SECONDS
+        self._scheduled_reconnect_delay_seconds = None
+        self._last_disconnect_reason = ""
+
+    def _schedule_reconnect(self) -> None:
+        if self._scheduled_reconnect_delay_seconds is None:
+            self._scheduled_reconnect_delay_seconds = self._reconnect_delay_seconds
+            self._reconnect_delay_seconds = min(
+                self._reconnect_delay_seconds + RECONNECT_DELAY_STEP_SECONDS,
+                RECONNECT_MAX_DELAY_SECONDS,
+            )
+        delay = self._scheduled_reconnect_delay_seconds
+        self._reconnect_timer.start(delay * 1_000)
+        self.status_label.setText(
+            f"{self._last_disconnect_reason} · "
+            f"повторное подключение через {delay} с"
+        )
+
+    def _start_connection(self) -> None:
+        if self._connected or self._connection_pending or self._shutting_down:
+            return
+        self._reconnect_timer.stop()
+        self._scheduled_reconnect_delay_seconds = None
+        self._connection_pending = True
         self.connect_button.setEnabled(False)
         self.status_label.setText("Подключение…")
         self.interval_requested.emit(self.interval_spin.value())
-        self.connect_requested.emit(self.host_edit.text().strip(), self.port_spin.value())
+        self.connect_requested.emit(
+            self.host_edit.text().strip(), self.port_spin.value()
+        )
+
+    @Slot()
+    def _retry_connection(self) -> None:
+        self._start_connection()
+
+    @Slot(bool)
+    def _auto_reconnect_toggled(self, enabled: bool) -> None:
+        if enabled:
+            if (not self._connected and not self._connection_pending
+                    and self._last_disconnect_reason):
+                self._schedule_reconnect()
+            return
+        self._reconnect_timer.stop()
+        if not self._connected and self._last_disconnect_reason:
+            self.status_label.setText(self._last_disconnect_reason)
 
     @Slot(str)
     def _on_connected(self, session_id: str) -> None:
         self._connected = True
+        self._connection_pending = False
+        self._reset_reconnect()
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Отключиться")
         self.command_button.setEnabled(True)
@@ -366,12 +433,22 @@ class DebuggerSessionWidget(QWidget):
     @Slot(str)
     def _on_disconnected(self, reason: str) -> None:
         self._connected = False
+        self._connection_pending = False
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Подключиться")
         self.command_button.setEnabled(False)
         if self.command_result.text() == "Выполнение…":
             self.command_result.setText(reason or "Нет подключения")
-        self.status_label.setText(reason or "Не подключено")
+        if reason:
+            self._last_disconnect_reason = reason
+            if (self.auto_reconnect_check.isChecked()
+                    and not self._shutting_down):
+                self._schedule_reconnect()
+            else:
+                self.status_label.setText(reason)
+        else:
+            self._reset_reconnect()
+            self.status_label.setText("Не подключено")
         self._update_title()
 
     @Slot()
@@ -928,6 +1005,7 @@ class DebuggerSessionWidget(QWidget):
             chart_data=self._last_chart_data,
             display_seconds=self.display_seconds_spin.value(),
             auto_follow=self.auto_follow_check.isChecked(),
+            auto_reconnect=self.auto_reconnect_check.isChecked(),
             timeline=self.timeline_combo.currentData(),
             statistics=self._statistics,
             series_styles=self._series_styles(),
@@ -1001,6 +1079,9 @@ class DebuggerSessionWidget(QWidget):
         self.history_limit_spin.setValue(int(document["history_limit"]))
         self.display_seconds_spin.setValue(int(document["display_seconds"]))
         self.auto_follow_check.setChecked(bool(document["auto_follow"]))
+        self.auto_reconnect_check.setChecked(
+            bool(document.get("auto_reconnect", False))
+        )
         self._statistics = {
             expression: dict(extrema)
             for expression, extrema in document["statistics"].items()
@@ -1045,6 +1126,7 @@ class DebuggerSessionWidget(QWidget):
             return
         self._shutting_down = True
         self._logging_timer.stop()
+        self._reconnect_timer.stop()
         QMetaObject.invokeMethod(
             self._worker, "shutdown", Qt.BlockingQueuedConnection
         )
