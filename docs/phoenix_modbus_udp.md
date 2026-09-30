@@ -24,8 +24,8 @@ current value is available through
 `G_PAC_INFO():get_phoenix_modbus_udp_timeout_ms()` and the SYSTEM snapshot.
 
 The control server publishes `SYSTEM.PHOENIX_MODBUS_UDP` as `0` or `1`. Write
-`SYSTEM.PHOENIX_MODBUS_UDP=1` or `0` to change it, or issue `SYSTEM.CMD=103`
-to enable and `SYSTEM.CMD=104` to disable UDP. The Lua debugger offers the same
+`SYSTEM.PHOENIX_MODBUS_UDP=1` or `0` to change it, or issue `SYSTEM.CMD=301`
+to enable and `SYSTEM.CMD=302` to disable UDP. The Lua debugger offers the same
 commands in its controller command selector. The setting is runtime only and
 does not modify saved controller parameters.
 

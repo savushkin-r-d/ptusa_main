@@ -58,8 +58,8 @@ from .session_store import load_session, save_session
 from .worker import DebuggerWorker
 
 CONTROLLER_COMMANDS = (
-    (103, "PHOENIX Modbus UDP: включить"),
-    (104, "PHOENIX Modbus UDP: выключить"),
+    (301, "PHOENIX Modbus UDP: включить"),
+    (302, "PHOENIX Modbus UDP: выключить"),
     (102, "Принудительно сохранить параметры"),
     (100, "Перезагрузить ограничения"),
     (101, "Сбросить параметры"),

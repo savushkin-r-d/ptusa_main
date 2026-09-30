@@ -3,6 +3,7 @@
 #include "OPCUAServer.h"
 #include "lua_manager.h"
 #include <cstdio>
+#include <limits>
 
 // Мок для G_OPCUA_SERVER.
 class MockOPCUAServer : public OPCUA_server
@@ -155,6 +156,8 @@ TEST( PAC_info, proc_OPC )
 
 TEST( PAC_info, phoenix_modbus_udp_commands )
     {
+    EXPECT_EQ( 301, static_cast<int>( PAC_info::COMMANDS::PHOENIX_MODBUS_UDP_ON ) );
+    EXPECT_EQ( 302, static_cast<int>( PAC_info::COMMANDS::PHOENIX_MODBUS_UDP_OFF ) );
     auto* info = G_PAC_INFO();
     info->set_phoenix_modbus_udp( false );
     EXPECT_EQ( 25u, info->get_phoenix_modbus_udp_timeout_ms() );
@@ -174,6 +177,17 @@ TEST( PAC_info, phoenix_modbus_udp_commands )
         static_cast<double>( PAC_info::COMMANDS::PHOENIX_MODBUS_UDP_ON ) ) );
     EXPECT_TRUE( info->is_phoenix_modbus_udp() );
     info->set_phoenix_modbus_udp( false );
+    }
+
+TEST( PAC_info, invalid_numeric_commands )
+    {
+    for ( const auto value : { 1030001.5,
+        std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::infinity(),
+        static_cast<double>( ( std::numeric_limits<int>::max )() ) + 1.0 } )
+        {
+        EXPECT_EQ( 10, G_PAC_INFO()->set_cmd( "CMD", 0, value ) );
+        }
     }
 
 TEST( PAC_info, reset_params )

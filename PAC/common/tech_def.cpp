@@ -1626,6 +1626,89 @@ int tech_object_manager::save_params_as_Lua_str( char* str )
     return res;
     }
 //-----------------------------------------------------------------------------
+int tech_object_manager::reload_object( u_int serial_number )
+    {
+    //Поиск объекта по глобальному порядковому номеру (ключ [N] в
+    //main.objects.lua, он же суффикс имени OBJECTn).
+    tech_object* old_object = 0;
+    u_int idx = 0;
+    for ( u_int i = 0; i < tech_objects.size(); i++ )
+        {
+        if ( tech_objects[ i ]->get_serial_idx() == serial_number )
+            {
+            old_object = tech_objects[ i ];
+            idx = i;
+            break;
+            }
+        }
+
+    if ( 0 == old_object )
+        {
+        printf( "Reload object error - object [%u] not found.\n",
+            serial_number );
+        return -1;
+        }
+
+    //Перезагрузка возможна только для объекта, находящегося в простое.
+    if ( false == old_object->is_idle() )
+        {
+        printf( "Reload object error - object [%u] is not idle.\n",
+            serial_number );
+        return -2;
+        }
+
+    //Построение нового объекта в Lua (см. reload_tech_object в
+    //sys/sys.objects.lua). Lua-функция обновляет обёртку объекта и возвращает
+    //новый системный объект.
+    auto* L = G_LUA_MANAGER->get_Lua();
+    if ( !L ) return -3;
+    const int stack_top = lua_gettop( L );
+    lua_getglobal( L, "reload_tech_object" );
+    lua_pushinteger( L, serial_number );
+    const int lua_result = lua_pcall( L, 1, 1, 0 );
+    tolua_Error type_error{};
+    tech_object* new_object = nullptr;
+    //tolua's inheritance check pushes values before reusing this index.
+    //It requires an absolute index for foreign/derived userdata.
+    const int result_idx = stack_top + 1;
+    if ( lua_result == 0 && lua_type( L, result_idx ) == LUA_TUSERDATA &&
+        tolua_isusertype( L, result_idx, "tech_object", 0, &type_error ) )
+        {
+        new_object = static_cast< tech_object* >(
+            tolua_tousertype( L, result_idx, nullptr ) );
+        }
+    else if ( lua_result != 0 )
+        {
+        const char* error = lua_tostring( L, -1 );
+        G_LOG->error( "Reload object [%u]: %s", serial_number,
+            error ? error : "Lua error" );
+        }
+    lua_settop( L, stack_top );
+
+    if ( !new_object )
+        {
+        printf( "Reload object error - Lua reload_tech_object [%u] "
+            "unavailable.\n", serial_number );
+        return -3;
+        }
+
+    //Замена объекта в менеджере, коммуникаторе устройств и реестре ошибок.
+    tech_objects[ idx ] = new_object;
+
+    //Восстанавливаем последовательный номер нового объекта, иначе повторная
+    //перезагрузка по номеру [N] не найдёт объект.
+    new_object->set_serial_idx( serial_number );
+
+    G_DEVICE_CMMCTR->update_device( old_object, new_object );
+    G_ERRORS_MANAGER->update_tech_object( old_object, new_object );
+
+    //Старый объект не удаляем здесь: он удаляется сборщиком мусора Lua после
+    //обновления обёртки (объекты создаются в Lua и живут в Lua).
+    printf( "Object [%u] reloaded - Ok.\n", serial_number );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 tech_object_manager* G_TECH_OBJECT_MNGR()
     {

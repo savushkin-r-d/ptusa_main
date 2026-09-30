@@ -200,7 +200,7 @@ def test_controller_commands_are_available_in_each_session(
         session.controller_command_requested.connect(sent.append)
         assert [session.command_combo.itemData(i)
                 for i in range(session.command_combo.count())
-                ] == [103, 104, 102, 100, 101, 0]
+                ] == [301, 302, 102, 100, 101, 0]
         assert not session.command_button.isEnabled()
 
         # Without a connection nothing is sent and no dialog is shown.
