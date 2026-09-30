@@ -14,6 +14,10 @@ class DebuggerWorker(QObject):
     command_executed = Signal(int, dict)
     reload_objects_loaded = Signal(list)
     reload_objects_failed = Signal(str)
+    browse_loaded = Signal(str, int, int, dict)
+    browse_failed = Signal(str, int, int, str)
+    assignment_done = Signal(str, int, dict)
+    assignment_failed = Signal(str, int, str)
     error = Signal(str)
 
     def __init__(self) -> None:
@@ -59,12 +63,63 @@ class DebuggerWorker(QObject):
     @Slot(str)
     def evaluate(self, expression: str) -> None:
         if not self._client.connected:
-            self.error.emit("Нет подключения к контроллеру")
+            self.evaluated.emit(
+                expression, {"ok": False, "error": "Нет подключения к контроллеру"}
+            )
             return
         try:
             self.evaluated.emit(expression, self._client.evaluate(expression))
         except (OSError, ProtocolError) as exc:
+            self.evaluated.emit(expression, {"ok": False, "error": str(exc)})
+
+    @Slot(str, int, int)
+    def browse_variables(
+        self, expression: str, offset: int, request_id: int
+    ) -> None:
+        if not self._client.connected:
+            self.browse_failed.emit(
+                expression, offset, request_id,
+                "Нет подключения к контроллеру",
+            )
+            return
+        try:
+            result = self._client.browse_variables(expression, offset)
+            self.browse_loaded.emit(expression, offset, request_id, result)
+        except OSError as exc:
             self.error.emit(str(exc))
+            self.browse_failed.emit(expression, offset, request_id, str(exc))
+        except (ProtocolError, ValueError) as exc:
+            self.browse_failed.emit(
+                expression, offset, request_id,
+                self._kernel_hint(str(exc)),
+            )
+
+    @Slot(str, str, str, int)
+    def set_variable(
+        self, expression: str, value_type: str, value: str, request_id: int
+    ) -> None:
+        if not self._client.connected:
+            self.assignment_failed.emit(
+                expression, request_id, "Нет подключения к контроллеру"
+            )
+            return
+        try:
+            result = self._client.set_variable(expression, value_type, value)
+            self.assignment_done.emit(expression, request_id, result)
+        except OSError as exc:
+            self.error.emit(str(exc))
+            self.assignment_failed.emit(expression, request_id, str(exc))
+        except (ProtocolError, ValueError) as exc:
+            self.assignment_failed.emit(
+                expression, request_id, self._kernel_hint(str(exc))
+            )
+
+    @staticmethod
+    def _kernel_hint(message: str) -> str:
+        if "Unknown command" in message:
+            return ("Ядро контроллера не поддерживает просмотр и запись "
+                    "переменных (команды 12/13) — обновите ядро")
+        return message
 
     @Slot(int)
     def execute_controller_command(self, command_id: int) -> None:

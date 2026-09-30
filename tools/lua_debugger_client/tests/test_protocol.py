@@ -220,3 +220,168 @@ def test_reload_reports_detailed_controller_failure() -> None:
     client.session_id = "session1"
     with pytest.raises(ProtocolError, match="Changed object.par_float"):
         client.execute_controller_command(1030042)
+
+
+def test_browse_variables_framing() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": True, "expression": "_G", "type": "table", "entries": [],
+        "offset": 0, "next_offset": None, "truncated": False,
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    result = client.browse_variables("_G", 128)
+
+    assert result["ok"] is True
+    assert result["entries"] == []
+    _, service, frame_type, packet_id, length = struct.unpack(
+        ">cBBBH", fake.sent[:6]
+    )
+    assert (service, frame_type, packet_id) == (2, 1, 1)
+    assert fake.sent[6 : 6 + length] == (
+        bytes((Command.BROWSE_VARIABLES,)) + b"session1\n_G\n128"
+    )
+
+
+def test_browse_variables_default_arguments() -> None:
+    fake = FakeSocket(response(1, {"ok": True, "type": "table", "entries": []}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    client.browse_variables()
+
+    assert fake.sent[6:] == (
+        bytes((Command.BROWSE_VARIABLES,)) + b"session1\n_G\n0"
+    )
+
+
+def test_browse_variables_reports_application_error() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": False, "error": "attempt to index a nil value",
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    with pytest.raises(ProtocolError, match="attempt to index a nil value"):
+        client.browse_variables("NIL", 0)
+
+
+def test_set_variable_framing_multiline_string() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": True, "expression": "name", "type": "string",
+        "value": "a\nb\n\"quoted\"",
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    result = client.set_variable("name", "string", "a\nb\n\"quoted\"")
+
+    assert result["value"] == "a\nb\n\"quoted\""
+    assert fake.sent[6:] == (
+        bytes((Command.SET_VARIABLE,))
+        + b"session1\nname\nstring\na\nb\n\"quoted\""
+    )
+
+
+def test_set_variable_number_and_nil_framing() -> None:
+    fake = FakeSocket(response(1, {"ok": True, "type": "nil", "value": "nil"}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+
+    client.set_variable("t.x", "nil", "")
+    assert fake.sent[6:] == (
+        bytes((Command.SET_VARIABLE,)) + b"session1\nt.x\nnil\n"
+    )
+
+
+def test_set_variable_reports_application_error() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": False, "error": "target is read-only",
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    with pytest.raises(ProtocolError, match="target is read-only"):
+        client.set_variable("obj.ro", "number", "1")
+
+
+def test_browse_and_set_require_session() -> None:
+    client = DebuggerProtocol()
+    with pytest.raises(ProtocolError):
+        client.browse_variables()
+    with pytest.raises(ProtocolError):
+        client.set_variable("x", "number", "1")
+
+
+def _session_client() -> tuple[DebuggerProtocol, FakeSocket]:
+    fake = FakeSocket(response(1, {"ok": True}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    return client, fake
+
+
+def test_browse_variables_rejects_invalid_arguments() -> None:
+    client, fake = _session_client()
+    invalid = [
+        ("", 0),
+        ("x" * 1025, 0),
+        ("я" * 600, 0),          # 1200 UTF-8 bytes over the limit
+        ("_G", -1),
+        ("_G", True),
+        ("_G", 1.5),
+        ("_G", "0"),
+    ]
+    for expression, offset in invalid:
+        with pytest.raises(ValueError):
+            client.browse_variables(expression, offset)
+    assert len(fake.sent) == 0
+
+
+def test_browse_variables_accepts_multibyte_limit() -> None:
+    client, fake = _session_client()
+    client.browse_variables("я" * 500, 0)   # 1000 bytes, allowed
+    assert len(fake.sent) > 0
+
+
+def test_set_variable_rejects_invalid_arguments() -> None:
+    client, fake = _session_client()
+    cases = [
+        ("a\nb", "number", "1"),
+        ("a\rb", "number", "1"),
+        ("", "number", "1"),
+        ("x" * 1025, "number", "1"),
+        ("x", "bogus", "1"),
+        ("x", "nil", "leftover"),
+        ("x", "boolean", "True"),
+        ("x", "boolean", "1"),
+        ("x", "number", ""),
+        ("x", "number", "abc"),
+        ("x", "number", "nan"),
+        ("x", "number", "inf"),
+        ("x", "number", "1 2"),
+        ("x", "number", " 1"),
+        ("x", "number", "1 "),
+        ("x", "number", "+1"),
+        ("x", "number", "1_0"),
+        ("x", "number", "١٢"),
+        ("x", "number", "0x10"),
+        ("x", "number", 3),
+    ]
+    for expression, kind, value in cases:
+        with pytest.raises(ValueError):
+            client.set_variable(expression, kind, value)
+    assert len(fake.sent) == 0
+
+
+def test_set_variable_accepts_binary_safe_string() -> None:
+    client, fake = _session_client()
+    client.set_variable("x", "string", "a\x00b\n")
+    assert fake.sent[6:] == (
+        bytes((Command.SET_VARIABLE,))
+        + b"session1\nx\nstring\na\x00b\n"
+    )

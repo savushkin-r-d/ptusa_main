@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QSpinBox,
     QSplitter,
@@ -55,6 +56,7 @@ from .history import (
 from .history_table import HistoryTableModel
 from .pulse_counter import PulseCounters, PulseDefinition
 from .session_store import load_session, save_session
+from .variable_browser import MAX_WATCH_EXPRESSIONS, VariableBrowserWidget
 from .worker import DebuggerWorker
 
 CONTROLLER_COMMANDS = (
@@ -112,6 +114,28 @@ class DebuggerSessionWidget(QWidget):
         self.reload_objects_requested.connect(self._worker.refresh_reload_objects)
         self._worker.reload_objects_loaded.connect(self._on_reload_objects)
         self._worker.reload_objects_failed.connect(self._on_reload_objects_error)
+        self._variable_browser = VariableBrowserWidget()
+        self._variable_browser.browse_requested.connect(
+            self._worker.browse_variables
+        )
+        self._variable_browser.assignment_requested.connect(
+            self._worker.set_variable
+        )
+        self._variable_browser.watch_requested.connect(
+            self._on_browser_watch
+        )
+        self._worker.browse_loaded.connect(
+            self._variable_browser.show_browse_result
+        )
+        self._worker.browse_failed.connect(
+            self._variable_browser.show_browse_error
+        )
+        self._worker.assignment_done.connect(
+            self._variable_browser.show_assignment_result
+        )
+        self._worker.assignment_failed.connect(
+            self._variable_browser.show_assignment_error
+        )
         self.clear_requested.connect(self._worker.clear_chart_data)
         self._worker.connected.connect(self._on_connected)
         self._worker.disconnected.connect(self._on_disconnected)
@@ -245,8 +269,12 @@ class DebuggerSessionWidget(QWidget):
         self.variables.header().setSectionResizeMode(0, QHeaderView.Interactive)
         self.variables.setColumnWidth(0, 230)
         self.variables.setAlternatingRowColors(True)
-        for column in range(1, 4):
-            self.variables.header().setSectionResizeMode(column, QHeaderView.ResizeToContents)
+        self.variables.setTextElideMode(Qt.ElideRight)
+        self.variables.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.variables.header().setSectionResizeMode(2, QHeaderView.Interactive)
+        self.variables.header().setSectionResizeMode(3, QHeaderView.Interactive)
+        self.variables.setColumnWidth(2, 160)
+        self.variables.setColumnWidth(3, 110)
         self.variables.setMinimumWidth(420)
         self.variables.itemChanged.connect(self._history_changed)
 
@@ -342,6 +370,7 @@ class DebuggerSessionWidget(QWidget):
         self.output_tabs.addTab(chart_page, "График")
         self.output_tabs.addTab(history_page, "История")
         self.output_tabs.addTab(messages_page, "Сообщения")
+        self.output_tabs.addTab(self._variable_browser, "Переменные")
 
         splitter = QSplitter()
         splitter.setChildrenCollapsible(False)
@@ -355,11 +384,20 @@ class DebuggerSessionWidget(QWidget):
         self.evaluate_edit.returnPressed.connect(self._evaluate_once)
         evaluate_button = QPushButton("Вычислить")
         evaluate_button.clicked.connect(self._evaluate_once)
-        self.evaluate_result = QLabel("—")
         evaluation = QHBoxLayout()
         evaluation.addWidget(self.evaluate_edit, 1)
         evaluation.addWidget(evaluate_button)
-        evaluation.addWidget(self.evaluate_result, 1)
+
+        self.evaluate_result = QPlainTextEdit()
+        self.evaluate_result.setObjectName("evaluateResult")
+        self.evaluate_result.setReadOnly(True)
+        self.evaluate_result.setPlaceholderText(
+            "История разовых вычислений"
+        )
+        self.evaluate_result.setLineWrapMode(QPlainTextEdit.WidgetWidth)
+        self.evaluate_result.setMaximumBlockCount(200)
+        self.evaluate_result.setMinimumHeight(48)
+        self.evaluate_result.setMaximumHeight(120)
 
         self.command_combo = QComboBox()
         for command_id, label in CONTROLLER_COMMANDS:
@@ -398,6 +436,7 @@ class DebuggerSessionWidget(QWidget):
         root_layout.addLayout(logging)
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
+        root_layout.addWidget(self.evaluate_result)
         root_layout.addLayout(commands)
         root_layout.addLayout(reload_row)
         self.status_label = QLabel("Не подключено")
@@ -474,6 +513,10 @@ class DebuggerSessionWidget(QWidget):
         self.reload_hint.setText("Загрузка списка…")
         self.reload_objects_requested.emit()
         self.status_label.setText(f"Подключено · сессия {session_id}")
+        self._variable_browser.set_target(
+            f"{self.host_edit.text().strip()}:{self.port_spin.value()}"
+        )
+        self._variable_browser.set_connected(True)
         self._update_title()
         self._apply_expressions()
 
@@ -481,6 +524,7 @@ class DebuggerSessionWidget(QWidget):
     def _on_disconnected(self, reason: str) -> None:
         self._connected = False
         self._connection_pending = False
+        self._variable_browser.set_connected(False)
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Подключиться")
         self.command_button.setEnabled(False)
@@ -576,6 +620,9 @@ class DebuggerSessionWidget(QWidget):
             while item.parent() is not None:
                 item = item.parent()
             items.add(item)
+        self._remove_expression_items(items)
+
+    def _remove_expression_items(self, items: set[QTreeWidgetItem]) -> None:
         removed = {item.text(0) for item in items}
         for expression, definition in self._pulse_counters.definitions.items():
             if definition.source in removed or definition.dependent in removed:
@@ -588,6 +635,46 @@ class DebuggerSessionWidget(QWidget):
             self.variables.takeTopLevelItem(self.variables.indexOfTopLevelItem(item))
         self._history_changed(None)
         self._apply_expressions()
+
+    @Slot(str, bool)
+    def _on_browser_watch(self, expression: str, watched: bool) -> None:
+        if watched:
+            if expression in self._expressions():
+                self._variable_browser.set_watched_expressions(
+                    self._expressions()
+                )
+                return
+            if len(self._expressions()) >= MAX_WATCH_EXPRESSIONS:
+                self._variable_browser.set_watched_expressions(
+                    self._expressions()
+                )
+                self.status_label.setText(
+                    f"Лимит выражений: {MAX_WATCH_EXPRESSIONS}"
+                )
+                return
+            self._create_expression(expression)
+            self._apply_expressions()
+        else:
+            pulse_users = [
+                name
+                for name, definition
+                in self._pulse_counters.definitions.items()
+                if expression in (definition.source, definition.dependent)
+            ]
+            if pulse_users:
+                # The expression feeds a pulse counter; removing the
+                # watch would silently delete the counter, so keep it
+                # watched and reflect that back to the browser.
+                self.status_label.setText(
+                    f"{expression} используется счётчиком импульсов "
+                    f"{pulse_users[0]} — оставлено в наблюдении"
+                )
+            else:
+                targets = {item for item in self._expression_items()
+                           if item.text(0) == expression}
+                if targets:
+                    self._remove_expression_items(targets)
+        self._variable_browser.set_watched_expressions(self._expressions())
 
     def _expression_items(self) -> list[QTreeWidgetItem]:
         return [self.variables.topLevelItem(i)
@@ -702,6 +789,7 @@ class DebuggerSessionWidget(QWidget):
     def _apply_expressions(self) -> None:
         if self._connected:
             self.expressions_requested.emit(self._expressions())
+        self._variable_browser.set_watched_expressions(self._expressions())
 
     @Slot()
     def _evaluate_once(self) -> None:
@@ -711,10 +799,21 @@ class DebuggerSessionWidget(QWidget):
 
     @Slot(str, dict)
     def _on_evaluated(self, expression: str, result: dict[str, Any]) -> None:
+        lines = [f">>> {expression}"]
         if result.get("ok"):
-            self.evaluate_result.setText(f"{result.get('type')}: {result.get('value')}")
+            value = result.get("value")
+            if isinstance(value, (dict, list)):
+                rendered = json.dumps(
+                    value, ensure_ascii=False, indent=2
+                )
+            else:
+                rendered = str(value)
+            lines.append(f"{result.get('type')}: {rendered}")
         else:
-            self.evaluate_result.setText(str(result.get("error", "Ошибка")))
+            lines.append(f"Ошибка: {result.get('error', 'Ошибка')}")
+        self.evaluate_result.appendPlainText("\n".join(lines))
+        scrollbar = self.evaluate_result.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
 
     @Slot()
     def _execute_controller_command(self) -> None:
@@ -838,11 +937,14 @@ class DebuggerSessionWidget(QWidget):
             samples = by_expression.get(item.text(0), {}).get("samples", [])
             last = samples[-1] if samples else None
             previous = samples[-2] if len(samples) > 1 else None
-            item.setText(2, "—" if last is None else str(last.get("value")))
+            value_text = "—" if last is None else str(last.get("value"))
+            item.setText(2, value_text)
+            item.setToolTip(2, value_text)
             item.child(0).setText(2, "—" if previous is None else str(previous.get("value")))
             status = "—" if last is None else (
                 "OK" if last.get("ok") else str(last.get("value", "ошибка")))
             item.setText(3, status)
+            item.setToolTip(3, status)
         self._refresh_table_statistics()
         self._draw_chart(self._last_chart_data)
         self._refresh_history_table()
@@ -1176,6 +1278,7 @@ class DebuggerSessionWidget(QWidget):
             ],
             pulse_state=self._pulse_counters.snapshot(),
             message_log=self._message_log(),
+            variable_browser=self._variable_browser.snapshot_state(),
         )
 
     def _next_log_path(self) -> Path:
@@ -1276,6 +1379,9 @@ class DebuggerSessionWidget(QWidget):
             self.plot.clear()
             self._refresh_history_table()
             self._refresh_table_statistics()
+        self._variable_browser.restore_state(
+            document.get("variable_browser")
+        )
         self._apply_expressions()
         self._update_title()
 

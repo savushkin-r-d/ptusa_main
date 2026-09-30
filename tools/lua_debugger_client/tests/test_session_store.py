@@ -348,3 +348,104 @@ def test_save_session_strips_legacy_statistics_fields(tmp_path) -> None:
     assert "average" not in saved["statistics"]["x"]
     assert "median" not in saved["statistics"]["x"]
     assert "_values" not in saved["statistics"]["x"]
+
+
+def _base_session_kwargs(**overrides):
+    kwargs = {
+        "host": "localhost",
+        "port": 10_000,
+        "poll_interval_ms": 500,
+        "history_limit": 5_000,
+        "expressions": ["x"],
+        "history_expressions": ["x"],
+        "chart_data": {"ok": True, "series": []},
+    }
+    kwargs.update(overrides)
+    return kwargs
+
+
+def test_variable_browser_state_roundtrip(tmp_path) -> None:
+    path = tmp_path / "browser.ptlua.json"
+    save_session(
+        path,
+        variable_browser={
+            "root": "OBJECT1",
+            "watched_expressions": ["OBJECT1.level", "OBJECT1.level", "x"],
+        },
+        **_base_session_kwargs(),
+    )
+    document = load_session(path)
+    assert document["variable_browser"] == {
+        "root": "OBJECT1",
+        "watched_expressions": ["OBJECT1.level", "x"],
+    }
+
+
+def test_variable_browser_defaults_for_old_sessions(tmp_path) -> None:
+    path = tmp_path / "old.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    del raw["variable_browser"]
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    document = load_session(path)
+    assert document["variable_browser"] == {
+        "root": "_G",
+        "watched_expressions": [],
+    }
+
+
+@pytest.mark.parametrize("browser", [
+    "not-a-dict",
+    {"root": 5, "watched_expressions": []},
+    {"root": "_G", "watched_expressions": "x"},
+    {"root": "_G", "watched_expressions": ["x", 42]},
+    {"root": "", "watched_expressions": []},
+])
+def test_invalid_variable_browser_state_is_rejected(tmp_path, browser) -> None:
+    path = tmp_path / "broken.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    raw["variable_browser"] = browser
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match="браузера переменных"):
+        load_session(path)
+
+
+def test_variable_browser_watched_expressions_capped(tmp_path) -> None:
+    path = tmp_path / "many.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    raw["variable_browser"] = {
+        "root": "_G",
+        "watched_expressions": [f"e{i}" for i in range(40)],
+    }
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    document = load_session(path)
+    assert len(document["variable_browser"]["watched_expressions"]) == 16
+
+
+def test_variable_browser_paths_use_byte_limits(tmp_path) -> None:
+    path = tmp_path / "bytes.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    document = json.loads(path.read_text(encoding="utf-8"))
+    # 600 two-byte characters exceed the 1024-byte protocol limit.
+    document["variable_browser"] = {
+        "root": "_G",
+        "watched_expressions": ["я" * 600],
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_session(path)
+
+
+def test_variable_browser_newline_paths_rejected(tmp_path) -> None:
+    path = tmp_path / "newline.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["variable_browser"] = {
+        "root": "_G",
+        "watched_expressions": ["x\ny"],
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_session(path)

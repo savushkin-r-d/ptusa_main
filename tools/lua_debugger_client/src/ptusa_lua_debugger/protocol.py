@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import math
+import re
 import socket
 import struct
 import time
@@ -20,6 +22,26 @@ class Command(IntEnum):
     POLL = 9
     EXEC_CONTROLLER_COMMAND = 10
     GET_RELOAD_OBJECTS = 11
+    BROWSE_VARIABLES = 12
+    SET_VARIABLE = 13
+
+
+VARIABLE_TYPES = ("number", "boolean", "string", "nil")
+MAX_REQUEST_PATH_BYTES = 1024
+# Same ASCII decimal/scientific shape the kernel accepts: no leading
+# '+', whitespace, underscores or non-ASCII digits.
+_NUMBER_PATTERN = re.compile(
+    r"-?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?"
+)
+
+
+def _check_path(expression: str) -> None:
+    if (
+        not isinstance(expression, str)
+        or not expression
+        or len(expression.encode("utf-8")) > MAX_REQUEST_PATH_BYTES
+    ):
+        raise ValueError("Некорректное выражение для запроса")
 
 
 class ProtocolError(RuntimeError):
@@ -123,6 +145,44 @@ class DebuggerProtocol:
         response = self._request(Command.GET_RELOAD_OBJECTS)
         self._ensure_ok(response)
         return response["objects"]
+
+    def browse_variables(
+        self, expression: str = "_G", offset: int = 0
+    ) -> dict[str, Any]:
+        _check_path(expression)
+        if isinstance(offset, bool) or not isinstance(offset, int) or offset < 0:
+            raise ValueError("Некорректное смещение обзора")
+        response = self._request(
+            Command.BROWSE_VARIABLES, f"{expression}\n{offset}"
+        )
+        self._ensure_ok(response)
+        return response
+
+    def set_variable(
+        self, expression: str, value_type: str, value: str
+    ) -> dict[str, Any]:
+        _check_path(expression)
+        # The target must not inject extra lines into the framed payload.
+        if "\n" in expression or "\r" in expression:
+            raise ValueError("Некорректная цель записи")
+        if value_type not in VARIABLE_TYPES:
+            raise ValueError(f"Неизвестный тип значения: {value_type}")
+        if not isinstance(value, str):
+            raise ValueError("Значение должно быть строкой")
+        if value_type == "nil" and value:
+            raise ValueError("Значение nil не имеет данных")
+        if value_type == "boolean" and value not in ("true", "false"):
+            raise ValueError("Логическое значение должно быть true или false")
+        if value_type == "number":
+            if not _NUMBER_PATTERN.fullmatch(value):
+                raise ValueError("Некорректное число")
+            if not math.isfinite(float(value)):
+                raise ValueError("Некорректное число")
+        response = self._request(
+            Command.SET_VARIABLE, f"{expression}\n{value_type}\n{value}"
+        )
+        self._ensure_ok(response)
+        return response
 
     def set_expressions(self, expressions: list[str]) -> dict[str, Any]:
         response = self._request(

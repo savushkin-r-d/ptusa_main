@@ -803,3 +803,169 @@ def test_object_reload_failure_and_disconnect_restore_controls(monkeypatch) -> N
         session.shutdown()
         session.deleteLater()
         application.processEvents()
+
+
+def test_evaluate_console_keeps_window_compact() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        baseline = session.minimumSizeHint().width()
+        session.show()
+        application.processEvents()
+        size_before = session.size()
+        huge = "x" * 200_000 + "\n" + "y" * 5_000
+        session._on_evaluated("f()", {"ok": True, "type": "string", "value": huge})
+        session._on_evaluated("g()", {"ok": False, "error": huge})
+        application.processEvents()
+        assert huge in session.evaluate_result.toPlainText()
+        assert ">>> g()" in session.evaluate_result.toPlainText()
+        assert "Ошибка:" in session.evaluate_result.toPlainText()
+        assert session.minimumSizeHint().width() <= baseline + 50
+        assert session.size() == size_before
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_browser_watch_adds_and_removes_owned_expressions() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    sent = []
+    session.expressions_requested.connect(lambda exprs: sent.append(list(exprs)))
+    try:
+        session._connected = True
+        session._on_browser_watch("_G.v", True)
+        assert session._expressions() == ["_G.v"]
+        assert sent[-1] == ["_G.v"]
+        # Deduplication: watching an existing expression does not add it.
+        session._on_browser_watch("_G.v", True)
+        assert session._expressions() == ["_G.v"]
+        # Browser-owned expression is removed on unwatch.
+        session._on_browser_watch("_G.v", False)
+        assert session._expressions() == []
+        assert sent[-1] == []
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_browser_watch_respects_expression_limit() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._connected = True
+        for index in range(16):
+            session._create_expression(f"e{index}")
+        session._on_browser_watch("_G.extra", True)
+        assert "_G.extra" not in session._expressions()
+        assert len(session._expressions()) == 16
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_session_widgets_have_isolated_browsers() -> None:
+    application = QApplication.instance() or QApplication([])
+    first = DebuggerSessionWidget()
+    second = DebuggerSessionWidget()
+    try:
+        first._connected = True
+        first._on_browser_watch("_G.v", True)
+        assert first._expressions() == ["_G.v"]
+        assert second._expressions() == []
+        assert first._variable_browser is not second._variable_browser
+    finally:
+        first.shutdown()
+        second.shutdown()
+        first.deleteLater()
+        second.deleteLater()
+        application.processEvents()
+
+
+def test_browser_state_saved_and_restored(tmp_path) -> None:
+    from ptusa_lua_debugger.session_store import load_session, save_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        session._connected = True
+        session._variable_browser.root_edit.setText("OBJECT1")
+        session._on_browser_watch("OBJECT1.level", True)
+        # Simulate ownership that the browser checkbox path records.
+        session._variable_browser._owned.add("OBJECT1.level")
+        path = tmp_path / "browser.ptlua.json"
+        session._save_session_to(path)
+        document = load_session(path)
+        assert document["variable_browser"] == {
+            "root": "OBJECT1",
+            "watched_expressions": ["OBJECT1.level"],
+        }
+        restored.load_document(document)
+        assert restored._variable_browser.root_edit.text() == "OBJECT1"
+        assert restored._variable_browser.watched_browser_expressions() == [
+            "OBJECT1.level"
+        ]
+        assert "OBJECT1.level" in restored._expressions()
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
+
+
+def test_browser_target_tracks_connection() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.host_edit.setText("10.0.0.5")
+        session.port_spin.setValue(20001)
+        session._on_connected("abc")
+        assert session._variable_browser._target == "10.0.0.5:20001"
+        assert session._variable_browser._connected
+        session._on_disconnected("")
+        assert not session._variable_browser._connected
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_browser_unwatch_keeps_pulse_counter_dependency() -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._connected = True
+        # The browser adds and owns this watch.
+        session._on_browser_watch("_G.sensor", True)
+        session._variable_browser._owned.add("_G.sensor")
+        # A pulse counter depends on it as the counted sensor.
+        definition = PulseDefinition(
+            "pulses", "_G.sensor", "_G.pump", 1, 1
+        )
+        session._pulse_counters.add(definition)
+        session._create_expression("_G.pump")
+        session._create_expression(definition.expression)
+        # Unchecking in the browser must keep the watch and the counter.
+        session._on_browser_watch("_G.sensor", False)
+        assert "_G.sensor" in session._expressions()
+        assert definition.expression in session._pulse_counters.definitions
+        assert definition.expression in [
+            item.text(0) for item in session._expression_items()
+        ]
+        # The explicit remove button still cascades counters as before.
+        targets = {item for item in session._expression_items()
+                   if item.text(0) == "_G.sensor"}
+        session._remove_expression_items(targets)
+        assert "_G.sensor" not in session._expressions()
+        assert definition.expression not in (
+            session._pulse_counters.definitions
+        )
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()

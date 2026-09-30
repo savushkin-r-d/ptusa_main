@@ -47,6 +47,7 @@ def save_session(
     pulse_state: dict[str, Any] | None = None,
     auto_reconnect: bool = False,
     message_log: list[dict[str, str]] | None = None,
+    variable_browser: dict[str, Any] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -65,6 +66,7 @@ def save_session(
         "expressions": expressions,
         "history_expressions": history_expressions,
         "chart_data": chart_data,
+        "variable_browser": variable_browser or {},
     }
     Path(path).write_text(
         json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -164,7 +166,37 @@ def load_session(path: str | Path) -> dict[str, Any]:
     document["history_expressions"] = history_expressions
     document["pulse_definitions"] = pulse_definitions
     document["pulse_state"] = pulse_state
+    document["variable_browser"] = _normalize_variable_browser(
+        document.get("variable_browser")
+    )
     return document
+
+
+def _normalize_variable_browser(browser: Any) -> dict[str, Any]:
+    if browser is None:
+        return {"root": "_G", "watched_expressions": []}
+    if not isinstance(browser, dict):
+        raise ValueError("Некорректное состояние браузера переменных")
+    root = browser.get("root", "_G")
+    watched = browser.get("watched_expressions", [])
+    # Length limits are measured in UTF-8 bytes to match the protocol;
+    # paths containing newlines would corrupt framed requests.
+    safe_path = lambda text: (
+        isinstance(text, str)
+        and 0 < len(text.encode("utf-8")) <= 1024
+        and "\n" not in text
+        and "\r" not in text
+    )
+    if (
+        not safe_path(root)
+        or not isinstance(watched, list)
+        or not all(safe_path(item) for item in watched)
+    ):
+        raise ValueError("Некорректное состояние браузера переменных")
+    return {
+        "root": root,
+        "watched_expressions": list(dict.fromkeys(watched))[:16],
+    }
 
 
 def _valid_pulse_definition(definition: Any, expressions: list[str]) -> bool:
