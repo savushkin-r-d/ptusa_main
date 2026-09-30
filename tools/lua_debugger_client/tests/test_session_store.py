@@ -54,11 +54,8 @@ def test_session_roundtrip(tmp_path) -> None:
             "TE1:get_value()": {
                 "min": 1.5,
                 "max": 8.0,
-                "average": 4.75,
-                "median": 4.75,
                 "_sum": 9.5,
                 "_count": 2,
-                "_values": [1.5, 8.0],
                 "_last_sample": {
                     "time_ms": 2,
                     "ok": True,
@@ -84,9 +81,18 @@ def test_session_roundtrip(tmp_path) -> None:
             "text": "Тестовая авария",
         }
     ]
-    assert document["statistics"]["TE1:get_value()"]["average"] == 4.75
-    assert document["statistics"]["TE1:get_value()"]["median"] == 4.75
-    assert document["statistics"]["TE1:get_value()"]["_count"] == 2
+    assert document["statistics"]["TE1:get_value()"] == {
+        "min": 1.5,
+        "max": 8.0,
+        "_sum": 9.5,
+        "_count": 2,
+        "_last_sample": {
+            "time_ms": 2,
+            "ok": True,
+            "type": "number",
+            "value": 8.0,
+        },
+    }
     assert document["expressions"] == ["TE1:get_value()"]
     assert document["history_expressions"] == ["TE1:get_value()"]
 
@@ -225,3 +231,120 @@ def test_old_session_accepts_legacy_min_max_statistics(tmp_path) -> None:
     document = load_session(path)
 
     assert document["statistics"] == {"x": {"min": 1, "max": 9}}
+
+
+def test_old_session_statistics_are_normalized_to_compact_fields(
+    tmp_path,
+) -> None:
+    path = tmp_path / "old-full-statistics.ptlua.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "connection": {},
+                "poll_interval_ms": 500,
+                "expressions": ["x"],
+                "statistics": {
+                    "x": {
+                        "min": 1.5,
+                        "max": 8.0,
+                        "average": 4.75,
+                        "median": 4.75,
+                        "_sum": 9.5,
+                        "_count": 2,
+                        "_values": [1.5, 8.0],
+                        "_last_sample": {"time_ms": 2, "value": 8.0},
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    document = load_session(path)
+
+    assert document["statistics"] == {
+        "x": {
+            "min": 1.5,
+            "max": 8.0,
+            "_sum": 9.5,
+            "_count": 2,
+            "_last_sample": {"time_ms": 2, "value": 8.0},
+        }
+    }
+
+
+def test_old_session_accepts_interim_statistics_with_average(
+    tmp_path,
+) -> None:
+    path = tmp_path / "interim-statistics.ptlua.json"
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "connection": {},
+                "poll_interval_ms": 500,
+                "expressions": ["x"],
+                "statistics": {
+                    "x": {
+                        "min": 1.5,
+                        "max": 8.0,
+                        "average": 4.75,
+                        "_sum": 9.5,
+                        "_count": 2,
+                        "_last_sample": {"time_ms": 2, "value": 8.0},
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    document = load_session(path)
+
+    assert document["statistics"]["x"] == {
+        "min": 1.5,
+        "max": 8.0,
+        "_sum": 9.5,
+        "_count": 2,
+        "_last_sample": {"time_ms": 2, "value": 8.0},
+    }
+
+
+def test_save_session_strips_legacy_statistics_fields(tmp_path) -> None:
+    path = tmp_path / "legacy-statistics.ptlua.json"
+    save_session(
+        path,
+        host="localhost",
+        port=10_000,
+        poll_interval_ms=500,
+        history_limit=5_000,
+        expressions=["x"],
+        history_expressions=["x"],
+        chart_data=None,
+        statistics={
+            "x": {
+                "min": 1.5,
+                "max": 8.0,
+                "average": 4.75,
+                "median": 4.75,
+                "_sum": 9.5,
+                "_count": 2,
+                "_values": [1.5, 8.0],
+                "_last_sample": {"time_ms": 2, "value": 8.0},
+            }
+        },
+    )
+
+    saved = json.loads(path.read_text(encoding="utf-8"))
+
+    assert saved["statistics"]["x"] == {
+        "min": 1.5,
+        "max": 8.0,
+        "_sum": 9.5,
+        "_count": 2,
+        "_last_sample": {"time_ms": 2, "value": 8.0},
+    }
+    assert "average" not in saved["statistics"]["x"]
+    assert "median" not in saved["statistics"]["x"]
+    assert "_values" not in saved["statistics"]["x"]

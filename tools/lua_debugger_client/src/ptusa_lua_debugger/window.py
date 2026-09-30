@@ -575,7 +575,7 @@ class DebuggerSessionWidget(QWidget):
             item.setToolTip(0, expression)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(1, Qt.Checked if history_enabled else Qt.Unchecked)
-            for label in ("Предыдущее", "Min", "Max", "Среднее", "Медиана"):
+            for label in ("Предыдущее", "Min", "Max", "Среднее"):
                 QTreeWidgetItem(item, [label, "", "—"])
             name_row = QTreeWidgetItem(item, ["Имя на графике"])
             name = QLineEdit(str(style.get("name", "")))
@@ -637,11 +637,11 @@ class DebuggerSessionWidget(QWidget):
         for item in self._expression_items():
             widget = lambda index: self.variables.itemWidget(item.child(index), 2)
             styles[item.text(0)] = {
-                "name": widget(5).text(),
-                "color": widget(6).property("lineColor"),
-                "offset": widget(7).value(),
-                "points": widget(8).isChecked(),
-                "chart_type": widget(9).currentData(),
+                "name": widget(4).text(),
+                "color": widget(5).property("lineColor"),
+                "offset": widget(6).value(),
+                "points": widget(7).isChecked(),
+                "chart_type": widget(8).currentData(),
             }
         return styles
 
@@ -829,8 +829,15 @@ class DebuggerSessionWidget(QWidget):
     def _refresh_table_statistics(self) -> None:
         for item in self._expression_items():
             statistics = self._statistics.get(item.text(0), {})
-            for index, key in enumerate(("min", "max", "average", "median"), start=1):
-                item.child(index).setText(2, self._format_stat(statistics.get(key)))
+            count = int(statistics.get("_count", 0))
+            average = (
+                float(statistics["_sum"]) / count
+                if count and "_sum" in statistics
+                else None
+            )
+            values = (statistics.get("min"), statistics.get("max"), average)
+            for index, value in enumerate(values, start=1):
+                item.child(index).setText(2, self._format_stat(value))
 
     @staticmethod
     def _format_stat(value: float | None) -> str:

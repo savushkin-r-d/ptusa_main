@@ -41,7 +41,7 @@ def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
         session._on_chart_data(data)
         original = deepcopy(session._last_chart_data)
         root = session.variables.topLevelItem(0)
-        selector = session.variables.itemWidget(root.child(9), 2)
+        selector = session.variables.itemWidget(root.child(8), 2)
         selector.setCurrentIndex(selector.findData(chart_type))
         curve = session.plot.listDataItems()[0]
         # Inspect the rendered geometry, not just the selected option.
@@ -142,12 +142,16 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         original = deepcopy(data)
         session._on_chart_data(data)
         root = session.variables.topLevelItem(0)
-        assert root.childCount() == 10
+        assert root.childCount() == 9
+        assert "Медиана" not in [
+            root.child(index).text(0) for index in range(root.childCount())
+        ]
         assert not root.isExpanded()
         assert root.text(2) == "1"
         assert root.child(0).text(2) == "0"
         assert root.child(1).text(2) == "0"
         assert root.child(2).text(2) == "1"
+        assert root.child(3).text(2) == "0.5"
         line, points = session.plot.listDataItems()
         assert line.opts["stepMode"] == "right"
         assert line.name() == "Ступень"
@@ -166,9 +170,9 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         assert restored._series_styles() == {"x": {**style, "chart_type": "step_post"}}
         assert list(restored.plot.listDataItems()[0].yData) == [2.5, 3.5, 3.5]
         # Editing presentation settings redraws immediately without altering samples.
-        session.variables.itemWidget(root.child(7), 2).setValue(-1)
+        session.variables.itemWidget(root.child(6), 2).setValue(-1)
         assert list(session.plot.listDataItems()[0].yData) == [-1, 0, 0]
-        session.variables.itemWidget(root.child(8), 2).setChecked(False)
+        session.variables.itemWidget(root.child(7), 2).setChecked(False)
         assert len(session.plot.listDataItems()) == 1
         # Removing a selected property removes its owning expression.
         root.child(1).setSelected(True)
