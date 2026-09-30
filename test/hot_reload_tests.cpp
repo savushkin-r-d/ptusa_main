@@ -46,10 +46,13 @@ class hot_reload_test : public ::testing::Test
                 ("reload_fixture_" + std::to_string(
                     std::chrono::steady_clock::now().time_since_epoch().count()));
             std::filesystem::create_directories( directory / "objects" );
-            G_PROJECT_MANAGER->path = directory.u8string(); // No trailing slash.
+            const auto directory_utf8 = directory.u8string();
+            G_PROJECT_MANAGER->path.assign( directory_utf8.begin(), directory_utf8.end() ); // No trailing slash.
             const auto system_script = std::filesystem::path( __FILE__ ).parent_path().parent_path() /
                 "demo_projects/T1-PLCnext-Demo/sys/sys.objects.lua";
-            ASSERT_EQ( 0, luaL_dofile( L, system_script.u8string().c_str() ) )
+            const auto script_utf8 = system_script.u8string();
+            const std::string script_path( script_utf8.begin(), script_utf8.end() );
+            ASSERT_EQ( 0, luaL_dofile( L, script_path.c_str() ) )
                 << (lua_tostring( L, -1 ) ? lua_tostring( L, -1 ) : "");
             const std::string init = "function init_tech_objects_modes() return {" +
                 std::string( description ) + "} end; init_tech_objects()";
