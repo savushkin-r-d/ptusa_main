@@ -54,6 +54,10 @@ class lua_debugger
             CMD_EXEC_CONTROLLER_COMMAND,
             /// Returns object ids/names and idle state for individual reload.
             CMD_GET_RELOAD_OBJECTS,
+            /// Returns one page of child variables for a root expression.
+            CMD_BROWSE_VARIABLES,
+            /// Assigns a scalar value to an existing scalar variable.
+            CMD_SET_VARIABLE,
             };
 
         static lua_debugger* get_instance();
@@ -126,6 +130,8 @@ class lua_debugger
         std::string create_session();
         std::string set_expressions( session& target,
             const std::string& request );
+        std::string browse_variables( const std::string& request ) const;
+        std::string set_variable( const std::string& request ) const;
         std::string chart_data( const session& target ) const;
         std::string message_data( session& target, std::size_t budget = 60000 );
         void clear_samples( session& target );
