@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from bisect import insort
 from dataclasses import dataclass
 from typing import Any
 
@@ -190,7 +189,13 @@ def merge_statistics(
     previous: dict[str, dict[str, Any]], data: dict[str, Any]
 ) -> dict[str, dict[str, Any]]:
     """Accumulate exact numeric statistics without recounting server cache data."""
-    result = {expression: dict(extrema) for expression, extrema in previous.items()}
+    kept_fields = {"min", "max", "_sum", "_count", "_last_sample"}
+    result = {
+        expression: {
+            key: value for key, value in statistics.items() if key in kept_fields
+        }
+        for expression, statistics in previous.items()
+    }
     for series in data.get("series", []):
         if not isinstance(series, dict):
             continue
@@ -222,36 +227,27 @@ def merge_statistics(
         if not values and not accumulated:
             continue
 
-        sorted_values = list(accumulated.get("_values", []))
-        total = float(accumulated.get("_sum", sum(sorted_values)))
-        count = int(accumulated.get("_count", len(sorted_values)))
+        total = float(accumulated.get("_sum", 0.0))
+        count = int(accumulated.get("_count", 0))
+        minimum = (
+            float(accumulated["min"]) if "min" in accumulated else None
+        )
+        maximum = (
+            float(accumulated["max"]) if "max" in accumulated else None
+        )
         for value in values:
-            insort(sorted_values, value)
             total += value
             count += 1
+            minimum = value if minimum is None else min(minimum, value)
+            maximum = value if maximum is None else max(maximum, value)
 
-        if not count:
+        if not count or minimum is None or maximum is None:
             continue
-        middle = count // 2
-        median = (
-            sorted_values[middle]
-            if count % 2
-            else (sorted_values[middle - 1] + sorted_values[middle]) / 2
-        )
-        minimum = min(sorted_values)
-        maximum = max(sorted_values)
-        if "min" in accumulated:
-            minimum = min(minimum, float(accumulated["min"]))
-        if "max" in accumulated:
-            maximum = max(maximum, float(accumulated["max"]))
         result[expression] = {
             "min": minimum,
             "max": maximum,
-            "average": total / count,
-            "median": median,
             "_sum": total,
             "_count": count,
-            "_values": sorted_values,
             "_last_sample": samples[-1],
         }
     return result

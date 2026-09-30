@@ -55,8 +55,7 @@ def test_statistics_are_kept_after_chart_history_is_trimmed() -> None:
     assert [sample["value"] for sample in history["series"][0]["samples"]] == [9]
     assert statistics["x"]["min"] == 1.0
     assert statistics["x"]["max"] == 9.0
-    assert statistics["x"]["average"] == 4.75
-    assert statistics["x"]["median"] == 4.5
+    assert statistics["x"]["_sum"] / statistics["x"]["_count"] == 4.75
 
 
 def test_statistics_do_not_recount_overlapping_server_cache() -> None:
@@ -65,8 +64,17 @@ def test_statistics_do_not_recount_overlapping_server_cache() -> None:
     statistics = merge_statistics(statistics, chart(3, 5, 9))
 
     assert statistics["x"]["_count"] == 4
-    assert statistics["x"]["average"] == 4.5
-    assert statistics["x"]["median"] == 4.0
+    assert statistics["x"]["_sum"] / statistics["x"]["_count"] == 4.5
+    assert set(statistics["x"]) == {
+        "min",
+        "max",
+        "_sum",
+        "_count",
+        "_last_sample",
+    }
+    assert "average" not in statistics["x"]
+    assert "median" not in statistics["x"]
+    assert "_values" not in statistics["x"]
 
 
 def test_controller_timestamp_uses_session_anchor_across_counter_wrap() -> None:

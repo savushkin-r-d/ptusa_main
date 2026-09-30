@@ -14,6 +14,19 @@ from .history import (
     MAX_HISTORY_LIMIT,
 )
 
+STATISTICS_FIELDS = ("min", "max", "_sum", "_count", "_last_sample")
+
+
+def _compact_statistics(
+    statistics: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    return {
+        expression: {
+            key: value for key, value in entry.items() if key in STATISTICS_FIELDS
+        }
+        for expression, entry in statistics.items()
+    }
+
 
 def save_session(
     path: str | Path,
@@ -45,7 +58,7 @@ def save_session(
         "auto_reconnect": auto_reconnect,
         "message_log": message_log or [],
         "timeline": timeline,
-        "statistics": statistics or {},
+        "statistics": _compact_statistics(statistics or {}),
         "series_styles": series_styles or {},
         "pulse_definitions": pulse_definitions or [],
         "pulse_state": pulse_state or {},
@@ -126,11 +139,15 @@ def load_session(path: str | Path) -> dict[str, Any]:
         raise ValueError("Некорректный журнал сообщений")
     if timeline not in ("real", "controller"):
         raise ValueError("Некорректная шкала времени")
-    if not isinstance(statistics, dict) or any(
-        not isinstance(expression, str) or not _valid_statistics_entry(entry)
-        for expression, entry in statistics.items()
-    ):
+    if not isinstance(statistics, dict):
         raise TypeError("Некорректная статистика выражений")
+    normalized_statistics: dict[str, dict[str, Any]] = {}
+    for expression, entry in statistics.items():
+        normalized = _normalize_statistics_entry(entry)
+        if not isinstance(expression, str) or normalized is None:
+            raise TypeError("Некорректная статистика выражений")
+        normalized_statistics[expression] = normalized
+    statistics = normalized_statistics
     styles = document.get("series_styles", {})
     if not isinstance(styles, dict) or any(
         not isinstance(expression, str) or not _valid_series_style(style)
@@ -181,39 +198,45 @@ def _valid_pulse_state(state: Any) -> bool:
     )
 
 
-def _valid_statistics_entry(entry: Any) -> bool:
+def _normalize_statistics_entry(entry: Any) -> dict[str, Any] | None:
     if not isinstance(entry, dict):
-        return False
+        return None
     numeric = lambda value: isinstance(value, (int, float)) and not isinstance(
         value, bool
     )
     if set(entry) == {"min", "max"}:
-        return numeric(entry["min"]) and numeric(entry["max"])
+        if numeric(entry["min"]) and numeric(entry["max"]):
+            return dict(entry)
+        return None
 
-    expected = {
-        "min",
-        "max",
-        "average",
-        "median",
-        "_sum",
-        "_count",
-        "_values",
-        "_last_sample",
-    }
-    if set(entry) != expected:
-        return False
-    values = entry["_values"]
+    keys = set(entry)
+    minimal = set(STATISTICS_FIELDS)
+    interim = minimal | {"average"}
+    full = interim | {"median", "_values"}
+    if keys not in (minimal, interim, full):
+        return None
     count = entry["_count"]
-    return (
-        all(numeric(entry[key]) for key in ("min", "max", "average", "median", "_sum"))
+    valid = (
+        all(numeric(entry[key]) for key in ("min", "max", "_sum"))
         and isinstance(count, int)
         and not isinstance(count, bool)
         and count > 0
-        and isinstance(values, list)
-        and len(values) == count
-        and all(numeric(value) for value in values)
         and isinstance(entry["_last_sample"], dict)
     )
+    if keys != minimal:
+        valid = valid and numeric(entry["average"])
+    if keys == full:
+        values = entry["_values"]
+        valid = (
+            valid
+            and numeric(entry["median"])
+            and isinstance(values, list)
+            and len(values) == count
+            and all(numeric(value) for value in values)
+        )
+    if not valid:
+        return None
+    return {key: entry[key] for key in STATISTICS_FIELDS}
 
 
 def _valid_series_style(style: Any) -> bool:
