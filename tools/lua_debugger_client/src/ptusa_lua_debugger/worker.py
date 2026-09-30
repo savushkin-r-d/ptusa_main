@@ -12,6 +12,8 @@ class DebuggerWorker(QObject):
     messages = Signal(dict)
     evaluated = Signal(str, dict)
     command_executed = Signal(int, dict)
+    reload_objects_loaded = Signal(list)
+    reload_objects_failed = Signal(str)
     error = Signal(str)
 
     def __init__(self) -> None:
@@ -74,6 +76,15 @@ class DebuggerWorker(QObject):
             self.command_executed.emit(command_id, response)
         except (OSError, ProtocolError) as exc:
             self.error.emit(str(exc))
+
+    @Slot()
+    def refresh_reload_objects(self) -> None:
+        if not self._client.connected:
+            return
+        try:
+            self.reload_objects_loaded.emit(self._client.get_reload_objects())
+        except (OSError, ProtocolError) as exc:
+            self.reload_objects_failed.emit(str(exc))
 
     @Slot()
     def clear_chart_data(self) -> None:

@@ -198,3 +198,25 @@ def test_controller_command_reports_controller_failure() -> None:
 
     with pytest.raises(ProtocolError, match="Controller command failed"):
         client.execute_controller_command(100)
+
+
+def test_reload_objects_use_debugger_session() -> None:
+    objects = [{"id": 42, "lua_name": "OBJECT42", "name": "Tank", "idle": True}]
+    fake = FakeSocket(response(1, {"ok": True, "objects": objects}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    assert client.get_reload_objects() == objects
+    assert fake.sent[6:] == bytes((Command.GET_RELOAD_OBJECTS,)) + b"session1\n"
+
+
+def test_reload_reports_detailed_controller_failure() -> None:
+    fake = FakeSocket(response(1, {
+        "ok": False, "command": 1030042, "result": -3,
+        "error": "Changed object.par_float; cold restart required",
+    }))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "session1"
+    with pytest.raises(ProtocolError, match="Changed object.par_float"):
+        client.execute_controller_command(1030042)

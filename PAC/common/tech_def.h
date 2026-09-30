@@ -157,6 +157,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         ///
         bool is_idle() const;
 
+        // Build operations separately and commit only after successful validation.
+        int reload_operations( lua_State* L, const std::string& path,
+            std::string& error );
+
         /// @brief Включен ли хотя бы один важный режим технологического объекта.
         bool is_any_important_mode();
 
@@ -354,6 +358,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         char *name_Lua;    ///< Имя объекта в Lua.
 
         mutable smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
+        unsigned operations_call_depth = 0; ///< Защита от reload из Lua callbacks.
 
         enum PARAMS_ID
             {
@@ -415,10 +420,9 @@ class tech_object_manager
 
         /// @brief Горячая перезагрузка технологического объекта.
         ///
-        /// Новый технологический объект строится Lua-функцией
-        /// reload_tech_object (см. sys/sys.objects.lua), затем заменяется
-        /// в менеджере, коммуникаторе устройств и реестре ошибок без
-        /// остановки остальных объектов.
+        /// Lua-функция prepare_tech_object_reload строит новые операции.
+        /// После проверки заменяется только менеджер операций; сам объект,
+        /// параметры, таймеры и регистрация в подсистемах сохраняются.
         ///
         /// @param serial_number - глобальный порядковый номер объекта (ключ [N]
         /// в main.objects.lua, он же суффикс имени OBJECTn).
@@ -426,8 +430,11 @@ class tech_object_manager
         /// @return 0 - объект перезагружен.
         /// @return -1 - объект с номером не найден.
         /// @return -2 - объект не в простое, перезагрузка невозможна.
-        /// @return -3 - ошибка построения нового объекта в Lua.
+        /// @return -3 - ошибка загрузки, несовместимое описание или ошибка Lua.
+        /// @return -4 - Lua-код удерживает ссылки на старые операции/шаги.
         int reload_object( u_int serial_number );
+
+        const std::string& get_reload_error() const { return reload_error; }
 
         int save_params_as_Lua_str( char* str );
 
@@ -479,6 +486,7 @@ class tech_object_manager
         static auto_smart_ptr < tech_object_manager > instance;
 
         std::vector< tech_object* > tech_objects; ///< Технологические объекты.
+        std::string reload_error;
 
         tech_object* stub;
     };

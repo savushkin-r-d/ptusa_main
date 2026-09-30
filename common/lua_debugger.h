@@ -52,6 +52,8 @@ class lua_debugger
             CMD_POLL,
             /// Decimal PAC_info::COMMANDS id in the request body.
             CMD_EXEC_CONTROLLER_COMMAND,
+            /// Returns object ids/names and idle state for individual reload.
+            CMD_GET_RELOAD_OBJECTS,
             };
 
         static lua_debugger* get_instance();
