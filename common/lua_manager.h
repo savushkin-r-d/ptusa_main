@@ -28,7 +28,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     {
     2, //"sys.io.lua",
     2, //"sys.devices.lua",
-    9, //"sys.objects.plua",
+    10, //"sys.objects.plua",
 
     1, //"main.io.plua",
     1, //"main.objects.plua",

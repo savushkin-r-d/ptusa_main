@@ -15,6 +15,7 @@
 #include "lua_manager.h"
 #include "PAC_info.h"
 #include "tcp_cmctr.h"
+#include "tech_def.h"
 
 namespace
     {
@@ -515,6 +516,28 @@ long lua_debugger::process_service( long len, unsigned char* data,
                 while ( item.samples.size() > 1 ) item.samples.pop_front();
             return write_response( response, outdata );
             }
+        case CMD_GET_RELOAD_OBJECTS:
+            {
+            std::string response = R"({"ok":true,"objects":[)";
+            auto* manager = G_TECH_OBJECT_MNGR();
+            bool first = true;
+            for ( u_int i = 0; i < manager->get_count(); ++i )
+                {
+                const auto* object = manager->get_tech_objects( i );
+                const auto id = object->get_serial_idx();
+                if ( id == 0 || id > 999 ) continue;
+                if ( !first ) response += ',';
+                first = false;
+                response += R"({"id":)" + std::to_string( id ) +
+                    R"(,"name":)" + json_quote( object->get_name() ) +
+                    R"(,"lua_name":)" + json_quote( object->get_name_in_Lua() ) +
+                    R"(,"idle":)" + ( object->is_idle() ? "true}" : "false}" );
+                if ( response.size() > MAX_RESPONSE_LENGTH - 1024 )
+                    return write_response(
+                        R"({"ok":false,"error":"Object list is too large"})", outdata );
+                }
+            return write_response( response + "]}", outdata );
+            }
         case CMD_EXEC_CONTROLLER_COMMAND:
             {
             if ( body.empty() )
@@ -532,6 +555,23 @@ long lua_debugger::process_service( long len, unsigned char* data,
 
             const auto controller_command =
                 static_cast<PAC_info::COMMANDS>( command_id );
+            const int reload_base = static_cast<int>(
+                PAC_info::COMMANDS::RELOAD_TECH_OBJECT_BASE );
+            if ( command_id > reload_base && command_id < reload_base + 1000 )
+                {
+                const auto id = command_id - reload_base;
+                const int result = G_PAC_INFO()->set_cmd( "CMD", 0, command_id );
+                const std::string message = result == 0 ?
+                    "Object " + std::to_string( id ) + " reloaded." :
+                    G_TECH_OBJECT_MNGR()->get_reload_error().substr( 0, 1024 );
+                return write_response( std::string( R"({"ok":)" ) +
+                    ( result == 0 ? "true" : "false" ) + R"(,"command":)" +
+                    std::to_string( command_id ) + R"(,"object":)" +
+                    std::to_string( id ) + R"(,"result":)" +
+                    std::to_string( result ) + R"(,"queued":false,"message":)" +
+                    json_quote( message ) + ( result == 0 ? "}" :
+                        R"(,"error":)" + json_quote( message ) + "}" ), outdata );
+                }
             switch ( controller_command )
                 {
                 case PAC_info::COMMANDS::CLEAR_RESULT_CMD:

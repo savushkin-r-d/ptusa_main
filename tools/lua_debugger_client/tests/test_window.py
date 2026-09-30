@@ -736,3 +736,70 @@ def test_session_saves_and_restores_message_log(tmp_path) -> None:
         session.deleteLater()
         restored.deleteLater()
         application.processEvents()
+
+
+@pytest.mark.parametrize("confirmed", [False, True])
+def test_individual_object_reload_uses_selected_id(monkeypatch, confirmed) -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.controller_command_requested.disconnect(session._worker.execute_controller_command)
+        session.reload_objects_requested.disconnect(session._worker.refresh_reload_objects)
+        sent = []
+        refreshed = []
+        session.controller_command_requested.connect(sent.append)
+        session.reload_objects_requested.connect(lambda: refreshed.append(True))
+        assert not session.reload_object_button.isEnabled()
+        session._connected = True
+        session._on_reload_objects([
+            {"id": 1, "name": "Первый", "lua_name": "OBJECT1", "idle": False},
+            {"id": 42, "name": "Второй", "lua_name": "OBJECT42", "idle": True},
+        ])
+        assert not session.reload_object_button.isEnabled()
+        session.reload_object_combo.setCurrentIndex(1)
+        assert session.reload_object_button.isEnabled()
+        calls = []
+        def confirm(*args):
+            calls.append(args[2])
+            return (QMessageBox.StandardButton.Yes if confirmed
+                    else QMessageBox.StandardButton.No)
+        monkeypatch.setattr(QMessageBox, "question", confirm)
+        session.reload_object_button.click()
+        assert "OBJECT42" in calls[0]
+        assert sent == ([1030042] if confirmed else [])
+        if confirmed:
+            assert not session.reload_object_button.isEnabled()
+            assert not session.command_button.isEnabled()
+            session._on_command_executed(1030042, {"ok": True, "result": 0})
+            assert "42" in session.command_result.text()
+            assert "перезагружен" in session.command_result.text()
+            assert refreshed == [True]
+        assert session.reload_object_button.isEnabled()
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_object_reload_failure_and_disconnect_restore_controls(monkeypatch) -> None:
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._connected = True
+        session._on_reload_objects([{"id": 3, "name": "Tank", "idle": True}])
+        session._command_pending = True
+        session.command_result.setText("Выполнение…")
+        monkeypatch.setattr(QMessageBox, "warning", lambda *args: None)
+        session._show_error("Changed object.par_float; cold restart required")
+        assert "Changed object.par_float" in session.command_result.text()
+        assert session.reload_object_button.isEnabled()
+        session._on_disconnected("")
+        assert session.reload_object_combo.count() == 0
+        assert not session.reload_object_button.isEnabled()
+        # Late response from a disconnected session must not repopulate the list.
+        session._on_reload_objects([{"id": 3, "idle": True}])
+        assert session.reload_object_combo.count() == 0
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()

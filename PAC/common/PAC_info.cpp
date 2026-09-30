@@ -274,7 +274,11 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 }
             else if ( res == -3 )
                 {
-                msg = "Reload object error - Lua reload unavailable.";
+                msg = "Reload object failed - see log for details.";
+                }
+            else if ( res == -4 )
+                {
+                msg = "Reload object rejected - Lua retains operation handles.";
                 }
             cmd_answer[ 0 ] = 0;
             auto r = fmt::format_to_n( cmd_answer,

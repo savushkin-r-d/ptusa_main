@@ -9,6 +9,18 @@
 #include "lua_debugger.h"
 
 #include "g_errors.h"
+#include "prj_mngr.h"
+#include <filesystem>
+#include <memory>
+namespace
+{
+struct operations_call_guard
+    {
+    unsigned& depth;
+    explicit operations_call_guard( unsigned& depth ) : depth( depth ) { ++depth; }
+    ~operations_call_guard() { --depth; }
+    };
+}
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 
@@ -96,6 +108,7 @@ int tech_object::init_runtime_params()
 //-----------------------------------------------------------------------------
 int tech_object::set_mode( u_int operation_n, int newm )
     {
+    const operations_call_guard guard( operations_call_depth );
     int res = 0;
 
     static u_char idx = 0;
@@ -356,6 +369,7 @@ int tech_object::check_on_mode( u_int operation, char* reason, int max_len )
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
+    const operations_call_guard guard( operations_call_depth );
     for ( u_int i = 0; i < operations_count; i++ )
         {
         int idx = i + 1;
@@ -1626,87 +1640,82 @@ int tech_object_manager::save_params_as_Lua_str( char* str )
     return res;
     }
 //-----------------------------------------------------------------------------
-int tech_object_manager::reload_object( u_int serial_number )
+int tech_object::reload_operations( lua_State* L, const std::string& path,
+    std::string& error )
     {
-    //Поиск объекта по глобальному порядковому номеру (ключ [N] в
-    //main.objects.lua, он же суффикс имени OBJECTn).
-    tech_object* old_object = 0;
-    u_int idx = 0;
-    for ( u_int i = 0; i < tech_objects.size(); i++ )
+    if ( operations_call_depth )
         {
-        if ( tech_objects[ i ]->get_serial_idx() == serial_number )
-            {
-            old_object = tech_objects[ i ];
-            idx = i;
-            break;
-            }
-        }
-
-    if ( 0 == old_object )
-        {
-        printf( "Reload object error - object [%u] not found.\n",
-            serial_number );
-        return -1;
-        }
-
-    //Перезагрузка возможна только для объекта, находящегося в простое.
-    if ( false == old_object->is_idle() )
-        {
-        printf( "Reload object error - object [%u] is not idle.\n",
-            serial_number );
+        error = "Object operations are in use by a controller/Lua call.";
         return -2;
         }
-
-    //Построение нового объекта в Lua (см. reload_tech_object в
-    //sys/sys.objects.lua). Lua-функция обновляет обёртку объекта и возвращает
-    //новый системный объект.
-    auto* L = G_LUA_MANAGER->get_Lua();
-    if ( !L ) return -3;
-    const int stack_top = lua_gettop( L );
-    lua_getglobal( L, "reload_tech_object" );
-    lua_pushinteger( L, serial_number );
-    const int lua_result = lua_pcall( L, 1, 1, 0 );
-    tolua_Error type_error{};
-    tech_object* new_object = nullptr;
-    //tolua's inheritance check pushes values before reusing this index.
-    //It requires an absolute index for foreign/derived userdata.
-    const int result_idx = stack_top + 1;
-    if ( lua_result == 0 && lua_type( L, result_idx ) == LUA_TUSERDATA &&
-        tolua_isusertype( L, result_idx, "tech_object", 0, &type_error ) )
+    const operations_call_guard guard( operations_call_depth );
+    if ( !L )
         {
-        new_object = static_cast< tech_object* >(
-            tolua_tousertype( L, result_idx, nullptr ) );
-        }
-    else if ( lua_result != 0 )
-        {
-        const char* error = lua_tostring( L, -1 );
-        G_LOG->error( "Reload object [%u]: %s", serial_number,
-            error ? error : "Lua error" );
-        }
-    lua_settop( L, stack_top );
-
-    if ( !new_object )
-        {
-        printf( "Reload object error - Lua reload_tech_object [%u] "
-            "unavailable.\n", serial_number );
+        error = "Lua runtime is unavailable.";
         return -3;
         }
-
-    //Замена объекта в менеджере, коммуникаторе устройств и реестре ошибок.
-    tech_objects[ idx ] = new_object;
-
-    //Восстанавливаем последовательный номер нового объекта, иначе повторная
-    //перезагрузка по номеру [N] не найдёт объект.
-    new_object->set_serial_idx( serial_number );
-
-    G_DEVICE_CMMCTR->update_device( old_object, new_object );
-    G_ERRORS_MANAGER->update_tech_object( old_object, new_object );
-
-    //Старый объект не удаляем здесь: он удаляется сборщиком мусора Lua после
-    //обновления обёртки (объекты создаются в Lua и живут в Lua).
-    printf( "Object [%u] reloaded - Ok.\n", serial_number );
-
+    // Drop temporary binding handles, then reject persistent references before
+    // replacing their C++ owners. Parameters and the object itself stay alive.
+    lua_gc( L, LUA_GCCOLLECT, 0 );
+    if ( operations_manager->has_lua_references( L ) )
+        {
+        error = "Lua code retains operation/step handles; release them before reload.";
+        return -4;
+        }
+    const int top = lua_gettop( L );
+    auto replacement = std::make_unique<operation_manager>( this );
+    lua_getglobal( L, "prepare_tech_object_reload" );
+    lua_pushinteger( L, serial_idx );
+    tolua_pushusertype( L, replacement.get(), "operation_manager" );
+    lua_pushlstring( L, path.data(), path.size() );
+    const int result = lua_pcall( L, 3, 1, 0 );
+    const bool prepared = result == 0 && lua_isboolean( L, -1 ) &&
+        lua_toboolean( L, -1 ) && replacement->size() == operations_count;
+    if ( !prepared )
+        {
+        const char* message = result ? lua_tostring( L, -1 ) : nullptr;
+        error = message ? message : "Invalid result from prepare_tech_object_reload.";
+        }
+    lua_settop( L, top );
+    // Remove temporary userdata before deleting a failed build or reusing its
+    // address on the next attempt. The system builder never exports handles.
+    lua_gc( L, LUA_GCCOLLECT, 0 );
+    if ( !prepared ) return -3;
+    if ( !is_idle() )
+        {
+        error = "Object is not idle.";
+        return -2;
+        }
+    auto* previous = static_cast<operation_manager*>( operations_manager );
+    operations_manager = replacement.release();
+    delete previous;
     return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object_manager::reload_object( u_int serial_number )
+    {
+    reload_error.clear();
+    for ( auto* object : tech_objects )
+        {
+        if ( object->get_serial_idx() != serial_number ) continue;
+        if ( !object->is_idle() )
+            {
+            reload_error = "Object is not idle.";
+            return -2;
+            }
+        const auto path = ( std::filesystem::u8path( G_PROJECT_MANAGER->path ) /
+            "objects" / ( "obj_" + std::to_string( serial_number ) + ".lua" ) ).u8string();
+        const int result = object->reload_operations(
+            G_LUA_MANAGER->get_Lua(), path, reload_error );
+        if ( result )
+            G_LOG->error( "Reload object [%u]: %s", serial_number,
+                reload_error.c_str() );
+        else
+            G_LOG->notice( "Object [%u] reloaded.", serial_number );
+        return result;
+        }
+    reload_error = "Object not found.";
+    return -1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -19,6 +19,7 @@ class Command(IntEnum):
     GET_MESSAGES = 8
     POLL = 9
     EXEC_CONTROLLER_COMMAND = 10
+    GET_RELOAD_OBJECTS = 11
 
 
 class ProtocolError(RuntimeError):
@@ -117,6 +118,11 @@ class DebuggerProtocol:
         response = self._request(Command.EXEC_CONTROLLER_COMMAND, str(command_id))
         self._ensure_ok(response)
         return response
+
+    def get_reload_objects(self) -> list[dict[str, Any]]:
+        response = self._request(Command.GET_RELOAD_OBJECTS)
+        self._ensure_ok(response)
+        return response["objects"]
 
     def set_expressions(self, expressions: list[str]) -> dict[str, Any]:
         response = self._request(

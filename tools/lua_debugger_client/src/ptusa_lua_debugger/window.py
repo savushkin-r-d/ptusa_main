@@ -81,12 +81,14 @@ class DebuggerSessionWidget(QWidget):
     interval_requested = Signal(int)
     evaluate_requested = Signal(str)
     controller_command_requested = Signal(int)
+    reload_objects_requested = Signal()
     clear_requested = Signal()
     title_changed = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
         self._connected = False
+        self._command_pending = False
         self._shutting_down = False
         self._connection_pending = False
         self._reconnect_delay_seconds = RECONNECT_INITIAL_DELAY_SECONDS
@@ -107,6 +109,9 @@ class DebuggerSessionWidget(QWidget):
         self.controller_command_requested.connect(
             self._worker.execute_controller_command
         )
+        self.reload_objects_requested.connect(self._worker.refresh_reload_objects)
+        self._worker.reload_objects_loaded.connect(self._on_reload_objects)
+        self._worker.reload_objects_failed.connect(self._on_reload_objects_error)
         self.clear_requested.connect(self._worker.clear_chart_data)
         self._worker.connected.connect(self._on_connected)
         self._worker.disconnected.connect(self._on_disconnected)
@@ -369,6 +374,23 @@ class DebuggerSessionWidget(QWidget):
         commands.addWidget(self.command_button)
         commands.addWidget(self.command_result, 1)
 
+        self.reload_object_combo = QComboBox()
+        self.reload_object_combo.setMinimumWidth(260)
+        self.reload_object_combo.currentIndexChanged.connect(self._update_reload_controls)
+        self.reload_objects_button = QPushButton("Обновить список")
+        self.reload_objects_button.setEnabled(False)
+        self.reload_objects_button.clicked.connect(self.reload_objects_requested.emit)
+        self.reload_object_button = QPushButton("Перезагрузить объект")
+        self.reload_object_button.setEnabled(False)
+        self.reload_object_button.clicked.connect(self._reload_selected_object)
+        self.reload_hint = QLabel("Нет подключения")
+        reload_row = QHBoxLayout()
+        reload_row.addWidget(QLabel("Объект:"))
+        reload_row.addWidget(self.reload_object_combo)
+        reload_row.addWidget(self.reload_objects_button)
+        reload_row.addWidget(self.reload_object_button)
+        reload_row.addWidget(self.reload_hint, 1)
+
         root_layout = QVBoxLayout(self)
         root_layout.setContentsMargins(12, 8, 12, 8)
         root_layout.setSpacing(8)
@@ -377,6 +399,7 @@ class DebuggerSessionWidget(QWidget):
         root_layout.addWidget(splitter, 1)
         root_layout.addLayout(evaluation)
         root_layout.addLayout(commands)
+        root_layout.addLayout(reload_row)
         self.status_label = QLabel("Не подключено")
         self.status_label.setObjectName("sessionStatus")
         root_layout.addWidget(self.status_label)
@@ -446,6 +469,10 @@ class DebuggerSessionWidget(QWidget):
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Отключиться")
         self.command_button.setEnabled(True)
+        self._command_pending = False
+        self._update_reload_controls()
+        self.reload_hint.setText("Загрузка списка…")
+        self.reload_objects_requested.emit()
         self.status_label.setText(f"Подключено · сессия {session_id}")
         self._update_title()
         self._apply_expressions()
@@ -457,6 +484,10 @@ class DebuggerSessionWidget(QWidget):
         self.connect_button.setEnabled(True)
         self.connect_button.setText("Подключиться")
         self.command_button.setEnabled(False)
+        self._command_pending = False
+        self.reload_object_combo.clear()
+        self.reload_hint.setText("Нет подключения")
+        self._update_reload_controls()
         if self.command_result.text() == "Выполнение…":
             self.command_result.setText(reason or "Нет подключения")
         if reason:
@@ -687,7 +718,7 @@ class DebuggerSessionWidget(QWidget):
 
     @Slot()
     def _execute_controller_command(self) -> None:
-        if not self._connected:
+        if not self._connected or self._command_pending:
             return
         answer = QMessageBox.question(
             self,
@@ -703,16 +734,79 @@ class DebuggerSessionWidget(QWidget):
         if answer != QMessageBox.StandardButton.Yes:
             return
         command_id = int(self.command_combo.currentData())
+        self._command_pending = True
+        self._update_reload_controls()
         self.command_button.setEnabled(False)
         self.command_result.setText("Выполнение…")
         self.controller_command_requested.emit(command_id)
+
+    @Slot()
+    def _update_reload_controls(self) -> None:
+        available = self._connected and not self._command_pending
+        obj = self.reload_object_combo.currentData()
+        self.reload_objects_button.setEnabled(available)
+        self.reload_object_combo.setEnabled(available)
+        self.reload_object_button.setEnabled(bool(available and obj and obj.get("idle")))
+
+    @Slot(list)
+    def _on_reload_objects(self, objects: list[dict[str, Any]]) -> None:
+        if not self._connected:
+            return
+        previous = self.reload_object_combo.currentData() or {}
+        self.reload_object_combo.blockSignals(True)
+        self.reload_object_combo.clear()
+        selected = 0
+        for obj in objects:
+            if not isinstance(obj.get("id"), int) or not 1 <= obj["id"] <= 999:
+                continue
+            state = "простой" if obj.get("idle") else "в работе"
+            label = f"{obj.get('lua_name', 'OBJECT' + str(obj['id']))} · {obj.get('name', '')} · {state}"
+            self.reload_object_combo.addItem(label, obj)
+            if obj["id"] == previous.get("id"):
+                selected = self.reload_object_combo.count() - 1
+        self.reload_object_combo.setCurrentIndex(selected)
+        self.reload_object_combo.blockSignals(False)
+        self.reload_hint.setText("Только в простое" if objects else "Объектов нет")
+        self._update_reload_controls()
+
+    @Slot(str)
+    def _on_reload_objects_error(self, message: str) -> None:
+        self.reload_object_combo.clear()
+        self.reload_hint.setText(message)
+        self._update_reload_controls()
+
+    @Slot()
+    def _reload_selected_object(self) -> None:
+        obj = self.reload_object_combo.currentData()
+        if not self._connected or self._command_pending or not obj or not obj.get("idle"):
+            return
+        object_id = obj["id"]
+        answer = QMessageBox.question(
+            self, "Перезагрузка объекта",
+            f"Перезагрузить {obj.get('lua_name', 'OBJECT' + str(object_id))} "
+            f"({obj.get('name', '')}) на {self.host_edit.text().strip()}:{self.port_spin.value()}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        self._command_pending = True
+        self.command_button.setEnabled(False)
+        self._update_reload_controls()
+        self.command_result.setText("Выполнение…")
+        self.controller_command_requested.emit(1_030_000 + object_id)
 
     @Slot(int, dict)
     def _on_command_executed(
         self, command_id: int, result: dict[str, Any]
     ) -> None:
+        self._command_pending = False
         self.command_button.setEnabled(self._connected)
-        if result.get("queued"):
+        self._update_reload_controls()
+        if 1_030_000 < command_id < 1_031_000:
+            self.command_result.setText(f"Объект {command_id - 1_030_000} перезагружен")
+            self.reload_objects_requested.emit()
+        elif result.get("queued"):
             self.command_result.setText("Сохранение запланировано")
         else:
             self.command_result.setText(
@@ -1011,7 +1105,9 @@ class DebuggerSessionWidget(QWidget):
 
     @Slot(str)
     def _show_error(self, message: str) -> None:
+        self._command_pending = False
         self.command_button.setEnabled(self._connected)
+        self._update_reload_controls()
         if self.command_result.text() == "Выполнение…":
             self.command_result.setText(f"Ошибка: {message}")
         self.status_label.setText(message)
