@@ -1237,3 +1237,58 @@ def test_assignment_reread_marks_lossy() -> None:
         assert "экранирован" in browser.detail.toPlainText()
     finally:
         browser.deleteLater()
+
+
+@pytest.mark.parametrize("type_name", ["table", "userdata"])
+def test_cycles_stop_at_ancestors_but_sibling_aliases_expand(type_name) -> None:
+    browser = make_browser()
+    requests = []
+    browser.browse_requested.connect(lambda *args: requests.append(args))
+
+    def obj(name, expression, identity):
+        return dict(entry(name, expression, type_name, "<object>", True),
+                    object_id=identity)
+
+    try:
+        browser.set_connected(True)
+        browser.load_root()
+        show_result(browser, "_G", 0, dict(result("_G", [
+            obj("_G", '_G["_G"]', "root"),
+            obj("a", "_G.a", "child"),
+            obj("b", "_G.b", "child"),
+        ]), object_id="root"))
+        cycle = find_item(browser, "_G")
+        assert cycle.childCount() == 0
+        assert "Циклическая ссылка: _G" in cycle.text(2)
+        before = len(requests)
+        browser._on_item_expanded(cycle)
+        assert len(requests) == before
+        for name in ("a", "b"):
+            assert find_item(browser, name).data(0, Qt.UserRole)["expandable"]
+        parent = find_item(browser, "a")
+        parent.setExpanded(True)
+        show_result(browser, "_G.a", 0, dict(result("_G.a", [
+            obj("self", "_G.a.self", "child"),
+            obj("back", "_G.a.back", "root"),
+            obj("nested", "_G.a.nested", "nested"),
+        ]), object_id="child"))
+        assert find_item(browser, "self").childCount() == 0
+        assert "_G.a" in find_item(browser, "self").text(2)
+        assert find_item(browser, "back").childCount() == 0
+        nested = find_item(browser, "nested")
+        nested.setExpanded(True)
+        show_result(browser, "_G.a.nested", 0, dict(result("_G.a.nested", [
+            obj("back_to_a", "_G.a.nested.back", "child"),
+        ]), object_id="nested"))
+        assert find_item(browser, "back_to_a").childCount() == 0
+        browser.tree.setCurrentItem(find_item(browser, "back_to_a"))
+        assert "Циклическая ссылка: _G.a" in browser.detail.toPlainText()
+        # Loading another root clears the old root identity.
+        browser.root_edit.setText("other")
+        browser.load_root()
+        show_result(browser, "other", 0, dict(result("other", [
+            obj("old_root", "other.old", "root"),
+        ]), object_id="other"))
+        assert find_item(browser, "old_root").data(0, Qt.UserRole)["expandable"]
+    finally:
+        browser.deleteLater()

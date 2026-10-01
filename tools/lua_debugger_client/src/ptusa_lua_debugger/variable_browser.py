@@ -52,6 +52,8 @@ class VariableBrowserWidget(QWidget):
         super().__init__()
         self._connected = False
         self._target = ""
+        self._root_object_id = ""
+        self._root_expression = ""
         self._generation = 0
         self._next_request_id = 0
         # request_id -> (expression, offset, tree item or None for root,
@@ -203,6 +205,8 @@ class VariableBrowserWidget(QWidget):
         self._requests.clear()
         self.tree.clear()
         self._expr_items.clear()
+        self._root_object_id = ""
+        self._root_expression = expression
         placeholder = QTreeWidgetItem(self.tree, ["Загрузка…", "", "", ""])
         placeholder.setData(0, Qt.UserRole, {"kind": _PLACEHOLDER})
         # Set the status before emitting the request so a synchronous
@@ -343,6 +347,7 @@ class VariableBrowserWidget(QWidget):
             if offset == 0:
                 self.tree.clear()
                 self._expr_items.clear()
+                self._root_object_id = str(result.get("object_id", ""))
             else:
                 for index in range(
                     self.tree.topLevelItemCount() - 1, -1, -1
@@ -362,6 +367,7 @@ class VariableBrowserWidget(QWidget):
         else:
             parent = item
             data = self._data(item) or {}
+            data["object_id"] = str(result.get("object_id", ""))
             data["loaded"] = True
             data["loading"] = False
             item.setData(0, Qt.UserRole, data)
@@ -474,6 +480,20 @@ class VariableBrowserWidget(QWidget):
         name = str(entry.get("name", "?"))
         value_type = str(entry.get("type", ""))
         value_text = self._display_value(entry)
+        object_id = str(entry.get("object_id", ""))
+        reference = ""
+        if object_id and value_type in ("table", "userdata"):
+            ancestor = parent
+            while ancestor is not None:
+                ancestor_data = self._data(ancestor) or {}
+                if ancestor_data.get("object_id") == object_id:
+                    reference = ancestor_data.get("expression", "")
+                    break
+                ancestor = ancestor.parent()
+            if not reference and object_id == self._root_object_id:
+                reference = self._root_expression
+        if reference:
+            value_text = f"↩ Циклическая ссылка: {reference}"
         item = QTreeWidgetItem(
             [name, value_type, value_text[:VALUE_PREVIEW_LIMIT], ""]
         )
@@ -489,7 +509,10 @@ class VariableBrowserWidget(QWidget):
             "value": value_text,
             "value_truncated": bool(entry.get("value_truncated")),
             "value_lossy": bool(entry.get("value_lossy")),
-            "expandable": bool(entry.get("expandable")) and bool(expression),
+            "object_id": object_id,
+            "reference": reference,
+            "expandable": (bool(entry.get("expandable"))
+                           and bool(expression) and not reference),
             "writable": bool(entry.get("writable")),
             "loaded": False,
             "loading": False,
