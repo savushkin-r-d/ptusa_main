@@ -102,6 +102,76 @@ def make_pending(browser: VariableBrowserWidget, expression: str) -> int:
     return rid
 
 
+def test_completions_use_loaded_pages_and_methods_without_requests() -> None:
+    browser = make_browser()
+    requests = []
+    browser.browse_requested.connect(
+        lambda expression, offset, rid: requests.append((expression, offset))
+    )
+    try:
+        assert browser.completion_expressions() == []
+        browser.set_connected(True)
+        browser.load_root()
+        show_result(browser, "_G", 0, result("_G", [
+            entry("LINE1V1", '_G["LINE1V1"]', "userdata",
+                  expandable=True),
+            entry("end", '_G["end"]'),
+            entry("odd key", '_G["odd key"]'),
+        ], next_offset=128))
+        completions = browser.completion_expressions()
+        assert "LINE1V1" in completions
+        assert "_G.LINE1V1" in completions
+        assert '_G["end"]' in completions and "end" not in completions
+        assert '_G["odd key"]' in completions
+        assert not any("get_value" in name for name in completions)
+        valve = find_item(browser, "LINE1V1")
+        valve.setExpanded(True)
+        show_result(browser, '_G["LINE1V1"]', 0, result("LINE1V1", [
+            entry("get_value", '_G["LINE1V1"]["get_value"]', "function"),
+            entry("value", '_G["LINE1V1"]["value"]'),
+            entry("broken", '_G["LINE1V1"]["broken"]', "error"),
+        ]))
+        before = list(requests)
+        completions = browser.completion_expressions()
+        assert "LINE1V1.get_value" in completions
+        assert "LINE1V1:get_value" in completions
+        assert '_G["LINE1V1"].get_value' in completions
+        assert '_G["LINE1V1"]:get_value' in completions
+        assert "LINE1V1.value" in completions
+        assert "LINE1V1:value" not in completions
+        assert not any("broken" in name for name in completions)
+        assert completions == sorted(set(completions))
+        assert requests == before
+        browser.tree.setCurrentItem(valve)
+        browser.refresh_selected()
+        show_result(browser, '_G["LINE1V1"]', 0, result("LINE1V1", [
+            entry("set_value", '_G["LINE1V1"]["set_value"]', "function"),
+        ]))
+        assert "LINE1V1:get_value" not in browser.completion_expressions()
+        assert "LINE1V1:set_value" in browser.completion_expressions()
+        browser.root_edit.setText("OBJECT1")
+        browser.load_root()
+        assert browser.completion_expressions() == []
+    finally:
+        browser.deleteLater()
+
+
+def test_completions_preserve_bracket_keys_and_indices() -> None:
+    browser = make_browser()
+    try:
+        browser._root_expression = "OBJECTS[1]"
+        browser._add_entry(None, entry("level", 'OBJECTS[1]["level"]'))
+        unusual = 'OBJECTS[1]["odd[\'key\']"]'
+        browser._add_entry(None, entry("odd['key']", unusual))
+        completions = browser.completion_expressions()
+        assert "OBJECTS[1]" in completions
+        assert "OBJECTS[1].level" in completions
+        assert unusual in completions
+        assert 'OBJECTS[1]["odd.key"]' not in completions
+    finally:
+        browser.deleteLater()
+
+
 def test_lazy_child_request_only_once_until_refresh() -> None:
     browser = make_browser()
     requests = []

@@ -38,6 +38,21 @@ class FakeSocket:
         self.closed = True
 
 
+def test_execute_sends_multiline_chunk_once() -> None:
+    fake = FakeSocket(response(1, {"ok": True, "type": "number", "value": 2}))
+    client = DebuggerProtocol()
+    client._socket = fake
+    client.session_id = "abc"
+    code = "x=2\nreturn x"
+    assert client.execute(code)["value"] == 2
+    assert fake.sent[6:] == bytes([14]) + b"abc\nx=2\nreturn x"
+    for invalid in ("", " " * 10, "x" * 16385, "я" * 8193):
+        before = bytes(fake.sent)
+        with pytest.raises(ValueError):
+            client.execute(invalid)
+        assert bytes(fake.sent) == before
+
+
 def test_connect_creates_session(monkeypatch) -> None:
     fake = FakeSocket(
         b"PAC accept"

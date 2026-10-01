@@ -2,17 +2,23 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pyqtgraph as pg
-from PySide6.QtCore import QMetaObject, Qt, QThread, QTimer, Signal, Slot
-from PySide6.QtGui import QAction, QCloseEvent, QKeySequence
+from PySide6.QtCore import (
+    QMetaObject, QStringListModel, Qt, QThread, QTimer, Signal, Slot,
+)
+from PySide6.QtGui import (
+    QAction, QCloseEvent, QKeyEvent, QKeySequence, QTextCursor,
+)
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QComboBox,
+    QCompleter,
     QColorDialog,
     QDoubleSpinBox,
     QDialog,
@@ -56,6 +62,7 @@ from .history import (
 from .history_table import HistoryTableModel
 from .pulse_counter import PulseCounters, PulseDefinition
 from .session_store import load_session, save_session
+from .setter import setter_code
 from .variable_browser import MAX_WATCH_EXPRESSIONS, VariableBrowserWidget
 from .worker import DebuggerWorker
 
@@ -76,12 +83,131 @@ RECONNECT_DELAY_STEP_SECONDS = 5
 RECONNECT_MAX_DELAY_SECONDS = 60
 
 
+class LuaConsoleEdit(QPlainTextEdit):
+    _IDENTIFIER = r"[A-Za-z_][A-Za-z0-9_]*"
+    _KEY = (r'''(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|'''
+            r"-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?|true|false)")
+    _PREFIX = re.compile(
+        rf"(?<![A-Za-z0-9_]){_IDENTIFIER}"
+        rf"(?:\.{_IDENTIFIER}|\[{_KEY}\])*"
+        rf"(?:[.:](?:{_IDENTIFIER})?|\[)?\Z"
+    )
+    _LEXEME = re.compile(r'''--|\[(=*)\[|["']''')
+
+    def __init__(self, expressions: Callable[[], list[str]]) -> None:
+        super().__init__()
+        self._expressions = expressions
+        self._model = QStringListModel(self)
+        self._completer = QCompleter(self._model, self)
+        self._completer.setWidget(self)
+        self._completer.setCaseSensitivity(Qt.CaseSensitive)
+        self._completer.setCompletionMode(QCompleter.PopupCompletion)
+        self._completer.activated[str].connect(self._insert_completion)
+
+    def _completion_prefix(self) -> str:
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            return ""
+        cursor.setPosition(0, QTextCursor.KeepAnchor)
+        source = cursor.selectedText().replace("\u2029", "\n")
+        position = 0
+        while token := self._LEXEME.search(source, position):
+            start = token.end()
+            opening = (re.match(r"\[(=*)\[", source[start:])
+                       if token.group(0) == "--" else None)
+            level = (opening.group(1) if opening else token.group(1))
+            if level is not None:
+                closing = "]" + level + "]"
+                end = source.find(closing, start +
+                                  (opening.end() if opening else 0))
+                if end < 0:
+                    return ""
+                position = end + len(closing)
+            elif token.group(0) == "--":
+                end = source.find("\n", start)
+                if end < 0:
+                    return ""
+                position = end + 1
+            else:
+                while start < len(source):
+                    if source[start] == "\\":
+                        start += 2
+                    elif source[start] == token.group(0):
+                        break
+                    else:
+                        start += 1
+                if start >= len(source):
+                    return ""
+                position = start + 1
+        match = self._PREFIX.search(source)
+        return match.group(0) if match else ""
+
+    @Slot(str)
+    def _insert_completion(self, completion: str) -> None:
+        prefix = self._completer.completionPrefix()
+        if not prefix or self._completion_prefix() != prefix:
+            return
+        cursor = self.textCursor()
+        start = cursor.position() - len(prefix.encode("utf-16-le")) // 2
+        end = cursor.position()
+        cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        suffix = re.match(r"[A-Za-z0-9_]*", cursor.selectedText()).group(0)
+        cursor.setPosition(start)
+        cursor.setPosition(end + len(suffix), QTextCursor.KeepAnchor)
+        cursor.insertText(completion)
+        self.setTextCursor(cursor)
+        self._completer.popup().hide()
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        popup = self._completer.popup()
+        if popup.isVisible() and event.key() in (
+            Qt.Key_Tab, Qt.Key_Return, Qt.Key_Enter, Qt.Key_Escape,
+        ):
+            if event.key() == Qt.Key_Escape:
+                popup.hide()
+            else:
+                completion = popup.currentIndex().data()
+                if completion:
+                    self._insert_completion(completion)
+            event.accept()
+            return
+        popup.hide()
+        if event.key() == Qt.Key_Tab and event.modifiers() == Qt.NoModifier:
+            prefix = self._completion_prefix()
+            suffix_pattern = (self._KEY + r"\]" if prefix.endswith("[")
+                              else r"[A-Za-z0-9_]*")
+            matches = sorted({
+                expression for expression in self._expressions()
+                if prefix and expression.startswith(prefix)
+                and re.fullmatch(suffix_pattern, expression[len(prefix):])
+            })
+            if matches:
+                self._model.setStringList(matches)
+                self._completer.setCompletionPrefix(prefix)
+                if len(matches) == 1:
+                    self._insert_completion(matches[0])
+                else:
+                    popup.setCurrentIndex(
+                        self._completer.completionModel().index(0, 0)
+                    )
+                    rectangle = self.cursorRect()
+                    rectangle.setWidth(max(280, popup.sizeHintForColumn(0)
+                                           + popup.verticalScrollBar()
+                                           .sizeHint().width()))
+                    self._completer.complete(rectangle)
+                event.accept()
+                return
+        super().keyPressEvent(event)
+
+
 class DebuggerSessionWidget(QWidget):
     connect_requested = Signal(str, int)
     disconnect_requested = Signal()
     expressions_requested = Signal(list)
     interval_requested = Signal(int)
     evaluate_requested = Signal(str)
+    execute_requested = Signal(str)
+    lua_executed = Signal(str, dict)
     controller_command_requested = Signal(int)
     reload_objects_requested = Signal()
     clear_requested = Signal()
@@ -91,8 +217,10 @@ class DebuggerSessionWidget(QWidget):
         super().__init__()
         self._connected = False
         self._command_pending = False
+        self._lua_pending = False
         self._shutting_down = False
         self._connection_pending = False
+        self._connection_generation = 0
         self._reconnect_delay_seconds = RECONNECT_INITIAL_DELAY_SECONDS
         self._scheduled_reconnect_delay_seconds: int | None = None
         self._last_disconnect_reason = ""
@@ -108,6 +236,8 @@ class DebuggerSessionWidget(QWidget):
         self.expressions_requested.connect(self._worker.set_expressions)
         self.interval_requested.connect(self._worker.set_interval)
         self.evaluate_requested.connect(self._worker.evaluate)
+        self.execute_requested.connect(self._worker.execute)
+        self._worker.executed.connect(self._on_executed)
         self.controller_command_requested.connect(
             self._worker.execute_controller_command
         )
@@ -387,6 +517,9 @@ class DebuggerSessionWidget(QWidget):
         evaluation = QHBoxLayout()
         evaluation.addWidget(self.evaluate_edit, 1)
         evaluation.addWidget(evaluate_button)
+        execute_button = QPushButton("Выполнить Lua…")
+        execute_button.clicked.connect(self._open_lua_console)
+        evaluation.addWidget(execute_button)
 
         self.evaluate_result = QPlainTextEdit()
         self.evaluate_result.setObjectName("evaluateResult")
@@ -503,6 +636,7 @@ class DebuggerSessionWidget(QWidget):
     @Slot(str)
     def _on_connected(self, session_id: str) -> None:
         self._connected = True
+        self._connection_generation += 1
         self._connection_pending = False
         self._reset_reconnect()
         self.connect_button.setEnabled(True)
@@ -523,6 +657,8 @@ class DebuggerSessionWidget(QWidget):
     @Slot(str)
     def _on_disconnected(self, reason: str) -> None:
         self._connected = False
+        self._connection_generation += 1
+        self._lua_pending = False
         self._connection_pending = False
         self._variable_browser.set_connected(False)
         self.connect_button.setEnabled(True)
@@ -685,7 +821,8 @@ class DebuggerSessionWidget(QWidget):
                 if item.text(0) not in self._pulse_counters.definitions]
 
     def _create_expression(self, expression: str, *, history_enabled: bool = False,
-                           style: dict[str, Any] | None = None) -> None:
+                           style: dict[str, Any] | None = None,
+                           setter: dict[str, str] | None = None) -> None:
         style = style or {}
         self.variables.blockSignals(True)
         try:
@@ -734,6 +871,23 @@ class DebuggerSessionWidget(QWidget):
             color.clicked.connect(lambda: self._choose_color(color))
             offset.valueChanged.connect(self._redraw_chart)
             points.toggled.connect(self._redraw_chart)
+            if expression not in self._pulse_counters.definitions:
+                settings = setter or {}
+                for label, key, placeholder in (
+                    ("Setter", "code", "LINE1V1:set_value(<newvalue>)"),
+                    ("Допустимые значения", "limits", "(0;1;2); пусто — без ограничения"),
+                ):
+                    row = QTreeWidgetItem(item, [label])
+                    edit = QLineEdit(settings.get(key, ""))
+                    edit.setPlaceholderText(placeholder)
+                    self.variables.setItemWidget(row, 2, edit)
+                row = QTreeWidgetItem(item, ["Новое значение"])
+                edit = QLineEdit()
+                edit.setPlaceholderText('Число, true/false или "строка"')
+                self.variables.setItemWidget(row, 2, edit)
+                button = QPushButton("Установить…")
+                button.clicked.connect(lambda: self._set_watch_value(item))
+                self.variables.setItemWidget(row, 3, button)
         finally:
             self.variables.blockSignals(False)
 
@@ -762,6 +916,90 @@ class DebuggerSessionWidget(QWidget):
                 "chart_type": widget(8).currentData(),
             }
         return styles
+
+    def _setter_settings(self) -> dict[str, dict[str, str]]:
+        return {
+            item.text(0): {
+                "code": self.variables.itemWidget(item.child(9), 2).text(),
+                "limits": self.variables.itemWidget(item.child(10), 2).text(),
+            }
+            for item in self._expression_items()
+            if item.text(0) not in self._pulse_counters.definitions
+        }
+
+    def _set_watch_value(self, item: QTreeWidgetItem) -> None:
+        if not self._connected or self._lua_pending:
+            self._show_error("Нет подключения или предыдущий Lua-запрос ещё выполняется")
+            return
+        settings = self._setter_settings()[item.text(0)]
+        new_value = self.variables.itemWidget(item.child(11), 2).text()
+        try:
+            code = setter_code(item.text(0), settings["code"], settings["limits"], new_value)
+        except ValueError as exc:
+            self._show_error(str(exc))
+            return
+        self._submit_lua(code, f"Getter: {item.text(0)}\n"
+                         f"Setter: {settings['code']}\nНовое значение: {new_value}\n"
+                         f"Допустимые значения: {settings['limits'] or 'без ограничения'}")
+
+    def _submit_lua(self, code: str, description: str) -> None:
+        if not self._connected or self._lua_pending:
+            self._show_error("Нет подключения или предыдущий Lua-запрос ещё выполняется")
+            return
+        if not code.strip() or len(code.encode("utf-8")) > 16384:
+            self._show_error("Lua-код должен содержать от 1 до 16384 байт")
+            return
+        generation = self._connection_generation
+        answer = QMessageBox.question(
+            self, "Выполнить Lua на контроллере",
+            f"Контроллер: {self.host_edit.text()}:{self.port_spin.value()}\n\n{description}",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
+        )
+        if answer != QMessageBox.Yes:
+            return
+        if (not self._connected or generation != self._connection_generation
+                or self._lua_pending or self._shutting_down):
+            self._show_error("Подключение изменилось; подтвердите Lua-запрос заново")
+            return
+        self._lua_pending = True
+        self.execute_requested.emit(code)
+
+    def _open_lua_console(self) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Выполнить Lua на контроллере")
+        dialog.resize(640, 360)
+        layout = QVBoxLayout(dialog)
+        editor = LuaConsoleEdit(self._variable_browser.completion_expressions)
+        editor.setPlaceholderText("LINE1V1:set_value(1)\nreturn LINE1V1:get_value()")
+        editor.setToolTip(
+            "Tab — дополнить из загруженного дерева переменных.\n"
+            "Для полей и методов сначала раскройте ветку объекта."
+        )
+        layout.addWidget(editor)
+        button = QPushButton("Выполнить…")
+        button.clicked.connect(lambda: self._submit_lua(
+            editor.toPlainText(), editor.toPlainText()))
+        layout.addWidget(button)
+        output = QPlainTextEdit()
+        output.setReadOnly(True)
+        output.setMaximumBlockCount(200)
+        layout.addWidget(output)
+
+        def show_result(code: str, result: dict[str, Any]) -> None:
+            output.appendPlainText(f">>> {code}\n" + json.dumps(result, ensure_ascii=False))
+
+        self.lua_executed.connect(show_result)
+        try:
+            dialog.exec()
+        finally:
+            self.lua_executed.disconnect(show_result)
+            dialog.deleteLater()
+
+    @Slot(str, dict)
+    def _on_executed(self, code: str, result: dict[str, Any]) -> None:
+        self._lua_pending = False
+        self._on_evaluated(code, result)
+        self.lua_executed.emit(code, result)
 
     def _redraw_chart(self, _value: object = None) -> None:
         if self._last_chart_data is not None:
@@ -1279,6 +1517,7 @@ class DebuggerSessionWidget(QWidget):
             pulse_state=self._pulse_counters.snapshot(),
             message_log=self._message_log(),
             variable_browser=self._variable_browser.snapshot_state(),
+            setter_settings=self._setter_settings(),
         )
 
     def _next_log_path(self) -> Path:
@@ -1361,6 +1600,7 @@ class DebuggerSessionWidget(QWidget):
             self._create_expression(
                 expression, history_enabled=expression in history_expressions,
                 style=document.get("series_styles", {}).get(expression),
+                setter=document.get("setter_settings", {}).get(expression),
             )
         chart_data = document.get("chart_data")
         self._last_chart_data = None

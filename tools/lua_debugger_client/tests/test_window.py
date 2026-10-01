@@ -72,6 +72,378 @@ def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
         application.processEvents()
 
 
+def test_setter_confirmation_limits_and_session_roundtrip(monkeypatch, tmp_path):
+    from ptusa_lua_debugger.session_store import load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        session.execute_requested.disconnect(session._worker.execute)
+        sent, errors, confirmations = [], [], []
+        session.execute_requested.connect(sent.append)
+        monkeypatch.setattr(session, "_show_error", errors.append)
+        session._connected = True
+        getter = "LINE1V1:get_value()"
+        settings = {"code": "LINE1V1:set_value(<newvalue>)", "limits": "(0;1;2)"}
+        session._create_expression(getter, setter=settings)
+        root = session.variables.topLevelItem(0)
+        value = session.variables.itemWidget(root.child(11), 2)
+
+        def confirm(*args):
+            confirmations.append(args)
+            return QMessageBox.Yes
+
+        monkeypatch.setattr(QMessageBox, "question", confirm)
+        value.setText("3")
+        session._set_watch_value(root)
+        assert errors and not sent and not confirmations
+        value.setText("2")
+        session._set_watch_value(root)
+        assert len(sent) == 1 and "LINE1V1:set_value(2)" in sent[0]
+        assert confirmations[0][-1] == QMessageBox.No
+        session._set_watch_value(root)
+        assert len(sent) == 1  # Do not queue repeated clicks.
+        session._on_executed(sent[0], {"ok": True, "type": "number", "value": 1})
+        assert "number: 1" in session.evaluate_result.toPlainText()
+        monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.No)
+        session._set_watch_value(root)
+        assert len(sent) == 1
+
+        path = tmp_path / "setter.ptlua.json"
+        session._save_session_to(path)
+        document = load_session(path)
+        restored.load_document(document)
+        assert restored._setter_settings() == {getter: settings}
+        assert restored.variables.itemWidget(restored.variables.topLevelItem(0).child(11), 2).text() == ""
+        assert len(sent) == 1  # Loading never runs a setter.
+        document.pop("setter_settings")
+        restored.load_document(document)
+        assert restored._setter_settings()[getter] == {"code": "", "limits": ""}
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("failure", [OSError("lost reply"), TimeoutError("timeout")])
+def test_execute_worker_does_not_retry_and_polls_after_success(monkeypatch, failure):
+    from ptusa_lua_debugger.worker import DebuggerWorker
+    from ptusa_lua_debugger.protocol import ProtocolError
+
+    application = QApplication.instance() or QApplication([])
+    worker = DebuggerWorker()
+    class Client:
+        connected = True
+        error = None
+        calls = 0
+        closes = []
+
+        def execute(self, code):
+            self.calls += 1
+            if self.error:
+                raise self.error
+            return {"ok": True, "value": 1}
+
+        def disconnect(self, *, send_close=True):
+            self.closes.append(send_close)
+            self.connected = False
+
+    client = Client()
+    worker._client = client
+    results, polls, disconnections = [], [], []
+    worker.executed.connect(lambda code, result: results.append(result))
+    worker.disconnected.connect(disconnections.append)
+    monkeypatch.setattr(worker, "poll", lambda: polls.append(True))
+    try:
+        worker._timer.start(9000)
+        worker.execute("x=1")
+        assert results[-1]["ok"] and len(polls) == 1
+        client.error = failure
+        worker.execute("x=1")
+        assert not results[-1]["ok"] and client.calls == 2 and len(polls) == 1
+        assert client.closes == [False] and not client.connected
+        assert not worker._timer.isActive() and len(disconnections) == 1
+        assert "неизвестен" in results[-1]["error"]
+        worker.execute("x=1")
+        assert not results[-1]["ok"] and client.calls == 2
+        client.connected = True
+        client.error = ProtocolError("bad packet")
+        worker.execute("x=1")
+        assert client.closes == [False, False] and client.calls == 3
+    finally:
+        worker._timer.stop()
+        worker.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("failure", [
+    ValueError("invalid local code"),
+    {"ok": False, "type": "error", "error": "Lua runtime error"},
+    {"ok": False, "error": "Unknown command"},
+])
+def test_execute_worker_keeps_connection_for_known_errors(monkeypatch, failure):
+    from ptusa_lua_debugger.worker import DebuggerWorker
+
+    application = QApplication.instance() or QApplication([])
+    worker = DebuggerWorker()
+
+    class Client:
+        connected = True
+
+        def execute(self, code):
+            if isinstance(failure, ValueError):
+                raise failure
+            return failure
+
+    worker._client = Client()
+    results, polls, disconnections = [], [], []
+    worker.executed.connect(lambda code, result: results.append(result))
+    worker.disconnected.connect(disconnections.append)
+    monkeypatch.setattr(worker, "poll", lambda: polls.append(True))
+    try:
+        worker._timer.start(9000)
+        worker.execute("x=1")
+        assert len(results) == 1 and not results[0]["ok"]
+        assert worker._timer.isActive() and worker._client.connected
+        assert not polls and not disconnections
+        if isinstance(failure, dict) and failure["error"] == "Unknown command":
+            assert "обновите ядро" in results[0]["error"]
+    finally:
+        worker._timer.stop()
+        worker.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("reconnect", [False, True])
+def test_lua_confirmation_cancelled_when_connection_changes(monkeypatch, reconnect):
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session.execute_requested.disconnect(session._worker.execute)
+        session.reload_objects_requested.disconnect(session._worker.refresh_reload_objects)
+        session.expressions_requested.disconnect(session._worker.set_expressions)
+        sent, errors = [], []
+        session.execute_requested.connect(sent.append)
+        monkeypatch.setattr(session, "_show_error", errors.append)
+        session._connected = True
+
+        def confirm(*args):
+            session._on_disconnected("lost connection")
+            if reconnect:
+                session._on_connected("new-session")
+            return QMessageBox.Yes
+
+        monkeypatch.setattr(QMessageBox, "question", confirm)
+        session._submit_lua("x=1", "x=1")
+        assert not sent and errors and not session._lua_pending
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_lua_disconnect_clears_pending_request():
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._lua_pending = True
+        session._on_disconnected("lost connection")
+        assert not session._lua_pending
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_lua_console_delivers_worker_result_on_gui_thread(monkeypatch):
+    from PySide6.QtCore import QEventLoop, QThread, QTimer
+    from PySide6.QtWidgets import QDialog, QPlainTextEdit, QPushButton
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    executed_threads, output_threads = [], []
+    append = QPlainTextEdit.appendPlainText
+
+    class Client:
+        connected = True
+
+        def execute(self, code):
+            executed_threads.append(QThread.currentThread())
+            return {"ok": True, "type": "number", "value": 1}
+
+        def disconnect(self, **kwargs):
+            self.connected = False
+
+    def record_output(widget, text):
+        output_threads.append(QThread.currentThread())
+        append(widget, text)
+
+    def run_dialog(dialog):
+        editor, output = dialog.findChildren(QPlainTextEdit)
+        editor.setPlainText("return 1")
+        loop = QEventLoop()
+        deadline = QTimer()
+        deadline.setSingleShot(True)
+        deadline.timeout.connect(loop.quit)
+        output.textChanged.connect(loop.quit)
+        dialog.findChild(QPushButton).click()
+        deadline.start(2000)
+        loop.exec()
+        deadline.stop()
+        assert "return 1" in output.toPlainText()
+        return QDialog.Accepted
+
+    session._worker._client = Client()
+    session._connected = True
+    monkeypatch.setattr(session._worker, "poll", lambda: None)
+    monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.Yes)
+    monkeypatch.setattr(QPlainTextEdit, "appendPlainText", record_output)
+    monkeypatch.setattr(QDialog, "exec", run_dialog)
+    try:
+        session._open_lua_console()
+        assert executed_threads == [session._thread]
+        assert output_threads and all(thread == application.thread() for thread in output_threads)
+        assert not session._lua_pending
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("source, expected", [
+    ("return LIN", "return LINE1V1"),
+    ("LINE1V1:ge", "LINE1V1:get_value"),
+    ("LINE1V1.se", "LINE1V1.set_value"),
+    ('_G["LINE1V1"]:ge', '_G["LINE1V1"]:get_value'),
+    ('_G["LINE1V1"].se', '_G["LINE1V1"].set_value'),
+    ("OBJECTS[1].le", "OBJECTS[1].level"),
+    ('return _G[', 'return _G["LINE1V1"]'),
+    ("local s='LIN';\nreturn LIN", "local s='LIN';\nreturn LINE1V1"),
+    ('local s="\U0001d11e"; return LIN',
+     'local s="\U0001d11e"; return LINE1V1'),
+])
+def test_lua_console_tab_uses_browser_snapshot(monkeypatch, source, expected):
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QTextCursor
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QDialog, QPlainTextEdit
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    browser = session._variable_browser
+    browser._root_expression = "_G"
+    browser._add_entry(None, {
+        "name": "LINE1V1", "expression": '_G["LINE1V1"]',
+        "type": "userdata",
+    })
+    browser._add_entry(None, {
+        "name": "get_value",
+        "expression": '_G["LINE1V1"]["get_value"]', "type": "function",
+    })
+    browser._add_entry(None, {
+        "name": "set_value",
+        "expression": '_G["LINE1V1"]["set_value"]', "type": "function",
+    })
+    browser._add_entry(None, {
+        "name": "level", "expression": 'OBJECTS[1]["level"]',
+        "type": "number",
+    })
+    requests, executions = [], []
+    browser.browse_requested.connect(lambda *args: requests.append(args))
+    session.execute_requested.connect(executions.append)
+
+    def run_dialog(dialog):
+        editor = dialog.findChildren(QPlainTextEdit)[0]
+        editor.setPlainText(source)
+        editor.moveCursor(QTextCursor.End)
+        QTest.keyClick(editor, Qt.Key_Tab)
+        assert editor.toPlainText() == expected
+        editor.undo()
+        assert editor.toPlainText() == source
+        return QDialog.Accepted
+
+    monkeypatch.setattr(QDialog, "exec", run_dialog)
+    try:
+        session._open_lua_console()
+        assert not requests and not executions
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("source", [
+    "", "\n    ", "unknown", "line1", 'print("LIN', "-- LIN",
+    "-- LIN\n", "LINE1V1\n", "--[=[\nLIN", "local s=[=[LIN",
+])
+def test_lua_completion_keeps_tab_without_code_matches(source):
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QTextCursor
+    from PySide6.QtTest import QTest
+    from ptusa_lua_debugger.window import LuaConsoleEdit
+
+    application = QApplication.instance() or QApplication([])
+    editor = LuaConsoleEdit(lambda: ["LINE1V1"])
+    try:
+        editor.setPlainText(source)
+        editor.moveCursor(QTextCursor.End)
+        QTest.keyClick(editor, Qt.Key_Tab)
+        assert editor.toPlainText() == source + "\t"
+    finally:
+        editor.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("accept_key", ["tab", "enter"])
+def test_lua_completion_popup_selection_midword_and_live_updates(accept_key):
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QTextCursor
+    from PySide6.QtTest import QTest
+    from ptusa_lua_debugger.window import LuaConsoleEdit
+
+    application = QApplication.instance() or QApplication([])
+    expressions = ["LINE1V1:get_value", "LINE1V1:set_value"]
+    editor = LuaConsoleEdit(lambda: list(expressions))
+    try:
+        editor.show()
+        editor.setFocus()
+        application.processEvents()
+        editor.setPlainText("LINE1V1:")
+        editor.moveCursor(QTextCursor.End)
+        QTest.keyClick(editor, Qt.Key_Tab)
+        popup = editor._completer.popup()
+        assert popup.isVisible()
+        assert editor.toPlainText() == "LINE1V1:"
+        QTest.keyClick(popup, Qt.Key_Down)
+        QTest.keyClick(editor, Qt.Key_Tab if accept_key == "tab"
+                       else Qt.Key_Return)
+        assert editor.toPlainText() == "LINE1V1:set_value"
+        editor.setPlainText("return LINE1V1:get_value()")
+        cursor = editor.textCursor()
+        cursor.setPosition(len("return LINE1V1:get_va"))
+        editor.setTextCursor(cursor)
+        QTest.keyClick(editor, Qt.Key_Tab)
+        assert editor.toPlainText() == "return LINE1V1:get_value()"
+        editor.setPlainText("LINE1V1:new")
+        editor.moveCursor(QTextCursor.End)
+        expressions.append("LINE1V1:new_method")
+        QTest.keyClick(editor, Qt.Key_Tab)
+        assert editor.toPlainText() == "LINE1V1:new_method"
+        editor.setPlainText("LINE1V1:")
+        editor.moveCursor(QTextCursor.End)
+        QTest.keyClick(editor, Qt.Key_Tab)
+        QTest.keyClick(editor._completer.popup(), Qt.Key_Escape)
+        assert editor.toPlainText() == "LINE1V1:"
+        assert not editor._completer.popup().isVisible()
+    finally:
+        editor.close()
+        editor.deleteLater()
+        application.processEvents()
+
+
 def test_tabs_own_independent_workers_and_threads() -> None:
     application = QApplication.instance() or QApplication([])
     window = MainWindow()
@@ -142,7 +514,7 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         original = deepcopy(data)
         session._on_chart_data(data)
         root = session.variables.topLevelItem(0)
-        assert root.childCount() == 9
+        assert root.childCount() == 12
         assert "Медиана" not in [
             root.child(index).text(0) for index in range(root.childCount())
         ]

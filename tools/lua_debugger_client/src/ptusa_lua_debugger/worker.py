@@ -11,6 +11,7 @@ class DebuggerWorker(QObject):
     chart_data = Signal(dict)
     messages = Signal(dict)
     evaluated = Signal(str, dict)
+    executed = Signal(str, dict)
     command_executed = Signal(int, dict)
     reload_objects_loaded = Signal(list)
     reload_objects_failed = Signal(str)
@@ -71,6 +72,30 @@ class DebuggerWorker(QObject):
             self.evaluated.emit(expression, self._client.evaluate(expression))
         except (OSError, ProtocolError) as exc:
             self.evaluated.emit(expression, {"ok": False, "error": str(exc)})
+
+    @Slot(str)
+    def execute(self, code: str) -> None:
+        if not self._client.connected:
+            self.executed.emit(
+                code, {"ok": False, "error": "Нет подключения к контроллеру"}
+            )
+            return
+        try:
+            result = self._client.execute(code)
+            if "Unknown command" in str(result.get("error", "")):
+                result = {"ok": False, "error":
+                          "Для выполнения Lua-кода обновите ядро (команда 14)"}
+            self.executed.emit(code, result)
+            if result.get("ok"):
+                self.poll()
+        except ValueError as exc:
+            self.executed.emit(code, {"ok": False, "error": str(exc)})
+        except (OSError, ProtocolError) as exc:
+            self._timer.stop()
+            self._client.disconnect(send_close=False)
+            message = f"{exc}. Результат выполнения Lua неизвестен; команда не повторяется"
+            self.executed.emit(code, {"ok": False, "error": message})
+            self.disconnected.emit(message)
 
     @Slot(str, int, int)
     def browse_variables(

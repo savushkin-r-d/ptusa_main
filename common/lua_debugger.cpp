@@ -592,11 +592,16 @@ lua_debugger::value lua_debugger::value_from_stack(
 lua_debugger::value lua_debugger::evaluate_source(
     const std::string& source ) const
     {
+    return execute_source( "return (" + source + ")" );
+    }
+
+lua_debugger::value lua_debugger::execute_source(
+    const std::string& chunk ) const
+    {
     auto* state = G_LUA_MANAGER->get_Lua();
     if ( !state ) return { false, "error", json_quote( "Lua is not initialized" ) };
 
     const int stack_top = lua_gettop( state );
-    const std::string chunk = "return (" + source + ")";
     if ( luaL_loadbuffer( state, chunk.data(), chunk.size(), "lua debugger" ) ||
         lua_pcall( state, 0, 1, 0 ) )
         {
@@ -1664,15 +1669,19 @@ long lua_debugger::process_service( long len, unsigned char* data,
     switch ( command )
         {
         case CMD_EVALUATE:
+        case CMD_EXECUTE:
             {
             if ( body.empty() )
                 return write_response(
                     R"({"ok":false,"error":"Missing expression"})", outdata );
-            if ( body.size() > MAX_EXPRESSION_LENGTH )
+            if ( body.size() > ( command == CMD_EXECUTE ? 16384 :
+                MAX_EXPRESSION_LENGTH ) )
                 return write_response(
                     R"({"ok":false,"error":"Expression is too long"})",
                     outdata );
-            const value result = debugger->evaluate_source( body );
+            const value result = command == CMD_EXECUTE ?
+                debugger->execute_source( body ) :
+                debugger->evaluate_source( body );
             const std::string response = R"({"ok":)" +
                 std::string( result.ok ? "true" : "false" ) +
                 R"(,"type":)" + json_quote( result.type ) +

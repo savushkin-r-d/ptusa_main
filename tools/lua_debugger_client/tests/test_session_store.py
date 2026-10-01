@@ -364,6 +364,36 @@ def _base_session_kwargs(**overrides):
     return kwargs
 
 
+def test_setter_settings_roundtrip_and_old_session_defaults(tmp_path) -> None:
+    path = tmp_path / "setter.ptlua.json"
+    settings = {"x": {"code": "set_x(<newvalue>)", "limits": "(0;1;2)"}}
+    save_session(path, setter_settings=settings, **_base_session_kwargs())
+    assert load_session(path)["setter_settings"] == settings
+    document = json.loads(path.read_text(encoding="utf-8"))
+    del document["setter_settings"]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_session(path)["setter_settings"] == {}
+
+
+@pytest.mark.parametrize("settings", [
+    "not-a-dict", [], None,
+    {"other": {"code": "f(<newvalue>)", "limits": ""}},
+    {"x": "not-a-dict"},
+    {"x": {"code": "f(<newvalue>)"}},
+    {"x": {"code": 1, "limits": ""}},
+    {"x": {"code": "x" * 16385, "limits": ""}},
+    {"x": {"code": "f(<newvalue>)", "limits": "я" * 8193}},
+])
+def test_invalid_setter_settings_are_rejected(tmp_path, settings) -> None:
+    path = tmp_path / "invalid-setter.ptlua.json"
+    save_session(path, **_base_session_kwargs())
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["setter_settings"] = settings
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="setter"):
+        load_session(path)
+
+
 def test_variable_browser_state_roundtrip(tmp_path) -> None:
     path = tmp_path / "browser.ptlua.json"
     save_session(
