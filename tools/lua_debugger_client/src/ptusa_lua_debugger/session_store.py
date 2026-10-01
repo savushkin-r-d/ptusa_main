@@ -289,6 +289,7 @@ def _valid_series_style(style: Any) -> bool:
     offset = style.get("offset", 0)
     return (
         isinstance(style.get("name", ""), str)
+        and isinstance(style.get("description", ""), str)
         and isinstance(style.get("color", "#ffffff"), str)
         and re.fullmatch(r"#[0-9a-fA-F]{6}", style.get("color", "#ffffff")) is not None
         and isinstance(offset, (int, float)) and not isinstance(offset, bool)
