@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -60,6 +61,7 @@ from .history import (
     trim_chart_data,
 )
 from .history_table import HistoryTableModel
+from .protocol import MAX_REQUEST_PATH_BYTES
 from .pulse_counter import PulseCounters, PulseDefinition
 from .session_store import load_session, save_session
 from .setter import setter_code
@@ -687,7 +689,7 @@ class DebuggerSessionWidget(QWidget):
         expression = self.expression_edit.text().strip()
         if not expression:
             return
-        if expression in [item.text(0) for item in self._expression_items()]:
+        if expression in [self._item_expression(item) for item in self._expression_items()]:
             self.expression_edit.clear()
             return
         self._create_expression(expression)
@@ -729,7 +731,7 @@ class DebuggerSessionWidget(QWidget):
                     dependent.currentText().strip(), json.loads(source_value.text()),
                     json.loads(dependent_value.text()),
                 )
-                if definition.expression in [item.text(0) for item in self._expression_items()]:
+                if definition.expression in [self._item_expression(item) for item in self._expression_items()]:
                     raise ValueError("Такое имя уже есть в списке величин")
                 self._pulse_counters.add(definition)
             except (ValueError, json.JSONDecodeError) as exc:
@@ -759,15 +761,15 @@ class DebuggerSessionWidget(QWidget):
         self._remove_expression_items(items)
 
     def _remove_expression_items(self, items: set[QTreeWidgetItem]) -> None:
-        removed = {item.text(0) for item in items}
+        removed = {self._item_expression(item) for item in items}
         for expression, definition in self._pulse_counters.definitions.items():
             if definition.source in removed or definition.dependent in removed:
                 for item in self._expression_items():
-                    if item.text(0) == expression:
+                    if self._item_expression(item) == expression:
                         items.add(item)
                         break
         for item in items:
-            self._pulse_counters.remove(item.text(0))
+            self._pulse_counters.remove(self._item_expression(item))
             self.variables.takeTopLevelItem(self.variables.indexOfTopLevelItem(item))
         self._history_changed(None)
         self._apply_expressions()
@@ -807,7 +809,7 @@ class DebuggerSessionWidget(QWidget):
                 )
             else:
                 targets = {item for item in self._expression_items()
-                           if item.text(0) == expression}
+                           if self._item_expression(item) == expression}
                 if targets:
                     self._remove_expression_items(targets)
         self._variable_browser.set_watched_expressions(self._expressions())
@@ -816,9 +818,13 @@ class DebuggerSessionWidget(QWidget):
         return [self.variables.topLevelItem(i)
                 for i in range(self.variables.topLevelItemCount())]
 
+    @staticmethod
+    def _item_expression(item: QTreeWidgetItem) -> str:
+        return item.data(0, Qt.UserRole)
+
     def _expressions(self) -> list[str]:
-        return [item.text(0) for item in self._expression_items()
-                if item.text(0) not in self._pulse_counters.definitions]
+        return [self._item_expression(item) for item in self._expression_items()
+                if self._item_expression(item) not in self._pulse_counters.definitions]
 
     def _create_expression(self, expression: str, *, history_enabled: bool = False,
                            style: dict[str, Any] | None = None,
@@ -826,12 +832,28 @@ class DebuggerSessionWidget(QWidget):
         style = style or {}
         self.variables.blockSignals(True)
         try:
-            item = QTreeWidgetItem(self.variables, [expression, "", "—", "ожидание"])
+            description_text = str(style.get("description", ""))
+            item = QTreeWidgetItem(self.variables, [
+                description_text.strip() or expression, "", "—", "ожидание"])
+            item.setData(0, Qt.UserRole, expression)
             item.setToolTip(0, expression)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(1, Qt.Checked if history_enabled else Qt.Unchecked)
             for label in ("Предыдущее", "Min", "Max", "Среднее"):
                 QTreeWidgetItem(item, [label, "", "—"])
+            description_row = QTreeWidgetItem(item, ["Описание"])
+            description = QLineEdit(description_text)
+            description.setPlaceholderText("Название в таблице вместо выражения")
+            self.variables.setItemWidget(description_row, 2, description)
+            description.textChanged.connect(lambda text: item.setText(
+                0, text.strip() or self._item_expression(item)))
+            expression_row = QTreeWidgetItem(item, ["Lua-выражение"])
+            expression_edit = QLineEdit(expression)
+            expression_edit.setReadOnly(expression in self._pulse_counters.definitions)
+            expression_edit.setToolTip("Применяется по Enter или при выходе из поля")
+            self.variables.setItemWidget(expression_row, 2, expression_edit)
+            expression_edit.editingFinished.connect(
+                lambda: self._edit_expression(item, expression_edit))
             name_row = QTreeWidgetItem(item, ["Имя на графике"])
             name = QLineEdit(str(style.get("name", "")))
             name.setPlaceholderText(expression)
@@ -891,6 +913,56 @@ class DebuggerSessionWidget(QWidget):
         finally:
             self.variables.blockSignals(False)
 
+    def _edit_expression(self, item: QTreeWidgetItem, editor: QLineEdit) -> None:
+        previous = self._item_expression(item)
+        expression = editor.text().strip()
+        if previous in self._pulse_counters.definitions or expression == previous:
+            editor.setText(previous)
+            return
+        if (not expression or len(expression.encode("utf-8")) > MAX_REQUEST_PATH_BYTES
+                or any(character in expression for character in ("\n", "\r", "\0"))):
+            editor.setText(previous)
+            self._show_error("Lua-выражение должно содержать от 1 до 1024 байт без переносов строк")
+            return
+        if expression in [self._item_expression(row) for row in self._expression_items()]:
+            editor.setText(previous)
+            self._show_error("Такое выражение уже есть в списке величин")
+            return
+        affected = {previous, expression}
+        for name, definition in list(self._pulse_counters.definitions.items()):
+            if previous in (definition.source, definition.dependent):
+                self._pulse_counters.remove(name)
+                self._pulse_counters.add(replace(
+                    definition,
+                    source=expression if definition.source == previous else definition.source,
+                    dependent=expression if definition.dependent == previous else definition.dependent,
+                ))
+                affected.add(name)
+        item.setData(0, Qt.UserRole, expression)
+        item.setToolTip(0, expression)
+        description = self.variables.itemWidget(item.child(4), 2).text().strip()
+        item.setText(0, description or expression)
+        self.variables.itemWidget(item.child(6), 2).setPlaceholderText(expression)
+        editor.setText(expression)
+        for row in self._expression_items():
+            if self._item_expression(row) in affected:
+                row.setText(2, "—")
+                row.setToolTip(2, "—")
+                row.setText(3, "ожидание")
+                row.setToolTip(3, "ожидание")
+                row.child(0).setText(2, "—")
+        for key in affected:
+            self._statistics.pop(key, None)
+        if self._last_chart_data is not None:
+            self._last_chart_data = {
+                **self._last_chart_data,
+                "series": [series for series in self._last_chart_data.get("series", [])
+                           if series.get("expression") not in affected],
+            }
+        self._history_changed(None)
+        self._refresh_table_statistics()
+        self._apply_expressions()
+
     @staticmethod
     def _set_color_button(button: QPushButton, color: str) -> None:
         button.setProperty("lineColor", color)
@@ -908,37 +980,39 @@ class DebuggerSessionWidget(QWidget):
         styles = {}
         for item in self._expression_items():
             widget = lambda index: self.variables.itemWidget(item.child(index), 2)
-            styles[item.text(0)] = {
-                "name": widget(4).text(),
-                "color": widget(5).property("lineColor"),
-                "offset": widget(6).value(),
-                "points": widget(7).isChecked(),
-                "chart_type": widget(8).currentData(),
+            styles[self._item_expression(item)] = {
+                "description": widget(4).text(),
+                "name": widget(6).text(),
+                "color": widget(7).property("lineColor"),
+                "offset": widget(8).value(),
+                "points": widget(9).isChecked(),
+                "chart_type": widget(10).currentData(),
             }
         return styles
 
     def _setter_settings(self) -> dict[str, dict[str, str]]:
         return {
-            item.text(0): {
-                "code": self.variables.itemWidget(item.child(9), 2).text(),
-                "limits": self.variables.itemWidget(item.child(10), 2).text(),
+            self._item_expression(item): {
+                "code": self.variables.itemWidget(item.child(11), 2).text(),
+                "limits": self.variables.itemWidget(item.child(12), 2).text(),
             }
             for item in self._expression_items()
-            if item.text(0) not in self._pulse_counters.definitions
+            if self._item_expression(item) not in self._pulse_counters.definitions
         }
 
     def _set_watch_value(self, item: QTreeWidgetItem) -> None:
         if not self._connected or self._lua_pending:
             self._show_error("Нет подключения или предыдущий Lua-запрос ещё выполняется")
             return
-        settings = self._setter_settings()[item.text(0)]
-        new_value = self.variables.itemWidget(item.child(11), 2).text()
+        expression = self._item_expression(item)
+        settings = self._setter_settings()[expression]
+        new_value = self.variables.itemWidget(item.child(13), 2).text()
         try:
-            code = setter_code(item.text(0), settings["code"], settings["limits"], new_value)
+            code = setter_code(expression, settings["code"], settings["limits"], new_value)
         except ValueError as exc:
             self._show_error(str(exc))
             return
-        self._submit_lua(code, f"Getter: {item.text(0)}\n"
+        self._submit_lua(code, f"Getter: {expression}\n"
                          f"Setter: {settings['code']}\nНовое значение: {new_value}\n"
                          f"Допустимые значения: {settings['limits'] or 'без ограничения'}")
 
@@ -1006,7 +1080,7 @@ class DebuggerSessionWidget(QWidget):
             self._draw_chart(self._last_chart_data)
 
     def _history_expressions(self) -> list[str]:
-        return [item.text(0) for item in self._expression_items()
+        return [self._item_expression(item) for item in self._expression_items()
                 if item.checkState(1) == Qt.Checked]
 
     def _history_changed(self, item: QTreeWidgetItem | None, column: int = 1) -> None:
@@ -1172,7 +1246,7 @@ class DebuggerSessionWidget(QWidget):
             for item in self._last_chart_data.get("series", [])
         }
         for item in self._expression_items():
-            samples = by_expression.get(item.text(0), {}).get("samples", [])
+            samples = by_expression.get(self._item_expression(item), {}).get("samples", [])
             last = samples[-1] if samples else None
             previous = samples[-2] if len(samples) > 1 else None
             value_text = "—" if last is None else str(last.get("value"))
@@ -1262,7 +1336,7 @@ class DebuggerSessionWidget(QWidget):
 
     def _refresh_table_statistics(self) -> None:
         for item in self._expression_items():
-            statistics = self._statistics.get(item.text(0), {})
+            statistics = self._statistics.get(self._item_expression(item), {})
             count = int(statistics.get("_count", 0))
             average = (
                 float(statistics["_sum"]) / count

@@ -28,6 +28,25 @@ def test_invalid_chart_type_is_rejected(tmp_path, invalid_type) -> None:
         load_session(path)
 
 
+@pytest.mark.parametrize("description", [None, 42, [], {}])
+def test_invalid_expression_description_is_rejected(tmp_path, description):
+    path = tmp_path / "invalid-description.ptlua.json"
+    save_session(path, series_styles={"x": {"description": description}},
+                 **_base_session_kwargs())
+    with pytest.raises(ValueError, match="настройки линий"):
+        load_session(path)
+
+
+def test_expression_description_roundtrip_and_old_session(tmp_path):
+    path = tmp_path / "description.ptlua.json"
+    save_session(path, series_styles={"x": {"description": "Температура продукта"}},
+                 **_base_session_kwargs())
+    assert load_session(path)["series_styles"]["x"]["description"] == "Температура продукта"
+    save_session(path, series_styles={"x": {"name": "График"}},
+                 **_base_session_kwargs())
+    assert load_session(path)["series_styles"]["x"] == {"name": "График"}
+
+
 def test_session_roundtrip(tmp_path) -> None:
     path = tmp_path / "line.ptlua.json"
     save_session(

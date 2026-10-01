@@ -12,6 +12,238 @@ from ptusa_lua_debugger.window import DebuggerSessionWidget, MainWindow
 from ptusa_lua_debugger.pulse_counter import PulseDefinition
 
 
+def _watch_property(session, item, label):
+    row = next(item.child(index) for index in range(item.childCount())
+               if item.child(index).text(0) == label)
+    return session.variables.itemWidget(row, 2)
+
+
+def test_expression_description_display_and_session_roundtrip(tmp_path, monkeypatch):
+    from copy import deepcopy
+    from ptusa_lua_debugger.session_store import load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        expression = "OBJECT1.par_float[15]"
+        session._create_expression(expression, history_enabled=True,
+                                   setter={"code": "set_value(<newvalue>)", "limits": ""})
+        root = session.variables.topLevelItem(0)
+        assert root.text(0) == expression
+        assert _watch_property(session, root, "Lua-выражение").text() == expression
+        description = _watch_property(session, root, "Описание")
+        session._on_chart_data({"server_time_ms": 2000, "series": [
+            {"expression": expression, "samples": [
+                {"time_ms": 1000, "value": 10, "type": "number", "ok": True}
+            ]}
+        ]})
+        original = deepcopy(session._last_chart_data)
+        description.setText("Температура продукта")
+        assert root.text(0) == "Температура продукта"
+        assert root.toolTip(0) == expression
+        assert session._expressions() == [expression]
+        assert session._history_expressions() == [expression]
+        assert session._last_chart_data == original
+        session._refresh_values()
+        assert root.text(2) == "10"
+        assert root.child(1).text(2) == "10"
+        assert session.plot.listDataItems()[0].name() == expression
+        session.expression_edit.setText(expression)
+        session._add_expression()
+        assert session.variables.topLevelItemCount() == 1
+        session._connected = True
+        session.execute_requested.disconnect(session._worker.execute)
+        sent = []
+        session.execute_requested.connect(sent.append)
+        monkeypatch.setattr(QMessageBox, "question", lambda *args: QMessageBox.Yes)
+        _watch_property(session, root, "Новое значение").setText("12")
+        session._set_watch_value(root)
+        assert len(sent) == 1 and expression in sent[0]
+        assert "Температура продукта" not in sent[0]
+        path = tmp_path / "description.ptlua.json"
+        session._save_session_to(path)
+        restored.load_document(load_session(path))
+        restored_root = restored.variables.topLevelItem(0)
+        assert restored_root.text(0) == "Температура продукта"
+        assert _watch_property(restored, restored_root, "Описание").text() == description.text()
+        assert _watch_property(restored, restored_root, "Lua-выражение").text() == expression
+        assert restored._expressions() == [expression]
+        description.setText("   ")
+        assert root.text(0) == expression
+        description.setText("Температура продукта")
+        session._on_browser_watch(expression, False)
+        assert session._expressions() == []
+        assert session.plot.listDataItems() == []
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
+
+
+def test_edit_expression_preserves_settings_and_resets_only_affected_history(tmp_path):
+    from ptusa_lua_debugger.session_store import load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    restored = DebuggerSessionWidget()
+    try:
+        session._create_expression("x", history_enabled=True,
+                                   style={"description": "Датчик", "name": "График", "offset": 2},
+                                   setter={"code": "set_value(<newvalue>)", "limits": "(0;1)"})
+        session._create_expression("other", history_enabled=True)
+        session._on_chart_data({"server_time_ms": 2000, "series": [
+            {"expression": expression, "samples": [
+                {"time_ms": 1000, "value": value, "type": "number", "ok": True}
+            ]} for expression, value in [("x", 10), ("other", 20)]
+        ]})
+        root = session.variables.topLevelItem(0)
+        root.setExpanded(True)
+        style = session._series_styles()["x"]
+        session.expressions_requested.disconnect(session._worker.set_expressions)
+        sent = []
+        session.expressions_requested.connect(sent.append)
+        session._connected = True
+        editor = _watch_property(session, root, "Lua-выражение")
+        editor.setText("  y  ")
+        assert session._expressions() == ["x", "other"]
+        editor.editingFinished.emit()
+        assert editor.text() == "y"
+        assert root.text(0) == "Датчик" and root.toolTip(0) == "y"
+        assert root.isExpanded()
+        assert root.text(2) == "—"
+        assert root.child(0).text(2) == "—"
+        assert root.child(1).text(2) == "—"
+        assert session._expressions() == ["y", "other"]
+        assert session._history_expressions() == ["y", "other"]
+        assert session._series_styles()["y"] == style
+        assert session._setter_settings()["y"] == {"code": "set_value(<newvalue>)", "limits": "(0;1)"}
+        assert _watch_property(session, root, "Имя на графике").placeholderText() == "y"
+        assert sent == [["y", "other"]]
+        assert set(session._statistics) == {"other"}
+        assert [series["expression"] for series in session._last_chart_data["series"]] == ["other"]
+        assert session.variables.topLevelItem(1).text(2) == "20"
+        editor.editingFinished.emit()
+        assert len(sent) == 1
+        session._on_chart_data({"server_time_ms": 3000, "series": [
+            {"expression": "y", "samples": [
+                {"time_ms": 3000, "value": 1, "type": "number", "ok": True}
+            ]}
+        ]})
+        assert root.text(2) == "1"
+        path = tmp_path / "edited.ptlua.json"
+        session._save_session_to(path)
+        restored.load_document(load_session(path))
+        assert restored._expressions() == ["y", "other"]
+        assert restored.variables.topLevelItem(0).text(0) == "Датчик"
+        assert restored._series_styles()["y"] == style
+        assert restored._setter_settings() == session._setter_settings()
+        _watch_property(session, root, "Описание").clear()
+        assert root.text(0) == "y"
+    finally:
+        session.shutdown()
+        restored.shutdown()
+        session.deleteLater()
+        restored.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("commit", ["enter", "focus_loss"])
+def test_expression_editor_commits_with_keyboard(commit):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._create_expression("x")
+        root = session.variables.topLevelItem(0)
+        root.setExpanded(True)
+        session.resize(1180, 900)
+        session.show()
+        editor = _watch_property(session, root, "Lua-выражение")
+        editor.setFocus()
+        application.processEvents()
+        assert editor.hasFocus()
+        editor.setText("y")
+        if commit == "enter":
+            QTest.keyClick(editor, Qt.Key_Return)
+        else:
+            _watch_property(session, root, "Описание").setFocus()
+            application.processEvents()
+        assert session._expressions() == ["y"]
+        assert root.text(0) == "y"
+    finally:
+        session.close()
+        session.deleteLater()
+        application.processEvents()
+
+
+@pytest.mark.parametrize("expression", ["", "   ", "other", "я" * 513, "x\ny", "x\ry", "x\0y"])
+def test_invalid_expression_edit_leaves_watch_unchanged(monkeypatch, expression):
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        session._create_expression("x", style={"description": "Датчик"})
+        session._create_expression("other")
+        errors, sent = [], []
+        monkeypatch.setattr(session, "_show_error", errors.append)
+        session.expressions_requested.disconnect(session._worker.set_expressions)
+        session.expressions_requested.connect(sent.append)
+        session._connected = True
+        root = session.variables.topLevelItem(0)
+        editor = _watch_property(session, root, "Lua-выражение")
+        editor.setText(expression)
+        editor.editingFinished.emit()
+        assert errors and not sent
+        assert editor.text() == "x"
+        assert root.text(0) == "Датчик"
+        assert session._expressions() == ["x", "other"]
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
+def test_edit_described_pulse_source_updates_dependencies_and_removal(tmp_path):
+    from ptusa_lua_debugger.session_store import load_session
+
+    application = QApplication.instance() or QApplication([])
+    session = DebuggerSessionWidget()
+    try:
+        definition = PulseDefinition("Партия", "left", "right", 1, 1)
+        session._pulse_counters.add(definition)
+        session._create_expression("left", history_enabled=True,
+                                   style={"description": "Левый датчик"})
+        session._create_expression("right", history_enabled=True)
+        session._create_expression(definition.expression, history_enabled=True,
+                                   style={"description": "Импульсы за партию"})
+        counter = session.variables.topLevelItem(2)
+        assert _watch_property(session, counter, "Lua-выражение").isReadOnly()
+        session._pulse_counters.states[definition.expression].count = 12
+        root = session.variables.topLevelItem(0)
+        editor = _watch_property(session, root, "Lua-выражение")
+        editor.setText("new_left")
+        editor.editingFinished.emit()
+        assert session._pulse_counters.definitions[definition.expression].source == "new_left"
+        assert session._pulse_counters.states[definition.expression].count == 0
+        assert session._expressions() == ["new_left", "right"]
+        path = tmp_path / "pulse.ptlua.json"
+        session._save_session_to(path)
+        assert load_session(path)["pulse_definitions"][0]["source"] == "new_left"
+        root.child(0).setSelected(True)
+        session._remove_expressions()
+        assert session._expressions() == ["right"]
+        assert session._pulse_counters.definitions == {}
+        assert session.variables.topLevelItemCount() == 1
+    finally:
+        session.shutdown()
+        session.deleteLater()
+        application.processEvents()
+
+
 @pytest.mark.parametrize("chart_type, expected_x, expected_y", [
     ("step_post", [1, 3, 3, 6, 6, 8, 8, 8], [0, 0, 1, 1, 0, 0, 0, 0]),
     ("step_pre", [1, 1, 1, 3, 3, 6, 6, 8], [0, 0, 1, 1, 0, 0, 0, 0]),
@@ -41,7 +273,7 @@ def test_chart_type_geometry_and_roundtrip(tmp_path, chart_type, expected_x,
         session._on_chart_data(data)
         original = deepcopy(session._last_chart_data)
         root = session.variables.topLevelItem(0)
-        selector = session.variables.itemWidget(root.child(8), 2)
+        selector = _watch_property(session, root, "Тип графика")
         selector.setCurrentIndex(selector.findData(chart_type))
         curve = session.plot.listDataItems()[0]
         # Inspect the rendered geometry, not just the selected option.
@@ -88,7 +320,7 @@ def test_setter_confirmation_limits_and_session_roundtrip(monkeypatch, tmp_path)
         settings = {"code": "LINE1V1:set_value(<newvalue>)", "limits": "(0;1;2)"}
         session._create_expression(getter, setter=settings)
         root = session.variables.topLevelItem(0)
-        value = session.variables.itemWidget(root.child(11), 2)
+        value = _watch_property(session, root, "Новое значение")
 
         def confirm(*args):
             confirmations.append(args)
@@ -115,7 +347,7 @@ def test_setter_confirmation_limits_and_session_roundtrip(monkeypatch, tmp_path)
         document = load_session(path)
         restored.load_document(document)
         assert restored._setter_settings() == {getter: settings}
-        assert restored.variables.itemWidget(restored.variables.topLevelItem(0).child(11), 2).text() == ""
+        assert _watch_property(restored, restored.variables.topLevelItem(0), "Новое значение").text() == ""
         assert len(sent) == 1  # Loading never runs a setter.
         document.pop("setter_settings")
         restored.load_document(document)
@@ -514,7 +746,7 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
         original = deepcopy(data)
         session._on_chart_data(data)
         root = session.variables.topLevelItem(0)
-        assert root.childCount() == 12
+        assert root.childCount() == 14
         assert "Медиана" not in [
             root.child(index).text(0) for index in range(root.childCount())
         ]
@@ -539,12 +771,12 @@ def test_tree_chart_styles_and_session_roundtrip(tmp_path) -> None:
                      chart_data=session._last_chart_data, statistics=session._statistics,
                      series_styles=session._series_styles())
         restored.load_document(load_session(path))
-        assert restored._series_styles() == {"x": {**style, "chart_type": "step_post"}}
+        assert restored._series_styles() == {"x": {**style, "description": "", "chart_type": "step_post"}}
         assert list(restored.plot.listDataItems()[0].yData) == [2.5, 3.5, 3.5]
         # Editing presentation settings redraws immediately without altering samples.
-        session.variables.itemWidget(root.child(6), 2).setValue(-1)
+        _watch_property(session, root, "Сдвиг по Y").setValue(-1)
         assert list(session.plot.listDataItems()[0].yData) == [-1, 0, 0]
-        session.variables.itemWidget(root.child(7), 2).setChecked(False)
+        _watch_property(session, root, "Точки на графике").setChecked(False)
         assert len(session.plot.listDataItems()) == 1
         # Removing a selected property removes its owning expression.
         root.child(1).setSelected(True)
