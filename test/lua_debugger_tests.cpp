@@ -394,6 +394,33 @@ TEST_F( lua_debugger_test, browses_inherited_fields_and_cycles )
         R"("name":"self","expression":"dbg_cycle[\"self\"]","type":"table","value":"<table>","expandable":true)" ) );
     }
 
+TEST_F( lua_debugger_test, browse_reports_object_identity_for_cycles )
+    {
+    ASSERT_EQ( 0, luaL_dostring( state,
+        "dbg_identity = {}; dbg_identity.self = dbg_identity; "
+        "dbg_identity.child = { back = dbg_identity }" ) );
+    const auto root = request( lua_debugger::CMD_BROWSE_VARIABLES,
+        "dbg_identity\n0" );
+    const auto self = request( lua_debugger::CMD_BROWSE_VARIABLES,
+        "dbg_identity.self\n0" );
+    const auto child = request( lua_debugger::CMD_BROWSE_VARIABLES,
+        "dbg_identity.child\n0" );
+    auto identity = []( const std::string& response )
+        {
+        const std::string marker = R"("object_id":")";
+        const auto start = response.find( marker );
+        if ( start == std::string::npos ) return std::string();
+        const auto value = start + marker.size();
+        return response.substr( value, response.find( '"', value ) - value );
+        };
+    ASSERT_FALSE( identity( root ).empty() );
+    EXPECT_EQ( identity( root ), identity( self ) );
+    EXPECT_NE( identity( root ), identity( child ) );
+    // The back reference in the child page carries the root identity.
+    EXPECT_NE( std::string::npos, child.find(
+        R"("writable":false,"object_id":")" + identity( root ) + "\"" ) );
+    }
+
 TEST_F( lua_debugger_test, browse_pages_long_tables )
     {
     ASSERT_EQ( 0, luaL_dostring( state,

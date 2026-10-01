@@ -760,12 +760,24 @@ std::string lua_debugger::browse_variables(
         return response;
         }
 
+    // Object identity is separate from the display preview. Clients compare
+    // it only with ancestors of the current snapshot, never across sessions.
+    auto object_id = [&]( int index ) -> std::string
+        {
+        const int type = lua_type( state, index );
+        if ( type != LUA_TTABLE && type != LUA_TUSERDATA ) return {};
+        return std::string( lua_typename( state, type ) ) + ":" +
+            std::to_string( reinterpret_cast<std::uintptr_t>(
+                lua_topointer( state, index ) ) );
+        };
+
     struct entry
         {
         std::string name;
         std::string expression;
         std::string type;
         std::string json;
+        std::string object_id;
         bool expandable = false;
         bool writable = false;
         bool value_truncated = false;
@@ -887,6 +899,7 @@ std::string lua_debugger::browse_variables(
             BROWSE_VALUE_STRING_LENGTH );
         item.type = current.type;
         item.json = current.json;
+        item.object_id = object_id( -1 );
         item.expandable = !item.expression.empty() &&
             ( current.type == "table" || current.type == "userdata" );
         if ( container_type == LUA_TTABLE )
@@ -1073,6 +1086,7 @@ std::string lua_debugger::browse_variables(
                             BROWSE_VALUE_STRING_LENGTH );
                         item.type = current.type;
                         item.json = current.json;
+                        item.object_id = object_id( -1 );
                         item.expandable = !item.expression.empty() &&
                             ( current.type == "table" ||
                                 current.type == "userdata" );
@@ -1140,6 +1154,7 @@ std::string lua_debugger::browse_variables(
                         else if ( lua_istable( state, -1 ) )
                             {
                             // Internal C array exposed through .get.
+                            item.object_id = object_id( -1 );
                             item.type = "table";
                             item.json = json_quote( "<table>" );
                             item.expandable = !item.expression.empty();
@@ -1230,6 +1245,7 @@ std::string lua_debugger::browse_variables(
                 BROWSE_VALUE_STRING_LENGTH );
             item.type = current.type;
             item.json = current.json;
+            item.object_id = object_id( -1 );
             item.expandable = !item.expression.empty() &&
                 ( current.type == "table" || current.type == "userdata" );
             item.writable = ctx.assignable && !item.expression.empty() &&
@@ -1252,6 +1268,8 @@ std::string lua_debugger::browse_variables(
         json_quote( root_type_name ) + R"(,"value":)" + root_json +
         ( root_truncated ? R"(,"value_truncated":true)" : "" ) +
         ( root_lossy ? R"(,"value_lossy":true)" : "" ) +
+        ( object_id( root_index ).empty() ? "" :
+            R"(,"object_id":)" + json_quote( object_id( root_index ) ) ) +
         R"(,"entries":[)";
     std::size_t written = 0;
     for ( std::size_t i = offset; i < ctx.entries.size(); ++i )
@@ -1263,6 +1281,8 @@ std::string lua_debugger::browse_variables(
             item.json + R"(,"expandable":)" +
             ( item.expandable ? "true" : "false" ) + R"(,"writable":)" +
             ( item.writable ? "true" : "false" ) +
+            ( item.object_id.empty() ? "" :
+                R"(,"object_id":)" + json_quote( item.object_id ) ) +
             ( item.value_truncated ? R"(,"value_truncated":true)" : "" ) +
             ( item.value_lossy ? R"(,"value_lossy":true)" : "" ) +
             "}";
