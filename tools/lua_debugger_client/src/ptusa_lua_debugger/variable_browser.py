@@ -37,6 +37,16 @@ _PLACEHOLDER = "placeholder"
 
 _NUMBER_PATTERN = re.compile(r"-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")
 _SCALAR_TYPES = ("number", "boolean", "string")
+_LUA_IDENTIFIER = r"[A-Za-z_][A-Za-z0-9_]*"
+_LUA_NAME_PATH = re.compile(
+    rf"{_LUA_IDENTIFIER}(?:\.{_LUA_IDENTIFIER}|"
+    rf"\[(?:\"{_LUA_IDENTIFIER}\"|'{_LUA_IDENTIFIER}'|"
+    r"-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?|true|false)\])*"
+)
+_LUA_KEYWORDS = frozenset(
+    "and break do else elseif end false for function if in local nil "
+    "not or repeat return then true until while".split()
+)
 
 
 class VariableBrowserWidget(QWidget):
@@ -816,6 +826,42 @@ class VariableBrowserWidget(QWidget):
             lines.append("Запись разрешена (двойной щелчок по значению)")
         self.detail.setPlainText("\n".join(lines))
         self._update_enabled()
+
+    def completion_expressions(self) -> list[str]:
+        expressions = set()
+        for expression, items in self._expr_items.items():
+            records = [self._data(item) for item in items
+                       if self._item_alive(item)]
+            records = [data for data in records
+                       if data and data.get("type") != "error"]
+            if not expression or not records:
+                continue
+            normalized = expression
+            if _LUA_NAME_PATH.fullmatch(expression):
+                normalized = re.sub(
+                    rf"\[([\"'])({_LUA_IDENTIFIER})\1\]",
+                    lambda match: (match.group(0)
+                                   if match.group(2) in _LUA_KEYWORDS
+                                   else "." + match.group(2)),
+                    expression,
+                )
+            paths = {expression, normalized}
+            field = re.search(
+                rf"\[([\"'])({_LUA_IDENTIFIER})\1\]\Z", expression,
+            )
+            if field and field.group(2) not in _LUA_KEYWORDS:
+                paths.add(expression[:field.start()] + "." + field.group(2))
+            if normalized.startswith("_G."):
+                paths.add(normalized[3:])
+            if any(data.get("type") == "function" for data in records):
+                for path in tuple(paths):
+                    parent, separator, name = path.rpartition(".")
+                    if separator and re.fullmatch(_LUA_IDENTIFIER, name):
+                        paths.add(parent + ":" + name)
+            expressions.update(paths)
+        if expressions and self._root_expression:
+            expressions.add(self._root_expression)
+        return sorted(expressions)
 
     def snapshot_state(self) -> dict[str, Any]:
         return {

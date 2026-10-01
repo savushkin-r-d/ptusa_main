@@ -24,6 +24,7 @@ class Command(IntEnum):
     GET_RELOAD_OBJECTS = 11
     BROWSE_VARIABLES = 12
     SET_VARIABLE = 13
+    EXECUTE = 14
 
 
 VARIABLE_TYPES = ("number", "boolean", "string", "nil")
@@ -135,6 +136,11 @@ class DebuggerProtocol:
 
     def evaluate(self, expression: str) -> dict[str, Any]:
         return self._request(Command.EVALUATE, expression)
+
+    def execute(self, code: str) -> dict[str, Any]:
+        if not code.strip() or len(code.encode("utf-8")) > 16384:
+            raise ValueError("Lua-код должен содержать от 1 до 16384 байт")
+        return self._request(Command.EXECUTE, code)
 
     def execute_controller_command(self, command_id: int) -> dict[str, Any]:
         response = self._request(Command.EXEC_CONTROLLER_COMMAND, str(command_id))

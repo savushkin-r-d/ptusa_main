@@ -48,6 +48,7 @@ def save_session(
     auto_reconnect: bool = False,
     message_log: list[dict[str, str]] | None = None,
     variable_browser: dict[str, Any] | None = None,
+    setter_settings: dict[str, dict[str, str]] | None = None,
 ) -> None:
     document = {
         "version": 1,
@@ -67,6 +68,7 @@ def save_session(
         "history_expressions": history_expressions,
         "chart_data": chart_data,
         "variable_browser": variable_browser or {},
+        "setter_settings": setter_settings or {},
     }
     Path(path).write_text(
         json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -157,6 +159,16 @@ def load_session(path: str | Path) -> dict[str, Any]:
     ):
         raise ValueError("Некорректные настройки линий графика")
     document["series_styles"] = styles
+    setters = document.get("setter_settings", {})
+    if not isinstance(setters, dict) or any(
+        expression not in expressions or not isinstance(settings, dict)
+        or set(settings) != {"code", "limits"}
+        or any(not isinstance(value, str) or len(value.encode("utf-8")) > 16384
+               for value in settings.values())
+        for expression, settings in setters.items()
+    ):
+        raise ValueError("Некорректные настройки setter")
+    document["setter_settings"] = setters
     document["display_seconds"] = display_seconds
     document["auto_follow"] = auto_follow
     document["auto_reconnect"] = auto_reconnect

@@ -58,6 +58,8 @@ class lua_debugger
             CMD_BROWSE_VARIABLES,
             /// Assigns a scalar value to an existing scalar variable.
             CMD_SET_VARIABLE,
+            /// Executes a Lua chunk; returns its first result (nil if absent).
+            CMD_EXECUTE,
             };
 
         static lua_debugger* get_instance();
@@ -124,6 +126,7 @@ class lua_debugger
         lua_debugger() = default;
 
         value evaluate_source( const std::string& source ) const;
+        value execute_source( const std::string& source ) const;
         value evaluate_ref( int lua_ref ) const;
         value value_from_stack( lua_State* state, int index,
             std::size_t max_string_length ) const;

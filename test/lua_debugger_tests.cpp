@@ -75,7 +75,7 @@ namespace
             std::string raw_request( lua_debugger::COMMAND command,
                 const std::string& text = {} )
                 {
-                std::array<unsigned char, 4096> input{};
+                std::vector<unsigned char> input( text.size() + 1 );
                 std::array<unsigned char, 65536> output{};
                 input[ 0 ] = command;
                 std::memcpy( input.data() + 1, text.data(), text.size() );
@@ -135,6 +135,69 @@ TEST_F( lua_debugger_test, evaluates_lua_expression )
     const auto error = request( lua_debugger::CMD_EVALUATE, "1 +" );
     EXPECT_NE( std::string::npos, error.find( R"("ok":false)" ) );
     EXPECT_NE( std::string::npos, error.find( R"("type":"error")" ) );
+    }
+
+TEST_F( lua_debugger_test, executes_lua_chunks_and_restores_stack )
+    {
+    lua_pushstring( state, "stack sentinel" );
+    const int top = lua_gettop( state );
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":2})",
+        request( lua_debugger::CMD_EXECUTE,
+            "remote_value = 1\nremote_value = remote_value + 1\n"
+            "return remote_value, 99" ) );
+    EXPECT_EQ( R"({"ok":true,"type":"nil","value":null})",
+        request( lua_debugger::CMD_EXECUTE, "remote_value = 3" ) );
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":3})",
+        request( lua_debugger::CMD_EVALUATE, "remote_value" ) );
+    for ( const auto& source : { "local =", "error('failed')" } )
+        {
+        EXPECT_NE( std::string::npos,
+            request( lua_debugger::CMD_EXECUTE, source ).find(
+                R"("ok":false)" ) );
+        EXPECT_EQ( top, lua_gettop( state ) );
+        }
+    EXPECT_EQ( top, lua_gettop( state ) );
+    EXPECT_STREQ( "stack sentinel", lua_tostring( state, -1 ) );
+    }
+
+TEST_F( lua_debugger_test, execute_requires_session_and_limits_source_size )
+    {
+    EXPECT_NE( std::string::npos,
+        raw_request( lua_debugger::CMD_EXECUTE, "invalid\nx = 1" ).find(
+            "Invalid or expired session" ) );
+    EXPECT_NE( std::string::npos,
+        request( lua_debugger::CMD_EXECUTE ).find( R"("ok":false)" ) );
+    EXPECT_NE( std::string::npos,
+        request( lua_debugger::CMD_EXECUTE, std::string( 16385, ' ' ) ).find(
+            "too long" ) );
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":1})",
+        request( lua_debugger::CMD_EXECUTE,
+            std::string( 16376, ' ' ) + "return 1" ) );
+    }
+
+TEST_F( lua_debugger_test, executes_setter_once_and_rereads_getter )
+    {
+    ASSERT_EQ( 0, luaL_dostring( state,
+        "LINE1V1 = {value=0, calls=0}; "
+        "function LINE1V1:get_value() return self.value end; "
+        "function LINE1V1:set_value(v) "
+        "self.calls=self.calls+1; self.value=math.min(v, 1) end" ) );
+    const std::string code =
+        "if not (2 == 0 or 2 == 1 or 2 == 2) then "
+        "error('Value is not allowed') end\n"
+        "do local function apply() LINE1V1:set_value(2) end\n"
+        "apply() end\nreturn (LINE1V1:get_value())";
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":1})",
+        request( lua_debugger::CMD_EXECUTE, code ) );
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":1})",
+        request( lua_debugger::CMD_EVALUATE, "LINE1V1.calls" ) );
+    EXPECT_NE( std::string::npos,
+        request( lua_debugger::CMD_EXECUTE,
+            "if not (3 == 0 or 3 == 1 or 3 == 2) then "
+            "error('Value is not allowed') end\nLINE1V1:set_value(3)" ).find(
+                R"("ok":false)" ) );
+    EXPECT_EQ( R"({"ok":true,"type":"number","value":1})",
+        request( lua_debugger::CMD_EVALUATE, "LINE1V1.calls" ) );
     }
 
 TEST_F( lua_debugger_test, executes_known_controller_commands )
