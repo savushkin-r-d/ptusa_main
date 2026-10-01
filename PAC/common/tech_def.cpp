@@ -1704,7 +1704,7 @@ int tech_object_manager::reload_object( u_int serial_number )
             return -2;
             }
         const auto utf8_path = ( std::filesystem::u8path( G_PROJECT_MANAGER->path ) /
-            "objects" / ( "obj_" + std::to_string( serial_number ) + ".lua" ) ).u8string();
+            "main.objects.lua" ).u8string();
         // u8string() uses char8_t in C++20; Lua still accepts UTF-8 char bytes.
         const std::string path( utf8_path.begin(), utf8_path.end() );
         const int result = object->reload_operations(
