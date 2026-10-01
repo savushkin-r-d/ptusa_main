@@ -22,7 +22,7 @@ const char* description = R"lua(
  par_uint={{nameLua='COUNT',value=3}},
  rt_par_float={{nameLua='VALUE'}}, rt_par_uint={{nameLua='STATE'}},
  modes={{name='Process', states={[1]={steps={
-     {name='Original', next_step_n=-1, time_param_n=1}
+     {name='Original', baseStep='WORK', next_step_n=-1, time_param_n=1}
  }}}}}
 }
 )lua";
@@ -45,7 +45,7 @@ class hot_reload_test : public ::testing::Test
             directory = std::filesystem::current_path() /
                 ("reload_fixture_" + std::to_string(
                     std::chrono::steady_clock::now().time_since_epoch().count()));
-            std::filesystem::create_directories( directory / "objects" );
+            std::filesystem::create_directories( directory );
             const auto directory_utf8 = directory.u8string();
             G_PROJECT_MANAGER->path.assign( directory_utf8.begin(), directory_utf8.end() ); // No trailing slash.
             const auto system_script = std::filesystem::path( __FILE__ ).parent_path().parent_path() /
@@ -55,7 +55,8 @@ class hot_reload_test : public ::testing::Test
             ASSERT_EQ( 0, luaL_dofile( L, script_path.c_str() ) )
                 << (lua_tostring( L, -1 ) ? lua_tostring( L, -1 ) : "");
             const std::string init = "function init_tech_objects_modes() return {" +
-                std::string( description ) + "} end; init_tech_objects()";
+                std::string( description ) + ", (function() local obj=" + description +
+                "; obj.n=42; obj.name='Other'; return obj end)()} end; init_tech_objects()";
             ASSERT_EQ( 0, luaL_dostring( L, init.c_str() ) );
             lua_getglobal( L, "OBJECT1" );
             lua_getfield( L, -1, "sys_tech_object" );
@@ -63,11 +64,16 @@ class hot_reload_test : public ::testing::Test
             lua_pop( L, 2 );
             ASSERT_NE( nullptr, object );
             manager.add_tech_object( object );
+            lua_getglobal( L, "OBJECT2" );
+            lua_getfield( L, -1, "sys_tech_object" );
+            manager.add_tech_object( static_cast<tech_object*>(
+                tolua_tousertype( L, -1, nullptr ) ) );
+            lua_pop( L, 2 );
             object->par_float[1] = 123.5f;
             object->par_uint[1] = 23;
             object->rt_par_float[1] = 45.5f;
             object->rt_par_uint[1] = 67;
-            write_module();
+            write_objects();
             }
 
         void TearDown() override
@@ -82,12 +88,12 @@ class hot_reload_test : public ::testing::Test
             std::filesystem::remove_all( directory );
             }
 
-        void write_module( const std::string& change = {} )
+        void write_objects( const std::string& change = {} )
             {
-            std::ofstream file( directory / "objects/obj_1.lua" );
+            std::ofstream file( directory / "main.objects.lua" );
             file << "local obj = " << description << "\n"
                  << "obj.modes[1].states[1].steps[1].name = 'Reloaded'\n"
-                 << change << "\nreturn obj\n";
+                 << change << "\nfunction init_tech_objects_modes() return {obj} end\n";
             }
 
         int reload() { return manager.reload_object( 1 ); }
@@ -143,6 +149,17 @@ TEST_F( hot_reload_test, repeated_reload_preserves_parameters_and_object_identit
     EXPECT_EQ( 789.0f, saved_float[0] ); // Original NVRAM address is still written.
     }
 
+TEST_F( hot_reload_test, cooperate_parameter_accepts_disabled_values_and_valid_indices )
+    {
+    for ( const int value : { -1, 0, 1, 2 } )
+        {
+        SCOPED_TRACE( value );
+        write_objects( "obj.cooper_param_number=" + std::to_string( value ) );
+        EXPECT_EQ( 0, reload() ) << manager.get_reload_error();
+        EXPECT_EQ( 123.5f, object->par_float[1] );
+        }
+    }
+
 TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
     {
     auto* original_modes = object->get_modes_manager();
@@ -150,7 +167,7 @@ TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
     params_manager::get_instance()->reserve_params_region( 0, before );
     const char* changes[] = {
         "this is not Lua!",
-        "return", // A module must return an object description.
+        "return", // Reject malformed Lua before changing live operations.
         "obj.n=99",
         "obj.tech_type=112",
         "obj.timers=2",
@@ -158,6 +175,15 @@ TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
         "obj.par_float[3]={nameLua='NEW',value=1}",
         "obj.modes[1].name='Different operation'",
         "obj.modes[2]=obj.modes[1]",
+        "obj.cooper_param_number=-2",
+        "obj.cooper_param_number=3",
+        "obj.cooper_param_number=1.5",
+        "obj.cooper_param_number='1'",
+        "obj.modes[1].states[1].steps[1].baseStep='OTHER'",
+        "obj.modes[1].states[1].steps[1].baseStep=nil",
+        "obj.modes[1].states[1].steps={}",
+        "obj.modes[1].states[1]=nil",
+        "obj.modes[1].states[1].steps[2]={name='New',baseStep='NEW'}",
         "obj.modes[1].states[1].steps[1].time_param_n=99",
         "obj.modes[1].states[1].steps[1].next_step_n=99",
         "obj.modes[1].states[9]={steps={}}",
@@ -173,7 +199,7 @@ TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
     for ( const auto* change : changes )
         {
         SCOPED_TRACE( change );
-        write_module( change );
+        write_objects( change );
         const int top = lua_gettop( L );
         EXPECT_EQ( -3, reload() );
         EXPECT_FALSE( manager.get_reload_error().empty() );
@@ -181,12 +207,72 @@ TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
         EXPECT_EQ( 123.5f, object->par_float[1] );
         EXPECT_EQ( top, lua_gettop( L ) );
         }
-    std::filesystem::remove( directory / "objects/obj_1.lua" );
+    std::filesystem::remove( directory / "main.objects.lua" );
     EXPECT_EQ( -3, reload() );
     params_manager::get_instance()->reserve_params_region( 0, after );
     EXPECT_EQ( before, after );
-    write_module();
+    write_objects();
     EXPECT_EQ( 0, reload() ) << manager.get_reload_error();
+    }
+
+TEST_F( hot_reload_test, shared_file_reloads_only_selected_serial_index )
+    {
+    // The second object's n deliberately differs from its serial index (2).
+    const std::string second = "local obj=" + std::string(description) +
+        "; obj.n=42; obj.name='Other'; return obj";
+    lua_getglobal( L, "OBJECT2" );
+    lua_getfield( L, -1, "sys_tech_object" );
+    auto* other = static_cast<tech_object*>( tolua_tousertype( L, -1, nullptr ) );
+    lua_pop( L, 2 );
+    ASSERT_NE( nullptr, other );
+    auto* first_modes = object->get_modes_manager();
+    ASSERT_EQ( 0, object->set_mode( 1, operation::RUN ) );
+    {
+    std::ofstream file( directory / "main.objects.lua" );
+    file << "function init_tech_objects_modes() local obj=(function() " << second
+         << " end)(); obj.modes[1].states[operation.RUN].steps[1].name='Selected'; "
+         << "return { {}, obj } end";
+    }
+    EXPECT_EQ( 0, manager.reload_object( 2 ) ) << manager.get_reload_error();
+    EXPECT_EQ( first_modes, object->get_modes_manager() );
+    EXPECT_EQ( operation::RUN, object->get_operation_state( 1 ) );
+    EXPECT_STREQ( "Original", (*(*(*first_modes)[1])[operation::RUN])[1]->get_name() );
+    EXPECT_STREQ( "Selected",
+        (*(*(*other->get_modes_manager())[1])[operation::RUN])[1]->get_name() );
+    }
+
+TEST_F( hot_reload_test, shared_file_errors_are_atomic_and_globals_are_isolated )
+    {
+    auto* original_modes = object->get_modes_manager();
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "saved_init=init_tech_objects_modes; reload_marker='live'" ) );
+    const char* sources[] = {
+        "return {}", // No initializer; never use the live global as a fallback.
+        "init_tech_objects_modes=1",
+        "function init_tech_objects_modes() return false end",
+        "function init_tech_objects_modes() return {} end",
+        "function init_tech_objects_modes() return {false} end",
+        "function init_tech_objects_modes() while true do end end",
+        "function init_tech_objects_modes() return OBJECT1 end",
+        "while true do end",
+        "require('prg')",
+    };
+    for ( const auto* source : sources )
+        {
+        SCOPED_TRACE( source );
+        {
+        std::ofstream file( directory / "main.objects.lua" );
+        file << source;
+        }
+        const int top = lua_gettop( L );
+        EXPECT_EQ( -3, reload() );
+        EXPECT_EQ( top, lua_gettop( L ) );
+        EXPECT_EQ( original_modes, object->get_modes_manager() );
+        }
+    write_objects("reload_marker='sandbox'");
+    EXPECT_EQ( 0, reload() ) << manager.get_reload_error();
+    ASSERT_EQ( 0, luaL_dostring( L,
+        "assert(init_tech_objects_modes==saved_init and reload_marker=='live')" ) );
     }
 
 TEST_F( hot_reload_test, busy_objects_are_rejected )
@@ -260,7 +346,7 @@ TEST_F( hot_reload_test, debugger_lists_objects_reloads_and_reports_failure )
     EXPECT_NE( std::string::npos, listed.find("\"idle\":true") );
     const auto success = request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, session+"1030001" );
     EXPECT_NE( std::string::npos, success.find("\"ok\":true") ) << success;
-    write_module("obj.n=2");
+    write_objects("obj.n=2");
     const auto failure = request( lua_debugger::CMD_EXEC_CONTROLLER_COMMAND, session+"1030001" );
     EXPECT_NE( std::string::npos, failure.find("\"result\":-3") ) << failure;
     EXPECT_NE( std::string::npos, failure.find("Changed object.n") ) << failure;

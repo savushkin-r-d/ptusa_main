@@ -89,8 +89,12 @@ payload.
 ```
 
 `idle` — состояние на момент запроса. Контроллер повторно проверяет его при
+<<<<<<< HEAD
 выполнении команды перезагрузки. Список не проверяет наличие `obj_N.lua`.
 >>>>>>> e4c554ef (Add hot reload validation with Lua reference checks and operation-level replacement)
+=======
+выполнении команды перезагрузки. Список не проверяет наличие `main.objects.lua`.
+>>>>>>> d561021b (Reload individual objects from main.objects.lua and cover generated metadata)
 
 Команда `3` атомарно заменяет список выражений только в указанной сессии.
 Поддерживается до 16 выражений длиной до 1024 байт. Они компилируются при
