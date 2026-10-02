@@ -194,7 +194,6 @@ TEST_F( hot_reload_test, failed_reload_is_atomic_and_does_not_reserve_nvram )
         "obj.modes[1].states[1].steps[1].jump_if={[2]={next_step_n=1}}",
         "obj.modes[1].states[1].steps[1].unsupported=true",
         "OBJECT1.par_float[1]=0", // Module environment cannot access the PAC.
-        "while true do end", // Bounded module execution.
         };
     for ( const auto* change : changes )
         {
@@ -252,9 +251,7 @@ TEST_F( hot_reload_test, shared_file_errors_are_atomic_and_globals_are_isolated 
         "function init_tech_objects_modes() return false end",
         "function init_tech_objects_modes() return {} end",
         "function init_tech_objects_modes() return {false} end",
-        "function init_tech_objects_modes() while true do end end",
         "function init_tech_objects_modes() return OBJECT1 end",
-        "while true do end",
         "require('prg')",
     };
     for ( const auto* source : sources )
@@ -273,6 +270,48 @@ TEST_F( hot_reload_test, shared_file_errors_are_atomic_and_globals_are_isolated 
     EXPECT_EQ( 0, reload() ) << manager.get_reload_error();
     ASSERT_EQ( 0, luaL_dostring( L,
         "assert(init_tech_objects_modes==saved_init and reload_marker=='live')" ) );
+    }
+
+TEST_F( hot_reload_test, source_larger_than_one_mib_reloads )
+    {
+    // Put the initializer beyond the former read limit to check full-file loading.
+    write_objects( "--" + std::string( 1024 * 1024, 'x' ) );
+    ASSERT_GT( std::filesystem::file_size( directory / "main.objects.lua" ),
+        1024u * 1024u );
+    const int top = lua_gettop( L );
+    ASSERT_EQ( 0, reload() ) << manager.get_reload_error();
+    EXPECT_EQ( top, lua_gettop( L ) );
+    EXPECT_STREQ( "Reloaded",
+        (*(*(*object->get_modes_manager())[1])[operation::RUN])[1]->get_name() );
+    EXPECT_EQ( 123.5f, object->par_float[1] );
+    }
+
+TEST_F( hot_reload_test, module_and_initializer_can_exceed_former_instruction_limit )
+    {
+    const char* loops[] = {
+        "local count=0; for i=1,1000000 do count=count+1 end; "
+        "if count==1000000 then obj.modes[1].states[1].steps[1].name='Long module' end",
+        "local initial=init_tech_objects_modes; function init_tech_objects_modes() "
+        "local count=0; for i=1,1000000 do count=count+1 end; "
+        "local objects=initial(); if count==1000000 then "
+        "objects[1].modes[1].states[1].steps[1].name='Long initializer' end; "
+        "return objects end",
+    };
+    const char* names[] = { "Long module", "Long initializer" };
+    for ( int i = 0; i < 2; ++i )
+        {
+        SCOPED_TRACE( names[i] );
+        write_objects();
+        {
+        std::ofstream file( directory / "main.objects.lua", std::ios::app );
+        file << loops[i];
+        }
+        const int top = lua_gettop( L );
+        ASSERT_EQ( 0, reload() ) << manager.get_reload_error();
+        EXPECT_EQ( top, lua_gettop( L ) );
+        EXPECT_STREQ( names[i],
+            (*(*(*object->get_modes_manager())[1])[operation::RUN])[1]->get_name() );
+        }
     }
 
 TEST_F( hot_reload_test, busy_objects_are_rejected )
