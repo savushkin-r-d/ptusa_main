@@ -379,6 +379,9 @@ class io_manager
 
 				WAGO_750_XXX_ETHERNET = 100,///< Wago Ethernet 750-341 и т.д.
 				PHOENIX_BK_ETH		  = 200,///< Phoenix 2702177
+
+                PHOENIX_AXC_F_2152 = 202, ///< Локальная шина AXC F 2152.
+                PHOENIX_AXC_F_3152 = 203, ///< Локальная шина AXC F 3152.
 				};
 
 			enum STATES           ///< Состояния работы с узлом.
@@ -491,6 +494,8 @@ class io_manager
             /// @brief Checks PP mode state of the node.
             /// @return true if PP mode is active (bit 4 set), else false.
             bool is_pp_mode_active() const;
+
+            bool is_local_bus() const;
 
             /// @return One of `io_node::DISPLAY_STATES`:
             ///         `DST_OK` for a connected and healthy node.

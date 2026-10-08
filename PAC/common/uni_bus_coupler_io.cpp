@@ -7,6 +7,7 @@
 #include <cstring>
 #include <algorithm>
 #include <limits>
+#include <exception>
 
 #ifdef WIN_OS
 const char* WSA_Last_Err_Decode();
@@ -700,7 +701,7 @@ int uni_io_manager::write_outputs()
     io_phase_scope phase{ phase_active, write_timing };
     prepare_phase( true );
 
-    int res = 0;
+    int res = exchange_local_bus( true );
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
@@ -1016,7 +1017,7 @@ int uni_io_manager::read_inputs()
     io_phase_scope phase{ phase_active, read_timing };
     prepare_phase( false );
 
-    auto res = 0;
+    auto res = exchange_local_bus( false );
     for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
@@ -1335,7 +1336,8 @@ bool uni_io_manager::read_phoenix_status_register( io_node* nd )
 //-----------------------------------------------------------------------------
 void uni_io_manager::disconnect( io_node* node )
     {
-    if ( node->sock || node->state != io_node::ST_NO_CONNECT )
+    if ( !node->is_local_bus() &&
+        ( node->sock || node->state != io_node::ST_NO_CONNECT ) )
         {
         shutdown( node->sock,
 #ifdef WIN_OS
@@ -1376,6 +1378,12 @@ void uni_io_manager::disconnect( io_node* node )
     }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
+    : uni_io_manager( make_local_bus_driver() )
+    {
+    }
+//-----------------------------------------------------------------------------
+uni_io_manager::uni_io_manager( std::unique_ptr<local_bus_driver> driver )
+    : local_driver( std::move( driver ) )
     {
     writebuff = &buff[ 13 ];
     resultbuff = &buff[ 9 ];
@@ -1459,8 +1467,10 @@ void uni_io_manager::make_wago_ao_request( io_node* nd )
     }
 
 void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_register,
-    unsigned int registers_count, unsigned int& ao_module_type, unsigned int& ao_module_offset )
+    unsigned int registers_count, unsigned int& ao_module_type,
+    unsigned int& ao_module_offset, u_char* output )
     {
+    if ( !output ) output = writebuff;
     auto bit_src = start_register * 16;
     for (u_int j = 0; j < registers_count * 2; j++)
         {
@@ -1470,7 +1480,7 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
             b = b | static_cast <unsigned char>( (nd->DO_[bit_src] & 1) << k );
             bit_src++;
             }
-        writebuff[j] = b;
+        output[j] = b;
         }
 
     for (unsigned int idx = start_register, l = 0; idx < start_register + registers_count; idx++)
@@ -1492,7 +1502,7 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
                 ao_module_offset %= 32;	   //if there are same modules one after other on bus
                 if (ao_module_offset > 2)  //first 3 words (bytes 0-5) are reserved, 2nd byte is used for trigger discrete outputs.
                     {
-                    memcpy(&writebuff[l], &nd->AO_[idx], 2);
+                    memcpy(&output[l], &nd->AO_[idx], 2);
                     }
                 l += 2;
                 break;
@@ -1501,13 +1511,13 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
                 ao_module_offset %= 14;	   //if there are same modules one after other on bus
                 if (0 == ao_module_offset) //assign start command and positive increment for both counters
                     {
-                    writebuff[l] = 0x5;
-                    writebuff[l + 1] = 0x5;
+                    output[l] = 0x5;
+                    output[l + 1] = 0x5;
                     }
                 else
                     {
-                    writebuff[l] = 0;
-                    writebuff[l + 1] = 0;
+                    output[l] = 0;
+                    output[l + 1] = 0;
                     }
                 l += 2;
                 break;
@@ -1515,9 +1525,10 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
             case 2688527:       //AXL F AO4 1H
             case 2702072:       //AXL F AI2 AO2 1H
             case 1088123:       //AXL SE AO4 I 4-20
+            case 1088126:       //AXL SE AO4 U 0-10
             case 2688666:       //AXL F RS UNI XC
-                writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
-                writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
+                output[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
+                output[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
                 l += 2;
                 break;
 
@@ -1527,6 +1538,189 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
             }
         }
 
+    }
+
+bool uni_io_manager::validate_local_bus( io_node* node )
+    {
+    // В main.io.lua адреса остаются в словах AI/AO и битах DI/DO.
+    // Служебные байты LocalbusData в эти адреса не входят.
+    if ( node->AI_cnt != node->AO_cnt ||
+        node->AI_cnt > io_node::C_ANALOG_BUF_SIZE ||
+        node->AI_cnt > 1024 / 2 ||
+        node->DI_cnt != node->AI_cnt * 16 ||
+        node->DO_cnt != node->AO_cnt * 16 ||
+        node->AI_size != node->AI_cnt * 2 ||
+        node->AO_size != node->AO_cnt * 2 )
+        {
+        return false;
+        }
+
+    unsigned int offset = 0;
+    for ( size_t slot = 0; slot < local_driver->module_count(); ++slot )
+        {
+        auto module = local_driver->module( slot );
+        if ( module.missing || module.bytes > 1024 ) return false;
+        // Каждый модуль выравнивается до слова отдельно.
+        auto words = ( module.bytes + 1 ) / 2;
+        if ( words > node->AI_cnt - offset ) return false;
+        for ( unsigned int word = 0; word < words; ++word )
+            {
+            if ( node->AI_types[offset + word] != module.article ||
+                node->AO_types[offset + word] != module.article )
+                {
+                return false;
+                }
+            }
+        offset += words;
+        }
+    return offset == node->AI_cnt;
+    }
+
+void uni_io_manager::local_bus_error( io_node* node, const char* message )
+    {
+    if ( !node->is_set_err )
+        {
+        G_LOG->error( "Локальная шина '%s': %s.", node->name, message );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NO_CONNECTION,
+            PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+        node->is_set_err = true;
+        }
+    node->state = io_node::ST_NO_CONNECT;
+    node->read_io_error_flag = true;
+    node->last_init_time = get_millisec();
+    }
+
+int uni_io_manager::exchange_local_bus( bool writing )
+    {
+    io_node* node = nullptr;
+    unsigned int count = 0;
+    for ( unsigned int i = 0; i < nodes_count; ++i )
+        {
+        auto current = nodes[i];
+        if ( current && current->is_active && current->is_local_bus() &&
+            ( current->AI_cnt || current->AO_cnt ||
+                current->DI_cnt || current->DO_cnt ) )
+            {
+            node = current;
+            ++count;
+            }
+        }
+    if ( count == 0 ) return 0;
+    if ( count > 1 )
+        {
+        for ( unsigned int i = 0; i < nodes_count; ++i )
+            {
+            if ( nodes[i] && nodes[i]->is_active && nodes[i]->is_local_bus() )
+                {
+                local_bus_error( nodes[i], "задан более чем один контроллер" );
+                }
+            }
+        return 1;
+        }
+    if ( writing && ( node->read_io_error_flag ||
+        node->state != io_node::ST_OK ) ) return 1;
+    if ( !writing && node->read_io_error_flag &&
+        get_delta_millisec( node->last_init_time ) < node->delay_time )
+        {
+        return 1;
+        }
+
+    try
+        {
+        if ( !local_driver )
+            {
+            local_bus_error( node,
+                "сборка не содержит драйвер plcnext-io-drivers-cpp" );
+            return 1;
+            }
+        if ( !local_driver->initialize() || !local_driver->ready() )
+            {
+            const char* details = local_driver->get_error_text();
+            local_bus_error( node, details && details[0]
+                ? details : "драйвер или шина не готовы" );
+            return 1;
+            }
+        if ( !validate_local_bus( node ) )
+            {
+            local_bus_error( node,
+                "состав или размер данных не совпадает с main.io.lua" );
+            return 1;
+            }
+        if ( !writing && !local_driver->read_inputs() )
+            {
+            local_bus_error( node, "ошибка чтения" );
+            return 1;
+            }
+
+        unsigned int offset = 0;
+        for ( size_t slot = 0; slot < local_driver->module_count(); ++slot )
+            {
+            auto module = local_driver->module( slot );
+            auto words = ( module.bytes + 1 ) / 2;
+            if ( words == 0 ) continue;
+            // Буфер сохраняет ёмкость между циклами обмена.
+            local_process_data.assign( words * 2, 0 );
+            auto& data = local_process_data;
+            if ( writing )
+                {
+                unsigned int type = 0, module_offset = 0;
+                make_phoenix_output( node, offset, words, type,
+                    module_offset, data.data() );
+                local_driver->write_module( slot, data.data(), module.bytes );
+                }
+            else
+                {
+                local_driver->read_module( slot, data.data(), module.bytes );
+                for ( unsigned int word = 0; word < words; ++word )
+                    {
+                    auto type = node->AI_types[offset + word];
+                    if ( type == 1027843 || type == 1088132 )
+                        {
+                        memcpy( &node->AI[offset + word],
+                            data.data() + word * 2, 2 );
+                        }
+                    else
+                        {
+                        node->AI[offset + word] =
+                            data[word * 2] * 256 + data[word * 2 + 1];
+                        }
+                    }
+                for ( unsigned int bit = 0; bit < words * 16; ++bit )
+                    {
+                    node->DI[offset * 16 + bit] =
+                        ( data[bit / 8] >> ( bit % 8 ) ) & 1;
+                    }
+                }
+            offset += words;
+            }
+        if ( writing )
+            {
+            if ( !local_driver->write_outputs() )
+                {
+                local_bus_error( node, "ошибка записи" );
+                return 1;
+                }
+            memcpy( node->AO, node->AO_, node->AO_cnt * sizeof( int_2 ) );
+            memcpy( node->DO, node->DO_, node->DO_cnt );
+            }
+        node->state = io_node::ST_OK;
+        node->read_io_error_flag = false;
+        node->last_poll_time = get_millisec();
+        if ( node->is_set_err )
+            {
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+            node->is_set_err = false;
+            }
+        return 0;
+        }
+    catch ( const std::exception& error )
+        {
+        local_bus_error( node, error.what() );
+        return 1;
+        }
     }
 
 void uni_io_manager::make_read_request( unsigned int address, unsigned int quantity,

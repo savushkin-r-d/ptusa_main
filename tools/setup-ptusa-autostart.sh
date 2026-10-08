@@ -1,0 +1,250 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          ptusa_main
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: ptusa_main с локальной шиной PLCnext
+### END INIT INFO
+# ptusa_main-autostart-v1
+# Установка от root: sh setup-ptusa-autostart.sh install
+# Установка включает автозапуск, но не запускает программу немедленно.
+
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+APP_DIR=/opt/main
+EXECUTABLE=$APP_DIR/ptusa_main
+SERVICE=/etc/init.d/ptusa_main
+DEFAULTS=/etc/default/ptusa_main
+PID_DIR=/run/ptusa_main
+PID_FILE=$PID_DIR/ptusa_main.pid
+LOG_FILE=/var/log/ptusa_main.log
+RUN_USER=plcnext_firmware
+RUN_GROUP=plcnext
+PTUSA_ARGS=main.plua
+
+fail()
+{
+    echo "Ошибка: $*" >&2
+    exit 1
+}
+
+require_root()
+{
+    [ "$(id -u)" = 0 ] || fail "Эта команда должна выполняться от root."
+}
+
+load_defaults()
+{
+    # Файл создаётся от root; аргументы разделяются пробелами, без eval.
+    if [ -f "$DEFAULTS" ]; then
+        . "$DEFAULTS"
+    fi
+    [ -n "$PTUSA_ARGS" ] || fail "PTUSA_ARGS не должен быть пустым."
+}
+
+check_files()
+{
+    [ -d "$APP_DIR" ] || fail "Нет каталога $APP_DIR."
+    [ -f "$EXECUTABLE" ] || fail "Нет программы $EXECUTABLE."
+    [ -r "$APP_DIR/main.plua" ] || fail "Нет доступного main.plua."
+    [ -r "$APP_DIR/libAxiobus.so.11" ] || fail "Нет libAxiobus.so.11."
+    [ -f /etc/init.d/plcnext ] || fail "Не найдена служба SysV PLCnext."
+    id "$RUN_USER" >/dev/null 2>&1 || fail "Нет пользователя $RUN_USER."
+    grep -q "^$RUN_GROUP:" /etc/group || fail "Нет группы $RUN_GROUP."
+    for utility in start-stop-daemon update-rc.d pidof install find chgrp; do
+        command -v "$utility" >/dev/null || fail "Нет команды $utility."
+    done
+}
+
+plcnext_running()
+{
+    if [ -r /run/plcnext/plcnext.pid ]; then
+        plc_pid=$(cat /run/plcnext/plcnext.pid)
+        case "$plc_pid" in
+            ''|*[!0-9]*) ;;
+            *)
+                if [ "$plc_pid" -gt 1 ] && kill -0 "$plc_pid" 2>/dev/null; then
+                    return 0
+                fi
+                ;;
+        esac
+    fi
+    pidof Arp.System.Application >/dev/null 2>&1
+}
+
+running()
+{
+    start-stop-daemon --status --pidfile "$PID_FILE" \
+        --exec "$EXECUTABLE" >/dev/null 2>&1
+}
+
+prepare_permissions()
+{
+    # Сохраняем владельцев проекта, даём группе доступ к скриптам и данным.
+    # find не следует по символическим ссылкам за пределы /opt/main.
+    [ ! -L "$APP_DIR" ] || fail "$APP_DIR не должен быть ссылкой."
+    find "$APP_DIR" -type d -exec chgrp "$RUN_GROUP" {} + \
+        -exec chmod g+rwx {} +
+    find "$APP_DIR" -type f -exec chgrp "$RUN_GROUP" {} + \
+        -exec chmod g+rw {} +
+    chmod 755 "$EXECUTABLE"
+
+    # Драйвер устройства создаётся службой localbus при загрузке системы.
+    waited=0
+    while [ ! -c /dev/axio_xfer0 ] && [ "$waited" -lt 20 ]; do
+        sleep 1
+        waited=$((waited + 1))
+    done
+    [ -c /dev/axio_xfer0 ] || fail "Нет устройства /dev/axio_xfer0."
+    chown "$RUN_USER:$RUN_GROUP" /dev/axio_xfer0
+    chmod 600 /dev/axio_xfer0
+
+    # Не удаляем файл с mutex библиотеки и не меняем его содержимое.
+    [ ! -L /tmp/axiopdi ] || fail "/tmp/axiopdi не должен быть ссылкой."
+    if [ -e /tmp/axiopdi ]; then
+        [ -f /tmp/axiopdi ] || fail "/tmp/axiopdi не является файлом."
+        chown "$RUN_USER:$RUN_GROUP" /tmp/axiopdi
+        chmod 660 /tmp/axiopdi
+    fi
+
+    install -d -m 755 "$PID_DIR"
+    [ ! -L "$LOG_FILE" ] || fail "$LOG_FILE не должен быть ссылкой."
+    touch "$LOG_FILE"
+    chown "$RUN_USER:$RUN_GROUP" "$LOG_FILE"
+    chmod 660 "$LOG_FILE"
+}
+
+start_service()
+{
+    require_root
+    load_defaults
+    check_files
+    if running; then
+        echo "ptusa_main уже запущена."
+        return 0
+    fi
+    if plcnext_running; then
+        fail "PLCnext работает. Сначала остановите /etc/init.d/plcnext."
+    fi
+    if start-stop-daemon --status --exec "$EXECUTABLE" >/dev/null 2>&1; then
+        fail "ptusa_main запущена вне этой службы. Сначала остановите её."
+    fi
+    prepare_permissions
+    rm -f "$PID_FILE"
+    # Отключаем подстановку имён файлов при разделении PTUSA_ARGS на слова.
+    set -f
+    start-stop-daemon --start --background --make-pidfile \
+        --pidfile "$PID_FILE" --exec "$EXECUTABLE" \
+        --chuid "$RUN_USER:$RUN_GROUP" --chdir "$APP_DIR" \
+        --umask 002 --output "$LOG_FILE" -- $PTUSA_ARGS
+    sleep 2
+    if ! running; then
+        fail "ptusa_main завершилась при старте. Проверьте $LOG_FILE."
+    fi
+    echo "ptusa_main запущена из $APP_DIR (PID $(cat "$PID_FILE"))."
+}
+
+stop_service()
+{
+    require_root
+    # SIGINT используется приложением для штатного завершения главного цикла.
+    start-stop-daemon --stop --oknodo --pidfile "$PID_FILE" \
+        --exec "$EXECUTABLE" --retry INT/15/KILL/2
+    rm -f "$PID_FILE"
+    echo "ptusa_main остановлена."
+}
+
+install_service()
+{
+    require_root
+    check_files
+    source_file=$(readlink -f "$0")
+    if [ -e "$SERVICE" ]; then
+        grep -q '^# ptusa_main-autostart-v1$' "$SERVICE" || \
+            fail "$SERVICE уже существует и создан другим установщиком."
+    fi
+    if start-stop-daemon --status --exec "$EXECUTABLE" >/dev/null 2>&1; then
+        if running; then
+            stop_service
+        else
+            fail "Сначала остановите ptusa_main, запущенную вручную."
+        fi
+    fi
+    if plcnext_running; then
+        /etc/init.d/plcnext stop
+    fi
+    if plcnext_running; then
+        fail "PLCnext не остановился; права Axiobus не изменены."
+    fi
+    prepare_permissions
+    if [ ! -e "$DEFAULTS" ]; then
+        install -d -m 755 /etc/default
+        (umask 022; cat > "$DEFAULTS" <<'EOF'
+# Аргументы ptusa_main; имена с пробелами не поддерживаются.
+# Для диагностики: PTUSA_ARGS='main.plua --read_only_io --opc off'
+PTUSA_ARGS='main.plua'
+EOF
+        )
+    fi
+    chown root:root "$DEFAULTS"
+    chmod 644 "$DEFAULTS"
+    if [ "$source_file" != "$SERVICE" ]; then
+        install -m 755 "$source_file" "$SERVICE"
+    fi
+    chown root:root "$SERVICE"
+    chmod 755 "$SERVICE"
+
+    # disable сохраняет ссылки остановки PLCnext и допускает enable при откате.
+    update-rc.d plcnext disable
+    update-rc.d -f ptusa_main remove
+    update-rc.d ptusa_main defaults 99 01
+    echo "Автозапуск ptusa_main включён; автозапуск PLCnext отключён."
+    echo "Программа запустится после перезагрузки. Для запуска сейчас:"
+    echo "  $SERVICE start"
+    echo "Лог: $LOG_FILE; аргументы: $DEFAULTS."
+}
+
+uninstall_service()
+{
+    require_root
+    if [ -e "$SERVICE" ]; then
+        grep -q '^# ptusa_main-autostart-v1$' "$SERVICE" || \
+            fail "$SERVICE создан другим установщиком."
+    fi
+    stop_service
+    update-rc.d -f ptusa_main remove
+    update-rc.d plcnext enable
+    rm -f "$SERVICE"
+    echo "Автозапуск ptusa_main удалён; автозапуск PLCnext восстановлен."
+    echo "PLCnext запустится после перезагрузки. Проект, настройки и лог сохранены."
+}
+
+case "${1:-help}" in
+    install) install_service ;;
+    uninstall) uninstall_service ;;
+    start) start_service ;;
+    stop) stop_service ;;
+    restart) stop_service; start_service ;;
+    status)
+        if running; then
+            echo "ptusa_main работает (PID $(cat "$PID_FILE"))."
+        else
+            echo "ptusa_main не работает."
+            exit 3
+        fi
+        ;;
+    check)
+        check_files
+        echo "Файлы проекта, пользователь и команды SysV доступны."
+        ;;
+    help|--help|-h)
+        echo "Использование: $0 {install|uninstall|start|stop|restart|status|check}"
+        echo "install/uninstall/start/stop/restart требуют root."
+        echo "install не запускает программу; start разрешает запись DO/AO."
+        ;;
+    *) fail "Неизвестная команда: $1. Используйте --help." ;;
+esac

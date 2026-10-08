@@ -29,6 +29,7 @@
 #include <array>
 #include <chrono>
 #include <vector>
+#include "axioline_local_bus.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода для OC Linux.
@@ -86,7 +87,13 @@ class uni_io_manager : public io_manager
         void make_wago_ao_request( io_node* node );
         void make_phoenix_output( io_node* node, unsigned int start_register,
             unsigned int registers_count, unsigned int& module_type,
-            unsigned int& module_offset );
+            unsigned int& module_offset, u_char* output = nullptr );
+
+        int exchange_local_bus( bool writing );
+        bool validate_local_bus( io_node* node );
+        void local_bus_error( io_node* node, const char* message );
+        std::unique_ptr<local_bus_driver> local_driver;
+        std::vector<unsigned char> local_process_data;
 
         /// @brief Обмен с узлом I/O.
         ///
@@ -135,6 +142,8 @@ class uni_io_manager : public io_manager
         int write_outputs() override;
 
         uni_io_manager();
+
+        explicit uni_io_manager( std::unique_ptr<local_bus_driver> driver );
 
         ~uni_io_manager() override = default;
 

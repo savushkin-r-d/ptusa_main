@@ -1,4 +1,5 @@
 .*
+!.gitattributes
 *.user
 *.aps
 intermediate
