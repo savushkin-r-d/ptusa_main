@@ -2,6 +2,33 @@
 #include "uni_bus_coupler_io.h"
 #include <algorithm>
 #include <stdexcept>
+#include <array>
+
+TEST( local_bus_diagnostics, io_error_contains_code_slot_and_cause )
+    {
+    local_bus_driver::diagnostics diag{ 0x02E2, 0x3130, 4, false, true };
+    auto text = describe_local_bus_diagnostics( diag );
+    EXPECT_THAT( text, testing::HasSubstr( "код=0x3130" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "слот 4" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "IO_ERROR" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "SYS_FAIL" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "питание I/O" ) );
+    EXPECT_THAT( text, testing::Not( testing::HasSubstr( "RUNNING=0" ) ) );
+    }
+
+TEST( local_bus_diagnostics, unavailable_or_unknown_diagnostics_are_explicit )
+    {
+    EXPECT_TRUE( describe_local_bus_diagnostics( {} ).empty() );
+    auto text = describe_local_bus_diagnostics(
+        { 0x010C, 0xDEAD, 0, true, true } );
+    EXPECT_THAT( text, testing::HasSubstr( "код=0xDEAD" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "аппаратного драйвера" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "BUS_DIFFERENT" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "BUS_ERROR" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "CONTROLLER_ERROR" ) );
+    EXPECT_THAT( text, testing::HasSubstr( "RUNNING=0" ) );
+    EXPECT_THAT( text, testing::Not( testing::HasSubstr( "слот 0" ) ) );
+    }
 
 TEST( local_bus_metadata, identification_record_contains_process_byte_length )
     {
@@ -55,6 +82,11 @@ namespace
             bool read_result = true, write_result = true;
             bool throw_on_read = false;
             int reads = 0, writes = 0, initializations = 0;
+            diagnostics diagnostic;
+            std::string error_text;
+
+            diagnostics get_diagnostics() const override { return diagnostic; }
+            const char* get_error_text() const override { return error_text.c_str(); }
 
             bool initialize() override
                 {
@@ -96,9 +128,11 @@ namespace
             fake_local_bus* driver = nullptr;
             std::unique_ptr<uni_io_manager> manager;
             io_manager::io_node* node = nullptr;
+            bool was_emulator = true;
 
             void SetUp() override
                 {
+                was_emulator = G_PAC_INFO()->is_emulator();
                 auto port = tcp_communicator::get_port();
                 auto modbus_port = tcp_communicator::get_modbus_port();
                 // Порт выбирает ОС: тестам локальной шины сеть не нужна.
@@ -144,6 +178,17 @@ namespace
             void TearDown() override
                 {
                 PAC_critical_errors_manager::get_instance()->reset_all_error();
+                if ( was_emulator ) G_PAC_INFO()->emulation_on();
+                else G_PAC_INFO()->emulation_off();
+                }
+
+            std::string alarms()
+                {
+                std::array<char, 8192> buffer{};
+                u_int_2 id = 0;
+                PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
+                    buffer.data(), id );
+                return buffer.data();
                 }
         };
     }
@@ -159,6 +204,87 @@ TEST_F( local_bus_io, controllers_without_ip_are_active )
         EXPECT_EQ( manager->read_inputs(), 0 );
         EXPECT_EQ( node->state, io_manager::io_node::ST_OK );
         }
+    }
+
+TEST_F( local_bus_io, fault_details_are_updated_in_scada_and_cleared_on_recovery )
+    {
+    create( { { 2688022, 2, false } } );
+    driver->operational = false;
+    driver->diagnostic = { 0x0084, 0x0BF2, 1, false, true };
+    driver->error_text = "BUS_ERROR, код=0x0BF2, слот 1";
+    ASSERT_EQ( manager->read_inputs(), 1 );
+    EXPECT_THAT( alarms(), testing::HasSubstr( driver->error_text ) );
+    EXPECT_EQ( node->local_bus_error_code, 0x0BF2 );
+    EXPECT_EQ( node->local_bus_error_location, 1 );
+    auto errors = PAC_critical_errors_manager::get_instance();
+    auto id = errors->get_id();
+    EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_EQ( errors->get_id(), id );
+    driver->error_text = "ошибка аппаратного драйвера";
+    EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_NE( errors->get_id(), id );
+    EXPECT_THAT( alarms(), testing::HasSubstr( driver->error_text ) );
+    driver->operational = true;
+    driver->diagnostic = { 0x00E0, 0, 0, false, true };
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_TRUE( alarms().empty() );
+    EXPECT_EQ( node->local_bus_error_code, 0 );
+    }
+
+TEST_F( local_bus_io, io_error_is_visible_while_exchange_continues )
+    {
+    create( { { 2688048, 2, false } } );
+    G_PAC_INFO()->emulation_off();
+    driver->diagnostic = { 0x00E2, 0x3422, 1, false, true };
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_EQ( node->get_display_state(),
+        io_manager::io_node::DISPLAY_STATES::DST_WARNING );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "код=0x3422" ) );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "priority = 250" ) );
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_critical_error() );
+    EXPECT_EQ( manager->write_outputs(), 0 );
+    driver->diagnostic = { 0x00E0, 0, 0, false, true };
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_EQ( node->get_display_state(),
+        io_manager::io_node::DISPLAY_STATES::DST_OK );
+    EXPECT_TRUE( alarms().empty() );
+    }
+
+TEST_F( local_bus_io, sysfail_notification_is_not_a_communication_failure )
+    {
+    create( { { 2688048, 2, false } } );
+    driver->diagnostic = { 0x02E0, 0, 0, false, true };
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_FALSE( node->read_io_error_flag );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "SYS_FAIL" ) );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "priority = 500" ) );
+    EXPECT_FALSE( PAC_critical_errors_manager::get_instance()->is_any_critical_error() );
+    manager->disconnect( node );
+    EXPECT_TRUE( alarms().empty() );
+    }
+
+TEST_F( local_bus_io, configuration_fault_identifies_slot_and_articles )
+    {
+    create( { { 2688022, 2, false } } );
+    driver->modules[0].article = 2688048;
+    ASSERT_EQ( manager->read_inputs(), 1 );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "слот 1" ) );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "2688022" ) );
+    EXPECT_THAT( alarms(), testing::HasSubstr( "2688048" ) );
+    }
+
+TEST_F( local_bus_io, write_fault_replaces_notification_with_exchange_alarm )
+    {
+    create( { { 2688048, 2, false } } );
+    driver->diagnostic = { 0x00E1, 0x3130, 1, false, true };
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_TRUE( node->is_cfg_bus_error_alarm_set );
+    driver->write_result = false;
+    driver->error_text = "ошибка записи: аппаратный драйвер";
+    EXPECT_EQ( manager->write_outputs(), 1 );
+    EXPECT_FALSE( node->is_cfg_bus_error_alarm_set );
+    EXPECT_THAT( alarms(), testing::HasSubstr( driver->error_text ) );
+    EXPECT_THAT( alarms(), testing::Not( testing::HasSubstr( "7-1-1" ) ) );
     }
 
 TEST_F( local_bus_io, mixed_modules_keep_word_and_bit_offsets )

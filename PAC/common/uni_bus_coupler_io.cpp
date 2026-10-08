@@ -1542,6 +1542,7 @@ void uni_io_manager::make_phoenix_output( io_node* nd, unsigned int start_regist
 
 bool uni_io_manager::validate_local_bus( io_node* node )
     {
+    local_validation_error.clear();
     // В main.io.lua адреса остаются в словах AI/AO и битах DI/DO.
     // Служебные байты LocalbusData в эти адреса не входят.
     if ( node->AI_cnt != node->AO_cnt ||
@@ -1552,6 +1553,9 @@ bool uni_io_manager::validate_local_bus( io_node* node )
         node->AI_size != node->AI_cnt * 2 ||
         node->AO_size != node->AO_cnt * 2 )
         {
+        local_validation_error = fmt::format(
+            "некорректные размеры main.io.lua: AI={}, AO={}, DI={}, DO={}",
+            node->AI_cnt, node->AO_cnt, node->DI_cnt, node->DO_cnt );
         return false;
         }
 
@@ -1559,33 +1563,82 @@ bool uni_io_manager::validate_local_bus( io_node* node )
     for ( size_t slot = 0; slot < local_driver->module_count(); ++slot )
         {
         auto module = local_driver->module( slot );
-        if ( module.missing || module.bytes > 1024 ) return false;
+        if ( module.missing || module.bytes > 1024 )
+            {
+            local_validation_error = fmt::format( "слот {}, артикул {}: {}",
+                slot + 1, module.article, module.missing ? "модуль отсутствует"
+                    : "данные модуля превышают 1024 байта" );
+            return false;
+            }
         // Каждый модуль выравнивается до слова отдельно.
         auto words = ( module.bytes + 1 ) / 2;
-        if ( words > node->AI_cnt - offset ) return false;
+        if ( words > node->AI_cnt - offset )
+            {
+            local_validation_error = fmt::format(
+                "слот {}: {} байт данных не помещаются в {} слов main.io.lua",
+                slot + 1, module.bytes, node->AI_cnt - offset );
+            return false;
+            }
         for ( unsigned int word = 0; word < words; ++word )
             {
             if ( node->AI_types[offset + word] != module.article ||
                 node->AO_types[offset + word] != module.article )
                 {
+                local_validation_error = fmt::format(
+                    "слот {}: обнаружен артикул {}, main.io.lua: AI={}, AO={}",
+                    slot + 1, module.article, node->AI_types[offset + word],
+                    node->AO_types[offset + word] );
                 return false;
                 }
             }
         offset += words;
         }
-    return offset == node->AI_cnt;
+    if ( offset != node->AI_cnt )
+        {
+        local_validation_error = fmt::format(
+            "обнаружено {} модулей, {} слов данных; main.io.lua: {} слов",
+            local_driver->module_count(), offset, node->AI_cnt );
+        return false;
+        }
+    return true;
+    }
+
+void uni_io_manager::update_local_bus_diagnostics( io_node* node, bool notify )
+    {
+    auto diag = local_driver ? local_driver->get_diagnostics()
+        : local_bus_driver::diagnostics{};
+    node->local_bus_diagnostics_valid = diag.valid;
+    node->diagnostic_status_register = diag.valid ? diag.status : 0;
+    node->local_bus_error_code = diag.valid ? diag.error_code : 0;
+    node->local_bus_error_location = diag.valid ? diag.error_location : 0;
+    auto errors = PAC_critical_errors_manager::get_instance();
+    if ( notify && diag.valid &&
+        ( diag.status & local_bus_driver::NOTIFICATION_MASK ) )
+        {
+        const char* details = local_driver->get_error_text();
+        errors->set_global_error( PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
+            PAC_critical_errors_manager::AS_IO_COUPLER, node->number,
+            std::string( "локальная шина: " ) + ( details && details[0]
+                ? details : describe_local_bus_diagnostics( diag ) ),
+            ( diag.status & 0x0802 ) ? P_ALARM : P_MESSAGE );
+        node->is_cfg_bus_error_alarm_set = true;
+        }
+    else if ( node->is_cfg_bus_error_alarm_set )
+        {
+        errors->reset_global_error( PAC_critical_errors_manager::AC_CFG_BUS_ERROR,
+            PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
+        node->is_cfg_bus_error_alarm_set = false;
+        }
     }
 
 void uni_io_manager::local_bus_error( io_node* node, const char* message )
     {
-    if ( !node->is_set_err )
-        {
-        G_LOG->error( "Локальная шина '%s': %s.", node->name, message );
-        PAC_critical_errors_manager::get_instance()->set_global_error(
-            PAC_critical_errors_manager::AC_NO_CONNECTION,
-            PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
-        node->is_set_err = true;
-        }
+    update_local_bus_diagnostics( node, false );
+    PAC_critical_errors_manager::get_instance()->set_global_error(
+        PAC_critical_errors_manager::AC_NO_CONNECTION,
+        PAC_critical_errors_manager::AS_IO_COUPLER, node->number,
+        std::string( "локальная шина: " ) + message );
+    node->is_set_err = true;
     node->state = io_node::ST_NO_CONNECT;
     node->read_io_error_flag = true;
     node->last_init_time = get_millisec();
@@ -1643,13 +1696,14 @@ int uni_io_manager::exchange_local_bus( bool writing )
             }
         if ( !validate_local_bus( node ) )
             {
-            local_bus_error( node,
-                "состав или размер данных не совпадает с main.io.lua" );
+            local_bus_error( node, local_validation_error.c_str() );
             return 1;
             }
         if ( !writing && !local_driver->read_inputs() )
             {
-            local_bus_error( node, "ошибка чтения" );
+            const char* details = local_driver->get_error_text();
+            local_bus_error( node, details && details[0]
+                ? details : "ошибка чтения" );
             return 1;
             }
 
@@ -1698,7 +1752,9 @@ int uni_io_manager::exchange_local_bus( bool writing )
             {
             if ( !local_driver->write_outputs() )
                 {
-                local_bus_error( node, "ошибка записи" );
+                const char* details = local_driver->get_error_text();
+                local_bus_error( node, details && details[0]
+                    ? details : "ошибка записи" );
                 return 1;
                 }
             memcpy( node->AO, node->AO_, node->AO_cnt * sizeof( int_2 ) );
@@ -1714,6 +1770,7 @@ int uni_io_manager::exchange_local_bus( bool writing )
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             node->is_set_err = false;
             }
+        update_local_bus_diagnostics( node, true );
         return 0;
         }
     catch ( const std::exception& error )

@@ -92,8 +92,10 @@ class uni_io_manager : public io_manager
         int exchange_local_bus( bool writing );
         bool validate_local_bus( io_node* node );
         void local_bus_error( io_node* node, const char* message );
+        void update_local_bus_diagnostics( io_node* node, bool notify );
         std::unique_ptr<local_bus_driver> local_driver;
         std::vector<unsigned char> local_process_data;
+        std::string local_validation_error;
 
         /// @brief Обмен с узлом I/O.
         ///

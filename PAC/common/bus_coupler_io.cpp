@@ -1427,6 +1427,12 @@ io_manager::io_node::DISPLAY_STATES io_manager::io_node::get_display_state() con
         return io_node::DISPLAY_STATES::DST_WARNING;
         }
 
+    if ( is_local_bus() && local_bus_diagnostics_valid &&
+        ( diagnostic_status_register & local_bus_driver::NOTIFICATION_MASK ) )
+        {
+        return io_node::DISPLAY_STATES::DST_WARNING;
+        }
+
     return io_node::DISPLAY_STATES::DST_OK;
     }
 //-----------------------------------------------------------------------------

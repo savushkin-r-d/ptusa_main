@@ -1,4 +1,5 @@
 #include "axioline_local_bus.h"
+#include "fmt/format.h"
 
 bool decode_local_bus_process_data_length( const unsigned char* record,
     size_t size, unsigned int& bytes )
@@ -11,11 +12,66 @@ bool decode_local_bus_process_data_length( const unsigned char* record,
     return true;
     }
 
+std::string describe_local_bus_diagnostics(
+    const local_bus_driver::diagnostics& diag )
+    {
+    if ( !diag.valid ) return {};
+    auto text = fmt::format( "status=0x{:04X}, код=0x{:04X}, param2=0x{:04X}",
+        diag.status, diag.error_code, diag.error_location );
+    if ( ( diag.status & 0x0007 ) && diag.error_location )
+        {
+        text += fmt::format( ", слот {}", diag.error_location );
+        }
+    if ( diag.driver_error ) text += "; ошибка аппаратного драйвера";
+    struct flag_text { uint16_t flag; const char* text; };
+    const flag_text flags[] =
+        {
+        { 0x0001, "предупреждение I/O (IO_WARNING)" },
+        { 0x0002, "ошибка I/O (IO_ERROR)" },
+        { 0x0004, "ошибка шины (BUS_ERROR)" },
+        { 0x0008, "ошибка контроллера (CONTROLLER_ERROR)" },
+        { 0x0100, "изменён состав шины (BUS_DIFFERENT)" },
+        { 0x0200, "выходные данные заблокированы (SYS_FAIL)" },
+        { 0x0400, "режим принудительного управления (FORCE_MODE)" },
+        { 0x0800, "ошибка синхронизации (SYNC_FAILED)" },
+        { 0x1000, "требуется параметризация (PARAM_REQUIRED)" },
+        };
+    for ( const auto& flag : flags )
+        {
+        if ( diag.status & flag.flag ) text += std::string( "; " ) + flag.text;
+        }
+    if ( !( diag.status & 0x0020 ) ) text += "; обмен остановлен (RUNNING=0)";
+    if ( !( diag.status & 0x0040 ) ) text += "; конфигурация не активна (ACTIVE=0)";
+    if ( !( diag.status & 0x0080 ) ) text += "; шина не готова (BUS_READY=0)";
+
+    // UM EN AXL F SYS DIAG, таблица 3-5. Неизвестный код остаётся в сообщении.
+    if ( diag.status & 0x0003 )
+        {
+        const char* cause = nullptr;
+        switch ( diag.error_code )
+            {
+            case 0x2340: cause = "перегрузка или короткое замыкание питания"; break;
+            case 0x2344: cause = "перегрузка или короткое замыкание выхода"; break;
+            case 0x3130: cause = "питание I/O отсутствует или неисправно"; break;
+            case 0x3412: cause = "отсутствует питание датчиков"; break;
+            case 0x3422: cause = "отсутствует питание исполнительных устройств"; break;
+            case 0x6320: cause = "некорректная таблица параметров"; break;
+            case 0x7710: cause = "обрыв сигнальной линии"; break;
+            case 0x8910: cause = "превышен диапазон измерения"; break;
+            case 0x8920: cause = "значение ниже диапазона измерения"; break;
+            }
+        if ( cause ) text += std::string( "; " ) + cause;
+        }
+    return text;
+    }
+
 #ifdef PTUSA_AXIOBUS
 #include "Axiobus/Axiobus.h"
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace
     {
@@ -26,7 +82,7 @@ namespace
                 {
                 if ( bus && bus->isInitialized() && metadata_ready )
                     {
-                    error_text[0] = 0;
+                    error_text.clear();
                     return true;
                     }
                 if ( !check_access( "/dev/axio_xfer0", false ) ||
@@ -43,8 +99,13 @@ namespace
                     }
                 if ( !bus->isInitialized() )
                     {
-                    std::snprintf( error_text, sizeof( error_text ),
-                        "Axiobus init_error=%u", bus->getInitializationError() );
+                    auto error = bus->getInitializationError();
+                    error_text = fmt::format( "инициализация Axiobus: {} (код {})",
+                        error == PLCnext::Axiobus::PDI_MUTEX_ERROR
+                            ? "недоступен mutex PDI"
+                            : error == PLCnext::Axiobus::MODULE_SCAN_ERROR
+                                ? "ошибка сканирования модулей" : "ошибка драйвера",
+                        error );
                     return false;
                     }
                 process_bytes.clear();
@@ -56,8 +117,8 @@ namespace
                     if ( !result || !decode_local_bus_process_data_length(
                         record.data(), record.size(), bytes ) )
                         {
-                        std::snprintf( error_text, sizeof( error_text ),
-                            "PDI 0x0037 slot=%u error=%04X size=%zu",
+                        error_text = fmt::format(
+                            "чтение описания PDI 0x0037: слот {}, код=0x{:04X}, размер={}",
                             module->getSlotNumber(), result.ErrorCode,
                             record.size() );
                         return false;
@@ -65,25 +126,26 @@ namespace
                     process_bytes.push_back( bytes );
                     }
                 metadata_ready = true;
-                error_text[0] = 0;
+                error_text.clear();
                 return true;
                 }
 
-            const char* get_error_text() const override { return error_text; }
+            const char* get_error_text() const override { return error_text.c_str(); }
+            diagnostics get_diagnostics() const override { return diagnostic; }
 
             bool ready() override
                 {
                 auto diag = bus->getDiagnosticsInfo();
+                diagnostic = { diag.status, diag.param1, diag.param2,
+                    diag.driverError, true };
                 // RUNNING, ACTIVE, BUS_READY; ошибки шины и контроллера.
                 bool operational = !diag.driverError &&
                     ( diag.status & 0x00E0 ) == 0x00E0 &&
                     ( diag.status & 0x010C ) == 0;
-                if ( !operational )
+                error_text = describe_local_bus_diagnostics( diagnostic );
+                if ( ( diag.status & 0x080C ) && diag.param1 )
                     {
-                    std::snprintf( error_text, sizeof( error_text ),
-                        "Axiobus status=%04X param1=%04X param2=%04X "
-                        "driver_error=%d", diag.status, diag.param1,
-                        diag.param2, diag.driverError );
+                    error_text += "; " + PLCnext::Axiobus::busErrorToString( diag.param1 );
                     }
                 return operational;
                 }
@@ -100,8 +162,20 @@ namespace
                     process_bytes.at( index ), module->isMissing() };
                 }
 
-            bool read_inputs() override { return bus->readInputs(); }
-            bool write_outputs() override { return bus->writeOutputs(); }
+            bool read_inputs() override
+                {
+                if ( bus->readInputs() ) return true;
+                ready();
+                error_text = "ошибка чтения: " + error_text;
+                return false;
+                }
+            bool write_outputs() override
+                {
+                if ( bus->writeOutputs() ) return true;
+                ready();
+                error_text = "ошибка записи: " + error_text;
+                return false;
+                }
 
             void read_module( size_t index, unsigned char* data,
                 unsigned int bytes ) override
@@ -127,15 +201,16 @@ namespace
                     }
                 else if ( access( path, R_OK | W_OK ) == 0 ) return true;
                 auto code = errno;
-                std::snprintf( error_text, sizeof( error_text ),
-                    "%s: %s (%d)", path, std::strerror( code ), code );
+                error_text = fmt::format( "{}: {} ({})",
+                    path, std::strerror( code ), code );
                 return false;
                 }
 
             std::unique_ptr<PLCnext::Axiobus> bus;
             std::vector<unsigned int> process_bytes;
             bool metadata_ready = false;
-            char error_text[256] = {};
+            diagnostics diagnostic;
+            std::string error_text;
         };
     }
 #endif

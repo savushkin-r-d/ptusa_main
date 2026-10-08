@@ -476,9 +476,13 @@ class io_manager
             /// Previous status register value for detecting changes.
             u_int_2 prev_status_register{};
 
-            /// Diagnostic status register (7997) for Phoenix BK ETH nodes.
-            /// Bits 2 and 8 indicate configuration/bus errors.
+            /// Диагностический статус: регистр 7997 каплера или статус Axiobus.
             u_int_2 diagnostic_status_register{};
+
+            /// Код и дополнительная информация локальной шины PLCnext.
+            u_int_2 local_bus_error_code{};
+            u_int_2 local_bus_error_location{};
+            bool local_bus_diagnostics_valid = false;
 
             /// Previous diagnostic register value for detecting changes.
             u_int_2 prev_diagnostic_status_register{};
