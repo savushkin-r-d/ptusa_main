@@ -18,12 +18,17 @@ class AutostartTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory(prefix="ptusa-autostart-")
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
-        self.config = self.directory / "ptusa_main.ini"
         self.defaults = self.directory / "defaults"
         self.shortcuts = self.directory / "commands"
         self.legacy_shortcuts = self.directory / "legacy-commands"
         self.project = self.directory / "main"
         self.project.mkdir()
+        self.application = self.directory / "ptusamain"
+        self.application.mkdir()
+        self.config = self.project / "ptusa_main.ini"
+        for filename in ("ptusa_main", "libAxiobus.so.11"):
+            (self.application / filename).touch()
+        (self.project / "main.plua").touch()
         self.service = self.directory / "service.sh"
         self.service.write_text(
             "#!/bin/sh\n# ptusa_main-autostart-v1\n"
@@ -68,12 +73,20 @@ set -- help
 . "$PTUSA_TEST_SCRIPT" >/dev/null
 DEFAULT_SHORTCUT_DIR=$SHORTCUT_DIR
 DEFAULT_SERVICE_PATH=$PATH
-CONFIG_FILE=$PTUSA_TEST_DIRECTORY/ptusa_main.ini
+DEFAULT_APP_DIR=$APP_DIR
+DEFAULT_WORK_DIR=$WORK_DIR
+DEFAULT_EXECUTABLE=$EXECUTABLE
+DEFAULT_CONFIG_FILE=$CONFIG_FILE
+APP_DIR=$PTUSA_TEST_DIRECTORY/ptusamain
+WORK_DIR=$PTUSA_TEST_DIRECTORY/main
+EXECUTABLE=$APP_DIR/ptusa_main
+CONFIG_FILE=$WORK_DIR/ptusa_main.ini
 DEFAULTS=$PTUSA_TEST_DIRECTORY/defaults
 SHORTCUT_DIR=$PTUSA_TEST_DIRECTORY/commands
 LEGACY_SHORTCUT_DIR=$PTUSA_TEST_DIRECTORY/legacy-commands
-APP_DIR=$PTUSA_TEST_DIRECTORY/main
 SERVICE=$PTUSA_TEST_DIRECTORY/service.sh
+PID_FILE=$PTUSA_TEST_DIRECTORY/ptusa_main.pid
+LOG_FILE=$PTUSA_TEST_DIRECTORY/ptusa_main.log
 PATH=$(cd "$PTUSA_TEST_DIRECTORY/utilities" && pwd):$PATH
 export PATH
 chown() { :; }
@@ -95,6 +108,112 @@ chown() { :; }
         result = subprocess.run([SHELL, "-n", SCRIPT.as_posix()],
                                 capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_default_application_and_work_directories_are_separate(self):
+        result = self.run_shell('''
+printf '%s\\n' "$DEFAULT_APP_DIR" "$DEFAULT_WORK_DIR" \
+    "$DEFAULT_EXECUTABLE" "$DEFAULT_CONFIG_FILE"
+''')
+        self.assertEqual(result.stdout.splitlines(), [
+            "/opt/ptusamain", "/opt/main", "/opt/ptusamain/ptusa_main",
+            "/opt/main/ptusa_main.ini"])
+
+    def test_files_are_checked_in_separate_directories(self):
+        self.run_shell("check_application_files")
+
+    def test_script_in_application_directory_does_not_replace_work_script(self):
+        (self.project / "main.plua").unlink()
+        (self.application / "main.plua").touch()
+        result = self.run_shell("check_application_files", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn((self.project / "main.plua").as_posix(), result.stderr)
+
+    def test_library_in_work_directory_does_not_replace_application_library(self):
+        (self.application / "libAxiobus.so.11").unlink()
+        (self.project / "libAxiobus.so.11").touch()
+        result = self.run_shell("check_application_files", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("libAxiobus.so.11", result.stderr)
+
+    def test_start_uses_application_binary_and_project_working_directory(self):
+        self.config.touch()
+        self.run_shell('''
+check_files() { check_application_files; }
+prepare_permissions() { :; }
+plcnext_running() { return 1; }
+running() { [ -f "$PID_FILE" ]; }
+sleep() { :; }
+start-stop-daemon() {
+    [ "$1" = --start ] || return 1
+    printf '%s\\n' "$@" > "$PTUSA_TEST_DIRECTORY/start-arguments"
+    printf '123\\n' > "$PID_FILE"
+}
+start_service
+''')
+        arguments = (self.directory / "start-arguments").read_text().splitlines()
+        self.assertEqual(arguments[arguments.index("--exec") + 1],
+                         (self.application / "ptusa_main").as_posix())
+        self.assertEqual(arguments[arguments.index("--chdir") + 1],
+                         self.project.as_posix())
+        self.assertEqual(arguments[arguments.index("--") + 1:],
+                         ["--config", self.config.as_posix()])
+
+    def test_start_rejects_manually_started_legacy_binary(self):
+        result = self.run_shell('''
+check_files() { check_application_files; }
+plcnext_running() { return 1; }
+running() { return 1; }
+prepare_permissions() { echo 'permissions changed'; }
+start-stop-daemon() {
+    [ "$*" = "--status --exec $WORK_DIR/ptusa_main" ]
+}
+start_service
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn((self.project / "ptusa_main").as_posix(), result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    def test_reinstall_stops_previous_service_before_preparing_directories(self):
+        self.write_defaults("main.plua --opc off")
+        original_defaults = self.defaults.read_bytes()
+        self.config.write_text("sleep_time=2\n", encoding="utf-8")
+        original_config = self.config.read_bytes()
+        self.service.write_text('''#!/bin/sh
+# ptusa_main-autostart-v1
+[ "$1" = stop ] || exit 90
+printf 'stopped\\n' > "$PTUSA_TEST_DIRECTORY/previous-stopped"
+''', encoding="utf-8")
+        self.run_shell('''
+check_files() { check_application_files; }
+readlink() { printf '%s\\n' "$PTUSA_TEST_SCRIPT"; }
+start-stop-daemon() { return 1; }
+plcnext_running() { return 1; }
+prepare_permissions() {
+    [ -f "$PTUSA_TEST_DIRECTORY/previous-stopped" ] || exit 91
+}
+update-rc.d() { :; }
+install_service
+''')
+        self.assertEqual(self.service.read_bytes(), SCRIPT.read_bytes())
+        self.assertEqual(self.defaults.read_bytes(), original_defaults)
+        self.assertEqual(self.config.read_bytes(), original_config)
+        self.assertEqual(len(list(self.shortcuts.iterdir())), 5)
+
+    def test_reinstall_aborts_if_previous_service_cannot_stop(self):
+        self.service.write_text(
+            "#!/bin/sh\n# ptusa_main-autostart-v1\nexit 17\n",
+            encoding="utf-8")
+        original_service = self.service.read_bytes()
+        result = self.run_shell('''
+check_files() { check_application_files; }
+readlink() { printf '%s\\n' "$PTUSA_TEST_SCRIPT"; }
+prepare_permissions() { echo 'permissions changed'; }
+install_service
+''', check=False)
+        self.assertEqual(result.returncode, 17)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.service.read_bytes(), original_service)
+        self.assertFalse(self.shortcuts.exists())
 
     def test_without_config_uses_main_script(self):
         self.assertEqual(self.load_arguments(), "main.plua")
@@ -207,9 +326,9 @@ export PTUSA_TEST_UID=1002
         self.assertEqual(foreign.read_text(encoding="utf-8"), "foreign\n")
         self.assertEqual(len(list(self.shortcuts.iterdir())), 5)
 
-    def test_install_shortcut_uses_updated_project_script(self):
+    def test_install_shortcut_uses_updated_application_script(self):
         self.run_shell("install_shortcuts")
-        installer = self.project / "setup-ptusa-autostart.sh"
+        installer = self.application / "setup-ptusa-autostart.sh"
         installer.write_text("#!/bin/sh\nprintf 'updated\\n'\n"
                              "printf '%s\\n' \"$@\"\n", encoding="utf-8")
         result = self.run_shell('"$SHORTCUT_DIR/ptusainstall" --check')

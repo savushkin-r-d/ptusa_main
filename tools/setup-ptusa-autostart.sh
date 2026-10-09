@@ -15,9 +15,10 @@ set -eu
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
-APP_DIR=/opt/main
+APP_DIR=/opt/ptusamain
+WORK_DIR=/opt/main
 EXECUTABLE=$APP_DIR/ptusa_main
-CONFIG_FILE=$APP_DIR/ptusa_main.ini
+CONFIG_FILE=$WORK_DIR/ptusa_main.ini
 SERVICE=/etc/init.d/ptusa_main
 DEFAULTS=/etc/default/ptusa_main
 SHORTCUT_DIR=/usr/bin
@@ -71,12 +72,18 @@ load_defaults()
     fi
 }
 
-check_files()
+check_application_files()
 {
     [ -d "$APP_DIR" ] || fail "Нет каталога $APP_DIR."
+    [ -d "$WORK_DIR" ] || fail "Нет рабочего каталога $WORK_DIR."
     [ -f "$EXECUTABLE" ] || fail "Нет программы $EXECUTABLE."
-    [ -r "$APP_DIR/main.plua" ] || fail "Нет доступного main.plua."
+    [ -r "$WORK_DIR/main.plua" ] || fail "Нет доступного $WORK_DIR/main.plua."
     [ -r "$APP_DIR/libAxiobus.so.11" ] || fail "Нет libAxiobus.so.11."
+}
+
+check_files()
+{
+    check_application_files
     [ -f /etc/init.d/plcnext ] || fail "Не найдена служба SysV PLCnext."
     id "$RUN_USER" >/dev/null 2>&1 || fail "Нет пользователя $RUN_USER."
     grep -q "^$RUN_GROUP:" /etc/group || fail "Нет группы $RUN_GROUP."
@@ -107,16 +114,26 @@ running()
         --exec "$EXECUTABLE" >/dev/null 2>&1
 }
 
-prepare_permissions()
+prepare_directory_permissions()
 {
-    # Сохраняем владельцев проекта, даём группе доступ к скриптам и данным.
-    # find не следует по символическим ссылкам за пределы /opt/main.
+    # Программе нужны чтение её файлов и запись в рабочий каталог.
+    # Сохраняем владельцев; find не следует по символическим ссылкам.
     [ ! -L "$APP_DIR" ] || fail "$APP_DIR не должен быть ссылкой."
+    [ ! -L "$WORK_DIR" ] || fail "$WORK_DIR не должен быть ссылкой."
     find "$APP_DIR" -type d -exec chgrp "$RUN_GROUP" {} + \
-        -exec chmod g+rwx {} +
+        -exec chmod g+rx {} +
     find "$APP_DIR" -type f -exec chgrp "$RUN_GROUP" {} + \
+        -exec chmod g+r {} +
+    find "$WORK_DIR" -type d -exec chgrp "$RUN_GROUP" {} + \
+        -exec chmod g+rwx {} +
+    find "$WORK_DIR" -type f -exec chgrp "$RUN_GROUP" {} + \
         -exec chmod g+rw {} +
     chmod 755 "$EXECUTABLE"
+}
+
+prepare_permissions()
+{
+    prepare_directory_permissions
 
     # Драйвер устройства создаётся службой localbus при загрузке системы.
     waited=0
@@ -143,6 +160,17 @@ prepare_permissions()
     chmod 660 "$LOG_FILE"
 }
 
+check_unmanaged_processes()
+{
+    # При смене каталога старый экземпляр также не должен владеть шиной.
+    for executable_path in "$EXECUTABLE" "$WORK_DIR/ptusa_main"; do
+        if start-stop-daemon --status --exec "$executable_path" \
+            >/dev/null 2>&1; then
+            fail "$executable_path запущена вне этой службы. Сначала остановите её."
+        fi
+    done
+}
+
 start_service()
 {
     require_root
@@ -155,22 +183,21 @@ start_service()
     if plcnext_running; then
         fail "PLCnext работает. Сначала остановите /etc/init.d/plcnext."
     fi
-    if start-stop-daemon --status --exec "$EXECUTABLE" >/dev/null 2>&1; then
-        fail "ptusa_main запущена вне этой службы. Сначала остановите её."
-    fi
+    check_unmanaged_processes
     prepare_permissions
     rm -f "$PID_FILE"
     # Отключаем подстановку имён файлов при разделении PTUSA_ARGS на слова.
     set -f
     start-stop-daemon --start --background --make-pidfile \
         --pidfile "$PID_FILE" --exec "$EXECUTABLE" \
-        --chuid "$RUN_USER:$RUN_GROUP" --chdir "$APP_DIR" \
+        --chuid "$RUN_USER:$RUN_GROUP" --chdir "$WORK_DIR" \
         --umask 002 --output "$LOG_FILE" -- $PTUSA_ARGS
     sleep 2
     if ! running; then
         fail "ptusa_main завершилась при старте. Проверьте $LOG_FILE."
     fi
-    echo "ptusa_main запущена из $APP_DIR (PID $(cat "$PID_FILE"))."
+    echo "$EXECUTABLE запущена (PID $(cat "$PID_FILE"))."
+    echo "Рабочий каталог: $WORK_DIR."
 }
 
 stop_service()
@@ -215,7 +242,7 @@ fi
 EOF
         )
         if [ "$shortcut_action" = install ]; then
-            # Повторная установка использует обновлённый скрипт из проекта.
+            # Повторная установка использует скрипт из каталога программы.
             cat >> "$shortcut_file" <<EOF
 if [ -f "$APP_DIR/setup-ptusa-autostart.sh" ]; then
     exec /bin/sh "$APP_DIR/setup-ptusa-autostart.sh" install "\$@"
@@ -261,13 +288,13 @@ install_service()
     fi
     # Конфликты команд выявляем до остановки служб и изменения настроек.
     check_shortcuts
-    if start-stop-daemon --status --exec "$EXECUTABLE" >/dev/null 2>&1; then
-        if running; then
-            stop_service
-        else
-            fail "Сначала остановите ptusa_main, запущенную вручную."
-        fi
+    if [ -f "$SERVICE" ] && [ "$source_file" != "$SERVICE" ]; then
+        # Старая служба знает путь своего бинарника до переноса программы.
+        /bin/sh "$SERVICE" stop
+    elif running; then
+        stop_service
     fi
+    check_unmanaged_processes
     if plcnext_running; then
         /etc/init.d/plcnext stop
     fi
@@ -303,6 +330,7 @@ EOF
     echo "Программа запустится после перезагрузки. Для запуска сейчас:"
     echo "  $SERVICE start"
     echo "Лог: $LOG_FILE; аргументы: $DEFAULTS."
+    echo "Программа: $EXECUTABLE; рабочий каталог: $WORK_DIR."
     echo "Конфиг по умолчанию (если существует): $CONFIG_FILE."
     echo "Команды в $SHORTCUT_DIR: ptusastart ptusastop ptusarestart"
     echo "  ptusainstall ptusauninstall (запрашивают пароль root через su)."

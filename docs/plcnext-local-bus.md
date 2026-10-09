@@ -40,7 +40,7 @@ cmake --build --preset <тот-же-preset> --target ptusa_main
 ```sh
 cd /opt/main
 sudo /usr/bin/gdbserver-start-program-wrapper.sh \
-    /opt/main/ptusa_main main.plua
+    /opt/ptusamain/ptusa_main main.plua
 ```
 
 Wrapper запускает программу от `plcnext_firmware`. Для диагностического
@@ -58,25 +58,40 @@ Wrapper запускает программу от `plcnext_firmware`. Для д
 Адаптер проверяет доступ до инициализации библиотеки: иначе библиотека может
 бесконечно повторять попытку открытия файла с ошибкой `EACCES`.
 
-## Автозапуск из /opt/main
+## Автозапуск и рабочий каталог
 
 Для контроллеров с SysV init предназначен скрипт
 [`tools/setup-ptusa-autostart.sh`](../tools/setup-ptusa-autostart.sh).
-Скопируйте его в `/opt/main` и выполните от `root`:
+По умолчанию файлы располагаются так:
+
+| Каталог | Содержимое |
+|---------|------------|
+| `/opt/ptusamain` | `ptusa_main`, `libAxiobus.so.11`, `setup-ptusa-autostart.sh` |
+| `/opt/main` | `main.plua`, остальные Lua-скрипты, каталоги модулей, `ptusa_main.ini`, рабочие данные |
+
+Скопируйте программу, библиотеку и установщик в `/opt/ptusamain`, а скрипты
+проекта оставьте в `/opt/main`. Выполните от `root`:
 
 ```sh
-sh /opt/main/setup-ptusa-autostart.sh check
-sh /opt/main/setup-ptusa-autostart.sh install
+sh /opt/ptusamain/setup-ptusa-autostart.sh check
+sh /opt/ptusamain/setup-ptusa-autostart.sh install
 ```
 
 Установка останавливает работающий PLCnext и управляемую службу ptusa_main,
-назначает группе `plcnext` права на каталог проекта и его файлы, исправляет
-владельца и права `/dev/axio_xfer0` и существующего `/tmp/axiopdi`.
+назначает группе `plcnext` чтение файлов программы и чтение/запись файлов
+рабочего каталога, исправляет владельца и права `/dev/axio_xfer0` и
+существующего `/tmp/axiopdi`.
 Владельцы файлов проекта сохраняются; символические ссылки внутри проекта
 не обходятся. Файл синхронизации Axiobus не удаляется.
 
-Служба `/etc/init.d/ptusa_main` запускает программу из `/opt/main` от
-`plcnext_firmware:plcnext` и повторяет подготовку прав при каждом старте.
+Служба `/etc/init.d/ptusa_main` запускает `/opt/ptusamain/ptusa_main` от
+`plcnext_firmware:plcnext` с рабочим каталогом `/opt/main` и повторяет
+подготовку прав при каждом старте. Относительные пути к Lua-скриптам,
+модулям и рабочим данным отсчитываются от `/opt/main`. Библиотека Axiobus
+загружается рядом с исполняемым файлом благодаря `$ORIGIN` в RPATH.
+При переходе со старой установки остановка выполняется установленной
+версией службы, которая знает прежний путь программы. Запуск блокируется,
+если старый экземпляр из `/opt/main` продолжает работать вне службы.
 Для регистрации используется `update-rc.d ptusa_main defaults 99 01`,
 а для отключения автозапуска штатного runtime — `update-rc.d plcnext disable`.
 Службы `localbus` и `plcnext-recovery` сохраняются. Использование SysV для
@@ -110,10 +125,10 @@ tail -f /var/log/ptusa_main.log
 его разрешения на контроллере ограничены. Повторная установка удаляет старые
 команды установщика из `/usr/local/bin`; чужие файлы сохраняются.
 
-`ptusainstall` использует `/opt/main/setup-ptusa-autostart.sh`, если он есть,
-чтобы применять обновлённый скрипт из проекта. Иначе используется установленная
-служба. Повторная установка обновляет созданные команды; чужие файлы с такими
-именами не перезаписываются.
+`ptusainstall` использует `/opt/ptusamain/setup-ptusa-autostart.sh`, если он
+есть, чтобы применять обновлённый скрипт из каталога программы.
+Иначе используется установленная служба. Повторная установка обновляет
+созданные команды; чужие файлы с такими именами не перезаписываются.
 
 Команда `start` по умолчанию разрешает запись DO/AO. Аргументы сохраняются
 в `/etc/default/ptusa_main`, начальное значение — `PTUSA_ARGS='main.plua'`.
@@ -134,7 +149,7 @@ tail -f /var/log/ptusa_main.log
 Для удаления службы и возврата автозапуска PLCnext выполните от root:
 
 ```sh
-sh /opt/main/setup-ptusa-autostart.sh uninstall
+sh /opt/ptusamain/setup-ptusa-autostart.sh uninstall
 ```
 
 Эта команда останавливает ptusa_main, восстанавливает автозапуск PLCnext
@@ -144,7 +159,7 @@ sh /opt/main/setup-ptusa-autostart.sh uninstall
 с паролем root, например:
 
 ```sh
-su -c 'sh /opt/main/setup-ptusa-autostart.sh install'
+su -c 'sh /opt/ptusamain/setup-ptusa-autostart.sh install'
 hash -r
 ptusastart
 ```
