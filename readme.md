@@ -236,6 +236,8 @@ launch item -> ptusa_main.exe`.
 
 ## Documentation ##
 
+[Конфигурационный файл standalone-приложения и время цикла](docs/russian_readme/readme.md#необязательный-конфигурационный-файл-standalone-приложения).
+
 ### Device Documentation ###
 
 Documentation for supported devices can be found in the

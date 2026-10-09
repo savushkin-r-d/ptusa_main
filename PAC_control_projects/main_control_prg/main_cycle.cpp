@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <chrono>
+#include <thread>
 
 #include "dtime.h"
 #include "lua_manager.h"
@@ -19,6 +21,7 @@ extern bool G_READ_ONLY_IO_NODES;
 
 int main_cycle()
     {
+    const auto cycle_start = std::chrono::steady_clock::now();
 #ifdef TEST_SPEED
     static uint32_t st_time;
     st_time = get_millisec();
@@ -29,15 +32,14 @@ int main_cycle()
     cycles_cnt++;
 #endif // TEST_SPEED
 
-    static uint32_t min_cycle_time = G_PROJECT_MANAGER->min_cycle_time;
-
     if ( G_DEBUG )
         {
         fflush( stdout );
         }
 
     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
-    sleep_ms( G_PROJECT_MANAGER->sleep_time_ms );
+    std::this_thread::sleep_for( std::chrono::duration<double, std::milli>(
+        G_PROJECT_MANAGER->sleep_time_ms ) );
 
     if ( !G_NO_IO_NODES ) G_IO_MANAGER()->read_inputs();
 
@@ -90,12 +92,6 @@ int main_cycle()
     cycle_time = get_delta_millisec( st_time );
     G_PAC_INFO()->set_cycle_time( cycle_time );
     
-    //Fast cycle time is not a problem, but if the cycle time is less than min_cycle_time ms, we will sleep for the remaining time to avoid overloading the CPU.
-    if ( cycle_time < min_cycle_time && cycle_time >= 0 )
-        {
-        sleep_ms( min_cycle_time - cycle_time);
-        }
-
     if ( max_iteration_cycle_time < cycle_time )
         {
         max_iteration_cycle_time = cycle_time;
@@ -130,6 +126,15 @@ int main_cycle()
         }
     //-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED
+
+    // Дополняем цикл до минимального времени с учетом основной паузы.
+    const auto minimum_cycle = std::chrono::duration<double, std::milli>(
+        G_PROJECT_MANAGER->min_cycle_time );
+    const auto elapsed = std::chrono::steady_clock::now() - cycle_start;
+    if ( elapsed < minimum_cycle )
+        {
+        std::this_thread::sleep_for( minimum_cycle - elapsed );
+        }
 
     return 0;
     }

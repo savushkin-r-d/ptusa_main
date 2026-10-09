@@ -72,7 +72,7 @@ namespace PtusaPLCnextEngineer
                     }
                 }
 
-            sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
+            sprintf( G_LOG->msg, "Starting main loop! Sleep time is %g ms.",
                      G_PROJECT_MANAGER->sleep_time_ms );
             G_LOG->write_log( i_log::P_INFO );
 

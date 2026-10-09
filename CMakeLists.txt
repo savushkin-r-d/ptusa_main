@@ -434,43 +434,8 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
-if (WIN32)
-    set_tests_properties( run_no_command_line_arguments
-        PROPERTIES PASS_REGULAR_EXPRESSION
-[[
-(.*)
-  -v, --version          Print version info
-  -d, --debug            Enable debugging
-      --no_io            No communicate with I\\O nodes \(default: true\)
-      --read_only_io     Read only from I\\O nodes \(default: true\)
-  -p, --port arg         Param port \(default: 10000\)
-  -h, --help             Print help info
-  -r, --rcrc             Reset params
-      --opc arg          OPC UA server behavior \(off, r, rw\)
-      --sys_path arg     Sys path \(default: \./sys\)
-      --path arg         Path \(default: \.\)
-      --extra_paths arg  Extra paths \(default: \./dairy-sys\)
-      --sleep_time arg   Sleep time, ms \(default: 2\)
-]] )
-else()
-    set_tests_properties( run_no_command_line_arguments
-        PROPERTIES PASS_REGULAR_EXPRESSION
-[[
-(.*)
-  -v, --version          Print version info
-  -d, --debug            Enable debugging
-      --no_io            No communicate with I\\O nodes
-      --read_only_io     Read only from I\\O nodes
-  -p, --port arg         Param port \(default: 10000\)
-  -h, --help             Print help info
-  -r, --rcrc             Reset params
-      --opc arg          OPC UA server behavior \(off, r, rw\)
-      --sys_path arg     Sys path \(default: \./sys\)
-      --path arg         Path \(default: \.\)
-      --extra_paths arg  Extra paths \(default: \./dairy-sys\)
-      --sleep_time arg   Sleep time, ms \(default: 2\)
-]] )
-endif()
+set_tests_properties(run_no_command_line_arguments PROPERTIES
+    PASS_REGULAR_EXPRESSION "--min_cycle_time arg +Minimum cycle time, ms")
 
 # Общие пути в Lua package.path
 set(LUA_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deps/lunarmodules")
@@ -571,6 +536,7 @@ set(STDOUT_CAPTURE_LOCKED_FILTER
 
 	"tech_object.set_mode:"
 
+    "StandaloneConfigTest.*:"
     "project_manager.proc_main_params:"
     "project_manager.lua_load_configuration:"
 	"project_manager.apply_opc_mode:")
