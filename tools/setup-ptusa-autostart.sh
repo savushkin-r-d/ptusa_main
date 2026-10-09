@@ -17,8 +17,11 @@ export PATH
 
 APP_DIR=/opt/main
 EXECUTABLE=$APP_DIR/ptusa_main
+CONFIG_FILE=$APP_DIR/ptusa_main.ini
 SERVICE=/etc/init.d/ptusa_main
 DEFAULTS=/etc/default/ptusa_main
+SHORTCUT_DIR=/usr/bin
+LEGACY_SHORTCUT_DIR=/usr/local/bin
 PID_DIR=/run/ptusa_main
 PID_FILE=$PID_DIR/ptusa_main.pid
 LOG_FILE=/var/log/ptusa_main.log
@@ -37,6 +40,19 @@ require_root()
     [ "$(id -u)" = 0 ] || fail "Эта команда должна выполняться от root."
 }
 
+has_config_arg()
+(
+    # Проверяем аргументы без подстановки имён файлов и без eval.
+    set -f
+    for argument in $PTUSA_ARGS; do
+        case "$argument" in
+            --) return 1 ;;
+            --config|--config=*|-c|-c?*) return 0 ;;
+        esac
+    done
+    return 1
+)
+
 load_defaults()
 {
     # Файл создаётся от root; аргументы разделяются пробелами, без eval.
@@ -44,6 +60,15 @@ load_defaults()
         . "$DEFAULTS"
     fi
     [ -n "$PTUSA_ARGS" ] || fail "PTUSA_ARGS не должен быть пустым."
+    if [ -f "$CONFIG_FILE" ] && ! has_config_arg; then
+        if [ "$PTUSA_ARGS" = main.plua ]; then
+            # Старое значение по умолчанию не переопределяет script в конфиге.
+            PTUSA_ARGS="--config $CONFIG_FILE"
+        else
+            # Консольные настройки сохраняют приоритет над конфигом.
+            PTUSA_ARGS="--config $CONFIG_FILE $PTUSA_ARGS"
+        fi
+    fi
 }
 
 check_files()
@@ -158,6 +183,73 @@ stop_service()
     echo "ptusa_main остановлена."
 }
 
+is_our_shortcut()
+{
+    [ ! -L "$1" ] && [ -f "$1" ] &&
+        grep -q '^# ptusa_main-shortcut-v1$' "$1"
+}
+
+check_shortcuts()
+{
+    for shortcut_action in start stop restart install uninstall; do
+        shortcut_file=$SHORTCUT_DIR/ptusa$shortcut_action
+        if [ -e "$shortcut_file" ] || [ -L "$shortcut_file" ]; then
+            is_our_shortcut "$shortcut_file" || \
+                fail "$shortcut_file уже существует и создан не установщиком."
+        fi
+    done
+}
+
+install_shortcuts()
+{
+    check_shortcuts
+    install -d -m 755 "$SHORTCUT_DIR"
+    for shortcut_action in start stop restart install uninstall; do
+        shortcut_file=$SHORTCUT_DIR/ptusa$shortcut_action
+        (umask 022; cat > "$shortcut_file" <<EOF
+#!/bin/sh
+# ptusa_main-shortcut-v1
+if [ "\$(id -u)" != 0 ]; then
+    exec su -s /bin/sh -c 'exec /bin/sh "\$@"' root sh "\$0" "\$@"
+fi
+EOF
+        )
+        if [ "$shortcut_action" = install ]; then
+            # Повторная установка использует обновлённый скрипт из проекта.
+            cat >> "$shortcut_file" <<EOF
+if [ -f "$APP_DIR/setup-ptusa-autostart.sh" ]; then
+    exec /bin/sh "$APP_DIR/setup-ptusa-autostart.sh" install "\$@"
+fi
+EOF
+        fi
+        cat >> "$shortcut_file" <<EOF
+exec /bin/sh "$SERVICE" "$shortcut_action" "\$@"
+EOF
+        chown root:root "$shortcut_file"
+        chmod 755 "$shortcut_file"
+    done
+    if [ "$SHORTCUT_DIR" != "$LEGACY_SHORTCUT_DIR" ]; then
+        remove_shortcuts_from "$LEGACY_SHORTCUT_DIR"
+    fi
+}
+
+remove_shortcuts_from()
+{
+    # Чужие файлы и ссылки с такими именами сохраняются.
+    for shortcut_action in start stop restart install uninstall; do
+        shortcut_file=$1/ptusa$shortcut_action
+        if is_our_shortcut "$shortcut_file"; then
+            rm -f "$shortcut_file"
+        fi
+    done
+}
+
+remove_shortcuts()
+{
+    remove_shortcuts_from "$SHORTCUT_DIR"
+    remove_shortcuts_from "$LEGACY_SHORTCUT_DIR"
+}
+
 install_service()
 {
     require_root
@@ -167,6 +259,8 @@ install_service()
         grep -q '^# ptusa_main-autostart-v1$' "$SERVICE" || \
             fail "$SERVICE уже существует и создан другим установщиком."
     fi
+    # Конфликты команд выявляем до остановки служб и изменения настроек.
+    check_shortcuts
     if start-stop-daemon --status --exec "$EXECUTABLE" >/dev/null 2>&1; then
         if running; then
             stop_service
@@ -185,6 +279,8 @@ install_service()
         install -d -m 755 /etc/default
         (umask 022; cat > "$DEFAULTS" <<'EOF'
 # Аргументы ptusa_main; имена с пробелами не поддерживаются.
+# Если есть /opt/main/ptusa_main.ini, служба подключает его автоматически.
+# Другой конфиг: PTUSA_ARGS='--config /opt/main/other.ini'
 # Для диагностики: PTUSA_ARGS='main.plua --read_only_io --opc off'
 PTUSA_ARGS='main.plua'
 EOF
@@ -197,6 +293,7 @@ EOF
     fi
     chown root:root "$SERVICE"
     chmod 755 "$SERVICE"
+    install_shortcuts
 
     # disable сохраняет ссылки остановки PLCnext и допускает enable при откате.
     update-rc.d plcnext disable
@@ -206,6 +303,9 @@ EOF
     echo "Программа запустится после перезагрузки. Для запуска сейчас:"
     echo "  $SERVICE start"
     echo "Лог: $LOG_FILE; аргументы: $DEFAULTS."
+    echo "Конфиг по умолчанию (если существует): $CONFIG_FILE."
+    echo "Команды в $SHORTCUT_DIR: ptusastart ptusastop ptusarestart"
+    echo "  ptusainstall ptusauninstall (запрашивают пароль root через su)."
 }
 
 uninstall_service()
@@ -218,6 +318,7 @@ uninstall_service()
     stop_service
     update-rc.d -f ptusa_main remove
     update-rc.d plcnext enable
+    remove_shortcuts
     rm -f "$SERVICE"
     echo "Автозапуск ptusa_main удалён; автозапуск PLCnext восстановлен."
     echo "PLCnext запустится после перезагрузки. Проект, настройки и лог сохранены."
