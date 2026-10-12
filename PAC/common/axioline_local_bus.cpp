@@ -67,6 +67,7 @@ std::string describe_local_bus_diagnostics(
 
 #ifdef PTUSA_AXIOBUS
 #include "Axiobus/Axiobus.h"
+#include "axiobus_process_data.h"
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -180,15 +181,17 @@ namespace
             void read_module( size_t index, unsigned char* data,
                 unsigned int bytes ) override
                 {
-                bus->getModules().at( index )->getInputProcessData(
-                    data, 0, 0, bytes );
+                axiobus_process_data<PLCnext::AXLModule>::read(
+                    *bus->getModules().at( index ), data, bytes,
+                    process_bytes.at( index ) );
                 }
 
             void write_module( size_t index, unsigned char* data,
                 unsigned int bytes ) override
                 {
-                bus->getModules().at( index )->setOutputProcessData(
-                    data, 0, 0, bytes );
+                axiobus_process_data<PLCnext::AXLModule>::write(
+                    *bus->getModules().at( index ), data, bytes,
+                    process_bytes.at( index ) );
                 }
 
         private:
