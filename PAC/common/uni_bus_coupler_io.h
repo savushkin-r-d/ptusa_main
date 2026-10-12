@@ -28,6 +28,7 @@
 #include "PAC_err.h"
 #include <array>
 #include <chrono>
+#include <functional>
 #include <vector>
 #include "axioline_local_bus.h"
 
@@ -94,6 +95,9 @@ class uni_io_manager : public io_manager
         void local_bus_error( io_node* node, const char* message );
         void update_local_bus_diagnostics( io_node* node, bool notify );
         std::unique_ptr<local_bus_driver> local_driver;
+        std::function<std::unique_ptr<local_bus_driver>( local_bus_backend )>
+            local_driver_factory;
+        local_bus_backend local_backend = local_bus_backend::LIBRARY;
         std::vector<unsigned char> local_process_data;
         std::string local_validation_error;
 

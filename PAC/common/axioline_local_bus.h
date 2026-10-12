@@ -31,6 +31,8 @@ class local_bus_driver
 
         virtual ~local_bus_driver() = default;
         virtual bool initialize() = 0;
+        /// @brief Установить состояние отказа при ошибке проверки или обмена.
+        virtual bool set_fail_state() { return true; }
         virtual const char* get_error_text() const { return ""; }
         virtual diagnostics get_diagnostics() const { return {}; }
         virtual bool ready() = 0;
@@ -44,8 +46,12 @@ class local_bus_driver
             unsigned int bytes ) = 0;
     };
 
-/// @brief На неподдерживаемой платформе возвращает nullptr.
-std::unique_ptr<local_bus_driver> make_local_bus_driver();
+enum class local_bus_backend { LIBRARY, IOCTL };
+
+/// @brief Создать выбранный транспорт без открытия аппаратного устройства.
+/// На неподдерживаемой платформе возвращает nullptr.
+std::unique_ptr<local_bus_driver> make_local_bus_driver(
+    local_bus_backend backend );
 
 /// @brief Длина процессных данных из записи идентификации PDI 0x0037.
 bool decode_local_bus_process_data_length( const unsigned char* record,

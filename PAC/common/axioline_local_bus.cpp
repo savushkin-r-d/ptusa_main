@@ -1,4 +1,5 @@
 #include "axioline_local_bus.h"
+#include "axio_ioctl_driver.h"
 #include "fmt/format.h"
 
 bool decode_local_bus_process_data_length( const unsigned char* record,
@@ -218,8 +219,10 @@ namespace
     }
 #endif
 
-std::unique_ptr<local_bus_driver> make_local_bus_driver()
+std::unique_ptr<local_bus_driver> make_local_bus_driver(
+    local_bus_backend backend )
     {
+    if ( backend == local_bus_backend::IOCTL ) return make_axio_ioctl_driver();
 #ifdef PTUSA_AXIOBUS
     return std::make_unique<axiobus_driver>();
 #else

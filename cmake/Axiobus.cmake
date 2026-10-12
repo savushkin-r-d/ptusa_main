@@ -1,15 +1,19 @@
 # Прямой доступ к локальной шине используется отдельным процессом ptusa_main.
 # Компонент PLCnext Engineer продолжает использовать свои настройки ввода-вывода.
 if(ARP_DEVICE MATCHES "^AXCF(2152|3152)$")
-    option(PTUSA_WITH_AXIOBUS "Локальная шина через plcnext-io-drivers-cpp" ON)
+    option(PTUSA_WITH_AXIOBUS "Поддержка локальной шины Axiobus" ON)
 else()
-    option(PTUSA_WITH_AXIOBUS "Локальная шина через plcnext-io-drivers-cpp" OFF)
+    option(PTUSA_WITH_AXIOBUS "Поддержка локальной шины Axiobus" OFF)
 endif()
+
+# Оба транспорта входят в одну сборку; выбор задаёт ntype в main.io.lua.
+unset(PTUSA_AXIOBUS_BACKEND CACHE)
 
 if(PTUSA_WITH_AXIOBUS)
     if(NOT LINUX OR NOT ARP_DEVICE MATCHES "^AXCF(2152|3152)$")
         message(FATAL_ERROR "PTUSA_WITH_AXIOBUS требует SDK AXCF2152 или AXCF3152")
     endif()
+    message(STATUS "Axiobus: LIBRARY и IOCTL, выбор по типу узла")
     if(ARP_DEVICE STREQUAL "AXCF2152")
         set(axiobus_arch arm)
     else()
@@ -24,7 +28,7 @@ if(PTUSA_WITH_AXIOBUS)
     set_target_properties(axiobus PROPERTIES
         IMPORTED_LOCATION "${axiobus_library}"
         INTERFACE_INCLUDE_DIRECTORIES "${axiobus_root}/include")
-    target_compile_definitions(ptusa_main PRIVATE PTUSA_AXIOBUS)
+    target_compile_definitions(ptusa_main PRIVATE PTUSA_AXIOBUS PTUSA_AXIO_IOCTL)
     target_link_libraries(ptusa_main PRIVATE axiobus)
     set_target_properties(ptusa_main PROPERTIES
         BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN")

@@ -382,6 +382,8 @@ class io_manager
 
                 PHOENIX_AXC_F_2152 = 202, ///< Локальная шина AXC F 2152.
                 PHOENIX_AXC_F_3152 = 203, ///< Локальная шина AXC F 3152.
+                PHOENIX_AXC_F_2152_IOCTL = 204, ///< AXC F 2152 через ioctl.
+                PHOENIX_AXC_F_3152_IOCTL = 205, ///< AXC F 3152 через ioctl.
 				};
 
 			enum STATES           ///< Состояния работы с узлом.
@@ -500,6 +502,7 @@ class io_manager
             bool is_pp_mode_active() const;
 
             bool is_local_bus() const;
+            bool is_ioctl_local_bus() const;
 
             /// @return One of `io_node::DISPLAY_STATES`:
             ///         `DST_OK` for a connected and healthy node.

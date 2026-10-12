@@ -1378,8 +1378,9 @@ void uni_io_manager::disconnect( io_node* node )
     }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager()
-    : uni_io_manager( make_local_bus_driver() )
+    : uni_io_manager( nullptr )
     {
+    local_driver_factory = make_local_bus_driver;
     }
 //-----------------------------------------------------------------------------
 uni_io_manager::uni_io_manager( std::unique_ptr<local_bus_driver> driver )
@@ -1633,11 +1634,18 @@ void uni_io_manager::update_local_bus_diagnostics( io_node* node, bool notify )
 
 void uni_io_manager::local_bus_error( io_node* node, const char* message )
     {
+    // Скопировать сообщение до вызова драйвера: его строка может измениться.
+    std::string details = message;
+    if ( local_driver && !local_driver->set_fail_state() )
+        {
+        details += "; ";
+        details += local_driver->get_error_text();
+        }
     update_local_bus_diagnostics( node, false );
     PAC_critical_errors_manager::get_instance()->set_global_error(
         PAC_critical_errors_manager::AC_NO_CONNECTION,
         PAC_critical_errors_manager::AS_IO_COUPLER, node->number,
-        std::string( "локальная шина: " ) + message );
+        std::string( "локальная шина: " ) + details );
     node->is_set_err = true;
     node->state = io_node::ST_NO_CONNECT;
     node->read_io_error_flag = true;
@@ -1681,10 +1689,27 @@ int uni_io_manager::exchange_local_bus( bool writing )
 
     try
         {
+        auto backend = node->is_ioctl_local_bus()
+            ? local_bus_backend::IOCTL : local_bus_backend::LIBRARY;
+        if ( local_driver_factory &&
+            ( !local_driver || local_backend != backend ) )
+            {
+            // Закрыть предыдущий транспорт до создания нового.
+            bool switching = local_driver != nullptr;
+            local_driver.reset();
+            local_backend = backend;
+            local_driver = local_driver_factory( backend );
+            if ( switching && writing )
+                {
+                local_bus_error( node,
+                    "после смены транспорта требуется чтение входов" );
+                return 1;
+                }
+            }
         if ( !local_driver )
             {
             local_bus_error( node,
-                "сборка не содержит драйвер plcnext-io-drivers-cpp" );
+                "сборка не содержит драйвер локальной шины Axiobus" );
             return 1;
             }
         if ( !local_driver->initialize() || !local_driver->ready() )

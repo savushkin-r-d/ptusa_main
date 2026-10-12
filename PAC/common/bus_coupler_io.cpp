@@ -1403,7 +1403,13 @@ bool io_manager::io_node::is_pp_mode_active() const
 //-----------------------------------------------------------------------------
 bool io_manager::io_node::is_local_bus() const
     {
-    return type == PHOENIX_AXC_F_2152 || type == PHOENIX_AXC_F_3152;
+    return type == PHOENIX_AXC_F_2152 || type == PHOENIX_AXC_F_3152 ||
+        is_ioctl_local_bus();
+    }
+//-----------------------------------------------------------------------------
+bool io_manager::io_node::is_ioctl_local_bus() const
+    {
+    return type == PHOENIX_AXC_F_2152_IOCTL || type == PHOENIX_AXC_F_3152_IOCTL;
     }
 //-----------------------------------------------------------------------------
 io_manager::io_node::DISPLAY_STATES io_manager::io_node::get_display_state() const

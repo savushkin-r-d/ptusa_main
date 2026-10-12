@@ -81,12 +81,13 @@ namespace
             bool initialized = true, operational = true;
             bool read_result = true, write_result = true;
             bool throw_on_read = false;
-            int reads = 0, writes = 0, initializations = 0;
+            int reads = 0, writes = 0, initializations = 0, failures = 0;
             diagnostics diagnostic;
             std::string error_text;
 
             diagnostics get_diagnostics() const override { return diagnostic; }
             const char* get_error_text() const override { return error_text.c_str(); }
+            bool set_fail_state() override { ++failures; return true; }
 
             bool initialize() override
                 {
@@ -175,6 +176,26 @@ namespace
                     }
                 }
 
+            void select_at_runtime( std::vector<local_bus_backend>& selected )
+                {
+                auto modules = driver->modules;
+                auto inputs = driver->inputs, outputs = driver->outputs;
+                manager->local_driver.reset();
+                driver = nullptr;
+                manager->local_driver_factory =
+                    [this, modules, inputs, outputs, &selected](
+                        local_bus_backend backend )
+                    {
+                    selected.push_back( backend );
+                    auto result = std::make_unique<fake_local_bus>();
+                    driver = result.get();
+                    driver->modules = modules;
+                    driver->inputs = inputs;
+                    driver->outputs = outputs;
+                    return result;
+                    };
+                }
+
             void TearDown() override
                 {
                 PAC_critical_errors_manager::get_instance()->reset_all_error();
@@ -196,7 +217,9 @@ namespace
 TEST_F( local_bus_io, controllers_without_ip_are_active )
     {
     for ( auto type : { io_manager::io_node::PHOENIX_AXC_F_2152,
-        io_manager::io_node::PHOENIX_AXC_F_3152 } )
+        io_manager::io_node::PHOENIX_AXC_F_3152,
+        io_manager::io_node::PHOENIX_AXC_F_2152_IOCTL,
+        io_manager::io_node::PHOENIX_AXC_F_3152_IOCTL } )
         {
         create( { { 2688022, 2, false } }, type );
         EXPECT_TRUE( node->is_active );
@@ -204,6 +227,71 @@ TEST_F( local_bus_io, controllers_without_ip_are_active )
         EXPECT_EQ( manager->read_inputs(), 0 );
         EXPECT_EQ( node->state, io_manager::io_node::ST_OK );
         }
+    }
+
+TEST_F( local_bus_io, node_type_selects_transport_and_reuses_driver )
+    {
+    for ( int type : { 202, 203, 204, 205 } )
+        {
+        SCOPED_TRACE( type );
+        create( { { 2688048, 2, false } }, type );
+        std::vector<local_bus_backend> selected;
+        select_at_runtime( selected );
+        EXPECT_TRUE( selected.empty() );
+        EXPECT_EQ( node->is_ioctl_local_bus(), type == 204 || type == 205 );
+        ASSERT_EQ( manager->read_inputs(), 0 );
+        node->DO_[0] = 1;
+        ASSERT_EQ( manager->write_outputs(), 0 );
+        ASSERT_EQ( manager->read_inputs(), 0 );
+        ASSERT_EQ( selected.size(), 1 );
+        EXPECT_EQ( selected[0], type < 204
+            ? local_bus_backend::LIBRARY : local_bus_backend::IOCTL );
+        EXPECT_EQ( driver->outputs[0][0], 1 );
+        }
+    }
+
+TEST_F( local_bus_io, transport_change_requires_fresh_input_before_write )
+    {
+    create( { { 2688048, 2, false } }, 202 );
+    std::vector<local_bus_backend> selected;
+    select_at_runtime( selected );
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    node->type = io_manager::io_node::PHOENIX_AXC_F_2152_IOCTL;
+    EXPECT_EQ( manager->write_outputs(), 1 );
+    ASSERT_EQ( selected.size(), 2 );
+    EXPECT_EQ( selected[0], local_bus_backend::LIBRARY );
+    EXPECT_EQ( selected[1], local_bus_backend::IOCTL );
+    EXPECT_EQ( driver->writes, 0 );
+    ASSERT_EQ( manager->read_inputs(), 0 );
+    EXPECT_EQ( manager->write_outputs(), 0 );
+    EXPECT_EQ( selected.size(), 2 );
+    }
+
+TEST_F( local_bus_io, unavailable_selected_transport_does_not_fall_back )
+    {
+    create( { { 2688048, 2, false } }, 204 );
+    manager->local_driver.reset();
+    std::vector<local_bus_backend> selected;
+    manager->local_driver_factory = [&selected]( local_bus_backend backend )
+        {
+        selected.push_back( backend );
+        return std::unique_ptr<local_bus_driver>{};
+        };
+    EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_EQ( manager->write_outputs(), 1 );
+    ASSERT_EQ( selected.size(), 1 );
+    EXPECT_EQ( selected[0], local_bus_backend::IOCTL );
+    EXPECT_TRUE( node->read_io_error_flag );
+    }
+
+TEST_F( local_bus_io, empty_controller_does_not_create_runtime_driver )
+    {
+    create( {}, 204 );
+    std::vector<local_bus_backend> selected;
+    select_at_runtime( selected );
+    EXPECT_EQ( manager->read_inputs(), 0 );
+    EXPECT_EQ( manager->write_outputs(), 0 );
+    EXPECT_TRUE( selected.empty() );
     }
 
 TEST_F( local_bus_io, fault_details_are_updated_in_scada_and_cleared_on_recovery )
@@ -411,6 +499,7 @@ TEST_F( local_bus_io, changed_configuration_before_write_blocks_output )
     driver->modules[0].article = 2688022;
     EXPECT_EQ( manager->write_outputs(), 1 );
     EXPECT_EQ( driver->writes, 0 );
+    EXPECT_EQ( driver->failures, 1 );
     }
 
 TEST_F( local_bus_io, build_without_driver_reports_error )
@@ -440,6 +529,7 @@ TEST_F( local_bus_io, driver_read_failure_blocks_outputs_and_recovers )
     ASSERT_EQ( manager->read_inputs(), 0 );
     driver->read_result = false;
     EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_EQ( driver->failures, 1 );
     EXPECT_TRUE( node->read_io_error_flag );
     EXPECT_EQ( manager->write_outputs(), 1 );
     EXPECT_EQ( driver->writes, 0 );
@@ -455,6 +545,7 @@ TEST_F( local_bus_io, write_failure_does_not_publish_output_values )
     node->DO_[0] = 1;
     driver->write_result = false;
     EXPECT_EQ( manager->write_outputs(), 1 );
+    EXPECT_EQ( driver->failures, 1 );
     EXPECT_EQ( node->DO[0], 0 );
     EXPECT_TRUE( node->read_io_error_flag );
     }
@@ -472,6 +563,7 @@ TEST_F( local_bus_io, unavailable_driver_and_exceptions_are_errors )
     driver->operational = true;
     driver->throw_on_read = true;
     EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_EQ( driver->failures, 3 );
     EXPECT_EQ( node->state, io_manager::io_node::ST_NO_CONNECT );
     }
 
@@ -488,4 +580,21 @@ TEST_F( local_bus_io, two_local_controllers_block_exchange )
     EXPECT_TRUE( first->read_io_error_flag );
     EXPECT_TRUE( second->read_io_error_flag );
     EXPECT_EQ( driver->initializations, 0 );
+    }
+
+TEST_F( local_bus_io, library_and_ioctl_nodes_do_not_open_bus_together )
+    {
+    create( { { 2688022, 2, false } } );
+    std::vector<local_bus_backend> selected;
+    select_at_runtime( selected );
+    manager->init( 2 );
+    auto first = manager->add_node( 0, 202, 1, "", "A100",
+        16, 16, 1, 2, 1, 2 );
+    auto second = manager->add_node( 1, 204, 2, "", "A200",
+        16, 16, 1, 2, 1, 2 );
+    EXPECT_EQ( manager->read_inputs(), 1 );
+    EXPECT_EQ( manager->write_outputs(), 1 );
+    EXPECT_TRUE( first->read_io_error_flag );
+    EXPECT_TRUE( second->read_io_error_flag );
+    EXPECT_TRUE( selected.empty() );
     }
