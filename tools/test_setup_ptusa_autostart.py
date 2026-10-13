@@ -85,6 +85,12 @@ DEFAULTS=$PTUSA_TEST_DIRECTORY/defaults
 SHORTCUT_DIR=$PTUSA_TEST_DIRECTORY/commands
 LEGACY_SHORTCUT_DIR=$PTUSA_TEST_DIRECTORY/legacy-commands
 SERVICE=$PTUSA_TEST_DIRECTORY/service.sh
+SYSV_SERVICE=$SERVICE
+SYSTEMD_HELPER=$PTUSA_TEST_DIRECTORY/systemd-helper.sh
+SYSTEMD_UNIT=$PTUSA_TEST_DIRECTORY/ptusa_main.service
+SYSTEMD_RUNTIME_DIR=$PTUSA_TEST_DIRECTORY/systemd
+PLCNEXT_SERVICE=$PTUSA_TEST_DIRECTORY/plcnext
+touch "$PLCNEXT_SERVICE"
 PID_FILE=$PTUSA_TEST_DIRECTORY/ptusa_main.pid
 LOG_FILE=$PTUSA_TEST_DIRECTORY/ptusa_main.log
 PATH=$(cd "$PTUSA_TEST_DIRECTORY/utilities" && pwd):$PATH
@@ -141,7 +147,7 @@ printf '%s\\n' "$DEFAULT_APP_DIR" "$DEFAULT_WORK_DIR" \
 check_files() { check_application_files; }
 prepare_permissions() { :; }
 plcnext_running() { return 1; }
-running() { [ -f "$PID_FILE" ]; }
+process_running() { [ -f "$PID_FILE" ]; }
 sleep() { :; }
 start-stop-daemon() {
     [ "$1" = --start ] || return 1
@@ -217,6 +223,154 @@ install_service
 
     def test_without_config_uses_main_script(self):
         self.assertEqual(self.load_arguments(), "main.plua")
+
+    def test_detects_sysv_without_systemd(self):
+        result = self.run_shell('detect_init_system\nprintf "%s\\n" "$INIT_SYSTEM"')
+        self.assertEqual(result.stdout.strip(), "sysv")
+
+    def test_prefers_running_systemd_over_legacy_init_script(self):
+        result = self.run_shell('''
+mkdir "$SYSTEMD_RUNTIME_DIR"
+systemctl() { printf 'loaded\\n'; }
+detect_init_system
+printf '%s\\n' "$INIT_SYSTEM" "$SERVICE"
+''')
+        self.assertEqual(result.stdout.splitlines(), [
+            "systemd", (self.directory / "systemd-helper.sh").as_posix()])
+
+    def test_missing_plcnext_systemd_unit_is_reported(self):
+        result = self.run_shell('''
+mkdir "$SYSTEMD_RUNTIME_DIR"
+systemctl() { printf 'not-found\\n'; }
+detect_init_system
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("plcnext.service (not-found)", result.stderr)
+
+    def test_systemd_start_and_stop_delegate_to_manager(self):
+        result = self.run_shell('''
+check_files() { INIT_SYSTEM=systemd; }
+systemctl() { printf '%s\\n' "$*"; }
+start_service
+stop_service
+''')
+        self.assertEqual(result.stdout.splitlines(), [
+            "start ptusa_main.service", "stop ptusa_main.service"])
+
+    def test_systemd_active_runtime_blocks_bus_permission_changes(self):
+        result = self.run_shell('''
+check_files() { INIT_SYSTEM=systemd; }
+process_running() { return 1; }
+systemctl() { printf 'activating\\n'; }
+prepare_permissions() { echo 'permissions changed'; }
+start_service --from-systemd
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PLCnext работает", result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    def test_systemd_failed_runtime_with_live_process_still_blocks_start(self):
+        result = self.run_shell('''
+check_files() { INIT_SYSTEM=systemd; }
+process_running() { return 1; }
+systemctl() { printf 'failed\\n'; }
+pidof() { return 0; }
+prepare_permissions() { echo 'permissions changed'; }
+start_service --from-systemd
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PLCnext работает", result.stderr)
+        self.assertEqual(result.stdout, "")
+
+    def test_systemd_reinstall_preserves_settings_and_does_not_start(self):
+        self.write_defaults("main.plua --read_only_io --opc off")
+        original_defaults = self.defaults.read_bytes()
+        unit = self.directory / "ptusa_main.service"
+        unit.write_text("# ptusa_main-systemd-v1\n", encoding="utf-8")
+        self.run_shell('''
+check_files() {
+    check_application_files
+    INIT_SYSTEM=systemd
+    SERVICE=$SYSTEMD_HELPER
+}
+readlink() { printf '%s\\n' "$PTUSA_TEST_SCRIPT"; }
+systemctl() {
+    printf '%s\\n' "$*" >> "$PTUSA_TEST_DIRECTORY/systemctl.log"
+    case "$*" in
+        'stop ptusa_main.service') touch "$PTUSA_TEST_DIRECTORY/previous-stopped" ;;
+        'stop plcnext.service') touch "$PTUSA_TEST_DIRECTORY/plcnext-stopped" ;;
+        'enable ptusa_main.service') [ ! -e "$SYSV_SERVICE" ] || exit 94 ;;
+    esac
+}
+plcnext_running() { [ ! -f "$PTUSA_TEST_DIRECTORY/plcnext-stopped" ]; }
+check_unmanaged_processes() { :; }
+prepare_permissions() {
+    [ -f "$PTUSA_TEST_DIRECTORY/previous-stopped" ] || exit 91
+    [ -f "$PTUSA_TEST_DIRECTORY/plcnext-stopped" ] || exit 92
+}
+update-rc.d() { echo 'unexpected SysV registration' >&2; exit 93; }
+install_service
+''')
+        self.assertEqual(self.defaults.read_bytes(), original_defaults)
+        helper = self.directory / "systemd-helper.sh"
+        self.assertEqual(helper.read_bytes(), SCRIPT.read_bytes())
+        self.assertFalse(self.service.exists())
+        self.assertEqual((self.directory / "systemctl.log").read_text().splitlines(), [
+            "stop ptusa_main.service", "stop plcnext.service", "daemon-reload",
+            "enable ptusa_main.service", "disable plcnext.service"])
+        contents = unit.read_text()
+        self.assertIn("Conflicts=plcnext.service", contents)
+        self.assertIn("After=network.target localbus.service plcnext.service", contents)
+        self.assertIn("ExecStart=/bin/sh " + helper.as_posix() + " _start", contents)
+        self.assertIn("ExecStop=/bin/sh " + helper.as_posix() + " _stop", contents)
+        self.assertIn("PIDFile=" + (self.directory / "ptusa_main.pid").as_posix(), contents)
+
+    def test_systemd_install_preserves_foreign_unit_before_stopping(self):
+        unit = self.directory / "ptusa_main.service"
+        unit.write_text("foreign\n", encoding="utf-8")
+        result = self.run_shell('''
+check_files() { INIT_SYSTEM=systemd; }
+readlink() { printf '%s\\n' "$PTUSA_TEST_SCRIPT"; }
+systemctl() { echo 'service changed'; }
+install_service
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("другим установщиком", result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(unit.read_text(), "foreign\n")
+
+    def test_systemd_install_aborts_before_permissions_if_runtime_survives(self):
+        result = self.run_shell('''
+check_files() { INIT_SYSTEM=systemd; }
+readlink() { printf '%s\\n' "$PTUSA_TEST_SCRIPT"; }
+plcnext_running() { return 0; }
+check_unmanaged_processes() { :; }
+systemctl() { :; }
+prepare_permissions() { echo 'permissions changed'; }
+install_service
+''', check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PLCnext не остановился", result.stderr)
+        self.assertEqual(result.stdout.splitlines(), ["service", "stop"])
+        self.assertFalse((self.directory / "ptusa_main.service").exists())
+
+    def test_systemd_uninstall_restores_plcnext_without_starting_it(self):
+        unit = self.directory / "ptusa_main.service"
+        unit.write_text("# ptusa_main-systemd-v1\n", encoding="utf-8")
+        helper = self.directory / "systemd-helper.sh"
+        helper.write_bytes(SCRIPT.read_bytes())
+        self.run_shell('''
+detect_init_system() { INIT_SYSTEM=systemd; SERVICE=$SYSTEMD_HELPER; }
+systemctl() { printf '%s\\n' "$*" >> "$PTUSA_TEST_DIRECTORY/systemctl.log"; }
+update-rc.d() { exit 93; }
+uninstall_service
+''')
+        self.assertFalse(unit.exists())
+        self.assertFalse(helper.exists())
+        self.assertFalse(self.service.exists())
+        self.assertEqual((self.directory / "systemctl.log").read_text().splitlines(), [
+            "stop ptusa_main.service", "disable ptusa_main.service", "daemon-reload",
+            "enable plcnext.service"])
 
     def test_config_is_used_by_default(self):
         self.config.touch()

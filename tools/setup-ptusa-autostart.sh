@@ -19,7 +19,13 @@ APP_DIR=/opt/ptusamain
 WORK_DIR=/opt/main
 EXECUTABLE=$APP_DIR/ptusa_main
 CONFIG_FILE=$WORK_DIR/ptusa_main.ini
-SERVICE=/etc/init.d/ptusa_main
+SYSV_SERVICE=/etc/init.d/ptusa_main
+SYSTEMD_HELPER=/usr/libexec/ptusa_main-autostart
+SERVICE=$SYSV_SERVICE
+SYSTEMD_UNIT=/etc/systemd/system/ptusa_main.service
+SYSTEMD_RUNTIME_DIR=/run/systemd/system
+PLCNEXT_SERVICE=/etc/init.d/plcnext
+INIT_SYSTEM=sysv
 DEFAULTS=/etc/default/ptusa_main
 SHORTCUT_DIR=/usr/bin
 LEGACY_SHORTCUT_DIR=/usr/local/bin
@@ -84,16 +90,57 @@ check_application_files()
 check_files()
 {
     check_application_files
-    [ -f /etc/init.d/plcnext ] || fail "Не найдена служба SysV PLCnext."
+    detect_init_system
     id "$RUN_USER" >/dev/null 2>&1 || fail "Нет пользователя $RUN_USER."
     grep -q "^$RUN_GROUP:" /etc/group || fail "Нет группы $RUN_GROUP."
-    for utility in start-stop-daemon update-rc.d pidof install find chgrp; do
+    for utility in start-stop-daemon pidof install find chgrp readlink; do
         command -v "$utility" >/dev/null || fail "Нет команды $utility."
     done
+    if [ "$INIT_SYSTEM" = sysv ]; then
+        command -v update-rc.d >/dev/null || fail "Нет команды update-rc.d."
+    fi
+}
+
+detect_init_system()
+{
+    if [ -d "$SYSTEMD_RUNTIME_DIR" ]; then
+        command -v systemctl >/dev/null || fail "Нет команды systemctl."
+        plcnext_load_state=$(systemctl show -p LoadState --value plcnext.service) || \
+            fail "Не удалось проверить plcnext.service."
+        case "$plcnext_load_state" in
+            loaded|masked) ;;
+            *) fail "Не найдена служба systemd plcnext.service ($plcnext_load_state)." ;;
+        esac
+        INIT_SYSTEM=systemd
+        SERVICE=$SYSTEMD_HELPER
+    elif [ -f "$PLCNEXT_SERVICE" ]; then
+        INIT_SYSTEM=sysv
+        SERVICE=$SYSV_SERVICE
+    else
+        fail "Не найдена служба PLCnext (SysV или systemd)."
+    fi
+}
+
+stop_plcnext()
+{
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        systemctl stop plcnext.service
+    else
+        "$PLCNEXT_SERVICE" stop
+    fi
 }
 
 plcnext_running()
 {
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        plcnext_state=$(systemctl show -p ActiveState --value plcnext.service) || \
+            fail "Не удалось проверить состояние plcnext.service."
+        case "$plcnext_state" in
+            active|activating|deactivating|reloading) return 0 ;;
+            inactive|failed) ;;
+            *) fail "Неизвестное состояние plcnext.service: $plcnext_state." ;;
+        esac
+    fi
     if [ -r /run/plcnext/plcnext.pid ]; then
         plc_pid=$(cat /run/plcnext/plcnext.pid)
         case "$plc_pid" in
@@ -109,6 +156,15 @@ plcnext_running()
 }
 
 running()
+{
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        systemctl is-active --quiet ptusa_main.service
+        return $?
+    fi
+    process_running
+}
+
+process_running()
 {
     start-stop-daemon --status --pidfile "$PID_FILE" \
         --exec "$EXECUTABLE" >/dev/null 2>&1
@@ -176,12 +232,16 @@ start_service()
     require_root
     load_defaults
     check_files
-    if running; then
+    if [ "$INIT_SYSTEM" = systemd ] && [ "${1:-}" != --from-systemd ]; then
+        systemctl start ptusa_main.service
+        return
+    fi
+    if process_running; then
         echo "ptusa_main уже запущена."
         return 0
     fi
     if plcnext_running; then
-        fail "PLCnext работает. Сначала остановите /etc/init.d/plcnext."
+        fail "PLCnext работает. Сначала остановите службу PLCnext."
     fi
     check_unmanaged_processes
     prepare_permissions
@@ -193,7 +253,7 @@ start_service()
         --chuid "$RUN_USER:$RUN_GROUP" --chdir "$WORK_DIR" \
         --umask 002 --output "$LOG_FILE" -- $PTUSA_ARGS
     sleep 2
-    if ! running; then
+    if ! process_running; then
         fail "ptusa_main завершилась при старте. Проверьте $LOG_FILE."
     fi
     echo "$EXECUTABLE запущена (PID $(cat "$PID_FILE"))."
@@ -203,6 +263,10 @@ start_service()
 stop_service()
 {
     require_root
+    if [ "$INIT_SYSTEM" = systemd ] && [ "${1:-}" != --from-systemd ]; then
+        systemctl stop ptusa_main.service
+        return
+    fi
     # SIGINT используется приложением для штатного завершения главного цикла.
     start-stop-daemon --stop --oknodo --pidfile "$PID_FILE" \
         --exec "$EXECUTABLE" --retry INT/15/KILL/2
@@ -282,28 +346,30 @@ install_service()
     require_root
     check_files
     source_file=$(readlink -f "$0")
-    if [ -e "$SERVICE" ]; then
-        grep -q '^# ptusa_main-autostart-v1$' "$SERVICE" || \
-            fail "$SERVICE уже существует и создан другим установщиком."
-    fi
+    check_service_files
+    check_systemd_unit
     # Конфликты команд выявляем до остановки служб и изменения настроек.
     check_shortcuts
-    if [ -f "$SERVICE" ] && [ "$source_file" != "$SERVICE" ]; then
+    if [ "$INIT_SYSTEM" = systemd ] && [ -f "$SYSTEMD_UNIT" ]; then
+        systemctl stop ptusa_main.service
+    elif [ -f "$SERVICE" ] && [ "$source_file" != "$SERVICE" ]; then
         # Старая служба знает путь своего бинарника до переноса программы.
         /bin/sh "$SERVICE" stop
+    elif [ "$INIT_SYSTEM" = systemd ] && [ -f "$SYSV_SERVICE" ]; then
+        /bin/sh "$SYSV_SERVICE" stop
     elif running; then
         stop_service
     fi
     check_unmanaged_processes
     if plcnext_running; then
-        /etc/init.d/plcnext stop
+        stop_plcnext
     fi
     if plcnext_running; then
         fail "PLCnext не остановился; права Axiobus не изменены."
     fi
     prepare_permissions
     if [ ! -e "$DEFAULTS" ]; then
-        install -d -m 755 /etc/default
+        install -d -m 755 "$(dirname "$DEFAULTS")"
         (umask 022; cat > "$DEFAULTS" <<'EOF'
 # Аргументы ptusa_main; имена с пробелами не поддерживаются.
 # Если есть /opt/main/ptusa_main.ini, служба подключает его автоматически.
@@ -316,16 +382,26 @@ EOF
     chown root:root "$DEFAULTS"
     chmod 644 "$DEFAULTS"
     if [ "$source_file" != "$SERVICE" ]; then
+        install -d -m 755 "$(dirname "$SERVICE")"
         install -m 755 "$source_file" "$SERVICE"
     fi
     chown root:root "$SERVICE"
     chmod 755 "$SERVICE"
     install_shortcuts
 
-    # disable сохраняет ссылки остановки PLCnext и допускает enable при откате.
-    update-rc.d plcnext disable
-    update-rc.d -f ptusa_main remove
-    update-rc.d ptusa_main defaults 99 01
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        install_systemd_unit
+        # Иначе systemctl enable вызывает отсутствующий systemd-sysv-install.
+        rm -f "$SYSV_SERVICE"
+        systemctl daemon-reload
+        systemctl enable ptusa_main.service
+        systemctl disable plcnext.service
+    else
+        # disable сохраняет ссылки остановки PLCnext и допускает enable при откате.
+        update-rc.d plcnext disable
+        update-rc.d -f ptusa_main remove
+        update-rc.d ptusa_main defaults 99 01
+    fi
     echo "Автозапуск ptusa_main включён; автозапуск PLCnext отключён."
     echo "Программа запустится после перезагрузки. Для запуска сейчас:"
     echo "  $SERVICE start"
@@ -336,16 +412,77 @@ EOF
     echo "  ptusainstall ptusauninstall (запрашивают пароль root через su)."
 }
 
+check_service_files()
+{
+    service_paths=$SERVICE
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        service_paths="$SERVICE $SYSV_SERVICE"
+    fi
+    for service_path in $service_paths; do
+        if [ -e "$service_path" ] || [ -L "$service_path" ]; then
+            [ ! -L "$service_path" ] && [ -f "$service_path" ] &&
+                grep -q '^# ptusa_main-autostart-v1$' "$service_path" || \
+                fail "$service_path уже существует и создан другим установщиком."
+        fi
+    done
+}
+
+check_systemd_unit()
+{
+    if [ "$INIT_SYSTEM" = systemd ] && \
+        { [ -e "$SYSTEMD_UNIT" ] || [ -L "$SYSTEMD_UNIT" ]; }; then
+        [ ! -L "$SYSTEMD_UNIT" ] &&
+            grep -q '^# ptusa_main-systemd-v1$' "$SYSTEMD_UNIT" || \
+            fail "$SYSTEMD_UNIT уже существует и создан другим установщиком."
+    fi
+}
+
+install_systemd_unit()
+{
+    install -d -m 755 "$(dirname "$SYSTEMD_UNIT")"
+    (umask 022; cat > "$SYSTEMD_UNIT" <<EOF
+# ptusa_main-systemd-v1
+[Unit]
+Description=ptusa_main with PLCnext local bus
+After=network.target localbus.service plcnext.service
+Conflicts=plcnext.service
+
+[Service]
+Type=forking
+PIDFile=$PID_FILE
+ExecStart=/bin/sh $SERVICE _start
+ExecStop=/bin/sh $SERVICE _stop
+KillSignal=SIGINT
+TimeoutStartSec=60
+TimeoutStopSec=25
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    )
+    chown root:root "$SYSTEMD_UNIT"
+    chmod 644 "$SYSTEMD_UNIT"
+}
+
 uninstall_service()
 {
     require_root
-    if [ -e "$SERVICE" ]; then
-        grep -q '^# ptusa_main-autostart-v1$' "$SERVICE" || \
-            fail "$SERVICE создан другим установщиком."
-    fi
+    detect_init_system
+    check_service_files
+    check_systemd_unit
     stop_service
-    update-rc.d -f ptusa_main remove
-    update-rc.d plcnext enable
+    if [ "$INIT_SYSTEM" = systemd ]; then
+        systemctl disable ptusa_main.service
+        rm -f "$SYSTEMD_UNIT"
+        rm -f "$SERVICE"
+        rm -f "$SYSV_SERVICE"
+        systemctl daemon-reload
+        systemctl enable plcnext.service
+    else
+        update-rc.d -f ptusa_main remove
+        update-rc.d plcnext enable
+    fi
     remove_shortcuts
     rm -f "$SERVICE"
     echo "Автозапуск ptusa_main удалён; автозапуск PLCnext восстановлен."
@@ -356,11 +493,14 @@ case "${1:-help}" in
     install) install_service ;;
     uninstall) uninstall_service ;;
     start) start_service ;;
-    stop) stop_service ;;
-    restart) stop_service; start_service ;;
+    stop) detect_init_system; stop_service ;;
+    restart) detect_init_system; stop_service; start_service ;;
+    _start) start_service --from-systemd ;;
+    _stop) stop_service --from-systemd ;;
     status)
+        detect_init_system
         if running; then
-            echo "ptusa_main работает (PID $(cat "$PID_FILE"))."
+            echo "ptusa_main работает."
         else
             echo "ptusa_main не работает."
             exit 3
@@ -368,7 +508,7 @@ case "${1:-help}" in
         ;;
     check)
         check_files
-        echo "Файлы проекта, пользователь и команды SysV доступны."
+        echo "Файлы проекта, пользователь и команды $INIT_SYSTEM доступны."
         ;;
     help|--help|-h)
         echo "Использование: $0 {install|uninstall|start|stop|restart|status|check}"

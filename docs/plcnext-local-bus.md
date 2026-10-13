@@ -102,8 +102,13 @@ IOCTL не использует `/tmp/axiopdi`. Он ставит неблоки
 
 ## Автозапуск и рабочий каталог
 
-Для контроллеров с SysV init предназначен скрипт
+Для контроллеров с SysV init и systemd предназначен скрипт
 [`tools/setup-ptusa-autostart.sh`](../tools/setup-ptusa-autostart.sh).
+Тип служб определяется по работающей системе, а не по номеру прошивки.
+PLCnext перешёл на systemd начиная с прошивки 2025.0; на прошивке 2026
+служба штатного runtime называется `plcnext.service`.
+Старый установщик, требующий `/etc/init.d/plcnext`, на такой прошивке выдаёт
+ошибку «Не найдена служба SysV PLCnext» — замените его актуальным скриптом.
 По умолчанию файлы располагаются так:
 
 | Каталог | Содержимое |
@@ -126,7 +131,7 @@ sh /opt/ptusamain/setup-ptusa-autostart.sh install
 Владельцы файлов проекта сохраняются; символические ссылки внутри проекта
 не обходятся. Файл синхронизации Axiobus не удаляется.
 
-Служба `/etc/init.d/ptusa_main` запускает `/opt/ptusamain/ptusa_main` от
+Служба запускает `/opt/ptusamain/ptusa_main` от
 `plcnext_firmware:plcnext` с рабочим каталогом `/opt/main` и повторяет
 подготовку прав при каждом старте. Относительные пути к Lua-скриптам,
 модулям и рабочим данным отсчитываются от `/opt/main`. Библиотека Axiobus
@@ -134,14 +139,24 @@ sh /opt/ptusamain/setup-ptusa-autostart.sh install
 При переходе со старой установки остановка выполняется установленной
 версией службы, которая знает прежний путь программы. Запуск блокируется,
 если старый экземпляр из `/opt/main` продолжает работать вне службы.
-Для регистрации используется `update-rc.d ptusa_main defaults 99 01`,
-а для отключения автозапуска штатного runtime — `update-rc.d plcnext disable`.
+На SysV устанавливается `/etc/init.d/ptusa_main`; для регистрации используется
+`update-rc.d ptusa_main defaults 99 01`, а для отключения автозапуска штатного
+runtime — `update-rc.d plcnext disable`.
+На systemd устанавливается `/etc/systemd/system/ptusa_main.service`, который
+использует `/usr/libexec/ptusa_main-autostart` как вспомогательный скрипт запуска
+и остановки. Созданный прежним установщиком `/etc/init.d/ptusa_main` удаляется:
+его наличие вызывает попытку запуска `systemd-sysv-install`, отсутствующего
+на прошивке 2026. Регистрация выполняется через `systemctl enable ptusa_main.service`,
+а отключение штатного runtime — через `systemctl disable plcnext.service`.
+Unit задаёт порядок после `localbus.service` и взаимное исключение с
+`plcnext.service`. Перед изменением прав проверяется остановка процессов
+PLCnext, в том числе оставшихся после сбоя службы.
 Службы `localbus` и `plcnext-recovery` сохраняются. Использование SysV для
 пользовательской программы описано также в
 [инструкции Phoenix Contact](https://plcnext.jp/archives/5019).
 
 Установка включает запуск после перезагрузки, но не запускает программу
-немедленно и не перезагружает контроллер. Для ручного управления от root:
+немедленно и не перезагружает контроллер. На SysV для ручного управления от root:
 
 ```sh
 /etc/init.d/ptusa_main start
@@ -150,6 +165,25 @@ sh /opt/ptusamain/setup-ptusa-autostart.sh install
 /etc/init.d/ptusa_main restart
 tail -f /var/log/ptusa_main.log
 ```
+
+На systemd используйте команды `ptusastart`, `ptusastop`, `ptusarestart`
+либо `sh /opt/ptusamain/setup-ptusa-autostart.sh start|stop|restart|status`.
+Напрямую можно использовать `systemctl start|stop|restart|status ptusa_main.service`.
+Проверка регистрации без запуска программы:
+
+```sh
+systemctl is-enabled ptusa_main.service plcnext.service
+systemctl cat ptusa_main.service
+```
+
+Ожидаемые состояния автозапуска: `enabled` для `ptusa_main.service` и
+`disabled` для `plcnext.service`. До ручного запуска или перезагрузки
+`ptusa_main.service` остаётся `inactive`.
+
+Установка проверена на AXC F 2152 с прошивкой `26.0.5.124`: `check` и
+`install` выполняются успешно, unit загружен без ошибок и включён в
+автозапуск, автозапуск PLCnext отключён. Запуск Ptusa_main и перезагрузка
+в эту проверку не входили.
 
 Установка также создаёт команды в `/usr/bin`, который входит в `PATH`
 пользователей `admin` и `root` на PLCnext. Их можно вызывать из любого каталога:
