@@ -20,7 +20,7 @@ auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр клас�
 //-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
-    if ( restrictions_set_to_off_time &&
+    if ( restrictions_set_to_off_time && 
         get_delta_millisec( restrictions_set_to_off_time ) >
         par[ P_RESTRICTIONS_MANUAL_TIME ] )
         {
