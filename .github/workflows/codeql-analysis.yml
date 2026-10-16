@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   analyze:
-    if: github.repository == 'savushkin-r-d/ptusa_main'
+    if: github.repository == 'sav-oss-org/ptusa_main'
     name: Analyze
     runs-on: ubuntu-latest
     timeout-minutes: 30
