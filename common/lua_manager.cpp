@@ -546,7 +546,7 @@ int lua_manager::error_trace( lua_State * L )
     std::string err_str = lua_tostring( L, -1 );
     lua_pop( L, 1 );
 
-    if ( lua_error_count < std::numeric_limits< int >::max() )
+    if ( lua_error_count < ( std::numeric_limits< int >::max )() )
         {
         lua_error_count++;
         }
